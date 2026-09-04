@@ -1,6 +1,8 @@
 # ocpfBcAgenticDevFramework
 The OnlyCopilotFans Business Central Agentic Development Framework - by AJ Ansari
 
+Last Updated: Friday, September 4, 2026
+
 ## Background
 This Agentic Development Framework with created to help Business Central Functional Consultants who want to use AI to create AL Extensions and apps the **right** way. But the framework can also be used by professional AL developers.
 
