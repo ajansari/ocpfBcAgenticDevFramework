@@ -15,3 +15,6 @@ This Agentic Development Framework with created to help Business Central Functio
 
 - **Building with GitHub Copilot Chat in Visual Studio Code?** Rename `BC_App_Build_Routine_Agent.md` to `copilot-instructions.md` and save the file in a new subfolder called `.github` in the root folder.
  
+## Roadmap
+- Add Support for AL MCP
+- Add Support for BCQuality
