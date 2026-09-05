@@ -20,6 +20,8 @@
 4. **Compile after every batch — never generate all batches first.** Treat one compiler error as a systemic signal: fix the rule/template, then every file it touched (Standards §9.3, §10.3).
 5. **Zero errors, zero warnings before PROVE.** Treat warnings as errors during development (Standards §9.4).
 6. **Human-in-the-loop is a feature.** Pause for human approval before: writing the first file of a batch, applying a root-cause fix, starting a new batch, and finalizing any design document.
+6a. **Ask decisions in a selectable options box, not in prose.** When the agent needs the human to *decide something* — pick between design options, approve a version bump, choose a name, resolve an ambiguity — present it through the interactive multiple-choice mechanism the agent's harness provides (in Claude Code, the `AskUserQuestion` tool), with the recommended option first and a short reason on each. A decision buried in a paragraph of chat is easy to miss: it reads like the agent finished and is idling, so the project silently stalls waiting on an answer nobody realised was owed.
+    **Use it only for decisions.** Do *not* wrap ordinary progress in it — finishing a step and waiting to be told to start the next one, reporting a clean compile, or handing back a result is normal conversation, not a decision point. Over-using the box makes it noise, which defeats the purpose.
 7. **Log every deviation immediately.** Any departure from FRD or TDD goes in the ChangeLog before the next batch starts (see *All Along*).
 
 ---
@@ -385,6 +387,19 @@ Classify every gap as **Intentional** (document the reasoning), **Oversight** (f
 
 **Outputs:** `PostDevTDD.md` (as-built reference), updated `FRD.md` (new baseline). Original TDD retained as historical context; ChangeLog is the bridge between them.
 
+> **Why the two documents are treated differently — there is deliberately no `PostDevFRD.md`.**
+> The TDD gets a *new* file because the gap between "what we told it to build" and "what got
+> built" is itself information worth keeping side by side; the original TDD is also the artifact
+> the code was generated from, so it stays as evidence. Requirements are not like that: there is
+> exactly one current answer to "what should this app do," and a second, stale copy of it is
+> actively misleading to the next planner — which is the whole point of re-baselining. So the FRD
+> is updated **in place**, not duplicated.
+>
+> **Because the FRD is updated in place, add a pointer to its pre-BUILD version** in the FRD's
+> own header — the commit hash that holds it, plus how to list its revisions. Otherwise the
+> original TDD sits in `docs/` where anyone finds it while the original FRD is only reachable by
+> someone who already knows to go looking, which is the one thing this asymmetry genuinely costs.
+
 **Exit gate:** As-built TDD is complete enough to regenerate the system from; FRD reflects reality; Dev Manager review.
 
 ## 12 — Document the Code
@@ -394,11 +409,12 @@ Classify every gap as **Intentional** (document the reasoning), **Oversight** (f
 **Actions:**
 - **Generate the reference documentation from the code, not from memory** (Standards §12.2). Parse every API page: extract IDs, source tables, editability, filters, and every field's identifier / source name / description / R/W status. Produce a structured reference — one section per object, one row per field — plus: quick-start deployment guide, authentication and URL patterns (Standards Appendix A), `$filter` / `$select` examples, create/update/delete examples, explicit limitations, common integration patterns, troubleshooting table.
 - **Draw the schema as a Mermaid diagram**, generated from the actual objects, not from memory. Include every table this app owns *and* every standard/base table it touches — via `TableRelation`, `tableextension`, or a `pageextension`'s `RunPageLink` — so a reader sees the whole relationship graph, not just the app's own corner of it. An ER diagram (`erDiagram`) is the usual fit; note cardinality and which side is the standard object.
+- **Render the diagram to prove it parses — never ship one you have not seen render.** Markdown happily stores a syntactically invalid diagram: it looks fine in the source file and simply fails to draw wherever it is finally viewed, so the defect is invisible until a reader hits it. Extract the fenced block and run it through a renderer (`npx @mermaid-js/mermaid-cli -i diagram.mmd -o diagram.svg`); a parse error exits non-zero and names the line. On a real project a diagram shipped with `PK_FK` as a key constraint — not valid Mermaid, which accepts `PK`, `FK`, `UK`, or comma-separated `PK,FK` — and never rendered anywhere until it was actually tested.
 - **Write the human unit test script** — a step-by-step manual test walkthrough a person can execute: endpoint by endpoint, the happy-path and boundary cases from Step 09, expected result for each. A well-written test script is ~70% of a user guide (Standards §12.1).
-- Assemble the **user guide / documentation**. Choose format per Standards §12.5 (Markdown for technical/repo audiences; HTML with `@media print` rules for branded or print deliverables).
+- Write the **user guide** as `UserGuide.md` — **Markdown, in the repo, always** (HTML with `@media print` rules only as an *additional* branded/print deliverable, never instead of the Markdown; Standards §12.5). This is a **separate document from `Documentation.md`** and must not be folded into it: `Documentation.md` is the integration/API reference written for a developer or BI consumer, whereas the user guide is written for the person clicking around in Business Central — what the feature is for, how to do each task in order, what each field means in business terms, and what to do when something is refused. If the only "user guide" produced is an API reference, this action has not been done.
 - Write one-page **deployment instructions** for an administrator: version requirements, install procedure, which permission sets map to which roles, verification steps, uninstall (Standards §12.3).
 
-**Outputs:** `Documentation.md` (consumer reference, includes the Mermaid schema diagram), `HumanUnitTestScript.md`, user guide, `Deployment.md`.
+**Outputs:** `Documentation.md` (consumer/API reference, includes the Mermaid schema diagram), `HumanUnitTestScript.md`, **`UserGuide.md`** (end-user, Markdown), `Deployment.md`. Four documents — check all four exist before claiming the step is complete.
 
 **Exit gate:** Reference is generated from actual code and current; test script executable by a non-developer; Dev Manager review; app ready for user acceptance testing.
 
