@@ -1,4 +1,4 @@
-# ANZ Agentic Dev Framework Outline
+# OnlyCopilotFans Business Central Agentic Development Framework Outline
 
 ## DEFINE
 
