@@ -15,7 +15,7 @@
 ## Operating Rules (apply in every phase)
 
 1. **Part 1 is authoritative.** Publisher, prefix, namespace, versions, ID ranges, localization — read them from the Project Parameters block (Step 01) and derive everything else. Never hardcode.
-2. **Verify against BC symbol files, not memory.** Table numbers, `using` namespaces, field IDs, `ObsoleteState` — confirm each in the symbol file named in Parameter 1.4. Agent knowledge of BC table numbers is not reliable (Standards §10.5, Appendix B).
+2. **Verify against BC symbol files, not memory.** Table numbers, `using` namespaces, field IDs, `ObsoleteState` — confirm each in the symbol file named in Parameter 1.4. Agent knowledge of BC table numbers is not reliable (Standards §10.5, Appendix B). **Fallback when the downloaded symbols don't answer the question** (a module isn't in `.alpackages`, or you need to browse/discover rather than already knowing what to grep for): the entire BC BaseApp, for the current Business Central Online version, is documented at <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application> — every standard table, field, and field datatype/size. Use it to corroborate or discover; the downloaded symbol file for the target version is still the authoritative source when the two ever disagree.
 3. **Phase large scope into batches.** A batch is a self-contained, compilable, reviewable increment (by module or document-type group). Define batch boundaries during DESIGN and record them in the TDD (Standards §2 intro, §10.3).
 4. **Compile after every batch — never generate all batches first.** Treat one compiler error as a systemic signal: fix the rule/template, then every file it touched (Standards §9.3, §10.3).
 5. **Zero errors, zero warnings before PROVE.** Treat warnings as errors during development (Standards §9.4).
@@ -65,6 +65,34 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
 
 **Actions:** Complete **every** field below. Replace every placeholder. These values override all defaults for the rest of the routine. This block is copied verbatim from `AL_PTE_Development_Standards_UNIFIED.md` Part 1 and is the authoritative source (Standards §1, "Authoritative-source rule").
 
+**Ask first, don't infer.** If `Extension Name`, `Publisher`, `Use Namespace (y/n)`, `Namespace`,
+`Localization`, or `AL Object Prefix` (§1.3) still carry placeholder values, ask the human
+directly — as these five questions, before writing anything:
+
+1. What is the Extension Name?
+2. Who is the Publisher?
+3. Should this project use an AL namespace? If yes, what should it be (e.g.
+   `<Publisher>.<ExtensionShort>`)?
+4. What Localization applies (`W1`, `US`, …)?
+5. What AL object prefix should be used?
+
+Do not infer these from context under time pressure (an email domain, a guess at house style) —
+that produces exactly the kind of full-project rename this framework has already had to do once
+on a real project, after the inferred publisher and prefix turned out to be wrong.
+
+**Then collect Object ID ranges (§1.2) the same way — as a loop, not a single question,** since
+there can be more than one range:
+
+1. Ask for the starting Object ID.
+2. Ask for the ending Object ID.
+3. Show the resulting range and its size (e.g. "80300–80339 — 40 IDs") and ask the human to
+   confirm it.
+4. Ask: "Are there additional ranges?" (Y/N).
+5. If yes, repeat steps 1–4 for the next range. If no, stop — every confirmed range is final.
+
+The first confirmed range is the Primary allocation; every one after it is an Additional
+allocation — there can be more than one.
+
 ### 1.1 Extension Identity
 
 | Parameter | Placeholder | Guidance & Example |
@@ -72,7 +100,8 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
 | **Extension Name** | `<ExtensionName>` | App name, not the object prefix. No AL quotes. Written to `app.json "name"`. Example: `ACME APIs` |
 | **Publisher** | `<Publisher>` | No AL quotes here. Written to `app.json "publisher"`. Example: `Contoso` |
 | **Deployment Target** | `<DeploymentTarget>` | One of the allowed values below. Governs `app.json` and `launch.json`. |
-| **Namespace** | `<Publisher>.<ExtensionShort>` | No quotes. PascalCase segments, no spaces. Example: `Contoso.AcmeAPIs` |
+| **Use Namespace (y/n)** | `<UseNamespace>` | Whether this project's AL objects declare a `namespace`. Default `Yes` — omit it only for a deliberate reason (e.g. a target AL/BC version that predates namespaces). If `No`, the `Namespace` row below is N/A and no generated file gets a `namespace` line. |
+| **Namespace** | `<Publisher>.<ExtensionShort>` | N/A if Use Namespace = `No`. Otherwise no quotes; PascalCase segments, no spaces. Example: `Contoso.AcmeAPIs` |
 | **Localization** | `<Localization>` | No quotes. **Set once here** — Part 5 derives all field/table inclusion from this value. Examples: `W1`, `NA`, `EU`, `US`. |
 
 **Deployment Target — allowed values (choose exactly one):**
@@ -93,15 +122,19 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
 - `Extension Name = ACME APIs`
 - `Publisher = Contoso`
 - `Deployment Target = SaaS PTE`
+- `Use Namespace = Yes`
 - `Namespace = Contoso.AcmeAPIs`
 - `Localization = W1`
 
 ### 1.2 Object ID Allocation
 
+Collected as the loop described above — one row per confirmed range, in the order confirmed:
+
 | Block | From | To | Notes |
 |---|---|---|---|
-| **Primary allocation** | `<fromObjectId>` | `<toObjectId>` | One contiguous block for the main scope. |
-| **Additional allocation** *(optional)* | `<additionalFrom>` | `<additionalTo>` | Populate only if an extra range is needed. |
+| **Primary allocation** | `<fromObjectId>` | `<toObjectId>` | The first range confirmed; the main scope. |
+| **Additional allocation 1** *(if any)* | `<additionalFrom1>` | `<additionalTo1>` | Second confirmed range, if the human said yes to "additional ranges?" |
+| **Additional allocation N** *(if any)* | … | … | Repeat one row per further "yes" — there is no fixed limit. |
 
 | Parameter | Value | Guidance |
 |---|---|---|
@@ -109,7 +142,10 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
 
 > **Rule:** Never use object IDs outside the allocated ranges. Maintain the object register as a separate project artifact. If `Permission Sets required = Yes`, plan them before code generation.
 
-**Worked example:** Primary `90800` → `90999`; Additional blank; Permission Sets required = `Yes`.
+**Worked example** (the loop ran twice): starting ID `90800`, ending ID `90899` → shown as
+"90800–90899 — 100 IDs," confirmed → "additional ranges?" → Yes → starting ID `91500`, ending ID
+`91549` → shown as "91500–91549 — 50 IDs," confirmed → "additional ranges?" → No → stop. Final:
+Primary `90800`–`90899`; Additional allocation 1 `91500`–`91549`; Permission Sets required = `Yes`.
 
 ### 1.3 Naming & API Parameters
 
@@ -121,7 +157,7 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
 | **APIPublisher** | `'<Publisher>'` | Single quotes in AL page metadata. Example: `'Contoso'` |
 | **APIGroup Prefix** | `<prefix>_` | Lowercase prefix + underscore, no AL quotes. Example: `acme_` |
 | **APIVersion** | `'v<Major>.<Minor>'` | Single quotes in AL. Example: `'v1.0'` |
-| **Namespace** | `<Publisher>.<ExtensionShort>` | Same value as Section 1.1. Example: `Contoso.AcmeAPIs` |
+| **Namespace** | `<Publisher>.<ExtensionShort>` | Same value as Section 1.1; N/A if Use Namespace = `No`. Example: `Contoso.AcmeAPIs` |
 | **Permission Set Prefix** | `<PREFIX> - ` | Uppercase, no AL quotes. Example: `ACME - ` |
 
 **Entity-naming patterns** — all derived from the prefix above (examples use prefix `acme`):
@@ -159,7 +195,7 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
 
 **Outputs:** The completed Project Parameters block (above, all placeholders replaced); an empty **Object Register** artifact seeded with the allocated ID ranges.
 
-**Exit gate:** No placeholder remains. Deployment Target is one allowed value. Namespace matches between 1.1 and 1.3. Localization is set. If Permission Sets required = `Yes`, ≥ 2 IDs are reserved in the primary range. Human confirms the sheet.
+**Exit gate:** No placeholder remains. Deployment Target is one allowed value. Namespace matches between 1.1 and 1.3, or both are correctly N/A if Use Namespace = `No`. Localization is set. If Permission Sets required = `Yes`, ≥ 2 IDs are reserved in the primary range. Human confirms the sheet.
 
 ---
 
@@ -196,6 +232,7 @@ Then **review and validate against the DEFINE artifacts:** every entity in the e
 - **Batch / phase plan** — which modules or document-type groups are built in which order; smallest and simplest batch first (Standards §10.3).
 - **Per-object spec** — for every object: ID, type, name, source table name *and* verified source table number, `PageType`, `APIPublisher`, `APIGroup`, `EntityName`, `EntitySetName`, `ODataKeyFields = SystemId`, and exactly one of `DelayedInsert = true` / `Editable = false` per §4.2.
 - **Per-field spec** — every field by source name and camelCase identifier, with each conversion decision shown (Standards §6.1); which fields are excluded and why (Standards Part 5, driven by the Localization parameter); abbreviations applied (Standards §6.2); reserved-keyword resolutions (Standards §6.3).
+- **Computed-field pattern, decided per field, not defaulted:** a `FlowField` is always read-only and always live-recalculated — it cannot be overridden. A field that should *suggest* a value but let the user override it (e.g. a price or date derived from other fields) must be a real **stored** field, seeded by an `OnValidate`/`OnInsert` trigger, that never overwrites a value the user has already entered — the same pattern as an R-1-style suggested-date rule. Decide and state explicitly which pattern each calculated-looking field uses; do not reach for `FlowField` out of habit when "auto-populated but editable" is what's actually wanted.
 - **`SourceTableView` filters** — for every document-type-filtered page, with the correct `const()` quoting (quote only multi-word enum values) (Standards §4.3).
 - **`using` directives** — the exact namespace for every object, copied from the symbol file (Standards §3.1, §5.4).
 - **Standard object template** — the exact AL API page pattern every generated object must follow (Standards §3.3).
@@ -223,6 +260,7 @@ Then **review and validate against the DEFINE artifacts:** every entity in the e
 - [ ] Read vs. read/write designations match the mutability rules in Standards §4.2.
 - [ ] Growth buffers are planned within each module block (Standards §7.2).
 - [ ] Permission sets are planned if enabled (Parameter 1.2).
+- [ ] Every entity's deletion behavior (block-if-referenced / cascade / allow) is explicitly decided and stated — not left to whatever the template defaults to. This includes fields on *other* tables (including standard BC tables extended via `tableextension`) that reference this entity by `TableRelation`: deciding a table's deletion behavior means re-checking every known referencing field, not just this app's own child tables.
 
 **Outputs:** `SanityCheck.md` — every check, finding, resolution.
 
@@ -351,11 +389,12 @@ Classify every gap as **Intentional** (document the reasoning), **Oversight** (f
 
 **Actions:**
 - **Generate the reference documentation from the code, not from memory** (Standards §12.2). Parse every API page: extract IDs, source tables, editability, filters, and every field's identifier / source name / description / R/W status. Produce a structured reference — one section per object, one row per field — plus: quick-start deployment guide, authentication and URL patterns (Standards Appendix A), `$filter` / `$select` examples, create/update/delete examples, explicit limitations, common integration patterns, troubleshooting table.
+- **Draw the schema as a Mermaid diagram**, generated from the actual objects, not from memory. Include every table this app owns *and* every standard/base table it touches — via `TableRelation`, `tableextension`, or a `pageextension`'s `RunPageLink` — so a reader sees the whole relationship graph, not just the app's own corner of it. An ER diagram (`erDiagram`) is the usual fit; note cardinality and which side is the standard object.
 - **Write the human unit test script** — a step-by-step manual test walkthrough a person can execute: endpoint by endpoint, the happy-path and boundary cases from Step 09, expected result for each. A well-written test script is ~70% of a user guide (Standards §12.1).
 - Assemble the **user guide / documentation**. Choose format per Standards §12.5 (Markdown for technical/repo audiences; HTML with `@media print` rules for branded or print deliverables).
 - Write one-page **deployment instructions** for an administrator: version requirements, install procedure, which permission sets map to which roles, verification steps, uninstall (Standards §12.3).
 
-**Outputs:** `Documentation.md` (consumer reference), `HumanUnitTestScript.md`, user guide, `Deployment.md`.
+**Outputs:** `Documentation.md` (consumer reference, includes the Mermaid schema diagram), `HumanUnitTestScript.md`, user guide, `Deployment.md`.
 
 **Exit gate:** Reference is generated from actual code and current; test script executable by a non-developer; Dev Manager review; app ready for user acceptance testing.
 
@@ -367,7 +406,7 @@ Run these in parallel with the phased work — they are not a final step.
 
 ## Document
 
-- Keep every required project document current as work proceeds, not retroactively (Standards §2.1): `ProblemStatement`, `FRD`, `TDD`, `SanityCheck`, `PostDevTDD`, `ChangeLog`, `GapAnalysis` / `CodeReview`, `Documentation`.
+- Keep every required project document current as work proceeds, not retroactively (Standards §2.1): `ProblemStatement`, `FRD`, `TDD`, `SanityCheck`, `PostDevTDD`, `ChangeLog`, `GapAnalysis` / `CodeReview`, `Documentation`, `TestingFeedback`, `Roadmap`, `ProjectMemory`.
 - Maintain the **Object Register** as a standalone artifact — every object, its ID, module, source table, and R/W status — updated as objects are planned and built (Standards §1.2).
 
 ## Track Changes — the ChangeLog
@@ -383,11 +422,53 @@ Every deviation from FRD or TDD — human or agent — is logged **before the ne
 **Updated:** TDD, FRD, or both — yes/no.
 ```
 
+**Name the person, not a role.** When a decision, a "hold off," or a preference is attributed to a human, write their actual name ("AJ decided X") — never a generic placeholder like "the human" or "the user." A role-noun silently assumes exactly one person exists on the project; the moment there's a second contributor, "the human decided X" stops answering the only question that phrase exists to answer — decided by *whom*. This applies throughout the TDD, FRD, and ChangeLog, not just here.
+
 ## Retain Explanations
 
-- When the agent flags something (an obsolete field, an ambiguous name, a scope question), record the flag, the human's decision, and the reasoning — not just the outcome.
+- When the agent flags something (an obsolete field, an ambiguous name, a scope question), record the flag, **who** decided and what they decided, and the reasoning — not just the outcome.
 - Every root-cause fix records the diagnosis, not only the patch, so the same class of error cannot recur in a later batch.
 - Commit each batch to version control separately, before the next begins, with a message that references its ChangeLog entries (Standards Appendix C).
+
+## Testing Feedback Log
+
+Human testing and review surfaces real feedback throughout PROVE (and sometimes earlier, on a
+demo) — a list of things to change, in the tester's own words, not yet triaged into decisions.
+This is distinct from both of the above: the ChangeLog records *decisions and reasoning*; the
+Step 09 test-run record captures *automated* green-team/red-team pass/fail. Neither preserves
+what the human actually said before it becomes a summary of what the human said.
+
+- Record every testing/feedback session in `TestingFeedback.md` — date, what was tested, and the
+  tester's findings/requests **verbatim**, before they are triaged.
+- Triage each item explicitly: implement now (its own ChangeLog Issue), schedule for later
+  (`Roadmap.md`), or reject (record why, in the same log).
+- Cross-reference in both directions: the `TestingFeedback.md` entry links to the ChangeLog
+  Issue(s) or Roadmap item(s) it produced, so the raw ask and the eventual decision both remain
+  traceable independently.
+
+## Project Memory — `docs/ProjectMemory.md` (required, in-repo)
+
+Continuity must not depend on which agent, machine, or tool picks the project up next.
+`docs/ProjectMemory.md` is a required project artifact, committed to version control like every
+other document here — **not** an agent's own external/cross-session memory feature, which is
+tied to one machine's file path and invisible to git, to a teammate, and to any other tool or
+agent that opens this repo.
+
+- **Keep it short — an anchor, not a narrative.** Current phase/step, where each live document
+  lives, any decision awaiting sign-off, and a one-line pointer per past milestone. The full
+  story of *why* a decision was made belongs in `ChangeLog.md`; `ProjectMemory.md` just says
+  *where to look*. If it starts reading like a second ChangeLog, trim it.
+- **Every row in "Open decisions" names who it's awaiting** — `(awaiting: <name>)`. This is not
+  redundant with `git blame`: blame tells you who last edited the line, not who the project is
+  actually waiting on for a forward-looking decision. With a single contributor every row will
+  say the same name — write it anyway, so the convention is already in place the day a second
+  person joins.
+- Update it at the close of every step or batch — the same moment the ChangeLog gets its entry.
+- If the executing agent *also* has its own persistent cross-session memory capability, that
+  memory may point at `docs/ProjectMemory.md` (e.g. "always read this file first") but must not
+  duplicate its content. A fact that lives only in an agent's private memory and nowhere in
+  `docs/ProjectMemory.md` or the other project documents does not count as recorded — the file
+  in the repo is the one a different agent, a teammate, or a fresh clone can actually read.
 
 ---
 
