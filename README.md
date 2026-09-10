@@ -1,3 +1,5 @@
+![OnlyCopilotFans Business Central Agentic Development Framework](images/ocpfBCAgenticDevFrameworkBanner.png)
+
 # ocpfBcAgenticDevFramework
 The OnlyCopilotFans Business Central Agentic Development Framework - by AJ Ansari
 
