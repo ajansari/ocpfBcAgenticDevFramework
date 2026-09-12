@@ -10,9 +10,9 @@ the runbook (`BC_App_Build_Routine_Agent.md`); for visual diagrams, see `Runbook
 *Turn a business need into a validated, complete scope and a filled-in parameter sheet — before
 any design work.*
 
-**PRE-01** — State the Problem. 
-**PRE-02** — Structured Gap Analysis. 
-**01** — Populate the Intake Sheet *(Project Parameters)*. 
+**PRE-01** — State the Problem\ 
+**PRE-02** — Structured Gap Analysis\ 
+**01** — Populate the Intake Sheet *(Project Parameters)*\
 
 ## II. DESIGN
 
