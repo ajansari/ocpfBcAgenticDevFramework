@@ -1,13 +1,19 @@
 # BC App Build Routine — Agent Runbook
-v1.0.0.0
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
+
+**Version:** 2.0.0.0
+**Last Updated:** 2026-09-12
+
+> Version history for this framework lives in `RunbookChangelog.md`, tracked independently of any
+> one project built with it — check there for what changed between the version you have and the
+> latest. If `RunbookChangelog.md` is not found, create one.
 
 > **What this is:** A single, ordered routine an AI agent follows to build a new Business Central AL Per-Tenant Extension (PTE) from a business problem through to a tested, documented, deployable app.
 >
 > **How the agent uses it:** Work the phases in order (DEFINE → DESIGN → BUILD → PROVE). Do not start a step until its predecessor's exit gate is met. Every step lists its **Inputs**, **Actions**, **Outputs**, and **Exit gate**. The *Project Parameters* block in Step 01 is the single source of truth for every name, ID, version, and quoting decision — never hardcode any of those values in AL; always derive them from that block.
 >
-> **Companion document:** `AL_PTE_Development_Standards_UNIFIED.md`. This runbook drives the *sequence*; that guide holds the detailed *rules* (Parts 2–11, Appendices A–C). References below point to it as **Standards §**.
+> **Companion document:** `AL_PTE_Development_Standards_UNIFIED.md`. This runbook drives the *sequence*; that guide holds the detailed *rules* (Parts 2–12, Appendices A–C). References below point to it as **Standards §**.
 >
 > **Prime directive for the agent:** An ambiguous input produces ambiguous code. If a step's inputs are incomplete or contradictory, stop and ask the human — do not invent rules to fill the gap.
 
@@ -17,12 +23,14 @@ v1.0.0.0
 
 1. **Part 1 is authoritative.** Publisher, prefix, namespace, versions, ID ranges, localization — read them from the Project Parameters block (Step 01) and derive everything else. Never hardcode.
 2. **Verify against BC symbol files, not memory.** Table numbers, `using` namespaces, field IDs, `ObsoleteState` — confirm each in the symbol file named in Parameter 1.4. Agent knowledge of BC table numbers is not reliable (Standards §10.5, Appendix B). **Fallback when the downloaded symbols don't answer the question** (a module isn't in `.alpackages`, or you need to browse/discover rather than already knowing what to grep for): the entire BC BaseApp, for the current Business Central Online version, is documented at <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application> — every standard table, field, and field datatype/size. Use it to corroborate or discover; the downloaded symbol file for the target version is still the authoritative source when the two ever disagree.
-3. **Phase large scope into batches.** A batch is a self-contained, compilable, reviewable increment (by module or document-type group). Define batch boundaries during DESIGN and record them in the TDD (Standards §2 intro, §10.3).
-4. **Compile after every batch — never generate all batches first.** Treat one compiler error as a systemic signal: fix the rule/template, then every file it touched (Standards §9.3, §10.3).
-5. **Zero errors, zero warnings before PROVE.** Treat warnings as errors during development (Standards §9.4).
-6. **Human-in-the-loop is a feature.** Pause for human approval before: writing the first file of a batch, applying a root-cause fix, starting a new batch, and finalizing any design document.
-6a. **Ask decisions in a selectable options box, not in prose.** When the agent needs the human to *decide something* — pick between design options, approve a version bump, choose a name, resolve an ambiguity — present it through the interactive multiple-choice mechanism the agent's harness provides (in Claude Code, the `AskUserQuestion` tool), with the recommended option first and a short reason on each. A decision buried in a paragraph of chat is easy to miss: it reads like the agent finished and is idling, so the project silently stalls waiting on an answer nobody realised was owed.
+3. **Phase large scope into batches.** A batch is a self-contained, reviewable increment (by module or document-type group) — designed to be independently correct even though, under Operating Rule 4, it is not compiled on its own to prove it. Define batch boundaries during DESIGN and record them in the TDD (Standards §2 intro, §10.3).
+4. **Lint every batch as it's written, including symbol verification. Do not compile per batch — the whole extension compiles once every batch from the TDD's batch plan is written, gating entry to PROVE.** Run the Step 05 pre-flight checklist immediately on each batch — both passes: pre-generation (on planned names/fields) and post-generation (on the actual files); Step 05 defines the full list — including **symbol verification**: for every reference to a standard/base object, field, method, property, or enum value, verify it against the downloaded symbol source (falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer), not just against what looks like plausible AL. That check exists specifically against hallucination: a pattern-matching lint pass draws on the same kind of intuition that produces a hallucinated reference in the first place, so checking against the actual symbols is the one thing that verifies against ground truth instead of a plausible-looking guess. Do not invoke the AL compiler as an automatic part of generating batches. The one mandatory compile of the originally-planned batches happens in Step 07, triggered the moment Step 06 finishes — not deferred further, and not skipped. A human may also request an earlier spot-check compile mid-BUILD; that doesn't replace the mandatory one. **Gap-fill work is not part of that mandatory compile — it doesn't exist yet at that point.** Whether gap-fill arrives ad hoc (a human request mid-project, as actually happened on the pilot project) or as a Step 08 output, it gets pre-flighted and then compiled the same way, as its own pass, when it's actually done. Whenever any compile runs, treat any error as a systemic signal: fix the rule/template, then every file it touched — across every batch, not only the one where the error surfaced (Standards §9.3, §10.3).
+    **Trade-off, accepted deliberately (AJ Ansari, 2026-09-12, superseding the 2026-09-11 "compile once at the end" version of this rule):** even symbol-verified lint cannot catch everything a real compile does — cross-file type mismatches, full semantic validation, and rule interactions the compiler's own engine resolves are still invisible until an actual compile runs. Deferring the first real compile further than before means a systemic issue found late can touch more already-written files than catching it mid-BUILD would have. Accepted because generation speed matters more, and because symbol verification specifically closes the gap this decision was actually worried about — a reference to something that doesn't exist, dressed up as something that does.
+5. **Zero errors, zero warnings before PROVE.** Treat warnings as errors during development (Standards §9.4). Satisfied by construction under Rule 4: the one mandatory compile (Step 07) always runs, and must reach 0/0, before Step 08 begins.
+6. **Human-in-the-loop is a feature.** Pause for human approval before: writing the first file of a batch, applying a root-cause fix, starting a new batch, finalizing any design document, and installing any tool or runtime.
+6a. **Ask decisions in a selectable options box, not in prose.** When the agent needs the human to *decide something* — pick between design options, approve a version bump, choose a name, resolve an ambiguity — present it through the interactive multiple-choice mechanism the agent's harness provides (e.g., in Claude Code, the `AskUserQuestion` tool — substitute whatever the actual harness offers), with the recommended option first and a short reason on each. A decision buried in a paragraph of chat is easy to miss: it reads like the agent finished and is idling, so the project silently stalls waiting on an answer nobody realised was owed.
     **Use it only for decisions.** Do *not* wrap ordinary progress in it — finishing a step and waiting to be told to start the next one, reporting a clean compile, or handing back a result is normal conversation, not a decision point. Over-using the box makes it noise, which defeats the purpose.
+6b. **Don't install tooling without asking — and look harder first.** Before concluding a required compiler/runtime is missing and reaching for an install, check whether the human's own IDE already provisions one privately for the tool in question — e.g., VS Code's AL extension gets its .NET runtime from a companion ".NET Install Tool" extension, not a system-wide install, at a path that differs by OS: `~/Library/Application Support/Code/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/` on macOS, `~/.config/Code/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/` on Linux, `%APPDATA%\Code\User\globalStorage\ms-dotnettools.vscode-dotnet-runtime\` on Windows — check the one matching the actual machine, not just the first one you think of, *before* assuming none exists. If the human's own editor can already do the thing you're about to install a tool for, that's a strong signal the tool already exists somewhere you haven't looked. Installing anything is itself a human-in-the-loop decision (rule 6) regardless of what a fallback option elsewhere in this runbook lists as available — on a real project the agent skipped the search, wrongly installed a fresh runtime, and had to remove it.
 7. **Log every deviation immediately.** Any departure from FRD or TDD goes in the ChangeLog before the next batch starts (see *All Along*).
 
 ---
@@ -141,9 +149,9 @@ Collected as the loop described above — one row per confirmed range, in the or
 
 | Parameter | Value | Guidance |
 |---|---|---|
-| **Permission Sets required?** | `Yes` / `No` | If `Yes`, reserve ≥ 2 IDs inside the primary range and deliver per Standards §7.3. |
+| **Permission Sets required?** | `Yes` / `No` | `No` is a valid answer **only when the extension introduces zero new tables of its own** (e.g., a pure page/report extension on standard objects) — the one case where BC PTE publish validation (`PTE0004`) doesn't require an in-package permission set. The moment the project owns even one table, this must be `Yes`; it stops being a free choice. If `Yes`, reserve ≥ 2 IDs inside the primary range and deliver per Standards §7.3. |
 
-> **Rule:** Never use object IDs outside the allocated ranges. Maintain the object register as a separate project artifact. If `Permission Sets required = Yes`, plan them before code generation.
+> **Rule:** Never use object IDs outside the allocated ranges. Maintain the object register as a separate project artifact. If the project plans any new table, `Permission Sets required` must be `Yes` and they must be planned before code generation — do not accept `No` alongside a table in the entity list without flagging the contradiction back to the human.
 
 **Worked example** (the loop ran twice): starting ID `90800`, ending ID `90899` → shown as
 "90800–90899 — 100 IDs," confirmed → "additional ranges?" → Yes → starting ID `91500`, ending ID
@@ -194,11 +202,129 @@ Primary `90800`–`90899`; Additional allocation 1 `91500`–`91549`; Permission
 
 | Flag | Status | Reason |
 |---|---|---|
-| `NoImplicitWith` | **Enabled (enforced)** | Requires every field source to be prefixed with `Rec.`, which prevents silent field-scoping bugs where an unqualified field name resolves to the wrong record. Enforcing it project-wide keeps all generated AL consistent and removes a whole class of ambiguous references.
+| `NoImplicitWith` | **Enabled (enforced)** | Requires every field source to be prefixed with `Rec.`, which prevents silent field-scoping bugs where an unqualified field name resolves to the wrong record. Enforcing it project-wide keeps all generated AL consistent and removes a whole class of ambiguous references. |
 
-**Outputs:** The completed Project Parameters block (above, all placeholders replaced); an empty **Object Register** artifact seeded with the allocated ID ranges. 
+### 1.6 Onboarding & Discoverability
 
-**Exit gate:** No placeholder remains. Deployment Target is one allowed value. Namespace matches between 1.1 and 1.3, or both are correctly N/A if Use Namespace = `No`. Localization is set. If Permission Sets required = `Yes`, ≥ 2 IDs are reserved in the primary range. Human confirms the sheet. Update relevant properties in `app.json` such as name, publisher, version, brief, description, and idranges.
+> These decisions shape real objects — a wizard page, Role Center cue fields, department/Tell Me
+> entries — so ask them at intake, not part-way through DESIGN when the object inventory is
+> already being drafted around their absence. Ask the same way as the §1.1 identity questions:
+> an explicit question each, before assuming an answer either way.
+
+Ask these three questions:
+
+1. Should this extension include an **Assisted Setup Wizard**? If yes, what should it configure
+   (e.g., number series, default setup values, sample/demo data, permission set assignment)?
+2. Should the Role Center get **Activity Cues** (the numeric tiles summarizing counts that need
+   attention — e.g., overdue items, unpaid records)? If yes, which cues, each one's underlying
+   filter, and what it opens when clicked?
+3. Should this extension be **findable via Departments / "My Business Central"** (the role-based
+   menu and Tell Me search surface — a different discovery path than the Role Center)? If yes,
+   under which department/category, and which pages should appear there?
+
+| Parameter | Placeholder | Guidance |
+|---|---|---|
+| **Assisted Setup Wizard** | `<AssistedSetupYN>` | `Yes`/`No`. If `Yes`, list exactly what it configures — not a bare yes. |
+| **Activity Cues** | `<ActivityCuesYN>` | `Yes`/`No`. If `Yes`, list each cue: what it counts, its filter, and its drill-through target. |
+| **Departments / My Business Central placement** | `<DepartmentsYN>` | `Yes`/`No`. If `Yes`, name the department/category and which pages appear there. |
+
+A `No` to any of these is a valid, final answer — not a placeholder to revisit later. Record the
+answer and reasoning in `ProblemStatement.md` or the Project Parameters sheet; a `Yes` answer's
+specifics feed the FRD (Step 02) object inventory and the TDD (Step 03) per-object spec directly.
+
+### 1.7 Model & Effort Assignment (Optional)
+
+> Ask once, at intake, before DESIGN begins — Step 02/03 authorship depends on the answer.
+> If the human has no preference, skip this: everything runs through the main model, as if this
+> section didn't exist.
+
+**Superseded 2026-09-12 (AJ Ansari) — from "record a preference" to a fixed division of labor.**
+Earlier guidance here only *recorded* a stated preference as documentation, on the reasoning that
+the executing agent can't switch its own model mid-session. That's still true, but it missed the
+actual point: the agent *can* delegate a specific, self-contained task to a subagent running a
+different model, get a result back, and act on it — a mechanism-agnostic capability, not tied to
+any one harness. AJ's decision below uses exactly that, for three fixed roles, kept deliberately
+generic (no vendor/model names) since this runbook travels to projects on other harnesses:
+
+Ask: "This framework can split work across up to three roles, each potentially a different model.
+Do you want to configure this, or should everything run through one model?"
+
+If configuring, capture three role assignments:
+
+1. **Main role** — does the bulk of the work: all BUILD code generation, all actual code edits
+   (including applying what the other two roles report), and end-to-end ownership of the
+   project's continuity documents — ChangeLog, Object Register, ProjectMemory, and
+   `TestingFeedback.md` itself (recording sessions verbatim, then logging the triage decision —
+   implement / schedule / reject — once the reasoning role's diagnosis below confirms it). A
+   capable general-purpose model is the right fit here.
+2. **Light role** — fast, cheap, checklist-driven verification only: the Step 05
+   **post-generation** pre-flight pass in full (see Step 05 for the actual list — don't
+   re-enumerate it here, it drifts). Notably includes **symbol verification**, deliberately not
+   given to the reasoning role: it's a lookup against ground truth, not a judgment call, so the
+   fast/cheap role handles it fine. Reports findings; never edits code itself. A fast, lower-cost
+   model is the right fit here.
+3. **Reasoning role** — heavier-reasoning, fresh-eyes work: Sanity Check (Step 04), Code Review
+   (Step 10), Gap-Fit Test (Step 08), FRD authorship (Step 02), TDD authorship (Step 03), and
+   root-cause troubleshooting/diagnosis (Step 07, and diagnosing *why* a PROVE-phase testing-feedback
+   report is real, before the main role triages and records it). Reports findings, drafts, or
+   diagnoses; never edits code or the continuity documents itself. A stronger-reasoning model is
+   the right fit here.
+
+**The division of labor is fixed regardless of which physical models are assigned to each role.**
+The light and reasoning roles investigate, draft, or diagnose; the main role is the *only* one
+that edits code and the *only* one that owns the continuity documents end to end. This keeps one
+consistent author/style across the codebase — the same discipline Step 10 already asks for
+internally ("early and late batches often drift — normalize") — and keeps root-cause tracing in
+one continuous thread instead of fragmenting across cold hand-offs. A role holder's output is
+always relayed back and integrated by the main role; never applied blind.
+
+**How to delegate a role in practice** (adapt to whatever mechanism the executing agent's own
+harness provides for running a task under a different model): hand the role-holder the specific
+inputs its task needs — the relevant project documents, the code or finding in question, the
+standing checklist — plus a pointer to this runbook itself, since every rule in it applies to
+whichever role is acting, not only the main role.
+
+| Parameter | Placeholder | Guidance |
+|---|---|---|
+| **Model/role assignment** | `<ModelRolesYN>` | `No` (default — one model for everything) or a 3-row table: Main role / Light role / Reasoning role → the model assigned to each. |
+
+### 1.8 Framework File Tracking (`.gitignore`)
+
+> Ask once, at intake. **Explain what `.gitignore` is and does in the same breath as asking it —
+> don't assume the human already knows.** Many stakeholders directing a build have never needed
+> to know Git internals; this decision affects them (whether their own project's remote — its
+> copy on GitHub, Azure DevOps, or wherever else it's hosted — carries a copy of this runbook), so
+> they need enough context to actually choose, not just a yes/no with no explanation.
+
+Ask: "`.gitignore` is a file Git reads to decide which files to leave alone — anything listed in
+it stays on disk exactly as normal and is fully usable locally, but is never tracked, committed,
+or pushed to a remote repository such as GitHub or Azure DevOps. This framework's own files — this
+runbook, its changelog, and its schematics if generated — can be excluded from *this project's*
+git tracking this way (the recommended default), or included if you'd rather this project's own
+repo carry its own copy of them. Which do you want?"
+
+| Parameter | Placeholder | Guidance |
+|---|---|---|
+| **Framework files in `.gitignore`?** | `<FrameworkGitignoreYN>` | `Yes` (**default, recommended**) excludes this runbook, its changelog, and its schematics (if present) from this project's git tracking. `No` tracks them alongside the project's own code. |
+
+**Why the recommended default is `Yes`:** this framework is distributed from its own dedicated
+repository; the methodology, naming conventions, and hard-won lessons it encodes are not
+themselves part of what a client is paying to receive when this framework builds their extension.
+Defaulting to excluded keeps that methodology from silently ending up inside every client or
+shared remote repo (GitHub, Azure DevOps, or otherwise) this framework is ever pointed at. A
+human who *wants* a project's repo to be
+self-contained — e.g., so a teammate cloning it fresh can see exactly how it was built without
+separately fetching the framework — can say so here and get that instead; both are legitimate,
+this just isn't a decision to make silently either way.
+
+This choice governs only the three framework documents named above. `.bcquality/` and any local
+tooling helper script this framework's own bootstrap creates (e.g., an AL MCP Server launcher) are
+**always** excluded from this project's git tracking regardless of the answer here — see ALL ALONG
+→ Repository Hygiene. That part isn't a choice the human makes per project.
+
+**Outputs:** The completed Project Parameters block (above, all placeholders replaced); an empty **Object Register** artifact seeded with the allocated ID ranges; the project's `.gitignore` populated per this section and per ALL ALONG → Repository Hygiene.
+
+**Exit gate:** No placeholder remains. Deployment Target is one allowed value. Namespace matches between 1.1 and 1.3, or both are correctly N/A if Use Namespace = `No`. Localization is set. If Permission Sets required = `Yes`, ≥ 2 IDs are reserved in the primary range. §1.6's three questions are each answered `Yes`/`No` with specifics recorded for any `Yes`. §1.7 is answered or explicitly skipped. §1.8 is answered (or defaults to `Yes`) and `.gitignore` reflects it. Human confirms the sheet.
 
 ---
 
@@ -207,6 +333,11 @@ Primary `90800`–`90899`; Additional allocation 1 `91500`–`91549`; Permission
 Goal: a complete FRD and a self-sufficient TDD, both validated for BC feasibility and internal consistency, before any code.
 
 ## 02 — Craft the Functional Requirements Document (FRD)
+
+**Role:** if §1.7 role assignment is configured, drafted by the **reasoning role**, fed
+`ProblemStatement.md`, the expanded entity list, and Project Parameters; the main role integrates
+the draft (saves it, does the ChangeLog/ProjectMemory bookkeeping) and takes it to the human for
+sign-off. Sign-off is unchanged either way — it's the human's, never the drafting role's.
 
 **Inputs:** `ProblemStatement.md`, expanded entity list + gap log, Project Parameters.
 
@@ -227,6 +358,10 @@ Then **review and validate against the DEFINE artifacts:** every entity in the e
 
 ## 03 — Craft the Technical Design Document (TDD)
 
+**Role:** if §1.7 role assignment is configured, drafted by the **reasoning role**, fed `FRD.md`,
+Project Parameters, and the symbol file; the main role integrates the draft and takes it to the
+human for sign-off, same as Step 02.
+
 **Inputs:** `FRD.md`, Project Parameters, BC symbol file (Parameter 1.4).
 
 **Actions:** Translate the FRD's *what* into a precise *how*. The TDD must be self-sufficient: a developer or agent who has never seen the project must be able to produce every object correctly from the TDD alone (Standards §2.3). Include:
@@ -240,13 +375,18 @@ Then **review and validate against the DEFINE artifacts:** every entity in the e
 - **`using` directives** — the exact namespace for every object, copied from the symbol file (Standards §3.1, §5.4).
 - **Standard object template** — the exact AL API page pattern every generated object must follow (Standards §3.3).
 - **Special design notes** — singletons (`EntityName = EntitySetName`), header/line pairs as two top-level pages, high-volume tables, naming conflicts.
-- **Permission sets** — if Parameter 1.2 = `Yes`: a read-only set and a read/write set (including the read-only set), both with IDs from the allocated range and names from the Permission Set Prefix (Standards §7.3).
+- **Permission sets** — if Parameter 1.2 = `Yes` (mandatory the moment the project owns any table — see Parameter 1.2): a read-only set and a read/write set (including the read-only set), both with IDs from the allocated range and names from the Permission Set Prefix (Standards §7.3). **The batch plan must ship each table's `tabledata` grant in the same batch that introduces the table — never deferred to a later batch.** BC PTE publish validation (`PTE0004`) requires every table in a published package to be covered by an in-package permission set; finding this at publish instead of at TDD time forces a batch-plan rewrite after code already exists (a real project hit exactly this and had to pull its permission sets forward from its last batch to its first).
 
 **Outputs:** `TDD.md`; updated **Object Register** with every planned object and its ID.
 
 **Exit gate:** Technical Lead sign-off. Self-sufficiency check passes: no rule requires knowledge outside the document (Standards §2.2 Stage 5).
 
 ## 04 — Sanity Check and Validation
+
+**Role:** if §1.7 role assignment is configured, this review is done by the **reasoning role** —
+same rationale as Step 10: fresh eyes catch what the author of the FRD/TDD is least likely to see
+in their own work. The reasoning role reports findings; the main role resolves them and updates
+the documents.
 
 **Inputs:** `FRD.md`, `TDD.md`, BC symbol file.
 
@@ -262,7 +402,7 @@ Then **review and validate against the DEFINE artifacts:** every entity in the e
 - [ ] All entity names ≤ 30 characters; all field identifiers ≤ 30 characters.
 - [ ] Read vs. read/write designations match the mutability rules in Standards §4.2.
 - [ ] Growth buffers are planned within each module block (Standards §7.2).
-- [ ] Permission sets are planned if enabled (Parameter 1.2).
+- [ ] Permission sets are planned if enabled (Parameter 1.2) — **with every table's `tabledata` grant explicitly enumerated per set**, not just "permission sets exist," and each grant assigned to the same batch that introduces its table (Standards §7.3).
 - [ ] Every entity's deletion behavior (block-if-referenced / cascade / allow) is explicitly decided and stated — not left to whatever the template defaults to. This includes fields on *other* tables (including standard BC tables extended via `tableextension`) that reference this entity by `TableRelation`: deciding a table's deletion behavior means re-checking every known referencing field, not just this app's own child tables.
 
 **Outputs:** `SanityCheck.md` — every check, finding, resolution.
@@ -273,7 +413,7 @@ Then **review and validate against the DEFINE artifacts:** every entity in the e
 
 # PHASE: BUILD
 
-Goal: generate AL that compiles clean, one batch at a time, fixing root causes not symptoms.
+Goal: generate AL batch by batch, lint clean — including symbol verification — as you go, without compiling per batch. The whole extension compiles once the TDD's planned batches are all written (Step 07) — fix root causes, not symptoms, when that surfaces anything.
 
 ## 05 — Plan the Code
 
@@ -282,12 +422,17 @@ Goal: generate AL that compiles clean, one batch at a time, fixing root causes n
 **Actions:**
 - Confirm the object build order: which objects are built in which batch, smallest/simplest module first (Standards §10.3).
 - Within a batch, order objects so lookup/reference tables precede the entities that reference them.
-- Prepare the scaffold: `app.json` (name, publisher, runtime, BC dependency, `"features": ["NoImplicitWith"]`), `launch.json`, folder structure per module.
-- Write the pre-flight validation checks to run before each batch is delivered: identifier length ≤ 30, entity name length ≤ 30, reserved-keyword scan, localization field-range filter, `ObsoleteState` filter, required-property presence.
+- Prepare the scaffold: `app.json` (name, publisher, runtime, BC dependency, `"features": ["NoImplicitWith"]`), `launch.json`, folder structure per module, and `.gitignore` populated per §1.8 and ALL ALONG → Repository Hygiene.
+- Bootstrap the AL MCP Server and the BCQuality knowledge snapshot for this project if not
+  already done (ALL ALONG) — both are one-time-per-project setup, cheapest to do alongside the
+  rest of the scaffold rather than as an afterthought once BUILD is underway.
+- Write the pre-flight validation checks to run for each batch — this is the canonical checklist every other reference to "the Step 05 checklist" in this runbook means; if you're re-stating it elsewhere, point here rather than re-enumerating. Split into two passes, since some checks are only possible before generation and some only after:
+  - **Pre-generation** (on the TDD's planned names/fields, before any file exists — main role): identifier length ≤ 30, entity/EntitySet name length ≤ 30, reserved-keyword scan, localization field-range filter, `ObsoleteState` filter.
+  - **Post-generation** (on the actual generated files — light role, if §1.7 role assignment is configured): required-property presence, `Rec.`-qualification (`NoImplicitWith`), dead-code check (no empty triggers, no `// TODO`, no commented-out fields), 4-space indentation with no tabs, permission-set `tabledata` coverage for every table the batch introduces (Standards §7.3 — `PTE0004` fires at **publish**, not at compile, so **nothing automated catches a missing grant** — pre-flight is the only defense; vacuously satisfied if this project introduces no tables — see Parameter 1.2), and **symbol verification** — every reference to a standard/base BC table, page, codeunit, method, property, or enum value confirmed against the downloaded symbol source, falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer, not assumed correct because it looks like plausible AL (Operating Rule 4).
 
-**Outputs:** Batch plan (ordered), project scaffold, pre-flight validation script/checklist.
+**Outputs:** Batch plan (ordered), project scaffold, pre-flight validation script/checklist (both passes).
 
-**Exit gate:** Batch order agreed with the human; scaffold compiles empty; pre-flight checks ready.
+**Exit gate:** Batch order agreed with the human; scaffold is structurally complete (`app.json` fields populated, dependencies declared, folders created — not compiled, per Operating Rule 4); pre-flight checks ready.
 
 ## 06 — Code Generation
 
@@ -296,25 +441,34 @@ Goal: generate AL that compiles clean, one batch at a time, fixing root causes n
 **Actions — per batch, in order:**
 1. Pause for human approval before writing the first file.
 2. Extract source-table and field data for this batch's objects from the symbol file.
-3. Run pre-flight validation on the planned names/fields; fix the TDD before generating if anything fails.
+3. Run the Step 05 **pre-generation** pre-flight pass on the planned names/fields (main role — this is TDD housekeeping, distinct from the file-level lint in Action 5 below); fix the TDD before generating if anything fails.
 4. Generate the batch's AL files from the standard template (Standards §3.3), substituting only Part 1 values. Every file: one `namespace`, one `using` (from symbol file), `ODataKeyFields = SystemId`, exactly one of `DelayedInsert = true` / `Editable = false`, and `Caption` + `ToolTip` + `ApplicationArea = All` on every field (Standards §3.1–§3.4, §4.1–§4.6). Captions and ToolTips written as self-describing schema for API consumers (Standards §4.5–§4.6). No dead code, no empty triggers, no commented-out fields, no `// TODO` (Standards §3.5).
-5. **Lint and compile the batch immediately** — dot the i's, cross the t's on each file as you go. Run the pre-compilation checklist (Standards §9.1) and the AZ AL Dev Tools linter (Appendix C). Indentation: 4 spaces per level, no tabs (Standards §9.2).
-6. Do not proceed to the next batch until this one compiles with 0 errors / 0 warnings and pre-flight is clean.
+5. **Run the Step 05 post-generation pre-flight pass on the batch immediately** — dot the i's, cross the t's on each file as you go, plus a manual read against the AZ AL Dev Tools rules (Appendix C — see the caveat on this citation under ALL ALONG → Retain Explanations). If §1.7 role assignment is configured, this pass is done by the **light role** — it reports findings only, it does not edit code; the main role applies every fix. **Do not invoke the AL compiler** (Operating Rule 4).
+6. Do not proceed to the next batch until this one's pre-flight (including symbol verification) is clean. Do not compile per batch. Once every batch from the TDD's batch plan is generated, move to Step 07 — that step opens with the one mandatory compile (Operating Rule 4); it is not optional and not deferred further. (Gap-fill work, if any comes later, is a separate pass through this same Step 05/06/07 discipline when it's actually written — see Operating Rule 4.)
+7. **Before moving past this step, verify permission-set coverage explicitly** (light role, same checklist nature as Action 5) — don't just trust that it was "planned." Check that every table built across every batch has a matching `tabledata` grant in both the read-only and read/write permission sets (Standards §7.3; vacuously satisfied if this project introduces no tables — see Parameter 1.2). This is a design-time check, independent of whether or when a compile happens: `PTE0004` (missing permission set) only fires at **publish**, and nothing else automated catches it. A real project didn't catch this until publish and had to rewrite its batch plan as a result — catch it here instead.
 
-**Outputs:** Compiled AL files for each batch; updated Object Register; ChangeLog entries for any deviation.
+**Outputs:** Generated AL files for every batch, each lint-clean including symbol verification; updated Object Register; ChangeLog entries for any deviation. The extension is **not** compiled as part of this step (Operating Rule 4) — that happens next, in Step 07.
 
-**Exit gate:** Every planned object generated; each batch compiled clean before the next began.
+**Exit gate:** Every planned object generated; each batch's pre-flight (including symbol verification) was clean before the next began; permission-set coverage verified for every table (Action 7). A clean compile is **not** required to close this gate — Step 06 hands off directly into Step 07's mandatory compile.
 
 ## 07 — Troubleshoot, Iterate
 
-**Inputs:** Compiler/linter output per batch; `TDD.md`; ChangeLog.
+**Role:** if §1.7 role assignment is configured, root-cause diagnosis (the three questions below)
+is done by the **reasoning role**; the main role applies the resulting fix and does the
+ChangeLog/TDD bookkeeping. Same division for any bug surfaced later during PROVE-phase testing
+(see Testing Feedback Log, ALL ALONG) — diagnosis is a reasoning-role task, fixing is the main
+role's.
 
-**Actions:** For every error or warning, ask the three questions (Standards §9.3, §10 troubleshooting mindset):
+**Inputs:** Every batch from Step 06 (all lint-clean; not yet compiled via this step's mandatory pass, though an earlier human-requested spot-check may already have run — Operating Rule 4); the symbol-verified lint findings accumulated across BUILD; `TDD.md`; ChangeLog.
+
+**Actions:** First, **compile the whole extension once** (Operating Rule 4 — check for an already-provisioned runtime before installing anything, Operating Rule 6b). This is the mandatory compile the rest of BUILD deferred to this exact point; it is not optional and does not move further. If the human separately requested an earlier spot-check compile mid-BUILD, that was additional, not a substitute — this one still runs.
+
+Then, for every error or warning the compile surfaces, ask the three questions (Standards §9.3, §10 troubleshooting mindset):
 1. **One-off or pattern?** Search all generated files for the same class of issue before fixing one instance.
 2. **Where did it come from?** Trace to the generation rule, the TDD template, or the source data.
 3. **What rule should have caught it?** Fix that rule or the pre-flight check.
 
-Then: fix the **root cause** (rule / template / filter), regenerate the affected files, re-compile, and log the issue + resolution in the ChangeLog before the next batch. Update the TDD whenever a rule changes. Pause for human approval of each root-cause diagnosis before applying it.
+Then: fix the **root cause** (rule / template / filter), regenerate the affected files, re-compile, and log the issue + resolution in the ChangeLog before moving on. Update the TDD whenever a rule changes. Pause for human approval of each root-cause diagnosis before applying it.
 
 **Outputs:** All batches compiling with **0 errors, 0 warnings**; ChangeLog current; TDD updated for every rule change.
 
@@ -328,6 +482,10 @@ Goal: prove the built code matches intent, is clean, is packaged and tested, and
 
 ## 08 — Gap-Fit Test, Fidelity Validation
 
+**Role:** if §1.7 role assignment is configured, this three-way comparison is done by the
+**reasoning role**; the main role applies the resulting classification (Intentional / Oversight /
+Spec stale) to the actual documents.
+
 **Inputs:** `FRD.md`, `TDD.md`, the built AL, ChangeLog.
 
 **Actions:** Run a formal three-way comparison — FRD vs. TDD vs. as-built (Standards §11.4). Answer: does the written code follow the TDD and the FRD? What changed? Why? For each gap:
@@ -339,7 +497,7 @@ Goal: prove the built code matches intent, is clean, is packaged and tested, and
 
 Classify every gap as **Intentional** (document the reasoning), **Oversight** (fix now or schedule), or **Spec stale** (code is right, update the FRD/TDD).
 
-**Outputs:** `GapAnalysis.md` — every gap, its classification, its resolution. Gap-fill work items (built with the same discipline as main batches, using reserved growth IDs — Standards §11.6).
+**Outputs:** `GapAnalysis.md` — every gap, its classification, its resolution. Gap-fill work items — built with the same discipline as main batches, using reserved growth IDs (Standards §11.6): pre-flighted per Step 05, then compiled and troubleshot per Step 07's pattern, as their own pass — the Step 07 compile that closed BUILD already ran and doesn't cover code that didn't exist yet (Operating Rule 4). Ad hoc gap-fill requested mid-project, outside a formal Step 08, follows the same pattern.
 
 **Exit gate:** Every gap classified and resolved or scheduled; no unexplained divergence from FRD/TDD.
 
@@ -364,6 +522,11 @@ Classify every gap as **Intentional** (document the reasoning), **Oversight** (f
 
 ## 10 — Code Review
 
+**Role:** if §1.7 role assignment is configured, this review is done by the **reasoning role** —
+fresh eyes matter here specifically, since the agent that wrote the code is the one least likely
+to notice its own batch-to-batch drift. The reasoning role reports findings; the main role applies
+every fix and normalizes whatever drift the findings call out.
+
 **Inputs:** The full built extension; `TDD.md`; Standards Parts 3, 4, 6, 9, 11.
 
 **Actions:** Comprehensive review across all objects (Standards §11.5). Check for:
@@ -372,7 +535,12 @@ Classify every gap as **Intentional** (document the reasoning), **Oversight** (f
 - **Redundant code** — duplicate field exposures, duplicate `using` directives, objects more complex than needed.
 - **"Marked for obsoletion"** — any reference to a field, table, procedure, or event with `ObsoleteState = Pending` or `Removed`; any subscription to an obsolete event (Standards §5.2–§5.3). Exclusion is unconditional — no version check, no exception.
 - **Standards compliance** — run the full Anti-Patterns table (Standards Part 11) against the codebase.
-- **Best practices** — `Rec.` prefix everywhere (`NoImplicitWith`), required metadata present, correct `DelayedInsert` / `Editable` per data mutability.
+- **Best practices** — `Rec.` prefix everywhere (`NoImplicitWith`), required metadata present, correct `DelayedInsert` / `Editable` per data mutability, every table covered by both permission sets' `tabledata` grants (re-verify independently — don't just trust Step 06 Action 7).
+- **BCQuality knowledge-backed review** (ALL ALONG) — invoke the local BCQuality snapshot's
+  `skills/entry.md` dispatch flow against the built extension as an additional, independent pass
+  alongside the Standards Anti-Patterns check above. Integrate its findings the same way as every
+  other finding here: knowledge-backed findings and the agent's own findings both surface, fixes
+  land through the normal ChangeLog/root-cause discipline, nothing is applied blind.
 
 **Outputs:** `CodeReview.md` — findings by dimension, severity, and resolution. Fixes applied at the rule level where a pattern repeats, with ChangeLog entries.
 
@@ -408,12 +576,12 @@ Classify every gap as **Intentional** (document the reasoning), **Oversight** (f
 **Inputs:** `PostDevTDD.md`, the built AL, test-run record from Step 09.
 
 **Actions:**
-- **Generate the reference documentation from the code, not from memory** (Standards §12.2). Parse every API page: extract IDs, source tables, editability, filters, and every field's identifier / source name / description / R/W status. Produce a structured reference — one section per object, one row per field — plus: quick-start deployment guide, authentication and URL patterns (Standards Appendix A), `$filter` / `$select` examples, create/update/delete examples, explicit limitations, common integration patterns, troubleshooting table.
+- **Generate the reference documentation from the code, not from memory** (Standards §12.2). Parse every API page: extract IDs, source tables, editability, filters, and every field's identifier / source name / description / R/W status. Produce a structured reference — one section per object, one row per field — plus: a **quick-start** guide (get the API working fast — auth, one request, one response; not the full install procedure, see `Deployment.md` below for that), authentication and URL patterns (Standards Appendix A), `$filter` / `$select` examples, create/update/delete examples, explicit limitations, common integration patterns, troubleshooting table.
 - **Draw the schema as a Mermaid diagram**, generated from the actual objects, not from memory. Include every table this app owns *and* every standard/base table it touches — via `TableRelation`, `tableextension`, or a `pageextension`'s `RunPageLink` — so a reader sees the whole relationship graph, not just the app's own corner of it. An ER diagram (`erDiagram`) is the usual fit; note cardinality and which side is the standard object.
-- **Render the diagram to prove it parses — never ship one you have not seen render.** Markdown happily stores a syntactically invalid diagram: it looks fine in the source file and simply fails to draw wherever it is finally viewed, so the defect is invisible until a reader hits it. Extract the fenced block and run it through a renderer (`npx @mermaid-js/mermaid-cli -i diagram.mmd -o diagram.svg`); a parse error exits non-zero and names the line. On a real project a diagram shipped with `PK_FK` as a key constraint — not valid Mermaid, which accepts `PK`, `FK`, `UK`, or comma-separated `PK,FK` — and never rendered anywhere until it was actually tested.
+- **Render the diagram to prove it parses — never ship one you have not seen render.** Markdown happily stores a syntactically invalid diagram: it looks fine in the source file and simply fails to draw wherever it is finally viewed, so the defect is invisible until a reader hits it. Extract the fenced block and run it through a renderer (e.g. `npx @mermaid-js/mermaid-cli -i diagram.mmd -o diagram.svg`, or whatever renderer is already available — this may download a package on first run, so Operating Rule 6b applies: confirm one is already usable, or ask, rather than installing anything unprompted); a parse error exits non-zero and names the line. On a real project a diagram shipped with `PK_FK` as a key constraint — not valid Mermaid, which accepts `PK`, `FK`, `UK`, or comma-separated `PK,FK` — and never rendered anywhere until it was actually tested.
 - **Write the human unit test script** — a step-by-step manual test walkthrough a person can execute: endpoint by endpoint, the happy-path and boundary cases from Step 09, expected result for each. A well-written test script is ~70% of a user guide (Standards §12.1).
 - Write the **user guide** as `UserGuide.md` — **Markdown, in the repo, always** (HTML with `@media print` rules only as an *additional* branded/print deliverable, never instead of the Markdown; Standards §12.5). This is a **separate document from `Documentation.md`** and must not be folded into it: `Documentation.md` is the integration/API reference written for a developer or BI consumer, whereas the user guide is written for the person clicking around in Business Central — what the feature is for, how to do each task in order, what each field means in business terms, and what to do when something is refused. If the only "user guide" produced is an API reference, this action has not been done.
-- Write one-page **deployment instructions** for an administrator: version requirements, install procedure, which permission sets map to which roles, verification steps, uninstall (Standards §12.3).
+- Write one-page **deployment instructions** as `Deployment.md`, for an administrator: version requirements, install procedure, which permission sets map to which roles, verification steps, uninstall (Standards §12.3). Distinct from `Documentation.md`'s quick-start: this is the full admin install/upgrade/uninstall procedure, not a fast path to a first API call.
 
 **Outputs:** `Documentation.md` (consumer/API reference, includes the Mermaid schema diagram), `HumanUnitTestScript.md`, **`UserGuide.md`** (end-user, Markdown), `Deployment.md`. Four documents — check all four exist before claiming the step is complete.
 
@@ -427,7 +595,7 @@ Run these in parallel with the phased work — they are not a final step.
 
 ## Document
 
-- Keep every required project document current as work proceeds, not retroactively (Standards §2.1): `ProblemStatement`, `FRD`, `TDD`, `SanityCheck`, `PostDevTDD`, `ChangeLog`, `GapAnalysis` / `CodeReview`, `Documentation`, `TestingFeedback`, `Roadmap`, `ProjectMemory`.
+- Keep every required project document current as work proceeds, not retroactively (Standards §2.1): `ProblemStatement`, `FRD`, `TDD`, `SanityCheck`, `PostDevTDD`, `ChangeLog`, `GapAnalysis` / `CodeReview`, `Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`, `TestingFeedback`, `Roadmap`, `ProjectMemory` — all four Step 12 outputs (`Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`) belong on this list, not just the first of them.
 - Maintain the **Object Register** as a standalone artifact — every object, its ID, module, source table, and R/W status — updated as objects are planned and built (Standards §1.2).
 
 ## Track Changes — the ChangeLog
@@ -449,7 +617,7 @@ Every deviation from FRD or TDD — human or agent — is logged **before the ne
 
 - When the agent flags something (an obsolete field, an ambiguous name, a scope question), record the flag, **who** decided and what they decided, and the reasoning — not just the outcome.
 - Every root-cause fix records the diagnosis, not only the patch, so the same class of error cannot recur in a later batch.
-- Commit each batch to version control separately, before the next begins, with a message that references its ChangeLog entries (Standards Appendix C).
+- Commit each batch to version control separately, before the next begins, with a message that references its ChangeLog entries (Standards Appendix C — **unverified against the companion doc, which isn't in this repo; Step 06's pre-flight action also cites "Appendix C" for the AZ AL Dev Tools linter rules, a different subject — confirm both against the actual Standards doc rather than assuming they're the same appendix**).
 
 ## Testing Feedback Log
 
@@ -466,6 +634,13 @@ what the human actually said before it becomes a summary of what the human said.
 - Cross-reference in both directions: the `TestingFeedback.md` entry links to the ChangeLog
   Issue(s) or Roadmap item(s) it produced, so the raw ask and the eventual decision both remain
   traceable independently.
+- **Role (§1.7):** diagnosing *why* a reported bug happens is a **reasoning-role** task, same as
+  Step 07. The **main role** applies the fix once the diagnosis is confirmed, and separately owns
+  the triage act itself — recording the implement/schedule/reject decision in `TestingFeedback.md`
+  and cross-referencing the ChangeLog/Roadmap entry it produced. Don't skip straight to a patch on
+  a guess — this is exactly where a wrong first diagnosis is cheapest to catch, and a wrong one
+  should stay in the log marked superseded, not be quietly deleted, the same as any other
+  ChangeLog correction.
 
 ## Project Memory — `docs/ProjectMemory.md` (required, in-repo)
 
@@ -514,9 +689,9 @@ functionally identical, not a true undelete. That recovery path will not always 
 old packages, if it ever happens, is a decision the human makes explicitly, never an automatic
 or "helpful" action by the agent.
 
-**Offer to (re-)package — use judgment on *when*, not *whether* to ask.** When a batch, a
-testing-feedback round, or a defect fix finishes compiling to 0 errors / 0 warnings and
-represents a meaningful, testable unit of change, ask whether to rebuild the package now. The
+**Offer to (re-)package — use judgment on *when*, not *whether* to ask.** When a meaningful,
+testable unit of change is done — a batch reaching lint-clean, the mandatory Step 07 compile
+succeeding, or a testing-feedback fix verified — ask whether to rebuild the package now. The
 right granularity is the same one that already governs a ChangeLog entry and its own commit — if
 the change was significant enough for those, it's significant enough to offer a fresh package
 for. Don't ask after every trivial or doc-only edit; don't silently skip asking after a real
@@ -539,6 +714,166 @@ actually changed (a one-field tweak billed as Major; a breaking change billed as
 say so plainly and recommend the right action instead of silently doing what was literally
 asked. If the human insists anyway, get an explicit override and proceed — but the mismatch must
 be named first, not absorbed silently.
+
+## Repository Hygiene — What Stays Out of the Project's Remote
+
+**What `.gitignore` is, briefly (for the human, not the agent — the agent already knows):**
+Git is the version-control system most projects use; a `.gitignore` file tells it which files to
+leave alone. Anything listed there stays on disk and works exactly normally — it's just never
+tracked, committed, or pushed to a remote repository like GitHub or Azure DevOps. A file being
+gitignored is not a file being deleted or hidden from the person working locally; it's a file
+that never leaves this one machine's copy of the project unless someone deliberately shares it
+another way.
+
+Some things a project needs locally to build or review with this framework are not the client's
+deliverable and should never end up in the project's own git remote (its GitHub, Azure DevOps, or
+similar hosting), even though they sit in the working directory like any other file.
+
+**Always gitignored — not a choice, not asked about per project:**
+- `.bcquality/` — the fetched BCQuality knowledge snapshot (ALL ALONG → BCQuality Knowledge
+  Snapshot). Unlike `.alpackages/`, which this project's own compile genuinely needs and is
+  therefore tracked for reproducibility, BCQuality is a review aid with no reproducibility
+  requirement — it can be refetched at will, and a client's repo has no reason to carry an
+  800-file third-party knowledge snapshot.
+- Any local tooling helper script this framework's own bootstrap creates for the executing
+  agent's convenience — e.g., an AL MCP Server launcher wrapper — typically under a `scripts/`
+  folder (ALL ALONG → AL MCP Server). This is the framework's own plumbing, not part of what the
+  client is paying to receive.
+
+**Gitignored by default, human can opt out at intake (Step 01 §1.8):** this runbook itself, its
+changelog, and its schematics, if generated. The recommended default keeps them out of the
+project's remote (GitHub, Azure DevOps, etc.) — this framework is distributed from its own dedicated repository, and the
+methodology and hard-won lessons it encodes are not themselves part of the deliverable. A human
+who wants a project's own repo to be self-contained (e.g., so a teammate cloning it fresh can see
+exactly how it was built) can say so at intake and get that instead — see §1.8 for the exact
+question and explanation to give them.
+
+**If any of the above is already tracked when this policy is adopted** (e.g., a project that
+started before this section existed): add the entries to `.gitignore`, then actually untrack them
+(`git rm --cached`, not `git rm` — the files stay on disk) so the ignore rule takes effect; adding
+an entry to `.gitignore` alone does nothing for a file Git is already tracking. Check whether the
+project has ever been pushed to a remote (GitHub, Azure DevOps, or wherever) before doing this —
+if it has, untracking rewrites what a `git pull` shows collaborators (files appearing "deleted")
+even though nothing was deleted locally; say so plainly before proceeding if a remote exists, per
+Operating Rule 6.
+
+## AL MCP Server
+
+The AL Language extension ships a standalone MCP server (`altool launchmcpserver`) exposing AL
+build/publish/symbol/diagnostic tools over the Model Context Protocol, so any MCP-capable agent —
+not only VS Code — can drive them directly instead of shelling out to the compiler by hand. It is
+not a background service: nothing runs until an MCP host spawns it, and it exits when the host
+tears it down.
+
+**Bootstrap once per new project** (idempotent — check for an existing registration before
+adding a duplicate):
+1. Locate `altool` inside the installed AL extension (its `bin/` folder) — it is not necessarily
+   on `PATH`. **On Windows**, `altool.exe` is a native binary — invoke it directly, no wrapper
+   needed. **On macOS or Linux**, the shipped `.exe` is Windows-only and won't run; invoke
+   `altool.dll` against a .NET runtime instead (prefer one already on `PATH`; otherwise check
+   whatever the IDE already privately provisions for its own AL tooling before installing
+   anything — Operating Rule 6b — noting that path itself differs by OS, e.g. VS Code's own
+   per-extension runtime storage lives under a different directory on macOS than on Linux).
+2. Confirm the project has a valid `app.json` and, if any MCP tool will publish or download
+   symbols from a live server, a `launch.json` with the target environment configured.
+2a. If bootstrapping needs a local wrapper script (e.g., because the host needs a fixed command
+    but the actual runtime/extension path must be re-discovered per machine — see the portable
+    pattern this project used), put it in a project-local folder such as `scripts/` and add that
+    folder to `.gitignore` (ALL ALONG → Repository Hygiene) — it's this framework's own tooling
+    plumbing, not part of the client's deliverable. **Consequence to document, not paper over:**
+    if the MCP host config that references the script (e.g., `.vscode/mcp.json`) *is* committed,
+    a fresh clone will have a config pointing at a script that doesn't exist yet — note this in the
+    project's own setup instructions, and re-run this bootstrap to regenerate the script locally
+    rather than assuming it's already there.
+3. Register the server with whatever MCP host the agent's harness provides, preferring
+   project-scoped config so it travels with the repository. Generic stdio descriptor (adapt keys
+   to the host's config format):
+   ```json
+   { "type": "stdio", "command": "<path to a runtime>", "args": ["<path to altool.dll>", "launchmcpserver", "--transport", "stdio"] }
+   ```
+   The command also accepts one or more AL project paths as positional arguments, and flags for
+   package cache path, ruleset, code analyzers, and output folder — check `altool launchmcpserver
+   --help` against the installed version rather than assuming a fixed flag set, since this
+   surface can grow between AL extension releases.
+4. Verify the connection by listing available tools — a lightweight capability check, not a
+   project compile. Compiling the actual extension is not automatic anywhere in BUILD (Operating
+   Rule 4); do not use this verification step as a backdoor to it.
+5. Tools reaching a live BC cloud environment (publish, downloading non-global symbols) trigger
+   an interactive sign-in the first time they're needed, cached for the session; log out when the
+   task reaching the cloud is done.
+
+**Standing use during development:** once registered, prefer the MCP build/publish/symbol tools
+over an ad hoc terminal compiler invocation where the harness makes both available — they're the
+first-party path and are kept current with the extension, where a hand-rolled wrapper script
+isn't. Re-verify the tool surface (names, arguments) against the installed version rather than
+trusting a prior project's notes about it, since this is actively developed and can change
+between AL extension releases.
+
+## BCQuality Knowledge Snapshot
+
+BCQuality (`microsoft/BCQuality` on GitHub) is a curated knowledge base and skill library for BC
+AL code quality — not an MCP server, not a running endpoint, just markdown knowledge files (the
+non-obvious platform rules: CodeCop specifics, security/performance/privacy footguns, etc.) plus
+skills that define how an agent should search and apply that knowledge during review. It
+augments review judgment; it does not replace it — an agent's own findings are still valid and
+should still be surfaced even without a knowledge-file citation.
+
+**Snapshot strategy — one-time per project, refreshed only on request:**
+- Do **not** install it as a plugin, even where the host supports one, and do not keep one
+  long-lived copy shared unrefreshed across many unrelated projects — that's how it goes stale
+  for all of them at once.
+- Do fetch a full, current snapshot from the repo's default branch exactly once, at Step 05
+  (alongside the rest of the project scaffold — see Step 05's own bootstrap bullet), into a
+  project-local folder (e.g. `.bcquality/`) — mirroring the repo's own layout
+  (`skills/`, `microsoft/`, `community/`, `custom/`, `docs/`), via a shallow clone
+  (`git clone --depth 1`) rather than fetching hundreds of files individually. **Tell the human
+  you're doing this** — it's not a silent background check. Strip `.git` from the snapshot
+  (it's a content copy, not a live checkout) and write a small `SNAPSHOT.json` alongside it
+  recording the commit SHA and fetch timestamp, so a refresh later has something to diff against
+  and report.
+- **Superseded 2026-09-12 (AJ Ansari) — always gitignored, not a project convention call.**
+  `.bcquality/` is added to the project's `.gitignore` unconditionally; it is never committed.
+  Unlike `.alpackages/` (a genuine build dependency this project's own compile needs, hence
+  tracked for reproducibility), BCQuality is a review aid fetched from a public repo with no
+  reproducibility requirement — it can be refetched at will, and there's no reason for a client's
+  or shared remote repository (GitHub, Azure DevOps, etc.) to carry an 806-file, third-party
+  knowledge snapshot. See ALL ALONG
+  → Repository Hygiene.
+- Refresh **only** when the human explicitly asks (e.g. "refresh BCQuality," "get the latest").
+  Re-run the fetch in full, overwrite the existing snapshot, and report plainly: "updated from
+  `<old sha>` to `<new sha>`" or "already up to date." The repo is under active development with
+  breaking changes possible at any time — that's expected, and exactly why refreshes are
+  human-triggered rather than silent.
+
+**Using the snapshot — this is a documented protocol, not something to improvise (verify against
+the snapshot's own `docs/agent-consumption.md` before relying on a paraphrase, including this
+one, since the repo's own conventions are the authority and can move):**
+1. Read `skills/entry.md` from the local snapshot and follow it with an explicit task-context
+   (goal, inputs available, technologies, BC version, enabled layers) — resolving BCQuality's own
+   instructions/knowledge against the snapshot root, and the actual review target against the
+   project's own files. Entry returns a **dispatch record** naming which action skill(s) to run;
+   if it returns `no-match` or `failed`, return that record as-is rather than inventing a review.
+2. Read the meta-skill contracts (`skills/read.md`, `skills/do.md`, and `skills/write.md` only if
+   authoring new knowledge) on demand, not upfront.
+3. Invoke each dispatched action skill from the snapshot's layers (`microsoft/skills/`,
+   `community/skills/`); for a full code review this is typically the super-skill at
+   `microsoft/skills/review/al-code-review.md`, which composes per-domain leaf skills
+   (security, performance, privacy, style, etc.) under the same folder.
+4. Each action skill runs the same four-step pattern (Source → Relevance → Worklist → Action),
+   filtering knowledge files by frontmatter (`bc-version`, `domain`, `technologies`, `countries`,
+   `application-area`) across every enabled layer, higher-precedence layers suppressing lower per
+   `read.md`. A prebuilt `knowledge-index.json` accelerates discovery when present; when absent
+   (the normal state for a static snapshot with no indexer run against it), skills fall back to
+   plain path-based discovery by domain folder — review still works either way.
+5. Findings come back in the shape `do.md` defines: outcome (`completed` / `not-applicable` /
+   `no-knowledge` / `partial` / `failed`), findings with a human-readable `domain` label, structured
+   `references` (knowledge-file path, optional commit SHA) for knowledge-backed findings, an empty
+   `references: []` for the agent's own findings (capped at `medium` confidence), and a
+   `suppressed` list of anything layer precedence overrode. Integrate this into the project the
+   same way any other Code Review finding is integrated (Step 10) — never applied blind.
+
+No network access is needed for any of the above once the snapshot exists; only the initial fetch
+and an explicit refresh touch the network.
 
 ---
 
