@@ -1,4 +1,5 @@
 # BC App Build Routine — Agent Runbook
+v1.0.0.0
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
