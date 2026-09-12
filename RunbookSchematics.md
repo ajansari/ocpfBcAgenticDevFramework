@@ -371,19 +371,19 @@ flowchart TD
     ThreeRoles --> Light
     ThreeRoles --> Reasoning
 
-    subgraph Main["MAIN ROLE"]
+    subgraph Main["MAIN ROLE — runs in the primary agent session"]
         direction TB
-        MainWork["All BUILD code generation<br/>All actual code edits<br/>(incl. applying what Light/<br/>Reasoning report)<br/>End-to-end ownership of:<br/>ChangeLog, Object Register,<br/>ProjectMemory, TestingFeedback.md"]
+        MainWork["All BUILD code generation<br/>All actual code edits<br/>(incl. applying what Light/<br/>Reasoning report)<br/>End-to-end ownership of:<br/>ChangeLog, Object Register,<br/>ProjectMemory, TestingFeedback.md<br/>Example model: Sonnet"]
     end
 
-    subgraph Light["LIGHT ROLE"]
+    subgraph Light["LIGHT ROLE — runs in a subagent"]
         direction TB
-        LightWork["Step 05 post-generation<br/>pre-flight pass only —<br/>required props, Rec.-qualification,<br/>dead code, indentation,<br/>permission-set coverage,<br/>symbol verification<br/>Reports findings; never edits code"]
+        LightWork["Step 05 post-generation<br/>pre-flight pass only —<br/>required props, Rec.-qualification,<br/>dead code, indentation,<br/>permission-set coverage,<br/>symbol verification<br/>Reports findings; never edits code<br/>Example model: Haiku"]
     end
 
-    subgraph Reasoning["REASONING ROLE"]
+    subgraph Reasoning["REASONING ROLE — runs in a subagent"]
         direction TB
-        ReasonWork["Sanity Check (04), Gap-Fit<br/>Test (08), Code Review (10),<br/>FRD authorship (02), TDD<br/>authorship (03), root-cause<br/>troubleshooting (07), diagnosing<br/>testing-feedback reports<br/>Reports findings/drafts/diagnoses;<br/>never edits code or continuity docs"]
+        ReasonWork["Sanity Check (04), Gap-Fit<br/>Test (08), Code Review (10),<br/>FRD authorship (02), TDD<br/>authorship (03), root-cause<br/>troubleshooting (07), diagnosing<br/>testing-feedback reports<br/>Reports findings/drafts/diagnoses;<br/>never edits code or continuity docs<br/>Example model: Opus"]
     end
 
     Main -.->|"relays fixes back into"| Codebase[("The codebase &<br/>continuity documents")]
@@ -406,6 +406,6 @@ flowchart TD
 
 ---
 
-*Generated from `CLAUDE.md` v2.0.0.0 (2026-09-12). If the runbook changes in a way that affects
+*Generated from `CLAUDE.md` v2.0.1.0 (2026-09-12). If the runbook changes in a way that affects
 the phase/step/role structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*

@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 2.0.0.0
+**Version:** 2.0.1.0
 **Last Updated:** 2026-09-12
 
 > Version history for this framework lives in `RunbookChangelog.md`, tracked independently of any
@@ -103,6 +103,14 @@ there can be more than one range:
 
 The first confirmed range is the Primary allocation; every one after it is an Additional
 allocation — there can be more than one.
+
+**Tell the human, at intake, where their built packages will live.** This framework always
+writes `.app` packages to a fixed folder named **`outputAppPackage/`** in the project root —
+never `out/`, `output/`, or anything ad hoc (see ALL ALONG → Packaging & Versioning for the full
+naming rule, the never-delete-a-previous-package policy, and the Schema Sync Mode / Force Sync
+guidance that goes with every completed build). Mention this once, plainly, during intake —
+before Step 09 ever produces the first package — so where their files will land is established
+up front, not discovered by surprise the first time a build finishes.
 
 ### 1.1 Extension Identity
 
@@ -317,8 +325,9 @@ self-contained — e.g., so a teammate cloning it fresh can see exactly how it w
 separately fetching the framework — can say so here and get that instead; both are legitimate,
 this just isn't a decision to make silently either way.
 
-This choice governs only the three framework documents named above. `.bcquality/` and any local
-tooling helper script this framework's own bootstrap creates (e.g., an AL MCP Server launcher) are
+This choice governs only the three framework documents named above. The BCQuality snapshot
+(kept entirely outside the project root — see ALL ALONG → BCQuality Knowledge Snapshot) and any
+local tooling helper script this framework's own bootstrap creates (e.g., an AL MCP Server launcher) are
 **always** excluded from this project's git tracking regardless of the answer here — see ALL ALONG
 → Repository Hygiene. That part isn't a choice the human makes per project.
 
@@ -507,9 +516,13 @@ Classify every gap as **Intentional** (document the reasoning), **Oversight** (f
 
 **Actions:**
 - Build the `.app` package, named `<ExtensionName, spaces → underscores>_<version>.app` — e.g.
-  `IP_Tracking_1.0.0.0.app` — derived from `app.json` at build time, never hardcoded (see
-  "Packaging & Versioning" under ALL ALONG for the full policy, and for when to offer packaging
-  and when to bump the version — both apply throughout the project, not only here).
+  `IP_Tracking_1.0.0.0.app` — derived from `app.json` at build time, never hardcoded, written to
+  the fixed `outputAppPackage/` folder (see "Packaging & Versioning" under ALL ALONG for the full
+  policy, and for when to offer packaging and when to bump the version — both apply throughout the
+  project, not only here). **State the exact output path plainly when the build completes** — this
+  is not automatic ordinary progress narration, it's the one line the human needs in order to find
+  the file — and **flag whether this build needs Schema Sync Mode = Force Sync on upload** (see
+  Packaging & Versioning for the exact criteria and terminology).
 - Confirm `app.json` identity, runtime, and dependencies match Part 1.
 - Publish to a BC sandbox tenant.
 - Run green-team (happy path) tests: `$metadata` returns the expected schema; read a collection; read a single record by `SystemId`; create a record on an editable endpoint; update a field; confirm a read-only endpoint rejects writes (Standards §12.1).
@@ -672,10 +685,16 @@ Packaging (Step 09's "build the `.app`") and version bumps recur throughout BUIL
 every batch or testing-feedback round that lands clean is a candidate moment, not just the one
 narrative pass through Step 09.
 
-**Package naming — fixed, not a judgment call.** Every package is named
+**Package naming and location — fixed, not a judgment call.** Every package is named
 `<ExtensionName, spaces → underscores>_<version>.app` — read `name` and `version` from `app.json`
 at build time, never hardcoded in the build script or typed by hand. Example: extension name
-`IP Tracking`, version `1.0.0.0` → `IP_Tracking_1.0.0.0.app`.
+`IP Tracking`, version `1.0.0.0` → `IP_Tracking_1.0.0.0.app`. It is written to a fixed output
+folder named **`outputAppPackage/`** in the project root — every project uses this exact folder
+name, not `out/`, `output/`, or anything improvised. **Say so twice, not once:** mention the
+folder name once, plainly, at intake (Step 01 — before any package exists), and state the exact
+path again, plainly, every time a build actually completes — e.g. "Package built:
+`outputAppPackage/IP_Tracking_1.0.0.0.app`." Don't bury either mention inside a longer status
+paragraph; it's the one thing the human needs in order to go find the file.
 
 **Never delete a previous package. NEVER.** Every repackage writes a new, uniquely-named file
 next to the old ones — it does not replace, overwrite, or "clean up" anything already in the
@@ -715,6 +734,24 @@ say so plainly and recommend the right action instead of silently doing what was
 asked. If the human insists anyway, get an explicit override and proceed — but the mismatch must
 be named first, not absorbed silently.
 
+**Flag Schema Sync Mode / Force Sync on every completed build, not just when asked.** Uploading
+a `.app` to a Business Central Online tenant through the **Extension Management** page (or the
+admin center) offers a **Schema Sync Mode** choice: **Add** (the default — warns and refuses the
+upload if the new schema is incompatible; no data loss) or **Force Sync** (overwrites the schema
+even when the change is destructive — table/field removals, a changed primary key, an
+incompatible data-type or length change — and can cause data loss; Microsoft's own guidance is to
+test a forced sync in a sandbox before ever doing one against production). Before or right after
+handing over a completed package, check what this build actually changed against the schema:
+additions only (new tables/fields, code-only changes) sync fine under the default **Add** mode;
+anything removed, shrunk, retyped incompatibly, or with an altered key needs **Force Sync**, and
+that needs saying plainly — e.g. "This build only adds fields — upload with the default **Add**
+sync mode" or "This build removes `<field>` — you'll need **Force Sync** on upload, and it may
+lose data in `<what>`." Never assume the human already knows which mode a given build needs, and
+never let a schema-breaking change go out the door without this warning attached. (The separate
+`schemaUpdateMode` setting in `launch.json` — `Synchronize` / `Recreate` / `ForceSync` — is a
+related but different mechanism for local F5 dev-publish only, explicitly never meant for
+production; don't conflate the two when explaining this to the human.)
+
 ## Repository Hygiene — What Stays Out of the Project's Remote
 
 **What `.gitignore` is, briefly (for the human, not the agent — the agent already knows):**
@@ -729,12 +766,15 @@ Some things a project needs locally to build or review with this framework are n
 deliverable and should never end up in the project's own git remote (its GitHub, Azure DevOps, or
 similar hosting), even though they sit in the working directory like any other file.
 
-**Always gitignored — not a choice, not asked about per project:**
-- `.bcquality/` — the fetched BCQuality knowledge snapshot (ALL ALONG → BCQuality Knowledge
-  Snapshot). Unlike `.alpackages/`, which this project's own compile genuinely needs and is
-  therefore tracked for reproducibility, BCQuality is a review aid with no reproducibility
-  requirement — it can be refetched at will, and a client's repo has no reason to carry an
-  800-file third-party knowledge snapshot.
+**Always kept out of the project's git tracking — not a choice, not asked about per project:**
+- The fetched BCQuality knowledge snapshot (ALL ALONG → BCQuality Knowledge Snapshot) — lives
+  **outside the AL project's own root folder entirely** (see that section for why: `alc` would
+  otherwise try to compile its illustrative code snippets), so it isn't even a candidate for this
+  project's git tracking, let alone something to gitignore. Unlike `.alpackages/`, which this
+  project's own compile genuinely needs and is therefore tracked for reproducibility, BCQuality is
+  a review aid with no reproducibility requirement — it can be refetched at will, and a client's
+  repo has no reason to carry an 800-file third-party knowledge snapshot regardless of where it
+  physically sits.
 - Any local tooling helper script this framework's own bootstrap creates for the executing
   agent's convenience — e.g., an AL MCP Server launcher wrapper — typically under a `scripts/`
   folder (ALL ALONG → AL MCP Server). This is the framework's own plumbing, not part of what the
@@ -823,9 +863,19 @@ should still be surfaced even without a knowledge-file citation.
   long-lived copy shared unrefreshed across many unrelated projects — that's how it goes stale
   for all of them at once.
 - Do fetch a full, current snapshot from the repo's default branch exactly once, at Step 05
-  (alongside the rest of the project scaffold — see Step 05's own bootstrap bullet), into a
-  project-local folder (e.g. `.bcquality/`) — mirroring the repo's own layout
-  (`skills/`, `microsoft/`, `community/`, `custom/`, `docs/`), via a shallow clone
+  (alongside the rest of the project scaffold — see Step 05's own bootstrap bullet). **Put it
+  OUTSIDE the AL project's own root folder** — e.g. a sibling directory such as
+  `../<ProjectName>.bcquality/`, never anywhere under the same tree as `app.json`. This is not a
+  style preference: `alc` recursively compiles every `.al` file it finds under the project root,
+  with no built-in exclusion mechanism, and BCQuality's own knowledge base ships illustrative
+  `.good.al`/`.bad.al` snippets that are deliberately incomplete fragments, not real compilable
+  objects — nesting the snapshot inside the project root breaks every subsequent compile with
+  hundreds of syntax errors that have nothing to do with the project's own code. (A real project
+  did exactly this and only found out when a compile that had been working suddenly produced 470+
+  errors, none of them in its own files.) This also matches BCQuality's own documented integration
+  pattern, which already uses two separate directories — one for its own checkout, one for the
+  app being reviewed — never one nested inside the other. Mirror the repo's own layout inside that
+  sibling folder (`skills/`, `microsoft/`, `community/`, `custom/`, `docs/`), via a shallow clone
   (`git clone --depth 1`) rather than fetching hundreds of files individually. **Tell the human
   you're doing this** — it's not a silent background check. Strip `.git` from the snapshot
   (it's a content copy, not a live checkout) and write a small `SNAPSHOT.json` alongside it
@@ -833,9 +883,13 @@ should still be surfaced even without a knowledge-file citation.
   and report.
 - **Superseded 2026-09-12 (AJ Ansari) — always gitignored, not a project convention call.**
   `.bcquality/` is added to the project's `.gitignore` unconditionally; it is never committed.
-  Unlike `.alpackages/` (a genuine build dependency this project's own compile needs, hence
-  tracked for reproducibility), BCQuality is a review aid fetched from a public repo with no
-  reproducibility requirement — it can be refetched at will, and there's no reason for a client's
+  **Superseded again the same day:** the snapshot doesn't live inside the project's git-tracked
+  tree *at all* anymore — it moved outside the AL project root entirely (see the snapshot-strategy
+  bullets above), which is a stronger guarantee than gitignore ever was and also the fix for the
+  compile-breaking discovery that motivated the move. Unlike `.alpackages/` (a genuine build
+  dependency this project's own compile needs, hence tracked for reproducibility), BCQuality is a
+  review aid fetched from a public repo with no reproducibility requirement — it can be refetched
+  at will, and there's no reason for a client's
   or shared remote repository (GitHub, Azure DevOps, etc.) to carry an 806-file, third-party
   knowledge snapshot. See ALL ALONG
   → Repository Hygiene.

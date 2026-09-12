@@ -14,6 +14,64 @@ specifically to keep a superseded decision on record — see the runbook's ALL A
 
 ---
 
+## v2.0.1.0 — 2026-09-12
+
+A packaging/deployment-communication gap found the same day, while wrapping up a bug-fix
+round on the pilot project — released as its own point revision rather than folded into
+v2.0.0.0, since v2.0.0.0 had already been established as the framework's first versioned
+baseline.
+
+### Output folder naming & Schema Sync Mode / Force Sync guidance (2026-09-12)
+
+- **Added — a fixed output-folder name.** "Packaging & Versioning" now names the folder every
+  built `.app` package is written to: **`outputAppPackage/`**, in the project root, the same way
+  package *naming* was already fixed (`<ExtensionName>_<version>.app`) — not `out/`, `output/`,
+  or whatever a given project happened to improvise. Step 01 intake now tells the human this
+  folder name once, plainly, before any package exists; Step 09 (and any later ad hoc repackage)
+  restates the exact path plainly every time a build actually completes — e.g. "Package built:
+  `outputAppPackage/IP_Tracking_1.0.0.0.app`" — as its own clear line, not folded into a longer
+  status paragraph.
+- **Why:** the pilot project had been calling this folder `out/` by unexamined precedent, with no
+  runbook rule actually requiring that name or requiring the agent to say where it is. AJ Ansari
+  asked for both the fixed name and the two required call-outs (intake, and every completed
+  build) so a human is never left to go hunting for a package that already exists.
+- **Added — Schema Sync Mode / Force Sync flagging, on every completed build.** A new Packaging &
+  Versioning bullet requires checking, for every completed build, whether its schema changes are
+  additive-only (new tables/fields, code-only changes — safe under Business Central's default
+  **Add** Schema Sync Mode when uploading via the Extension Management page or admin center) or
+  destructive (anything removed, resized down, retyped incompatibly, or with an altered primary
+  key — needs **Force Sync**, which can cause data loss), and saying so plainly rather than
+  assuming the human already knows. Distinguishes this from the similarly-named but different
+  `schemaUpdateMode` setting in `launch.json` (`Synchronize`/`Recreate`/`ForceSync`), which governs
+  local F5 dev-publish only and is explicitly never meant for production — the runbook now says
+  not to conflate the two when explaining this to a human.
+- **Verified before writing in, not assumed from memory** (Operating Rule 2's own discipline,
+  applied to the runbook's own authoring): the exact terminology — **Schema Sync Mode**, **Add**,
+  **Force Sync**, and the data-loss caution — was confirmed against current Microsoft Learn and
+  the original BC19 (2021 wave 2) release-plan documentation before being written into the
+  runbook, rather than reconstructed from a half-remembered UI label.
+- **Applied to the pilot project the same day:** its own `out/` folder was renamed to
+  `outputAppPackage/` (all existing packages preserved, none deleted, per the existing
+  never-delete policy) and its `.gitignore` updated to match — see that project's own ChangeLog
+  (Issue BUILD-18) for the full record, including a retroactive Force Sync assessment of its most
+  recent build.
+
+### Schematics — Model & Effort Assignment diagram clarified (2026-09-12)
+
+- **Changed — `RunbookSchematics.md` §4.2.** The diagram named what each of the three §1.7 roles
+  *does* but not *how it executes*: it now labels the Main role box "runs in the primary agent
+  session" and the Light and Reasoning role boxes "runs in a subagent" — matching §1.7's own text
+  ("the agent *can* delegate a specific, self-contained task to a subagent running a different
+  model, get a result back, and act on it"), which the diagram had never actually shown.
+- **Added — an example recommended model to each role box**, matching how the pilot project
+  actually configured §1.7 (`ProjectParameters.md`): **Sonnet** for Main, **Haiku** for Light,
+  **Opus** for Reasoning. Illustrative only — §1.7 itself stays deliberately model-agnostic, and a
+  different project can assign different physical models to the same three roles.
+- **Why:** AJ Ansari noticed the diagram was silent on both points while it's otherwise the
+  clearest single picture of how the three-role split actually runs.
+
+---
+
 ## v2.0.0.0 — 2026-09-12
 
 First versioned revision. Everything below was learned during the framework's first real
@@ -278,6 +336,19 @@ but that the fix pass hadn't introduced anything new. It found two more real iss
   Repository Hygiene section now names concrete examples (GitHub, Azure DevOps) rather than
   assuming the term is self-explanatory, except one same-sentence reference back to a mention
   already clarified moments earlier, left alone since repeating the example there would be noise.
+- **Corrected — the BCQuality snapshot must live outside the AL project's own root folder,
+  not just outside git tracking.** Discovered when a routine compile on the pilot project
+  suddenly produced 470+ syntax errors, none in the project's own code: `alc` recursively compiles
+  every `.al` file under the project root with no built-in exclusion mechanism, and BCQuality
+  ships illustrative `.good.al`/`.bad.al` knowledge snippets that are deliberately incomplete
+  fragments, not real compilable objects. Gitignoring the snapshot (the fix two entries above)
+  only ever addressed git tracking — it does nothing about the compiler, which doesn't consult
+  `.gitignore` at all. Fixed by moving the snapshot physically outside the project root (e.g. a
+  sibling directory) rather than merely excluding it from version control; this also matches
+  BCQuality's own documented integration pattern, which already keeps its checkout and the
+  reviewed app in two separate directories, never one nested inside the other. Updated the
+  BCQuality Knowledge Snapshot section, the Repository Hygiene section, and §1.8's cross-reference
+  to reflect that the snapshot isn't a git-tracking question for this path at all anymore.
 
 ---
 
