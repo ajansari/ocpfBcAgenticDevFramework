@@ -5,6 +5,7 @@
 **The OnlyCopilotFans Business Central Agentic Development Framework**
 
 Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
+
 *by AJ Ansari*
 
 *Last Updated: Saturday, September 12, 2026*
