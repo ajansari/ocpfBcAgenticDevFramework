@@ -1,7 +1,7 @@
 # OnlyCopilotFans Business Central Agentic Development Framework Outline
 
 *A one-page map of the routine — every phase, and the steps within it. For the full rules, see
-the runbook (`BC_App_Build_Routine_Agent.md`); for visual diagrams, see `RunbookSchematics.md`.*
+the runbook (`CLAUDE.md`); for visual diagrams, see `RunbookSchematics.md`.*
 
 ---
 
@@ -25,21 +25,25 @@ consistency — before any code.*
 
 ## III. BUILD
 
-*Generate AL batch by batch, lint clean, one mandatory compile — fix root causes, not symptoms.*
+*Generate AL batch by batch, lint clean — fix root causes, not symptoms. Compiling and packaging
+starts as one mandatory pass at Step 07, then becomes a continuous cycle (compile, package,
+deploy, test, diagnose, fix, repeat) that carries through the rest of BUILD and into PROVE.*
 
 **05** — Plan the Code   
 **06** — Code Generation   
-**07** — Troubleshoot, Iterate   
+**07** — Compile and Package, Troubleshoot, Iterate   
 
 ## IV. PROVE
 
-*Prove the built code matches intent — tested, reviewed, documented, and packaged.*
+*Prove the built code matches intent — tested, reviewed, documented, and released. Packaging and
+sandbox testing are already underway from Step 07; PROVE adds fidelity validation, review,
+documentation, and a human-run release test on top.*
 
 **08** — Gap-Fit Test, Fidelity Validation   
-**09** — Package and Test the App   
-**10** — Code Review   
-**11** — Update Design Documents   
-**12** — Document the Code   
+**09** — Code Review   
+**10** — Update Design Documents   
+**11** — Document the Code   
+**12** — Release to Users for Testing   
 
 ---
 
@@ -56,6 +60,7 @@ consistency — before any code.*
 - Repository Hygiene
 - AL MCP Server
 - BCQuality Knowledge Snapshot
+- OCPF BC AL Patterns Library
 
 ---
 

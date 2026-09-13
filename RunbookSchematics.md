@@ -5,7 +5,7 @@ for its version history). These diagrams are a reading aid, not a source of trut
 and the runbook text ever disagree, the runbook wins and this file is stale and needs updating.
 
 Every diagram below was extracted and rendered through `@mermaid-js/mermaid-cli` before being
-committed here, per the same discipline the runbook itself requires at Step 12 ("never ship a
+committed here, per the same discipline the runbook itself requires at Step 11 ("never ship a
 diagram you have not seen render"). Markdown can store a syntactically invalid Mermaid diagram
 that looks fine in the source and simply fails to draw wherever it's viewed — that check is what
 catches it before a reader does.
@@ -36,8 +36,8 @@ discipline running underneath every one of them.
 flowchart LR
     Problem(["Business Problem"]) --> DEFINE["DEFINE<br/>Scope the problem,<br/>fill in parameters"]
     DEFINE --> DESIGN["DESIGN<br/>FRD + self-sufficient TDD"]
-    DESIGN --> BUILD["BUILD<br/>Generate AL, lint,<br/>one mandatory compile"]
-    BUILD --> PROVE["PROVE<br/>Test, review, document,<br/>package"]
+    DESIGN --> BUILD["BUILD<br/>Generate AL, lint,<br/>then compile+package+test+fix,<br/>on repeat"]
+    BUILD --> PROVE["PROVE<br/>Gap-fit, review, document,<br/>then a human-run release test"]
     PROVE --> Deployed(["Deployed, Documented App"])
 
     AllAlong[["ALL ALONG<br/>Continuous Discipline"]]
@@ -87,21 +87,21 @@ flowchart TD
         S05["05 — Plan the Code"] --> G_S05{{"Batch order agreed,<br/>scaffold structurally complete"}}
         G_S05 --> S06["06 — Code Generation<br/>(per-batch loop, no compile)"]
         S06 --> G_S06{{"Every batch pre-flight clean,<br/>permission-set coverage verified"}}
-        G_S06 --> S07["07 — Troubleshoot, Iterate<br/>(the one mandatory compile)"]
-        S07 --> G_S07{{"0 errors / 0 warnings"}}
+        G_S06 --> S07["07 — Compile and Package,<br/>Troubleshoot, Iterate<br/>(mandatory compile-and-package,<br/>then a sandbox test/fix/repackage cycle)"]
+        S07 --> G_S07{{"0 errors / 0 warnings,<br/>sandbox testing clean"}}
     end
 
     subgraph PROVE["PHASE: PROVE"]
         direction TB
-        S08["08 — Gap-Fit Test"] --> G_S08{{"Every gap classified,<br/>resolved or scheduled"}}
-        G_S08 --> S09["09 — Package and Test"]
-        S09 --> G_S09{{"Publishes cleanly,<br/>green/red-team pass"}}
-        G_S09 --> S10["10 — Code Review"]
-        S10 --> G_S10{{"Critical findings resolved,<br/>dead-code scan clean"}}
-        G_S10 --> S11["11 — Update Design Documents"]
-        S11 --> G_S11{{"As-built TDD complete,<br/>FRD reflects reality"}}
-        G_S11 --> S12["12 — Document the Code"]
-        S12 --> G_S12{{"4 docs exist,<br/>ready for UAT"}}
+        S08["08 — Gap-Fit Test<br/>(code-touching gaps loop back<br/>through Step 07's cycle)"] --> G_S08{{"Every gap classified,<br/>resolved or scheduled"}}
+        G_S08 --> S09["09 — Code Review<br/>(code-touching fixes also<br/>loop back through Step 07)"]
+        S09 --> G_S09{{"Critical findings resolved,<br/>dead-code scan clean"}}
+        G_S09 --> S10["10 — Update Design Documents"]
+        S10 --> G_S10{{"As-built TDD complete,<br/>FRD reflects reality"}}
+        G_S10 --> S11["11 — Document the Code<br/>(asks: Automated Test Scripts too?)"]
+        S11 --> G_S11{{"4 docs exist (+ 1 conditional),<br/>ready for release testing"}}
+        G_S11 --> S12["12 — Release to Users<br/>for Testing"]
+        S12 --> G_S12{{"Green tests pass,<br/>red tests fail gracefully →<br/>same package ships to Production"}}
     end
 
     G_S01 --> S02
@@ -204,7 +204,8 @@ flowchart TD
 ### 3.3 BUILD
 
 The phase most reshaped by this project's own lessons: no per-batch compile, symbol-verified
-lint instead, and exactly one mandatory compile once every planned batch exists.
+lint instead, one mandatory compile-and-package once every planned batch exists, then a
+continuous sandbox test/fix/repackage cycle rather than a single event.
 
 ```mermaid
 flowchart TD
@@ -212,7 +213,7 @@ flowchart TD
 
     subgraph S05["05 — Plan the Code"]
         direction LR
-        In1[/"Inputs:<br/>TDD.md, Object Register"/] --> Act1["Actions:<br/>Confirm batch order,<br/>prepare scaffold,<br/>bootstrap AL MCP Server<br/>+ BCQuality snapshot,<br/>write pre-flight checks<br/>(pre-gen + post-gen passes)"] --> Out1[/"Output:<br/>Batch plan, scaffold,<br/>pre-flight checklist"/]
+        In1[/"Inputs:<br/>TDD.md, Object Register"/] --> Act1["Actions:<br/>Confirm batch order,<br/>prepare scaffold,<br/>bootstrap AL MCP Server<br/>+ BCQuality snapshot<br/>+ OCPF Patterns library,<br/>write pre-flight checks<br/>(pre-gen + post-gen passes)"] --> Out1[/"Output:<br/>Batch plan, scaffold,<br/>pre-flight checklist"/]
     end
     S05 --> Gate1{{"Exit gate:<br/>Batch order agreed,<br/>scaffold structurally complete<br/>(not compiled)"}}
 
@@ -230,15 +231,24 @@ flowchart TD
     MoreBatches -- "No — every planned<br/>batch generated" --> Gate2{{"Exit gate:<br/>Every batch pre-flight clean,<br/>permission-set coverage verified<br/>— NO compile required here"}}
 
     Gate2 --> S07
-    subgraph S07["07 — Troubleshoot, Iterate"]
+    subgraph S07["07 — Compile and Package,<br/>Troubleshoot, Iterate"]
         direction LR
-        Compile["FIRST: compile the whole<br/>extension once — the one<br/>mandatory compile (Op. Rule 4)"] --> Q{"Errors or<br/>warnings?"}
-        Q -- "Yes" --> Diag["Reasoning role diagnoses:<br/>one-off or pattern? where<br/>from? what rule missed it?"]
-        Diag --> Fix["Main role fixes root cause,<br/>regenerates files, re-compiles,<br/>logs ChangeLog + updates TDD"]
-        Fix --> Compile
-        Q -- "No" --> Clean["0 errors / 0 warnings"]
+        Compile["FIRST: compile the whole<br/>extension once, then package it —<br/>the one mandatory compile-and-<br/>package (Op. Rule 4)"] --> Deploy["Publish package<br/>to BC sandbox"]
+        Deploy --> Test["Test — manually by the<br/>human, or via the optional<br/>agent-run MCP API pass"]
+        Test --> Q{"Errors, warnings,<br/>or issues found?"}
+        Q -- "Yes" --> Diag["Check patterns/ first, then<br/>reasoning role diagnoses:<br/>one-off or pattern? where<br/>from? what rule missed it?"]
+        Diag --> Fix["Main role fixes root cause,<br/>regenerates files, logs<br/>ChangeLog + updates TDD"]
+        Fix --> Repackage["Compile AND package again<br/>(not just recompile)"]
+        Repackage --> Deploy
+        Q -- "No" --> Clean["0 errors / 0 warnings,<br/>sandbox testing clean"]
+        Clean --> APICheck{"Offer: live MCP<br/>connection available<br/>and human wants it?"}
+        APICheck -- "Yes (optional)" --> APITest["Agent runs full green/red-team<br/>checklist against the sandbox API"]
+        APICheck -- "No / declined" --> Manual["Suggest manual testing instead:<br/>Postman, Power Automate,<br/>Power Apps, or Copilot Studio"]
     end
-    S07 --> Gate3{{"Exit gate:<br/>Full extension compiles clean,<br/>ChangeLog & TDD reconciled"}}
+    APITest --> Gate3
+    Manual --> Gate3
+
+    Gate3{{"Exit gate:<br/>Full extension compiles clean,<br/>human confirms sandbox testing<br/>clean, ChangeLog & TDD reconciled"}}
 
     Gate3 --> Next(["to PROVE, Step 08"])
 
@@ -250,60 +260,77 @@ flowchart TD
     classDef endpoint fill:#f2f2f2,stroke:#888,stroke-width:1px;
     classDef decision fill:#fde2e2,stroke:#c0504d,stroke-width:1px;
     class In1,Out1 io;
-    class Act1,B1,Fix act;
+    class Act1,B1,Fix,Compile,Deploy,Test,Repackage,APITest,Manual act;
     class PostGen,PermCheck light;
     class PreGen act;
     class Diag reasoning;
     class Gate1,Gate2,Gate3 gate;
     class Start,Next,Clean endpoint;
-    class MoreBatches,Q decision;
+    class MoreBatches,Q,APICheck decision;
 ```
 
 ### 3.4 PROVE
 
+> **Restructured 2026-09-13 (AJ Ansari).** Old Step 09 ("Package and Test the App") is gone —
+> compiling and packaging is now a continuous cycle that started back in Step 07 (BUILD), not a
+> milestone reserved for here. A new Step 12 ("Release to Users for Testing") closes PROVE
+> instead, running the same green/red-team checklist by hand, against the `HumanUnitTestScript.md`
+> that Step 11 (formerly Step 12) actually wrote — old Step 09 tried to run that checklist before
+> the script it depends on existed.
+
 ```mermaid
 flowchart TD
-    Start(["from BUILD,<br/>extension compiles 0/0"]) --> S08
+    Start(["from Step 07,<br/>extension compiles/packages 0/0,<br/>at least one sandbox test done"]) --> S08
 
     subgraph S08["08 — Gap-Fit Test, Fidelity Validation"]
         direction LR
         In1[/"Inputs:<br/>FRD.md, TDD.md,<br/>built AL, ChangeLog"/] --> Act1["Actions (Reasoning role):<br/>Three-way comparison —<br/>FRD vs. TDD vs. as-built.<br/>Classify every gap"] --> Out1[/"Output:<br/>GapAnalysis.md,<br/>gap-fill work items"/]
     end
-    S08 --> Gate1{{"Exit gate:<br/>Every gap classified,<br/>resolved or scheduled"}}
+    S08 --> GapFill{"Any Oversight gap<br/>needs a code fix?"}
+    GapFill -- "Yes" --> GapCycle08["Step 07 cycle again —<br/>fix, compile, package,<br/>redeploy, retest<br/>(Operating Rule 4)"]
+    GapCycle08 --> Gate1
+    GapFill -- "No (doc-only)" --> Gate1
+    Gate1{{"Exit gate:<br/>Every gap classified,<br/>resolved or scheduled,<br/>code fixes recompiled/repackaged"}}
 
-    Gate1 --> GapFill{"Any gap-fill<br/>work items?"}
-    GapFill -- "Yes" --> GapCycle["Own pass through<br/>Step 05/06/07 discipline —<br/>pre-flight, then compile<br/>(Operating Rule 4)"]
-    GapCycle --> S09
-    GapFill -- "No" --> S09
+    Gate1 --> S09
 
-    subgraph S09["09 — Package and Test the App"]
-        direction LR
-        In2[/"Inputs:<br/>Clean-compiling extension,<br/>permission sets if any tables"/] --> Act2["Actions:<br/>Build .app (name/version from<br/>app.json), publish to sandbox,<br/>green-team + red-team tests,<br/>verify permission sets"] --> Out2[/"Output:<br/>.app package,<br/>test-run record"/]
-    end
-    S09 --> Gate2{{"Exit gate:<br/>Publishes cleanly,<br/>green tests pass,<br/>red tests fail gracefully"}}
-
-    Gate2 --> S10
-    subgraph S10["10 — Code Review"]
+    subgraph S09["09 — Code Review"]
         direction LR
         In3[/"Inputs:<br/>Full built extension,<br/>TDD.md, Standards"/] --> Act3["Actions (Reasoning role):<br/>Code quality, dead code,<br/>obsolete refs, anti-patterns,<br/>permission-set re-verify,<br/>BCQuality knowledge-backed review"] --> Out3[/"Output:<br/>CodeReview.md"/]
     end
-    S10 --> Gate3{{"Exit gate:<br/>Critical findings resolved,<br/>dead-code scan 100% clean"}}
+    S09 --> ReviewFix{"Any finding<br/>needs a code fix?"}
+    ReviewFix -- "Yes" --> GapCycle09["Step 07 cycle again —<br/>fix, compile, package,<br/>redeploy, retest"]
+    GapCycle09 --> Gate3
+    ReviewFix -- "No (comment/format only)" --> Gate3
+    Gate3{{"Exit gate:<br/>Critical findings resolved,<br/>dead-code scan 100% clean,<br/>code fixes recompiled/repackaged"}}
 
-    Gate3 --> S11
-    subgraph S11["11 — Update Design Documents"]
+    Gate3 --> S10
+    subgraph S10["10 — Update Design Documents"]
         direction LR
         In4[/"Inputs:<br/>TDD.md, FRD.md, ChangeLog,<br/>GapAnalysis.md, CodeReview.md"/] --> Act4["Actions:<br/>New PostDevTDD.md (as-built);<br/>update FRD.md in place<br/>(new baseline)"] --> Out4[/"Output:<br/>PostDevTDD.md,<br/>updated FRD.md"/]
     end
-    S11 --> Gate4{{"Exit gate:<br/>As-built TDD regenerable,<br/>FRD reflects reality"}}
+    S10 --> Gate4{{"Exit gate:<br/>As-built TDD regenerable,<br/>FRD reflects reality"}}
 
-    Gate4 --> S12
-    subgraph S12["12 — Document the Code"]
+    Gate4 --> S11
+    subgraph S11["11 — Document the Code"]
         direction LR
-        In5[/"Inputs:<br/>PostDevTDD.md, built AL,<br/>Step 09 test-run record"/] --> Act5["Actions:<br/>Generate reference docs +<br/>Mermaid ER diagram (render it!),<br/>human test script, UserGuide.md,<br/>Deployment.md"] --> Out5[/"Output:<br/>4 documents:<br/>Documentation, UserGuide,<br/>HumanUnitTestScript, Deployment"/]
+        In5[/"Inputs:<br/>PostDevTDD.md, built AL,<br/>optional Step 07 API test result"/] --> Act5["Actions:<br/>Generate reference docs +<br/>Mermaid ER diagram (render it!),<br/>human test script (per Step 07's<br/>checklist), UserGuide.md,<br/>Deployment.md; ASK: also want<br/>Automated Test Scripts?"] --> Out5[/"Output:<br/>4 docs (Documentation, UserGuide,<br/>HumanUnitTestScript, Deployment)<br/>+ AutomatedTestScripts.md if yes"/]
     end
-    S12 --> Gate5{{"Exit gate:<br/>Reference generated from code,<br/>ready for UAT"}}
+    S11 --> Gate5{{"Exit gate:<br/>Reference generated from code,<br/>Automated Test Scripts question<br/>answered, ready for release testing"}}
 
-    Gate5 --> Done(["Deployed, Documented App"])
+    Gate5 --> S12
+    subgraph S12["12 — Release to Users for Testing"]
+        direction LR
+        In6[/"Inputs:<br/>Latest package, HumanUnitTestScript.md,<br/>AutomatedTestScripts.md if any,<br/>UserGuide.md, Deployment.md"/] --> Act6["Actions:<br/>Real users run the script by hand<br/>on the sandbox — green + red team,<br/>permission-set verification;<br/>triage findings via Testing<br/>Feedback Log"] --> Out6[/"Output:<br/>ReleaseTestResults.md"/]
+    end
+    S12 --> ReleaseCheck{"All green pass,<br/>all red fail gracefully?"}
+    ReleaseCheck -- "No" --> GapCycle12["Step 07 cycle again —<br/>fix, compile, package,<br/>redeploy; re-run Step 09/10/11<br/>on whatever the fix touched"]
+    GapCycle12 --> S12
+    ReleaseCheck -- "Yes" --> Gate6
+
+    Gate6{{"Exit gate:<br/>Bump the Build segment (or copy to<br/>an immutable name) on the package<br/>that passed; restate Schema Sync<br/>Mode; that package ships to Production"}}
+
+    Gate6 --> Done(["Deployed, Documented App"])
 
     classDef io fill:#eef2f7,stroke:#4a7ab5,stroke-width:1px;
     classDef act fill:#d4e6f7,stroke:#4a7ab5,stroke-width:1px;
@@ -311,12 +338,12 @@ flowchart TD
     classDef gate fill:#fff3cd,stroke:#c99a3a,stroke-width:1px;
     classDef endpoint fill:#f2f2f2,stroke:#888,stroke-width:1px;
     classDef decision fill:#fde2e2,stroke:#c0504d,stroke-width:1px;
-    class In1,Out1,In2,Out2,In3,Out3,In4,Out4,In5,Out5 io;
-    class Act2,Act4,Act5,GapCycle act;
+    class In1,Out1,In3,Out3,In4,Out4,In5,Out5,In6,Out6 io;
+    class Act4,Act5,Act6,GapCycle08,GapCycle09,GapCycle12 act;
     class Act1,Act3 reasoning;
-    class Gate1,Gate2,Gate3,Gate4,Gate5 gate;
+    class Gate1,Gate3,Gate4,Gate5,Gate6 gate;
     class Start,Done endpoint;
-    class GapFill decision;
+    class GapFill,ReviewFix,ReleaseCheck decision;
 ```
 
 ---
@@ -346,6 +373,7 @@ flowchart LR
         Pack["Packaging & Versioning<br/>never delete a package;<br/>propose bumps, don't apply silently"]
         MCP["AL MCP Server<br/>bootstrap once, prefer its<br/>tools over ad hoc terminal use"]
         BCQ["BCQuality Knowledge Snapshot<br/>fetch once, refresh only<br/>on explicit request"]
+        Pat["OCPF BC AL Patterns Library<br/>fetch once into patterns/,<br/>check before diagnosing from scratch"]
     end
 
     Continuous -.-> DEFINE
@@ -356,7 +384,7 @@ flowchart LR
     classDef phase fill:#d4e6f7,stroke:#4a7ab5,stroke-width:1px;
     classDef discipline fill:#fdf0d5,stroke:#c99a3a,stroke-width:1px;
     class DEFINE,DESIGN,BUILD,PROVE phase;
-    class Doc,Change,Retain,Test,Mem,Pack,MCP,BCQ discipline;
+    class Doc,Change,Retain,Test,Mem,Pack,MCP,BCQ,Pat discipline;
 ```
 
 ### 4.2 Model & Effort Assignment (§1.7)
@@ -383,7 +411,7 @@ flowchart TD
 
     subgraph Reasoning["REASONING ROLE — runs in a subagent"]
         direction TB
-        ReasonWork["Sanity Check (04), Gap-Fit<br/>Test (08), Code Review (10),<br/>FRD authorship (02), TDD<br/>authorship (03), root-cause<br/>troubleshooting (07), diagnosing<br/>testing-feedback reports<br/>Reports findings/drafts/diagnoses;<br/>never edits code or continuity docs<br/>Example model: Opus"]
+        ReasonWork["Sanity Check (04), Gap-Fit<br/>Test (08), Code Review (09),<br/>FRD authorship (02), TDD<br/>authorship (03), root-cause<br/>troubleshooting (07), diagnosing<br/>testing-feedback reports<br/>Reports findings/drafts/diagnoses;<br/>never edits code or continuity docs<br/>Example model: Opus"]
     end
 
     Main -.->|"relays fixes back into"| Codebase[("The codebase &<br/>continuity documents")]
@@ -406,6 +434,7 @@ flowchart TD
 
 ---
 
-*Generated from `CLAUDE.md` v2.0.1.0 (2026-09-12). If the runbook changes in a way that affects
+*Generated from `CLAUDE.md` v2.1.0.0 (2026-09-13, the Step 07/09/12 restructure plus the OCPF BC
+AL Patterns Library addition — see `RunbookChangelog.md`). If the runbook changes in a way that affects
 the phase/step/role structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*

@@ -14,6 +14,228 @@ specifically to keep a superseded decision on record — see the runbook's ALL A
 
 ---
 
+## v2.1.0.0 — 2026-09-13
+
+**The single biggest structural change since v2.0.0.0** — a whole step dropped, four others
+renumbered, a new step added — released as its own minor version rather than folded into
+v2.0.1.0, which had already shipped to the pilot project the day before under the old structure.
+
+### Step 09 dropped; compile-and-package made a continuous cycle; new Step 12 added
+
+AJ Ansari: "Step 9 keeps tripping me up" — the old sequence talked about a single mandatory
+*compile*, then a separate, later *Package and Test the App* step (old Step 09) that ran
+green-team/red-team API tests against a `HumanUnitTestScript.md` that, at that point in the
+sequence, hadn't even been written yet (that script was old Step 12's output). Packaging and
+live-sandbox testing were also already happening in practice throughout Step 07's troubleshooting
+loop on the pilot project, well before old Step 09 was ever reached — the runbook's own words
+didn't match how the framework was actually being used.
+
+- **Changed — Operating Rule 4 and Step 07's own title/actions: "compile" → "compile and
+  package," and the mandatory event became a continuous cycle.** Step 07 is renamed **"Compile
+  and Package, Troubleshoot, Iterate."** The one mandatory compile at the top of Step 07 is now a
+  mandatory **compile-and-package**; from there, Step 07, Step 08's gap-fix loop, and Step 09's
+  Code Review fixes (whenever any of them needs a code change) share one explicit cycle: publish
+  to a sandbox → test → diagnose → fix → **compile and package again** → redeploy → retest →
+  repeat. Packaging is no longer a milestone reserved for a later step; it is the default rhythm
+  of BUILD/PROVE from the moment Step 07 opens. `outputAppPackage/` naming, never-delete, and
+  Schema Sync Mode/Force Sync guidance all apply from the very first package onward.
+- **Removed — Step 09 ("Package and Test the App") entirely.** Its concerns split two ways: the
+  actual green-team/red-team API checklist is now defined once, in Step 07 (as its own named
+  block, not buried inside the optional pass that uses it), reused three times — optionally by
+  the agent at the end of Step 07, as the source Step 11 writes `HumanUnitTestScript.md` from,
+  and authoritatively by humans at the new Step 12.
+- **Added — an optional, agent-run API test pass at the end of Step 07, gated on a live MCP
+  connection.** Once the extension is compiling and packaging cleanly, the agent offers to run
+  the checklist directly against the published sandbox — but only if, and because, the human can
+  supply a working connection (the AL MCP Server, or another authenticated MCP endpoint reaching
+  the sandbox's API). This is optional and conditional, never assumed available. If no working
+  connection exists, the agent says so plainly and suggests manual alternatives instead of
+  leaving API testing undone — **Postman**, or a low-code caller like **Power Automate**,
+  **Power Apps**, or **Copilot Studio**.
+- **Renumbered — Code Review (09, was 10), Update Design Documents (10, was 11), Document the
+  Code (11, was 12).** Every internal cross-reference in `CLAUDE.md` updated to match (§1.7's
+  role table, Step 04's rationale, the BCQuality section, the Stage↔Step Map, the ALL ALONG
+  sections) — see the follow-up review below for the ones a first pass missed, including in
+  `RunbookSchematics.md`.
+- **Changed — Step 11 (Document the Code) gains a genuine question: does the human also want
+  Automated Test Scripts?** Alongside — never instead of — the Human Unit Test Script. Framed
+  explicitly as a real decision, not a default: automated scripts (a Postman/Newman collection, a
+  Playwright suite, etc.) imply an ongoing maintenance commitment a one-time manual script
+  doesn't. If yes, the agent also asks what tooling to standardize on (recommending a Postman
+  collection as the lowest-friction default if the human has no preference), what should trigger
+  a re-run, and where the scripts should live — then writes a companion `AutomatedTestScripts.md`
+  (separate from `HumanUnitTestScript.md`) explaining how to run and maintain them.
+- **Added — Step 12, "Release to Users for Testing," a new, fully-structured step** (its own
+  Role/Inputs/Actions/Outputs/Exit gate, the same rigor as every other step) covering what old
+  Step 09 tried to cover too early: real users run `HumanUnitTestScript.md` (and
+  `AutomatedTestScripts.md` if it exists) end to end against the latest package, on a sandbox,
+  *after* Code Review and documentation are done. Outputs `docs/ReleaseTestResults.md`. **Its
+  exit gate is also the production go-live gate:** if everything passes, the package that was
+  actually tested is the one deployed to the Production company (see the never-delete correction
+  below for exactly how that package is marked before it ships) — no new package is built solely
+  to "finalize" a release.
+- **Net step count: still 12** (numbered 01–12), just reshuffled — dropping old Step 09 and
+  adding new Step 12 cancel out. AJ's own initial estimate ("11 instead of 12") assumed the new
+  release-testing step wouldn't need its own formal slot; resolved by asking directly (AJ chose
+  the fully-structured Step 12 over a lighter closing-section alternative) rather than guessing
+  either way.
+- **Updated:** Stage↔Step Map (Stage 7 now notes Step 07 also carries the first compile-and-package
+  cycle; Stage 8 = 08+09; Stage 9 = 10+11; Stage 10 = 12 → production); ALL ALONG → Document
+  (added `ReleaseTestResults`, conditional `AutomatedTestScripts`); Testing Feedback Log (now
+  starts "from Step 07 onward," not "throughout PROVE" — sandbox testing is mandatory in BUILD
+  now, not a PROVE-only concern; test-run record cites Step 12, not old Step 09); Packaging &
+  Versioning (intro and the "offer to repackage" bullet reworded from an occasional ask to the
+  default rhythm of Step 07/08/09; folded in a note to confirm `app.json` identity before every
+  build, moved here from old Step 09; "push back on a premature ask" rescoped to requests
+  *outside* the cycle, since packaging with known open issues is now the cycle's own point, not
+  a violation of it).
+
+### Independent review of the restructure, and its fixes (2026-09-13)
+
+Per §1.7, a reasoning-role subagent ran a full self-consistency review of the restructure above —
+the same kind of pass recorded under v2.0.0.0's "Full self-consistency review" entry, this time
+targeted at a much larger, more recent edit. Main role independently re-verified its four
+highest-priority findings against the actual files before trusting them (confirmed all four).
+Findings and resolutions:
+
+- **Corrected — package overwrite now legitimately collides with "never delete a previous
+  package."** Filenames derive only from `<ExtensionName>_<version>`, so the new "repackage every
+  fix" default means same-version cycle builds now routinely write the identical filename — the
+  never-delete rule as originally worded forbade this. **AJ Ansari's decision:** the protection is
+  per-version, not per-file — interim cycle builds at one version may overwrite each other freely;
+  the specific package that passes Step 12 gets its **Build** segment bumped (e.g. `0.0.5.0` →
+  `0.0.5.1`) or is copied to an immutable filename before shipping, so the release candidate stays
+  permanently identifiable and is never itself silently overwritten. Step 12's exit gate and the
+  Packaging & Versioning "never delete" rule both updated to say this explicitly.
+- **Fixed — a stale step number survived in `RunbookSchematics.md` §4.2** ("Code Review (10)"),
+  even though `CLAUDE.md`'s own copy of the same fact was correctly updated to (09). Exactly the
+  kind of drift a same-agent re-read is least likely to catch.
+- **Fixed — three residual contradictions of the new model, all in `CLAUDE.md`:** Step 12's
+  Inputs triggered a repackage on "Step 09/10/11 touched code or docs," even though Steps 10–11
+  are documentation-only and the rule elsewhere is explicit that doc-only changes never need a
+  repackage; the AL MCP Server section still said "compiling the actual extension is not
+  automatic anywhere in BUILD," directly contradicted by Step 07's now-mandatory, now-automatic
+  compile-and-package; Operating Rule 4's "continuous rhythm" sentence named Step 07/08 but not
+  Step 09, though three other places (Packaging & Versioning, Step 09 itself, this very changelog
+  entry) already say the cycle covers Step 09 too.
+- **Fixed — the PROVE diagram in `RunbookSchematics.md` §3.4 showed a gate being satisfied by a
+  fix loop drawn *after* it.** Gate 1's label claimed "code fixes recompiled/repackaged" while the
+  gap-fix decision/loop was drawn downstream of that gate, not upstream — the diagram taught the
+  opposite of what `CLAUDE.md` says. Reordered so the fix loop precedes its gate; the same
+  fix-loop pattern was also missing after Step 09 and Step 12 in the diagram (present in prose,
+  absent in the picture) — added both, plus a Step 12 "no → loop back" edge that was implied by
+  the text ("repeat until…") but never drawn.
+- **Tightened, same pass (lower priority, all applied):** the green/red-team checklist promoted
+  out of the "optional MCP pass" paragraph into its own named block, since Step 11 and Step 12
+  both depend on it unconditionally, not just when the optional pass runs; Step 12 gained a
+  reminder to re-run whichever of Step 09/10/11 a late fix actually invalidates (documentation
+  generated from code is stale the instant the code changes, and old Step 09 never had to worry
+  about this because it ran *before* documentation existed); Step 12 gained an explicit
+  restate-Schema-Sync-Mode action before the production deploy, since its exit gate is now the
+  one moment that decision matters most; Step 12 gained a one-line Role block and an explanation
+  of why `UserGuide.md`/`Deployment.md` are listed as its inputs; the BUILD diagram's `Compile`
+  node was missing from its own color class, and its API-connection check read as mandatory
+  rather than optional — both fixed; the Testing Feedback Log's "throughout PROVE (and sometimes
+  earlier, on a demo)" framing corrected to "from Step 07 onward" since sandbox testing is now
+  mandatory in BUILD; two "old Step 12"/"old Step 09" mentions that read ambiguously against the
+  *new* meaning of those numbers were qualified as "old"; the front-matter description's
+  "deployable app" softened to "app deployed to production," matching the routine's new actual
+  end point; `AutomatedTestScripts` added to the ALL ALONG document-inventory list itself, not
+  just its trailing prose.
+- **Version bump, not a fold-in:** this review, and its fixes, are why the restructure above
+  shipped as **v2.1.0.0** rather than folding into v2.0.1.0 — a change this size, found to still
+  have five real defects on independent re-read, earns its own version number rather than hiding
+  inside a point revision that had already shipped the day before under a different structure.
+- **Not fixed, deliberately: the rendering gap.** No Mermaid renderer is available in this
+  environment, and Operating Rule 6b blocks installing one unprompted. The reviewing subagent
+  confirmed all 8 diagram blocks (including the ones this pass re-edited) pass structural checks
+  — balanced delimiters, every `class`-referenced node ID actually defined — but structural
+  parsing is not a render, and `RunbookSchematics.md`'s own header promises every diagram *was*
+  rendered before being committed. That promise is not currently true for the diagrams touched in
+  this version. Flagged here rather than silently claimed otherwise; re-render before fully
+  trusting §2, §3.3, and §3.4's Mermaid blocks.
+
+### OCPF BC AL Patterns Library — a new ALL ALONG section (2026-09-13)
+
+**OCPF = OnlyCopilotFans**, the abbreviation used throughout. AJ Ansari had a standalone AL
+pattern library created the same day (`patterns/Pattern-SubPageLink-FilterGroup4.md`,
+`patterns/Pattern-Init-Does-Not-Clear-Primary-Key.md`, plus a `README.md` — see that folder's own
+README for what it is: "OnlyCopilotFans Business Central AL Patterns," a portable library meant
+to travel across engagements, not tied to the pilot project it was first extracted from) and
+wanted the runbook to bootstrap it into every future project automatically, the same way it
+already bootstraps the AL MCP Server and BCQuality.
+
+- **Added — a new ALL ALONG section, "OCPF BC AL Patterns Library."** Modeled closely on the
+  BCQuality Knowledge Snapshot section (same one-time-fetch-refreshed-on-request cadence, same
+  "tell the human, don't fetch silently" principle, same `SNAPSHOT.json` metadata convention), with
+  three deliberate differences:
+  1. **Location — inside the project root**, in `patterns/`, not outside it. BCQuality has to
+     live outside because its illustrative `.good.al`/`.bad.al` snippets aren't real compilable
+     objects and `alc` would try to swallow them; every file in this library is Markdown with
+     embedded AL code, so that failure mode doesn't exist here and nothing forces it out.
+  2. **Merge behavior, not a plain overwrite — a human-specified exception for the README
+     specifically.** If `patterns/` doesn't exist, create it and copy the fetch in. If it already
+     exists and already has a `README.md`, **append** the fetched repo's `README.md` to the
+     existing one under a fixed delimiter (`## Upstream README — ajansari/ocpfBCALPatterns @
+     <sha>`), rather than overwriting it, so any project-specific content already documented there
+     survives — and so a later *refresh* can find and replace that exact block instead of
+     appending a second copy underneath the first. Pattern-file name collisions (a case AJ didn't
+     specify) default to *flag and ask, per Operating Rule 6a*, not silent overwrite — filled in
+     explicitly as a gap-fill and marked as such in `CLAUDE.md` itself, not invented silently or
+     left looking as authoritative as AJ's own README rule.
+  3. **Gitignored — same *policy* as BCQuality and `scripts/`, though the *mechanism* differs
+     from BCQuality's.** BCQuality lives outside the project root entirely, so it isn't even a
+     candidate for git tracking; `patterns/` lives inside the root, so it genuinely needs its own
+     `.gitignore` entry to reach the same result. Either way: this is the human's own portable
+     methodology, not part of what a client is paying to receive, and it's refetchable at will.
+- **Wired into Step 05** (bootstrap, alongside AL MCP Server + BCQuality), **Step 07** (Compile and
+  Package, Troubleshoot, Iterate) — check `patterns/` for a matching, already-documented pattern
+  *before* running the three-questions diagnosis from scratch — and the **Testing Feedback Log**'s
+  own reasoning-role diagnosis bullet, which now states the same check explicitly rather than
+  relying on its existing "same as Step 07" cross-reference to carry it silently. A library nobody
+  consults during troubleshooting is fetched for nothing; this is the actual payoff the fetch
+  exists to enable.
+- **Contribution direction also wired, at Step 09 (Code Review), not just consumption.**
+  Recognizing "this looks like it'll recur" is the agent's job everywhere a fix happens; deciding
+  to add it to a library the human carries across every other engagement is his call, never the
+  agent's to make unilaterally — but Step 09's own cross-batch read is one of the best moments in
+  the whole routine to actually notice a repeated shape, so it now says so explicitly, alongside
+  the same flag-don't-add rule already stated in the Patterns section itself.
+- **Applied to the pilot project the same day:** its own `patterns/` folder (created earlier that
+  day, before this runbook section existed) is treated as already satisfying this bootstrap step
+  — the two pattern files and their `README.md` already exist locally, so no fetch from
+  `ajansari/ocpfBCALPatterns` was actually run against this project. `.gitignore` already had a
+  `/patterns/` entry from that earlier same-day work; **this change moved it** into the "always
+  gitignored, not a per-project choice" block alongside `scripts/`, and rewrote its comment, which
+  had said the library was "not yet wired into the runbook" — true that morning, false the moment
+  this section existed.
+- **Corrected on independent review, same day (Opus, limited-scope pass on this section only):**
+  a stale reference to Step 07's pre-restructure title ("Troubleshoot, Iterate," missing "Compile
+  and Package"); the pattern-file-collision rule not citing Operating Rule 6a and reading as if it
+  carried the same authority as AJ's own README rule; the Testing Feedback Log claim above having
+  nothing on the other end before this pass; a flat "public" repo claim in `CLAUDE.md` that
+  `ProjectMemory.md` hedged as "meant to be" — resolved by dropping the unverifiable adjective and
+  adding an explicit "if unreachable, say so and continue" fallback, since neither this session nor
+  the reviewing subagent could confirm the repo has actually been created; and this entry's own
+  now-corrected claim that no `.gitignore` change was needed, when the same commit had in fact
+  moved and rewritten that entry. `RunbookSchematics.md`'s Step 07 diagnosis node (§3.3) updated to
+  show the patterns-check ahead of the three questions, matching the text.
+- **Resolved, same day:** whether `ajansari/ocpfBCALPatterns` actually exists. AJ Ansari confirmed
+  it directly; independently verified rather than taken on his word alone — `git ls-remote` against
+  the bare URL returned a `main` branch with no authentication required (confirming public), and
+  its rendered README on GitHub matches this project's own local `patterns/README.md` ("OnlyCopilotFans
+  Business Central AL Patterns," same opening paragraph) plus both pattern files. `CLAUDE.md`'s
+  "public" claim, softened to an unverified adjective earlier the same day pending this check, is
+  restored with the verification method and date attached, so the next reader doesn't have to
+  re-litigate it. The "if unreachable" fallback stays in place regardless — a repo confirmed
+  reachable today isn't guaranteed reachable on some future project's Step 05.
+- **Also fixed, found by the same review but pre-existing and unrelated to this section:** this
+  file's own version sections weren't in the newest-first order its header promises (§8–13) — the
+  prior round's v2.1.0.0 entry had been appended after v2.0.1.0 rather than before it. Reordered
+  to v2.1.0.0 → v2.0.1.0 → v2.0.0.0 → v1.0.0.0; no content changed, only position.
+
+---
+
 ## v2.0.1.0 — 2026-09-12
 
 A packaging/deployment-communication gap found the same day, while wrapping up a bug-fix
@@ -27,8 +249,9 @@ baseline.
   built `.app` package is written to: **`outputAppPackage/`**, in the project root, the same way
   package *naming* was already fixed (`<ExtensionName>_<version>.app`) — not `out/`, `output/`,
   or whatever a given project happened to improvise. Step 01 intake now tells the human this
-  folder name once, plainly, before any package exists; Step 09 (and any later ad hoc repackage)
-  restates the exact path plainly every time a build actually completes — e.g. "Package built:
+  folder name once, plainly, before any package exists; Step 07's compile-and-package cycle (and
+  any later ad hoc repackage) restates the exact path plainly every time a build actually
+  completes — e.g. "Package built:
   `outputAppPackage/IP_Tracking_1.0.0.0.app`" — as its own clear line, not folded into a longer
   status paragraph.
 - **Why:** the pilot project had been calling this folder `out/` by unexamined precedent, with no
