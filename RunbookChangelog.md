@@ -14,6 +14,180 @@ specifically to keep a superseded decision on record — see the runbook's ALL A
 
 ---
 
+## v2.3.0.0 — 2026-09-13
+
+Three changes from the same request, all corrections or additions AJ Ansari made after actually
+living with `v2.2.1.0` for a few minutes on the pilot project — a location he wanted fixed, a
+capture behavior that had never existed at all, and a tracking default nobody had ever actually
+reviewed.
+
+### Fixed — `ProjectProgress.md` now lives in the project root, not `docs/`
+
+v2.2.1.0 placed the new tracker under `docs/` alongside every other document. AJ wanted it at the
+project root instead — the whole point is a fast, at-a-glance check, and every other required
+document already lives under `docs/`, so putting this one there too buried the one file meant to
+be the fastest thing to find. PRE-01's own action and the ALL ALONG section heading both corrected
+to say "project root," explicitly called out as the deliberate exception to where every other
+document lives.
+
+### New — capture raw requirements verbatim, at PRE-01 and whenever they arrive later
+
+Nothing in the routine previously said what to do with a stakeholder's raw input — pasted
+requirements text in chat, or an uploaded file — beyond it eventually feeding `ProblemStatement.md`
+in already-interpreted form. AJ wanted the raw material itself preserved, unedited, as its own
+artifact — exactly the role this pilot project's own `requirements/bootcamp-registration-extension-requirements.md`
+had already been playing informally, now made a standing rule instead of something that happened
+to be done right once.
+
+- **New PRE-01 action:** create `requirements/` in the project root if it doesn't exist (a
+  normal, git-tracked artifact, never gitignored). Pasted chat text becomes its own Markdown file
+  (descriptive name, a header naming who provided it and when, then the raw text verbatim —
+  no editing, cleanup, or summarizing in this copy). An uploaded file gets saved as an unmodified
+  copy under its own filename. A same-named capture is never overwritten — a date suffix is added
+  instead, same never-delete discipline as `outputAppPackage/`.
+- **Not limited to kickoff** — the same capture applies any time later raw requirements or scope
+  input arrives (a change request, a fresh drop of material), not only at PRE-01.
+
+### Fixed — `.app` build packages are tracked in git by default, not gitignored
+
+AJ, reviewing the pilot project's own `.gitignore`: the runbook's Packaging & Versioning section
+had never actually said to gitignore built packages — an earlier project scaffolded its own
+`.gitignore` that way regardless, as an unreviewed default nobody had traced back to a rule that
+didn't exist. Corrected the actual gap rather than just the pilot project's file:
+
+- **New standing rule:** `outputAppPackage/*.app`, and any `.app` file anywhere in the repo, are
+  git-tracked like any other project deliverable — never gitignored, at Step 05 scaffolding or
+  ever after. If a project is ever found with one anyway (e.g. built on an older framework copy),
+  remove the ignore rule and track the packages it was hiding — checking first, per Repository
+  Hygiene's own untracking caution, whether a remote exists that would show collaborators a sudden
+  batch of "new" files.
+- Applied on the pilot project itself: the `.gitignore` rule removed, all 6 `outputAppPackage/`
+  versions added, plus 6 duplicate, non-standard-named `.app` files that had accumulated at the
+  repo root (from a VS Code Publish action, outside the framework's own naming/location
+  convention) — AJ's explicit choice to track those too rather than leave them out. A stray
+  `_compile_check.app` (a spot-check compile byproduct, never actually named like a real release)
+  was deleted outright, also AJ's explicit choice — the only one of the three ever actually
+  removed rather than tracked or left alone.
+
+**Files affected:** `CLAUDE.md` (PRE-01, ALL ALONG → Project Progress Tracker, Packaging &
+Versioning). Project files touched on the pilot project directly (not part of this framework
+repo): `.gitignore`, `ProjectProgress.md` moved to root, 12 `.app` files added, 1 deleted.
+
+---
+
+## v2.2.1.0 — 2026-09-13
+
+### Fixed — Step 11's "Automated Test Scripts" question was wrongly scoped to API-only tooling
+
+AJ Ansari, reviewing a project that had already been asked this question once: "Why is the
+automated test script focused around Postman/API? This was supposed to be for automated test
+scripts for the entire BC app (AL)." A real misunderstanding, not a deliberate scoping the
+runbook had ever actually confirmed with AJ — the wording introduced in v2.1.0.0's Step 07/09/12
+restructure framed "Automated Test Scripts" entirely in terms of external HTTP tooling (a
+Postman/Newman collection, a Playwright suite), as if that were the only kind of automation
+worth asking about. It caught real, if quiet, damage: the pilot project had already been asked
+the mis-scoped question at its own Step 11 and declined — no wrong artifact was produced, but the
+question itself never offered the option that was actually wanted.
+
+- **Fixed — Step 11 now names two genuinely different kinds of automated testing and asks which
+  (or both), rather than assuming API-level tooling is the only kind:**
+  - **AL Test Framework (native)** — BC's own mechanism: test codeunits (`Subtype = Test`),
+    `[Test]`-attributed methods, the platform's test libraries (`Library Assert` etc.), run via
+    the in-client Test Tool or headlessly in CI (AL-Go for GitHub, `BcContainerHelper`). Tests the
+    app's actual business logic directly in AL, not just what's reachable over an API. Shipped as
+    its own test app with its own `app.json` and object ID range.
+  - **API-level automation** — the previously-described Postman/Newman/Playwright approach,
+    unchanged, now correctly presented as one of two options rather than the only one.
+  - Recommends AL Test Framework as the default when the human has no preference and the
+    extension has nontrivial business logic (it's the only one of the two that can exercise logic
+    never surfaced through the API); recommends a Postman collection as the default specifically
+    for whichever project chooses API-level automation.
+  - `AutomatedTestScripts.md`'s own description updated to name which kind(s) were created and
+    to track the app, not just its API, as the thing to keep current against.
+
+**Files affected:** `CLAUDE.md` (Step 11). No project files touched.
+
+### New — `docs/ProjectProgress.md`, a required, standing status table
+
+AJ Ansari asked for a persistent way to see which step a project is on across the whole
+routine — ideally a progress bar. No mechanism available to any agent running this framework
+writes to a persistent UI element outside its own conversation, and even a harness-specific one
+wouldn't travel with the repo the way a file does — so a durable, in-repo artifact is the
+substitute, the same reasoning that already justifies `ProjectMemory.md` existing instead of
+relying on an agent's own non-shared cross-session memory.
+
+- **Added a new required ALL ALONG artifact:** `docs/ProjectProgress.md` — one row per step
+  (PRE-01 through 12, the full routine, not only the numbered steps), a Status column
+  (blank / `In Progress` / `Completed`), and a closing note that asking, in plain language,
+  "Where are we in the process? What's next?" always gets a direct answer, agent running or not.
+  Deliberately kept to a single table, nothing narrative — that's what `ProjectMemory.md` is
+  already for.
+- **Created at PRE-01, updated at every step boundary alongside `ProjectMemory.md`'s "Current
+  position."** PRE-01's own Actions gained a new first bullet: create this file, seeded, before
+  anything else — the very first artifact of the entire engagement.
+- **Finer-grained, in-session progress (a live plan while a step is actively being worked) stays
+  conversational, not filed.** `ProjectProgress.md` tracks step-level status only; narrating
+  what's planned/done/left within a single step's multi-part work is ordinary text in the
+  conversation, no tool or document update involved.
+
+**Folded into this version rather than given its own** (AJ's call) — same-day addition on top of
+the fix above, not yet exercised on any project when it landed.
+
+**Files affected:** `CLAUDE.md` (PRE-01, ALL ALONG). No project files touched by this addition
+itself (the pilot project's own `docs/ProjectProgress.md` was created and backfilled separately,
+since the project predates this rule).
+
+---
+
+## v2.2.0.0 — 2026-09-13
+
+Two standing interaction-behavior changes, both from the pilot project reaching the end of its
+own PROVE phase for the first time and AJ Ansari deciding how that moment — and every PROVE-phase
+step boundary before it — should actually be handled going forward, rather than left to whatever
+the agent's own judgment produced in the moment (which, on the pilot project, was to just ask in
+ordinary prose whether to keep going).
+
+### New Operating Rule 6c — check in after every step from Step 08 onward
+
+Previously, Rule 6a explicitly said *not* to wrap ordinary step-to-step hand-off in a decision
+box ("finishing a step and waiting to be told to start the next one... is normal conversation,
+not a decision point"). That's still the right default for Steps 01–07, where Operating Rule 6's
+own approval gates already pace things tightly batch by batch. But starting at Step 08, each step
+hands back a real artifact — a gap analysis, a code review, a repackaged build, a full
+documentation set — that the human may need time to act on before anything else happens, which
+makes "keep going or pause here" a genuine decision, not noise.
+
+- **New Rule 6c:** from Step 08 (Gap-Fit Test) through Step 12 (Release to Users for Testing),
+  close every step with a second message after its normal summary: put "proceed directly into
+  the next step now" vs. "pause here" through the same interactive mechanism Rule 6a already
+  uses, and say how to resume when ready. Steps 01–07 are explicitly carved out as unaffected.
+- The Step 11 → Step 12 boundary is called out as a special case of this rule, not an addition to
+  it — see below.
+
+### New: a formal hand-off message at the Step 11 → Step 12 boundary
+
+The moment Step 11's outputs are done, the agent's own work in this routine is effectively
+finished — Step 12 runs entirely by human hands. AJ wanted that specific moment marked
+deliberately rather than folded into the generic Rule 6c check-in or, worse, left to ordinary
+conversational back-and-forth (a real risk: it's easy for this instant to slide by unremarked
+when the agent is mid-flow finishing Step 11's four documents).
+
+- Added a note at the top of Step 12 describing the required message: it must congratulate the
+  human, state plainly that this is the logical end of the framework's own work, say concretely
+  what to do next, and say how to bring the agent back in — sent through Rule 6a's interactive
+  mechanism with exactly two named options (**"Perfect, I understand!"** / **"I have some
+  questions"**) plus the mechanism's own free-text/Other entry, never as plain prose.
+- A worked example from the pilot project is included directly in the runbook text, since this is
+  exactly the kind of moment that's easy to under-specify and then improvise inconsistently
+  project to project.
+- **This replaces, not adds to, Rule 6c's generic check-in for this one boundary** — a project
+  doesn't get both a generic "proceed or pause?" prompt and the formal hand-off message back to
+  back at this specific transition.
+
+**Files affected:** `CLAUDE.md` (Operating Rules, Step 12). No project files touched.
+
+---
+
 ## v2.1.0.0 — 2026-09-13
 
 **The single biggest structural change since v2.0.0.0** — a whole step dropped, four others

@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 2.1.0.0
+**Version:** 2.3.0.0
 **Last Updated:** 2026-09-13
 
 > Version history for this framework lives in `RunbookChangelog.md`, tracked independently of any
@@ -32,6 +32,24 @@
 6a. **Ask decisions in a selectable options box, not in prose.** When the agent needs the human to *decide something* — pick between design options, approve a version bump, choose a name, resolve an ambiguity — present it through the interactive multiple-choice mechanism the agent's harness provides (e.g., in Claude Code, the `AskUserQuestion` tool — substitute whatever the actual harness offers), with the recommended option first and a short reason on each. A decision buried in a paragraph of chat is easy to miss: it reads like the agent finished and is idling, so the project silently stalls waiting on an answer nobody realised was owed.
     **Use it only for decisions.** Do *not* wrap ordinary progress in it — finishing a step and waiting to be told to start the next one, reporting a clean compile, or handing back a result is normal conversation, not a decision point. Over-using the box makes it noise, which defeats the purpose.
 6b. **Don't install tooling without asking — and look harder first.** Before concluding a required compiler/runtime is missing and reaching for an install, check whether the human's own IDE already provisions one privately for the tool in question — e.g., VS Code's AL extension gets its .NET runtime from a companion ".NET Install Tool" extension, not a system-wide install, at a path that differs by OS: `~/Library/Application Support/Code/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/` on macOS, `~/.config/Code/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/` on Linux, `%APPDATA%\Code\User\globalStorage\ms-dotnettools.vscode-dotnet-runtime\` on Windows — check the one matching the actual machine, not just the first one you think of, *before* assuming none exists. If the human's own editor can already do the thing you're about to install a tool for, that's a strong signal the tool already exists somewhere you haven't looked. Installing anything is itself a human-in-the-loop decision (rule 6) regardless of what a fallback option elsewhere in this runbook lists as available — on a real project the agent skipped the search, wrongly installed a fresh runtime, and had to remove it.
+6c. **From Step 08 onward, check in after every step closes — proceed now, or pause?** (AJ
+    Ansari, 2026-09-13.) When a step's own work is finished — its outputs written, its exit gate
+    met, and the normal end-of-step summary given — don't default to waiting for the human to
+    say "go" in ordinary conversation, and don't default to silently starting the next step
+    either. Starting at Step 08 (Gap-Fit Test) through Step 12 (Release to Users for Testing),
+    close every step with a second message: after the summary, put the choice itself through the
+    interactive mechanism (Rule 6a) — proceed directly into the next step now, or stop here so
+    the human has room to review, run, publish, or just sit with what was produced before
+    anything else happens. State in that same message how to resume when ready (e.g., "say
+    'continue' or name the step to run next"). This is a deliberate, narrow exception to Rule
+    6a's own "don't wrap ordinary progress in a decision box" guidance: PROVE-phase steps
+    routinely hand back a real package, design document, or test script the human may need time
+    to act on, so "keep going or pause" is a genuine decision at this point in the routine, not
+    noise. Steps 01–07 are unaffected — ordinary conversational hand-off continues to govern
+    there, since Operating Rule 6's own approval gates already pace BUILD tightly. **The Step
+    11 → Step 12 boundary is a special case of this rule, not an addition to it** — see Step 12's
+    own note on the hand-off moment, which replaces this generic check-in for that one specific
+    transition.
 7. **Log every deviation immediately.** Any departure from FRD or TDD goes in the ChangeLog before the next batch starts (see *All Along*).
 
 ---
@@ -45,12 +63,34 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
 **Inputs:** Stakeholder conversation notes; the business need in plain language.
 
 **Actions:**
+- **Capture any raw requirements input verbatim, before any interpretation happens** (AJ Ansari,
+  2026-09-13). If the human has pasted raw requirements text in chat, or uploaded a file, this is
+  the frozen, ground-truth source the rest of DEFINE works from — preserve it untouched, the same
+  role a project's own `requirements/<name>.md` already plays once DEFINE is done with it:
+  - Create a `requirements/` folder in the project root if one doesn't already exist. It is a
+    normal, git-tracked project artifact — never add it to `.gitignore`.
+  - **Pasted text in chat:** save it as its own Markdown file in `requirements/` (a descriptive
+    name, e.g. `<short-topic-slug>-requirements.md`), with a brief header noting exactly who
+    provided it and the date/time, then the raw text **verbatim** below — do not edit, clean up,
+    reformat, or summarize it in this copy. If a same-named capture already exists from an
+    earlier drop, don't overwrite it — add a date suffix instead, so every capture is preserved
+    independently (the same never-delete discipline as `outputAppPackage/`).
+  - **An uploaded file:** save an unmodified copy of that exact file into `requirements/`, under
+    its original filename (or a de-duplicated variant on a name collision) — no wrapper, no
+    reformatting.
+  - This isn't a one-time, PRE-01-only action — apply the same capture the moment any later raw
+    requirements/scope input arrives too (a change request, a follow-up drop of new material),
+    not only at kickoff.
+- Before anything else, create `ProjectProgress.md` (ALL ALONG → Project Progress Tracker), **in
+  the project root — always, not `docs/`** (AJ Ansari, 2026-09-13) — one row per step of the whole
+  routine, every row blank except this one, marked `In Progress`. This is the very first file
+  artifact of the entire engagement.
 - Write a problem statement: what business outcome is required, who the consumers are (users, other systems, AI tools, BI/reporting), and what is explicitly out of scope.
 - Capture the domain vocabulary the design will anchor to (entity names, categories, known pain points).
 - Produce an initial entity/object list from stakeholder domain knowledge.
 - As the agent: identify duplicates, ambiguous terms, and outdated/legacy terminology in the initial list; ask clarifying questions about scope and consumer use cases. Do not resolve ambiguities silently.
 
-**Outputs:** `ProblemStatement.md` — purpose, scope, out-of-scope, target consumers, initial entity list, open questions.
+**Outputs:** `requirements/` (seeded, if any raw input was provided), `ProjectProgress.md` (seeded, project root), `ProblemStatement.md` — purpose, scope, out-of-scope, target consumers, initial entity list, open questions.
 
 **Exit gate:** Functional Consultant signs off on the problem statement and initial entity list (Standards §2.2 Stage 1).
 
@@ -596,7 +636,45 @@ every fix and normalizes whatever drift the findings call out.
 - **Draw the schema as a Mermaid diagram**, generated from the actual objects, not from memory. Include every table this app owns *and* every standard/base table it touches — via `TableRelation`, `tableextension`, or a `pageextension`'s `RunPageLink` — so a reader sees the whole relationship graph, not just the app's own corner of it. An ER diagram (`erDiagram`) is the usual fit; note cardinality and which side is the standard object.
 - **Render the diagram to prove it parses — never ship one you have not seen render.** Markdown happily stores a syntactically invalid diagram: it looks fine in the source file and simply fails to draw wherever it is finally viewed, so the defect is invisible until a reader hits it. Extract the fenced block and run it through a renderer (e.g. `npx @mermaid-js/mermaid-cli -i diagram.mmd -o diagram.svg`, or whatever renderer is already available — this may download a package on first run, so Operating Rule 6b applies: confirm one is already usable, or ask, rather than installing anything unprompted); a parse error exits non-zero and names the line. On a real project a diagram shipped with `PK_FK` as a key constraint — not valid Mermaid, which accepts `PK`, `FK`, `UK`, or comma-separated `PK,FK` — and never rendered anywhere until it was actually tested.
 - **Write the human unit test script** — a step-by-step manual test walkthrough a person can execute: endpoint by endpoint, the happy-path (green-team) and boundary (red-team) cases per the checklist defined in Step 07, expected result for each, written against this app's actual endpoints. A well-written test script is ~70% of a user guide (Standards §12.1). This is the script Step 12 will actually run.
-- **Ask the human whether they also want Automated Test Scripts created**, alongside — not instead of — the Human Unit Test Script. This is a genuine question, not a default: automated scripts (e.g., a Postman/Newman collection, a Playwright suite, or similar) imply an ongoing maintenance commitment as the API evolves, which a one-time manual script doesn't carry. If yes, also ask: what tooling/framework to standardize on (recommend a Postman collection if the human has no preference — lowest friction for OData/API testing, no separate runtime to maintain); what should trigger a re-run (every build, or only before a release); and where the scripts should live (this repo, alongside the extension, vs. a separate test-automation repo). If created, write a companion `AutomatedTestScripts.md` — a **separate document from `HumanUnitTestScript.md`** — explaining what they cover, how to run them, and how to keep them current as the API changes.
+- **Ask the human whether they also want Automated Test Scripts created**, alongside — not
+  instead of — the Human Unit Test Script. This is a genuine question, not a default: automated
+  scripts imply an ongoing maintenance commitment as the app evolves, which a one-time manual
+  script doesn't carry.
+  **Corrected 2026-09-13 (AJ Ansari) — this has two genuinely different meanings; ask which,
+  don't assume the API-only one.** An earlier draft of this bullet (introduced in the Step
+  07/09/12 restructure, v2.1.0.0) scoped "Automated Test Scripts" entirely around external
+  HTTP tooling, as if testing the API surface were the only kind of automation worth asking
+  about — that was the agent's own drafting narrowing, never something AJ asked for, and it was
+  caught only after a project had already been asked the (mis-scoped) question once. The two
+  real options:
+  - **AL Test Framework (native).** Business Central's own automated-testing mechanism: a test
+    codeunit (`Subtype = Test`) per feature area, with `[Test]`-attributed methods and the
+    platform's test libraries (`Library Assert`, `Library - Random`, etc.), exercising the app's
+    actual business logic — tables, codeunits, pages — directly in AL, not limited to whatever
+    happens to be reachable over an API. Run via the in-client **Test Tool** page during
+    development, and headlessly in CI (e.g., AL-Go for GitHub's built-in test pipeline, or
+    `BcContainerHelper`'s `Run-TestsInBcContainer`). Conventionally shipped as its own **test
+    app** — a separate `app.json` depending on the extension under test — in a `test/` (or
+    similarly named) folder alongside the main extension's source, not mixed into it; it needs
+    its own object ID range, distinct from Parameter 1.2's, noted in the Object Register the same
+    as any other range.
+  - **API-level automation.** External HTTP tooling (a Postman/Newman collection, a Playwright
+    suite, or similar) exercising the OData API surface from outside BC — the same requests
+    `Documentation.md` and `HumanUnitTestScript.md` Part B already describe by hand.
+  Ask **which of the two, or both** — a project with substantial internal business logic may want
+  AL test codeunits regardless of whether it exposes an API at all (it's the only one of the two
+  that can exercise logic never surfaced through the API — a page's own validation, a report, an
+  internal codeunit); a project that's mostly a thin API surface over standard BC tables may get
+  more value from API-level automation instead. Recommend **AL Test Framework** as the default
+  when the human has no preference and the extension has any nontrivial business logic — it's the
+  platform's own idiomatic mechanism. If API-level automation is chosen (alone or alongside),
+  recommend a **Postman collection** as its default — lowest friction for OData/API testing, no
+  separate runtime to maintain. For whichever is chosen, also ask what should trigger a re-run
+  (every build, only before a release, or on a CI schedule) and where the artifacts should live
+  (this repo vs. a separate test-automation repo). If created, write a companion
+  `AutomatedTestScripts.md` — a **separate document from `HumanUnitTestScript.md`** — naming
+  which kind(s) were created, what they cover, how to run them, and how to keep them current as
+  the app (not just its API) changes.
 - Write the **user guide** as `UserGuide.md` — **Markdown, in the repo, always** (HTML with `@media print` rules only as an *additional* branded/print deliverable, never instead of the Markdown; Standards §12.5). This is a **separate document from `Documentation.md`** and must not be folded into it: `Documentation.md` is the integration/API reference written for a developer or BI consumer, whereas the user guide is written for the person clicking around in Business Central — what the feature is for, how to do each task in order, what each field means in business terms, and what to do when something is refused. If the only "user guide" produced is an API reference, this action has not been done.
 - Write one-page **deployment instructions** as `Deployment.md`, for an administrator: version requirements, install procedure, which permission sets map to which roles, verification steps, uninstall (Standards §12.3). Distinct from `Documentation.md`'s quick-start: this is the full admin install/upgrade/uninstall procedure, not a fast path to a first API call.
 
@@ -611,6 +689,33 @@ every fix and normalizes whatever drift the findings call out.
 > script that hadn't been written yet. By the time this step runs, `HumanUnitTestScript.md`
 > exists (Step 11), Code Review has landed (Step 09), and the design documents reflect reality
 > (Step 10) — so this is a real gate on a reviewed, documented app, not a first look at raw code.
+
+> **The hand-off moment (AJ Ansari, 2026-09-13) — mark it, don't slide into it.** The instant
+> Step 11's four outputs are done and this step is about to begin, the agent's own work in this
+> routine is effectively finished: everything from here is a human running tests and deciding
+> whether to ship. Send a formal message for this specific transition — this **replaces**, it
+> does not add to, the ordinary Rule 6c step-completion check-in for this one boundary — through
+> the interactive mechanism (Rule 6a), with exactly two named options plus the mechanism's own
+> free-text/Other entry: **"Perfect, I understand!"** and **"I have some questions."** The
+> message itself must: (a) congratulate the human on reaching this point; (b) state plainly that
+> this is the logical end of the agentic development framework's own work — Step 12 runs
+> entirely by human hands from here; (c) say concretely what they need to do next (run
+> `HumanUnitTestScript.md`, record results in `ReleaseTestResults.md`); and (d) say how to bring
+> the agent back in — either when testing surfaces something to fix, or once everything passes
+> and it's time to mark the release candidate.
+>
+> **Worked example** (from the pilot project):
+> > 🎉 We've reached the logical end of the OnlyCopilotFans Agentic Development Framework's own
+> > work on *Bootcamp Registration Tracking*. Every step the agent can carry end-to-end — DEFINE
+> > through PROVE Steps 08–11 — is complete: built, gap-tested, code-reviewed, documented, and
+> > packaged as `Bootcamp_Registration_Tracking_0.0.5.1.app`. What's left, Step 12, is
+> > intentionally human-run: have your testers work through `docs/HumanUnitTestScript.md` end to
+> > end and record results in `docs/ReleaseTestResults.md`. When something needs a fix, or once
+> > everything passes and you're ready to mark the release candidate, just tell me and I'll pick
+> > it back up.
+>
+> Options shown: **Perfect, I understand!** / **I have some questions** (free text also
+> available, as with any use of Rule 6a's mechanism).
 
 **Role:** if §1.7 role assignment is configured, this is a **main-role** step end to end — confirming the publish, coordinating the human testers, recording results in `ReleaseTestResults.md`, and triaging findings via the Testing Feedback Log. Any diagnosis a finding needs still routes to the reasoning role first, same as everywhere else (Step 07, Testing Feedback Log).
 
@@ -637,7 +742,7 @@ Run these in parallel with the phased work — they are not a final step.
 
 ## Document
 
-- Keep every required project document current as work proceeds, not retroactively (Standards §2.1): `ProblemStatement`, `FRD`, `TDD`, `SanityCheck`, `PostDevTDD`, `ChangeLog`, `GapAnalysis` / `CodeReview`, `Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`, `AutomatedTestScripts` (if created), `ReleaseTestResults`, `TestingFeedback`, `Roadmap`, `ProjectMemory` — all four mandatory Step 11 outputs (`Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`) belong on this list, not just the first of them, as does `AutomatedTestScripts` if the human opted in at Step 11, and `ReleaseTestResults` (Step 12).
+- Keep every required project document current as work proceeds, not retroactively (Standards §2.1): `ProblemStatement`, `FRD`, `TDD`, `SanityCheck`, `PostDevTDD`, `ChangeLog`, `GapAnalysis` / `CodeReview`, `Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`, `AutomatedTestScripts` (if created), `ReleaseTestResults`, `TestingFeedback`, `Roadmap`, `ProjectMemory`, `ProjectProgress` — all four mandatory Step 11 outputs (`Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`) belong on this list, not just the first of them, as does `AutomatedTestScripts` if the human opted in at Step 11, and `ReleaseTestResults` (Step 12).
 - Maintain the **Object Register** as a standalone artifact — every object, its ID, module, source table, and R/W status — updated as objects are planned and built (Standards §1.2).
 
 ## Track Changes — the ChangeLog
@@ -714,6 +819,51 @@ agent that opens this repo.
   `docs/ProjectMemory.md` or the other project documents does not count as recorded — the file
   in the repo is the one a different agent, a teammate, or a fresh clone can actually read.
 
+## Project Progress Tracker — `ProjectProgress.md` (required, in-repo, **project root**)
+
+**New 2026-09-13 (AJ Ansari).** AJ asked for a persistent way to see which step a project is on
+— ideally a progress bar. No mechanism available to any agent running this framework writes to a
+persistent UI element outside its own conversation (no status bar, no external dashboard); even
+where a specific harness *does* expose something like that, it wouldn't travel with the repo the
+way a file does. `ProjectProgress.md` is the durable, host-agnostic substitute — the same
+reasoning that already justifies `ProjectMemory.md` existing instead of relying on an agent's own
+non-shared cross-session memory (previous section).
+
+**Lives in the project root, always — not `docs/`** (AJ Ansari, 2026-09-13, correcting the file's
+own first placement). Every other required document in this list lives under `docs/`; this one is
+deliberately the exception, so it's the first thing visible on opening the repo, no navigation
+needed — that's the whole point of it being a fast, at-a-glance status check.
+
+This is **not** a narrative document and must not become one — that is exactly what
+`ProjectMemory.md` is already for. It is one table, nothing else:
+
+| Phase | Step | Status |
+|---|---|---|
+| DEFINE | PRE-01 — State the Problem | *(blank / `In Progress` / `Completed`)* |
+| … | *(one row per step, PRE-01 through 12 — the full routine, not only the numbered steps)* | |
+
+- **Create it as the very first artifact of the whole routine** — the moment PRE-01 begins, before
+  `ProblemStatement.md` itself is even finished — with every row blank except PRE-01, marked
+  `In Progress`. A project that already has `ProjectMemory.md` but no `ProjectProgress.md` (e.g.
+  one that adopts this framework version mid-project) gets one backfilled from the ChangeLog the
+  next time any step closes.
+- **Update it at the exact same moments `ProjectMemory.md`'s "Current position" is updated** — a
+  step starting, a step's exit gate being met — never on a separate schedule. The two files must
+  never disagree about which step is current.
+- Leave a step's row blank until it actually starts; don't pre-fill future steps as blank
+  placeholders with any other text, and don't mark a step `Completed` before its own exit gate is
+  actually met (Standards' own exit-gate language for that step is the test, not "the agent moved
+  on").
+- Close the file with the same standing note every project ships it with: that asking, in plain
+  language, **"Where are we in the process? What's next?"** always gets a direct answer from this
+  file (plus `ProjectMemory.md` and `ChangeLog.md` for the reasoning behind it) — whether or not
+  an agent session happens to be running at that exact moment.
+- **While a step is actively `In Progress` and the agent is doing multi-part work within it**
+  (e.g. applying a dozen Code Review findings), narrate a live plan in the conversation itself —
+  what's planned, what's done, what's left — as ordinary text; no tool or file update is needed
+  for this finer-grained, in-session view. `ProjectProgress.md` tracks step-level status only,
+  never sub-step task lists.
+
 ## Packaging & Versioning
 
 Packaging first happens as part of Step 07's mandatory compile-and-package, and recurs
@@ -734,6 +884,17 @@ path again, plainly, every time a build actually completes — e.g. "Package bui
 paragraph; it's the one thing the human needs in order to go find the file. Confirm `app.json`
 identity, runtime, and dependencies still match Part 1 before every build, the same check every
 time — cheap, and it catches drift before it reaches a package.
+
+**`outputAppPackage/*.app` — and any `.app` file anywhere in the repo — is git-tracked, never
+gitignored** (AJ Ansari, 2026-09-13). This runbook never actually mandated gitignoring built
+packages; an earlier project scaffolded its own `.gitignore` that way as an unreviewed default,
+not something stated here, and it took a human catching it to notice. Track every `.app` the same
+way as any other project deliverable — never delete one (see below), and that now extends to
+never having deleted its git history either. Do not add an `outputAppPackage/` or `*.app` entry
+to `.gitignore` at Step 05 scaffolding, and if one is ever found already present (e.g. a project
+built on an older copy of this framework), remove it and `git add` the packages it was hiding —
+checking first, per Repository Hygiene's own untracking caution, whether the project has a remote
+that would show collaborators a sudden batch of "new" files.
 
 **Never delete — or overwrite — a package from a *different* version. NEVER.** A repackage at a
 new version writes a new, uniquely-named file next to the old ones — it does not replace,

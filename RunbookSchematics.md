@@ -100,7 +100,8 @@ flowchart TD
         S10 --> G_S10{{"As-built TDD complete,<br/>FRD reflects reality"}}
         G_S10 --> S11["11 — Document the Code<br/>(asks: Automated Test Scripts too?)"]
         S11 --> G_S11{{"4 docs exist (+ 1 conditional),<br/>ready for release testing"}}
-        G_S11 --> S12["12 — Release to Users<br/>for Testing"]
+        G_S11 --> HandOff2{{"Formal hand-off message —<br/>the framework's own work is done"}}
+        HandOff2 --> S12["12 — Release to Users<br/>for Testing"]
         S12 --> G_S12{{"Green tests pass,<br/>red tests fail gracefully →<br/>same package ships to Production"}}
     end
 
@@ -111,7 +112,7 @@ flowchart TD
     classDef step fill:#d4e6f7,stroke:#4a7ab5,stroke-width:1px;
     classDef gate fill:#fff3cd,stroke:#c99a3a,stroke-width:1px;
     class PRE01,PRE02,S01,S02,S03,S04,S05,S06,S07,S08,S09,S10,S11,S12 step;
-    class G_PRE01,G_PRE02,G_S01,G_S02,G_S03,G_S04,G_S05,G_S06,G_S07,G_S08,G_S09,G_S10,G_S11,G_S12 gate;
+    class G_PRE01,G_PRE02,G_S01,G_S02,G_S03,G_S04,G_S05,G_S06,G_S07,G_S08,G_S09,G_S10,G_S11,G_S12,HandOff2 gate;
 ```
 
 ---
@@ -126,7 +127,7 @@ flowchart TD
 
     subgraph PRE01["PRE-01 — State the Problem"]
         direction LR
-        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Write problem statement,<br/>capture vocabulary,<br/>initial entity list,<br/>flag ambiguities"] --> Out1[/"Output:<br/>ProblemStatement.md"/]
+        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Capture raw requirements<br/>verbatim into requirements/;<br/>create ProjectProgress.md<br/>(project root); write problem<br/>statement, capture vocabulary,<br/>initial entity list, flag<br/>ambiguities"] --> Out1[/"Output:<br/>requirements/ (if any),<br/>ProjectProgress.md (root),<br/>ProblemStatement.md"/]
     end
     PRE01 --> Gate1{{"Exit gate:<br/>Functional Consultant<br/>signs off"}}
 
@@ -318,7 +319,8 @@ flowchart TD
     end
     S11 --> Gate5{{"Exit gate:<br/>Reference generated from code,<br/>Automated Test Scripts question<br/>answered, ready for release testing"}}
 
-    Gate5 --> S12
+    Gate5 --> HandOff{{"Formal hand-off message (Rule 6a) —<br/>replaces the generic Rule 6c check-in<br/>for this one boundary:<br/>'Perfect, I understand!' /<br/>'I have some questions'"}}
+    HandOff --> S12
     subgraph S12["12 — Release to Users for Testing"]
         direction LR
         In6[/"Inputs:<br/>Latest package, HumanUnitTestScript.md,<br/>AutomatedTestScripts.md if any,<br/>UserGuide.md, Deployment.md"/] --> Act6["Actions:<br/>Real users run the script by hand<br/>on the sandbox — green + red team,<br/>permission-set verification;<br/>triage findings via Testing<br/>Feedback Log"] --> Out6[/"Output:<br/>ReleaseTestResults.md"/]
@@ -341,7 +343,7 @@ flowchart TD
     class In1,Out1,In3,Out3,In4,Out4,In5,Out5,In6,Out6 io;
     class Act4,Act5,Act6,GapCycle08,GapCycle09,GapCycle12 act;
     class Act1,Act3 reasoning;
-    class Gate1,Gate3,Gate4,Gate5,Gate6 gate;
+    class Gate1,Gate3,Gate4,Gate5,Gate6,HandOff gate;
     class Start,Done endpoint;
     class GapFill,ReviewFix,ReleaseCheck decision;
 ```
@@ -370,6 +372,7 @@ flowchart LR
         Retain["Retain Explanations<br/>who decided, and why —<br/>not just the outcome"]
         Test["Testing Feedback Log<br/>verbatim findings, triaged<br/>explicitly, cross-referenced"]
         Mem["Project Memory<br/>docs/ProjectMemory.md —<br/>anchor, not a narrative"]
+        Prog["Project Progress Tracker<br/>docs/ProjectProgress.md —<br/>one status table, created at PRE-01"]
         Pack["Packaging & Versioning<br/>never delete a package;<br/>propose bumps, don't apply silently"]
         MCP["AL MCP Server<br/>bootstrap once, prefer its<br/>tools over ad hoc terminal use"]
         BCQ["BCQuality Knowledge Snapshot<br/>fetch once, refresh only<br/>on explicit request"]
@@ -384,7 +387,7 @@ flowchart LR
     classDef phase fill:#d4e6f7,stroke:#4a7ab5,stroke-width:1px;
     classDef discipline fill:#fdf0d5,stroke:#c99a3a,stroke-width:1px;
     class DEFINE,DESIGN,BUILD,PROVE phase;
-    class Doc,Change,Retain,Test,Mem,Pack,MCP,BCQ,Pat discipline;
+    class Doc,Change,Retain,Test,Mem,Prog,Pack,MCP,BCQ,Pat discipline;
 ```
 
 ### 4.2 Model & Effort Assignment (§1.7)
@@ -434,7 +437,10 @@ flowchart TD
 
 ---
 
-*Generated from `CLAUDE.md` v2.1.0.0 (2026-09-13, the Step 07/09/12 restructure plus the OCPF BC
-AL Patterns Library addition — see `RunbookChangelog.md`). If the runbook changes in a way that affects
+*Generated from `CLAUDE.md` v2.3.0.0 (2026-09-13, the Step 07/09/12 restructure and the OCPF BC
+AL Patterns Library addition, the Rule 6c step-completion check-in, the Step 11 → 12 formal
+hand-off message, the Step 11 Automated Test Scripts fix, the `ProjectProgress.md` tracker (project
+root) and its move there, the `requirements/` verbatim-capture rule, and the git-tracked `.app`
+packages default — see `RunbookChangelog.md`). If the runbook changes in a way that affects
 the phase/step/role structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*
