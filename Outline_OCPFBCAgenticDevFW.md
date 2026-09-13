@@ -1,7 +1,7 @@
 # OnlyCopilotFans Business Central Agentic Development Framework Outline
 
 *A one-page map of the routine — every phase, and the steps within it. For the full rules, see
-the runbook (`CLAUDE.md`); for visual diagrams, see `RunbookSchematics.md`.*
+the runbook (`BC_App_Build_Routine_Agent.md`); for visual diagrams, see `RunbookSchematics.md`.*
 
 ---
 
