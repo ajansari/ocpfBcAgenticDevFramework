@@ -2,14 +2,14 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 2.0.1.0
-**Last Updated:** 2026-09-12
+**Version:** 2.1.0.0
+**Last Updated:** 2026-09-13
 
 > Version history for this framework lives in `RunbookChangelog.md`, tracked independently of any
 > one project built with it — check there for what changed between the version you have and the
 > latest. If `RunbookChangelog.md` is not found, create one.
 
-> **What this is:** A single, ordered routine an AI agent follows to build a new Business Central AL Per-Tenant Extension (PTE) from a business problem through to a tested, documented, deployable app.
+> **What this is:** A single, ordered routine an AI agent follows to build a new Business Central AL Per-Tenant Extension (PTE) from a business problem through to a tested, documented app deployed to production.
 >
 > **How the agent uses it:** Work the phases in order (DEFINE → DESIGN → BUILD → PROVE). Do not start a step until its predecessor's exit gate is met. Every step lists its **Inputs**, **Actions**, **Outputs**, and **Exit gate**. The *Project Parameters* block in Step 01 is the single source of truth for every name, ID, version, and quoting decision — never hardcode any of those values in AL; always derive them from that block.
 >
@@ -24,9 +24,10 @@
 1. **Part 1 is authoritative.** Publisher, prefix, namespace, versions, ID ranges, localization — read them from the Project Parameters block (Step 01) and derive everything else. Never hardcode.
 2. **Verify against BC symbol files, not memory.** Table numbers, `using` namespaces, field IDs, `ObsoleteState` — confirm each in the symbol file named in Parameter 1.4. Agent knowledge of BC table numbers is not reliable (Standards §10.5, Appendix B). **Fallback when the downloaded symbols don't answer the question** (a module isn't in `.alpackages`, or you need to browse/discover rather than already knowing what to grep for): the entire BC BaseApp, for the current Business Central Online version, is documented at <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application> — every standard table, field, and field datatype/size. Use it to corroborate or discover; the downloaded symbol file for the target version is still the authoritative source when the two ever disagree.
 3. **Phase large scope into batches.** A batch is a self-contained, reviewable increment (by module or document-type group) — designed to be independently correct even though, under Operating Rule 4, it is not compiled on its own to prove it. Define batch boundaries during DESIGN and record them in the TDD (Standards §2 intro, §10.3).
-4. **Lint every batch as it's written, including symbol verification. Do not compile per batch — the whole extension compiles once every batch from the TDD's batch plan is written, gating entry to PROVE.** Run the Step 05 pre-flight checklist immediately on each batch — both passes: pre-generation (on planned names/fields) and post-generation (on the actual files); Step 05 defines the full list — including **symbol verification**: for every reference to a standard/base object, field, method, property, or enum value, verify it against the downloaded symbol source (falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer), not just against what looks like plausible AL. That check exists specifically against hallucination: a pattern-matching lint pass draws on the same kind of intuition that produces a hallucinated reference in the first place, so checking against the actual symbols is the one thing that verifies against ground truth instead of a plausible-looking guess. Do not invoke the AL compiler as an automatic part of generating batches. The one mandatory compile of the originally-planned batches happens in Step 07, triggered the moment Step 06 finishes — not deferred further, and not skipped. A human may also request an earlier spot-check compile mid-BUILD; that doesn't replace the mandatory one. **Gap-fill work is not part of that mandatory compile — it doesn't exist yet at that point.** Whether gap-fill arrives ad hoc (a human request mid-project, as actually happened on the pilot project) or as a Step 08 output, it gets pre-flighted and then compiled the same way, as its own pass, when it's actually done. Whenever any compile runs, treat any error as a systemic signal: fix the rule/template, then every file it touched — across every batch, not only the one where the error surfaced (Standards §9.3, §10.3).
+4. **Lint every batch as it's written, including symbol verification. Do not compile per batch — the whole extension compiles and packages once every batch from the TDD's batch plan is written, gating entry to PROVE.** Run the Step 05 pre-flight checklist immediately on each batch — both passes: pre-generation (on planned names/fields) and post-generation (on the actual files); Step 05 defines the full list — including **symbol verification**: for every reference to a standard/base object, field, method, property, or enum value, verify it against the downloaded symbol source (falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer), not just against what looks like plausible AL. That check exists specifically against hallucination: a pattern-matching lint pass draws on the same kind of intuition that produces a hallucinated reference in the first place, so checking against the actual symbols is the one thing that verifies against ground truth instead of a plausible-looking guess. Do not invoke the AL compiler as an automatic part of generating batches. The one mandatory compile-and-package of the originally-planned batches happens in Step 07, triggered the moment Step 06 finishes — not deferred further, and not skipped. **From that point, compiling and packaging is not a one-time event held back for a later step — it is the continuous rhythm of Step 07, Step 08's gap-fix loop, and Step 09's Code Review fixes, whenever any of them needs a code change: compile, package, deploy to a sandbox, test, diagnose and fix, then compile and package again, and repeat.** A human may also request an earlier spot-check compile mid-BUILD; that doesn't replace the mandatory one. **Gap-fill work is not part of that mandatory compile-and-package — it doesn't exist yet at that point.** Whether gap-fill arrives ad hoc (a human request mid-project, as actually happened on the pilot project) or as a Step 08 output, it gets pre-flighted and then compiled-and-packaged the same way, as its own pass, when it's actually done. Whenever any compile runs, treat any error as a systemic signal: fix the rule/template, then every file it touched — across every batch, not only the one where the error surfaced (Standards §9.3, §10.3).
     **Trade-off, accepted deliberately (AJ Ansari, 2026-09-12, superseding the 2026-09-11 "compile once at the end" version of this rule):** even symbol-verified lint cannot catch everything a real compile does — cross-file type mismatches, full semantic validation, and rule interactions the compiler's own engine resolves are still invisible until an actual compile runs. Deferring the first real compile further than before means a systemic issue found late can touch more already-written files than catching it mid-BUILD would have. Accepted because generation speed matters more, and because symbol verification specifically closes the gap this decision was actually worried about — a reference to something that doesn't exist, dressed up as something that does.
-5. **Zero errors, zero warnings before PROVE.** Treat warnings as errors during development (Standards §9.4). Satisfied by construction under Rule 4: the one mandatory compile (Step 07) always runs, and must reach 0/0, before Step 08 begins.
+    **Corrected 2026-09-13 (AJ Ansari) — "compile" was the wrong word throughout Step 07/08/09; packaging isn't a later milestone.** The original wording of this rule and of Step 07 and old Step 09 talked only about *compiling*, which read as though building a `.app` package was a separate, later concern reserved for a dedicated packaging step. That's backwards: from the moment Step 07 opens, every fix that touches code gets compiled *and packaged* before it's deployed to a sandbox for the next test round — there is no meaningful "compile without packaging" state in this workflow once BUILD's mandatory pass runs. Old Step 09 ("Package and Test the App") is removed entirely for the same reason — see the PROVE phase and the Stage↔Step Map below for the corrected step sequence.
+5. **Zero errors, zero warnings before PROVE.** Treat warnings as errors during development (Standards §9.4). Satisfied by construction under Rule 4: the one mandatory compile-and-package (Step 07) always runs, and must reach 0/0, before Step 08 begins.
 6. **Human-in-the-loop is a feature.** Pause for human approval before: writing the first file of a batch, applying a root-cause fix, starting a new batch, finalizing any design document, and installing any tool or runtime.
 6a. **Ask decisions in a selectable options box, not in prose.** When the agent needs the human to *decide something* — pick between design options, approve a version bump, choose a name, resolve an ambiguity — present it through the interactive multiple-choice mechanism the agent's harness provides (e.g., in Claude Code, the `AskUserQuestion` tool — substitute whatever the actual harness offers), with the recommended option first and a short reason on each. A decision buried in a paragraph of chat is easy to miss: it reads like the agent finished and is idling, so the project silently stalls waiting on an answer nobody realised was owed.
     **Use it only for decisions.** Do *not* wrap ordinary progress in it — finishing a step and waiting to be told to start the next one, reporting a clean compile, or handing back a result is normal conversation, not a decision point. Over-using the box makes it noise, which defeats the purpose.
@@ -109,7 +110,7 @@ writes `.app` packages to a fixed folder named **`outputAppPackage/`** in the pr
 never `out/`, `output/`, or anything ad hoc (see ALL ALONG → Packaging & Versioning for the full
 naming rule, the never-delete-a-previous-package policy, and the Schema Sync Mode / Force Sync
 guidance that goes with every completed build). Mention this once, plainly, during intake —
-before Step 09 ever produces the first package — so where their files will land is established
+before Step 07 ever produces the first package — so where their files will land is established
 up front, not discovered by surprise the first time a build finishes.
 
 ### 1.1 Extension Identity
@@ -272,7 +273,7 @@ If configuring, capture three role assignments:
    fast/cheap role handles it fine. Reports findings; never edits code itself. A fast, lower-cost
    model is the right fit here.
 3. **Reasoning role** — heavier-reasoning, fresh-eyes work: Sanity Check (Step 04), Code Review
-   (Step 10), Gap-Fit Test (Step 08), FRD authorship (Step 02), TDD authorship (Step 03), and
+   (Step 09), Gap-Fit Test (Step 08), FRD authorship (Step 02), TDD authorship (Step 03), and
    root-cause troubleshooting/diagnosis (Step 07, and diagnosing *why* a PROVE-phase testing-feedback
    report is real, before the main role triages and records it). Reports findings, drafts, or
    diagnoses; never edits code or the continuity documents itself. A stronger-reasoning model is
@@ -281,7 +282,7 @@ If configuring, capture three role assignments:
 **The division of labor is fixed regardless of which physical models are assigned to each role.**
 The light and reasoning roles investigate, draft, or diagnose; the main role is the *only* one
 that edits code and the *only* one that owns the continuity documents end to end. This keeps one
-consistent author/style across the codebase — the same discipline Step 10 already asks for
+consistent author/style across the codebase — the same discipline Step 09 already asks for
 internally ("early and late batches often drift — normalize") — and keeps root-cause tracing in
 one continuous thread instead of fragmenting across cold hand-offs. A role holder's output is
 always relayed back and integrated by the main role; never applied blind.
@@ -393,7 +394,7 @@ human for sign-off, same as Step 02.
 ## 04 — Sanity Check and Validation
 
 **Role:** if §1.7 role assignment is configured, this review is done by the **reasoning role** —
-same rationale as Step 10: fresh eyes catch what the author of the FRD/TDD is least likely to see
+same rationale as Step 09: fresh eyes catch what the author of the FRD/TDD is least likely to see
 in their own work. The reasoning role reports findings; the main role resolves them and updates
 the documents.
 
@@ -422,7 +423,7 @@ the documents.
 
 # PHASE: BUILD
 
-Goal: generate AL batch by batch, lint clean — including symbol verification — as you go, without compiling per batch. The whole extension compiles once the TDD's planned batches are all written (Step 07) — fix root causes, not symptoms, when that surfaces anything.
+Goal: generate AL batch by batch, lint clean — including symbol verification — as you go, without compiling per batch. The whole extension compiles and packages once the TDD's planned batches are all written (Step 07), then keeps compiling and packaging every time a fix lands, as troubleshooting against a live sandbox iterates — fix root causes, not symptoms, when that surfaces anything.
 
 ## 05 — Plan the Code
 
@@ -432,9 +433,10 @@ Goal: generate AL batch by batch, lint clean — including symbol verification �
 - Confirm the object build order: which objects are built in which batch, smallest/simplest module first (Standards §10.3).
 - Within a batch, order objects so lookup/reference tables precede the entities that reference them.
 - Prepare the scaffold: `app.json` (name, publisher, runtime, BC dependency, `"features": ["NoImplicitWith"]`), `launch.json`, folder structure per module, and `.gitignore` populated per §1.8 and ALL ALONG → Repository Hygiene.
-- Bootstrap the AL MCP Server and the BCQuality knowledge snapshot for this project if not
-  already done (ALL ALONG) — both are one-time-per-project setup, cheapest to do alongside the
-  rest of the scaffold rather than as an afterthought once BUILD is underway.
+- Bootstrap the AL MCP Server, the BCQuality knowledge snapshot, and the OnlyCopilotFans (OCPF)
+  BC AL Patterns library for this project if not already done (ALL ALONG) — all three are
+  one-time-per-project setup, cheapest to do alongside the rest of the scaffold rather than as an
+  afterthought once BUILD is underway.
 - Write the pre-flight validation checks to run for each batch — this is the canonical checklist every other reference to "the Step 05 checklist" in this runbook means; if you're re-stating it elsewhere, point here rather than re-enumerating. Split into two passes, since some checks are only possible before generation and some only after:
   - **Pre-generation** (on the TDD's planned names/fields, before any file exists — main role): identifier length ≤ 30, entity/EntitySet name length ≤ 30, reserved-keyword scan, localization field-range filter, `ObsoleteState` filter.
   - **Post-generation** (on the actual generated files — light role, if §1.7 role assignment is configured): required-property presence, `Rec.`-qualification (`NoImplicitWith`), dead-code check (no empty triggers, no `// TODO`, no commented-out fields), 4-space indentation with no tabs, permission-set `tabledata` coverage for every table the batch introduces (Standards §7.3 — `PTE0004` fires at **publish**, not at compile, so **nothing automated catches a missing grant** — pre-flight is the only defense; vacuously satisfied if this project introduces no tables — see Parameter 1.2), and **symbol verification** — every reference to a standard/base BC table, page, codeunit, method, property, or enum value confirmed against the downloaded symbol source, falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer, not assumed correct because it looks like plausible AL (Operating Rule 4).
@@ -453,41 +455,63 @@ Goal: generate AL batch by batch, lint clean — including symbol verification �
 3. Run the Step 05 **pre-generation** pre-flight pass on the planned names/fields (main role — this is TDD housekeeping, distinct from the file-level lint in Action 5 below); fix the TDD before generating if anything fails.
 4. Generate the batch's AL files from the standard template (Standards §3.3), substituting only Part 1 values. Every file: one `namespace`, one `using` (from symbol file), `ODataKeyFields = SystemId`, exactly one of `DelayedInsert = true` / `Editable = false`, and `Caption` + `ToolTip` + `ApplicationArea = All` on every field (Standards §3.1–§3.4, §4.1–§4.6). Captions and ToolTips written as self-describing schema for API consumers (Standards §4.5–§4.6). No dead code, no empty triggers, no commented-out fields, no `// TODO` (Standards §3.5).
 5. **Run the Step 05 post-generation pre-flight pass on the batch immediately** — dot the i's, cross the t's on each file as you go, plus a manual read against the AZ AL Dev Tools rules (Appendix C — see the caveat on this citation under ALL ALONG → Retain Explanations). If §1.7 role assignment is configured, this pass is done by the **light role** — it reports findings only, it does not edit code; the main role applies every fix. **Do not invoke the AL compiler** (Operating Rule 4).
-6. Do not proceed to the next batch until this one's pre-flight (including symbol verification) is clean. Do not compile per batch. Once every batch from the TDD's batch plan is generated, move to Step 07 — that step opens with the one mandatory compile (Operating Rule 4); it is not optional and not deferred further. (Gap-fill work, if any comes later, is a separate pass through this same Step 05/06/07 discipline when it's actually written — see Operating Rule 4.)
+6. Do not proceed to the next batch until this one's pre-flight (including symbol verification) is clean. Do not compile per batch. Once every batch from the TDD's batch plan is generated, move to Step 07 — that step opens with the one mandatory compile-and-package (Operating Rule 4); it is not optional and not deferred further. (Gap-fill work, if any comes later, is a separate pass through this same Step 05/06/07 discipline when it's actually written — see Operating Rule 4.)
 7. **Before moving past this step, verify permission-set coverage explicitly** (light role, same checklist nature as Action 5) — don't just trust that it was "planned." Check that every table built across every batch has a matching `tabledata` grant in both the read-only and read/write permission sets (Standards §7.3; vacuously satisfied if this project introduces no tables — see Parameter 1.2). This is a design-time check, independent of whether or when a compile happens: `PTE0004` (missing permission set) only fires at **publish**, and nothing else automated catches it. A real project didn't catch this until publish and had to rewrite its batch plan as a result — catch it here instead.
 
 **Outputs:** Generated AL files for every batch, each lint-clean including symbol verification; updated Object Register; ChangeLog entries for any deviation. The extension is **not** compiled as part of this step (Operating Rule 4) — that happens next, in Step 07.
 
-**Exit gate:** Every planned object generated; each batch's pre-flight (including symbol verification) was clean before the next began; permission-set coverage verified for every table (Action 7). A clean compile is **not** required to close this gate — Step 06 hands off directly into Step 07's mandatory compile.
+**Exit gate:** Every planned object generated; each batch's pre-flight (including symbol verification) was clean before the next began; permission-set coverage verified for every table (Action 7). A clean compile is **not** required to close this gate — Step 06 hands off directly into Step 07's mandatory compile-and-package.
 
-## 07 — Troubleshoot, Iterate
+## 07 — Compile and Package, Troubleshoot, Iterate
+
+> **Renamed and restructured 2026-09-13 (AJ Ansari).** This step used to be titled "Troubleshoot,
+> Iterate" and described a single mandatory compile followed by a fix loop, with packaging held
+> back for a later, separate "Package and Test the App" step (old Step 09). That framing put
+> packaging and live-sandbox testing too late: by the time this step is actually iterating on
+> real bugs, the human is already publishing builds and testing them against a sandbox — the
+> "single compile" story never matched what was really happening. Old Step 09 is removed; its
+> concerns are folded in here (compiling and packaging are now the same recurring action) and at
+> the very end of PROVE (Step 12, the human-run release test). See the Stage↔Step Map for the
+> full corrected sequence.
 
 **Role:** if §1.7 role assignment is configured, root-cause diagnosis (the three questions below)
 is done by the **reasoning role**; the main role applies the resulting fix and does the
-ChangeLog/TDD bookkeeping. Same division for any bug surfaced later during PROVE-phase testing
-(see Testing Feedback Log, ALL ALONG) — diagnosis is a reasoning-role task, fixing is the main
-role's.
+ChangeLog/TDD bookkeeping, and is also the one who compiles, packages, and (with the human)
+gets each build onto the sandbox. Same division for any bug surfaced later during PROVE-phase
+testing (see Testing Feedback Log, ALL ALONG) — diagnosis is a reasoning-role task, fixing is the
+main role's.
 
 **Inputs:** Every batch from Step 06 (all lint-clean; not yet compiled via this step's mandatory pass, though an earlier human-requested spot-check may already have run — Operating Rule 4); the symbol-verified lint findings accumulated across BUILD; `TDD.md`; ChangeLog.
 
-**Actions:** First, **compile the whole extension once** (Operating Rule 4 — check for an already-provisioned runtime before installing anything, Operating Rule 6b). This is the mandatory compile the rest of BUILD deferred to this exact point; it is not optional and does not move further. If the human separately requested an earlier spot-check compile mid-BUILD, that was additional, not a substitute — this one still runs.
+**Actions:** First, **compile the whole extension once, then package it** (Operating Rule 4 — check for an already-provisioned runtime before installing anything, Operating Rule 6b). This is the mandatory compile-and-package the rest of BUILD deferred to this exact point; it is not optional and does not move further. If the human separately requested an earlier spot-check compile mid-BUILD, that was additional, not a substitute — this one still runs. Package naming, location (`outputAppPackage/`), the never-delete rule, and Schema Sync Mode/Force Sync guidance all apply from this very first package onward (ALL ALONG → Packaging & Versioning) — there is no "not a real package yet" grace period.
 
-Then, for every error or warning the compile surfaces, ask the three questions (Standards §9.3, §10 troubleshooting mindset):
-1. **One-off or pattern?** Search all generated files for the same class of issue before fixing one instance.
-2. **Where did it come from?** Trace to the generation rule, the TDD template, or the source data.
-3. **What rule should have caught it?** Fix that rule or the pre-flight check.
+**From here, Step 07 is a cycle, not a single event.** Packaging is not a milestone held back for later — it happens every time the extension changes during troubleshooting:
+1. Publish the current package to a BC sandbox tenant.
+2. Test it — manually, by the human, unless the optional agent-run API pass below is in play.
+3. For every error, warning, or reported problem, **first check `patterns/` (ALL ALONG → OCPF BC AL Patterns Library)** for a matching, already-documented pattern — a previously-solved bug class should be a fast recognition, not a fresh investigation. If nothing matches, ask the three questions (Standards §9.3, §10 troubleshooting mindset):
+   - **One-off or pattern?** Search all generated files for the same class of issue before fixing one instance.
+   - **Where did it come from?** Trace to the generation rule, the TDD template, or the source data.
+   - **What rule should have caught it?** Fix that rule or the pre-flight check.
+4. Fix the **root cause** (rule / template / filter), regenerate the affected files, and log the issue + resolution in the ChangeLog before moving on. Update the TDD whenever a rule changes. Pause for human approval of each root-cause diagnosis before applying it.
+5. **Compile and package again**, redeploy to the sandbox, retest. Repeat steps 1–5 until the extension compiles with 0 errors / 0 warnings and the human confirms sandbox testing is clean.
 
-Then: fix the **root cause** (rule / template / filter), regenerate the affected files, re-compile, and log the issue + resolution in the ChangeLog before moving on. Update the TDD whenever a rule changes. Pause for human approval of each root-cause diagnosis before applying it.
+**The API test checklist** — defined once, here, and used three times over the rest of the routine: optionally by the agent at the end of this step (below), as the source Step 11 writes `HumanUnitTestScript.md` from, and authoritatively by humans at Step 12 (Release to Users for Testing):
+- **Green-team (happy path):** `$metadata` returns the expected schema; read a collection; read a single record by `SystemId`; create a record on an editable endpoint; update a field; confirm a read-only endpoint rejects writes (Standards §12.1).
+- **Red-team (boundary):** write to a read-only endpoint; send a non-existent field; send an invalid key; delete a record with dependencies; call with missing permissions — confirm each fails *gracefully with a clean, actionable error* (Standards §12.1).
 
-**Outputs:** All batches compiling with **0 errors, 0 warnings**; ChangeLog current; TDD updated for every rule change.
+**Optional, once things are stable: agent-run API testing via a live MCP connection.** Offer the human an automated pass over the app's own API pages, using the checklist above, run directly by the agent against the published sandbox — but only if, and because, the human can supply a working connection (e.g., the AL MCP Server actually connected per ALL ALONG → AL MCP Server, or another authenticated MCP endpoint that reaches the sandbox's API). This is optional and conditional, never assumed to be available:
+- **If no working connection is available, say so plainly and suggest a manual alternative instead of leaving it undone** — testing the API by hand via **Postman**, or through a low-code caller like **Power Automate**, **Power Apps**, or **Copilot Studio**.
+- This is a cheap, early pass, not a substitute for the authoritative one: the same checklist runs again at Step 12, by a human, after Code Review and documentation have had their say — whether or not this optional agent-run pass ever happened.
 
-**Exit gate:** Full extension compiles clean; no known systemic issue outstanding; ChangeLog and TDD reconciled (Standards §9.4).
+**Outputs:** All batches compiling and packaging with **0 errors, 0 warnings**; at least one package published and manually tested on a sandbox; ChangeLog current; TDD updated for every rule change; an agent-run API test result, if a live MCP connection was available and the human opted in.
+
+**Exit gate:** Full extension compiles clean; the human confirms sandbox testing is clean; no known systemic issue outstanding; ChangeLog and TDD reconciled (Standards §9.4).
 
 ---
 
 # PHASE: PROVE
 
-Goal: prove the built code matches intent, is clean, is packaged and tested, and is fully documented.
+Goal: prove the built code matches intent, is clean, is fully documented, and has passed a human-run release test — packaging and sandbox testing are already underway by this point (Step 07) and continue throughout, not a separate milestone reserved for PROVE.
 
 ## 08 — Gap-Fit Test, Fidelity Validation
 
@@ -506,34 +530,13 @@ Spec stale) to the actual documents.
 
 Classify every gap as **Intentional** (document the reasoning), **Oversight** (fix now or schedule), or **Spec stale** (code is right, update the FRD/TDD).
 
-**Outputs:** `GapAnalysis.md` — every gap, its classification, its resolution. Gap-fill work items — built with the same discipline as main batches, using reserved growth IDs (Standards §11.6): pre-flighted per Step 05, then compiled and troubleshot per Step 07's pattern, as their own pass — the Step 07 compile that closed BUILD already ran and doesn't cover code that didn't exist yet (Operating Rule 4). Ad hoc gap-fill requested mid-project, outside a formal Step 08, follows the same pattern.
+**If a gap is classified Oversight and needs a code fix, apply the same Step 07 cycle before closing this step** — fix the root cause, compile and package again, redeploy to the sandbox, retest. A documentation-only correction (Spec stale, or Intentional-with-a-doc-update) does not require a new package; a code change does, every time, no matter how small — packaging is still the default rhythm here, not something reserved for a later step (Operating Rule 4).
 
-**Exit gate:** Every gap classified and resolved or scheduled; no unexplained divergence from FRD/TDD.
+**Outputs:** `GapAnalysis.md` — every gap, its classification, its resolution. Gap-fill work items — built with the same discipline as main batches, using reserved growth IDs (Standards §11.6): pre-flighted per Step 05, then compiled, packaged, and troubleshot per Step 07's pattern, as their own pass — the Step 07 compile-and-package that closed BUILD already ran and doesn't cover code that didn't exist yet (Operating Rule 4). Ad hoc gap-fill requested mid-project, outside a formal Step 08, follows the same pattern.
 
-## 09 — Package and Test the App
+**Exit gate:** Every gap classified and resolved or scheduled; every code-touching resolution recompiled, repackaged, and retested; no unexplained divergence from FRD/TDD.
 
-**Inputs:** Clean-compiling extension; permission sets (if Parameter 1.2 = `Yes`).
-
-**Actions:**
-- Build the `.app` package, named `<ExtensionName, spaces → underscores>_<version>.app` — e.g.
-  `IP_Tracking_1.0.0.0.app` — derived from `app.json` at build time, never hardcoded, written to
-  the fixed `outputAppPackage/` folder (see "Packaging & Versioning" under ALL ALONG for the full
-  policy, and for when to offer packaging and when to bump the version — both apply throughout the
-  project, not only here). **State the exact output path plainly when the build completes** — this
-  is not automatic ordinary progress narration, it's the one line the human needs in order to find
-  the file — and **flag whether this build needs Schema Sync Mode = Force Sync on upload** (see
-  Packaging & Versioning for the exact criteria and terminology).
-- Confirm `app.json` identity, runtime, and dependencies match Part 1.
-- Publish to a BC sandbox tenant.
-- Run green-team (happy path) tests: `$metadata` returns the expected schema; read a collection; read a single record by `SystemId`; create a record on an editable endpoint; update a field; confirm a read-only endpoint rejects writes (Standards §12.1).
-- Run red-team (boundary) tests: write to a read-only endpoint; send a non-existent field; send an invalid key; delete a record with dependencies; call with missing permissions — confirm each fails *gracefully with a clean, actionable error* (Standards §12.1).
-- Verify permission sets: read-only set grants read on all pages; read/write set includes it plus write on editable pages; document the underlying `D365` base permissions consumers also need (Standards §7.3).
-
-**Outputs:** `.app` package; test-run record (green + red team results); deployment verification notes.
-
-**Exit gate:** App publishes cleanly; all green-team tests pass; all red-team tests fail gracefully.
-
-## 10 — Code Review
+## 09 — Code Review
 
 **Role:** if §1.7 role assignment is configured, this review is done by the **reasoning role** —
 fresh eyes matter here specifically, since the agent that wrote the code is the one least likely
@@ -555,11 +558,11 @@ every fix and normalizes whatever drift the findings call out.
   other finding here: knowledge-backed findings and the agent's own findings both surface, fixes
   land through the normal ChangeLog/root-cause discipline, nothing is applied blind.
 
-**Outputs:** `CodeReview.md` — findings by dimension, severity, and resolution. Fixes applied at the rule level where a pattern repeats, with ChangeLog entries.
+**Outputs:** `CodeReview.md` — findings by dimension, severity, and resolution. Fixes applied at the rule level where a pattern repeats, with ChangeLog entries. Any fix that touches code follows the same Step 07 cycle — recompile, repackage, redeploy to the sandbox, retest — before this step closes (Operating Rule 4); a comment/formatting-only fix does not need a fresh package. If a finding repeats across batches and looks generalizable beyond this project — not a one-off, project-specific defect — flag it to the human as a candidate for a new entry in the OCPF BC AL Patterns Library (ALL ALONG), the same way Step 07 does; this pass, reading every batch side by side, is one of the best places in the whole routine to actually notice that shape of repetition.
 
-**Exit gate:** All critical findings resolved; dead-code scan 100% clean across every file (Standards §11.2); no obsolete references remain.
+**Exit gate:** All critical findings resolved; dead-code scan 100% clean across every file (Standards §11.2); no obsolete references remain; any code fix from this step has been recompiled, repackaged, and retested.
 
-## 11 — Update Design Documents
+## 10 — Update Design Documents
 
 **Inputs:** `TDD.md`, `FRD.md`, ChangeLog, `GapAnalysis.md`, `CodeReview.md`.
 
@@ -584,21 +587,47 @@ every fix and normalizes whatever drift the findings call out.
 
 **Exit gate:** As-built TDD is complete enough to regenerate the system from; FRD reflects reality; Dev Manager review.
 
-## 12 — Document the Code
+## 11 — Document the Code
 
-**Inputs:** `PostDevTDD.md`, the built AL, test-run record from Step 09.
+**Inputs:** `PostDevTDD.md`, the built AL, any agent-run API test result from Step 07 (if a live MCP connection was available there — optional, may not exist).
 
 **Actions:**
 - **Generate the reference documentation from the code, not from memory** (Standards §12.2). Parse every API page: extract IDs, source tables, editability, filters, and every field's identifier / source name / description / R/W status. Produce a structured reference — one section per object, one row per field — plus: a **quick-start** guide (get the API working fast — auth, one request, one response; not the full install procedure, see `Deployment.md` below for that), authentication and URL patterns (Standards Appendix A), `$filter` / `$select` examples, create/update/delete examples, explicit limitations, common integration patterns, troubleshooting table.
 - **Draw the schema as a Mermaid diagram**, generated from the actual objects, not from memory. Include every table this app owns *and* every standard/base table it touches — via `TableRelation`, `tableextension`, or a `pageextension`'s `RunPageLink` — so a reader sees the whole relationship graph, not just the app's own corner of it. An ER diagram (`erDiagram`) is the usual fit; note cardinality and which side is the standard object.
 - **Render the diagram to prove it parses — never ship one you have not seen render.** Markdown happily stores a syntactically invalid diagram: it looks fine in the source file and simply fails to draw wherever it is finally viewed, so the defect is invisible until a reader hits it. Extract the fenced block and run it through a renderer (e.g. `npx @mermaid-js/mermaid-cli -i diagram.mmd -o diagram.svg`, or whatever renderer is already available — this may download a package on first run, so Operating Rule 6b applies: confirm one is already usable, or ask, rather than installing anything unprompted); a parse error exits non-zero and names the line. On a real project a diagram shipped with `PK_FK` as a key constraint — not valid Mermaid, which accepts `PK`, `FK`, `UK`, or comma-separated `PK,FK` — and never rendered anywhere until it was actually tested.
-- **Write the human unit test script** — a step-by-step manual test walkthrough a person can execute: endpoint by endpoint, the happy-path and boundary cases from Step 09, expected result for each. A well-written test script is ~70% of a user guide (Standards §12.1).
+- **Write the human unit test script** — a step-by-step manual test walkthrough a person can execute: endpoint by endpoint, the happy-path (green-team) and boundary (red-team) cases per the checklist defined in Step 07, expected result for each, written against this app's actual endpoints. A well-written test script is ~70% of a user guide (Standards §12.1). This is the script Step 12 will actually run.
+- **Ask the human whether they also want Automated Test Scripts created**, alongside — not instead of — the Human Unit Test Script. This is a genuine question, not a default: automated scripts (e.g., a Postman/Newman collection, a Playwright suite, or similar) imply an ongoing maintenance commitment as the API evolves, which a one-time manual script doesn't carry. If yes, also ask: what tooling/framework to standardize on (recommend a Postman collection if the human has no preference — lowest friction for OData/API testing, no separate runtime to maintain); what should trigger a re-run (every build, or only before a release); and where the scripts should live (this repo, alongside the extension, vs. a separate test-automation repo). If created, write a companion `AutomatedTestScripts.md` — a **separate document from `HumanUnitTestScript.md`** — explaining what they cover, how to run them, and how to keep them current as the API changes.
 - Write the **user guide** as `UserGuide.md` — **Markdown, in the repo, always** (HTML with `@media print` rules only as an *additional* branded/print deliverable, never instead of the Markdown; Standards §12.5). This is a **separate document from `Documentation.md`** and must not be folded into it: `Documentation.md` is the integration/API reference written for a developer or BI consumer, whereas the user guide is written for the person clicking around in Business Central — what the feature is for, how to do each task in order, what each field means in business terms, and what to do when something is refused. If the only "user guide" produced is an API reference, this action has not been done.
 - Write one-page **deployment instructions** as `Deployment.md`, for an administrator: version requirements, install procedure, which permission sets map to which roles, verification steps, uninstall (Standards §12.3). Distinct from `Documentation.md`'s quick-start: this is the full admin install/upgrade/uninstall procedure, not a fast path to a first API call.
 
-**Outputs:** `Documentation.md` (consumer/API reference, includes the Mermaid schema diagram), `HumanUnitTestScript.md`, **`UserGuide.md`** (end-user, Markdown), `Deployment.md`. Four documents — check all four exist before claiming the step is complete.
+**Outputs:** `Documentation.md` (consumer/API reference, includes the Mermaid schema diagram), `HumanUnitTestScript.md`, **`UserGuide.md`** (end-user, Markdown), `Deployment.md`, and `AutomatedTestScripts.md` (only if the human opted in above). Four mandatory documents — check all four exist before claiming the step is complete; the fifth is conditional.
 
-**Exit gate:** Reference is generated from actual code and current; test script executable by a non-developer; Dev Manager review; app ready for user acceptance testing.
+**Exit gate:** Reference is generated from actual code and current; test script executable by a non-developer; Dev Manager review; the human has been asked about Automated Test Scripts (answer recorded either way); app ready to hand to Step 12 for release testing.
+
+## 12 — Release to Users for Testing
+
+> **New 2026-09-13 (AJ Ansari).** This step is the human-run counterpart to Step 07's optional
+> agent-run API pass, and replaces what old Step 09 tried to do too early — testing against a
+> script that hadn't been written yet. By the time this step runs, `HumanUnitTestScript.md`
+> exists (Step 11), Code Review has landed (Step 09), and the design documents reflect reality
+> (Step 10) — so this is a real gate on a reviewed, documented app, not a first look at raw code.
+
+**Role:** if §1.7 role assignment is configured, this is a **main-role** step end to end — confirming the publish, coordinating the human testers, recording results in `ReleaseTestResults.md`, and triaging findings via the Testing Feedback Log. Any diagnosis a finding needs still routes to the reasoning role first, same as everywhere else (Step 07, Testing Feedback Log).
+
+**Inputs:** The most recently built package (from Step 07/08/09's ongoing compile-and-package cycle, or a fresh repackage if Step 09's Code Review found something needing a code fix since the last one — Steps 10 and 11 are documentation-only and never trigger a repackage on their own); `HumanUnitTestScript.md`; `AutomatedTestScripts.md` (if created); `UserGuide.md`; `Deployment.md`.
+
+**Actions:**
+- Confirm the latest package is published to a BC sandbox tenant — republish if anything changed since the last publish.
+- Real users/testers — not the agent, not a simulated pass — run `HumanUnitTestScript.md` end to end: every green-team (happy path) case and every red-team (boundary) case, executed by hand this time (Step 07 may have already run the same checklist once, automatically, as an early check — this is the authoritative pass). Testers work from `UserGuide.md` for how each feature is supposed to behave; the sandbox install itself is a live dry run of `Deployment.md`'s procedure — confirm it matches what a real admin would follow.
+- Verify permission sets as part of the same pass: the read-only set grants read on all pages; the read/write set includes it plus write on the editable pages; the underlying `D365` base permissions consumers also need are confirmed (Standards §7.3).
+- If `AutomatedTestScripts.md` was created at Step 11, also run those and record results the same way.
+- Record every finding via the Testing Feedback Log (ALL ALONG) — verbatim, then triaged: implement now (its own ChangeLog Issue, fixed via the Step 07 cycle — fix, compile and package again, redeploy, retest), schedule (`Roadmap.md`), or reject.
+- **If a fix here changes any object, field, or behavior, treat the artifacts Steps 09–11 already produced as stale, not as already covered:** re-run the affected parts of Step 09 (Code Review on the changed files), Step 10 (as-built TDD/FRD), and Step 11 (regenerate `Documentation.md` and its ER diagram from the now-changed code — Step 11's own rule is "from the code, not from memory," and that's now-changed code). A trivial fix might touch none of these; say explicitly which ones a given fix actually requires re-running, rather than skipping the check by default.
+- Repeat until every green-team test passes and every red-team test fails gracefully.
+
+**Outputs:** `docs/ReleaseTestResults.md` — every test case, its result, and a link to any ChangeLog issue it produced.
+
+**Exit gate:** All green-team tests pass; all red-team tests fail gracefully; permission sets verified. **If everything passes, the package that was actually tested is the one deployed to the Production company** — bump its Build segment (e.g. `0.0.5.0` → `0.0.5.1`) or copy it to an immutable filename first (ALL ALONG → Packaging & Versioning) so the shipped artifact stays permanently identifiable and is never itself overwritten by a later cycle build; this is marking the release candidate, not building a new one — no code is recompiled and no new testing is required to do it. **Before that deploy, restate the Schema Sync Mode assessment for this exact package** (ALL ALONG → Packaging & Versioning) — **Add** if this release is additive-only, **Force Sync** with an explicit data-loss warning if anything was removed, shrunk, retyped, or re-keyed since the last production release.
 
 ---
 
@@ -608,7 +637,7 @@ Run these in parallel with the phased work — they are not a final step.
 
 ## Document
 
-- Keep every required project document current as work proceeds, not retroactively (Standards §2.1): `ProblemStatement`, `FRD`, `TDD`, `SanityCheck`, `PostDevTDD`, `ChangeLog`, `GapAnalysis` / `CodeReview`, `Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`, `TestingFeedback`, `Roadmap`, `ProjectMemory` — all four Step 12 outputs (`Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`) belong on this list, not just the first of them.
+- Keep every required project document current as work proceeds, not retroactively (Standards §2.1): `ProblemStatement`, `FRD`, `TDD`, `SanityCheck`, `PostDevTDD`, `ChangeLog`, `GapAnalysis` / `CodeReview`, `Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`, `AutomatedTestScripts` (if created), `ReleaseTestResults`, `TestingFeedback`, `Roadmap`, `ProjectMemory` — all four mandatory Step 11 outputs (`Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`) belong on this list, not just the first of them, as does `AutomatedTestScripts` if the human opted in at Step 11, and `ReleaseTestResults` (Step 12).
 - Maintain the **Object Register** as a standalone artifact — every object, its ID, module, source table, and R/W status — updated as objects are planned and built (Standards §1.2).
 
 ## Track Changes — the ChangeLog
@@ -634,11 +663,15 @@ Every deviation from FRD or TDD — human or agent — is logged **before the ne
 
 ## Testing Feedback Log
 
-Human testing and review surfaces real feedback throughout PROVE (and sometimes earlier, on a
-demo) — a list of things to change, in the tester's own words, not yet triaged into decisions.
+Human testing and review surfaces real feedback from Step 07 onward — sandbox testing is already
+mandatory there, in BUILD, not something that waits for PROVE — and continues throughout PROVE
+(and sometimes earlier still, on a demo). It's a list of things to change, in the tester's own
+words, not yet triaged into decisions.
 This is distinct from both of the above: the ChangeLog records *decisions and reasoning*; the
-Step 09 test-run record captures *automated* green-team/red-team pass/fail. Neither preserves
-what the human actually said before it becomes a summary of what the human said.
+Step 12 test-run record (`ReleaseTestResults.md`) captures the human-run green-team/red-team
+pass/fail (with an earlier, optional agent-run pass at Step 07 if a live MCP connection was
+available there). Neither preserves what the human actually said before it becomes a summary of
+what the human said.
 
 - Record every testing/feedback session in `TestingFeedback.md` — date, what was tested, and the
   tester's findings/requests **verbatim**, before they are triaged.
@@ -648,7 +681,9 @@ what the human actually said before it becomes a summary of what the human said.
   Issue(s) or Roadmap item(s) it produced, so the raw ask and the eventual decision both remain
   traceable independently.
 - **Role (§1.7):** diagnosing *why* a reported bug happens is a **reasoning-role** task, same as
-  Step 07. The **main role** applies the fix once the diagnosis is confirmed, and separately owns
+  Step 07 — including Step 07's own first move: **check `patterns/` (ALL ALONG → OCPF BC AL
+  Patterns Library) for an already-documented match before diagnosing from scratch.** The **main
+  role** applies the fix once the diagnosis is confirmed, and separately owns
   the triage act itself — recording the implement/schedule/reject decision in `TestingFeedback.md`
   and cross-referencing the ChangeLog/Roadmap entry it produced. Don't skip straight to a patch on
   a guess — this is exactly where a wrong first diagnosis is cheapest to catch, and a wrong one
@@ -681,9 +716,11 @@ agent that opens this repo.
 
 ## Packaging & Versioning
 
-Packaging (Step 09's "build the `.app`") and version bumps recur throughout BUILD and PROVE —
-every batch or testing-feedback round that lands clean is a candidate moment, not just the one
-narrative pass through Step 09.
+Packaging first happens as part of Step 07's mandatory compile-and-package, and recurs
+continuously from there through the rest of BUILD and PROVE — every fix that touches code gets a
+fresh package before it's redeployed to a sandbox for the next test round (Step 07, Step 08's
+gap-fix loop, Step 09's Code Review fixes). Version bumps follow the same recurring pattern, but
+stay separately gated — see below.
 
 **Package naming and location — fixed, not a judgment call.** Every package is named
 `<ExtensionName, spaces → underscores>_<version>.app` — read `name` and `version` from `app.json`
@@ -694,27 +731,37 @@ name, not `out/`, `output/`, or anything improvised. **Say so twice, not once:**
 folder name once, plainly, at intake (Step 01 — before any package exists), and state the exact
 path again, plainly, every time a build actually completes — e.g. "Package built:
 `outputAppPackage/IP_Tracking_1.0.0.0.app`." Don't bury either mention inside a longer status
-paragraph; it's the one thing the human needs in order to go find the file.
+paragraph; it's the one thing the human needs in order to go find the file. Confirm `app.json`
+identity, runtime, and dependencies still match Part 1 before every build, the same check every
+time — cheap, and it catches drift before it reaches a package.
 
-**Never delete a previous package. NEVER.** Every repackage writes a new, uniquely-named file
-next to the old ones — it does not replace, overwrite, or "clean up" anything already in the
-output folder, even one that looks superseded by a newer version. This applies to the build
-script itself and to the agent running it: no `rm`, no "let me tidy this up first," not even as
-a seemingly-harmless pre-build habit. On a real project this was violated exactly that way — a
-manual `rm -f out/*.app` run *before* the build, purely out of habit, deleted the previous
-version's package. It was recovered only because the output folder isn't git-tracked but the
-*source* is: the exact prior commit was checked out, rebuilt, and the file regenerated —
-functionally identical, not a true undelete. That recovery path will not always exist. Pruning
-old packages, if it ever happens, is a decision the human makes explicitly, never an automatic
-or "helpful" action by the agent.
+**Never delete — or overwrite — a package from a *different* version. NEVER.** A repackage at a
+new version writes a new, uniquely-named file next to the old ones — it does not replace,
+overwrite, or "clean up" anything already in the output folder, even one that looks superseded.
+This applies to the build script itself and to the agent running it: no `rm`, no "let me tidy
+this up first," not even as a seemingly-harmless pre-build habit. On a real project this was
+violated exactly that way — a manual `rm -f out/*.app` run *before* the build, purely out of
+habit, deleted the previous version's package. It was recovered only because the output folder
+isn't git-tracked but the *source* is: the exact prior commit was checked out, rebuilt, and the
+file regenerated — functionally identical, not a true undelete. That recovery path will not
+always exist. Pruning old packages, if it ever happens, is a decision the human makes explicitly,
+never an automatic or "helpful" action by the agent.
 
-**Offer to (re-)package — use judgment on *when*, not *whether* to ask.** When a meaningful,
-testable unit of change is done — a batch reaching lint-clean, the mandatory Step 07 compile
-succeeding, or a testing-feedback fix verified — ask whether to rebuild the package now. The
-right granularity is the same one that already governs a ChangeLog entry and its own commit — if
-the change was significant enough for those, it's significant enough to offer a fresh package
-for. Don't ask after every trivial or doc-only edit; don't silently skip asking after a real
-batch either.
+**Corrected 2026-09-13 (AJ Ansari) — this protection is per-version, not per-file, now that
+packaging happens on every fix.** Package filenames derive only from `<ExtensionName>_<version>`,
+so under the Step 07/08/09 cycle's "repackage every fix" default, consecutive builds *at the same
+version* legitimately write the same filename — that is expected overwriting within an
+in-progress version, not the destructive deletion the rule above exists to prevent. **The
+never-delete protection applies across versions; it does not require every interim cycle build at
+one version to be individually preserved.** What must be preserved is the specific package that
+actually passes Step 12 (Release to Users for Testing) — the one that ships to production. To
+keep that package permanently identifiable and never itself silently overwritten by a later
+same-version cycle build: once a build passes Step 12, bump the **Build** segment (e.g.
+`0.0.5.0` → `0.0.5.1`) before it's treated as the release candidate, or copy it to an immutable
+filename outside the normal cycle path. Either way, say explicitly which package is "the one that
+passed" once Step 12 closes — don't leave it to be inferred from a timestamp.
+
+**Package by default during the Step 07/08/09 compile-and-package cycle — stop asking whether to, once that cycle is underway.** From the moment Step 07 opens, every fix that touches code gets recompiled and repackaged as a matter of course, before redeploying to the sandbox for the next test round — this is the default rhythm of BUILD/PROVE, not an occasional offer. Outside that cycle — a doc-only edit, a repackage requested out of the blue, a meaningful unit of change that didn't itself require a code fix — use judgment the same way as before: if the change was significant enough for its own ChangeLog entry and commit, it's significant enough to offer a fresh package for; don't ask after every trivial or doc-only edit.
 
 **Version bumps require a proposal and approval — never a silent edit to `app.json`.** Propose
 a specific bump with reasoning, then wait for confirmation before changing anything:
@@ -727,12 +774,14 @@ a specific bump with reasoning, then wait for confirmation before changing anyth
 - **Revision** — a small correction or hotfix discovered while testing a specific package, with
   no new features.
 
-**Push back on a premature ask — don't just comply.** If asked to package while known errors or
-an unfinished batch stand, or asked for a version bump that doesn't match the size of what
-actually changed (a one-field tweak billed as Major; a breaking change billed as a Revision),
-say so plainly and recommend the right action instead of silently doing what was literally
-asked. If the human insists anyway, get an explicit override and proceed — but the mismatch must
-be named first, not absorbed silently.
+**Push back on a premature ask — don't just comply.** This is about requests *outside* the
+Step 07/08/09 cycle, where packaging with known open issues is the whole point (that's how you
+test them) — not about the cycle's own default behavior. If asked to package outside that cycle
+while known compile errors or an unfinished batch stand, or asked for a version bump that doesn't
+match the size of what actually changed (a one-field tweak billed as Major; a breaking change
+billed as a Revision), say so plainly and recommend the right action instead of silently doing
+what was literally asked. If the human insists anyway, get an explicit override and proceed — but
+the mismatch must be named first, not absorbed silently.
 
 **Flag Schema Sync Mode / Force Sync on every completed build, not just when asked.** Uploading
 a `.app` to a Business Central Online tenant through the **Extension Management** page (or the
@@ -779,6 +828,12 @@ similar hosting), even though they sit in the working directory like any other f
   agent's convenience — e.g., an AL MCP Server launcher wrapper — typically under a `scripts/`
   folder (ALL ALONG → AL MCP Server). This is the framework's own plumbing, not part of what the
   client is paying to receive.
+- The fetched OCPF BC AL Patterns library (ALL ALONG → OCPF BC AL Patterns Library) — lives
+  **inside** the project root, in `patterns/` (unlike BCQuality, nothing in it is `.al`, so there's
+  no compile-breaking reason to push it outside), but is still always excluded from this project's
+  git tracking, same reasoning as BCQuality: it's AJ Ansari's own portable, cross-project
+  methodology, refetchable at will from `https://github.com/ajansari/ocpfBCALPatterns`, not
+  something a client's repo has any reason to carry a copy of.
 
 **Gitignored by default, human can opt out at intake (Step 01 §1.8):** this runbook itself, its
 changelog, and its schematics, if generated. The recommended default keeps them out of the
@@ -836,8 +891,9 @@ adding a duplicate):
    --help` against the installed version rather than assuming a fixed flag set, since this
    surface can grow between AL extension releases.
 4. Verify the connection by listing available tools — a lightweight capability check, not a
-   project compile. Compiling the actual extension is not automatic anywhere in BUILD (Operating
-   Rule 4); do not use this verification step as a backdoor to it.
+   project compile. Compiling is not an automatic part of *batch generation* in Step 05/06
+   (Operating Rule 4) — the first real compile is Step 07's mandatory compile-and-package; do
+   not use this MCP verification step as a backdoor to it.
 5. Tools reaching a live BC cloud environment (publish, downloading non-global symbols) trigger
    an interactive sign-in the first time they're needed, cached for the session; log out when the
    task reaching the cloud is done.
@@ -924,10 +980,85 @@ one, since the repo's own conventions are the authority and can move):**
    `references` (knowledge-file path, optional commit SHA) for knowledge-backed findings, an empty
    `references: []` for the agent's own findings (capped at `medium` confidence), and a
    `suppressed` list of anything layer precedence overrode. Integrate this into the project the
-   same way any other Code Review finding is integrated (Step 10) — never applied blind.
+   same way any other Code Review finding is integrated (Step 09) — never applied blind.
 
 No network access is needed for any of the above once the snapshot exists; only the initial fetch
 and an explicit refresh touch the network.
+
+## OCPF BC AL Patterns Library
+
+**OCPF** = **OnlyCopilotFans** — the abbreviation used throughout this section and wherever else
+this runbook refers to it.
+
+The OnlyCopilotFans BC AL Patterns library (`ajansari/ocpfBCALPatterns` on GitHub, public —
+confirmed reachable 2026-09-13 via `git ls-remote` and its rendered README, not assumed) is
+AJ Ansari's own curated collection of reusable Business Central AL coding patterns — each one
+extracted from a real bug found and fixed on a past project, then generalized: symptom, verified
+root cause (against Microsoft Learn, not memory), the fix, a worked example, and caveats, all in
+one self-contained Markdown file per pattern. It is content, not a service — no MCP tools, no
+running endpoint, just files — and it is **AJ's own accumulated, cross-project material**, which
+is what distinguishes it from BCQuality: BCQuality is a third-party platform-wide knowledge base
+this framework consumes; this library is the human's own portable lessons, meant to travel with
+him from engagement to engagement and grow every time a new recurring bug class gets documented.
+
+**Fetch strategy — one-time per project, refreshed only on request (same cadence as BCQuality):**
+- Fetch from `https://github.com/ajansari/ocpfBCALPatterns` at Step 05, alongside the AL MCP
+  Server and BCQuality bootstrap — one-time project setup, not an afterthought once BUILD starts.
+- **Unlike BCQuality, this lives INSIDE the project root**, in a folder named `patterns/`. Every
+  file in the library is Markdown with embedded AL code, not a real `.al` object — so there is no
+  `alc` compile-breaking risk the way there was with BCQuality's illustrative snippets, and
+  nothing forces this one outside the project tree.
+- **If the repo isn't reachable** (not yet pushed, made private, network unavailable), say so
+  plainly and continue — an absent or unreachable library is not a blocker to the rest of Step 05,
+  the same way a missing AL MCP Server connection isn't (ALL ALONG → AL MCP Server).
+- Get the repo's `README.md` and every pattern file it lists, via a shallow clone
+  (`git clone --depth 1`) with `.git` stripped, same as BCQuality — a content snapshot, not a live
+  checkout. Write a small `SNAPSHOT.json` inside `patterns/` recording the source repo, ref,
+  commit SHA, and fetch timestamp, so a later refresh has something to diff against and report.
+- **Merge behavior — this is not a plain overwrite, and the README case is a specific,
+  human-specified exception:**
+  - If `patterns/` doesn't exist yet, create it and copy the fetched content in directly.
+  - If `patterns/` already exists and already has its own `README.md` (e.g., a human-created
+    pattern file was already dropped in before the shared library was ever fetched), **do not
+    overwrite that README.md — append the fetched repo's `README.md` content to the end of the
+    existing one instead**, under a fixed, recognizable delimiter:
+    ```
+    ---
+    ## Upstream README — ajansari/ocpfBCALPatterns @ <commit SHA>
+    ```
+    followed by the fetched README's full content. That delimiter is what makes a **refresh**
+    idempotent: find and replace the block from that heading to the end of the file, rather than
+    appending a second copy underneath the first — never append the same upstream block twice. If
+    `patterns/` exists but has no `README.md` yet, just write the fetched one as
+    `patterns/README.md` directly, no delimiter needed.
+  - Pattern files themselves: add any that aren't already present under `patterns/`. If a
+    same-named pattern file already exists locally with different content, **do not silently
+    overwrite it** — this specific case is an agent-filled gap, not something AJ Ansari specified
+    (unlike the README rule above, which is his) — so ask him directly which he wants (rename,
+    replace, or keep the local one), per **Operating Rule 6a**, as a selectable options box, not a
+    prose question. Revise this particular sub-rule freely if a better convention emerges; the
+    README rule is the one to treat as fixed.
+- **Always gitignored — same *policy* as BCQuality and `scripts/`, though the *mechanism* differs
+  from BCQuality's** (ALL ALONG → Repository Hygiene): BCQuality lives outside the project root
+  entirely, so it isn't even a candidate for git tracking; `patterns/` lives inside the root, so it
+  genuinely needs its own `.gitignore` entry to get the same result. Either way, not a per-project
+  choice — this is the human's own portable methodology, not part of what a client is paying to
+  receive, and it's refetchable at will with no reproducibility requirement.
+- **Tell the human you're doing this** — it's not a silent background fetch, same principle as
+  BCQuality.
+- Refresh **only** when the human explicitly asks (e.g. "refresh patterns," "get the latest
+  patterns"). Re-run the fetch, apply the same merge behavior above (never blind-overwrite), and
+  report plainly what changed — new pattern files added, or "already up to date."
+
+**Using the library:** before diagnosing a bug from scratch at Step 07 (Compile and Package,
+Troubleshoot, Iterate) or in the Testing Feedback Log's reasoning-role diagnosis (ALL ALONG — see
+that section's own role bullet, which carries the same check), check whether `patterns/` already
+documents this class of problem — that is the entire point of the library existing: turning a
+previously-solved bug into a fast recognition instead of a fresh investigation. If a fix produced
+during this project looks like it will recur on future projects (not a one-off, project-specific
+defect), that's a candidate for a new pattern file — flag it to the human rather than deciding
+unilaterally to add one, since contributing back to a shared, cross-project library is the
+human's call, not the agent's.
 
 ---
 
@@ -941,10 +1072,10 @@ and an explicit refresh touch the network.
 | 4 — FRD | 02 |
 | 5 — TDD | 03 |
 | 6 — SanityCheck | 04 |
-| 7 — Implementation | 05 + 06 + 07 |
-| 8 — Code Review | 08 + 10 |
-| 9 — Documentation | 11 + 12 |
-| 10 — Deployment | 09 (sandbox) → post-routine production deploy per `Deployment.md` |
+| 7 — Implementation | 05 + 06 + 07 (07 also carries the first compile-and-package cycle and its optional API test pass — see Operating Rule 4) |
+| 8 — Code Review | 08 + 09 |
+| 9 — Documentation | 10 + 11 |
+| 10 — Deployment | 12 (sandbox, human-run release test) → production deploy of that same package, per `Deployment.md` |
 
 ---
 
