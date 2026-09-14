@@ -1043,7 +1043,4 @@ but that the fix pass hadn't introduced anything new. It found two more real iss
 
 ## v1.0.0.0 — baseline
 
-The version the framework was at when the pilot project (Bootcamp Registration Tracking) began.
-Assigned this number retroactively — the framework wasn't itself versioned before v2.0.0.0 — as
-the starting point every change above is measured against. No changelog entries exist prior to
-this point.
+Prior to this, there were two separate private repos of earlier versions and directions of this agentic development framework. These were merged and rebooted as this project.
