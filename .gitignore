@@ -25,6 +25,8 @@ TestResults.xml
 slidedecks/standaloneHTML/
 #Fonts folder
 slidedecks/fonts/
+#Multilanguage design working notes — local only, never pushed to the remote
+translationDesign/
 
 ### macOS ###
 #Finder per-folder view-state file — local/cosmetic only, never useful to commit

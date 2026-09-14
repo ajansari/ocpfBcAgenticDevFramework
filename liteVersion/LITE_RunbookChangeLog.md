@@ -15,6 +15,43 @@ change is recorded, matching the convention `RunbookChangelog.md` uses for the f
 
 ---
 
+## v1.3.0.0 — September 14, 2026
+
+**Deprecated multilanguage (ML) syntax banned in generation and flagged in review; System App docs
+and AL Guidelines added as reference sources; third-party resources credited under their
+licenses.**
+
+Derived from full framework v2.6.0.0; applies Standards Guide v1.1.0.0's new §1.7 and Part 7 row.
+See `RunbookChangelog.md` v2.6.0.0 for the full reasoning.
+
+### Added — Reference Sources
+
+- **Operating Rule 2** fallback now names the BC System Application docs on Microsoft Learn
+  alongside the Base App docs.
+- **New ALL ALONG section — Reference Sources:** Base App docs, System App docs, *Working with
+  translation files*, and AL Guidelines. Consulted online, not fetched. Precedence: symbol files
+  beat Microsoft Learn, the Standards Guide beats AL Guidelines. AL Guidelines' legacy C/AL pages
+  recommending `CaptionML` / `OptionCaptionML` are excluded by name.
+- **Step 2** consults AL Guidelines for design patterns the Standards Guide doesn't cover;
+  **Step 6** adds an AL Guidelines best-practice pass.
+- **Snapshots keep `LICENSE`:** the BCQuality and Patterns Library fetches strip `.git` but keep
+  the upstream `LICENSE` file, as MIT requires. Every resource is credited in the framework's new
+  `THIRD_PARTY_NOTICES.md`.
+- `LITE_Outline_OCPFBCAgenticDevFW.md` and the ALL ALONG diagram in `LITE_RunbookSchematics.md`
+  updated; all 7 Lite diagrams re-rendered clean.
+
+### Changed — ML anti-pattern
+
+- **Step 3** — the post-generation pre-flight checklist now fails any `CaptionML`, `ToolTipML`,
+  `OptionCaptionML`, other ML property, or `TextConst`.
+- **Step 4** — generation instruction names single-language label syntax explicitly.
+- **Step 6** — code review searches every AL file, including human-written or pasted code, for the
+  deprecated constructs; every hit is a finding. Called out explicitly because AL0424 only fires
+  when `TranslationFile` is enabled, so a clean compile doesn't prove the code is free of it.
+- Standards Guide version references updated to v1.1.0.0.
+
+---
+
 ## v1.2.0.0 — September 13, 2026
 
 **Lite gets its own `ProjectParameters.md` — closing the same storage gap the full framework had,

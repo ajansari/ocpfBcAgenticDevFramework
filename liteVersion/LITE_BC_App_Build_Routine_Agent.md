@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 1.2.0.0 (Lite, derived from the full framework v2.5.0.0)
-**Last Updated:** September 13, 2026
+**Version:** 1.3.0.0 (Lite, derived from the full framework v2.6.0.0)
+**Last Updated:** September 14, 2026
 
 > Version history for this edition lives in `LITE_RunbookChangeLog.md`, tracked independently of
 > the full framework's own `RunbookChangelog.md` (though a change to one often has to be reflected
@@ -16,7 +16,7 @@
 > doesn't need.
 
 > **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development
-> Standards Guide** (v1.0.0.0), shared unchanged with the full framework. Lite is *not* a reduced
+> Standards Guide** (v1.1.0.0), shared unchanged with the full framework. Lite is *not* a reduced
 > set of AL rules: the same AL rules apply to a 5-file extension as to a 50-file one. What Lite
 > reduces is *process*. So this runbook states each rule in short form where you need it and cites
 > the guide as **Standards §** for the full version — the abbreviation tables, the complete
@@ -77,8 +77,11 @@ repository into `standardsGuide/` and gitignores it there.
    knowledge of BC table numbers is not reliable. **Fallback** when the downloaded symbols don't
    answer the question (a module isn't in `.alpackages`, or you need to browse rather than already
    knowing what to grep for): the BC BaseApp is documented in full at
-   <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application>.
-   Use it to corroborate or discover; the downloaded symbol file for the target version is still
+   <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application>,
+   and the System Application (Language, Translation, Email, Telemetry, and its other foundation
+   modules) at
+   <https://learn.microsoft.com/en-us/dynamics365/business-central/application/system-application/module/system-application>.
+   Use them to corroborate or discover; the downloaded symbol file for the target version is still
    authoritative when the two disagree. The step-by-step verification procedure is Standards
    Appendix B.
 3. **Treat the whole extension as one batch — two only if there's a natural split** (e.g., "setup
@@ -287,6 +290,9 @@ be able to produce every object correctly from this document alone. Two halves, 
   (**Standards §2.3**).
 - `using` directives — exact namespace per object, copied from the symbol file (**Standards §1.1**,
   **§3.4**).
+- Design patterns the Standards Guide doesn't cover (error handling, events, no. series, and
+  similar): consult AL Guidelines (ALL ALONG → Reference Sources) and cite the guideline used,
+  rather than inventing a pattern.
 - Permission sets, if required (see Step 1): a read-only set and a read/write set (which includes
   the read-only set), with every table's `tabledata` grant enumerated per set — not just "sets
   exist." `PTE0004` fires at **publish**, not compile, and nothing automated catches a missing
@@ -340,8 +346,11 @@ fix in a loop until clean.
   - **Pre-generation** (on the planned name/fields): identifier length ≤ 30, reserved-keyword
     scan, localization field-range filter, `ObsoleteState` filter.
   - **Post-generation** (on the actual file): required-property presence (**Standards §1.4** —
-    `Caption`, `ToolTip`, `ApplicationArea = All` on every field, no exceptions),
-    `Rec.`-qualification (`NoImplicitWith`, **§1.2**), dead-code check (no empty triggers, no
+    `Caption`, `ToolTip`, `ApplicationArea = All` on every field, no exceptions), **no
+    multilanguage (ML) properties and no `TextConst`** — `CaptionML`, `ToolTipML`,
+    `OptionCaptionML`, or any other ML variant fails pre-flight; single-language label syntax only
+    (**§1.7** — AL0424 fires only when `TranslationFile` is enabled, so the compiler won't reliably
+    catch it), `Rec.`-qualification (`NoImplicitWith`, **§1.2**), dead-code check (no empty triggers, no
     `// TODO`, no commented-out fields, **§1.5**), 4-space indentation with no tabs (**§1.6**),
     permission-set `tabledata` coverage for any table the object introduces (**§5.3**), and
     **symbol verification** for every standard/base reference (**Appendix B**).
@@ -366,7 +375,8 @@ fix in a loop until clean.
    code, no empty triggers, no commented-out fields, no `// TODO` (**Standards §1.1–§1.5**).
    Write `Caption` and `ToolTip` as self-describing schema for API consumers, not UI filler — they
    flow into OData `$metadata` and are what a developer or AI agent reads when discovering the
-   endpoint (**Standards §2.5–§2.6**).
+   endpoint (**Standards §2.5–§2.6**). Single-language label syntax only — never `CaptionML`,
+   `ToolTipML`, any other ML property, or `TextConst` (**Standards §1.7**).
 5. Run the post-generation pre-flight pass immediately on this file. **Do not invoke the AL
    compiler** (Operating Rule 4).
 6. Don't move to the next object until this one's pre-flight, including symbol verification, is
@@ -452,7 +462,13 @@ human-run release test.
   Anti-Patterns table — Standards Part 7 — against the codebase.** It's one table and it reads in
   a couple of minutes; it's the single highest-value thing the Standards Guide gives a Lite
   project, because most of what it catches is invisible until publish or until a consumer hits
-  it. Then invoke the BCQuality snapshot's `skills/entry.md` dispatch flow (fetched at Step 3) as
+  it. **Search every AL file — including anything a human wrote or pasted in — for deprecated
+  multilanguage syntax** (`CaptionML`, `ToolTipML`, `OptionCaptionML`, any other `…ML` property,
+  `TextConst`); every hit is a finding, refactored per **Standards §1.7**. A clean compile proves
+  nothing here: AL0424 only fires when `app.json` enables `TranslationFile`. Read the code against
+  AL Guidelines' *Best Practices* and *Vibe Coding Rules* for anything the Standards Guide doesn't
+  already cover (the Standards Guide wins on any conflict — surface it rather than picking a side
+  silently). Then invoke the BCQuality snapshot's `skills/entry.md` dispatch flow (fetched at Step 3) as
   an additional, independent pass, and fold its findings in the same way as your own — never
   applied blind. If the fetch didn't happen or the snapshot is missing, say so rather than
   silently skipping this pass.
@@ -596,7 +612,7 @@ schema-breaking change go out without this warning.
 
 ## OCPF AL Development Standards Guide
 
-The companion rules document — `ocpfALDevStandardsGuide.md`, v1.0.0.0 — shared unchanged with the
+The companion rules document — `ocpfALDevStandardsGuide.md`, v1.1.0.0 — shared unchanged with the
 full framework. **Lite reduces process, not AL rules**, so this is the one fetched resource that
 isn't optional: this runbook cites it as **Standards §** from Step 1 onward.
 
@@ -646,6 +662,27 @@ provisions before installing anything, Rule 6b), confirm `app.json`/`launch.json
 register it with the harness's MCP host, and verify by listing tools (not a project compile).
 Prefer its build/publish/symbol tools over an ad hoc terminal invocation once registered.
 
+## Reference Sources — Microsoft Learn and AL Guidelines
+
+Consulted online, never fetched into the project, so there's nothing to bootstrap, gitignore, or
+refresh. If there's no web access, say so rather than answering from memory of what a reference
+says.
+
+| Reference | What it's for | Used at |
+|---|---|---|
+| **BC Base Application docs** — <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application> | Standard Base App tables, fields, datatypes/sizes | Operating Rule 2 fallback |
+| **BC System Application docs** — <https://learn.microsoft.com/en-us/dynamics365/business-central/application/system-application/module/system-application> | System Application modules — check before building what the platform already provides | Operating Rule 2 fallback; Step 2 |
+| **Working with translation files** — <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-work-with-translation-files> | XLIFF translation in AL; why ML properties are banned | Standards §1.7 |
+| **AL Guidelines** — <https://alguidelines.dev> (<https://github.com/microsoft/alguidelines>, MIT) | AL best practices, design patterns, agent-oriented *Vibe Coding Rules* | Step 2 (patterns); Step 6 (review) |
+
+**Precedence:** the downloaded symbol file beats Microsoft Learn on anything symbol-verifiable; the
+Standards Guide beats AL Guidelines on any AL rule. **Known conflict, excluded outright:** AL
+Guidelines' legacy *NAV Patterns → C/AL Coding Guidelines* pages recommending `CaptionML` and
+`OptionCaptionML` predate AL and XLIFF — never follow them (Standards §1.7).
+
+Every third-party resource the framework references, fetches, or recommends is credited, with its
+license, in `THIRD_PARTY_NOTICES.md` at the root of the framework repository.
+
 ## BCQuality Knowledge Snapshot
 
 BCQuality (`microsoft/BCQuality` on GitHub) is a curated knowledge base and skill library for BC
@@ -657,7 +694,8 @@ augments review judgment; it doesn't replace it.
   `../<ProjectName>.bcquality/` — never anywhere under `app.json`'s tree: `alc` recursively
   compiles every `.al` file it finds, and BCQuality's own knowledge base ships illustrative
   `.good.al`/`.bad.al` fragments that aren't real compilable objects. A shallow clone
-  (`git clone --depth 1`), `.git` stripped, mirroring the repo's own layout. Write a small
+  (`git clone --depth 1`), `.git` stripped but its `LICENSE` file kept (BCQuality is MIT-licensed,
+  and MIT requires the notice to stay with every copy), mirroring the repo's own layout. Write a small
   `SNAPSHOT.json` alongside it recording the commit SHA and fetch timestamp. Tell the human you're
   doing this — it's not a silent background check.
 - Refresh **only** when explicitly asked ("refresh BCQuality"). Overwrite the existing snapshot
@@ -684,7 +722,7 @@ material, not a third-party knowledge base.
   the repo isn't reachable, say so plainly and continue — it's not a blocker.
 - Lives **inside** the project root, in `patterns/` — every file is Markdown with embedded AL, not
   a real `.al` object, so there's no compile-breaking risk the way there was with BCQuality.
-- Shallow clone (`git clone --depth 1`), `.git` stripped. Write `SNAPSHOT.json` inside `patterns/`
+- Shallow clone (`git clone --depth 1`), `.git` stripped, `LICENSE` kept. Write `SNAPSHOT.json` inside `patterns/`
   recording source, ref, commit SHA, fetch timestamp.
 - **Merge behavior:** if `patterns/` doesn't exist, create it and copy the content in directly. If
   `patterns/README.md` already exists locally, don't overwrite it — append the fetched README
@@ -722,7 +760,7 @@ one.
 | Step 7 — Release for Testing | Step 12 |
 
 **Shared with the full framework, not reduced:** the OCPF AL Development Standards Guide. Both
-editions fetch the same v1.0.0.0 file and apply the same AL rules — Lite differs only in process.
+editions fetch the same v1.1.0.0 file and apply the same AL rules — Lite differs only in process.
 
 **Document count:** 4 tracked files (`DesignDoc.md`, `ChangeLog.md`, `Docs.md`, `TestScript.md`)
 versus the full framework's 19 (`ProblemStatement`, `ProjectParameters`, `FRD`, `TDD`,

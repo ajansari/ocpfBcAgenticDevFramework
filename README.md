@@ -8,7 +8,7 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 *by AJ Ansari*
 
-*Last Updated: Sunday, September 13, 2026*
+*Last Updated: Monday, September 14, 2026*
 
 ## Table of Contents
 
@@ -27,7 +27,7 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 This Agentic Development Framework was created to help Business Central Functional Consultants use AI to build AL extensions and apps the **right** way — though professional AL developers will find it just as useful.
 
-The framework incorporates the AL MCP Server, BC Base App documentation from Microsoft Learn, and BCQuality, grounding the agent's guidance in official references and quality tooling rather than AI guesswork alone. Alongside the runbook sits my **OCPF AL Development Standards Guide** — the detailed AL rules the routine applies at each step — which the agent fetches into your project automatically.
+The framework incorporates the AL MCP Server, BC Base App and System App documentation from Microsoft Learn, Microsoft's AL Guidelines, and BCQuality, grounding the agent's guidance in official references and quality tooling rather than AI guesswork alone. Alongside the runbook sits my **OCPF AL Development Standards Guide** — the detailed AL rules the routine applies at each step — which the agent fetches into your project automatically.
 
 It comes in two editions: the **full framework** (14 steps) for substantial projects, and **[Lite](#lite-edition)** (7 steps) for smaller ones that need to move fast. Both apply the same AL standards.
 
@@ -61,6 +61,7 @@ At the heart of this project is a simple vision: that this framework should be *
 | `BC_App_Build_Routine_Agent.md` | The agent instructions file to drop into any new AL project in Visual Studio Code. Review and adapt it as needed, then kick off the process with the prompt below. |
 | `standardsGuide/ocpfALDevStandardsGuide.md` | The companion **OCPF AL Development Standards Guide** — the detailed AL rules the runbook cites as **Standards §** (coding standards, API page design, field inclusion, naming, ID allocation, gap analysis, anti-patterns). You don't need to copy this one by hand: the runbook fetches it from this repository into every project at PRE-01, and gitignores it there. Shared by both editions. |
 | `liteVersion/` | The **Lite Edition** — a 7-step version of the framework for small, fast-moving projects. See [Lite Edition](#lite-edition) below. |
+| `THIRD_PARTY_NOTICES.md` | Credits and licenses for every third-party resource the framework references, fetches, or recommends — BCQuality, AL Guidelines, Microsoft Learn, and others. |
 
 </details>
 

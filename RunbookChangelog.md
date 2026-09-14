@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the two documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v2.5.0.0**, the guide remains at **v1.0.0.0**, untouched, and Lite is at **v1.2.0.0** — but
+**v2.6.0.0**, the guide is at **v1.1.0.0** and Lite is at **v1.3.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 
 Entries are grouped by version, newest first, and describe the **cumulative** result of a
@@ -17,6 +17,112 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v2.6.0.0 — September 14, 2026
+
+**Deprecated multilanguage (ML) syntax is now a named anti-pattern; two new reference sources join
+the framework (Microsoft Learn's BC System App docs and Microsoft's AL Guidelines); and every
+third-party resource is now credited under its license.** Ships with Standards Guide **v1.1.0.0**
+and Lite **v1.3.0.0**.
+
+### Why — the ML anti-pattern
+
+AJ Ansari, after feedback from several European MVPs on the launched framework: multilanguage
+support is a must-have, not a nice-to-have, and `CaptionML` (marked for deprecation, AL0424)
+should never be written by the agent or a subagent, and should be flagged when a human writes it.
+The fuller multilanguage architecture (target languages, XLIFF generation, translated documents)
+is being planned separately; this version closes the one rule that shouldn't wait for it.
+
+Two facts, verified against Microsoft Learn rather than assumed, shaped how the rule is enforced:
+
+- **ML properties and `TextConst` are not included in the generated `.xlf` file** (*Working with
+  translation files*). The problem is not just "deprecated" — text written that way can't be
+  translated by any XLIFF workflow, which AppSource requires.
+- **AL0424 fires only when `app.json`'s `features` includes `TranslationFile`.** Without that
+  flag, `CaptionML` compiles with no warning at all, so Operating Rule 5's zero-warnings gate can't
+  be relied on to catch it. That's why it is enforced in pre-flight and in Code Review explicitly,
+  not left to the compiler.
+
+### Added — Standards Guide v1.1.0.0
+
+- **New §1.7 — Translatable Text: Label Syntax Only, Never Multilanguage (ML) Properties.** Bans
+  all eight ML properties (`CaptionML`, `ToolTipML`, `OptionCaptionML`, `InstructionalTextML`,
+  `PromotedActionCategoriesML`, `RequestFilterHeadingML`, `AboutTitleML`, `AboutTextML`) and the
+  `TextConst` data type — scoped wider than `CaptionML` alone, since all nine share the same
+  deprecation and the same absence from the `.xlf` file. Includes a correct/wrong example, a
+  replacement table, `Comment` / `Locked` / `MaxLength` guidance, and what to do when it's found in
+  existing code (refactor to the single-language property; move other-language text into `.xlf`,
+  don't discard it).
+- **§1.4** — the `Caption` and `ToolTip` rows now say "never the ML variant (§1.7)."
+- **Part 7** — new anti-pattern row covering the whole ML family and `TextConst`, explicitly
+  "whoever wrote it."
+
+### Changed — full runbook
+
+- **Step 05** — the post-generation pre-flight checklist now fails any ML property or `TextConst`.
+- **Step 06 Action 4** — generation instruction names single-language label syntax explicitly.
+- **Step 09** — new Code Review bullet: search every AL file, **including human-written or pasted
+  code**, for the nine deprecated constructs; every hit is a finding. Kept separate from the Part 7
+  pass because a clean compile proves nothing here.
+- Standards Guide version references updated to v1.1.0.0.
+
+### Added — Reference Sources: BC System App docs and AL Guidelines (both editions)
+
+AJ Ansari asked for two references to sit alongside the AL MCP Server, BCQuality, and the Patterns
+Library, in both the full framework and Lite:
+
+- **Microsoft Learn — BC System Application docs**
+  (<https://learn.microsoft.com/en-us/dynamics365/business-central/application/system-application/module/system-application>).
+  Added next to the existing Base App docs in Operating Rule 2's fallback and Standards Appendix B.
+- **AL Guidelines** (<https://github.com/microsoft/alguidelines>, published at
+  <https://alguidelines.dev>). Consulted at Step 03 for design patterns the Standards Guide doesn't
+  cover, and at Step 09 as a best-practice pass (Lite: Steps 2 and 6).
+- **New ALL ALONG section — Reference Sources.** Lists both, plus the Base App docs and Microsoft
+  Learn's *Working with translation files*, with a precedence rule: symbol files beat Microsoft
+  Learn, the Standards Guide beats AL Guidelines, and a conflict is surfaced to the human rather
+  than silently reconciled. All are consulted online, not fetched, so there's nothing to
+  bootstrap, gitignore, or refresh.
+- **One known conflict, excluded by name.** AL Guidelines' legacy *C/AL Coding Guidelines* include
+  *"CaptionML on System Pages"* and *"Using OptionCaptionML"*, both of which recommend exactly what
+  the new §1.7 bans. An agent consulting AL Guidelines could otherwise pick them up. Both the new
+  section and Standards §1.7 say they're superseded. AL Guidelines' current *Vibe Coding Rules*
+  already agree with §1.7.
+- **Outlines and schematics:** both ALL ALONG lists gain the entry; both ALL ALONG diagrams gain a
+  Reference Sources node. All 15 diagrams (8 full, 7 Lite) re-rendered clean with mermaid-cli.
+
+### Added — `THIRD_PARTY_NOTICES.md`, and license-safe snapshots
+
+AJ Ansari asked that everything the framework uses from other repositories be credited as its
+open-source license requires. Every referenced repository's license was checked against its own
+`LICENSE` file: BCQuality, AL Guidelines, the Patterns Library, mermaid-cli, and AZ AL Dev Tools
+are MIT; Microsoft Learn documentation is CC BY 4.0.
+
+- **New `THIRD_PARTY_NOTICES.md`** at the repo root: every resource the framework fetches,
+  references, invokes, or recommends, with its license, copyright holder, how it's used, and how
+  the obligation is met. Linked from the README's Contents table. It records that this repository
+  bundles no third-party code.
+- **Snapshots keep their `LICENSE` file.** The BCQuality and Patterns Library fetch instructions
+  said to strip `.git`; both editions now also say explicitly to keep `LICENSE`, since MIT requires
+  the copyright and permission notice to travel with every copy — and these snapshots are copies.
+- **CC BY 4.0 attribution in Standards §1.7.** The quoted AL0424 message and the adapted list of
+  ML properties now carry a source link, the license, and a note that the list was reorganized.
+
+### Changed — Lite v1.3.0.0
+
+- The ML anti-pattern's three touchpoints, in Lite's equivalents: Step 3's post-generation
+  pre-flight, Step 4's generation instruction, and Step 6's code review.
+- Operating Rule 2 fallback gains the System App docs; Step 2 consults AL Guidelines for patterns;
+  Step 6 adds the AL Guidelines best-practice pass.
+- New ALL ALONG → Reference Sources section, and `LICENSE` retention for the BCQuality and
+  Patterns snapshots.
+- Standards Guide version references updated to v1.1.0.0.
+
+### Changed — README
+
+Background lists the System App docs and AL Guidelines among the framework's grounding sources;
+Contents gains `THIRD_PARTY_NOTICES.md`; Last Updated moved to September 14, 2026.
 
 ---
 

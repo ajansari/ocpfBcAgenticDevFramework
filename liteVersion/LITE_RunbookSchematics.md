@@ -289,6 +289,7 @@ flowchart LR
         Std["OCPF AL Dev Standards Guide<br/>fetched at Step 1, gitignored —<br/>the one fetch that isn't optional"]
         Hygiene["Repository Hygiene<br/>standardsGuide/, BCQuality,<br/>patterns/ always gitignored"]
         MCP["AL MCP Server (optional)<br/>bootstrap once, prefer its<br/>tools over ad hoc terminal use"]
+        Ref["Reference Sources<br/>MS Learn Base App + System App,<br/>translation files, AL Guidelines —<br/>consulted online, not fetched"]
         BCQ["BCQuality Knowledge Snapshot<br/>fetch once at Step 3, refresh<br/>only on explicit request"]
         Pat["OCPF BC AL Patterns Library<br/>fetch once into patterns/,<br/>check before diagnosing from scratch"]
         Perm["Permission Sets<br/>Yes the moment 1 table exists;<br/>re-verify at Steps 3, 4, and 6"]
@@ -302,13 +303,14 @@ flowchart LR
     classDef phase fill:#d4e6f7,stroke:#4a7ab5,stroke-width:1px;
     classDef discipline fill:#fdf0d5,stroke:#c99a3a,stroke-width:1px;
     class DEFINE,DESIGN,BUILD,PROVE phase;
-    class Change,Pack,Std,Hygiene,MCP,BCQ,Pat,Perm discipline;
+    class Change,Pack,Std,Hygiene,MCP,Ref,BCQ,Pat,Perm discipline;
 ```
 
 ---
 
-*Generated from `LITE_BC_App_Build_Routine_Agent.md` v1.2.0.0 (September 13, 2026 — first release
-of this schematics file, alongside `ProjectParameters.md` as Step 1's own persisted artifact; see
+*Generated from `LITE_BC_App_Build_Routine_Agent.md` v1.3.0.0 (September 14, 2026 — the ALL ALONG
+diagram gains a Reference Sources node; all 7 diagrams re-rendered clean. Previously, v1.2.0.0:
+first release of this schematics file, alongside `ProjectParameters.md` as Step 1's own persisted artifact; see
 `LITE_RunbookChangeLog.md`). If the Lite runbook changes in a way that affects the phase/step
 structure, regenerate the affected diagram(s) here and re-render before committing — don't
 hand-edit a diagram without checking it still parses.*

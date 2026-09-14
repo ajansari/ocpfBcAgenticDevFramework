@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 2.5.0.0
-**Last Updated:** September 13, 2026
+**Version:** 2.6.0.0
+**Last Updated:** September 14, 2026
 
 > Version history for this framework lives in `RunbookChangelog.md`, tracked independently of any
 > one project built with it — check there for what changed between the version you have and the
@@ -13,7 +13,7 @@
 >
 > **How the agent uses it:** Work the phases in order (DEFINE → DESIGN → BUILD → PROVE). Do not start a step until its predecessor's exit gate is met. Every step lists its **Inputs**, **Actions**, **Outputs**, and **Exit gate**. The *Project Parameters* block in Step 01 is the single source of truth for every name, ID, version, and quoting decision — never hardcode any of those values in AL; always derive them from that block. It is persisted as `docs/ProjectParameters.md`, not just discussed — every later step reads it from that file.
 >
-> **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide** (v1.0.0.0). This runbook drives the *sequence*; that guide holds the detailed AL *rules* the sequence applies (Parts 1–7, Appendices A–C). References below point to it as **Standards §**. It is fetched into the project at PRE-01 and kept for the life of the project — see ALL ALONG → OCPF AL Development Standards Guide for the fetch, refresh, and `.gitignore` policy. **Neither document restates the other:** the intake sheet, the phase/step sequence, every checklist, the compile cadence, and the ChangeLog format live only here; AL coding rules, API page design, field inclusion, naming, ID allocation, gap analysis, and anti-patterns live only there.
+> **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide** (v1.1.0.0). This runbook drives the *sequence*; that guide holds the detailed AL *rules* the sequence applies (Parts 1–7, Appendices A–C). References below point to it as **Standards §**. It is fetched into the project at PRE-01 and kept for the life of the project — see ALL ALONG → OCPF AL Development Standards Guide for the fetch, refresh, and `.gitignore` policy. **Neither document restates the other:** the intake sheet, the phase/step sequence, every checklist, the compile cadence, and the ChangeLog format live only here; AL coding rules, API page design, field inclusion, naming, ID allocation, gap analysis, and anti-patterns live only there.
 >
 > **Prime directive for the agent:** An ambiguous input produces ambiguous code. If a step's inputs are incomplete or contradictory, stop and ask the human — do not invent rules to fill the gap.
 
@@ -22,7 +22,7 @@
 ## Operating Rules (apply in every phase)
 
 1. **Part 1 is authoritative.** Publisher, prefix, namespace, versions, ID ranges, localization — read them from the Project Parameters block (Step 01) and derive everything else. Never hardcode.
-2. **Verify against BC symbol files, not memory.** Table numbers, `using` namespaces, field IDs, `ObsoleteState` — confirm each in the symbol file named in Parameter 1.4. Agent knowledge of BC table numbers is not reliable; the verification procedure is Standards Appendix B. **Fallback when the downloaded symbols don't answer the question** (a module isn't in `.alpackages`, or you need to browse/discover rather than already knowing what to grep for): the entire BC BaseApp, for the current Business Central Online version, is documented at <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application> — every standard table, field, and field datatype/size. Use it to corroborate or discover; the downloaded symbol file for the target version is still the authoritative source when the two ever disagree.
+2. **Verify against BC symbol files, not memory.** Table numbers, `using` namespaces, field IDs, `ObsoleteState` — confirm each in the symbol file named in Parameter 1.4. Agent knowledge of BC table numbers is not reliable; the verification procedure is Standards Appendix B. **Fallback when the downloaded symbols don't answer the question** (a module isn't in `.alpackages`, or you need to browse/discover rather than already knowing what to grep for): the entire BC BaseApp, for the current Business Central Online version, is documented at <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application> — every standard table, field, and field datatype/size — and the **System Application** (the foundation modules everything else builds on: Language, Translation, Email, Telemetry, and the rest) at <https://learn.microsoft.com/en-us/dynamics365/business-central/application/system-application/module/system-application>. Use them to corroborate or discover; the downloaded symbol file for the target version is still the authoritative source when the two ever disagree.
 3. **Phase large scope into batches.** A batch is a self-contained, reviewable increment (by module or document-type group) — designed to be independently correct even though, under Operating Rule 4, it is not compiled on its own to prove it. Define batch boundaries during DESIGN and record them in the TDD.
 4. **Lint every batch as it's written, including symbol verification. Do not compile per batch — the whole extension compiles and packages once every batch from the TDD's batch plan is written, gating entry to PROVE.** Run the Step 05 pre-flight checklist immediately on each batch — both passes: pre-generation (on planned names/fields) and post-generation (on the actual files); Step 05 defines the full list — including **symbol verification**: for every reference to a standard/base object, field, method, property, or enum value, verify it against the downloaded symbol source (falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer), not just against what looks like plausible AL. That check exists specifically against hallucination: a pattern-matching lint pass draws on the same kind of intuition that produces a hallucinated reference in the first place, so checking against the actual symbols is the one thing that verifies against ground truth instead of a plausible-looking guess. Do not invoke the AL compiler as an automatic part of generating batches. The one mandatory compile-and-package of the originally-planned batches happens in Step 07, triggered the moment Step 06 finishes — not deferred further, and not skipped. **From that point, compiling and packaging is not a one-time event held back for a later step — it is the continuous rhythm of Step 07, Step 08's gap-fix loop, and Step 09's Code Review fixes, whenever any of them needs a code change: compile, package, deploy to a sandbox, test, diagnose and fix, then compile and package again, and repeat.** A human may also request an earlier spot-check compile mid-BUILD; that doesn't replace the mandatory one. **Gap-fill work is not part of that mandatory compile-and-package — it doesn't exist yet at that point.** Whether gap-fill arrives ad hoc (a human request mid-project, as actually happened on the pilot project) or as a Step 08 output, it gets pre-flighted and then compiled-and-packaged the same way, as its own pass, when it's actually done. Whenever any compile runs, treat any error as a systemic signal: fix the rule/template, then every file it touched — across every batch, not only the one where the error surfaced.
     **Trade-off, accepted deliberately (AJ Ansari, September 12, 2026, superseding the September 11, 2026 "compile once at the end" version of this rule):** even symbol-verified lint cannot catch everything a real compile does — cross-file type mismatches, full semantic validation, and rule interactions the compiler's own engine resolves are still invisible until an actual compile runs. Deferring the first real compile further than before means a systemic issue found late can touch more already-written files than catching it mid-BUILD would have. Accepted because generation speed matters more, and because symbol verification specifically closes the gap this decision was actually worried about — a reference to something that doesn't exist, dressed up as something that does.
@@ -474,6 +474,7 @@ human for sign-off, same as Step 02.
 - **`SourceTableView` filters** — for every document-type-filtered page, with the correct `const()` quoting (quote only multi-word enum values) (Standards §2.3).
 - **`using` directives** — the exact namespace for every object, copied from the symbol file (Standards §1.1, §3.4).
 - **Standard object template** — the exact AL API page pattern every generated object must follow (Standards §1.3).
+- **Design patterns beyond the Standards Guide** — where the design needs a pattern the Standards Guide doesn't cover (error handling, events, facades, no. series, and similar), consult AL Guidelines (ALL ALONG → Reference Sources) and cite the specific guideline in the TDD rather than inventing one.
 - **Special design notes** — singletons (`EntityName = EntitySetName`), header/line pairs as two top-level pages, high-volume tables, naming conflicts.
 - **Permission sets** — if Parameter 1.2 = `Yes` (mandatory the moment the project owns any table — see Parameter 1.2): a read-only set and a read/write set (including the read-only set), both with IDs from the allocated range and names from the Permission Set Prefix (Standards §5.3). **The batch plan must ship each table's `tabledata` grant in the same batch that introduces the table — never deferred to a later batch.** BC PTE publish validation (`PTE0004`) requires every table in a published package to be covered by an in-package permission set; finding this at publish instead of at TDD time forces a batch-plan rewrite after code already exists (a real project hit exactly this and had to pull its permission sets forward from its last batch to its first).
 
@@ -531,7 +532,7 @@ Goal: generate AL batch by batch, lint clean — including symbol verification �
   `standardsGuide/` is present and gitignored here rather than re-fetching it.)
 - Write the pre-flight validation checks to run for each batch — this is the canonical checklist every other reference to "the Step 05 checklist" in this runbook means; if you're re-stating it elsewhere, point here rather than re-enumerating. Split into two passes, since some checks are only possible before generation and some only after:
   - **Pre-generation** (on the TDD's planned names/fields, before any file exists — main role): identifier length ≤ 30, entity/EntitySet name length ≤ 30, reserved-keyword scan, localization field-range filter, `ObsoleteState` filter.
-  - **Post-generation** (on the actual generated files — light role, if §1.7 role assignment is configured): required-property presence, `Rec.`-qualification (`NoImplicitWith`), dead-code check (no empty triggers, no `// TODO`, no commented-out fields), 4-space indentation with no tabs (Standards §1.6), permission-set `tabledata` coverage for every table the batch introduces (Standards §5.3 — `PTE0004` fires at **publish**, not at compile, so **nothing automated catches a missing grant** — pre-flight is the only defense; vacuously satisfied if this project introduces no tables — see Parameter 1.2), and **symbol verification** — every reference to a standard/base BC table, page, codeunit, method, property, or enum value confirmed against the downloaded symbol source, falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer, not assumed correct because it looks like plausible AL (Operating Rule 4).
+  - **Post-generation** (on the actual generated files — light role, if §1.7 role assignment is configured): required-property presence, **no multilanguage (ML) properties and no `TextConst`** — `CaptionML`, `ToolTipML`, `OptionCaptionML`, or any other ML variant is a pre-flight failure; single-language `Caption`/`ToolTip`/`OptionCaption`/`Label` only (Standards §1.7 — AL0424 fires only when `TranslationFile` is enabled, so the compiler cannot be relied on to catch it), `Rec.`-qualification (`NoImplicitWith`), dead-code check (no empty triggers, no `// TODO`, no commented-out fields), 4-space indentation with no tabs (Standards §1.6), permission-set `tabledata` coverage for every table the batch introduces (Standards §5.3 — `PTE0004` fires at **publish**, not at compile, so **nothing automated catches a missing grant** — pre-flight is the only defense; vacuously satisfied if this project introduces no tables — see Parameter 1.2), and **symbol verification** — every reference to a standard/base BC table, page, codeunit, method, property, or enum value confirmed against the downloaded symbol source, falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer, not assumed correct because it looks like plausible AL (Operating Rule 4).
 
 **Outputs:** Batch plan (ordered), project scaffold, pre-flight validation script/checklist (both passes).
 
@@ -545,7 +546,7 @@ Goal: generate AL batch by batch, lint clean — including symbol verification �
 1. Pause for human approval before writing the first file.
 2. Extract source-table and field data for this batch's objects from the symbol file.
 3. Run the Step 05 **pre-generation** pre-flight pass on the planned names/fields (main role — this is TDD housekeeping, distinct from the file-level lint in Action 5 below); fix the TDD before generating if anything fails.
-4. Generate the batch's AL files from the standard template (Standards §1.3), substituting only Step 01 parameter values. Every file: one `namespace` (omitted entirely if Parameter 1.1 `Use Namespace` = `No`), one `using` (from symbol file), `ODataKeyFields = SystemId`, exactly one of `DelayedInsert = true` / `Editable = false`, and `Caption` + `ToolTip` + `ApplicationArea = All` on every field (Standards §1.1–§1.4, §2.1–§2.6). Captions and ToolTips written as self-describing schema for API consumers (Standards §2.5–§2.6). No dead code, no empty triggers, no commented-out fields, no `// TODO` (Standards §1.5).
+4. Generate the batch's AL files from the standard template (Standards §1.3), substituting only Step 01 parameter values. Every file: one `namespace` (omitted entirely if Parameter 1.1 `Use Namespace` = `No`), one `using` (from symbol file), `ODataKeyFields = SystemId`, exactly one of `DelayedInsert = true` / `Editable = false`, and `Caption` + `ToolTip` + `ApplicationArea = All` on every field (Standards §1.1–§1.4, §2.1–§2.6). Captions and ToolTips written as self-describing schema for API consumers (Standards §2.5–§2.6), in single-language label syntax only — never `CaptionML`, `ToolTipML`, any other ML property, or `TextConst` (Standards §1.7). No dead code, no empty triggers, no commented-out fields, no `// TODO` (Standards §1.5).
 5. **Run the Step 05 post-generation pre-flight pass on the batch immediately** — dot the i's, cross the t's on each file as you go, plus a manual read against the AZ AL Dev Tools rules (Standards Appendix C). If §1.7 role assignment is configured, this pass is done by the **light role** — it reports findings only, it does not edit code; the main role applies every fix. **Do not invoke the AL compiler** (Operating Rule 4).
 6. Do not proceed to the next batch until this one's pre-flight (including symbol verification) is clean. Do not compile per batch. Once every batch from the TDD's batch plan is generated, move to Step 07 — that step opens with the one mandatory compile-and-package (Operating Rule 4); it is not optional and not deferred further. (Gap-fill work, if any comes later, is a separate pass through this same Step 05/06/07 discipline when it's actually written — see Operating Rule 4.)
 7. **Before moving past this step, verify permission-set coverage explicitly** (light role, same checklist nature as Action 5) — don't just trust that it was "planned." Check that every table built across every batch has a matching `tabledata` grant in both the read-only and read/write permission sets (Standards §5.3; vacuously satisfied if this project introduces no tables — see Parameter 1.2). This is a design-time check, independent of whether or when a compile happens: `PTE0004` (missing permission set) only fires at **publish**, and nothing else automated catches it. A real project didn't catch this until publish and had to rewrite its batch plan as a result — catch it here instead.
@@ -643,7 +644,9 @@ every fix and normalizes whatever drift the findings call out.
 - **Redundant code** — duplicate field exposures, duplicate `using` directives, objects more complex than needed.
 - **"Marked for obsoletion"** — any reference to a field, table, procedure, or event with `ObsoleteState = Pending` or `Removed`; any subscription to an obsolete event (Standards §3.2–§3.3). Exclusion is unconditional — no version check, no exception.
 - **Standards compliance** — run the full Anti-Patterns table (Standards Part 7) against the codebase.
+- **Deprecated multilanguage syntax** — search every AL file, **including any code a human wrote or pasted in, not only agent-generated files**, for `CaptionML`, `ToolTipML`, `OptionCaptionML`, `InstructionalTextML`, `PromotedActionCategoriesML`, `RequestFilterHeadingML`, `AboutTitleML`, `AboutTextML`, and `TextConst`. Every hit is a finding, refactored per Standards §1.7. Called out separately from the Part 7 pass because a clean compile proves nothing here: AL0424 only fires when `app.json` enables `TranslationFile`, so on a project without it this syntax compiles silently.
 - **Best practices** — `Rec.` prefix everywhere (`NoImplicitWith`), required metadata present, correct `DelayedInsert` / `Editable` per data mutability, every table covered by both permission sets' `tabledata` grants (re-verify independently — don't just trust Step 06 Action 7).
+- **AL Guidelines best-practice pass** (ALL ALONG → Reference Sources) — read the built code against AL Guidelines' current *Best Practices* and *Vibe Coding Rules* for anything the Standards Guide doesn't already cover. The Standards Guide wins on any conflict; surface a conflict to the human rather than silently picking a side.
 - **BCQuality knowledge-backed review** (ALL ALONG) — invoke the local BCQuality snapshot's
   `skills/entry.md` dispatch flow against the built extension as an additional, independent pass
   alongside the Standards Anti-Patterns check above. Integrate its findings the same way as every
@@ -1127,7 +1130,7 @@ between AL extension releases.
 ## OCPF AL Development Standards Guide
 
 **New September 13, 2026 (AJ Ansari).** The runbook's companion rules document —
-`ocpfALDevStandardsGuide.md`, v1.0.0.0 — is distributed from this framework's own repository and
+`ocpfALDevStandardsGuide.md`, v1.1.0.0 — is distributed from this framework's own repository and
 fetched into every project that runs this routine, so the rules the runbook cites are on disk and
 readable for the life of the engagement rather than assumed to be in the agent's memory. This is
 the third of three fetched knowledge sources, alongside BCQuality and the OCPF BC AL Patterns
@@ -1165,9 +1168,38 @@ latest standards"). Re-run the fetch, overwrite the local copy, and report plain
 `<old sha>` to `<new sha>`" or "already up to date."
 
 **Version skew is worth naming, not papering over.** The guide carries its own version number
-(v1.0.0.0 at the time of runbook v2.4.0.0) and is versioned independently of this runbook, with
+(v1.1.0.0 as of runbook v2.6.0.0) and is versioned independently of this runbook, with
 both tracked in `RunbookChangelog.md`. If a fetched guide's version doesn't match what this
 runbook expects, say so — don't silently reconcile a citation that doesn't resolve.
+
+## Reference Sources — Microsoft Learn and AL Guidelines
+
+**New September 14, 2026 (AJ Ansari).** Alongside the three fetched knowledge sources (the
+Standards Guide, BCQuality, the Patterns Library) and the AL MCP Server, the framework grounds its
+work in these references. None are fetched into the project — they're consulted online, so
+there's nothing to bootstrap, gitignore, or refresh. If the agent has no web access, say so
+plainly rather than answering from memory of what a reference says.
+
+| Reference | What it's for | Where the routine uses it |
+|---|---|---|
+| **BC Base Application docs** (Microsoft Learn) — <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application> | Every standard Base App table, field, and datatype/size | Operating Rule 2 fallback; Standards Appendix B |
+| **BC System Application docs** (Microsoft Learn) — <https://learn.microsoft.com/en-us/dynamics365/business-central/application/system-application/module/system-application> | The System Application modules (Language, Translation, Email, Telemetry, and others) — check here before building something the platform already provides | Operating Rule 2 fallback; Standards Appendix B; Step 03 design |
+| **Working with translation files** (Microsoft Learn) — <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-work-with-translation-files> | How XLIFF translation works in AL; why ML properties are banned | Standards §1.7 |
+| **AL Guidelines** — <https://alguidelines.dev> (source: <https://github.com/microsoft/alguidelines>, MIT) | Community-driven, Microsoft-hosted AL best practices, design patterns, and agent-oriented *Vibe Coding Rules* | Step 03 (patterns beyond the Standards Guide); Step 09 (best-practice pass) |
+
+**Precedence.** The downloaded symbol file beats Microsoft Learn on anything symbol-verifiable
+(Operating Rule 2). The Standards Guide beats AL Guidelines on any AL rule. Surface a conflict to
+the human rather than silently reconciling it.
+
+**AL Guidelines — one known conflict, excluded outright.** Its legacy *NAV Patterns → C/AL Coding
+Guidelines* section predates AL and XLIFF, and includes pages recommending `CaptionML` (*"CaptionML
+on System Pages"*) and `OptionCaptionML` (*"Using OptionCaptionML"*). Never follow those: they are
+superseded by Standards §1.7. Treat the rest of the C/AL-tagged section as historical context, not
+current AL guidance.
+
+**Credit.** Every third-party resource this framework references, fetches, or recommends — with
+its license and what that license asks of us — is listed in `THIRD_PARTY_NOTICES.md` at the root
+of the framework repository.
 
 ## BCQuality Knowledge Snapshot
 
@@ -1198,7 +1230,9 @@ should still be surfaced even without a knowledge-file citation.
   sibling folder (`skills/`, `microsoft/`, `community/`, `custom/`, `docs/`), via a shallow clone
   (`git clone --depth 1`) rather than fetching hundreds of files individually. **Tell the human
   you're doing this** — it's not a silent background check. Strip `.git` from the snapshot
-  (it's a content copy, not a live checkout) and write a small `SNAPSHOT.json` alongside it
+  (it's a content copy, not a live checkout) — **but never strip its `LICENSE` file**: BCQuality
+  is MIT-licensed, and MIT requires the copyright and permission notice to stay with every copy
+  (see the framework repository's `THIRD_PARTY_NOTICES.md`) — and write a small `SNAPSHOT.json` alongside it
   recording the commit SHA and fetch timestamp, so a refresh later has something to diff against
   and report.
 - **Superseded September 12, 2026 (AJ Ansari) — always gitignored, not a project convention call.**
@@ -1277,7 +1311,7 @@ him from engagement to engagement and grow every time a new recurring bug class 
   the same way a missing AL MCP Server connection isn't (ALL ALONG → AL MCP Server).
 - Get the repo's `README.md` and every pattern file it lists, via a shallow clone
   (`git clone --depth 1`) with `.git` stripped, same as BCQuality — a content snapshot, not a live
-  checkout. Write a small `SNAPSHOT.json` inside `patterns/` recording the source repo, ref,
+  checkout — keeping its `LICENSE` file, same as BCQuality. Write a small `SNAPSHOT.json` inside `patterns/` recording the source repo, ref,
   commit SHA, and fetch timestamp, so a later refresh has something to diff against and report.
 - **Merge behavior — this is not a plain overwrite, and the README case is a specific,
   human-specified exception:**

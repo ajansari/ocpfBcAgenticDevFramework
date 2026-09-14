@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 1.0.0.0
-**Last Updated:** September 13, 2026
+**Version:** 1.1.0.0
+**Last Updated:** September 14, 2026
 
 > **Audience:** Human developers and agentic (AI) developers building Business Central AL
 > Per-Tenant Extensions (PTEs).
@@ -141,8 +141,8 @@ Every field on every page must have all three. No exceptions.
 
 | Property | Requirement | Notes |
 |---|---|---|
-| `Caption` | Required | Source from BC field metadata, or the field name in title case |
-| `ToolTip` | Required | Source from BC field metadata, or `'Specifies the <FieldName>.'` |
+| `Caption` | Required | Source from BC field metadata, or the field name in title case. Never `CaptionML` (§1.7). |
+| `ToolTip` | Required | Source from BC field metadata, or `'Specifies the <FieldName>.'` Never `ToolTipML` (§1.7). |
 | `ApplicationArea` | `All` | Always. Omitting it breaks visibility in both client and API contexts. |
 
 ### 1.5 No Dead Code
@@ -170,6 +170,86 @@ Use 4-space indentation per AL level. Fields inside `repeater(Group)` are 4 leve
 ```
 
 **Do not mix tabs and spaces.** Normalize every file to spaces before committing.
+
+### 1.7 Translatable Text — Label Syntax Only, Never Multilanguage (ML) Properties
+
+Every piece of user-facing text — captions, tooltips, option captions, instructional text, and
+every message, error, confirmation, and notification string — is written **once, in the
+project's default language**, using the single-language property or a `Label`. Translations
+never live in AL code; they live in XLIFF (`.xlf`) translation files.
+
+```al
+// Correct — single-language label syntax; picked up in the generated .xlf file
+Caption = 'Credit Memo No.';
+ToolTip = 'Specifies the number of the credit memo.';
+OptionCaption = 'Open,Released,Closed';
+
+var
+    PostedMsg: Label 'Document %1 was posted.', Comment = '%1 = Document No.';
+
+// Wrong — multilanguage (ML) syntax; deprecated, and never reaches the .xlf file
+CaptionML = ENU = 'Credit Memo No.', ENA = 'Credit Note No.';
+ToolTipML = ENU = 'Specifies the number of the credit memo.';
+
+var
+    PostedMsg: TextConst ENU = 'Document %1 was posted.';
+```
+
+**Never use any of these**, in new code or in a modification to existing code:
+
+| Deprecated | Use instead |
+|---|---|
+| `CaptionML` | `Caption` |
+| `ToolTipML` | `ToolTip` |
+| `OptionCaptionML` | `OptionCaption` |
+| `InstructionalTextML` | `InstructionalText` |
+| `PromotedActionCategoriesML` | `PromotedActionCategories` |
+| `RequestFilterHeadingML` | `RequestFilterHeading` |
+| `AboutTitleML` | `AboutTitle` |
+| `AboutTextML` | `AboutText` |
+| `TextConst` (data type) | `Label` (data type) |
+
+**Why this is unconditional:**
+
+- **The ML syntax is deprecated.** Compiler warning **AL0424** — *"The multilanguage syntax is
+  being deprecated. Please update to the new syntax."* It may still compile today; that is not a
+  reason to write it.
+- **ML properties and `TextConst` are not included in the generated `.xlf` file** — Microsoft
+  Learn, [*Working with translation files*](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-work-with-translation-files). A string written that way is invisible to every
+  translation workflow, so the app silently shows untranslated (or wrong-regional) text to
+  exactly the users it was meant to serve.
+- **AppSource requires XLIFF translation files.** An extension carrying ML syntax is not on the
+  path to AppSource.
+- **The compiler will not reliably catch it.** AL0424 fires only when `app.json`'s `features`
+  includes `TranslationFile`. On a project without that flag, `CaptionML` compiles with **no
+  warning at all** — so the zero-warnings gate cannot be relied on to find it, and code review
+  must (Part 7).
+
+**Label attributes.** Use `Comment` to tell the translator what every placeholder (`%1`, `%2`, …)
+stands for — required whenever a string has a placeholder. Use `Locked = true` for strings that
+must never be translated (telemetry event IDs, API-facing technical values, fixed codes). Use
+`MaxLength` when the string lands somewhere with a length limit.
+
+**Found in existing code** (human-written, inherited, or pasted in): it is a Code Review finding,
+not a style note. Refactor to the single-language property or `Label`, keeping the
+default-language text as the value; move any other-language text out of AL and into that
+language's `.xlf` file rather than discarding it.
+
+**Conflicting older guidance.** AL Guidelines (<https://alguidelines.dev>) still hosts legacy
+*C/AL Coding Guidelines* pages — *"CaptionML on System Pages"* and *"Using OptionCaptionML"* —
+that recommend ML properties. They predate AL and XLIFF; this section supersedes them. AL
+Guidelines' current *Vibe Coding Rules* agree with this section (labels for every message,
+`Comment` for placeholders, `Locked = true` for technical text).
+
+> *Sources and attribution:* the AL0424 message text and the list of ML properties excluded from
+> `.xlf` files are quoted or adapted from Microsoft Learn — [Compiler Warning
+> AL0424](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/diagnostics/diagnostic-al424)
+> and [Working with translation
+> files](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-work-with-translation-files)
+> — © Microsoft Corporation, licensed under
+> [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); reorganized into the table above. The
+> AL0424 message text follows the compiler's wording as reported in
+> [microsoft/AL issue #5789](https://github.com/microsoft/AL/issues/5789).
 
 ---
 
@@ -550,6 +630,7 @@ them. Do not assume.
 | Generic ToolTips with no information value | Poor `$metadata` schema quality | Write descriptive, field-specific ToolTips (§2.6) |
 | Hardcoding publisher, prefix, namespace, or version in AL code | Values diverge from the project parameters | Always derive from the runbook's Step 01 block — never hardcode |
 | Reaching for a `FlowField` when "auto-populated but editable" is what's wanted | A `FlowField` is always read-only and always live-recalculated; a user can never override it | Use a real stored field seeded by `OnValidate`/`OnInsert` that never overwrites a value the user already entered |
+| Using `CaptionML`, `ToolTipML`, `OptionCaptionML`, or any other multilanguage (ML) property, or the `TextConst` data type — whoever wrote it | Deprecated (AL0424); never included in the `.xlf` file, so the text can't be translated; blocks AppSource; compiles with **no warning** unless `TranslationFile` is enabled | Single-language `Caption` / `ToolTip` / `OptionCaption` / `Label` in the default language; translations go in `.xlf` files (§1.7) |
 
 ---
 
@@ -598,8 +679,11 @@ namespaces.** Symbol files are authoritative.
 `.alpackages`, or you need to browse and discover rather than grep for something you already
 know): the entire BC BaseApp for the current Business Central Online version is documented at
 <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application>
-— every standard table, field, and field datatype/size. Use it to corroborate or discover; the
-downloaded symbol file for the target version still wins if the two ever disagree.
+— every standard table, field, and field datatype/size — and the System Application (its
+foundation modules: Language, Translation, Email, Telemetry, and the rest) at
+<https://learn.microsoft.com/en-us/dynamics365/business-central/application/system-application/module/system-application>.
+Use them to corroborate or discover; the downloaded symbol file for the target version still wins
+if the two ever disagree.
 
 ---
 

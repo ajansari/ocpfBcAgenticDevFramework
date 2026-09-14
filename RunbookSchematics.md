@@ -378,6 +378,7 @@ flowchart LR
         Pack["Packaging & Versioning<br/>never delete a package;<br/>propose bumps, don't apply silently"]
         Std["OCPF AL Dev Standards Guide<br/>fetched at PRE-01 into standardsGuide/,<br/>gitignored — the rules cited as Standards §"]
         MCP["AL MCP Server<br/>bootstrap once, prefer its<br/>tools over ad hoc terminal use"]
+        Ref["Reference Sources<br/>MS Learn Base App + System App,<br/>translation files, AL Guidelines —<br/>consulted online, not fetched"]
         BCQ["BCQuality Knowledge Snapshot<br/>fetch once, refresh only<br/>on explicit request"]
         Pat["OCPF BC AL Patterns Library<br/>fetch once into patterns/,<br/>check before diagnosing from scratch"]
     end
@@ -390,7 +391,7 @@ flowchart LR
     classDef phase fill:#d4e6f7,stroke:#4a7ab5,stroke-width:1px;
     classDef discipline fill:#fdf0d5,stroke:#c99a3a,stroke-width:1px;
     class DEFINE,DESIGN,BUILD,PROVE phase;
-    class Doc,Change,Retain,Test,Mem,Prog,Pack,Std,MCP,BCQ,Pat discipline;
+    class Doc,Change,Retain,Test,Mem,Prog,Pack,Std,MCP,Ref,BCQ,Pat discipline;
 ```
 
 ### 4.2 Model & Effort Assignment (§1.7)
@@ -447,7 +448,9 @@ flowchart TD
 
 ---
 
-*Generated from `BC_App_Build_Routine_Agent.md` v2.5.0.0 (September 13, 2026 — §1.7 now captures
+*Generated from `BC_App_Build_Routine_Agent.md` v2.6.0.0 (September 14, 2026 — the ALL ALONG
+diagram gains a Reference Sources node for Microsoft Learn's BC System App docs, translation-files
+docs, and AL Guidelines; all 8 diagrams re-rendered clean. Previously, v2.5.0.0: §1.7 now captures
 thinking effort per role, as its own question asked separately from the model question, with High
 as the recommended default for every role; `docs/ProjectParameters.md` named as the persisted
 artifact for the intake sheet, closing the gap where the single source of truth for the whole
