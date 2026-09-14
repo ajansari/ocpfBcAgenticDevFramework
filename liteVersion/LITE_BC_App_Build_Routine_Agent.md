@@ -5,6 +5,11 @@
 **Version:** 1.2.0.0 (Lite, derived from the full framework v2.5.0.0)
 **Last Updated:** September 13, 2026
 
+> Version history for this edition lives in `LITE_RunbookChangeLog.md`, tracked independently of
+> the full framework's own `RunbookChangelog.md` (though a change to one often has to be reflected
+> in the other) and of any one project built with it. Diagrams for this routine live in
+> `LITE_RunbookSchematics.md`. If either file is not found, create it.
+
 > This is the lightweight sibling of the full **OCPF BC Agentic Development Framework**
 > (`BC_App_Build_Routine_Agent.md`, in the same repo). Same author, same underlying discipline —
 > half the steps, one model doing all the work, and no ceremony that a 10-files-or-fewer project
