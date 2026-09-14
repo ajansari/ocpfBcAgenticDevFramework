@@ -10,6 +10,15 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 *Last Updated: Sunday, September 13, 2026*
 
+## Table of Contents
+
+- [Background](#background)
+- [Inspiration](#inspiration)
+- [Contents](#contents)
+- [Setup: Full Framework](#setup-full)
+- [Setup: Lite Edition](#lite-edition)
+- [Roadmap](#roadmap)
+
 <a id="background"></a>
 <details open>
 <summary><h2>Background</h2></summary>
