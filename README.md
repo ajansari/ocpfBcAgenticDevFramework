@@ -4,7 +4,7 @@
 
 **The OnlyCopilotFans Business Central Agentic Development Framework**
 
-Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
+Simple Enough for Functional Consultants. Robust Enough for Pro Developers.  
 
 *by AJ Ansari*
 
@@ -18,6 +18,8 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 - [Setup: Full Framework](#setup-full)
 - [Setup: Lite Edition](#lite-edition)
 - [Roadmap](#roadmap)
+- [Overview - Slidedeck](https://ajansari.github.io/ocpfBcAgenticDevFramework/)
+
 
 <a id="background"></a>
 <details open>
