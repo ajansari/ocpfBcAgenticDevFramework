@@ -10,15 +10,21 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 *Last Updated: Sunday, September 13, 2026*
 
-## Background
+<a id="background"></a>
+<details open>
+<summary><h2>Background</h2></summary>
 
 This Agentic Development Framework was created to help Business Central Functional Consultants use AI to build AL extensions and apps the **right** way — though professional AL developers will find it just as useful.
 
 The framework incorporates the AL MCP Server, BC Base App documentation from Microsoft Learn, and BCQuality, grounding the agent's guidance in official references and quality tooling rather than AI guesswork alone. Alongside the runbook sits my **OCPF AL Development Standards Guide** — the detailed AL rules the routine applies at each step — which the agent fetches into your project automatically.
 
-It comes in two editions: the **full framework** (14 steps) for substantial projects, and **[Lite](#lite-edition--for-small-fast-moving-projects)** (7 steps) for smaller ones that need to move fast. Both apply the same AL standards.
+It comes in two editions: the **full framework** (14 steps) for substantial projects, and **[Lite](#lite-edition)** (7 steps) for smaller ones that need to move fast. Both apply the same AL standards.
 
-## Inspiration
+</details>
+
+<a id="inspiration"></a>
+<details open>
+<summary><h2>Inspiration</h2></summary>
 
 The spark for this project was Microsoft's **Business Central Agentic Engineering Process** vision, first unveiled at Directions North America in Orlando in April 2026.
 
@@ -32,16 +38,24 @@ In the time since, my focus has turned to fine-tuning the framework and enhancin
 
 At the heart of this project is a simple vision: that this framework should be **Simple Enough for a Functional Consultant, but Robust Enough for a Pro Developer**.
 
-## Contents
+</details>
+
+<a id="contents"></a>
+<details open>
+<summary><h2>Contents</h2></summary>
 
 | File | Purpose |
 |---|---|
 | `Outline_OCPFBCAgenticDevFW.md` | A raw outline of the framework's Stages and Steps. Start here for a high-level understanding of how the framework is organized. |
 | `BC_App_Build_Routine_Agent.md` | The agent instructions file to drop into any new AL project in Visual Studio Code. Review and adapt it as needed, then kick off the process with the prompt below. |
 | `standardsGuide/ocpfALDevStandardsGuide.md` | The companion **OCPF AL Development Standards Guide** — the detailed AL rules the runbook cites as **Standards §** (coding standards, API page design, field inclusion, naming, ID allocation, gap analysis, anti-patterns). You don't need to copy this one by hand: the runbook fetches it from this repository into every project at PRE-01, and gitignores it there. Shared by both editions. |
-| `liteVersion/` | The **Lite Edition** — a 7-step version of the framework for small, fast-moving projects. See [Lite Edition](#lite-edition--for-small-fast-moving-projects) below. |
+| `liteVersion/` | The **Lite Edition** — a 7-step version of the framework for small, fast-moving projects. See [Lite Edition](#lite-edition) below. |
 
-## Full Framework — Setup
+</details>
+
+<a id="setup-full"></a>
+<details open>
+<summary><h2>Setup: Full Framework</h2></summary>
 
 ### Setup by Tooling
 
@@ -63,9 +77,13 @@ Choose the setup that matches your development environment. Both paths use the s
 
 > 💡 **Don't copy the Standards Guide by hand.** PRE-01 — the very first step of the routine — fetches it from this repository into a `standardsGuide/` folder in your project and adds that folder to `.gitignore`, so it stays out of your project's remote.
 
-> ⚠️ **One edition per project.** A project follows either the full framework or Lite — not both at once. If this project is only ~5–10 AL files with one person and one AI model on it, [Lite](#lite-edition--for-small-fast-moving-projects) covers the same ground in 7 steps and 4 documents.
+> ⚠️ **One edition per project.** A project follows either the full framework or Lite — not both at once. If this project is only ~5–10 AL files with one person and one AI model on it, [Lite](#lite-edition) covers the same ground in 7 steps and 4 documents.
 
-## Lite Edition — for small, fast-moving projects
+</details>
+
+<a id="lite-edition"></a>
+<details open>
+<summary><h2>Setup: Lite Edition — for small, fast-moving projects</h2></summary>
 
 Not every extension needs the full 14-step routine. **Lite Edition** covers the same ground in **7 steps** and **4 documents**, for projects that need to move fast without giving up the discipline that keeps AI-generated AL correct.
 
@@ -106,9 +124,15 @@ Same pattern as the full framework — only the source file changes.
 
 > ⚠️ **One edition per project.** A project follows either the full framework or Lite — not both at once. If a Lite project outgrows Lite mid-flight, swap in the full runbook in place of the Lite one; your `DesignDoc.md` and `ChangeLog.md` carry straight over.
 
-## Roadmap
+</details>
+
+<a id="roadmap"></a>
+<details open>
+<summary><h2>Roadmap</h2></summary>
 
 - ~~Add support for AL MCP~~ ✅ Completed
 - ~~Add support for BCQuality~~ ✅ Completed
 
 All previously planned roadmap items have been addressed. New items will be listed here as they're identified.
+
+</details>
