@@ -25,3 +25,8 @@ TestResults.xml
 slidedecks/standaloneHTML/
 #Fonts folder
 slidedecks/fonts/
+
+### macOS ###
+#Finder per-folder view-state file — local/cosmetic only, never useful to commit
+.DS_Store
+**/.DS_Store
