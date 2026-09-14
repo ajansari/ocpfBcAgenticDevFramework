@@ -20,4 +20,6 @@ rad.json
 *.bclicense
 *.flf
 #Test results file
-TestResults.xml
+TestResults.xml   
+#Standalone HTML
+slidedecks/standaloneHTML/
