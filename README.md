@@ -143,7 +143,6 @@ Same pattern as the full framework — only the source file changes.
 
 - ~~Add support for AL MCP~~ ✅ Completed
 - ~~Add support for BCQuality~~ ✅ Completed
-
-All previously planned roadmap items have been addressed. New items will be listed here as they're identified.
+- Add support for multi language translations 
 
 </details>
