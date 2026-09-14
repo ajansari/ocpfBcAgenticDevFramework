@@ -67,6 +67,10 @@ release test.*
 
 Four tracked files, start to finish: `DesignDoc.md`, `ChangeLog.md`, `Docs.md`, `TestScript.md`.
 
+Plus two Step 1 setup artifacts, produced once at kickoff rather than maintained throughout:
+`ProblemStatement.md` and `ProjectParameters.md` (project root — the persisted intake sheet every
+later step reads from).
+
 Plus one fetched, gitignored reference: `standardsGuide/ocpfALDevStandardsGuide.md` — shared
 unchanged with the full framework. **Lite reduces process, not AL rules:** the same rules apply to
 a 5-file extension as to a 50-file one.

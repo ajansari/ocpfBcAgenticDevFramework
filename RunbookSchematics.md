@@ -143,7 +143,7 @@ flowchart TD
     Gate2 --> S01
     subgraph S01["01 — Populate the Intake Sheet"]
         direction LR
-        In3[/"Inputs:<br/>Expanded entity list,<br/>symbol file"/] --> Act3["Actions:<br/>§1.1 Identity, §1.2 ID ranges,<br/>§1.3 Naming/API, §1.4 Platform,<br/>§1.6 Onboarding/Discoverability,<br/>§1.7 Model & Effort Assignment<br/>— ask, don't infer"] --> Out3[/"Output:<br/>Project Parameters,<br/>Object Register (seeded)"/]
+        In3[/"Inputs:<br/>Expanded entity list,<br/>symbol file"/] --> Act3["Actions:<br/>§1.1 Identity, §1.2 ID ranges,<br/>§1.3 Naming/API, §1.4 Platform,<br/>§1.6 Onboarding/Discoverability,<br/>§1.7 Model & Effort Assignment<br/>(model, then effort, asked<br/>separately per role)<br/>— ask, don't infer"] --> Out3[/"Output:<br/>docs/ProjectParameters.md,<br/>Object Register (seeded)"/]
     end
     S01 --> Gate3{{"Exit gate:<br/>No placeholders remain,<br/>human confirms sheet"}}
 
@@ -395,6 +395,13 @@ flowchart LR
 
 ### 4.2 Model & Effort Assignment (§1.7)
 
+Each role's box now carries both halves of what this section is named for — model **and**
+thinking effort — not model alone. Model and effort are asked as **two separate questions per
+role**, never merged into one prompt. **High is the recommended default for all three roles**,
+presented as the first-listed option through the interactive mechanism; the example below shows
+Main and Reasoning accepting that default and Light being explicitly overridden to Medium for
+cost — a real override, not a rule that Light must always be lowered.
+
 ```mermaid
 flowchart TD
     Config{"§1.7 configured?"}
@@ -407,17 +414,17 @@ flowchart TD
 
     subgraph Main["MAIN ROLE — runs in the primary agent session"]
         direction TB
-        MainWork["All BUILD code generation<br/>All actual code edits<br/>(incl. applying what Light/<br/>Reasoning report)<br/>End-to-end ownership of:<br/>ChangeLog, Object Register,<br/>ProjectMemory, TestingFeedback.md<br/>Example model: Sonnet"]
+        MainWork["All BUILD code generation<br/>All actual code edits<br/>(incl. applying what Light/<br/>Reasoning report)<br/>End-to-end ownership of:<br/>ChangeLog, Object Register,<br/>ProjectMemory, TestingFeedback.md<br/>Example: Sonnet, effort High (default accepted)"]
     end
 
     subgraph Light["LIGHT ROLE — runs in a subagent"]
         direction TB
-        LightWork["Step 05 post-generation<br/>pre-flight pass only —<br/>required props, Rec.-qualification,<br/>dead code, indentation,<br/>permission-set coverage,<br/>symbol verification<br/>Reports findings; never edits code<br/>Example model: Haiku"]
+        LightWork["Step 05 post-generation<br/>pre-flight pass only —<br/>required props, Rec.-qualification,<br/>dead code, indentation,<br/>permission-set coverage,<br/>symbol verification<br/>Reports findings; never edits code<br/>Example: Haiku, effort Medium (High default overridden)"]
     end
 
     subgraph Reasoning["REASONING ROLE — runs in a subagent"]
         direction TB
-        ReasonWork["Sanity Check (04), Gap-Fit<br/>Test (08), Code Review (09),<br/>FRD authorship (02), TDD<br/>authorship (03), root-cause<br/>troubleshooting (07), diagnosing<br/>testing-feedback reports<br/>Reports findings/drafts/diagnoses;<br/>never edits code or continuity docs<br/>Example model: Opus"]
+        ReasonWork["Sanity Check (04), Gap-Fit<br/>Test (08), Code Review (09),<br/>FRD authorship (02), TDD<br/>authorship (03), root-cause<br/>troubleshooting (07), diagnosing<br/>testing-feedback reports<br/>Reports findings/drafts/diagnoses;<br/>never edits code or continuity docs<br/>Example: Opus, effort High (default accepted)"]
     end
 
     Main -.->|"relays fixes back into"| Codebase[("The codebase &<br/>continuity documents")]
@@ -440,12 +447,16 @@ flowchart TD
 
 ---
 
-*Generated from `BC_App_Build_Routine_Agent.md` v2.4.0.0 (September 13, 2026 — the recovered and
-renumbered OCPF AL Development Standards Guide v1.0.0.0, its PRE-01 fetch and new ALL ALONG
-section; previously: the Step 07/09/12 restructure and the OCPF BC AL Patterns Library addition,
-the Rule 6c step-completion check-in, the Step 11 → 12 formal hand-off message, the Step 11
-Automated Test Scripts fix, the `ProjectProgress.md` tracker (project root) and its move there,
-the `requirements/` verbatim-capture rule, and the git-tracked `.app` packages default — see
-`RunbookChangelog.md`). If the runbook changes in a way that affects
+*Generated from `BC_App_Build_Routine_Agent.md` v2.5.0.0 (September 13, 2026 — §1.7 now captures
+thinking effort per role, as its own question asked separately from the model question, with High
+as the recommended default for every role; `docs/ProjectParameters.md` named as the persisted
+artifact for the intake sheet, closing the gap where the single source of truth for the whole
+project had no file of its own; previously: the recovered and renumbered OCPF AL Development
+Standards Guide v1.0.0.0, its PRE-01 fetch and new ALL ALONG section; the Step 07/09/12
+restructure and the OCPF BC AL Patterns Library addition, the Rule 6c step-completion check-in,
+the Step 11 → 12 formal hand-off message, the Step 11 Automated Test Scripts fix, the
+`ProjectProgress.md` tracker (project root) and its move there, the `requirements/`
+verbatim-capture rule, and the git-tracked `.app` packages default — see `RunbookChangelog.md`).
+If the runbook changes in a way that affects
 the phase/step/role structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*

@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 2.4.0.0
+**Version:** 2.5.0.0
 **Last Updated:** September 13, 2026
 
 > Version history for this framework lives in `RunbookChangelog.md`, tracked independently of any
@@ -11,7 +11,7 @@
 
 > **What this is:** A single, ordered routine an AI agent follows to build a new Business Central AL Per-Tenant Extension (PTE) from a business problem through to a tested, documented app deployed to production.
 >
-> **How the agent uses it:** Work the phases in order (DEFINE → DESIGN → BUILD → PROVE). Do not start a step until its predecessor's exit gate is met. Every step lists its **Inputs**, **Actions**, **Outputs**, and **Exit gate**. The *Project Parameters* block in Step 01 is the single source of truth for every name, ID, version, and quoting decision — never hardcode any of those values in AL; always derive them from that block.
+> **How the agent uses it:** Work the phases in order (DEFINE → DESIGN → BUILD → PROVE). Do not start a step until its predecessor's exit gate is met. Every step lists its **Inputs**, **Actions**, **Outputs**, and **Exit gate**. The *Project Parameters* block in Step 01 is the single source of truth for every name, ID, version, and quoting decision — never hardcode any of those values in AL; always derive them from that block. It is persisted as `docs/ProjectParameters.md`, not just discussed — every later step reads it from that file.
 >
 > **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide** (v1.0.0.0). This runbook drives the *sequence*; that guide holds the detailed AL *rules* the sequence applies (Parts 1–7, Appendices A–C). References below point to it as **Standards §**. It is fetched into the project at PRE-01 and kept for the life of the project — see ALL ALONG → OCPF AL Development Standards Guide for the fetch, refresh, and `.gitignore` policy. **Neither document restates the other:** the intake sheet, the phase/step sequence, every checklist, the compile cadence, and the ChangeLog format live only here; AL coding rules, API page design, field inclusion, naming, ID allocation, gap analysis, and anti-patterns live only there.
 >
@@ -307,7 +307,20 @@ generic (no vendor/model names) since this runbook travels to projects on other 
 Ask: "This framework can split work across up to three roles, each potentially a different model.
 Do you want to configure this, or should everything run through one model?"
 
-If configuring, capture three role assignments:
+If configuring, go through the three roles **one at a time** — Main, then Light, then Reasoning —
+and for each one, ask **two separate questions in sequence, never merged into one prompt:**
+
+1. *"Which model should the `<Role>` role use?"*
+2. *"What thinking effort should the `<Role>` role run at — High or Medium?"* — its own
+   interactive prompt (Rule 6a), asked immediately after the model is chosen for that role, never
+   inferred from which model was just picked. **Recommend High as the first-listed option, for
+   every role, regardless of which model was just chosen** — see the unifying rule below. If the
+   model just chosen has no such setting at all, that's `N/A`, still recorded explicitly rather
+   than left blank.
+
+Repeat the pair for each of the three roles before moving on. What each role is *for*, so the
+human is choosing a model (and, per the rule below, confirming or overriding High) with the actual
+job in mind:
 
 1. **Main role** — does the bulk of the work: all BUILD code generation, all actual code edits
    (including applying what the other two roles report), and end-to-end ownership of the
@@ -328,6 +341,31 @@ If configuring, capture three role assignments:
    diagnoses; never edits code or the continuity documents itself. A stronger-reasoning model is
    the right fit here.
 
+**High is the recommended default thinking effort for all three roles — always, regardless of
+which model is assigned to which role.** This is a quality-first framework: Operating Rule 5
+already requires zero errors and zero warnings before PROVE, and every one of the three roles'
+jobs — generating and editing AL, verifying against ground truth, or doing fresh-eyes review —
+benefits from more thinking effort, not less. Present High as the recommended option, with that
+reasoning, through the interactive mechanism (Rule 6a) for every role's effort question. A human
+who wants to trade some of that for speed or cost may still choose Medium — most plausibly for the
+**Light** role, whose checklist-matching work has the smallest marginal benefit from extra effort
+of the three — and that's a legitimate, explicit override, not a mistake to talk them out of. The
+point is that the *default offered* is High everywhere; a lower setting is something the human
+opts into, never something the framework assumes on their behalf.
+
+**Not every model or harness exposes a thinking-effort dial.** If a role's assigned model has no
+such setting, record `N/A` for that role rather than leaving it blank — a blank reads as "not yet
+asked," `N/A` reads as "asked, and the model has no dial to turn."
+
+**Worked example** (Main and Reasoning accept the recommended default; Light is overridden for
+cost — a realistic mix, not a rule that Light must always be lowered):
+
+| Role | Model | Thinking Effort |
+|---|---|---|
+| Main | Sonnet | High |
+| Light | Haiku | Medium *(human overrode the recommended High, for cost)* |
+| Reasoning | Opus | High |
+
 **The division of labor is fixed regardless of which physical models are assigned to each role.**
 The light and reasoning roles investigate, draft, or diagnose; the main role is the *only* one
 that edits code and the *only* one that owns the continuity documents end to end. This keeps one
@@ -337,14 +375,15 @@ one continuous thread instead of fragmenting across cold hand-offs. A role holde
 always relayed back and integrated by the main role; never applied blind.
 
 **How to delegate a role in practice** (adapt to whatever mechanism the executing agent's own
-harness provides for running a task under a different model): hand the role-holder the specific
-inputs its task needs — the relevant project documents, the code or finding in question, the
-standing checklist — plus a pointer to this runbook itself, since every rule in it applies to
-whichever role is acting, not only the main role.
+harness provides for running a task under a different model, **and set that role's configured
+thinking effort when the mechanism allows it** — the same way the model itself is set): hand the
+role-holder the specific inputs its task needs — the relevant project documents, the code or
+finding in question, the standing checklist — plus a pointer to this runbook itself, since every
+rule in it applies to whichever role is acting, not only the main role.
 
 | Parameter | Placeholder | Guidance |
 |---|---|---|
-| **Model/role assignment** | `<ModelRolesYN>` | `No` (default — one model for everything) or a 3-row table: Main role / Light role / Reasoning role → the model assigned to each. |
+| **Model/role assignment** | `<ModelRolesYN>` | `No` (default — one model for everything) or a 3-row table: Main role / Light role / Reasoning role → the **model and thinking effort** (High recommended / Medium / N/A) assigned to each, asked as two separate questions per role. |
 
 ### 1.8 Framework File Tracking (`.gitignore`)
 
@@ -383,9 +422,9 @@ bootstrap creates (e.g., an AL MCP Server launcher) are **always** excluded from
 git tracking regardless of the answer here — see ALL ALONG → Repository Hygiene. That part isn't
 a choice the human makes per project.
 
-**Outputs:** The completed Project Parameters block (above, all placeholders replaced); an empty **Object Register** artifact seeded with the allocated ID ranges; the project's `.gitignore` populated per this section and per ALL ALONG → Repository Hygiene.
+**Outputs:** `docs/ProjectParameters.md` — the completed Project Parameters block (above, all placeholders replaced), persisted as its own tracked document so every later step, and every role under §1.7, reads it from disk rather than depending on conversation history; an empty **Object Register** artifact seeded with the allocated ID ranges; the project's `.gitignore` populated per this section and per ALL ALONG → Repository Hygiene.
 
-**Exit gate:** No placeholder remains. Deployment Target is one allowed value. Namespace matches between 1.1 and 1.3, or both are correctly N/A if Use Namespace = `No`. Localization is set. If Permission Sets required = `Yes`, ≥ 2 IDs are reserved in the primary range. §1.6's three questions are each answered `Yes`/`No` with specifics recorded for any `Yes`. §1.7 is answered or explicitly skipped. §1.8 is answered (or defaults to `Yes`) and `.gitignore` reflects it. Human confirms the sheet.
+**Exit gate:** No placeholder remains. Deployment Target is one allowed value. Namespace matches between 1.1 and 1.3, or both are correctly N/A if Use Namespace = `No`. Localization is set. If Permission Sets required = `Yes`, ≥ 2 IDs are reserved in the primary range. §1.6's three questions are each answered `Yes`/`No` with specifics recorded for any `Yes`. §1.7 is answered or explicitly skipped — if configured, every one of the three roles has both a model and a thinking effort (or `N/A`) recorded, not model alone. §1.8 is answered (or defaults to `Yes`) and `.gitignore` reflects it. Human confirms the sheet.
 
 ---
 
@@ -400,7 +439,7 @@ Goal: a complete FRD and a self-sufficient TDD, both validated for BC feasibilit
 the draft (saves it, does the ChangeLog/ProjectMemory bookkeeping) and takes it to the human for
 sign-off. Sign-off is unchanged either way — it's the human's, never the drafting role's.
 
-**Inputs:** `ProblemStatement.md`, expanded entity list + gap log, Project Parameters.
+**Inputs:** `ProblemStatement.md`, expanded entity list + gap log, `docs/ProjectParameters.md`.
 
 **Actions:** Write the FRD in business language — *what* the extension does and *why*, not *how*. It must capture:
 - Purpose and scope; explicit out-of-scope list.
@@ -423,7 +462,7 @@ Then **review and validate against the DEFINE artifacts:** every entity in the e
 Project Parameters, and the symbol file; the main role integrates the draft and takes it to the
 human for sign-off, same as Step 02.
 
-**Inputs:** `FRD.md`, Project Parameters, BC symbol file (Parameter 1.4).
+**Inputs:** `FRD.md`, `docs/ProjectParameters.md`, BC symbol file (Parameter 1.4).
 
 **Actions:** Translate the FRD's *what* into a precise *how*. The TDD must be self-sufficient: a developer or agent who has never seen the project must be able to produce every object correctly from the TDD alone — no rule it applies may require knowledge that lives outside the document. Include:
 - **System identity** — Publisher, namespace, prefix, APIPublisher, APIGroup prefix, APIVersion, AL runtime, BC minimum, object ID ranges (all from Part 1).
@@ -500,7 +539,7 @@ Goal: generate AL batch by batch, lint clean — including symbol verification �
 
 ## 06 — Code Generation
 
-**Inputs:** `TDD.md`, Project Parameters, symbol file, batch plan, pre-flight checks.
+**Inputs:** `TDD.md`, `docs/ProjectParameters.md`, symbol file, batch plan, pre-flight checks.
 
 **Actions — per batch, in order:**
 1. Pause for human approval before writing the first file.
@@ -755,7 +794,7 @@ Run these in parallel with the phased work — they are not a final step.
 
 ## Document
 
-- Keep every required project document current as work proceeds, not retroactively — this list is canonical; the Standards Guide keeps no second copy of it: `ProblemStatement`, `FRD`, `TDD`, `SanityCheck`, `PostDevTDD`, `ChangeLog`, `GapAnalysis` / `CodeReview`, `Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`, `AutomatedTestScripts` (if created), `ReleaseTestResults`, `TestingFeedback`, `Roadmap`, `ProjectMemory`, `ProjectProgress` — all four mandatory Step 11 outputs (`Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`) belong on this list, not just the first of them, as does `AutomatedTestScripts` if the human opted in at Step 11, and `ReleaseTestResults` (Step 12).
+- Keep every required project document current as work proceeds, not retroactively — this list is canonical; the Standards Guide keeps no second copy of it: `ProblemStatement`, `ProjectParameters`, `FRD`, `TDD`, `SanityCheck`, `PostDevTDD`, `ChangeLog`, `GapAnalysis` / `CodeReview`, `Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`, `AutomatedTestScripts` (if created), `ReleaseTestResults`, `TestingFeedback`, `Roadmap`, `ProjectMemory`, `ProjectProgress` — all four mandatory Step 11 outputs (`Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`) belong on this list, not just the first of them, as does `AutomatedTestScripts` if the human opted in at Step 11, and `ReleaseTestResults` (Step 12). `ProjectParameters` is produced at Step 01, right after `ProblemStatement` — it is the one entry on this list a project cannot proceed without, since every other document and every AL file derives its identity from it.
 - Maintain the **Object Register** as a standalone artifact — every object, its ID, module, source table, and R/W status — updated as objects are planned and built. Never use an object ID outside the ranges allocated at Parameter 1.2; the allocation strategy the register records is Standards Part 5.
 
 ## Track Changes — the ChangeLog

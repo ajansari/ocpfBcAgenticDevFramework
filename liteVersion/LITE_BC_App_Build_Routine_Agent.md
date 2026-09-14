@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 1.1.0.0 (Lite, derived from the full framework v2.4.0.0)
+**Version:** 1.2.0.0 (Lite, derived from the full framework v2.5.0.0)
 **Last Updated:** September 13, 2026
 
 > This is the lightweight sibling of the full **OCPF BC Agentic Development Framework**
@@ -35,7 +35,9 @@
 > **How the agent uses it:** work the phases in order (DEFINE → DESIGN → BUILD → PROVE). Don't
 > start a step until its predecessor's exit gate is met. The *Project Parameters* block in Step 1
 > is the single source of truth for every name, ID, version, and quoting decision — never hardcode
-> any of those values in AL; always derive them from that block.
+> any of those values in AL; always derive them from that block. It is persisted as
+> `ProjectParameters.md` in the project root, not just discussed — every later step reads it from
+> that file.
 >
 > **One model does everything.** Lite drops the full framework's optional Main/Light/Reasoning
 > role split. There's no delegation mechanism to configure — the executing agent plans, generates,
@@ -154,8 +156,10 @@ design work.
   table costs far more to add after BUILD than before it.
 - Identify duplicates, ambiguous terms, and outdated terminology; ask clarifying questions about
   scope and consumer use cases. Do not resolve ambiguities silently.
-- **Populate the Project Parameters block below.** Complete every field; replace every
-  placeholder. These values override all defaults for the rest of the routine.
+- **Populate the Project Parameters block below, and persist it as `ProjectParameters.md` in the
+  project root.** Complete every field; replace every placeholder. These values override all
+  defaults for the rest of the routine, and every later step reads them from that file rather than
+  from conversation history.
 
 **Ask first, don't infer** — as five explicit questions, before writing anything, if any of these
 still carry placeholder values:
@@ -221,11 +225,13 @@ EntitySetName`. Use modern BC names, not legacy ones (e.g. table "Job" → `Enti
 > names, IDs, prefixes, and versions means "whatever is filled in here."
 
 **Outputs:** `standardsGuide/` (fetched, gitignored), `requirements/` (if any raw input was
-captured), `ProblemStatement.md` (purpose, scope, out-of-scope, entity list, open questions), the
-completed Project Parameters, `.gitignore` populated per the table above.
+captured), `ProblemStatement.md` (purpose, scope, out-of-scope, entity list, open questions),
+`ProjectParameters.md` (project root — the completed Project Parameters block, all placeholders
+replaced), `.gitignore` populated per the table above.
 
-**Exit gate:** The Standards Guide is present in `standardsGuide/` and gitignored. No placeholder
-remains. Deployment Target is one allowed value. Namespace is consistent or correctly N/A. If
+**Exit gate:** The Standards Guide is present in `standardsGuide/` and gitignored.
+`ProjectParameters.md` exists in the project root with no placeholder remaining. Deployment Target
+is one allowed value. Namespace is consistent or correctly N/A. If
 Permission Sets required = `Yes`, ≥ 2 IDs are reserved. Onboarding questions are each answered.
 Human confirms the sheet.
 
@@ -237,7 +243,7 @@ Goal: one self-sufficient Design Doc, sanity-checked, before any code.
 
 ## STEP 2 — Write the Design Doc & Self-Check
 
-**Inputs:** `ProblemStatement.md`, Project Parameters, BC symbol file.
+**Inputs:** `ProblemStatement.md`, `ProjectParameters.md`, BC symbol file.
 
 **Actions:** Write **one** document — `DesignDoc.md` — that does the job the full framework splits
 across an FRD and a TDD. It must be self-sufficient: someone who's never seen the project should
@@ -342,7 +348,7 @@ fix in a loop until clean.
 
 ## STEP 4 — Generate the Code
 
-**Inputs:** `DesignDoc.md`, Project Parameters, symbol file, batch plan, pre-flight checklist.
+**Inputs:** `DesignDoc.md`, `ProjectParameters.md`, symbol file, batch plan, pre-flight checklist.
 
 **Actions — per object, in order:**
 1. Pause for human approval before writing the first file.
@@ -714,10 +720,10 @@ one.
 editions fetch the same v1.0.0.0 file and apply the same AL rules — Lite differs only in process.
 
 **Document count:** 4 tracked files (`DesignDoc.md`, `ChangeLog.md`, `Docs.md`, `TestScript.md`)
-versus the full framework's 18 (`ProblemStatement`, `FRD`, `TDD`, `SanityCheck`, `ChangeLog`,
-`ProjectMemory`, `ProjectProgress`, `GapAnalysis`, `CodeReview`, `PostDevTDD`, `Documentation`,
-`UserGuide`, `HumanUnitTestScript`, `Deployment`, `AutomatedTestScripts`, `ReleaseTestResults`,
-`TestingFeedback`, `Roadmap`).
+versus the full framework's 19 (`ProblemStatement`, `ProjectParameters`, `FRD`, `TDD`,
+`SanityCheck`, `ChangeLog`, `ProjectMemory`, `ProjectProgress`, `GapAnalysis`, `CodeReview`,
+`PostDevTDD`, `Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`,
+`AutomatedTestScripts`, `ReleaseTestResults`, `TestingFeedback`, `Roadmap`).
 
 ---
 

@@ -8,8 +8,8 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the two documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v2.4.0.0**, the guide is at **v1.0.0.0** and Lite at **v1.1.0.0** — but recorded together here,
-since a change to one usually has to be reflected in the others.
+**v2.5.0.0**, the guide remains at **v1.0.0.0**, untouched, and Lite is at **v1.2.0.0** — but
+recorded together here, since a change to one usually has to be reflected in the others.
 
 Entries are grouped by version, newest first, and describe the **cumulative** result of a
 version's changes — not the drafting history behind them. If a change was revised multiple times
@@ -17,6 +17,101 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v2.5.0.0 — September 13, 2026
+
+**§1.7 now asks for thinking effort, not just a model, per role — as its own separate question,
+recommending High by default.** Also names, for the first time, the file the whole intake sheet is
+actually persisted to.
+
+### Fixed — §1.7 has been titled "Model & Effort Assignment" since it existed, but never asked for effort
+
+An independent review asked directly: when the runbook lets the human configure Main / Light /
+Reasoning roles, does it also let them pick a thinking-effort level per role? It did not — §1.7
+captured a model per role and stopped there, even though "Effort" has been in its own section
+title since the three-role division was introduced in v2.1.0.0. The schematics diagram at §4.2
+(itself titled "Model & Effort Assignment") had the same gap: each role's box showed "Example
+model: …" with no effort anywhere.
+
+A follow-up question sharpened the fix further: model and effort needed to be **two separate
+interactive questions per role, always** — never inferred from the model choice, never bundled
+into one prompt — and the recommended default across **every** role needed to be **High**, not a
+mix of Medium and High by role. An earlier pass at this fix had differentiated the recommendation
+(Medium for Main and Light, High only for Reasoning); that reasoning is preserved as the rationale
+for when a human might *choose* to override toward Medium, but it is no longer what the framework
+recommends by default anywhere.
+
+### Added — thinking effort as its own question per role, High recommended everywhere
+
+- **Two separate questions per role, asked in sequence, never merged:** "Which model should the
+  `<Role>` role use?", then — as its own distinct interactive prompt (Rule 6a), immediately after —
+  "What thinking effort should the `<Role>` role run at?" Repeated for Main, then Light, then
+  Reasoning.
+- **High is the recommended default for all three roles, always**, regardless of which model is
+  assigned to which role — presented as the first-listed option with the reasoning: this is a
+  quality-first framework, and every one of the three roles' jobs benefits from more thinking
+  effort, not less. A human may still choose Medium as an explicit override — most plausibly for
+  **Light**, whose checklist-matching work has the smallest marginal benefit from extra effort of
+  the three roles — but the default *offered* is High everywhere.
+- **`N/A` is now a valid, explicit answer** for a role whose assigned model exposes no
+  thinking-effort dial at all — distinct from a blank, which still reads as "not yet asked."
+- **The Parameters table row, the worked example, the delegation-mechanics paragraph, and Step
+  01's exit gate** were all updated to match: the exit gate now requires every configured role to
+  carry both a model and an effort (or `N/A`), not model alone. The worked example shows a
+  realistic mix — Main and Reasoning accepting the recommended High, Light explicitly overridden
+  to Medium for cost — rather than either all-High or the old differentiated defaults.
+- **Schematics §4.2** — each role's box now reads "effort High (default accepted)" for Main and
+  Reasoning and "effort Medium (High default overridden)" for Light, with an intro line stating
+  model and effort are two separate questions and High is the universal recommended default.
+  Re-rendered and verified (all 8 diagrams in the file still parse clean).
+
+### Fixed — the Project Parameters block had no named file to live in
+
+Answering a direct question about where the model/role decision (and every other Step 01 value) is
+actually stored turned up a real gap: "Project Parameters" was referenced as an Input or Output by
+Steps 01, 02, 03, and 06, and called the project's single source of truth in the runbook's own
+opening paragraph — but no step ever named a file for it. It was the one entry implied by every
+other document's existence that was never itself on the canonical document list.
+
+- **`docs/ProjectParameters.md`** is now Step 01's named output — the completed intake sheet,
+  persisted as its own tracked document so every later step and every §1.7 role reads it from disk
+  rather than depending on conversation history.
+- **Added to the ALL ALONG → Document canonical list**, right after `ProblemStatement` (the list is
+  now 19 documents, not 18), and to the opening paragraph's description of the Project Parameters
+  block.
+- **Steps 02, 03, and 06's Inputs lines** now cite `docs/ProjectParameters.md` by name instead of
+  the bare phrase "Project Parameters."
+- **Schematics' DEFINE diagram (Step 01 node)** updated to output `docs/ProjectParameters.md`
+  instead of the unnamed "Project Parameters."
+- **Lite's own document-count comparison** (which cites the full framework's total) updated from
+  18 to 19 and now lists `ProjectParameters` alongside `ProblemStatement`.
+
+This section remains entirely optional and vendor-agnostic, as it always was — if the human has
+no preference, §1.7 is skipped in full and every role, including effort, runs through whatever the
+harness's own default is.
+
+### Fixed — Lite gets its own `ProjectParameters.md`, closing the same gap (Lite v1.2.0.0)
+
+Lite had the identical version of the gap above: its own Project Parameters block was referenced
+throughout — Step 1's own actions, and as an Input to Steps 2 and 3 — but never persisted to a
+named file. Fixed the same way, adapted to where Lite actually keeps things:
+
+- **`ProjectParameters.md`**, in the **project root** — not `docs/`, since Lite never uses a
+  `docs/` folder anywhere; everything lives flat at the root, matching `ProblemStatement.md` and
+  `ProjectProgress.md`.
+- Step 1's own action bullet, Outputs, and Exit gate all updated to name the file explicitly, the
+  same way Step 01's did in the full framework.
+- **Steps 2 and 3's Inputs lines** now cite `ProjectParameters.md` by name instead of the bare
+  phrase "Project Parameters."
+- **`LITE_Outline_OCPFBCAgenticDevFW.md`'s Document Set** section now lists `ProblemStatement.md`
+  and `ProjectParameters.md` as the two Step 1 setup artifacts, distinct from the four documents
+  tracked throughout the routine — that "four tracked files" framing was never meant to be a
+  literal file count (it already excluded `ProblemStatement.md`), so it's left as-is; the new line
+  just makes what it does and doesn't cover explicit.
+- Lite's own header bumped to **v1.2.0.0** (derived from full framework v2.5.0.0) to reflect a real
+  addition, not just documentation churn.
 
 ---
 
