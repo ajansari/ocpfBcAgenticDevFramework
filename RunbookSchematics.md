@@ -1,8 +1,10 @@
 # Agentic Development Framework — Schematics
 
-Visual companion to the runbook (see `CLAUDE.md` for the authoritative text, `RunbookChangelog.md`
-for its version history). These diagrams are a reading aid, not a source of truth — if a diagram
-and the runbook text ever disagree, the runbook wins and this file is stale and needs updating.
+Visual companion to the runbook (see `BC_App_Build_Routine_Agent.md` for the authoritative text,
+`RunbookChangelog.md` for its version history, and `standardsGuide/ocpfALDevStandardsGuide.md` for
+the AL rules it cites as **Standards §**). These diagrams are a reading aid, not a source of
+truth — if a diagram and the runbook text ever disagree, the runbook wins and this file is stale
+and needs updating.
 
 Every diagram below was extracted and rendered through `@mermaid-js/mermaid-cli` before being
 committed here, per the same discipline the runbook itself requires at Step 11 ("never ship a
@@ -127,9 +129,9 @@ flowchart TD
 
     subgraph PRE01["PRE-01 — State the Problem"]
         direction LR
-        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Capture raw requirements<br/>verbatim into requirements/;<br/>create ProjectProgress.md<br/>(project root); write problem<br/>statement, capture vocabulary,<br/>initial entity list, flag<br/>ambiguities"] --> Out1[/"Output:<br/>requirements/ (if any),<br/>ProjectProgress.md (root),<br/>ProblemStatement.md"/]
+        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Fetch Standards Guide into<br/>standardsGuide/ + gitignore it;<br/>capture raw requirements<br/>verbatim into requirements/;<br/>create ProjectProgress.md<br/>(project root); write problem<br/>statement, capture vocabulary,<br/>initial entity list, flag<br/>ambiguities"] --> Out1[/"Output:<br/>standardsGuide/ (gitignored),<br/>requirements/ (if any),<br/>ProjectProgress.md (root),<br/>ProblemStatement.md"/]
     end
-    PRE01 --> Gate1{{"Exit gate:<br/>Functional Consultant<br/>signs off"}}
+    PRE01 --> Gate1{{"Exit gate:<br/>Standards Guide present<br/>and gitignored;<br/>Functional Consultant<br/>signs off"}}
 
     Gate1 --> PRE02
     subgraph PRE02["PRE-02 — Structured Gap Analysis"]
@@ -272,7 +274,7 @@ flowchart TD
 
 ### 3.4 PROVE
 
-> **Restructured 2026-09-13 (AJ Ansari).** Old Step 09 ("Package and Test the App") is gone —
+> **Restructured September 13, 2026 (AJ Ansari).** Old Step 09 ("Package and Test the App") is gone —
 > compiling and packaging is now a continuous cycle that started back in Step 07 (BUILD), not a
 > milestone reserved for here. A new Step 12 ("Release to Users for Testing") closes PROVE
 > instead, running the same green/red-team checklist by hand, against the `HumanUnitTestScript.md`
@@ -372,8 +374,9 @@ flowchart LR
         Retain["Retain Explanations<br/>who decided, and why —<br/>not just the outcome"]
         Test["Testing Feedback Log<br/>verbatim findings, triaged<br/>explicitly, cross-referenced"]
         Mem["Project Memory<br/>docs/ProjectMemory.md —<br/>anchor, not a narrative"]
-        Prog["Project Progress Tracker<br/>docs/ProjectProgress.md —<br/>one status table, created at PRE-01"]
+        Prog["Project Progress Tracker<br/>ProjectProgress.md (project root) —<br/>one status table, created at PRE-01"]
         Pack["Packaging & Versioning<br/>never delete a package;<br/>propose bumps, don't apply silently"]
+        Std["OCPF AL Dev Standards Guide<br/>fetched at PRE-01 into standardsGuide/,<br/>gitignored — the rules cited as Standards §"]
         MCP["AL MCP Server<br/>bootstrap once, prefer its<br/>tools over ad hoc terminal use"]
         BCQ["BCQuality Knowledge Snapshot<br/>fetch once, refresh only<br/>on explicit request"]
         Pat["OCPF BC AL Patterns Library<br/>fetch once into patterns/,<br/>check before diagnosing from scratch"]
@@ -387,7 +390,7 @@ flowchart LR
     classDef phase fill:#d4e6f7,stroke:#4a7ab5,stroke-width:1px;
     classDef discipline fill:#fdf0d5,stroke:#c99a3a,stroke-width:1px;
     class DEFINE,DESIGN,BUILD,PROVE phase;
-    class Doc,Change,Retain,Test,Mem,Prog,Pack,MCP,BCQ,Pat discipline;
+    class Doc,Change,Retain,Test,Mem,Prog,Pack,Std,MCP,BCQ,Pat discipline;
 ```
 
 ### 4.2 Model & Effort Assignment (§1.7)
@@ -437,10 +440,12 @@ flowchart TD
 
 ---
 
-*Generated from `CLAUDE.md` v2.3.0.0 (2026-09-13, the Step 07/09/12 restructure and the OCPF BC
-AL Patterns Library addition, the Rule 6c step-completion check-in, the Step 11 → 12 formal
-hand-off message, the Step 11 Automated Test Scripts fix, the `ProjectProgress.md` tracker (project
-root) and its move there, the `requirements/` verbatim-capture rule, and the git-tracked `.app`
-packages default — see `RunbookChangelog.md`). If the runbook changes in a way that affects
+*Generated from `BC_App_Build_Routine_Agent.md` v2.4.0.0 (September 13, 2026 — the recovered and
+renumbered OCPF AL Development Standards Guide v1.0.0.0, its PRE-01 fetch and new ALL ALONG
+section; previously: the Step 07/09/12 restructure and the OCPF BC AL Patterns Library addition,
+the Rule 6c step-completion check-in, the Step 11 → 12 formal hand-off message, the Step 11
+Automated Test Scripts fix, the `ProjectProgress.md` tracker (project root) and its move there,
+the `requirements/` verbatim-capture rule, and the git-tracked `.app` packages default — see
+`RunbookChangelog.md`). If the runbook changes in a way that affects
 the phase/step/role structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*

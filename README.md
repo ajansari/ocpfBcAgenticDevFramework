@@ -8,23 +8,26 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 *by AJ Ansari*
 
-*Last Updated: Saturday, September 12, 2026*
+*Last Updated: Sunday, September 13, 2026*
 
 ## Background
 
 This Agentic Development Framework was created to help Business Central Functional Consultants use AI to build AL extensions and apps the **right** way — though professional AL developers will find it just as useful.
 
-The framework incorporates the AL MCP Server, BC Base App documentation from Microsoft Learn, and BCQuality, grounding the agent's guidance in official references and quality tooling rather than AI guesswork alone.
+The framework incorporates the AL MCP Server, BC Base App documentation from Microsoft Learn, and BCQuality, grounding the agent's guidance in official references and quality tooling rather than AI guesswork alone. Alongside the runbook sits my **OCPF AL Development Standards Guide** — the detailed AL rules the routine applies at each step — which the agent fetches into your project automatically.
+
+It comes in two editions: the **full framework** (14 steps) for substantial projects, and **[Lite](#lite-edition--for-small-fast-moving-projects)** (7 steps) for smaller ones that need to move fast. Both apply the same AL standards.
 
 ## Contents
 
 | File | Purpose |
 |---|---|
-| `The OCPF BC Agentic Dev Framework Outline.md` | A raw outline of the framework's Stages and Steps. Start here for a high-level understanding of how the framework is organized. |
+| `Outline_OCPFBCAgenticDevFW.md` | A raw outline of the framework's Stages and Steps. Start here for a high-level understanding of how the framework is organized. |
 | `BC_App_Build_Routine_Agent.md` | The agent instructions file to drop into any new AL project in Visual Studio Code. Review and adapt it as needed, then kick off the process with the prompt below. |
+| `standardsGuide/ocpfALDevStandardsGuide.md` | The companion **OCPF AL Development Standards Guide** — the detailed AL rules the runbook cites as **Standards §** (coding standards, API page design, field inclusion, naming, ID allocation, gap analysis, anti-patterns). You don't need to copy this one by hand: the runbook fetches it from this repository into every project at PRE-01, and gitignores it there. Shared by both editions. |
+| `liteVersion/` | The **Lite Edition** — a 7-step version of the framework for small, fast-moving projects. See [Lite Edition](#lite-edition--for-small-fast-moving-projects) below. |
 
-**Getting started prompt:**
-> This AL project will follow the Agentic Development Framework outlined in "BC_App_Build_Routine_Agent.md". Please review this file and let's get started.
+## Full Framework — Setup
 
 ### Setup by Tooling
 
@@ -41,7 +44,53 @@ Choose the setup that matches your development environment. Both paths use the s
 3. Rename the copy to `copilot-instructions.md`.
 4. Copilot Chat will automatically pick up `copilot-instructions.md` for the workspace.
 
-> 💡 **Tip:** Keep the original `BC_App_Build_Routine_Agent.md` in place as your master copy, and create renamed copies for whichever tool(s) you use — that way you can update one framework source and re-propagate changes as needed.
+**Getting started prompt:**
+> This AL project will follow the Agentic Development Framework outlined in `BC_App_Build_Routine_Agent.md` (may also be referred to as `CLAUDE.md` or `.github/copilot-instructions.md`). Please review this file and let's get started.
+
+> 💡 **Don't copy the Standards Guide by hand.** PRE-01 — the very first step of the routine — fetches it from this repository into a `standardsGuide/` folder in your project and adds that folder to `.gitignore`, so it stays out of your project's remote.
+
+> ⚠️ **One edition per project.** A project follows either the full framework or Lite — not both at once. If this project is only ~5–10 AL files with one person and one AI model on it, [Lite](#lite-edition--for-small-fast-moving-projects) covers the same ground in 7 steps and 4 documents.
+
+## Lite Edition — for small, fast-moving projects
+
+Not every extension needs the full 14-step routine. **Lite Edition** covers the same ground in **7 steps** and **4 documents**, for projects that need to move fast without giving up the discipline that keeps AI-generated AL correct.
+
+**Use Lite when:**
+
+- The extension is roughly **5–10 AL files** — a handful of API pages over standard tables, maybe a new table or two.
+- **One person** is driving it, and **one AI model** is doing the work.
+- You don't need separate Dev Manager / Technical Lead / Functional Consultant sign-off roles.
+
+**Use the full framework when** any of those stops being true — the object count grows past ~10, multiple sign-off roles are involved, you want to split work across more than one AI model (Main / Light / Reasoning), or the extension is heading to AppSource, which tends to demand the fuller documentation trail.
+
+**What Lite trims — and what it doesn't.** Lite reduces *process*, never the AL rules: it merges the FRD, TDD and Sanity Check into a single `DesignDoc.md`, folds the Testing Feedback Log and Roadmap into `ChangeLog.md`, and drops the multi-model role split. Both editions fetch and apply the **same** OCPF AL Development Standards Guide — the same rules apply to a 5-file extension as to a 50-file one. Nothing is lost by switching later: `DesignDoc.md` maps directly onto the full framework's TDD, and `ChangeLog.md` carries straight over.
+
+| Lite file | Purpose |
+|---|---|
+| `liteVersion/LITE_Outline_OCPFBCAgenticDevFW.md` | A one-page map of the Lite routine. Start here. |
+| `liteVersion/LITE_BC_App_Build_Routine_Agent.md` | The Lite agent instructions file to drop into your AL project. |
+
+### Lite Setup by Tooling
+
+Same pattern as the full framework — only the source file changes.
+
+**Claude Code plugin (Visual Studio Code)**
+1. Copy `liteVersion/LITE_BC_App_Build_Routine_Agent.md` into your project's root folder.
+2. Rename the copy to `CLAUDE.md`.
+3. Open the project in VS Code with the Claude Code plugin active — it will automatically load `CLAUDE.md` as project instructions.
+
+**GitHub Copilot Chat (Visual Studio Code)**
+1. Create a `.github` subfolder in your project's root folder, if one doesn't already exist.
+2. Copy `liteVersion/LITE_BC_App_Build_Routine_Agent.md` into that `.github` subfolder.
+3. Rename the copy to `copilot-instructions.md`.
+4. Copilot Chat will automatically pick up `copilot-instructions.md` for the workspace.
+
+**Getting started prompt (Lite):**
+> This AL project (10 files or fewer) will follow the Lite Agentic Development Framework outlined in `LITE_BC_App_Build_Routine_Agent.md` (may also be referred to as `CLAUDE.md` or `.github/copilot-instructions.md`). Please review this file and let's get started.
+
+> 💡 **Don't copy the Standards Guide by hand.** Step 1 — the very first step of the Lite routine — fetches it from this repository into a `standardsGuide/` folder in your project and adds that folder to `.gitignore`, so it stays out of your project's remote.
+
+> ⚠️ **One edition per project.** A project follows either the full framework or Lite — not both at once. If a Lite project outgrows Lite mid-flight, swap in the full runbook in place of the Lite one; your `DesignDoc.md` and `ChangeLog.md` carry straight over.
 
 ## Roadmap
 

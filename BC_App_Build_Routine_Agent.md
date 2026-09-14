@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 2.3.0.0
-**Last Updated:** 2026-09-13
+**Version:** 2.4.0.0
+**Last Updated:** September 13, 2026
 
 > Version history for this framework lives in `RunbookChangelog.md`, tracked independently of any
 > one project built with it — check there for what changed between the version you have and the
@@ -13,7 +13,7 @@
 >
 > **How the agent uses it:** Work the phases in order (DEFINE → DESIGN → BUILD → PROVE). Do not start a step until its predecessor's exit gate is met. Every step lists its **Inputs**, **Actions**, **Outputs**, and **Exit gate**. The *Project Parameters* block in Step 01 is the single source of truth for every name, ID, version, and quoting decision — never hardcode any of those values in AL; always derive them from that block.
 >
-> **Companion document:** `AL_PTE_Development_Standards_UNIFIED.md`. This runbook drives the *sequence*; that guide holds the detailed *rules* (Parts 2–12, Appendices A–C). References below point to it as **Standards §**.
+> **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide** (v1.0.0.0). This runbook drives the *sequence*; that guide holds the detailed AL *rules* the sequence applies (Parts 1–7, Appendices A–C). References below point to it as **Standards §**. It is fetched into the project at PRE-01 and kept for the life of the project — see ALL ALONG → OCPF AL Development Standards Guide for the fetch, refresh, and `.gitignore` policy. **Neither document restates the other:** the intake sheet, the phase/step sequence, every checklist, the compile cadence, and the ChangeLog format live only here; AL coding rules, API page design, field inclusion, naming, ID allocation, gap analysis, and anti-patterns live only there.
 >
 > **Prime directive for the agent:** An ambiguous input produces ambiguous code. If a step's inputs are incomplete or contradictory, stop and ask the human — do not invent rules to fill the gap.
 
@@ -22,18 +22,18 @@
 ## Operating Rules (apply in every phase)
 
 1. **Part 1 is authoritative.** Publisher, prefix, namespace, versions, ID ranges, localization — read them from the Project Parameters block (Step 01) and derive everything else. Never hardcode.
-2. **Verify against BC symbol files, not memory.** Table numbers, `using` namespaces, field IDs, `ObsoleteState` — confirm each in the symbol file named in Parameter 1.4. Agent knowledge of BC table numbers is not reliable (Standards §10.5, Appendix B). **Fallback when the downloaded symbols don't answer the question** (a module isn't in `.alpackages`, or you need to browse/discover rather than already knowing what to grep for): the entire BC BaseApp, for the current Business Central Online version, is documented at <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application> — every standard table, field, and field datatype/size. Use it to corroborate or discover; the downloaded symbol file for the target version is still the authoritative source when the two ever disagree.
-3. **Phase large scope into batches.** A batch is a self-contained, reviewable increment (by module or document-type group) — designed to be independently correct even though, under Operating Rule 4, it is not compiled on its own to prove it. Define batch boundaries during DESIGN and record them in the TDD (Standards §2 intro, §10.3).
-4. **Lint every batch as it's written, including symbol verification. Do not compile per batch — the whole extension compiles and packages once every batch from the TDD's batch plan is written, gating entry to PROVE.** Run the Step 05 pre-flight checklist immediately on each batch — both passes: pre-generation (on planned names/fields) and post-generation (on the actual files); Step 05 defines the full list — including **symbol verification**: for every reference to a standard/base object, field, method, property, or enum value, verify it against the downloaded symbol source (falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer), not just against what looks like plausible AL. That check exists specifically against hallucination: a pattern-matching lint pass draws on the same kind of intuition that produces a hallucinated reference in the first place, so checking against the actual symbols is the one thing that verifies against ground truth instead of a plausible-looking guess. Do not invoke the AL compiler as an automatic part of generating batches. The one mandatory compile-and-package of the originally-planned batches happens in Step 07, triggered the moment Step 06 finishes — not deferred further, and not skipped. **From that point, compiling and packaging is not a one-time event held back for a later step — it is the continuous rhythm of Step 07, Step 08's gap-fix loop, and Step 09's Code Review fixes, whenever any of them needs a code change: compile, package, deploy to a sandbox, test, diagnose and fix, then compile and package again, and repeat.** A human may also request an earlier spot-check compile mid-BUILD; that doesn't replace the mandatory one. **Gap-fill work is not part of that mandatory compile-and-package — it doesn't exist yet at that point.** Whether gap-fill arrives ad hoc (a human request mid-project, as actually happened on the pilot project) or as a Step 08 output, it gets pre-flighted and then compiled-and-packaged the same way, as its own pass, when it's actually done. Whenever any compile runs, treat any error as a systemic signal: fix the rule/template, then every file it touched — across every batch, not only the one where the error surfaced (Standards §9.3, §10.3).
-    **Trade-off, accepted deliberately (AJ Ansari, 2026-09-12, superseding the 2026-09-11 "compile once at the end" version of this rule):** even symbol-verified lint cannot catch everything a real compile does — cross-file type mismatches, full semantic validation, and rule interactions the compiler's own engine resolves are still invisible until an actual compile runs. Deferring the first real compile further than before means a systemic issue found late can touch more already-written files than catching it mid-BUILD would have. Accepted because generation speed matters more, and because symbol verification specifically closes the gap this decision was actually worried about — a reference to something that doesn't exist, dressed up as something that does.
-    **Corrected 2026-09-13 (AJ Ansari) — "compile" was the wrong word throughout Step 07/08/09; packaging isn't a later milestone.** The original wording of this rule and of Step 07 and old Step 09 talked only about *compiling*, which read as though building a `.app` package was a separate, later concern reserved for a dedicated packaging step. That's backwards: from the moment Step 07 opens, every fix that touches code gets compiled *and packaged* before it's deployed to a sandbox for the next test round — there is no meaningful "compile without packaging" state in this workflow once BUILD's mandatory pass runs. Old Step 09 ("Package and Test the App") is removed entirely for the same reason — see the PROVE phase and the Stage↔Step Map below for the corrected step sequence.
-5. **Zero errors, zero warnings before PROVE.** Treat warnings as errors during development (Standards §9.4). Satisfied by construction under Rule 4: the one mandatory compile-and-package (Step 07) always runs, and must reach 0/0, before Step 08 begins.
+2. **Verify against BC symbol files, not memory.** Table numbers, `using` namespaces, field IDs, `ObsoleteState` — confirm each in the symbol file named in Parameter 1.4. Agent knowledge of BC table numbers is not reliable; the verification procedure is Standards Appendix B. **Fallback when the downloaded symbols don't answer the question** (a module isn't in `.alpackages`, or you need to browse/discover rather than already knowing what to grep for): the entire BC BaseApp, for the current Business Central Online version, is documented at <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application> — every standard table, field, and field datatype/size. Use it to corroborate or discover; the downloaded symbol file for the target version is still the authoritative source when the two ever disagree.
+3. **Phase large scope into batches.** A batch is a self-contained, reviewable increment (by module or document-type group) — designed to be independently correct even though, under Operating Rule 4, it is not compiled on its own to prove it. Define batch boundaries during DESIGN and record them in the TDD.
+4. **Lint every batch as it's written, including symbol verification. Do not compile per batch — the whole extension compiles and packages once every batch from the TDD's batch plan is written, gating entry to PROVE.** Run the Step 05 pre-flight checklist immediately on each batch — both passes: pre-generation (on planned names/fields) and post-generation (on the actual files); Step 05 defines the full list — including **symbol verification**: for every reference to a standard/base object, field, method, property, or enum value, verify it against the downloaded symbol source (falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer), not just against what looks like plausible AL. That check exists specifically against hallucination: a pattern-matching lint pass draws on the same kind of intuition that produces a hallucinated reference in the first place, so checking against the actual symbols is the one thing that verifies against ground truth instead of a plausible-looking guess. Do not invoke the AL compiler as an automatic part of generating batches. The one mandatory compile-and-package of the originally-planned batches happens in Step 07, triggered the moment Step 06 finishes — not deferred further, and not skipped. **From that point, compiling and packaging is not a one-time event held back for a later step — it is the continuous rhythm of Step 07, Step 08's gap-fix loop, and Step 09's Code Review fixes, whenever any of them needs a code change: compile, package, deploy to a sandbox, test, diagnose and fix, then compile and package again, and repeat.** A human may also request an earlier spot-check compile mid-BUILD; that doesn't replace the mandatory one. **Gap-fill work is not part of that mandatory compile-and-package — it doesn't exist yet at that point.** Whether gap-fill arrives ad hoc (a human request mid-project, as actually happened on the pilot project) or as a Step 08 output, it gets pre-flighted and then compiled-and-packaged the same way, as its own pass, when it's actually done. Whenever any compile runs, treat any error as a systemic signal: fix the rule/template, then every file it touched — across every batch, not only the one where the error surfaced.
+    **Trade-off, accepted deliberately (AJ Ansari, September 12, 2026, superseding the September 11, 2026 "compile once at the end" version of this rule):** even symbol-verified lint cannot catch everything a real compile does — cross-file type mismatches, full semantic validation, and rule interactions the compiler's own engine resolves are still invisible until an actual compile runs. Deferring the first real compile further than before means a systemic issue found late can touch more already-written files than catching it mid-BUILD would have. Accepted because generation speed matters more, and because symbol verification specifically closes the gap this decision was actually worried about — a reference to something that doesn't exist, dressed up as something that does.
+    **Corrected September 13, 2026 (AJ Ansari) — "compile" was the wrong word throughout Step 07/08/09; packaging isn't a later milestone.** The original wording of this rule and of Step 07 and old Step 09 talked only about *compiling*, which read as though building a `.app` package was a separate, later concern reserved for a dedicated packaging step. That's backwards: from the moment Step 07 opens, every fix that touches code gets compiled *and packaged* before it's deployed to a sandbox for the next test round — there is no meaningful "compile without packaging" state in this workflow once BUILD's mandatory pass runs. Old Step 09 ("Package and Test the App") is removed entirely for the same reason — see the PROVE phase and the Stage↔Step Map below for the corrected step sequence.
+5. **Zero errors, zero warnings before PROVE.** Treat warnings as errors during development — a warning about an obsolete field or a missing property is a defect, not cosmetic noise. Satisfied by construction under Rule 4: the one mandatory compile-and-package (Step 07) always runs, and must reach 0/0, before Step 08 begins.
 6. **Human-in-the-loop is a feature.** Pause for human approval before: writing the first file of a batch, applying a root-cause fix, starting a new batch, finalizing any design document, and installing any tool or runtime.
 6a. **Ask decisions in a selectable options box, not in prose.** When the agent needs the human to *decide something* — pick between design options, approve a version bump, choose a name, resolve an ambiguity — present it through the interactive multiple-choice mechanism the agent's harness provides (e.g., in Claude Code, the `AskUserQuestion` tool — substitute whatever the actual harness offers), with the recommended option first and a short reason on each. A decision buried in a paragraph of chat is easy to miss: it reads like the agent finished and is idling, so the project silently stalls waiting on an answer nobody realised was owed.
     **Use it only for decisions.** Do *not* wrap ordinary progress in it — finishing a step and waiting to be told to start the next one, reporting a clean compile, or handing back a result is normal conversation, not a decision point. Over-using the box makes it noise, which defeats the purpose.
 6b. **Don't install tooling without asking — and look harder first.** Before concluding a required compiler/runtime is missing and reaching for an install, check whether the human's own IDE already provisions one privately for the tool in question — e.g., VS Code's AL extension gets its .NET runtime from a companion ".NET Install Tool" extension, not a system-wide install, at a path that differs by OS: `~/Library/Application Support/Code/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/` on macOS, `~/.config/Code/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/` on Linux, `%APPDATA%\Code\User\globalStorage\ms-dotnettools.vscode-dotnet-runtime\` on Windows — check the one matching the actual machine, not just the first one you think of, *before* assuming none exists. If the human's own editor can already do the thing you're about to install a tool for, that's a strong signal the tool already exists somewhere you haven't looked. Installing anything is itself a human-in-the-loop decision (rule 6) regardless of what a fallback option elsewhere in this runbook lists as available — on a real project the agent skipped the search, wrongly installed a fresh runtime, and had to remove it.
 6c. **From Step 08 onward, check in after every step closes — proceed now, or pause?** (AJ
-    Ansari, 2026-09-13.) When a step's own work is finished — its outputs written, its exit gate
+    Ansari, September 13, 2026.) When a step's own work is finished — its outputs written, its exit gate
     met, and the normal end-of-step summary given — don't default to waiting for the human to
     say "go" in ordinary conversation, and don't default to silently starting the next step
     either. Starting at Step 08 (Gap-Fit Test) through Step 12 (Release to Users for Testing),
@@ -63,8 +63,17 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
 **Inputs:** Stakeholder conversation notes; the business need in plain language.
 
 **Actions:**
+- **Fetch the OCPF AL Development Standards Guide into the project, before anything else needs
+  it** (AJ Ansari, September 13, 2026). Every phase from PRE-02 onward cites it as **Standards §**
+  — PRE-02's own gap-analysis checklist is Standards Part 6 — so it has to be on disk from the
+  first step, not fetched at Step 05 alongside the other libraries. Get
+  `standardsGuide/ocpfALDevStandardsGuide.md` from
+  `https://github.com/ajansari/ocpfBcAgenticDevFramework/` into a `standardsGuide/` folder in this
+  project's root, and **add `standardsGuide/` to this project's `.gitignore`** — see ALL ALONG →
+  OCPF AL Development Standards Guide for the full fetch, refresh, and hygiene policy, and say so
+  plainly to the human rather than fetching silently.
 - **Capture any raw requirements input verbatim, before any interpretation happens** (AJ Ansari,
-  2026-09-13). If the human has pasted raw requirements text in chat, or uploaded a file, this is
+  September 13, 2026). If the human has pasted raw requirements text in chat, or uploaded a file, this is
   the frozen, ground-truth source the rest of DEFINE works from — preserve it untouched, the same
   role a project's own `requirements/<name>.md` already plays once DEFINE is done with it:
   - Create a `requirements/` folder in the project root if one doesn't already exist. It is a
@@ -82,7 +91,7 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
     requirements/scope input arrives too (a change request, a follow-up drop of new material),
     not only at kickoff.
 - Before anything else, create `ProjectProgress.md` (ALL ALONG → Project Progress Tracker), **in
-  the project root — always, not `docs/`** (AJ Ansari, 2026-09-13) — one row per step of the whole
+  the project root — always, not `docs/`** (AJ Ansari, September 13, 2026) — one row per step of the whole
   routine, every row blank except this one, marked `In Progress`. This is the very first file
   artifact of the entire engagement.
 - Write a problem statement: what business outcome is required, who the consumers are (users, other systems, AI tools, BI/reporting), and what is explicitly out of scope.
@@ -90,32 +99,32 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
 - Produce an initial entity/object list from stakeholder domain knowledge.
 - As the agent: identify duplicates, ambiguous terms, and outdated/legacy terminology in the initial list; ask clarifying questions about scope and consumer use cases. Do not resolve ambiguities silently.
 
-**Outputs:** `requirements/` (seeded, if any raw input was provided), `ProjectProgress.md` (seeded, project root), `ProblemStatement.md` — purpose, scope, out-of-scope, target consumers, initial entity list, open questions.
+**Outputs:** `standardsGuide/` (fetched, gitignored), `requirements/` (seeded, if any raw input was provided), `ProjectProgress.md` (seeded, project root), `ProblemStatement.md` — purpose, scope, out-of-scope, target consumers, initial entity list, open questions.
 
-**Exit gate:** Functional Consultant signs off on the problem statement and initial entity list (Standards §2.2 Stage 1).
+**Exit gate:** The Standards Guide is present in `standardsGuide/` and gitignored. Functional Consultant signs off on the problem statement and initial entity list (Stage↔Step Map, Stage 1).
 
 ## PRE-02 — Structured Gap Analysis
 
 **Inputs:** `ProblemStatement.md` and the initial entity list.
 
-**Actions:** Run the gap analysis checklist against standard BC modules (Standards §8). For every transactional entity, check each category:
-- **Analytical detail tables** — sub-ledgers, detailed ledger entries, value entries, registers, audit trails (§8.1).
-- **Posted / archived versions** — the posted equivalent of every open document, header *and* lines (§8.2).
-- **Reference / lookup tables** — payment terms/methods, currencies, countries, UoM, locations, shipment methods, item categories, salesperson/purchaser codes (§8.3).
-- **Secondary document types** — quotes, blanket orders, return orders alongside orders (§8.4).
-- **Modern vs. legacy tables** — replace legacy price tables etc. with current equivalents; use modern entity names (§8.5).
-- **Tax framework tables** — decide per the target localization; do not assume (§8.6).
+**Actions:** Run the gap analysis checklist against standard BC modules (Standards Part 6). For every transactional entity, check each category:
+- **Analytical detail tables** — sub-ledgers, detailed ledger entries, value entries, registers, audit trails (Standards §6.1).
+- **Posted / archived versions** — the posted equivalent of every open document, header *and* lines (Standards §6.2).
+- **Reference / lookup tables** — payment terms/methods, currencies, countries, UoM, locations, shipment methods, item categories, salesperson/purchaser codes (Standards §6.3).
+- **Secondary document types** — quotes, blanket orders, return orders alongside orders (Standards §6.4).
+- **Modern vs. legacy tables** — replace legacy price tables etc. with current equivalents; use modern entity names (Standards §6.5).
+- **Tax framework tables** — decide per the target localization; do not assume (Standards §6.6).
 - **Global vs. localized scope** — mark each entity as global or jurisdiction-specific.
 
 **Outputs:** Expanded, de-duplicated entity list with each entity tagged (analytical / master / setup / document / posted / lookup), R/W intent noted, and global-vs-localized noted. Gap log: what was added and why.
 
-**Exit gate:** Technical Lead reviews the expanded list; all gaps are closed or explicitly deferred with reasoning (Standards §2.2 Stage 2).
+**Exit gate:** Technical Lead reviews the expanded list; all gaps are closed or explicitly deferred with reasoning (Stage↔Step Map, Stage 2).
 
 ## 01 — Populate the Intake Sheet (Project Parameters)
 
 **Inputs:** Expanded entity list; platform/tenant constraints from the stakeholder; BC symbol file for the target version.
 
-**Actions:** Complete **every** field below. Replace every placeholder. These values override all defaults for the rest of the routine. This block is copied verbatim from `AL_PTE_Development_Standards_UNIFIED.md` Part 1 and is the authoritative source (Standards §1, "Authoritative-source rule").
+**Actions:** Complete **every** field below. Replace every placeholder. These values override all defaults for the rest of the routine. **This block is the authoritative source** — the single source of truth for every name, ID, version, prefix, namespace, and quoting decision in the project. The Standards Guide deliberately keeps no copy of it and defers to whatever is filled in here (Standards, "Authoritative-source rule"); nothing in AL code hardcodes a value that belongs in this block.
 
 **Ask first, don't infer.** If `Extension Name`, `Publisher`, `Use Namespace (y/n)`, `Namespace`,
 `Localization`, or `AL Object Prefix` (§1.3) still carry placeholder values, ask the human
@@ -198,7 +207,7 @@ Collected as the loop described above — one row per confirmed range, in the or
 
 | Parameter | Value | Guidance |
 |---|---|---|
-| **Permission Sets required?** | `Yes` / `No` | `No` is a valid answer **only when the extension introduces zero new tables of its own** (e.g., a pure page/report extension on standard objects) — the one case where BC PTE publish validation (`PTE0004`) doesn't require an in-package permission set. The moment the project owns even one table, this must be `Yes`; it stops being a free choice. If `Yes`, reserve ≥ 2 IDs inside the primary range and deliver per Standards §7.3. |
+| **Permission Sets required?** | `Yes` / `No` | `No` is a valid answer **only when the extension introduces zero new tables of its own** (e.g., a pure page/report extension on standard objects) — the one case where BC PTE publish validation (`PTE0004`) doesn't require an in-package permission set. The moment the project owns even one table, this must be `Yes`; it stops being a free choice. If `Yes`, reserve ≥ 2 IDs inside the primary range and deliver per Standards §5.3. |
 
 > **Rule:** Never use object IDs outside the allocated ranges. Maintain the object register as a separate project artifact. If the project plans any new table, `Permission Sets required` must be `Yes` and they must be planned before code generation — do not accept `No` alongside a table in the entity list without flagging the contradiction back to the human.
 
@@ -209,7 +218,7 @@ Primary `90800`–`90899`; Additional allocation 1 `91500`–`91549`; Permission
 
 ### 1.3 Naming & API Parameters
 
-> These values govern every AL object, API registration, and permission set. Do not hardcode them — derive all names from this table. **These parameters directly control the entity-naming patterns used in Standards Part 4.**
+> These values govern every AL object, API registration, and permission set. Do not hardcode them — derive all names from this table. **These parameters directly control the entity-naming patterns used in Standards Part 2.**
 
 | Parameter | Placeholder | Guidance & Example |
 |---|---|---|
@@ -230,7 +239,7 @@ Primary `90800`–`90899`; Additional allocation 1 `91500`–`91549`; Permission
 | `ODataKeyFields` | `SystemId` | Always. On every page. |
 | Page object name | Same as `EntitySetName`, in double quotes | `page 90801 "acmeGeneralLedgerEntries"` |
 
-- `EntitySetName` and `EntityName` must be ≤ 30 characters **including** the prefix. Apply abbreviations from Standards §6.2 as needed.
+- `EntitySetName` and `EntityName` must be ≤ 30 characters **including** the prefix. Apply abbreviations from Standards §4.2 as needed.
 - **Singleton tables** (e.g., General Ledger Setup, Company Information): set `EntityName = EntitySetName`. The OData response is a single-entry collection.
 - **Legacy vs. modern names:** use the modern BC name in entity identifiers. Example: Table 167 "Job" → `EntityName = '<prefix>Project'`.
 
@@ -241,7 +250,7 @@ Primary `90800`–`90899`; Additional allocation 1 `91500`–`91549`; Permission
 | **AL Runtime** | `<major.minor>` | No quotes. Set in `app.json "runtime"`. Example: `16.0` |
 | **BC Application Minimum** | `<major.minor.build.revision>` | No quotes. Set in `app.json` dependencies. Example: `27.0.0.0` |
 | **Recommended BC Version** | `<BC version>` | Informational; validation target. Example: `27.5+` |
-| **Symbol Source** | `<BC symbol file version>` | Symbol file used for verification (Appendix B). Example: `BC v27.5 symbol file` |
+| **Symbol Source** | `<BC symbol file version>` | Symbol file used for verification (Standards Appendix B). Example: `BC v27.5 symbol file` |
 
 > Localization is **not** repeated here — it is set once in Section 1.1.
 
@@ -287,7 +296,7 @@ specifics feed the FRD (Step 02) object inventory and the TDD (Step 03) per-obje
 > If the human has no preference, skip this: everything runs through the main model, as if this
 > section didn't exist.
 
-**Superseded 2026-09-12 (AJ Ansari) — from "record a preference" to a fixed division of labor.**
+**Superseded September 12, 2026 (AJ Ansari) — from "record a preference" to a fixed division of labor.**
 Earlier guidance here only *recorded* a stated preference as documentation, on the reasoning that
 the executing agent can't switch its own model mid-session. That's still true, but it missed the
 actual point: the agent *can* delegate a specific, self-contained task to a subagent running a
@@ -366,11 +375,13 @@ self-contained — e.g., so a teammate cloning it fresh can see exactly how it w
 separately fetching the framework — can say so here and get that instead; both are legitimate,
 this just isn't a decision to make silently either way.
 
-This choice governs only the three framework documents named above. The BCQuality snapshot
-(kept entirely outside the project root — see ALL ALONG → BCQuality Knowledge Snapshot) and any
-local tooling helper script this framework's own bootstrap creates (e.g., an AL MCP Server launcher) are
-**always** excluded from this project's git tracking regardless of the answer here — see ALL ALONG
-→ Repository Hygiene. That part isn't a choice the human makes per project.
+This choice governs only the three framework documents named above. The fetched Standards Guide
+(`standardsGuide/` — see ALL ALONG → OCPF AL Development Standards Guide), the BCQuality snapshot
+(kept entirely outside the project root — see ALL ALONG → BCQuality Knowledge Snapshot), the
+fetched patterns library (`patterns/`), and any local tooling helper script this framework's own
+bootstrap creates (e.g., an AL MCP Server launcher) are **always** excluded from this project's
+git tracking regardless of the answer here — see ALL ALONG → Repository Hygiene. That part isn't
+a choice the human makes per project.
 
 **Outputs:** The completed Project Parameters block (above, all placeholders replaced); an empty **Object Register** artifact seeded with the allocated ID ranges; the project's `.gitignore` populated per this section and per ALL ALONG → Repository Hygiene.
 
@@ -391,20 +402,20 @@ sign-off. Sign-off is unchanged either way — it's the human's, never the draft
 
 **Inputs:** `ProblemStatement.md`, expanded entity list + gap log, Project Parameters.
 
-**Actions:** Write the FRD in business language — *what* the extension does and *why*, not *how* (Standards §2.1). It must capture:
+**Actions:** Write the FRD in business language — *what* the extension does and *why*, not *how*. It must capture:
 - Purpose and scope; explicit out-of-scope list.
 - Business objectives and the value delivered.
 - Target consumers (users, systems, AI tools, reports).
 - Platform requirements (BC version, deployment model, compatibility) — from Parameters 1.1 and 1.4.
 - Design rules — the non-negotiable constraints governing every object.
-- Entity / object inventory — every object with source table, type, and read vs. read/write designation (use the mutability rules in Standards §4.2).
+- Entity / object inventory — every object with source table, type, and read vs. read/write designation (use the mutability rules in Standards §2.2).
 - Non-functional requirements — compilation cleanliness, performance, compliance, deployment.
 
 Then **review and validate against the DEFINE artifacts:** every entity in the expanded list appears in the FRD inventory (or is listed as deferred with a reason); every consumer use case from PRE-01 is addressed. For every platform capability the FRD assumes, verify BC can actually do it — do not write requirements based on assumed platform behavior.
 
 **Outputs:** `FRD.md`.
 
-**Exit gate:** FRD + Dev Manager sign-off. Every DEFINE-phase entity is accounted for. No unverified platform assumptions remain (Standards §2.2 Stage 4).
+**Exit gate:** FRD + Dev Manager sign-off. Every DEFINE-phase entity is accounted for. No unverified platform assumptions remain (Stage↔Step Map, Stage 4).
 
 ## 03 — Craft the Technical Design Document (TDD)
 
@@ -414,22 +425,22 @@ human for sign-off, same as Step 02.
 
 **Inputs:** `FRD.md`, Project Parameters, BC symbol file (Parameter 1.4).
 
-**Actions:** Translate the FRD's *what* into a precise *how*. The TDD must be self-sufficient: a developer or agent who has never seen the project must be able to produce every object correctly from the TDD alone (Standards §2.3). Include:
+**Actions:** Translate the FRD's *what* into a precise *how*. The TDD must be self-sufficient: a developer or agent who has never seen the project must be able to produce every object correctly from the TDD alone — no rule it applies may require knowledge that lives outside the document. Include:
 - **System identity** — Publisher, namespace, prefix, APIPublisher, APIGroup prefix, APIVersion, AL runtime, BC minimum, object ID ranges (all from Part 1).
-- **Module grouping** — cluster entities into cohesive functional modules; assign each module a contiguous ID sub-block with a growth buffer (min 20% unallocated) and a tail block for cross-module additions (Standards §7.1–§7.2).
-- **Batch / phase plan** — which modules or document-type groups are built in which order; smallest and simplest batch first (Standards §10.3).
-- **Per-object spec** — for every object: ID, type, name, source table name *and* verified source table number, `PageType`, `APIPublisher`, `APIGroup`, `EntityName`, `EntitySetName`, `ODataKeyFields = SystemId`, and exactly one of `DelayedInsert = true` / `Editable = false` per §4.2.
-- **Per-field spec** — every field by source name and camelCase identifier, with each conversion decision shown (Standards §6.1); which fields are excluded and why (Standards Part 5, driven by the Localization parameter); abbreviations applied (Standards §6.2); reserved-keyword resolutions (Standards §6.3).
+- **Module grouping** — cluster entities into cohesive functional modules; assign each module a contiguous ID sub-block with a growth buffer (min 20% unallocated) and a tail block for cross-module additions (Standards §5.1–§5.2).
+- **Batch / phase plan** — which modules or document-type groups are built in which order; smallest and simplest batch first (Operating Rule 3).
+- **Per-object spec** — for every object: ID, type, name, source table name *and* verified source table number, `PageType`, `APIPublisher`, `APIGroup`, `EntityName`, `EntitySetName`, `ODataKeyFields = SystemId`, and exactly one of `DelayedInsert = true` / `Editable = false` per Standards §2.2.
+- **Per-field spec** — every field by source name and camelCase identifier, with each conversion decision shown (Standards §4.1); which fields are excluded and why (Standards Part 3, driven by the Localization parameter); abbreviations applied (Standards §4.2); reserved-keyword resolutions (Standards §4.3).
 - **Computed-field pattern, decided per field, not defaulted:** a `FlowField` is always read-only and always live-recalculated — it cannot be overridden. A field that should *suggest* a value but let the user override it (e.g. a price or date derived from other fields) must be a real **stored** field, seeded by an `OnValidate`/`OnInsert` trigger, that never overwrites a value the user has already entered — the same pattern as an R-1-style suggested-date rule. Decide and state explicitly which pattern each calculated-looking field uses; do not reach for `FlowField` out of habit when "auto-populated but editable" is what's actually wanted.
-- **`SourceTableView` filters** — for every document-type-filtered page, with the correct `const()` quoting (quote only multi-word enum values) (Standards §4.3).
-- **`using` directives** — the exact namespace for every object, copied from the symbol file (Standards §3.1, §5.4).
-- **Standard object template** — the exact AL API page pattern every generated object must follow (Standards §3.3).
+- **`SourceTableView` filters** — for every document-type-filtered page, with the correct `const()` quoting (quote only multi-word enum values) (Standards §2.3).
+- **`using` directives** — the exact namespace for every object, copied from the symbol file (Standards §1.1, §3.4).
+- **Standard object template** — the exact AL API page pattern every generated object must follow (Standards §1.3).
 - **Special design notes** — singletons (`EntityName = EntitySetName`), header/line pairs as two top-level pages, high-volume tables, naming conflicts.
-- **Permission sets** — if Parameter 1.2 = `Yes` (mandatory the moment the project owns any table — see Parameter 1.2): a read-only set and a read/write set (including the read-only set), both with IDs from the allocated range and names from the Permission Set Prefix (Standards §7.3). **The batch plan must ship each table's `tabledata` grant in the same batch that introduces the table — never deferred to a later batch.** BC PTE publish validation (`PTE0004`) requires every table in a published package to be covered by an in-package permission set; finding this at publish instead of at TDD time forces a batch-plan rewrite after code already exists (a real project hit exactly this and had to pull its permission sets forward from its last batch to its first).
+- **Permission sets** — if Parameter 1.2 = `Yes` (mandatory the moment the project owns any table — see Parameter 1.2): a read-only set and a read/write set (including the read-only set), both with IDs from the allocated range and names from the Permission Set Prefix (Standards §5.3). **The batch plan must ship each table's `tabledata` grant in the same batch that introduces the table — never deferred to a later batch.** BC PTE publish validation (`PTE0004`) requires every table in a published package to be covered by an in-package permission set; finding this at publish instead of at TDD time forces a batch-plan rewrite after code already exists (a real project hit exactly this and had to pull its permission sets forward from its last batch to its first).
 
 **Outputs:** `TDD.md`; updated **Object Register** with every planned object and its ID.
 
-**Exit gate:** Technical Lead sign-off. Self-sufficiency check passes: no rule requires knowledge outside the document (Standards §2.2 Stage 5).
+**Exit gate:** Technical Lead sign-off. Self-sufficiency check passes: no rule requires knowledge outside the document (Stage↔Step Map, Stage 5).
 
 ## 04 — Sanity Check and Validation
 
@@ -440,24 +451,24 @@ the documents.
 
 **Inputs:** `FRD.md`, `TDD.md`, BC symbol file.
 
-**Actions:** Run a formal structured review — not a read-through — answering: **(A)** Can BC actually do everything the FRD asks? **(B)** Does the TDD fully and correctly implement the FRD? What will the object structure look like when built? Record each check, its finding, and any resolution in a document. Work the checklist (Standards §2.4):
+**Actions:** Run a formal structured review — not a read-through — answering: **(A)** Can BC actually do everything the FRD asks? **(B)** Does the TDD fully and correctly implement the FRD? What will the object structure look like when built? Record each check, its finding, and any resolution in a document. Work the checklist — this is the canonical sanity-check list; the Standards Guide deliberately keeps no second copy of it:
 
 - [ ] Every FRD entity maps to at least one TDD object.
 - [ ] Every TDD object has a valid ID inside an allocated range (Parameter 1.2).
 - [ ] Every source table number is verified against the symbol file (not estimated).
-- [ ] Every field complies with the Localization parameter and Standards Part 5.
+- [ ] Every field complies with the Localization parameter and Standards Part 3.
 - [ ] Every obsolete / pending field is excluded.
 - [ ] Every `using` namespace is sourced from the symbol file.
 - [ ] All document-type-filtered pages use the correct `const()` quoting pattern.
 - [ ] All entity names ≤ 30 characters; all field identifiers ≤ 30 characters.
-- [ ] Read vs. read/write designations match the mutability rules in Standards §4.2.
-- [ ] Growth buffers are planned within each module block (Standards §7.2).
-- [ ] Permission sets are planned if enabled (Parameter 1.2) — **with every table's `tabledata` grant explicitly enumerated per set**, not just "permission sets exist," and each grant assigned to the same batch that introduces its table (Standards §7.3).
+- [ ] Read vs. read/write designations match the mutability rules in Standards §2.2.
+- [ ] Growth buffers are planned within each module block (Standards §5.2).
+- [ ] Permission sets are planned if enabled (Parameter 1.2) — **with every table's `tabledata` grant explicitly enumerated per set**, not just "permission sets exist," and each grant assigned to the same batch that introduces its table (Standards §5.3).
 - [ ] Every entity's deletion behavior (block-if-referenced / cascade / allow) is explicitly decided and stated — not left to whatever the template defaults to. This includes fields on *other* tables (including standard BC tables extended via `tableextension`) that reference this entity by `TableRelation`: deciding a table's deletion behavior means re-checking every known referencing field, not just this app's own child tables.
 
 **Outputs:** `SanityCheck.md` — every check, finding, resolution.
 
-**Exit gate:** 0 blocking issues; every gap resolved; Technical Lead sign-off. Issues found here cost hours; the same issues found during BUILD cost days (Standards §2.2 Stage 6).
+**Exit gate:** 0 blocking issues; every gap resolved; Technical Lead sign-off. Issues found here cost hours; the same issues found during BUILD cost days (Stage↔Step Map, Stage 6).
 
 ---
 
@@ -470,16 +481,18 @@ Goal: generate AL batch by batch, lint clean — including symbol verification �
 **Inputs:** `TDD.md` (module grouping + batch plan), Object Register.
 
 **Actions:**
-- Confirm the object build order: which objects are built in which batch, smallest/simplest module first (Standards §10.3).
+- Confirm the object build order: which objects are built in which batch, smallest/simplest module first (Operating Rule 3).
 - Within a batch, order objects so lookup/reference tables precede the entities that reference them.
 - Prepare the scaffold: `app.json` (name, publisher, runtime, BC dependency, `"features": ["NoImplicitWith"]`), `launch.json`, folder structure per module, and `.gitignore` populated per §1.8 and ALL ALONG → Repository Hygiene.
 - Bootstrap the AL MCP Server, the BCQuality knowledge snapshot, and the OnlyCopilotFans (OCPF)
   BC AL Patterns library for this project if not already done (ALL ALONG) — all three are
   one-time-per-project setup, cheapest to do alongside the rest of the scaffold rather than as an
-  afterthought once BUILD is underway.
+  afterthought once BUILD is underway. (The Standards Guide is **not** in this group — it is
+  fetched much earlier, at PRE-01, because DEFINE and DESIGN both cite it. Confirm
+  `standardsGuide/` is present and gitignored here rather than re-fetching it.)
 - Write the pre-flight validation checks to run for each batch — this is the canonical checklist every other reference to "the Step 05 checklist" in this runbook means; if you're re-stating it elsewhere, point here rather than re-enumerating. Split into two passes, since some checks are only possible before generation and some only after:
   - **Pre-generation** (on the TDD's planned names/fields, before any file exists — main role): identifier length ≤ 30, entity/EntitySet name length ≤ 30, reserved-keyword scan, localization field-range filter, `ObsoleteState` filter.
-  - **Post-generation** (on the actual generated files — light role, if §1.7 role assignment is configured): required-property presence, `Rec.`-qualification (`NoImplicitWith`), dead-code check (no empty triggers, no `// TODO`, no commented-out fields), 4-space indentation with no tabs, permission-set `tabledata` coverage for every table the batch introduces (Standards §7.3 — `PTE0004` fires at **publish**, not at compile, so **nothing automated catches a missing grant** — pre-flight is the only defense; vacuously satisfied if this project introduces no tables — see Parameter 1.2), and **symbol verification** — every reference to a standard/base BC table, page, codeunit, method, property, or enum value confirmed against the downloaded symbol source, falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer, not assumed correct because it looks like plausible AL (Operating Rule 4).
+  - **Post-generation** (on the actual generated files — light role, if §1.7 role assignment is configured): required-property presence, `Rec.`-qualification (`NoImplicitWith`), dead-code check (no empty triggers, no `// TODO`, no commented-out fields), 4-space indentation with no tabs (Standards §1.6), permission-set `tabledata` coverage for every table the batch introduces (Standards §5.3 — `PTE0004` fires at **publish**, not at compile, so **nothing automated catches a missing grant** — pre-flight is the only defense; vacuously satisfied if this project introduces no tables — see Parameter 1.2), and **symbol verification** — every reference to a standard/base BC table, page, codeunit, method, property, or enum value confirmed against the downloaded symbol source, falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer, not assumed correct because it looks like plausible AL (Operating Rule 4).
 
 **Outputs:** Batch plan (ordered), project scaffold, pre-flight validation script/checklist (both passes).
 
@@ -493,10 +506,10 @@ Goal: generate AL batch by batch, lint clean — including symbol verification �
 1. Pause for human approval before writing the first file.
 2. Extract source-table and field data for this batch's objects from the symbol file.
 3. Run the Step 05 **pre-generation** pre-flight pass on the planned names/fields (main role — this is TDD housekeeping, distinct from the file-level lint in Action 5 below); fix the TDD before generating if anything fails.
-4. Generate the batch's AL files from the standard template (Standards §3.3), substituting only Part 1 values. Every file: one `namespace`, one `using` (from symbol file), `ODataKeyFields = SystemId`, exactly one of `DelayedInsert = true` / `Editable = false`, and `Caption` + `ToolTip` + `ApplicationArea = All` on every field (Standards §3.1–§3.4, §4.1–§4.6). Captions and ToolTips written as self-describing schema for API consumers (Standards §4.5–§4.6). No dead code, no empty triggers, no commented-out fields, no `// TODO` (Standards §3.5).
-5. **Run the Step 05 post-generation pre-flight pass on the batch immediately** — dot the i's, cross the t's on each file as you go, plus a manual read against the AZ AL Dev Tools rules (Appendix C — see the caveat on this citation under ALL ALONG → Retain Explanations). If §1.7 role assignment is configured, this pass is done by the **light role** — it reports findings only, it does not edit code; the main role applies every fix. **Do not invoke the AL compiler** (Operating Rule 4).
+4. Generate the batch's AL files from the standard template (Standards §1.3), substituting only Step 01 parameter values. Every file: one `namespace` (omitted entirely if Parameter 1.1 `Use Namespace` = `No`), one `using` (from symbol file), `ODataKeyFields = SystemId`, exactly one of `DelayedInsert = true` / `Editable = false`, and `Caption` + `ToolTip` + `ApplicationArea = All` on every field (Standards §1.1–§1.4, §2.1–§2.6). Captions and ToolTips written as self-describing schema for API consumers (Standards §2.5–§2.6). No dead code, no empty triggers, no commented-out fields, no `// TODO` (Standards §1.5).
+5. **Run the Step 05 post-generation pre-flight pass on the batch immediately** — dot the i's, cross the t's on each file as you go, plus a manual read against the AZ AL Dev Tools rules (Standards Appendix C). If §1.7 role assignment is configured, this pass is done by the **light role** — it reports findings only, it does not edit code; the main role applies every fix. **Do not invoke the AL compiler** (Operating Rule 4).
 6. Do not proceed to the next batch until this one's pre-flight (including symbol verification) is clean. Do not compile per batch. Once every batch from the TDD's batch plan is generated, move to Step 07 — that step opens with the one mandatory compile-and-package (Operating Rule 4); it is not optional and not deferred further. (Gap-fill work, if any comes later, is a separate pass through this same Step 05/06/07 discipline when it's actually written — see Operating Rule 4.)
-7. **Before moving past this step, verify permission-set coverage explicitly** (light role, same checklist nature as Action 5) — don't just trust that it was "planned." Check that every table built across every batch has a matching `tabledata` grant in both the read-only and read/write permission sets (Standards §7.3; vacuously satisfied if this project introduces no tables — see Parameter 1.2). This is a design-time check, independent of whether or when a compile happens: `PTE0004` (missing permission set) only fires at **publish**, and nothing else automated catches it. A real project didn't catch this until publish and had to rewrite its batch plan as a result — catch it here instead.
+7. **Before moving past this step, verify permission-set coverage explicitly** (light role, same checklist nature as Action 5) — don't just trust that it was "planned." Check that every table built across every batch has a matching `tabledata` grant in both the read-only and read/write permission sets (Standards §5.3; vacuously satisfied if this project introduces no tables — see Parameter 1.2). This is a design-time check, independent of whether or when a compile happens: `PTE0004` (missing permission set) only fires at **publish**, and nothing else automated catches it. A real project didn't catch this until publish and had to rewrite its batch plan as a result — catch it here instead.
 
 **Outputs:** Generated AL files for every batch, each lint-clean including symbol verification; updated Object Register; ChangeLog entries for any deviation. The extension is **not** compiled as part of this step (Operating Rule 4) — that happens next, in Step 07.
 
@@ -504,7 +517,7 @@ Goal: generate AL batch by batch, lint clean — including symbol verification �
 
 ## 07 — Compile and Package, Troubleshoot, Iterate
 
-> **Renamed and restructured 2026-09-13 (AJ Ansari).** This step used to be titled "Troubleshoot,
+> **Renamed and restructured September 13, 2026 (AJ Ansari).** This step used to be titled "Troubleshoot,
 > Iterate" and described a single mandatory compile followed by a fix loop, with packaging held
 > back for a later, separate "Package and Test the App" step (old Step 09). That framing put
 > packaging and live-sandbox testing too late: by the time this step is actually iterating on
@@ -528,7 +541,7 @@ main role's.
 **From here, Step 07 is a cycle, not a single event.** Packaging is not a milestone held back for later — it happens every time the extension changes during troubleshooting:
 1. Publish the current package to a BC sandbox tenant.
 2. Test it — manually, by the human, unless the optional agent-run API pass below is in play.
-3. For every error, warning, or reported problem, **first check `patterns/` (ALL ALONG → OCPF BC AL Patterns Library)** for a matching, already-documented pattern — a previously-solved bug class should be a fast recognition, not a fresh investigation. If nothing matches, ask the three questions (Standards §9.3, §10 troubleshooting mindset):
+3. For every error, warning, or reported problem, **first check `patterns/` (ALL ALONG → OCPF BC AL Patterns Library)** for a matching, already-documented pattern — a previously-solved bug class should be a fast recognition, not a fresh investigation. If nothing matches, ask the three questions (Operating Rule 4's systemic-signal discipline):
    - **One-off or pattern?** Search all generated files for the same class of issue before fixing one instance.
    - **Where did it come from?** Trace to the generation rule, the TDD template, or the source data.
    - **What rule should have caught it?** Fix that rule or the pre-flight check.
@@ -536,8 +549,8 @@ main role's.
 5. **Compile and package again**, redeploy to the sandbox, retest. Repeat steps 1–5 until the extension compiles with 0 errors / 0 warnings and the human confirms sandbox testing is clean.
 
 **The API test checklist** — defined once, here, and used three times over the rest of the routine: optionally by the agent at the end of this step (below), as the source Step 11 writes `HumanUnitTestScript.md` from, and authoritatively by humans at Step 12 (Release to Users for Testing):
-- **Green-team (happy path):** `$metadata` returns the expected schema; read a collection; read a single record by `SystemId`; create a record on an editable endpoint; update a field; confirm a read-only endpoint rejects writes (Standards §12.1).
-- **Red-team (boundary):** write to a read-only endpoint; send a non-existent field; send an invalid key; delete a record with dependencies; call with missing permissions — confirm each fails *gracefully with a clean, actionable error* (Standards §12.1).
+- **Green-team (happy path):** `$metadata` returns the expected schema; read a collection; read a single record by `SystemId`; create a record on an editable endpoint; update a field; confirm a read-only endpoint rejects writes. Endpoint URL shapes are in Standards Appendix A.
+- **Red-team (boundary):** write to a read-only endpoint; send a non-existent field; send an invalid key; delete a record with dependencies; call with missing permissions — confirm each fails *gracefully with a clean, actionable error*.
 
 **Optional, once things are stable: agent-run API testing via a live MCP connection.** Offer the human an automated pass over the app's own API pages, using the checklist above, run directly by the agent against the published sandbox — but only if, and because, the human can supply a working connection (e.g., the AL MCP Server actually connected per ALL ALONG → AL MCP Server, or another authenticated MCP endpoint that reaches the sandbox's API). This is optional and conditional, never assumed to be available:
 - **If no working connection is available, say so plainly and suggest a manual alternative instead of leaving it undone** — testing the API by hand via **Postman**, or through a low-code caller like **Power Automate**, **Power Apps**, or **Copilot Studio**.
@@ -545,7 +558,7 @@ main role's.
 
 **Outputs:** All batches compiling and packaging with **0 errors, 0 warnings**; at least one package published and manually tested on a sandbox; ChangeLog current; TDD updated for every rule change; an agent-run API test result, if a live MCP connection was available and the human opted in.
 
-**Exit gate:** Full extension compiles clean; the human confirms sandbox testing is clean; no known systemic issue outstanding; ChangeLog and TDD reconciled (Standards §9.4).
+**Exit gate:** Full extension compiles clean; the human confirms sandbox testing is clean; no known systemic issue outstanding; ChangeLog and TDD reconciled (Operating Rule 5).
 
 ---
 
@@ -561,7 +574,7 @@ Spec stale) to the actual documents.
 
 **Inputs:** `FRD.md`, `TDD.md`, the built AL, ChangeLog.
 
-**Actions:** Run a formal three-way comparison — FRD vs. TDD vs. as-built (Standards §11.4). Answer: does the written code follow the TDD and the FRD? What changed? Why? For each gap:
+**Actions:** Run a formal three-way comparison — FRD vs. TDD vs. as-built. Answer: does the written code follow the TDD and the FRD? What changed? Why? For each gap:
 - Object in the FRD but not built — intentional or oversight?
 - Object built but not in the FRD — scope creep or gap fill?
 - Rule in the FRD the TDD did not implement — TDD gap.
@@ -572,7 +585,7 @@ Classify every gap as **Intentional** (document the reasoning), **Oversight** (f
 
 **If a gap is classified Oversight and needs a code fix, apply the same Step 07 cycle before closing this step** — fix the root cause, compile and package again, redeploy to the sandbox, retest. A documentation-only correction (Spec stale, or Intentional-with-a-doc-update) does not require a new package; a code change does, every time, no matter how small — packaging is still the default rhythm here, not something reserved for a later step (Operating Rule 4).
 
-**Outputs:** `GapAnalysis.md` — every gap, its classification, its resolution. Gap-fill work items — built with the same discipline as main batches, using reserved growth IDs (Standards §11.6): pre-flighted per Step 05, then compiled, packaged, and troubleshot per Step 07's pattern, as their own pass — the Step 07 compile-and-package that closed BUILD already ran and doesn't cover code that didn't exist yet (Operating Rule 4). Ad hoc gap-fill requested mid-project, outside a formal Step 08, follows the same pattern.
+**Outputs:** `GapAnalysis.md` — every gap, its classification, its resolution. Gap-fill work items — built with the same discipline as main batches, drawing on the growth IDs each module block reserved (Standards §5.2): pre-flighted per Step 05, then compiled, packaged, and troubleshot per Step 07's pattern, as their own pass — the Step 07 compile-and-package that closed BUILD already ran and doesn't cover code that didn't exist yet (Operating Rule 4). Ad hoc gap-fill requested mid-project, outside a formal Step 08, follows the same pattern.
 
 **Exit gate:** Every gap classified and resolved or scheduled; every code-touching resolution recompiled, repackaged, and retested; no unexplained divergence from FRD/TDD.
 
@@ -583,14 +596,14 @@ fresh eyes matter here specifically, since the agent that wrote the code is the 
 to notice its own batch-to-batch drift. The reasoning role reports findings; the main role applies
 every fix and normalizes whatever drift the findings call out.
 
-**Inputs:** The full built extension; `TDD.md`; Standards Parts 3, 4, 6, 9, 11.
+**Inputs:** The full built extension; `TDD.md`; Standards Parts 1, 2, 4, and 7.
 
-**Actions:** Comprehensive review across all objects (Standards §11.5). Check for:
+**Actions:** Comprehensive review across all objects. Check for:
 - **Code quality** — every object follows the standard template; structure, naming, and formatting identical across all batches (early and late batches often drift — normalize).
-- **Dead code** — empty triggers, commented-out blocks, placeholder `// TODO` (Standards §3.5).
+- **Dead code** — empty triggers, commented-out blocks, placeholder `// TODO` (Standards §1.5).
 - **Redundant code** — duplicate field exposures, duplicate `using` directives, objects more complex than needed.
-- **"Marked for obsoletion"** — any reference to a field, table, procedure, or event with `ObsoleteState = Pending` or `Removed`; any subscription to an obsolete event (Standards §5.2–§5.3). Exclusion is unconditional — no version check, no exception.
-- **Standards compliance** — run the full Anti-Patterns table (Standards Part 11) against the codebase.
+- **"Marked for obsoletion"** — any reference to a field, table, procedure, or event with `ObsoleteState = Pending` or `Removed`; any subscription to an obsolete event (Standards §3.2–§3.3). Exclusion is unconditional — no version check, no exception.
+- **Standards compliance** — run the full Anti-Patterns table (Standards Part 7) against the codebase.
 - **Best practices** — `Rec.` prefix everywhere (`NoImplicitWith`), required metadata present, correct `DelayedInsert` / `Editable` per data mutability, every table covered by both permission sets' `tabledata` grants (re-verify independently — don't just trust Step 06 Action 7).
 - **BCQuality knowledge-backed review** (ALL ALONG) — invoke the local BCQuality snapshot's
   `skills/entry.md` dispatch flow against the built extension as an additional, independent pass
@@ -600,15 +613,15 @@ every fix and normalizes whatever drift the findings call out.
 
 **Outputs:** `CodeReview.md` — findings by dimension, severity, and resolution. Fixes applied at the rule level where a pattern repeats, with ChangeLog entries. Any fix that touches code follows the same Step 07 cycle — recompile, repackage, redeploy to the sandbox, retest — before this step closes (Operating Rule 4); a comment/formatting-only fix does not need a fresh package. If a finding repeats across batches and looks generalizable beyond this project — not a one-off, project-specific defect — flag it to the human as a candidate for a new entry in the OCPF BC AL Patterns Library (ALL ALONG), the same way Step 07 does; this pass, reading every batch side by side, is one of the best places in the whole routine to actually notice that shape of repetition.
 
-**Exit gate:** All critical findings resolved; dead-code scan 100% clean across every file (Standards §11.2); no obsolete references remain; any code fix from this step has been recompiled, repackaged, and retested.
+**Exit gate:** All critical findings resolved; dead-code scan 100% clean across every file (Standards §1.5); no obsolete references remain; any code fix from this step has been recompiled, repackaged, and retested.
 
 ## 10 — Update Design Documents
 
 **Inputs:** `TDD.md`, `FRD.md`, ChangeLog, `GapAnalysis.md`, `CodeReview.md`.
 
 **Actions:**
-- Produce a new **as-built TDD version** (`PostDevTDD.md`) reflecting the architecture as actually implemented: final system identity, final object inventory with all properties, every naming convention and abbreviation as applied, all special cases and exceptions, and a deviation summary that references the ChangeLog (Standards §2.1, §11.3).
-- Produce a new **FRD baseline** for future development: fold in every implementation decision that diverged from the original FRD — even where the implementation is better — so the next planning session starts from truth, not a stale spec (Standards §11.4 key lesson).
+- Produce a new **as-built TDD version** (`PostDevTDD.md`) reflecting the architecture as actually implemented: final system identity, final object inventory with all properties, every naming convention and abbreviation as applied, all special cases and exceptions, and a deviation summary that references the ChangeLog.
+- Produce a new **FRD baseline** for future development: fold in every implementation decision that diverged from the original FRD — even where the implementation is better — so the next planning session starts from truth, not a stale spec.
 
 **Outputs:** `PostDevTDD.md` (as-built reference), updated `FRD.md` (new baseline). Original TDD retained as historical context; ChangeLog is the bridge between them.
 
@@ -632,15 +645,15 @@ every fix and normalizes whatever drift the findings call out.
 **Inputs:** `PostDevTDD.md`, the built AL, any agent-run API test result from Step 07 (if a live MCP connection was available there — optional, may not exist).
 
 **Actions:**
-- **Generate the reference documentation from the code, not from memory** (Standards §12.2). Parse every API page: extract IDs, source tables, editability, filters, and every field's identifier / source name / description / R/W status. Produce a structured reference — one section per object, one row per field — plus: a **quick-start** guide (get the API working fast — auth, one request, one response; not the full install procedure, see `Deployment.md` below for that), authentication and URL patterns (Standards Appendix A), `$filter` / `$select` examples, create/update/delete examples, explicit limitations, common integration patterns, troubleshooting table.
+- **Generate the reference documentation from the code, not from memory.** Parse every API page: extract IDs, source tables, editability, filters, and every field's identifier / source name / description / R/W status. Produce a structured reference — one section per object, one row per field — plus: a **quick-start** guide (get the API working fast — auth, one request, one response; not the full install procedure, see `Deployment.md` below for that), authentication and URL patterns (Standards Appendix A), `$filter` / `$select` examples, create/update/delete examples, explicit limitations, common integration patterns, troubleshooting table.
 - **Draw the schema as a Mermaid diagram**, generated from the actual objects, not from memory. Include every table this app owns *and* every standard/base table it touches — via `TableRelation`, `tableextension`, or a `pageextension`'s `RunPageLink` — so a reader sees the whole relationship graph, not just the app's own corner of it. An ER diagram (`erDiagram`) is the usual fit; note cardinality and which side is the standard object.
 - **Render the diagram to prove it parses — never ship one you have not seen render.** Markdown happily stores a syntactically invalid diagram: it looks fine in the source file and simply fails to draw wherever it is finally viewed, so the defect is invisible until a reader hits it. Extract the fenced block and run it through a renderer (e.g. `npx @mermaid-js/mermaid-cli -i diagram.mmd -o diagram.svg`, or whatever renderer is already available — this may download a package on first run, so Operating Rule 6b applies: confirm one is already usable, or ask, rather than installing anything unprompted); a parse error exits non-zero and names the line. On a real project a diagram shipped with `PK_FK` as a key constraint — not valid Mermaid, which accepts `PK`, `FK`, `UK`, or comma-separated `PK,FK` — and never rendered anywhere until it was actually tested.
-- **Write the human unit test script** — a step-by-step manual test walkthrough a person can execute: endpoint by endpoint, the happy-path (green-team) and boundary (red-team) cases per the checklist defined in Step 07, expected result for each, written against this app's actual endpoints. A well-written test script is ~70% of a user guide (Standards §12.1). This is the script Step 12 will actually run.
+- **Write the human unit test script** — a step-by-step manual test walkthrough a person can execute: endpoint by endpoint, the happy-path (green-team) and boundary (red-team) cases per the checklist defined in Step 07, expected result for each, written against this app's actual endpoints. A well-written test script is ~70% of a user guide. This is the script Step 12 will actually run.
 - **Ask the human whether they also want Automated Test Scripts created**, alongside — not
   instead of — the Human Unit Test Script. This is a genuine question, not a default: automated
   scripts imply an ongoing maintenance commitment as the app evolves, which a one-time manual
   script doesn't carry.
-  **Corrected 2026-09-13 (AJ Ansari) — this has two genuinely different meanings; ask which,
+  **Corrected September 13, 2026 (AJ Ansari) — this has two genuinely different meanings; ask which,
   don't assume the API-only one.** An earlier draft of this bullet (introduced in the Step
   07/09/12 restructure, v2.1.0.0) scoped "Automated Test Scripts" entirely around external
   HTTP tooling, as if testing the API surface were the only kind of automation worth asking
@@ -675,8 +688,8 @@ every fix and normalizes whatever drift the findings call out.
   `AutomatedTestScripts.md` — a **separate document from `HumanUnitTestScript.md`** — naming
   which kind(s) were created, what they cover, how to run them, and how to keep them current as
   the app (not just its API) changes.
-- Write the **user guide** as `UserGuide.md` — **Markdown, in the repo, always** (HTML with `@media print` rules only as an *additional* branded/print deliverable, never instead of the Markdown; Standards §12.5). This is a **separate document from `Documentation.md`** and must not be folded into it: `Documentation.md` is the integration/API reference written for a developer or BI consumer, whereas the user guide is written for the person clicking around in Business Central — what the feature is for, how to do each task in order, what each field means in business terms, and what to do when something is refused. If the only "user guide" produced is an API reference, this action has not been done.
-- Write one-page **deployment instructions** as `Deployment.md`, for an administrator: version requirements, install procedure, which permission sets map to which roles, verification steps, uninstall (Standards §12.3). Distinct from `Documentation.md`'s quick-start: this is the full admin install/upgrade/uninstall procedure, not a fast path to a first API call.
+- Write the **user guide** as `UserGuide.md` — **Markdown, in the repo, always** (HTML with `@media print` rules only as an *additional* branded/print deliverable, never instead of the Markdown). This is a **separate document from `Documentation.md`** and must not be folded into it: `Documentation.md` is the integration/API reference written for a developer or BI consumer, whereas the user guide is written for the person clicking around in Business Central — what the feature is for, how to do each task in order, what each field means in business terms, and what to do when something is refused. If the only "user guide" produced is an API reference, this action has not been done.
+- Write one-page **deployment instructions** as `Deployment.md`, for an administrator: version requirements, install procedure, which permission sets map to which roles, verification steps, uninstall. Distinct from `Documentation.md`'s quick-start: this is the full admin install/upgrade/uninstall procedure, not a fast path to a first API call.
 
 **Outputs:** `Documentation.md` (consumer/API reference, includes the Mermaid schema diagram), `HumanUnitTestScript.md`, **`UserGuide.md`** (end-user, Markdown), `Deployment.md`, and `AutomatedTestScripts.md` (only if the human opted in above). Four mandatory documents — check all four exist before claiming the step is complete; the fifth is conditional.
 
@@ -684,13 +697,13 @@ every fix and normalizes whatever drift the findings call out.
 
 ## 12 — Release to Users for Testing
 
-> **New 2026-09-13 (AJ Ansari).** This step is the human-run counterpart to Step 07's optional
+> **New September 13, 2026 (AJ Ansari).** This step is the human-run counterpart to Step 07's optional
 > agent-run API pass, and replaces what old Step 09 tried to do too early — testing against a
 > script that hadn't been written yet. By the time this step runs, `HumanUnitTestScript.md`
 > exists (Step 11), Code Review has landed (Step 09), and the design documents reflect reality
 > (Step 10) — so this is a real gate on a reviewed, documented app, not a first look at raw code.
 
-> **The hand-off moment (AJ Ansari, 2026-09-13) — mark it, don't slide into it.** The instant
+> **The hand-off moment (AJ Ansari, September 13, 2026) — mark it, don't slide into it.** The instant
 > Step 11's four outputs are done and this step is about to begin, the agent's own work in this
 > routine is effectively finished: everything from here is a human running tests and deciding
 > whether to ship. Send a formal message for this specific transition — this **replaces**, it
@@ -724,7 +737,7 @@ every fix and normalizes whatever drift the findings call out.
 **Actions:**
 - Confirm the latest package is published to a BC sandbox tenant — republish if anything changed since the last publish.
 - Real users/testers — not the agent, not a simulated pass — run `HumanUnitTestScript.md` end to end: every green-team (happy path) case and every red-team (boundary) case, executed by hand this time (Step 07 may have already run the same checklist once, automatically, as an early check — this is the authoritative pass). Testers work from `UserGuide.md` for how each feature is supposed to behave; the sandbox install itself is a live dry run of `Deployment.md`'s procedure — confirm it matches what a real admin would follow.
-- Verify permission sets as part of the same pass: the read-only set grants read on all pages; the read/write set includes it plus write on the editable pages; the underlying `D365` base permissions consumers also need are confirmed (Standards §7.3).
+- Verify permission sets as part of the same pass: the read-only set grants read on all pages; the read/write set includes it plus write on the editable pages; the underlying `D365` base permissions consumers also need are confirmed (Standards §5.3).
 - If `AutomatedTestScripts.md` was created at Step 11, also run those and record results the same way.
 - Record every finding via the Testing Feedback Log (ALL ALONG) — verbatim, then triaged: implement now (its own ChangeLog Issue, fixed via the Step 07 cycle — fix, compile and package again, redeploy, retest), schedule (`Roadmap.md`), or reject.
 - **If a fix here changes any object, field, or behavior, treat the artifacts Steps 09–11 already produced as stale, not as already covered:** re-run the affected parts of Step 09 (Code Review on the changed files), Step 10 (as-built TDD/FRD), and Step 11 (regenerate `Documentation.md` and its ER diagram from the now-changed code — Step 11's own rule is "from the code, not from memory," and that's now-changed code). A trivial fix might touch none of these; say explicitly which ones a given fix actually requires re-running, rather than skipping the check by default.
@@ -742,12 +755,12 @@ Run these in parallel with the phased work — they are not a final step.
 
 ## Document
 
-- Keep every required project document current as work proceeds, not retroactively (Standards §2.1): `ProblemStatement`, `FRD`, `TDD`, `SanityCheck`, `PostDevTDD`, `ChangeLog`, `GapAnalysis` / `CodeReview`, `Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`, `AutomatedTestScripts` (if created), `ReleaseTestResults`, `TestingFeedback`, `Roadmap`, `ProjectMemory`, `ProjectProgress` — all four mandatory Step 11 outputs (`Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`) belong on this list, not just the first of them, as does `AutomatedTestScripts` if the human opted in at Step 11, and `ReleaseTestResults` (Step 12).
-- Maintain the **Object Register** as a standalone artifact — every object, its ID, module, source table, and R/W status — updated as objects are planned and built (Standards §1.2).
+- Keep every required project document current as work proceeds, not retroactively — this list is canonical; the Standards Guide keeps no second copy of it: `ProblemStatement`, `FRD`, `TDD`, `SanityCheck`, `PostDevTDD`, `ChangeLog`, `GapAnalysis` / `CodeReview`, `Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`, `AutomatedTestScripts` (if created), `ReleaseTestResults`, `TestingFeedback`, `Roadmap`, `ProjectMemory`, `ProjectProgress` — all four mandatory Step 11 outputs (`Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`) belong on this list, not just the first of them, as does `AutomatedTestScripts` if the human opted in at Step 11, and `ReleaseTestResults` (Step 12).
+- Maintain the **Object Register** as a standalone artifact — every object, its ID, module, source table, and R/W status — updated as objects are planned and built. Never use an object ID outside the ranges allocated at Parameter 1.2; the allocation strategy the register records is Standards Part 5.
 
 ## Track Changes — the ChangeLog
 
-Every deviation from FRD or TDD — human or agent — is logged **before the next batch begins** (Standards §10.4). It is the ground truth for what was actually built and why. Entry format (Standards §10.4):
+Every deviation from FRD or TDD — human or agent — is logged **before the next batch begins**. It is the ground truth for what was actually built and why. Entry format (canonical — the Standards Guide keeps no second copy):
 
 ```
 ## Issue <BatchID>-<SeqNo> — <Short Description>
@@ -764,7 +777,7 @@ Every deviation from FRD or TDD — human or agent — is logged **before the ne
 
 - When the agent flags something (an obsolete field, an ambiguous name, a scope question), record the flag, **who** decided and what they decided, and the reasoning — not just the outcome.
 - Every root-cause fix records the diagnosis, not only the patch, so the same class of error cannot recur in a later batch.
-- Commit each batch to version control separately, before the next begins, with a message that references its ChangeLog entries (Standards Appendix C — **unverified against the companion doc, which isn't in this repo; Step 06's pre-flight action also cites "Appendix C" for the AZ AL Dev Tools linter rules, a different subject — confirm both against the actual Standards doc rather than assuming they're the same appendix**).
+- Commit each batch to version control separately, before the next begins, with a message that references its ChangeLog entries. (**Resolved September 13, 2026:** an earlier version of this line cited "Standards Appendix C" for this convention and flagged the citation as unverified, because the companion document wasn't in the repo at the time. It has since been recovered, cleaned up, and republished as `standardsGuide/ocpfALDevStandardsGuide.md` — its Appendix C is a *tools* list, not a commit convention, so this rule lives here in the runbook and cites nothing. Step 06's own Appendix C citation, for the AZ AL Dev Tools rule set, was the correct one all along.)
 
 ## Testing Feedback Log
 
@@ -821,7 +834,7 @@ agent that opens this repo.
 
 ## Project Progress Tracker — `ProjectProgress.md` (required, in-repo, **project root**)
 
-**New 2026-09-13 (AJ Ansari).** AJ asked for a persistent way to see which step a project is on
+**New September 13, 2026 (AJ Ansari).** AJ asked for a persistent way to see which step a project is on
 — ideally a progress bar. No mechanism available to any agent running this framework writes to a
 persistent UI element outside its own conversation (no status bar, no external dashboard); even
 where a specific harness *does* expose something like that, it wouldn't travel with the repo the
@@ -829,7 +842,7 @@ way a file does. `ProjectProgress.md` is the durable, host-agnostic substitute �
 reasoning that already justifies `ProjectMemory.md` existing instead of relying on an agent's own
 non-shared cross-session memory (previous section).
 
-**Lives in the project root, always — not `docs/`** (AJ Ansari, 2026-09-13, correcting the file's
+**Lives in the project root, always — not `docs/`** (AJ Ansari, September 13, 2026, correcting the file's
 own first placement). Every other required document in this list lives under `docs/`; this one is
 deliberately the exception, so it's the first thing visible on opening the repo, no navigation
 needed — that's the whole point of it being a fast, at-a-glance status check.
@@ -852,8 +865,8 @@ This is **not** a narrative document and must not become one — that is exactly
   never disagree about which step is current.
 - Leave a step's row blank until it actually starts; don't pre-fill future steps as blank
   placeholders with any other text, and don't mark a step `Completed` before its own exit gate is
-  actually met (Standards' own exit-gate language for that step is the test, not "the agent moved
-  on").
+  actually met (that step's own **Exit gate** line in this runbook is the test, not "the agent
+  moved on").
 - Close the file with the same standing note every project ships it with: that asking, in plain
   language, **"Where are we in the process? What's next?"** always gets a direct answer from this
   file (plus `ProjectMemory.md` and `ChangeLog.md` for the reasoning behind it) — whether or not
@@ -886,7 +899,7 @@ identity, runtime, and dependencies still match Part 1 before every build, the s
 time — cheap, and it catches drift before it reaches a package.
 
 **`outputAppPackage/*.app` — and any `.app` file anywhere in the repo — is git-tracked, never
-gitignored** (AJ Ansari, 2026-09-13). This runbook never actually mandated gitignoring built
+gitignored** (AJ Ansari, September 13, 2026). This runbook never actually mandated gitignoring built
 packages; an earlier project scaffolded its own `.gitignore` that way as an unreviewed default,
 not something stated here, and it took a human catching it to notice. Track every `.app` the same
 way as any other project deliverable — never delete one (see below), and that now extends to
@@ -908,7 +921,7 @@ file regenerated — functionally identical, not a true undelete. That recovery 
 always exist. Pruning old packages, if it ever happens, is a decision the human makes explicitly,
 never an automatic or "helpful" action by the agent.
 
-**Corrected 2026-09-13 (AJ Ansari) — this protection is per-version, not per-file, now that
+**Corrected September 13, 2026 (AJ Ansari) — this protection is per-version, not per-file, now that
 packaging happens on every fix.** Package filenames derive only from `<ExtensionName>_<version>`,
 so under the Step 07/08/09 cycle's "repackage every fix" default, consecutive builds *at the same
 version* legitimately write the same filename — that is expected overwriting within an
@@ -977,6 +990,12 @@ deliverable and should never end up in the project's own git remote (its GitHub,
 similar hosting), even though they sit in the working directory like any other file.
 
 **Always kept out of the project's git tracking — not a choice, not asked about per project:**
+- The fetched OCPF AL Development Standards Guide (ALL ALONG → OCPF AL Development Standards
+  Guide) — lives **inside** the project root, in `standardsGuide/`, so it needs its own
+  `.gitignore` entry to get this result. Added at PRE-01, when the guide itself is fetched. Same
+  reasoning as the patterns library below: it's AJ Ansari's own cross-project methodology,
+  refetchable at will from `https://github.com/ajansari/ocpfBcAgenticDevFramework/`, not part of
+  the client's deliverable.
 - The fetched BCQuality knowledge snapshot (ALL ALONG → BCQuality Knowledge Snapshot) — lives
   **outside the AL project's own root folder entirely** (see that section for why: `alc` would
   otherwise try to compile its illustrative code snippets), so it isn't even a candidate for this
@@ -1066,6 +1085,51 @@ isn't. Re-verify the tool surface (names, arguments) against the installed versi
 trusting a prior project's notes about it, since this is actively developed and can change
 between AL extension releases.
 
+## OCPF AL Development Standards Guide
+
+**New September 13, 2026 (AJ Ansari).** The runbook's companion rules document —
+`ocpfALDevStandardsGuide.md`, v1.0.0.0 — is distributed from this framework's own repository and
+fetched into every project that runs this routine, so the rules the runbook cites are on disk and
+readable for the life of the engagement rather than assumed to be in the agent's memory. This is
+the third of three fetched knowledge sources, alongside BCQuality and the OCPF BC AL Patterns
+Library, but it is the only one that is **not** optional and **not** deferred to Step 05: the
+runbook cites it as **Standards §** from PRE-02 onward, so a missing copy is a real gap, not a
+degraded-but-workable state.
+
+**Fetch — at PRE-01, before anything else in the routine needs it:**
+- Fetch `standardsGuide/ocpfALDevStandardsGuide.md` from
+  `https://github.com/ajansari/ocpfBcAgenticDevFramework/` — the `standardsGuide/` folder on the
+  default branch — into a folder named **`standardsGuide/`** in this project's root.
+- **Lives INSIDE the project root**, same as `patterns/` and unlike BCQuality: it is a single
+  Markdown file with no `.al` objects in it, so there is no `alc` compile-breaking reason to push
+  it outside the project tree (ALL ALONG → BCQuality Knowledge Snapshot explains why that one is
+  different).
+- Write a small `SNAPSHOT.json` alongside it recording the source repo, ref, commit SHA, and
+  fetch timestamp, so a later refresh has something to diff against and report — same convention
+  as BCQuality and the patterns library.
+- **Tell the human you're doing this.** Not a silent background fetch.
+- **If the repo isn't reachable** (network unavailable, or the file has moved), say so plainly
+  and ask the human for a copy rather than proceeding from memory of what the standards say. This
+  is a stricter failure mode than the patterns library's — an absent patterns library degrades
+  gracefully, an absent standards guide means every `Standards §` citation in the rest of the
+  routine points at nothing.
+
+**Always gitignored — not a per-project choice.** Add `standardsGuide/` to this project's
+`.gitignore` at PRE-01, the same policy and for the same reason as `patterns/` and the BCQuality
+snapshot (ALL ALONG → Repository Hygiene): it is AJ Ansari's own portable, cross-project
+methodology, refetchable at will, and not part of what a client is paying to receive when this
+framework builds their extension. It is therefore **not** governed by the §1.8 intake question —
+that question covers only the runbook, its changelog, and its schematics.
+
+**Refresh only when the human explicitly asks** (e.g. "refresh the standards guide," "get the
+latest standards"). Re-run the fetch, overwrite the local copy, and report plainly: "updated from
+`<old sha>` to `<new sha>`" or "already up to date."
+
+**Version skew is worth naming, not papering over.** The guide carries its own version number
+(v1.0.0.0 at the time of runbook v2.4.0.0) and is versioned independently of this runbook, with
+both tracked in `RunbookChangelog.md`. If a fetched guide's version doesn't match what this
+runbook expects, say so — don't silently reconcile a citation that doesn't resolve.
+
 ## BCQuality Knowledge Snapshot
 
 BCQuality (`microsoft/BCQuality` on GitHub) is a curated knowledge base and skill library for BC
@@ -1098,7 +1162,7 @@ should still be surfaced even without a knowledge-file citation.
   (it's a content copy, not a live checkout) and write a small `SNAPSHOT.json` alongside it
   recording the commit SHA and fetch timestamp, so a refresh later has something to diff against
   and report.
-- **Superseded 2026-09-12 (AJ Ansari) — always gitignored, not a project convention call.**
+- **Superseded September 12, 2026 (AJ Ansari) — always gitignored, not a project convention call.**
   `.bcquality/` is added to the project's `.gitignore` unconditionally; it is never committed.
   **Superseded again the same day:** the snapshot doesn't live inside the project's git-tracked
   tree *at all* anymore — it moved outside the AL project root entirely (see the snapshot-strategy
@@ -1152,7 +1216,7 @@ and an explicit refresh touch the network.
 this runbook refers to it.
 
 The OnlyCopilotFans BC AL Patterns library (`ajansari/ocpfBCALPatterns` on GitHub, public —
-confirmed reachable 2026-09-13 via `git ls-remote` and its rendered README, not assumed) is
+confirmed reachable September 13, 2026 via `git ls-remote` and its rendered README, not assumed) is
 AJ Ansari's own curated collection of reusable Business Central AL coding patterns — each one
 extracted from a real bug found and fixed on a past project, then generalized: symptom, verified
 root cause (against Microsoft Learn, not memory), the fix, a worked example, and caveats, all in
@@ -1225,7 +1289,12 @@ human's call, not the agent's.
 
 ## Stage ↔ Step Map
 
-| Standards §2.2 Stage | This runbook step |
+The classic ten-stage BC development model, mapped onto this runbook's steps. Several exit gates
+above cite it as **Stage↔Step Map, Stage N**. It is kept here, in the runbook, for teams and
+documents that still speak in those stage numbers — the Standards Guide no longer carries a copy
+of the lifecycle, since the phase/step sequence is the runbook's own concern.
+
+| Stage | This runbook step |
 |---|---|
 | 1 — Problem Space | PRE-01 |
 | 2 — Gap Analysis | PRE-02 |

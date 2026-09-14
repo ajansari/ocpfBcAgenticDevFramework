@@ -5,6 +5,12 @@ DEFINE → DESIGN → BUILD → PROVE) — independent of any single project bui
 is distributed as a standalone repository; a project built from an earlier copy won't otherwise
 know if or how the framework it's using has since changed. Check here for what changed and why.
 
+Since v2.4.0.0 this also tracks the two documents that ship alongside the runbook:
+`standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
+`liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
+**v2.4.0.0**, the guide is at **v1.0.0.0** and Lite at **v1.1.0.0** — but recorded together here,
+since a change to one usually has to be reflected in the others.
+
 Entries are grouped by version, newest first, and describe the **cumulative** result of a
 version's changes — not the drafting history behind them. If a change was revised multiple times
 before the version that introduced it ever shipped, only the final, current form is recorded
@@ -14,7 +20,198 @@ specifically to keep a superseded decision on record — see the runbook's ALL A
 
 ---
 
-## v2.3.0.0 — 2026-09-13
+## v2.4.0.0 — September 13, 2026
+
+**The companion Standards document is back — recovered, cleaned up, versioned, and now fetched
+into every project.** Also tracks the first release of `ocpfALDevStandardsGuide.md` **v1.0.0.0**,
+which is versioned independently of the runbook but recorded here alongside it.
+
+### The problem this version fixes
+
+Every version of this runbook since the baseline cited a companion rules document —
+`AL_PTE_Development_Standards_UNIFIED.md` — as **Standards §**, roughly seventy times across
+every phase. That file was never in this repository and never in its git history. The runbook had
+been operating as one half of a two-document pair whose other half nobody could open.
+
+Worse, an audit of those citations found that a large fraction of them pointed at sections that
+had never existed in the companion document *even when it did exist* — every `Standards §11.2`,
+`§11.3`, `§11.4`, `§11.5`, `§11.6`, and the whole `§12.x` family (nine citations in all, covering
+the API test checklist, as-built TDD, gap-fit comparison, code review, user guide, and deployment
+instructions). The real content for all of them was already in the runbook; the citations were
+decoration pointing into a void. A separate note at ALL ALONG → Retain Explanations had already
+flagged one of these as "unverified against the companion doc, which isn't in this repo."
+
+### Fixed — the Standards Guide, recovered and rewritten as a rules-only document
+
+AJ Ansari supplied the original file. It has been cleaned up and republished as
+`standardsGuide/ocpfALDevStandardsGuide.md` (**v1.0.0.0**). The governing edit was: **anything the
+runbook already handles must not also live in the Standards Guide**, because two copies of a rule
+are two rules that will eventually disagree. Removed from the guide entirely:
+
+| Removed from the guide | Why | Now lives only in |
+|---|---|---|
+| **Part 1 — Project Parameters** (§1.1–§1.5: identity, ID allocation, naming/API, platform/runtime, feature flags) | The runbook collects all of this interactively at Step 01, with questions, a multi-range ID loop, and four sections (§1.6–§1.8 plus the `Use Namespace` parameter) the guide never had. A static second copy could only ever be a stale copy. | Runbook **Step 01** |
+| **Part 2 — Project Lifecycle & Documentation Standards** (§2.1 required documents, §2.2 development stages, §2.3 TDD self-sufficiency, §2.4 sanity-check checklist) | All four are in the runbook in fuller form. The runbook's document list carries 17 documents to the guide's 7. | Runbook **ALL ALONG → Document**, **Step 03**, **Step 04**, and the phase structure |
+| **§9.1 Pre-Compilation Checklist** | Directly duplicated Step 05's pre-flight checklist, which explicitly declares itself canonical and says "if you're re-stating it elsewhere, point here rather than re-enumerating." | Runbook **Step 05** |
+| **§9.3 / §9.4** (systemic compiler errors; zero errors/warnings) | Operating Rules 4 and 5 say the same thing. | Runbook **Operating Rules 4, 5** |
+| **Part 10 — Agentic Development Guidance** (§10.1–§10.5) | §10.1 duplicates the prime directive; §10.2 duplicates Step 03; §10.4's ChangeLog format is byte-identical to ALL ALONG → Track Changes; §10.5 is Operating Rule 2. | Runbook **prime directive, Step 03, ALL ALONG → Track Changes, Operating Rule 2** |
+
+### Fixed — two live contradictions between the two documents, now gone
+
+Both were in the guide and both would have actively mis-instructed an agent that read it:
+
+- **§10.3 "Batch Generation Strategy"** told the agent to *"Open in VS Code and compile
+  immediately"* after Batch 1 and *"Never generate all batches before compiling Batch 1."* Operating
+  Rule 4 says the exact opposite — do **not** compile per batch; lint with symbol verification
+  instead, and compile-and-package once at Step 07. Removed.
+- **The Anti-Patterns row "Generating all batches before compiling → Compile after each batch"**
+  was the same contradiction in table form. Removed; every other row was kept.
+
+### Changed — the Standards Guide renumbered, and all ~70 runbook citations repointed
+
+With Parts 1, 2, 9 (mostly) and 10 gone, the remainder was renumbered into a contiguous rules-only
+structure. Every citation in the runbook was updated to match; all of them now resolve to a
+section that actually exists.
+
+| Old | New |
+|---|---|
+| Part 3 — AL Coding Standards | **Part 1** (§3.1–§3.5 → §1.1–§1.5, plus old §9.2 indentation as **§1.6**) |
+| Part 4 — API Page Design Rules | **Part 2** (§4.1–§4.6 → §2.1–§2.6) |
+| Part 5 — Field Inclusion & Exclusion | **Part 3** (§5.1–§5.4 → §3.1–§3.4) |
+| Part 6 — Identifier Naming Rules | **Part 4** (§6.1–§6.4 → §4.1–§4.4) |
+| Part 7 — Module & ID Allocation | **Part 5** (§7.1–§7.3 → §5.1–§5.3) |
+| Part 8 — Gap Analysis Checklist | **Part 6** (§8.1–§8.6 → §6.1–§6.6) |
+| Part 11 — Anti-Patterns Reference | **Part 7** |
+| Appendices A, B, C | unchanged |
+
+The nine citations to sections that never existed (`§11.2`–`§11.6`, `§12.1`–`§12.5`) were dropped
+rather than repointed — the content they claimed to cite was always the runbook's own. The six
+`Standards §2.2 Stage N` exit-gate citations now read **Stage↔Step Map, Stage N**, pointing at the
+runbook's own map, which gained a short explanation of why it's kept.
+
+### Changed — the relationship between the two documents is now stated in both, in one direction
+
+The runbook's Step 01 used to claim its parameter block was *"copied verbatim from
+`AL_PTE_Development_Standards_UNIFIED.md` Part 1."* With Part 1 gone from the guide, that's
+reversed and stated explicitly on both sides: **Step 01 is the authoritative source**, and the
+guide defers to whatever is filled in there rather than carrying its own copy. The guide opens
+with a "What is deliberately *not* here" table naming all ten topics that live only in the
+runbook, so a future reader can see the split was a decision rather than an omission.
+
+### New — the guide is fetched at PRE-01, and gitignored
+
+- **PRE-01 gained a first action**: fetch `standardsGuide/ocpfALDevStandardsGuide.md` from
+  `https://github.com/ajansari/ocpfBcAgenticDevFramework/` into a `standardsGuide/` folder in the
+  project root. PRE-01, not Step 05 alongside BCQuality and the patterns library, because PRE-02's
+  own gap-analysis checklist *is* Standards Part 6 — by Step 05 it would already be four steps
+  too late.
+- **New ALL ALONG section — OCPF AL Development Standards Guide** — covering fetch, `SNAPSHOT.json`,
+  refresh-only-on-request, and version skew. It records one deliberate difference from its two
+  sibling sections: an unreachable patterns library degrades gracefully, but an unreachable
+  standards guide means every `Standards §` citation in the routine points at nothing, so the agent
+  must stop and ask for a copy rather than proceed from memory of what the standards say.
+- **`standardsGuide/` is always gitignored**, never a per-project choice — same policy as
+  `patterns/`, the BCQuality snapshot, and `scripts/`. Added to Repository Hygiene's
+  always-excluded list, and §1.8 now says explicitly that the intake question governs only the
+  runbook, its changelog, and its schematics — not the fetched libraries.
+- PRE-01's exit gate now requires the guide to be present and gitignored.
+
+### Fixed — the "unverified Appendix C" note, resolved rather than carried forward
+
+ALL ALONG → Retain Explanations carried a standing caveat that its Appendix C citation (per-batch
+commits) was unverifiable and might conflict with Step 06's Appendix C citation (the AZ AL Dev
+Tools rule set). With the guide recovered, both are settled: Appendix C is a **tools** list, so
+Step 06's citation was right all along and the commit convention is the runbook's own rule, now
+stated without a citation. The caveat is replaced with a note recording the resolution.
+
+### Changed — Lite Edition wired up to the Standards Guide (Lite v1.1.0.0)
+
+The Lite Edition (`liteVersion/`) had no Standards references at all — it inlined short-form
+summaries of the AL rules and stopped there. It now fetches and cites the same guide, on the
+principle stated in its own header: **Lite reduces process, not AL rules.** The same AL rules
+apply to a 5-file extension as to a 50-file one, so both editions fetch the identical v1.0.0.0
+file; only the surrounding ceremony differs.
+
+- **Lite Step 1 gained the fetch** as its first action — the same PRE-01 reasoning, since Lite's
+  Step 1 gap check already leans on Standards Part 6. `standardsGuide/` added to `.gitignore`,
+  added to Lite's Repository Hygiene list, and named in Step 1's exit gate and outputs.
+- **New Lite ALL ALONG section** — OCPF AL Development Standards Guide — with the same
+  fetch/refresh/version-skew policy and the same stricter-than-patterns failure mode (stop and ask
+  rather than proceed from memory).
+- **Citations added where Lite states a rule in short form**, so its brevity now has depth behind
+  it rather than being the end of the story: naming and abbreviations (§4.1–§4.4), the page
+  template and mandatory properties (§1.1–§1.5), indentation (§1.6), editable vs. read-only
+  (§2.2), `const()` quoting (§2.3), captions/tooltips as schema (§2.5–§2.6), field exclusion
+  (Part 3), growth-buffer IDs (§5.2), permission sets (§5.3), the gap-analysis tables (Part 6),
+  endpoint patterns (Appendix A), and symbol verification (Appendix B).
+- **Step 6's code review now explicitly runs the full Anti-Patterns table (Part 7)** — called out
+  as the single highest-value thing the guide gives a Lite project, since most of what it catches
+  stays invisible until publish or until a consumer hits it.
+- Lite's Parameters block now states that it is authoritative and that the guide defers to it —
+  the same one-directional relationship the full framework's Step 01 now states.
+- `LITE_Outline_OCPFBCAgenticDevFW.md` updated to list the guide under ALL ALONG and in the
+  document set.
+
+### Fixed — three defects found in an independent review of Lite (carried over from Lite v1.0.0.0)
+
+A review of Lite against the full framework, checking whether each of the full framework's
+mechanisms actually made it across, confirmed that Rule 6a (options box), Rule 6c (step-completion
+check-in), the AL MCP Server, BCQuality, and the Patterns Library are all present and wired up.
+It also turned up three real defects, all predating this version:
+
+- **The hand-off moment was in the wrong place.** Lite's note sat at the *end* of Step 7, after
+  the exit gate, and read "what's left is a human running tests and deciding whether to ship" —
+  but Step 7's own actions *are* the human running tests, and its exit gate has already marked the
+  release candidate and shipped to Production. By the time an agent reached that line, nothing it
+  described was still pending. Moved to the **top of Step 7**, reframed as the Step 6 → Step 7
+  boundary — the same position and purpose as the full framework's Step 11 → Step 12 note.
+- **The hand-off didn't use the options box, and silently collided with Rule 6c.** It said "say so
+  plainly" — prose — while Rule 6c independently requires a selectable-options check-in when Step
+  6 closes, leaving two interactions at one boundary with no guidance. It now runs through the
+  Rule 6a mechanism with the same two named options as the full framework, and both sides state
+  the precedence explicitly: the hand-off **replaces** Rule 6c's generic check-in at that one
+  boundary, and Rule 6c now points at it.
+- **The document count was wrong** — the Step Map claimed the full framework has "~15" documents
+  while listing 18 in the same sentence. The full framework's own canonical list in ALL ALONG →
+  Document is exactly 18. Corrected.
+
+Also tightened: Step 6's code review hedged with "if a live BCQuality snapshot exists," even
+though Step 3 bootstraps it unconditionally. It now invokes the snapshot directly and requires the
+agent to say so if it's missing, rather than silently skipping the pass.
+
+### Changed — README documents both editions
+
+The README covered only the full framework. It now carries a **Lite Edition** section: when to use
+it (~5–10 AL files, one person, one model), when to graduate to the full framework, what Lite
+trims (process, not rules), and per-tool deployment steps for the Claude Code plugin and GitHub
+Copilot Chat — matching the existing full-framework instructions. Also adds the Standards Guide to
+the Contents table with a note that it's fetched automatically rather than copied by hand, and
+notes that a project follows one edition or the other, with the full runbook swapped in place of
+the Lite one if a project outgrows Lite mid-flight. Two stale items fixed in passing: the
+Contents table still named the pre-rename `The OCPF BC Agentic Dev Framework Outline.md`, and the
+"Last Updated" line read Saturday, September 12, 2026.
+
+### Changed — dates are written in long form throughout
+
+Every `YYYY-MM-DD` date in the runbook, this changelog, the schematics, and the Lite runbook is now
+written as `September 13, 2026`. No date was changed — only its formatting.
+
+### Also in the guide, not just removals
+
+- **§1.1 and §1.3** now honor the runbook's `Use Namespace (y/n)` parameter, which postdates the
+  original guide: if it's `No`, the `namespace` line is omitted from every generated file. The old
+  template assumed a namespace unconditionally.
+- **§5.3** absorbed the `PTE0004` / `tabledata`-coverage rule that the runbook had been carrying
+  alone across four separate steps.
+- **§5.2** notes that reserved growth IDs are what gap-fill work draws on later — the fact the
+  deleted `§11.6` citation was reaching for.
+- **Appendix B** gained the MS Learn BaseApp fallback that Operating Rule 2 already described.
+- **Part 7** gained one anti-pattern row from the runbook's Step 03: reaching for a `FlowField`
+  when "auto-populated but editable" is what's actually wanted.
+
+---
+
+## v2.3.0.0 — September 13, 2026
 
 Three changes from the same request, all corrections or additions AJ Ansari made after actually
 living with `v2.2.1.0` for a few minutes on the pilot project — a location he wanted fixed, a
@@ -75,7 +272,7 @@ repo): `.gitignore`, `ProjectProgress.md` moved to root, 12 `.app` files added, 
 
 ---
 
-## v2.2.1.0 — 2026-09-13
+## v2.2.1.0 — September 13, 2026
 
 ### Fixed — Step 11's "Automated Test Scripts" question was wrongly scoped to API-only tooling
 
@@ -139,7 +336,7 @@ since the project predates this rule).
 
 ---
 
-## v2.2.0.0 — 2026-09-13
+## v2.2.0.0 — September 13, 2026
 
 Two standing interaction-behavior changes, both from the pilot project reaching the end of its
 own PROVE phase for the first time and AJ Ansari deciding how that moment — and every PROVE-phase
@@ -188,7 +385,7 @@ when the agent is mid-flow finishing Step 11's four documents).
 
 ---
 
-## v2.1.0.0 — 2026-09-13
+## v2.1.0.0 — September 13, 2026
 
 **The single biggest structural change since v2.0.0.0** — a whole step dropped, four others
 renumbered, a new step added — released as its own minor version rather than folded into
@@ -264,7 +461,7 @@ didn't match how the framework was actually being used.
   *outside* the cycle, since packaging with known open issues is now the cycle's own point, not
   a violation of it).
 
-### Independent review of the restructure, and its fixes (2026-09-13)
+### Independent review of the restructure, and its fixes (September 13, 2026)
 
 Per §1.7, a reasoning-role subagent ran a full self-consistency review of the restructure above —
 the same kind of pass recorded under v2.0.0.0's "Full self-consistency review" entry, this time
@@ -329,7 +526,7 @@ Findings and resolutions:
   this version. Flagged here rather than silently claimed otherwise; re-render before fully
   trusting §2, §3.3, and §3.4's Mermaid blocks.
 
-### OCPF BC AL Patterns Library — a new ALL ALONG section (2026-09-13)
+### OCPF BC AL Patterns Library — a new ALL ALONG section (September 13, 2026)
 
 **OCPF = OnlyCopilotFans**, the abbreviation used throughout. AJ Ansari had a standalone AL
 pattern library created the same day (`patterns/Pattern-SubPageLink-FilterGroup4.md`,
@@ -410,14 +607,14 @@ already bootstraps the AL MCP Server and BCQuality.
 
 ---
 
-## v2.0.1.0 — 2026-09-12
+## v2.0.1.0 — September 12, 2026
 
 A packaging/deployment-communication gap found the same day, while wrapping up a bug-fix
 round on the pilot project — released as its own point revision rather than folded into
 v2.0.0.0, since v2.0.0.0 had already been established as the framework's first versioned
 baseline.
 
-### Output folder naming & Schema Sync Mode / Force Sync guidance (2026-09-12)
+### Output folder naming & Schema Sync Mode / Force Sync guidance (September 12, 2026)
 
 - **Added — a fixed output-folder name.** "Packaging & Versioning" now names the folder every
   built `.app` package is written to: **`outputAppPackage/`**, in the project root, the same way
@@ -453,7 +650,7 @@ baseline.
   (Issue BUILD-18) for the full record, including a retroactive Force Sync assessment of its most
   recent build.
 
-### Schematics — Model & Effort Assignment diagram clarified (2026-09-12)
+### Schematics — Model & Effort Assignment diagram clarified (September 12, 2026)
 
 - **Changed — `RunbookSchematics.md` §4.2.** The diagram named what each of the three §1.7 roles
   *does* but not *how it executes*: it now labels the Main role box "runs in the primary agent
@@ -469,13 +666,13 @@ baseline.
 
 ---
 
-## v2.0.0.0 — 2026-09-12
+## v2.0.0.0 — September 12, 2026
 
 First versioned revision. Everything below was learned during the framework's first real
 project (a Business Central bootcamp-registration tracking PTE) and folded back into the
 framework itself, dated to when each change actually happened during that project.
 
-### Compile cadence (2026-09-11 → 2026-09-12)
+### Compile cadence (September 11, 2026 → September 12, 2026)
 
 - **Changed — Operating Rule 4.** Original rule: compile after every batch, never generate all
   batches first. Final form: **no per-batch compile at all.** Every batch is pre-flighted as it's
@@ -514,7 +711,7 @@ framework itself, dated to when each change actually happened during that projec
   from "whenever compiling is actually triggered" rather than assuming it happens right after
   Step 06; the BUILD phase's own Goal statement was reworded to match.
 
-### Tooling installation (2026-09-11)
+### Tooling installation (September 11, 2026)
 
 - **Added — Operating Rule 6b.** Before concluding a required compiler/runtime is missing and
   reaching for an install, check whether the human's own IDE already provisions one privately for
@@ -529,7 +726,7 @@ framework itself, dated to when each change actually happened during that projec
   already been running the same compiler the whole time via its own private copy. The agent had
   to remove what it installed once this came to light.
 
-### Intake — Step 01 (2026-09-11)
+### Intake — Step 01 (September 11, 2026)
 
 - **Added — §1.6 Onboarding & Discoverability.** Three new intake questions, asked at Step 01
   (not left to emerge mid-DESIGN): should the extension include an **Assisted Setup Wizard**
@@ -541,7 +738,7 @@ framework itself, dated to when each change actually happened during that projec
   tiles?" and the honest answer was no — not because it was rejected, but because nothing in the
   framework had ever asked at intake.
 
-### Permission-set coverage (2026-09-11)
+### Permission-set coverage (September 11, 2026)
 
 - **Changed — Step 03 (TDD) permission-set guidance.** Added: the batch plan must ship each
   table's `tabledata` grant in the *same batch* that introduces the table — never deferred to a
@@ -564,7 +761,7 @@ framework itself, dated to when each change actually happened during that projec
   already existed. All five of the above exist so the next project catches this at design time
   instead.
 
-### Model & effort assignment — Step 01 §1.7 (2026-09-12)
+### Model & effort assignment — Step 01 §1.7 (September 12, 2026)
 
 - **Added — §1.7 Model & Effort Assignment.** New intake question, asked once before DESIGN
   begins: whether to split work across a **fixed three-role division of labor**, kept
@@ -598,7 +795,7 @@ framework itself, dated to when each change actually happened during that projec
     recording itself — a wrong diagnosis is marked superseded in the project's own ChangeLog, not
     deleted).
 
-### AL MCP Server & BCQuality Knowledge Snapshot (2026-09-12)
+### AL MCP Server & BCQuality Knowledge Snapshot (September 12, 2026)
 
 - **Added — AL MCP Server, as a new ALL ALONG section.** The AL Language extension's standalone
   MCP server (`altool launchmcpserver`) exposes build/publish/symbol/diagnostic tools over MCP,
@@ -637,7 +834,7 @@ framework itself, dated to when each change actually happened during that projec
   against the live source rather than trust a paraphrase, including this one — the upstream repo
   is explicitly under active development.
 
-### Full self-consistency review (2026-09-12)
+### Full self-consistency review (September 12, 2026)
 
 A dedicated reasoning-role pass (§1.7) read the entire runbook end to end looking for places
 where it contradicted itself — separate from, and in addition to, the compile-cadence and
@@ -698,7 +895,7 @@ but that the fix pass hadn't introduced anything new. It found two more real iss
   remove the false impression that the compile was a peer of the three troubleshooting questions
   rather than what precedes them.
 
-### Repository hygiene — what never syncs to a project's remote (2026-09-12)
+### Repository hygiene — what never syncs to a project's remote (September 12, 2026)
 
 - **Added — a new ALL ALONG section, "Repository Hygiene."** Consolidates, in one place, what
   stays out of a project's own git remote (GitHub, Azure DevOps, or otherwise) even though it
