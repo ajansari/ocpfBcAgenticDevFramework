@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the two documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v2.10.0.0**, the guide is at **v1.3.0.0** and Lite is at **v1.7.0.0** — but
+**v2.11.0.0**, the guide is at **v1.4.0.0** and Lite is at **v1.8.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 
 Entries are grouped by version, newest first, and describe the **cumulative** result of a
@@ -17,6 +17,101 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v2.11.0.0 — September 15, 2026
+
+**The mandatory compile now runs with Microsoft's own code analyzers engaged, catching several
+things this runbook previously only checked by hand — and a round of narrative cleanup, prompted
+by an independent review, shrinks what has to be read every session.** Standards Guide **v1.4.0.0**
+corrects §1.7 and §5.3. Ships with Lite **v1.8.0.0**. Plugin **v1.3.0**.
+
+### Why
+
+An independent review (`pluginDesign/ReviewReport.md`, gitignored) found the runbook had grown
+large and repetitive, and flagged that this framework's own repeated claim — "nothing automated
+catches a missing permission set; `PTE0004` only fires at publish" — didn't match what Microsoft
+documents. Both are addressed here: the false claim is corrected, using a mechanism verified to
+actually work, and the historical narrative that made the runbook larger than it needed to be is
+removed.
+
+### Facts verified before designing — not assumed
+
+- **`PTE0004` is a PerTenantExtensionCop rule that fires at compile, not only at publish.**
+  Reproduced directly: a table with no permission set, compiled with the analyzer DLL attached,
+  fails with `error PTE0004: Table 60300 'OCPF No Perm Table' is missing a matching permission
+  set.` The same compile also caught `PTE0008` (a page field missing `ApplicationArea`) and, with
+  CodeCop attached, `AA0074` (a `Label` missing its suffix).
+- **`AL0424` (deprecated multilanguage syntax) already fires with no analyzer at all**, as a base
+  compiler warning, whenever `app.json`'s `features` includes `TranslationFile` — which every
+  project built with this framework has (Standards §8.2). Reproduced: a `CaptionML` property
+  produced `warning AL0424` on a plain compile. The runbook's own repeated claim that "a clean
+  compile proves nothing here" was simply false for every project this framework builds.
+- **The AL MCP Server's `al_build`/`al_compile` tools do not reliably apply analyzers**, despite
+  documenting a `codeAnalyzers` argument and the server's own `--codeanalyzers` launch flag. Six
+  attempts — the tool-call argument and the server flag, each with symbolic names (`${CodeCop}`)
+  and literal DLL paths, comma- and semicolon-separated — all produced a clean result on code that
+  should have failed `PTE0004` and `PTE0008` (AL Language extension 18.0.2732683, September 2026).
+  Invoking the compiler directly (`altool compile -- /analyzer:<dll path>`, the same pattern the
+  `al-mcp-call.sh` launcher already uses to reach `altool`) reliably engages every analyzer tested.
+  Re-verify against a newer AL extension release before assuming either result still holds.
+- **A permission set name collision across extensions is still not caught by the compiler**, even
+  with PerTenantExtensionCop enabled — confirmed again under this rule's analyzer, closing the
+  question raised when §5.4 shipped (v2.10.0.0): two apps declaring the identical bare permission
+  set name, one depending on the other, compiled clean with `${PerTenantExtensionCop}` attached.
+  §5.4's naming rule stands as the only defense.
+
+### Changed
+
+- **Operating Rule 4:** the trade-off/correction narrative folded into one short reasoning clause;
+  the substance (don't compile per batch; one mandatory compile-and-package at Step 07) is
+  unchanged.
+- **Rule 6a, 6c, 6d:** dated attributions and incident-list narrative moved to this changelog; the
+  rules themselves are unchanged. Rule 6d's four incidents are now a single sentence pointing here.
+- **§1.7 Model & Effort Assignment:** the "superseded" framing removed; the decision stands as
+  stated.
+- **Step 05 post-generation checklist, Standards §5.3, and Lite's equivalents:** corrected — a
+  missing permission-set grant is caught by the mandatory compile via `PTE0004` when the analyzer
+  runs, not only at publish. The per-batch pre-flight check stays: it catches a gap before the next
+  batch builds on it, cheaper than waiting for Step 07.
+- **Step 05 checklist, Standards §1.7, Standards Part 7, `ocpf-code-reviewer`, and Lite's
+  equivalents:** corrected — `AL0424` already proves the codebase is free of ML syntax, since
+  `TranslationFile` is always on. The manual search stays as a backstop for anything added since
+  the last compile.
+- **Step 06:** Action 7's final cross-batch permission-set re-check removed — the per-batch check
+  (Step 05, kept) and Step 07's mandatory compile (now analyzer-enabled) already cover it without
+  a third pass. Step 06's Outputs and Exit gate updated to match.
+- **Step 07 and Lite Step 5:** the mandatory compile now explicitly runs with CodeCop,
+  PerTenantExtensionCop, and UICop (AppSourceCop added for an AppSource target).
+- **Step 09, `ocpf-code-reviewer`, and Lite Step 6's equivalent:** the re-verification of
+  `Rec.`-qualification, ML syntax, and permission-set coverage replaced with one check — the last
+  compile was 0/0, with the required analyzers, and nothing suppressed. Obsolete-reference
+  checking is unchanged: compiler behavior there wasn't independently verified this round.
+- **Packaging & Versioning:** the git-tracking rule and the never-delete rule kept in full; the
+  incidents that motivated them moved to this changelog.
+- **`.bcquality/`'s stale `.gitignore` claim removed** (it lives outside the project; there was
+  nothing to gitignore). `.alpackages/`'s tracked-for-reproducibility claim is unchanged and still
+  sits alongside the never-commit-translation-files rule without being reconciled — flagged, not
+  resolved, this round.
+
+### Added
+
+- **ALL ALONG → Analyzers** (both editions): what the analyzers catch, how to run them on each
+  harness, and the verified reason the AL MCP Server's own tools don't work for this.
+- **`agentPlugin/ocpf-bc/skills/al-mcp-setup/scripts/al-analyze.sh`** (macOS/Linux) and
+  **`al-analyze.cmd` + `al-analyze-resolve.ps1`** (Windows, untested on Windows): locate the same
+  AL extension the MCP launcher does, resolve the analyzer DLLs beside it, and run
+  `altool compile --` directly. Exits with the compiler's own code.
+
+### Not changed
+
+- **Option B — an analysis compile after every batch** (revisiting the September 12, 2026
+  trade-off in Operating Rule 4) is not adopted here. The review that prompted this round
+  recommended running one real project first to see the warning volume before deciding; that
+  hasn't happened yet.
+- **`.alpackages/` tracked vs. gitignored** — a real, still-open contradiction the review
+  identified. Left for a separate decision.
 
 ---
 

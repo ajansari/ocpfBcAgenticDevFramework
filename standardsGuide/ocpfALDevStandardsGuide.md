@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 1.3.0.0
+**Version:** 1.4.0.0
 **Last Updated:** September 15, 2026
 
 > **Audience:** Human developers and agentic (AI) developers building Business Central AL
@@ -230,10 +230,12 @@ var
   exactly the users it was meant to serve.
 - **AppSource requires XLIFF translation files.** An extension carrying ML syntax is not on the
   path to AppSource.
-- **The compiler will not reliably catch it.** AL0424 fires only when `app.json`'s `features`
-  includes `TranslationFile`. On a project without that flag, `CaptionML` compiles with **no
-  warning at all** — so the zero-warnings gate cannot be relied on to find it, and code review
-  must (Part 7).
+- **The compiler catches it, but only because this framework always enables `TranslationFile`.**
+  AL0424 fires only when `app.json`'s `features` includes `TranslationFile` — every project built
+  with this framework has it (§8.2), so a clean, zero-warnings compile already proves the codebase
+  is free of ML syntax. On a project *without* that flag, `CaptionML` compiles with no warning at
+  all, which is why the code review pass (Part 7) checks it explicitly rather than trusting the
+  compile alone.
 
 **Label attributes.** Use `Comment` to tell the translator what every placeholder (`%1`, `%2`, …)
 stands for — required whenever a string has a placeholder. Use `Locked = true` for strings that
@@ -535,10 +537,12 @@ data must deliver:
 Both must be assigned IDs from the allocated range before development begins, and named per
 §5.4.
 
-**Every table the extension owns needs a `tabledata` grant in both sets.** BC PTE publish
-validation (`PTE0004`) requires every table in a published package to be covered by an in-package
-permission set — and it fires at **publish**, not at compile, so no automated step catches a
-missing grant. Ship each table's grant in the same batch that introduces the table.
+**Every table the extension owns needs a `tabledata` grant in both sets.** `PTE0004`
+("Table definitions must have a matching permission set") is a PerTenantExtensionCop rule, and BC
+publish validation enforces the same requirement independently — so a missing grant is caught at
+the mandatory compile (runbook Operating Rule 4, ALL ALONG → Analyzers) if that compile has the
+analyzer engaged, and at publish either way if it somehow wasn't. Ship each table's grant in the
+same batch that introduces the table rather than relying on either backstop to catch a gap late.
 
 **Deployment note:** Extension permission sets grant access to extension objects only. Consumers
 also need the underlying BC base-table permissions:

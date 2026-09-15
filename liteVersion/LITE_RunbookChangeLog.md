@@ -16,6 +16,40 @@ framework.
 
 ---
 
+## v1.8.0.0 — September 15, 2026
+
+**The mandatory compile now runs with Microsoft's own code analyzers engaged, and a round of
+narrative cleanup shrinks what's loaded every session.** Derived from full framework v2.11.0.0;
+applies Standards Guide v1.4.0.0's corrected §1.7 and §5.3. See `fullVersion/RunbookChangelog.md`
+v2.11.0.0 for what was verified and the full reasoning.
+
+### Changed
+
+- **Step 3, 4, and Permission Sets:** corrected — the mandatory Step 5 compile catches a missing
+  permission-set grant via `PTE0004` when the analyzer runs, not only at publish. The pre-flight
+  checks stay: they catch a gap before compile, cheaper than waiting for it.
+- **Step 3 and Step 6:** corrected — `AL0424` already proves the codebase is free of ML syntax,
+  since `TranslationFile` is always on. The manual search stays as a backstop for anything added
+  since the last compile.
+- **Step 5:** the mandatory compile now explicitly runs with CodeCop, PerTenantExtensionCop, and
+  UICop.
+- **Step 6:** the `Rec.`-qualification and permission-set-coverage re-checks replaced with one
+  check — the last compile was 0/0, with the required analyzers, and nothing suppressed.
+- **Operating Rules and ALL ALONG:** dated attributions and incident narrative moved to this
+  changelog; the rules themselves are unchanged.
+
+### Added
+
+- **ALL ALONG → Analyzers:** what the analyzers catch, how to run them, and why the AL MCP
+  Server's own tools don't reliably apply them (verified — see the full changelog).
+
+### Not changed
+
+- **An analysis compile after every object** is not adopted here — see the full changelog's
+  "Not changed" for the reasoning.
+
+---
+
 ## v1.7.0.0 — September 15, 2026
 
 **Permission set names now include something unique to the extension.** Derived from full

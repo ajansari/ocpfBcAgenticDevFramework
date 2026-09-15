@@ -4,6 +4,19 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 1.3.0 — September 15, 2026
+
+**Bundles:** full runbook v2.11.0.0, Lite v1.8.0.0, Standards Guide v1.4.0.0.
+
+- **New scripts:** `al-analyze.sh` (macOS/Linux) and `al-analyze.cmd` + `al-analyze-resolve.ps1`
+  (Windows, untested on Windows) — run the mandatory compile with Microsoft's bundled code
+  analyzers actually engaged. Verified necessary: the AL MCP Server's own `al_build`/`al_compile`
+  tools don't reliably apply analyzers (six attempts, all silently produced a clean result on code
+  that should have failed). See `RunbookChangelog.md` v2.11.0.0.
+- **Runbook cleanup:** the bundled runbooks and Standards Guide correct a repeated, false claim
+  ("nothing catches a missing permission set before publish") and drop dated narrative from an
+  independent review, shrinking what's loaded every session.
+
 ## 1.2.1 — September 15, 2026
 
 **Bundles:** full runbook v2.10.0.0, Lite v1.7.0.0, Standards Guide v1.3.0.0 (unchanged).

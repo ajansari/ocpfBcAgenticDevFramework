@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 2.10.0.0
+**Version:** 2.11.0.0
 **Last Updated:** September 15, 2026
 
 > Version history for this framework lives in `RunbookChangelog.md`, tracked independently of any
@@ -13,7 +13,7 @@
 >
 > **How the agent uses it:** Work the phases in order (DEFINE → DESIGN → BUILD → PROVE). Do not start a step until its predecessor's exit gate is met. Every step lists its **Inputs**, **Actions**, **Outputs**, and **Exit gate**. The *Project Parameters* block in Step 01 is the single source of truth for every name, ID, version, and quoting decision — never hardcode any of those values in AL; always derive them from that block. It is persisted as `docs/ProjectParameters.md`, not just discussed — every later step reads it from that file.
 >
-> **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide** (v1.3.0.0). This runbook drives the *sequence*; that guide holds the detailed AL *rules* the sequence applies (Parts 1–8, Appendices A–D). References below point to it as **Standards §**. It is fetched into the project at PRE-01 and kept for the life of the project — see ALL ALONG → OCPF AL Development Standards Guide for the fetch, refresh, and `.gitignore` policy. **Neither document restates the other:** the intake sheet, the phase/step sequence, every checklist, the compile cadence, and the ChangeLog format live only here; AL coding rules, API page design, field inclusion, naming, ID allocation, gap analysis, and anti-patterns live only there.
+> **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide** (v1.4.0.0). This runbook drives the *sequence*; that guide holds the detailed AL *rules* the sequence applies (Parts 1–8, Appendices A–D). References below point to it as **Standards §**. It is fetched into the project at PRE-01 and kept for the life of the project — see ALL ALONG → OCPF AL Development Standards Guide for the fetch, refresh, and `.gitignore` policy. **Neither document restates the other:** the intake sheet, the phase/step sequence, every checklist, the compile cadence, and the ChangeLog format live only here; AL coding rules, API page design, field inclusion, naming, ID allocation, gap analysis, and anti-patterns live only there.
 >
 > **Prime directive for the agent:** An ambiguous input produces ambiguous code. If a step's inputs are incomplete or contradictory, stop and ask the human — do not invent rules to fill the gap.
 >
@@ -26,24 +26,21 @@
 1. **Part 1 is authoritative.** Publisher, prefix, namespace, versions, ID ranges, localization — read them from the Project Parameters block (Step 01) and derive everything else. Never hardcode.
 2. **Verify against BC symbol files, not memory.** Table numbers, `using` namespaces, field IDs, `ObsoleteState` — confirm each in the symbol file named in Parameter 1.4. Agent knowledge of BC table numbers is not reliable; the verification procedure is Standards Appendix B. The agent downloads those symbols itself at Step 01 §1.10 (ALL ALONG → Symbols); the human never has to. **Fallback when the downloaded symbols don't answer the question** (a module isn't in `.alpackages`, or you need to browse/discover rather than already knowing what to grep for): the entire BC BaseApp, for the current Business Central Online version, is documented at <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application> — every standard table, field, and field datatype/size — and the **System Application** (the foundation modules everything else builds on: Language, Translation, Email, Telemetry, and the rest) at <https://learn.microsoft.com/en-us/dynamics365/business-central/application/system-application/module/system-application>. Use them to corroborate or discover; the downloaded symbol file for the target version is still the authoritative source when the two ever disagree.
 3. **Phase large scope into batches.** A batch is a self-contained, reviewable increment (by module or document-type group) — designed to be independently correct even though, under Operating Rule 4, it is not compiled on its own to prove it. Define batch boundaries during DESIGN and record them in the TDD.
-4. **Lint every batch as it's written, including symbol verification. Do not compile per batch — the whole extension compiles and packages once every batch from the TDD's batch plan is written, gating entry to PROVE.** Run the Step 05 pre-flight checklist immediately on each batch — both passes: pre-generation (on planned names/fields) and post-generation (on the actual files); Step 05 defines the full list — including **symbol verification**: for every reference to a standard/base object, field, method, property, or enum value, verify it against the downloaded symbol source (falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer), not just against what looks like plausible AL. That check exists specifically against hallucination: a pattern-matching lint pass draws on the same kind of intuition that produces a hallucinated reference in the first place, so checking against the actual symbols is the one thing that verifies against ground truth instead of a plausible-looking guess. Do not invoke the AL compiler as an automatic part of generating batches. The one mandatory compile-and-package of the originally-planned batches happens in Step 07, triggered the moment Step 06 finishes — not deferred further, and not skipped. **From that point, compiling and packaging is not a one-time event held back for a later step — it is the continuous rhythm of Step 07, Step 08's gap-fix loop, and Step 09's Code Review fixes, whenever any of them needs a code change: compile, package, deploy to a sandbox, test, diagnose and fix, then compile and package again, and repeat.** A human may also request an earlier spot-check compile mid-BUILD; that doesn't replace the mandatory one. **Gap-fill work is not part of that mandatory compile-and-package — it doesn't exist yet at that point.** Whether gap-fill arrives ad hoc (a human request mid-project, as actually happened on the pilot project) or as a Step 08 output, it gets pre-flighted and then compiled-and-packaged the same way, as its own pass, when it's actually done. Whenever any compile runs, treat any error as a systemic signal: fix the rule/template, then every file it touched — across every batch, not only the one where the error surfaced.
-    **Trade-off, accepted deliberately (AJ Ansari, September 12, 2026, superseding the September 11, 2026 "compile once at the end" version of this rule):** even symbol-verified lint cannot catch everything a real compile does — cross-file type mismatches, full semantic validation, and rule interactions the compiler's own engine resolves are still invisible until an actual compile runs. Deferring the first real compile further than before means a systemic issue found late can touch more already-written files than catching it mid-BUILD would have. Accepted because generation speed matters more, and because symbol verification specifically closes the gap this decision was actually worried about — a reference to something that doesn't exist, dressed up as something that does.
-    **Corrected September 13, 2026 (AJ Ansari) — "compile" was the wrong word throughout Step 07/08/09; packaging isn't a later milestone.** The original wording of this rule and of Step 07 and old Step 09 talked only about *compiling*, which read as though building a `.app` package was a separate, later concern reserved for a dedicated packaging step. That's backwards: from the moment Step 07 opens, every fix that touches code gets compiled *and packaged* before it's deployed to a sandbox for the next test round — there is no meaningful "compile without packaging" state in this workflow once BUILD's mandatory pass runs. Old Step 09 ("Package and Test the App") is removed entirely for the same reason — see the PROVE phase and the Stage↔Step Map below for the corrected step sequence.
+4. **Lint every batch as it's written, including symbol verification. Do not compile per batch — the whole extension compiles and packages once every batch from the TDD's batch plan is written, gating entry to PROVE.** Run the Step 05 pre-flight checklist immediately on each batch — both passes: pre-generation (on planned names/fields) and post-generation (on the actual files); Step 05 defines the full list — including **symbol verification**: for every reference to a standard/base object, field, method, property, or enum value, verify it against the downloaded symbol source (falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer), not just against what looks like plausible AL. That check exists specifically against hallucination: checking against the actual symbols is the one thing that verifies against ground truth instead of a plausible-looking guess. Do not invoke the AL compiler as an automatic part of generating batches — a real compile still catches cross-file type mismatches and full semantic validation that symbol-verified lint can't, so deferring it to one mandatory pass trades a small risk of a late, wider-reaching fix for faster generation. The one mandatory compile-and-package of the originally-planned batches happens in Step 07, triggered the moment Step 06 finishes — not deferred further, and not skipped. **From that point, compiling and packaging is the continuous rhythm of Step 07, Step 08's gap-fix loop, and Step 09's Code Review fixes, whenever any of them needs a code change: compile, package, deploy to a sandbox, test, diagnose and fix, then compile and package again, and repeat** — never a one-time event held back for a later step. A human may also request an earlier spot-check compile mid-BUILD; that doesn't replace the mandatory one. Gap-fill work is pre-flighted and compiled-and-packaged the same way, as its own pass, once it actually exists — it isn't part of the mandatory compile-and-package, since it doesn't exist yet at that point. Whenever any compile runs, treat any error as a systemic signal: fix the rule/template, then every file it touched — across every batch, not only the one where the error surfaced.
 5. **Zero errors, zero warnings before PROVE.** Treat warnings as errors during development — a warning about an obsolete field or a missing property is a defect, not cosmetic noise. Satisfied by construction under Rule 4: the one mandatory compile-and-package (Step 07) always runs, and must reach 0/0, before Step 08 begins.
 6. **Human-in-the-loop is a feature.** Pause for human approval before: writing the first file of a batch, applying a root-cause fix, starting a new batch, finalizing any design document, and installing any tool or runtime.
 6a. **Ask decisions in a selectable options box, not in prose.** When the agent needs the human to *decide something* — pick between design options, approve a version bump, choose a name, resolve an ambiguity — present it through the interactive multiple-choice mechanism the agent's harness provides (e.g., in Claude Code, the `AskUserQuestion` tool — substitute whatever the actual harness offers), with the recommended option first and a short reason on each. A decision buried in a paragraph of chat is easy to miss: it reads like the agent finished and is idling, so the project silently stalls waiting on an answer nobody realised was owed.
     **Use it only for decisions.** Do *not* wrap ordinary progress in it — finishing a step and waiting to be told to start the next one, reporting a clean compile, or handing back a result is normal conversation, not a decision point. Over-using the box makes it noise, which defeats the purpose.
-    **Every intake question counts as a decision, including the ones only the human can answer**
-    (AJ Ansari, September 15, 2026). Names, publisher, prefix, namespace, localization, object ID
-    ranges, and versions all go through the options mechanism. None is asked as an open-ended
-    question or a numbered list in chat. When the answer is a value only the human knows, the
-    mechanism's free-text entry carries it (in Claude Code, *Other*). Step 01 says what to offer
-    as options for each question. **Why:** on a real Lite project, the extension name, publisher,
-    and object ranges were asked as open-ended chat questions, which is exactly what this rule
+    **Every intake question counts as a decision, including the ones only the human can answer.**
+    Names, publisher, prefix, namespace, localization, object ID ranges, and versions all go
+    through the options mechanism. None is asked as an open-ended question or a numbered list in
+    chat. When the answer is a value only the human knows, the mechanism's free-text entry carries
+    it (in Claude Code, *Other*). Step 01 says what to offer as options for each question. Why: an
+    open-ended chat question is easy to half-answer or skip past — exactly the failure this rule
     exists to prevent.
 6b. **Don't install tooling without asking — and look harder first.** Before concluding a required compiler/runtime is missing and reaching for an install, check whether the human's own IDE already provisions one privately for the tool in question — e.g., VS Code's AL extension gets its .NET runtime from a companion ".NET Install Tool" extension, not a system-wide install, at a path that differs by OS: `~/Library/Application Support/Code/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/` on macOS, `~/.config/Code/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/` on Linux, `%APPDATA%\Code\User\globalStorage\ms-dotnettools.vscode-dotnet-runtime\` on Windows — check the one matching the actual machine, not just the first one you think of, *before* assuming none exists. If the human's own editor can already do the thing you're about to install a tool for, that's a strong signal the tool already exists somewhere you haven't looked. Installing anything is itself a human-in-the-loop decision (rule 6) regardless of what a fallback option elsewhere in this runbook lists as available — on a real project the agent skipped the search, wrongly installed a fresh runtime, and had to remove it.
-6c. **From Step 08 onward, check in after every step closes — proceed now, or pause?** (AJ
-    Ansari, September 13, 2026.) When a step's own work is finished — its outputs written, its exit gate
+6c. **From Step 08 onward, check in after every step closes — proceed now, or pause?** When a
+    step's own work is finished — its outputs written, its exit gate
     met, and the normal end-of-step summary given — don't default to waiting for the human to
     say "go" in ordinary conversation, and don't default to silently starting the next step
     either. Starting at Step 08 (Gap-Fit Test) through Step 12 (Release to Users for Testing),
@@ -60,8 +57,7 @@
     11 → Step 12 boundary is a special case of this rule, not an addition to it** — see Step 12's
     own note on the hand-off moment, which replaces this generic check-in for that one specific
     transition.
-6d. **Zero-install first — never turn setup into the human's job.** (AJ Ansari, September 14,
-    2026.) Before proposing *any* install (runtime, SDK, CLI, package, extension) or *any* manual
+6d. **Zero-install first — never turn setup into the human's job.** Before proposing *any* install (runtime, SDK, CLI, package, extension) or *any* manual
     setup step for the human (editing `PATH`, a shell profile, or an environment variable), work
     through this order and stop at the first option that works:
     1. **What the human's editor and extensions already provide.** For AL, the **AL Language
@@ -81,8 +77,8 @@
     **The test before proposing any setup:** would a functional consultant who has only VS Code and
     the AL Language extension have to do anything by hand? If yes, look again.
 
-    **Never hand the human a setup task the agent can do itself** (AJ Ansari, September 15, 2026).
-    Connecting the AL tools, downloading symbols, and keeping the editor's view current are the
+    **Never hand the human a setup task the agent can do itself.** Connecting the AL tools,
+    downloading symbols, and keeping the editor's view current are the
     agent's job (ALL ALONG → AL MCP Server, Symbols, and Keeping the Editor in Sync). The human's
     part is limited to:
     - approving the AI tool's own permission prompts, and
@@ -95,19 +91,10 @@
     sets one up or registers one. **Never route AL tooling through a third-party VS Code
     extension** the human would have to install first.
 
-    **Why this is a rule, not advice:** agents have tripped on this four times.
-    - First, an agent installed a .NET runtime the AL extension already had (Rule 6b's origin).
-    - Then, while the OCPF plugin was being built, the agent designed AL MCP support around
-      installing the .NET SDK and a NuGet tool, plus a `PATH` edit. The AL extension already
-      provided everything needed.
-    - On a real Lite project (September 15, 2026), the agent had the human download symbols by
-      hand three times. Microsoft's public symbol feed needs no sign-in, and the AL MCP Server
-      downloads from it.
-    - On the same project, the agent sent the human to the Command Palette for an AL MCP command
-      that doesn't exist. Only after the human said so did it do the setup itself.
-
-    A step a developer shrugs off can stop a functional consultant cold. An agent reaching for
-    installs in front of a client makes the whole framework look careless.
+    **Why this is a rule, not advice:** a step a developer shrugs off can stop a functional
+    consultant cold, and an agent reaching for an install or a dead-end Command Palette trip in
+    front of a client makes the whole framework look careless — this has already happened four
+    separate times (`RunbookChangelog.md`).
 7. **Log every deviation immediately.** Any departure from FRD or TDD goes in the ChangeLog before the next batch starts (see *All Along*).
 8. **Work in the human's chosen working language.** The very first question of the routine (PRE-01) asks which language the human wants to work in. From then on, every question, options box (Rule 6a), explanation, and status message is in that language. **Always in English, regardless:** this runbook and the Standards Guide, AL code, object and identifier names, commit messages, and the engineering documents (`FRD`, `TDD`, `SanityCheck`, `PostDevTDD`, `ChangeLog`, `GapAnalysis`, `CodeReview`, `ProjectMemory`) — so no second-language copy can drift from them. **Kept verbatim in their original language:** raw requirements (`requirements/`) and tester feedback (`TestingFeedback.md`). When the human names a BC concept in their own language, map it to the standard object through the translation glossary (ALL ALONG → Translations & Terminology) rather than guessing.
 
@@ -128,7 +115,7 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
   in the language chosen. Record it in `ProjectMemory.md` immediately; Step 01 §1.9 carries it
   into `docs/ProjectParameters.md`.
 - **Fetch the OCPF AL Development Standards Guide into the project, before anything else needs
-  it** (AJ Ansari, September 13, 2026). Every phase from PRE-02 onward cites it as **Standards §**
+  it**. Every phase from PRE-02 onward cites it as **Standards §**
   — PRE-02's own gap-analysis checklist is Standards Part 6 — so it has to be on disk from the
   first step, not fetched at Step 05 alongside the other libraries. Get
   `standardsGuide/ocpfALDevStandardsGuide.md` from
@@ -136,8 +123,7 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
   project's root, and **add `standardsGuide/` to this project's `.gitignore`** — see ALL ALONG →
   OCPF AL Development Standards Guide for the full fetch, refresh, and hygiene policy, and say so
   plainly to the human rather than fetching silently.
-- **Capture any raw requirements input verbatim, before any interpretation happens** (AJ Ansari,
-  September 13, 2026). If the human has pasted raw requirements text in chat, or uploaded a file, this is
+- **Capture any raw requirements input verbatim, before any interpretation happens**. If the human has pasted raw requirements text in chat, or uploaded a file, this is
   the frozen, ground-truth source the rest of DEFINE works from — preserve it untouched, the same
   role a project's own `requirements/<name>.md` already plays once DEFINE is done with it:
   - Create a `requirements/` folder in the project root if one doesn't already exist. It is a
@@ -155,7 +141,7 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
     requirements/scope input arrives too (a change request, a follow-up drop of new material),
     not only at kickoff.
 - Before anything else, create `ProjectProgress.md` (ALL ALONG → Project Progress Tracker), **in
-  the project root — always, not `docs/`** (AJ Ansari, September 13, 2026) — one row per step of the whole
+  the project root — always, not `docs/`** — one row per step of the whole
   routine, every row blank except this one, marked `In Progress`. This is the very first file
   artifact of the entire engagement.
 - Write a problem statement: what business outcome is required, who the consumers are (users, other systems, AI tools, BI/reporting), which **countries and languages** the users work in (confirmed formally at Step 01 §1.9), and what is explicitly out of scope.
@@ -191,8 +177,7 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
 
 **Actions:** Complete **every** field below. Replace every placeholder. These values override all defaults for the rest of the routine. **This block is the authoritative source** — the single source of truth for every name, ID, version, prefix, namespace, and quoting decision in the project. The Standards Guide deliberately keeps no copy of it and defers to whatever is filled in here (Standards, "Authoritative-source rule"); nothing in AL code hardcodes a value that belongs in this block.
 
-**Ask first, don't infer — and ask interactively** (Operating Rule 6a; AJ Ansari, September 15,
-2026). **Every question in this step goes through the options mechanism, never as an open-ended
+**Ask first, don't infer — and ask interactively** (Operating Rule 6a). **Every question in this step goes through the options mechanism, never as an open-ended
 question or a numbered list in chat.** That includes the identity questions below, the ID range
 loop, Deployment Target, §1.4's BC version, §1.6, §1.7, §1.8, and §1.9. Ask one question per box, or a
 few related ones together where the mechanism allows it (Claude Code's `AskUserQuestion` takes up
@@ -217,7 +202,7 @@ suggestions only from what the human said or confirmed, never from an email doma
 house style. Inferring these under time pressure already forced a full-project rename on a real
 project, after the inferred publisher and prefix turned out to be wrong.
 
-**Why question 6 exists** (AJ Ansari, September 15, 2026): permission sets named from the prefix
+**Why question 6 exists**: permission sets named from the prefix
 alone (`OCPF - READ`) collided across every extension built with that prefix. Each extension was
 fixed by hand after the error surfaced, each with a different pattern, and the runbook never
 changed, so the next extension hit it again. The rule, the length limit, and the evidence are
@@ -396,13 +381,11 @@ specifics feed the FRD (Step 02) object inventory and the TDD (Step 03) per-obje
 > If the human has no preference, skip this: everything runs through the main model, as if this
 > section didn't exist.
 
-**Superseded September 12, 2026 (AJ Ansari) — from "record a preference" to a fixed division of labor.**
-Earlier guidance here only *recorded* a stated preference as documentation, on the reasoning that
-the executing agent can't switch its own model mid-session. That's still true, but it missed the
-actual point: the agent *can* delegate a specific, self-contained task to a subagent running a
-different model, get a result back, and act on it — a mechanism-agnostic capability, not tied to
-any one harness. AJ's decision below uses exactly that, for three fixed roles, kept deliberately
-generic (no vendor/model names) since this runbook travels to projects on other harnesses:
+The executing agent can't switch its own model mid-session, but it *can* delegate a
+self-contained task to a subagent running a different model, get a result back, and act on it —
+a mechanism-agnostic capability, not tied to any one harness. This runbook uses exactly that, for
+three fixed roles, kept deliberately generic (no vendor/model names) since it travels to projects
+on other harnesses:
 
 Ask: "This framework can split work across up to three roles, each potentially a different model.
 Do you want to configure this, or should everything run through one model?"
@@ -481,7 +464,7 @@ role-holder the specific inputs its task needs — the relevant project document
 finding in question, the standing checklist — plus a pointer to this runbook itself, since every
 rule in it applies to whichever role is acting, not only the main role.
 
-**When the OCPF plugin is installed** (AJ Ansari, September 14, 2026): the plugin ships the Light
+**When the OCPF plugin is installed**: the plugin ships the Light
 and Reasoning roles as ready-made sub-agents, `ocpf-light` and `ocpf-reasoning`. In Claude Code
 they appear as `ocpf-bc:ocpf-light` and `ocpf-bc:ocpf-reasoning`. They already carry this
 section's division of labor: they report, draft, or diagnose, and are denied file-editing tools.
@@ -535,9 +518,8 @@ a choice the human makes per project.
 
 ### 1.9 Languages & Translation
 
-> **New in v2.7.0.0 (AJ Ansari, September 14, 2026),** prompted by feedback from European MVPs:
-> multilanguage support is a must-have. Ask these interactively (Rule 6a), in the working language
-> (Operating Rule 8), after §1.8. The rules each answer applies are Standards Part 8.
+> Ask these interactively (Rule 6a), in the working language (Operating Rule 8), after §1.8. The
+> rules each answer applies are Standards Part 8.
 
 **1. Countries, then languages — a loop, country first.**
 - Before asking, **read Microsoft's live *Country/Regional Availability and Supported Languages*
@@ -607,11 +589,8 @@ keeping every engineering document in English only (Operating Rule 8).
 
 ### 1.10 AL Project File, AL Tools & Symbols (the agent's job, before DESIGN)
 
-> **New in v2.9.0.0 (AJ Ansari, September 15, 2026).** Operating Rule 2 verifies every design
-> decision against downloaded symbols, so symbols have to be on disk before Step 02, not first
-> appear at Step 07. On a real Lite project, the agent had the human download symbols by hand
-> three times. It then misread the packages as unusable and designed from Microsoft Learn
-> instead, recording posting events that don't exist. Nothing here needs the human beyond the
+> Operating Rule 2 verifies every design decision against downloaded symbols, so symbols have to
+> be on disk before Step 02, not first appear at Step 07. Nothing here needs the human beyond the
 > AI tool's own approval prompts (Operating Rule 6d).
 
 Once the human confirms the sheet, and before Step 02:
@@ -756,7 +735,7 @@ Goal: generate AL batch by batch, lint clean — including symbol verification �
   holds the target version's symbols, rather than redoing any of it.)
 - Write the pre-flight validation checks to run for each batch — this is the canonical checklist every other reference to "the Step 05 checklist" in this runbook means; if you're re-stating it elsewhere, point here rather than re-enumerating. Split into two passes, since some checks are only possible before generation and some only after:
   - **Pre-generation** (on the TDD's planned names/fields, before any file exists — main role): identifier length ≤ 30, entity/EntitySet name length ≤ 30, reserved-keyword scan, localization field-range filter, `ObsoleteState` filter.
-  - **Post-generation** (on the actual generated files — light role, if §1.7 role assignment is configured): required-property presence, **no multilanguage (ML) properties and no `TextConst`** — `CaptionML`, `ToolTipML`, `OptionCaptionML`, or any other ML variant is a pre-flight failure; single-language `Caption`/`ToolTip`/`OptionCaption`/`Label` only (Standards §1.7 — AL0424 fires only when `TranslationFile` is enabled, so the compiler cannot be relied on to catch it), **translatable text** (Standards §8.3–§8.4: no string literal in `Error` / `Message` / `Confirm` / `StrMenu` / notifications / `ErrorInfo`; every label has an AA0074 suffix; every placeholder label has a `Comment`; tokens and telemetry `Locked`; every `OptionCaption` member count matches its option), **API caption locking** matches the per-object decision recorded at Step 03 (translatable objects set `EntityCaption`/`EntitySetCaption`; locked objects lock every `Caption` and leave `ToolTip`s translatable — Standards §8.6), `Rec.`-qualification (`NoImplicitWith`), dead-code check (no empty triggers, no `// TODO`, no commented-out fields), 4-space indentation with no tabs (Standards §1.6), **permission set names** match `<PREFIX> <APPCODE>, VIEW` / `, EDIT` from Parameter 1.3, ≤ 20 characters, captions ≤ 30 (Standards §5.4 — with namespaces the compiler won't flag a name another extension also uses), permission-set `tabledata` coverage for every table the batch introduces (Standards §5.3 — `PTE0004` fires at **publish**, not at compile, so **nothing automated catches a missing grant** — pre-flight is the only defense; vacuously satisfied if this project introduces no tables — see Parameter 1.2), and **symbol verification** — every reference to a standard/base BC table, page, codeunit, method, property, or enum value confirmed against the downloaded symbol source, falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer, not assumed correct because it looks like plausible AL (Operating Rule 4).
+  - **Post-generation** (on the actual generated files — light role, if §1.7 role assignment is configured): required-property presence, **no multilanguage (ML) properties and no `TextConst`** — `CaptionML`, `ToolTipML`, `OptionCaptionML`, or any other ML variant is a pre-flight failure; single-language `Caption`/`ToolTip`/`OptionCaption`/`Label` only (Standards §1.7 — `TranslationFile` is on for every project, Standards §8.2, so a clean compile already proves this via `AL0424`; catch it here anyway, before the batch's files reach a compile), **translatable text** (Standards §8.3–§8.4: no string literal in `Error` / `Message` / `Confirm` / `StrMenu` / notifications / `ErrorInfo`; every label has an AA0074 suffix; every placeholder label has a `Comment`; tokens and telemetry `Locked`; every `OptionCaption` member count matches its option), **API caption locking** matches the per-object decision recorded at Step 03 (translatable objects set `EntityCaption`/`EntitySetCaption`; locked objects lock every `Caption` and leave `ToolTip`s translatable — Standards §8.6), `Rec.`-qualification (`NoImplicitWith`), dead-code check (no empty triggers, no `// TODO`, no commented-out fields), 4-space indentation with no tabs (Standards §1.6), **permission set names** match `<PREFIX> <APPCODE>, VIEW` / `, EDIT` from Parameter 1.3, ≤ 20 characters, captions ≤ 30 (Standards §5.4 — with namespaces the compiler won't flag a name another extension also uses), permission-set `tabledata` coverage for every table the batch introduces (Standards §5.3 — the analyzer-enabled compile at Step 07 catches a missing grant with `PTE0004`, but a batch generated wrong builds the next batch on top of the gap; catch it here, before that happens — vacuously satisfied if this project introduces no tables — see Parameter 1.2), and **symbol verification** — every reference to a standard/base BC table, page, codeunit, method, property, or enum value confirmed against the downloaded symbol source, falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer, not assumed correct because it looks like plausible AL (Operating Rule 4).
 
 **Outputs:** Batch plan (ordered), project scaffold, pre-flight validation script/checklist (both passes).
 
@@ -772,24 +751,13 @@ Goal: generate AL batch by batch, lint clean — including symbol verification �
 3. Run the Step 05 **pre-generation** pre-flight pass on the planned names/fields (main role — this is TDD housekeeping, distinct from the file-level lint in Action 5 below); fix the TDD before generating if anything fails.
 4. Generate the batch's AL files from the standard template (Standards §1.3), substituting only Step 01 parameter values. Every file: one `namespace` (omitted entirely if Parameter 1.1 `Use Namespace` = `No`), one `using` (from symbol file), `ODataKeyFields = SystemId`, exactly one of `DelayedInsert = true` / `Editable = false`, and `Caption` + `ToolTip` + `ApplicationArea = All` on every field (Standards §1.1–§1.4, §2.1–§2.6). Captions and ToolTips written as self-describing schema for API consumers (Standards §2.5–§2.6), in single-language label syntax only — never `CaptionML`, `ToolTipML`, any other ML property, or `TextConst` (Standards §1.7). Every message a `Label` per Standards §8.3, source wording per Parameter §1.9 and the glossary, API caption locking per the Step 03 decision (Standards §8.6). **Source text only** — no translation file is created or edited during generation; translation starts at Step 07, once a build has produced `.g.xlf`. No dead code, no empty triggers, no commented-out fields, no `// TODO` (Standards §1.5).
 5. **Run the Step 05 post-generation pre-flight pass on the batch immediately** — dot the i's, cross the t's on each file as you go, plus a manual read against the AZ AL Dev Tools rules (Standards Appendix C). If §1.7 role assignment is configured, this pass is done by the **light role** — it reports findings only, it does not edit code; the main role applies every fix. **Do not invoke the AL compiler** (Operating Rule 4).
-6. Do not proceed to the next batch until this one's pre-flight (including symbol verification) is clean. Do not compile per batch. Once every batch from the TDD's batch plan is generated, move to Step 07 — that step opens with the one mandatory compile-and-package (Operating Rule 4); it is not optional and not deferred further. (Gap-fill work, if any comes later, is a separate pass through this same Step 05/06/07 discipline when it's actually written — see Operating Rule 4.)
-7. **Before moving past this step, verify permission-set coverage explicitly** (light role, same checklist nature as Action 5) — don't just trust that it was "planned." Check that every table built across every batch has a matching `tabledata` grant in both the read-only and read/write permission sets (Standards §5.3; vacuously satisfied if this project introduces no tables — see Parameter 1.2). This is a design-time check, independent of whether or when a compile happens: `PTE0004` (missing permission set) only fires at **publish**, and nothing else automated catches it. A real project didn't catch this until publish and had to rewrite its batch plan as a result — catch it here instead.
+6. Do not proceed to the next batch until this one's pre-flight (including symbol verification and Standards §5.3 permission-set coverage) is clean. Do not compile per batch. Once every batch from the TDD's batch plan is generated, move to Step 07 — that step opens with the one mandatory compile-and-package (Operating Rule 4); it is not optional and not deferred further. (Gap-fill work, if any comes later, is a separate pass through this same Step 05/06/07 discipline when it's actually written — see Operating Rule 4.)
 
 **Outputs:** Generated AL files for every batch, each lint-clean including symbol verification; updated Object Register; ChangeLog entries for any deviation. The extension is **not** compiled as part of this step (Operating Rule 4) — that happens next, in Step 07.
 
-**Exit gate:** Every planned object generated; each batch's pre-flight (including symbol verification) was clean before the next began; permission-set coverage verified for every table (Action 7). A clean compile is **not** required to close this gate — Step 06 hands off directly into Step 07's mandatory compile-and-package.
+**Exit gate:** Every planned object generated; each batch's pre-flight (including symbol verification and permission-set coverage) was clean before the next began. A clean compile is **not** required to close this gate — Step 06 hands off directly into Step 07's mandatory compile-and-package, which re-proves coverage for the whole extension at once via `PTE0004`.
 
 ## 07 — Compile and Package, Troubleshoot, Iterate
-
-> **Renamed and restructured September 13, 2026 (AJ Ansari).** This step used to be titled "Troubleshoot,
-> Iterate" and described a single mandatory compile followed by a fix loop, with packaging held
-> back for a later, separate "Package and Test the App" step (old Step 09). That framing put
-> packaging and live-sandbox testing too late: by the time this step is actually iterating on
-> real bugs, the human is already publishing builds and testing them against a sandbox — the
-> "single compile" story never matched what was really happening. Old Step 09 is removed; its
-> concerns are folded in here (compiling and packaging are now the same recurring action) and at
-> the very end of PROVE (Step 12, the human-run release test). See the Stage↔Step Map for the
-> full corrected sequence.
 
 **Role:** if §1.7 role assignment is configured, root-cause diagnosis (the three questions below)
 is done by the **reasoning role**; the main role applies the resulting fix and does the
@@ -800,10 +768,10 @@ main role's.
 
 **Inputs:** Every batch from Step 06 (all lint-clean; not yet compiled via this step's mandatory pass, though an earlier human-requested spot-check may already have run — Operating Rule 4); the symbol-verified lint findings accumulated across BUILD; `TDD.md`; ChangeLog.
 
-**Actions:** First, **compile the whole extension once, then package it** (Operating Rule 4 — check for an already-provisioned runtime before installing anything, Operating Rule 6b). This is the mandatory compile-and-package the rest of BUILD deferred to this exact point; it is not optional and does not move further. If the human separately requested an earlier spot-check compile mid-BUILD, that was additional, not a substitute — this one still runs. Package naming, location (`outputAppPackage/`), the never-delete rule, and Schema Sync Mode/Force Sync guidance all apply from this very first package onward (ALL ALONG → Packaging & Versioning) — there is no "not a real package yet" grace period.
+**Actions:** First, **compile the whole extension once, with the analyzers this framework requires, then package it** (Operating Rule 4; ALL ALONG → Analyzers — check for an already-provisioned runtime before installing anything, Operating Rule 6b). This is the mandatory compile-and-package the rest of BUILD deferred to this exact point; it is not optional and does not move further. If the human separately requested an earlier spot-check compile mid-BUILD, that was additional, not a substitute — this one still runs. Package naming, location (`outputAppPackage/`), the never-delete rule, and Schema Sync Mode/Force Sync guidance all apply from this very first package onward (ALL ALONG → Packaging & Versioning) — there is no "not a real package yet" grace period.
 
 **After every compile with 0 errors, check what the human's editor shows** (ALL ALONG → Keeping
-the Editor in Sync; AJ Ansari, September 15, 2026). If VS Code still marks AL errors the compiler
+the Editor in Sync). If VS Code still marks AL errors the compiler
 didn't report, such as an object ID "outside the allowed ranges" or a symbol that "is missing",
 the editor's view is stale, not the code. Refresh the view; never change code that compiles
 clean to make stale red marks go away.
@@ -816,7 +784,7 @@ clean to make stale red marks go away.
    - **Where did it come from?** Trace to the generation rule, the TDD template, or the source data.
    - **What rule should have caught it?** Fix that rule or the pre-flight check.
 4. Fix the **root cause** (rule / template / filter), regenerate the affected files, and log the issue + resolution in the ChangeLog before moving on. Update the TDD whenever a rule changes. Pause for human approval of each root-cause diagnosis before applying it.
-5. **Compile and package again**, redeploy to the sandbox, retest. Repeat steps 1–5 until the extension compiles with 0 errors / 0 warnings and the human confirms sandbox testing is clean.
+5. **Compile and package again, with the same analyzers**, redeploy to the sandbox, retest. Repeat steps 1–5 until the extension compiles with 0 errors / 0 warnings and the human confirms sandbox testing is clean.
 
 **Translations are part of this cycle, from the first full build onward** (skip if Parameter §1.9
 chose *US wording, no translation files*). Each time a build produces a new `.g.xlf`, before
@@ -902,7 +870,7 @@ every fix and normalizes whatever drift the findings call out.
 - **Redundant code** — duplicate field exposures, duplicate `using` directives, objects more complex than needed.
 - **"Marked for obsoletion"** — any reference to a field, table, procedure, or event with `ObsoleteState = Pending` or `Removed`; any subscription to an obsolete event (Standards §3.2–§3.3). Exclusion is unconditional — no version check, no exception.
 - **Standards compliance** — run the full Anti-Patterns table (Standards Part 7) against the codebase.
-- **Deprecated multilanguage syntax** — search every AL file, **including any code a human wrote or pasted in, not only agent-generated files**, for `CaptionML`, `ToolTipML`, `OptionCaptionML`, `InstructionalTextML`, `PromotedActionCategoriesML`, `RequestFilterHeadingML`, `AboutTitleML`, `AboutTextML`, and `TextConst`. Every hit is a finding, refactored per Standards §1.7. Called out separately from the Part 7 pass because a clean compile proves nothing here: AL0424 only fires when `app.json` enables `TranslationFile`, so on a project without it this syntax compiles silently.
+- **Deprecated multilanguage syntax** — `TranslationFile` is on for every project (Standards §8.2), so a clean compile already proves the whole codebase is free of `CaptionML`, `ToolTipML`, and the rest via `AL0424` — this bullet is a confirmation, not the only defense. If the last compile was 0/0 with no `#pragma warning disable` or ruleset downgrade of `AL0424`, this passes; note that explicitly rather than re-scanning file by file.
 - **Translations** (skip if Parameter §1.9 chose *US wording, no translation files*) — run the full technical translation checks across every target file with all rules enabled (e.g. `Test-BcAppXliffTranslations -translationRulesEnableAll`). Then review against Standards Part 8:
   - no hard-coded user-facing strings;
   - every placeholder label has a `Comment`;
@@ -912,7 +880,7 @@ every fix and normalizes whatever drift the findings call out.
   - report layouts free of typed-in user-facing text.
 
   Re-verify API caption locking independently against the Step 03 records — don't just trust Step 06's pre-flight.
-- **Best practices** — `Rec.` prefix everywhere (`NoImplicitWith`), required metadata present, correct `DelayedInsert` / `Editable` per data mutability, every table covered by both permission sets' `tabledata` grants (re-verify independently — don't just trust Step 06 Action 7), permission set names built from the App Code per Standards §5.4.
+- **Best practices** — required metadata present, correct `DelayedInsert` / `Editable` per data mutability, permission set names built from the App Code per Standards §5.4. `Rec.`-qualification (`NoImplicitWith`) and every table's `tabledata` coverage (`PTE0004`) are already proven by the last 0/0 compile — confirm it ran with the analyzers this framework requires (ALL ALONG → Analyzers) and nothing is suppressed, rather than re-deriving either check by hand.
 - **AL Guidelines best-practice pass** (ALL ALONG → Reference Sources) — read the built code against AL Guidelines' current *Best Practices* and *Vibe Coding Rules* for anything the Standards Guide doesn't already cover. The Standards Guide wins on any conflict; surface a conflict to the human rather than silently picking a side.
 - **BCQuality knowledge-backed review** (ALL ALONG) — invoke the local BCQuality snapshot's
   `skills/entry.md` dispatch flow against the built extension as an additional, independent pass
@@ -963,13 +931,8 @@ every fix and normalizes whatever drift the findings call out.
   instead of — the Human Unit Test Script. This is a genuine question, not a default: automated
   scripts imply an ongoing maintenance commitment as the app evolves, which a one-time manual
   script doesn't carry.
-  **Corrected September 13, 2026 (AJ Ansari) — this has two genuinely different meanings; ask which,
-  don't assume the API-only one.** An earlier draft of this bullet (introduced in the Step
-  07/09/12 restructure, v2.1.0.0) scoped "Automated Test Scripts" entirely around external
-  HTTP tooling, as if testing the API surface were the only kind of automation worth asking
-  about — that was the agent's own drafting narrowing, never something AJ asked for, and it was
-  caught only after a project had already been asked the (mis-scoped) question once. The two
-  real options:
+  **"Automated Test Scripts" has two genuinely different meanings — ask which, don't assume the
+  API-only one.** The two real options:
   - **AL Test Framework (native).** Business Central's own automated-testing mechanism: a test
     codeunit (`Subtype = Test`) per feature area, with `[Test]`-attributed methods and the
     platform's test libraries (`Library Assert`, `Library - Random`, etc.), exercising the app's
@@ -1010,13 +973,7 @@ every fix and normalizes whatever drift the findings call out.
 
 ## 12 — Release to Users for Testing
 
-> **New September 13, 2026 (AJ Ansari).** This step is the human-run counterpart to Step 07's optional
-> agent-run API pass, and replaces what old Step 09 tried to do too early — testing against a
-> script that hadn't been written yet. By the time this step runs, `HumanUnitTestScript.md`
-> exists (Step 11), Code Review has landed (Step 09), and the design documents reflect reality
-> (Step 10) — so this is a real gate on a reviewed, documented app, not a first look at raw code.
-
-> **The hand-off moment (AJ Ansari, September 13, 2026) — mark it, don't slide into it.** The instant
+> **The hand-off moment — mark it, don't slide into it.** The instant
 > Step 11's four outputs are done and this step is about to begin, the agent's own work in this
 > routine is effectively finished: everything from here is a human running tests and deciding
 > whether to ship. Send a formal message for this specific transition — this **replaces**, it
@@ -1093,7 +1050,7 @@ Every deviation from FRD or TDD — human or agent — is logged **before the ne
 
 - When the agent flags something (an obsolete field, an ambiguous name, a scope question), record the flag, **who** decided and what they decided, and the reasoning — not just the outcome.
 - Every root-cause fix records the diagnosis, not only the patch, so the same class of error cannot recur in a later batch.
-- Commit each batch to version control separately, before the next begins, with a message that references its ChangeLog entries. (**Resolved September 13, 2026:** an earlier version of this line cited "Standards Appendix C" for this convention and flagged the citation as unverified, because the companion document wasn't in the repo at the time. It has since been recovered, cleaned up, and republished as `standardsGuide/ocpfALDevStandardsGuide.md` — its Appendix C is a *tools* list, not a commit convention, so this rule lives here in the runbook and cites nothing. Step 06's own Appendix C citation, for the AZ AL Dev Tools rule set, was the correct one all along.)
+- Commit each batch to version control separately, before the next begins, with a message that references its ChangeLog entries.
 
 ## Testing Feedback Log
 
@@ -1150,16 +1107,14 @@ agent that opens this repo.
 
 ## Project Progress Tracker — `ProjectProgress.md` (required, in-repo, **project root**)
 
-**New September 13, 2026 (AJ Ansari).** AJ asked for a persistent way to see which step a project is on
-— ideally a progress bar. No mechanism available to any agent running this framework writes to a
-persistent UI element outside its own conversation (no status bar, no external dashboard); even
-where a specific harness *does* expose something like that, it wouldn't travel with the repo the
-way a file does. `ProjectProgress.md` is the durable, host-agnostic substitute — the same
-reasoning that already justifies `ProjectMemory.md` existing instead of relying on an agent's own
-non-shared cross-session memory (previous section).
+No mechanism available to any agent running this framework writes to a persistent UI element
+outside its own conversation (no status bar, no external dashboard); even where a specific
+harness *does* expose something like that, it wouldn't travel with the repo the way a file does.
+`ProjectProgress.md` is the durable, host-agnostic substitute — the same reasoning that already
+justifies `ProjectMemory.md` existing instead of relying on an agent's own non-shared cross-session
+memory (previous section).
 
-**Lives in the project root, always — not `docs/`** (AJ Ansari, September 13, 2026, correcting the file's
-own first placement). Every other required document in this list lives under `docs/`; this one is
+**Lives in the project root, always — not `docs/`.** Every other required document in this list lives under `docs/`; this one is
 deliberately the exception, so it's the first thing visible on opening the repo, no navigation
 needed — that's the whole point of it being a fast, at-a-glance status check.
 
@@ -1195,8 +1150,8 @@ This is **not** a narrative document and must not become one — that is exactly
 
 ## Translations & Terminology
 
-**New in v2.7.0.0 (AJ Ansari, September 14, 2026).** The discipline that keeps an extension's
-translations correct, reviewed, and current across every step. The *rules* are Standards Part 8;
+The discipline that keeps an extension's translations correct, reviewed, and current across
+every step. The *rules* are Standards Part 8;
 this section is *how the routine applies them*. Everything here is skipped for a project whose
 Parameter §1.9 chose *US wording, no translation files*, except Operating Rule 8 and Standards
 §1.7.
@@ -1279,35 +1234,29 @@ identity, runtime, and dependencies still match Part 1 before every build, the s
 time — cheap, and it catches drift before it reaches a package.
 
 **`outputAppPackage/*.app` — and any `.app` file anywhere in the repo — is git-tracked, never
-gitignored** (AJ Ansari, September 13, 2026). This runbook never actually mandated gitignoring built
-packages; an earlier project scaffolded its own `.gitignore` that way as an unreviewed default,
-not something stated here, and it took a human catching it to notice. Track every `.app` the same
-way as any other project deliverable — never delete one (see below), and that now extends to
-never having deleted its git history either. Do not add an `outputAppPackage/` or `*.app` entry
-to `.gitignore` at Step 05 scaffolding, and if one is ever found already present (e.g. a project
-built on an older copy of this framework), remove it and `git add` the packages it was hiding —
-checking first, per Repository Hygiene's own untracking caution, whether the project has a remote
-that would show collaborators a sudden batch of "new" files.
+gitignored.** Track every `.app` the same way as any other project deliverable — never delete one
+(see below), and never delete its git history either. Do not add an `outputAppPackage/` or `*.app`
+entry to `.gitignore` at Step 05 scaffolding, and if one is ever found already present (e.g. a
+project built on an older copy of this framework), remove it and `git add` the packages it was
+hiding — checking first, per Repository Hygiene's own untracking caution, whether the project has
+a remote that would show collaborators a sudden batch of "new" files.
 
 **Never delete — or overwrite — a package from a *different* version. NEVER.** A repackage at a
 new version writes a new, uniquely-named file next to the old ones — it does not replace,
 overwrite, or "clean up" anything already in the output folder, even one that looks superseded.
 This applies to the build script itself and to the agent running it: no `rm`, no "let me tidy
-this up first," not even as a seemingly-harmless pre-build habit. On a real project this was
-violated exactly that way — a manual `rm -f out/*.app` run *before* the build, purely out of
-habit, deleted the previous version's package. It was recovered only because the output folder
-isn't git-tracked but the *source* is: the exact prior commit was checked out, rebuilt, and the
-file regenerated — functionally identical, not a true undelete. That recovery path will not
-always exist. Pruning old packages, if it ever happens, is a decision the human makes explicitly,
-never an automatic or "helpful" action by the agent.
+this up first," not even as a seemingly-harmless pre-build habit — a habitual `rm -f` run before a
+build has deleted a previous version's package on a real project, recoverable only because the
+source (not the output folder) was git-tracked. Pruning old packages, if it ever happens, is a
+decision the human makes explicitly, never an automatic or "helpful" action by the agent.
 
-**Corrected September 13, 2026 (AJ Ansari) — this protection is per-version, not per-file, now that
-packaging happens on every fix.** Package filenames derive only from `<ExtensionName>_<version>`,
-so under the Step 07/08/09 cycle's "repackage every fix" default, consecutive builds *at the same
-version* legitimately write the same filename — that is expected overwriting within an
-in-progress version, not the destructive deletion the rule above exists to prevent. **The
-never-delete protection applies across versions; it does not require every interim cycle build at
-one version to be individually preserved.** What must be preserved is the specific package that
+**This protection is per-version, not per-file.** Package filenames derive only from
+`<ExtensionName>_<version>`, so under the Step 07/08/09 cycle's "repackage every fix" default,
+consecutive builds *at the same version* legitimately write the same filename — that is expected
+overwriting within an in-progress version, not the destructive deletion the rule above exists to
+prevent. **The never-delete protection applies across versions; it does not require every interim
+cycle build at one version to be individually preserved.** What must be preserved is the specific
+package that
 actually passes Step 12 (Release to Users for Testing) — the one that ships to production. To
 keep that package permanently identifiable and never itself silently overwritten by a later
 same-version cycle build: once a build passes Step 12, bump the **Build** segment (e.g.
@@ -1426,7 +1375,7 @@ not only VS Code — can drive them directly instead of shelling out to the comp
 not a background service: nothing runs until an MCP host spawns it, and it exits when the host
 tears it down.
 
-**Zero-install first (Operating Rule 6d; AJ Ansari, September 14, 2026).** Everything this
+**Zero-install first (Operating Rule 6d).** Everything this
 section needs is already on the machine of anyone developing AL in VS Code.
 - **GitHub Copilot Chat in VS Code:** the AL Language extension's tools are already built in
   (`al_build`, `al_publish`, `al_downloadsymbols`, `al_symbolsearch`, `al_getdiagnostics`,
@@ -1451,8 +1400,7 @@ section needs is already on the machine of anyone developing AL in VS Code.
 **When the AL tools are needed:** from Step 01 §1.10, which downloads symbols before DESIGN. Not
 from Step 05.
 
-**The human approves; the agent does everything else** (Operating Rule 6d; AJ Ansari, September
-15, 2026).
+**The human approves; the agent does everything else** (Operating Rule 6d).
 - **No Command Palette.** The AL Language extension has no command that sets up or registers
   the AL MCP Server. Its only MCP commands sign in to two separate servers, Profiling and
   Snapshot debugging (verified in AL Language extension 18.0's `package.json`).
@@ -1514,21 +1462,69 @@ adding a duplicate):
    task reaching the cloud is done.
 
 `launchmcpserver` also accepts AL project paths as positional arguments, and flags for package
-cache path, ruleset, code analyzers, and output folder. Check `--help` against the installed
-version rather than assuming a fixed flag set, since this surface grows between AL extension
-releases.
+cache path, ruleset, and output folder. Check `--help` against the installed version rather than
+assuming a fixed flag set, since this surface grows between AL extension releases. **Its
+`--codeanalyzers` flag, and the `al_build`/`al_compile` tools' own `codeAnalyzers` argument, are
+not reliable** — see ALL ALONG → Analyzers.
 
 **Standing use during development:** once registered, prefer the MCP build/publish/symbol tools
 over an ad hoc terminal compiler invocation where the harness makes both available — they're the
 first-party path and are kept current with the extension, where a hand-rolled wrapper script
-isn't. Re-verify the tool surface (names, arguments) against the installed version rather than
-trusting a prior project's notes about it, since this is actively developed and can change
-between AL extension releases.
+isn't. **The one exception is the analysis compile itself** (ALL ALONG → Analyzers): use the
+launcher script there, not `al_build`/`al_compile`. Re-verify the tool surface (names, arguments)
+against the installed version rather than trusting a prior project's notes about it, since this is
+actively developed and can change between AL extension releases.
+
+## Analyzers
+
+**The mandatory Step 07 / Lite Step 5 compile runs with Microsoft's bundled code analyzers
+engaged — CodeCop, PerTenantExtensionCop, and UICop, plus AppSourceCop when Deployment Target is
+AppSource — not a plain compile.** These analyzers already ship with the AL Language extension;
+nothing is installed to turn them on (Operating Rule 6d). Doing this catches, at compile time,
+several checks this runbook previously only verified by hand: `PTE0004` (a table missing a
+matching permission set — Standards §5.3), `PTE0008` (a page control or action missing
+`ApplicationArea`), and `AA0074` (a `Label` missing its suffix). It does not replace symbol
+verification (Operating Rule 2) or any design-time decision a compiler can't judge — caption and
+tooltip quality, permission-set App Code uniqueness across extensions (Standards §5.4, which the
+compiler doesn't check), or the Step 03 caption-locking decisions.
+
+**How to run it, verified on AL Language extension 18.0.2732683 (September 2026) — don't assume
+the easier-looking route works without checking:**
+- **GitHub Copilot Chat in VS Code:** its own `al_build` tool takes a `codeAnalyzers` argument
+  (well-known values `${CodeCop}`, `${PerTenantExtensionCop}`, `${UICop}`, `${AppSourceCop}`), or
+  reads the workspace's `al.codeAnalyzers` setting when the argument is omitted. Set
+  `"al.enableCodeAnalysis": true` and `"al.codeAnalyzers"` in `.vscode/settings.json` once, at
+  Step 05 / Lite Step 3 scaffolding.
+- **Claude Code, Copilot CLI, or any other MCP host: do not use the AL MCP Server's
+  `al_build`/`al_compile` tools for this.** Tested six ways — the tool call's `codeAnalyzers`
+  argument and the server's `--codeanalyzers` launch flag, each with symbolic names (`${CodeCop}`)
+  and literal DLL paths — and every one produced a clean result on code that should have failed
+  `PTE0004` and `PTE0008`. Invoking the compiler directly does work: with the plugin, run
+  `scripts/al-analyze.sh <project folder> <output .app path>` (Windows:
+  `scripts\al-analyze.cmd <project folder> <output .app path>`) — it locates the same AL
+  extension the launcher does, resolves the analyzer DLLs that ship beside it, and runs
+  `altool compile --` with them attached. Without the plugin, fetch it the same way as the AL MCP
+  Server launcher (ALL ALONG → AL MCP Server, step 1), from
+  `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/al-mcp-setup/scripts/al-analyze.sh`
+  (or `al-analyze.cmd` + `al-analyze-resolve.ps1` on Windows), or invoke `altool compile --
+  /analyzer:<path>` yourself with the analyzer DLLs found beside `altool.dll` in the AL
+  extension's `bin/` folder. Its exit code is the compiler's own: 0 only when clean under every
+  analyzer passed.
+- **Re-verify before trusting either route on a newer AL extension release.** This is exactly the
+  kind of tool-surface claim Operating Rule 2 exists to guard against taking on faith: test a
+  known-certain case (a table with no permission set at all) and confirm `PTE0004` actually
+  appears, the same way you'd verify a symbol.
+
+**Zero-warnings still means zero, honestly.** Confirming a 0/0 compile proves the checks above
+only if nothing was suppressed to get there: no `#pragma warning disable` around a real defect, no
+ruleset file that silently downgrades `PTE0004`, `AL0424`, or `AA0074` below Error/Warning. A
+ruleset that narrows CodeCop's broader style rules (indentation, casing conventions this framework
+already enforces its own way) to avoid noise is fine; one that touches these specific checks is not
+— treat that the same as a suppressed warning under Rule 5.
 
 ## Symbols
 
-**The agent downloads symbols; the human never does** (Operating Rule 6d; AJ Ansari, September
-15, 2026). First at Step 01 §1.10, then whenever the dependencies change. Stop at the first option
+**The agent downloads symbols; the human never does** (Operating Rule 6d). First at Step 01 §1.10, then whenever the dependencies change. Stop at the first option
 that works:
 1. **GitHub Copilot Chat in VS Code:** the AL extension's own `al_downloadsymbols` tool, with
    `globalSourcesOnly: true` unless option 3 applies. It runs inside VS Code, so VS Code's AL
@@ -1567,7 +1563,7 @@ to localized symbols. Then follow Keeping the Editor in Sync.
 
 ## Keeping the Editor in Sync
 
-**The symptom** (AJ Ansari, September 15, 2026, seen on both editions): the extension compiles
+**The symptom** (seen on both editions): the extension compiles
 clean, but VS Code still marks objects red. The usual messages say an object ID isn't within the
 allowed ranges, or a referenced symbol is missing. The marks stay until the window is reloaded or
 VS Code restarts. The code is fine; VS Code's AL language server is working from old information.
@@ -1620,8 +1616,8 @@ Never change code that compiles clean just to clear stale marks.
 
 ## OCPF AL Development Standards Guide
 
-**New September 13, 2026 (AJ Ansari).** The runbook's companion rules document —
-`ocpfALDevStandardsGuide.md`, v1.3.0.0 — is distributed from this framework's own repository and
+The runbook's companion rules document —
+`ocpfALDevStandardsGuide.md`, v1.4.0.0 — is distributed from this framework's own repository and
 fetched into every project that runs this routine, so the rules the runbook cites are on disk and
 readable for the life of the engagement rather than assumed to be in the agent's memory. This is
 the third of three fetched knowledge sources, alongside BCQuality and the OCPF BC AL Patterns
@@ -1646,7 +1642,7 @@ degraded-but-workable state.
   is a stricter failure mode than the patterns library's — an absent patterns library degrades
   gracefully, an absent standards guide means every `Standards §` citation in the rest of the
   routine points at nothing.
-  **Exception, when the OCPF plugin is installed** (AJ Ansari, September 14, 2026): the plugin
+  **Exception, when the OCPF plugin is installed**: the plugin
   bundles a copy of the guide in its `al-standards` skill. Use that copy instead of stopping, per
   ALL ALONG → OCPF Plugin. Record `"source": "ocpf-bc plugin bundle"` and the bundled guide's
   version in `SNAPSHOT.json`, and tell the human plainly that the bundled copy was used and which
@@ -1665,13 +1661,13 @@ latest standards"). Re-run the fetch, overwrite the local copy, and report plain
 `<old sha>` to `<new sha>`" or "already up to date."
 
 **Version skew is worth naming, not papering over.** The guide carries its own version number
-(v1.3.0.0 as of runbook v2.10.0.0) and is versioned independently of this runbook, with
+(v1.4.0.0 as of runbook v2.11.0.0) and is versioned independently of this runbook, with
 both tracked in `RunbookChangelog.md`. If a fetched guide's version doesn't match what this
 runbook expects, say so — don't silently reconcile a citation that doesn't resolve.
 
 ## Reference Sources — Microsoft Learn and AL Guidelines
 
-**New September 14, 2026 (AJ Ansari).** Alongside the three fetched knowledge sources (the
+Alongside the three fetched knowledge sources (the
 Standards Guide, BCQuality, the Patterns Library) and the AL MCP Server, the framework grounds its
 work in these references. None are fetched into the project — they're consulted online, so
 there's nothing to bootstrap, gitignore, or refresh. If the agent has no web access, say so
@@ -1735,18 +1731,14 @@ should still be surfaced even without a knowledge-file citation.
   (see the framework repository's `THIRD_PARTY_NOTICES.md`) — and write a small `SNAPSHOT.json` alongside it
   recording the commit SHA and fetch timestamp, so a refresh later has something to diff against
   and report.
-- **Superseded September 12, 2026 (AJ Ansari) — always gitignored, not a project convention call.**
-  `.bcquality/` is added to the project's `.gitignore` unconditionally; it is never committed.
-  **Superseded again the same day:** the snapshot doesn't live inside the project's git-tracked
-  tree *at all* anymore — it moved outside the AL project root entirely (see the snapshot-strategy
-  bullets above), which is a stronger guarantee than gitignore ever was and also the fix for the
-  compile-breaking discovery that motivated the move. Unlike `.alpackages/` (a genuine build
-  dependency this project's own compile needs, hence tracked for reproducibility), BCQuality is a
-  review aid fetched from a public repo with no reproducibility requirement — it can be refetched
-  at will, and there's no reason for a client's
-  or shared remote repository (GitHub, Azure DevOps, etc.) to carry an 806-file, third-party
-  knowledge snapshot. See ALL ALONG
-  → Repository Hygiene.
+- **Never committed, and there's nothing to gitignore.** The snapshot doesn't live inside the
+  project's git-tracked tree at all — it's outside the AL project root entirely (see the
+  snapshot-strategy bullets above), a stronger guarantee than a `.gitignore` entry. Unlike
+  `.alpackages/` (a genuine build dependency this project's own compile needs, hence tracked for
+  reproducibility), BCQuality is a review aid fetched from a public repo with no reproducibility
+  requirement — it can be refetched at will, and there's no reason for a client's or shared remote
+  repository (GitHub, Azure DevOps, etc.) to carry an 806-file, third-party knowledge snapshot. See
+  ALL ALONG → Repository Hygiene.
 - Refresh **only** when the human explicitly asks (e.g. "refresh BCQuality," "get the latest").
   Re-run the fetch in full, overwrite the existing snapshot, and report plainly: "updated from
   `<old sha>` to `<new sha>`" or "already up to date." The repo is under active development with
@@ -1831,11 +1823,8 @@ him from engagement to engagement and grow every time a new recurring bug class 
     `patterns/README.md` directly, no delimiter needed.
   - Pattern files themselves: add any that aren't already present under `patterns/`. If a
     same-named pattern file already exists locally with different content, **do not silently
-    overwrite it** — this specific case is an agent-filled gap, not something AJ Ansari specified
-    (unlike the README rule above, which is his) — so ask him directly which he wants (rename,
-    replace, or keep the local one), per **Operating Rule 6a**, as a selectable options box, not a
-    prose question. Revise this particular sub-rule freely if a better convention emerges; the
-    README rule is the one to treat as fixed.
+    overwrite it** — ask which the human wants (rename, replace, or keep the local one), per
+    **Operating Rule 6a**, as a selectable options box, not a prose question.
 - **Always gitignored — same *policy* as BCQuality and `scripts/`, though the *mechanism* differs
   from BCQuality's** (ALL ALONG → Repository Hygiene): BCQuality lives outside the project root
   entirely, so it isn't even a candidate for git tracking; `patterns/` lives inside the root, so it
@@ -1860,7 +1849,7 @@ human's call, not the agent's.
 
 ## OCPF Plugin (Optional)
 
-**New September 14, 2026 (AJ Ansari).** This framework is also distributed as an agent plugin,
+This framework is also distributed as an agent plugin,
 `ocpf-bc`, from the same repository (`agentPlugin/ocpf-bc`, listed in
 `.claude-plugin/marketplace.json`). It works in Claude Code, the Claude apps, GitHub Copilot (VS
 Code, Copilot CLI, github.com), and Microsoft Copilot Cowork. The plugin is **optional**. Copying

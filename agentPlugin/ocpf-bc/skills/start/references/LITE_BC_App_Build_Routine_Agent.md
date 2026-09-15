@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 1.7.0.0 (Lite, derived from the full framework v2.10.0.0)
+**Version:** 1.8.0.0 (Lite, derived from the full framework v2.11.0.0)
 **Last Updated:** September 15, 2026
 
 > Version history for this edition lives in `LITE_RunbookChangeLog.md`, tracked independently of
@@ -16,7 +16,7 @@
 > 10-files-or-fewer project doesn't need.
 
 > **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development
-> Standards Guide** (v1.3.0.0), shared unchanged with the full framework. Lite is *not* a reduced
+> Standards Guide** (v1.4.0.0), shared unchanged with the full framework. Lite is *not* a reduced
 > set of AL rules: the same AL rules apply to a 5-file extension as to a 50-file one. What Lite
 > reduces is *process*. So this runbook states each rule in short form where you need it and cites
 > the guide as **Standards §** for the full version — the abbreviation tables, the complete
@@ -127,7 +127,7 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
        knows: names, publisher, prefix, namespace, localization, ID ranges, versions. Ask them
        through the options mechanism, never as open-ended questions or a numbered list in chat;
        the mechanism's free-text entry (Claude Code: *Other*) carries a typed answer. Step 1 says
-       what to offer. (AJ Ansari, September 15, 2026, after a Lite project asked these open-ended.)
+       what to offer.
    6b. **Don't install tooling without asking — and look harder first.** Before concluding a
        required compiler/runtime is missing, check whether the human's own IDE already provisions
        one privately (e.g., VS Code's AL extension gets its .NET runtime from a companion
@@ -158,7 +158,7 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
        tripped on this four times (see the full framework's Rule 6d), and it makes the framework
        look careless in front of a client.
 
-       **Never hand the human a setup task the agent can do** (AJ Ansari, September 15, 2026).
+       **Never hand the human a setup task the agent can do**.
        Connecting the AL tools, downloading symbols, and keeping the editor's view current are
        the agent's job (ALL ALONG → AL MCP Server, Symbols, Keeping the Editor in Sync). The
        human only approves the AI tool's permission prompts, and signs in when a tool reaches a
@@ -242,7 +242,7 @@ or a guess at house style. A wrong guess here means renaming the whole project l
 
 **Question 6 exists because permission sets named from the prefix alone** (`OCPF - READ`) collided
 across every extension with that prefix, and each one was fixed by hand after the error, without
-the runbook changing (AJ Ansari, September 15, 2026). Rules and evidence: **Standards §5.4**.
+the runbook changing. Rules and evidence: **Standards §5.4**.
 
 **Deployment Target:** *SaaS PTE* / *OnPrem PTE* / *AppSource*, best fit first.
 
@@ -315,9 +315,8 @@ EntitySetName`. Use modern BC names, not legacy ones (e.g. table "Job" → `Enti
 > names, IDs, prefixes, and versions means "whatever is filled in here."
 
 **Once the human confirms the sheet, set up the AL project before DESIGN** — the agent's job,
-never the human's (Rule 6d; AJ Ansari, September 15, 2026). Step 2 verifies against symbols, so
-they must be on disk now. On a real Lite project, the agent had the human download symbols by hand
-three times.
+never the human's (Rule 6d). Step 2 verifies against symbols, so they must be on disk now, and
+nothing here needs the human beyond the AI tool's own approval prompts.
 1. **Write `app.json` once, complete,** from the sheet: name, publisher, version, every ID range,
    `platform`, `application`, `runtime`, and the `features` Step 3 lists. If one already exists
    (for example from **AL: Go!**), keep its `id` GUID and replace the rest.
@@ -395,8 +394,9 @@ be able to produce every object correctly from this document alone. Two halves, 
   rather than inventing a pattern.
 - Permission sets, if required (see Step 1): a read-only set and a read/write set (which includes
   the read-only set), with every table's `tabledata` grant enumerated per set — not just "sets
-  exist." `PTE0004` fires at **publish**, not compile, and nothing automated catches a missing
-  grant, so this has to be right at design time. Name them `<PREFIX> <APPCODE>, VIEW` and
+  exist." The mandatory compile at Step 5 catches a missing grant via `PTE0004` (ALL ALONG →
+  Analyzers), but get it right at design time rather than relying on that backstop. Name them
+  `<PREFIX> <APPCODE>, VIEW` and
   `<PREFIX> <APPCODE>, EDIT` from `ProjectParameters.md`, each ≤ 20 characters with a caption ≤ 30.
   **Standards §5.3–§5.4** cover both sets, the naming rule, and the `D365` base permissions
   consumers need on top of them.
@@ -484,8 +484,8 @@ fix in a loop until clean.
     `Caption`, `ToolTip`, `ApplicationArea = All` on every field, no exceptions), **no
     multilanguage (ML) properties and no `TextConst`** — `CaptionML`, `ToolTipML`,
     `OptionCaptionML`, or any other ML variant fails pre-flight; single-language label syntax only
-    (**§1.7** — AL0424 fires only when `TranslationFile` is enabled, so the compiler won't reliably
-    catch it), **translatable text** (**§8.3–§8.4**: no string literals in `Error`/`Message`/
+    (**§1.7** — `TranslationFile` is on for every project, so a clean compile already proves this
+    via `AL0424`; catch it here anyway, before the file reaches a compile), **translatable text** (**§8.3–§8.4**: no string literals in `Error`/`Message`/
     `Confirm`/`StrMenu`/notifications, AA0074 suffixes, a `Comment` on every placeholder label,
     `OptionCaption` member counts match), **API caption locking** matches the Step 2 decision
     (**§8.6**), `Rec.`-qualification (`NoImplicitWith`, **§1.2**), dead-code check (no empty triggers, no
@@ -524,8 +524,9 @@ fix in a loop until clean.
 6. Don't move to the next object until this one's pre-flight, including symbol verification, is
    clean.
 - **Before moving past this step, verify permission-set coverage explicitly** across every table
-  generated — don't just trust that it was planned. `PTE0004` only fires at publish; this is the
-  only defense before then (vacuously satisfied if the extension owns no tables).
+  generated — don't just trust that it was planned. Step 5's mandatory compile catches a gap via
+  `PTE0004` (ALL ALONG → Analyzers) if it somehow slipped through, but that's a backstop, not a
+  substitute for catching it now (vacuously satisfied if the extension owns no tables).
 
 **Outputs:** Every AL file, lint-clean including symbol verification; ChangeLog entries for any
 deviation from `DesignDoc.md`. The extension is **not** compiled yet.
@@ -539,10 +540,11 @@ Step 5's mandatory compile-and-package.
 **Inputs:** Every generated file (lint-clean, not yet compiled); accumulated lint findings;
 `DesignDoc.md`; `ChangeLog.md`.
 
-**Actions:** First, **compile the whole extension once, then package it** (check for an
-already-provisioned runtime before installing anything — Rule 6b). This is the mandatory
-compile-and-package; it is not optional. Package naming, location (`outputAppPackage/`), and the
-never-delete rule (ALL ALONG → Packaging & Versioning) apply from this very first package on.
+**Actions:** First, **compile the whole extension once, with the analyzers this framework
+requires, then package it** (ALL ALONG → Analyzers; check for an already-provisioned runtime
+before installing anything — Rule 6b). This is the mandatory compile-and-package; it is not
+optional. Package naming, location (`outputAppPackage/`), and the never-delete rule (ALL ALONG →
+Packaging & Versioning) apply from this very first package on.
 
 **After every compile with 0 errors, check what the human's editor shows** (ALL ALONG → Keeping
 the Editor in Sync). Red marks the compiler didn't report, like an object ID outside the allowed
@@ -616,17 +618,19 @@ human-run release test.
 - **Code review** — one pass across every object: consistent structure/naming/formatting
   throughout (small projects still drift between the first file written and the last); no dead
   code (**Standards §1.5**); no reference to anything with `ObsoleteState = Pending`/`Removed`,
-  unconditionally and with no version check (**Standards §3.2–§3.3**); `Rec.`-prefix everywhere;
-  correct `DelayedInsert`/`Editable` per data mutability (**§2.2**); every table covered by both
-  permission sets (re-verify independently — don't just trust Step 4), and both sets named with
-  the App Code (**§5.4**). **Then run the full
+  unconditionally and with no version check (**Standards §3.2–§3.3**); both permission sets named
+  with the App Code (**§5.4**). `Rec.`-prefix everywhere and every table's `tabledata` coverage are
+  already proven by the last 0/0 compile — confirm it ran with the analyzers this framework
+  requires (ALL ALONG → Analyzers) and nothing is suppressed, rather than re-deriving either check
+  by hand. Correct `DelayedInsert`/`Editable` per data mutability (**§2.2**) still needs a human
+  read; a compiler can't judge it. **Then run the full
   Anti-Patterns table — Standards Part 7 — against the codebase.** It's one table and it reads in
   a couple of minutes; it's the single highest-value thing the Standards Guide gives a Lite
   project, because most of what it catches is invisible until publish or until a consumer hits
-  it. **Search every AL file — including anything a human wrote or pasted in — for deprecated
-  multilanguage syntax** (`CaptionML`, `ToolTipML`, `OptionCaptionML`, any other `…ML` property,
-  `TextConst`); every hit is a finding, refactored per **Standards §1.7**. A clean compile proves
-  nothing here: AL0424 only fires when `app.json` enables `TranslationFile`. Read the code against
+  it. `TranslationFile` is on for every project (**§8.2**), so a 0/0 compile already proves the
+  compiled codebase is free of `CaptionML`, `ToolTipML`, and the rest via `AL0424` — search anyway
+  for anything added since that last compile, human-pasted included, so nothing new slips past
+  before the next one. Read the code against
   AL Guidelines' *Best Practices* and *Vibe Coding Rules* for anything the Standards Guide doesn't
   already cover (the Standards Guide wins on any conflict — surface it rather than picking a side
   silently). **Translations:** run every technical translation check with all rules enabled, then
@@ -795,7 +799,7 @@ schema-breaking change go out without this warning.
 
 ## OCPF AL Development Standards Guide
 
-The companion rules document — `ocpfALDevStandardsGuide.md`, v1.3.0.0 — shared unchanged with the
+The companion rules document — `ocpfALDevStandardsGuide.md`, v1.4.0.0 — shared unchanged with the
 full framework. **Lite reduces process, not AL rules**, so this is the one fetched resource that
 isn't optional: this runbook cites it as **Standards §** from Step 1 onward.
 
@@ -809,7 +813,7 @@ isn't optional: this runbook cites it as **Standards §** from Step 1 onward.
 - **If the repo isn't reachable**, say so and ask the human for a copy — don't proceed from memory
   of what the standards say. This is stricter than the patterns library, which degrades
   gracefully: an absent Standards Guide means every `Standards §` citation in this runbook points
-  at nothing. **Exception, when the OCPF plugin is installed** (AJ Ansari, September 14, 2026):
+  at nothing. **Exception, when the OCPF plugin is installed**:
   the plugin bundles a copy of the guide in its `al-standards` skill. Use that copy instead of
   stopping. Record `"source": "ocpf-bc plugin bundle"` and the guide's version in
   `SNAPSHOT.json`, tell the human plainly which version was used, and offer a refresh from GitHub
@@ -864,7 +868,7 @@ downloads symbols.
 - **With the OCPF plugin:** its `al-mcp-setup` skill does the bootstrap in one step.
 - **Microsoft's `al` .NET tool on NuGet** is for cloud sessions and machines without VS Code only.
 
-**The human approves; the agent does everything else** (AJ Ansari, September 15, 2026). The AL
+**The human approves; the agent does everything else**. The AL
 Language extension has **no Command Palette command** that sets up or registers this server; its
 only MCP commands sign in to the separate Profiling and Snapshot servers. Don't use, install, or
 depend on a third-party bridge extension (such as the *AL Language Model Tools — MCP Bridge*
@@ -894,7 +898,40 @@ for a new project server.
    `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\al-mcp-call.ps1 . <tool> '<JSON>'`).
 5. **Verify** with a non-compile call such as `al_getpackagedependencies` — not a project compile.
 
-Prefer the server's build/publish/symbol tools over an ad hoc terminal invocation.
+Prefer the server's build/publish/symbol tools over an ad hoc terminal invocation — **except for
+the analysis compile itself (ALL ALONG → Analyzers): its `codeAnalyzers` argument doesn't reliably
+work.**
+
+## Analyzers
+
+**The mandatory Step 5 compile runs with Microsoft's bundled code analyzers engaged — CodeCop,
+PerTenantExtensionCop, and UICop, plus AppSourceCop when Deployment Target is AppSource — not a
+plain compile.** Nothing is installed; these ship with the AL Language extension already. This
+catches, at compile time, checks the runbook previously only verified by hand: `PTE0004` (a table
+missing a matching permission set — Standards §5.3), `PTE0008` (a page control or action missing
+`ApplicationArea`), and `AA0074` (a `Label` missing its suffix). It does not replace symbol
+verification or a design-time decision a compiler can't judge, such as permission-set App Code
+uniqueness across extensions (Standards §5.4).
+
+**How to run it, verified on AL Language extension 18.0.2732683 (September 2026):**
+- **GitHub Copilot Chat in VS Code:** its own `al_build` tool takes a `codeAnalyzers` argument, or
+  reads the workspace's `al.codeAnalyzers` setting. Set `"al.enableCodeAnalysis": true` and
+  `"al.codeAnalyzers"` in `.vscode/settings.json` at Step 3 scaffolding.
+- **Claude Code, Copilot CLI, or any other MCP host: do not use the AL MCP Server's
+  `al_build`/`al_compile` for this.** Tested six ways — the tool call's `codeAnalyzers` argument
+  and the server's `--codeanalyzers` launch flag, symbolic names and literal DLL paths alike — and
+  every one silently produced a clean result on code that should have failed `PTE0004` and
+  `PTE0008`. Invoking the compiler directly does work. With the plugin, run
+  `scripts/al-analyze.sh <project folder> <output .app path>` (Windows: `scripts\al-analyze.cmd`);
+  it finds the same AL extension the launcher does and resolves the analyzer DLLs beside it.
+  Without the plugin, fetch it the same way as the AL MCP Server launcher (ALL ALONG → AL MCP
+  Server, step 1). Its exit code is the compiler's own: 0 only when clean under every analyzer.
+- **Re-verify before trusting either route on a newer AL extension release** — test a known-certain
+  case (a table with no permission set) and confirm `PTE0004` actually appears, the same way
+  you'd verify a symbol (Rule 2).
+
+**Zero-warnings still means zero.** A 0/0 compile proves the checks above only if nothing was
+suppressed: no `#pragma warning disable`, no ruleset downgrade of `PTE0004`, `AL0424`, or `AA0074`.
 
 ## Symbols
 
@@ -1049,10 +1086,10 @@ just fewer documents. Skip everything here if Step 1 chose *US wording, no trans
 ## Permission Sets — the one rule worth restating
 
 The moment this project owns even one table, Permission Sets required = `Yes` — it stops being a
-free choice. `PTE0004` (missing permission set) fires at **publish**, not compile, and nothing
-automated catches a missing `tabledata` grant before then except the pre-flight checks in Steps 3,
-4, and 6. Verify coverage independently at each of those points; don't just trust the previous
-one.
+free choice. The mandatory compile at Step 5 catches a missing `tabledata` grant via `PTE0004`
+(ALL ALONG → Analyzers), and BC publish validation enforces the same requirement independently —
+but don't rely on either as the first catch: verify coverage at the pre-flight checks in Steps 3,
+4, and 6 too, independently at each point, so a gap doesn't wait until compile to surface.
 
 **Name them for this extension, not just the prefix:** `<PREFIX> <APPCODE>, VIEW` and
 `<PREFIX> <APPCODE>, EDIT`, 20 characters or fewer (**Standards §5.4**). A permission set's Role ID
@@ -1061,7 +1098,7 @@ compile cleanly.
 
 ## OCPF Plugin (Optional)
 
-**New September 14, 2026 (AJ Ansari).** This framework is also distributed as an agent plugin,
+This framework is also distributed as an agent plugin,
 `ocpf-bc`, from the same repository. It works in Claude Code, the Claude apps, GitHub Copilot, and
 Microsoft Copilot Cowork. It's optional: copying this runbook in by hand still works exactly as
 before.
@@ -1112,7 +1149,7 @@ Never replace the project's runbook without an explicit yes.
 | Step 7 — Release for Testing | Step 12 |
 
 **Shared with the full framework, not reduced:** the OCPF AL Development Standards Guide. Both
-editions fetch the same v1.3.0.0 file and apply the same AL rules — Lite differs only in process.
+editions fetch the same v1.4.0.0 file and apply the same AL rules — Lite differs only in process.
 
 **Document count:** 4 tracked files (`DesignDoc.md`, `ChangeLog.md`, `Docs.md`, `TestScript.md`)
 versus the full framework's 20 (`ProblemStatement`, `ProjectParameters`, `FRD`, `TDD`,

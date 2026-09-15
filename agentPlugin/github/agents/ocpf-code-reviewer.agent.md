@@ -69,8 +69,9 @@ Work through every AL file (`*.al`) and the translation files. Don't sample.
 6. **Deprecated multilanguage syntax** (Standards §1.7): search every AL file, including
    hand-written code, for `CaptionML`, `ToolTipML`, `OptionCaptionML`, `InstructionalTextML`,
    `PromotedActionCategoriesML`, `RequestFilterHeadingML`, `AboutTitleML`, `AboutTextML`, and
-   `TextConst`. Every hit is a finding. A clean compile proves nothing here: AL0424 fires only when
-   `app.json` enables `TranslationFile`.
+   `TextConst`. Every hit is a finding. `TranslationFile` is on for every project (Standards §8.2),
+   so a 0/0 compile already proves this via `AL0424` — search anyway for anything added since the
+   last compile, hand-written code included.
 7. **Translations** (Standards Part 8), unless the parameters say *US wording, no translation
    files*:
    - no hard-coded user-facing strings in `Error`, `Message`, `Confirm`, `StrMenu`, notifications,
@@ -80,11 +81,14 @@ Work through every AL file (`*.al`) and the translation files. Don't sample.
    - API caption locking matching the design;
    - glossary terms used consistently;
    - text likely to truncate in longer languages.
-8. **Best practices:** `Rec.` qualification everywhere (`NoImplicitWith`), required metadata,
-   correct `DelayedInsert` and `Editable` per data mutability (Standards §2.2).
-9. **Permission sets** (Standards §5.3): every table the extension introduces has `tabledata`
-   grants in both permission sets. Check this independently. It fails only at publish, so nothing
-   earlier catches it.
+8. **Best practices:** required metadata, correct `DelayedInsert` and `Editable` per data
+   mutability (Standards §2.2). `Rec.` qualification (`NoImplicitWith`) and permission-set
+   `tabledata` coverage (Standards §5.3) are already proven by a 0/0 compile run with the
+   analyzers the framework requires (`PTE0004` catches a missing grant) — confirm that compile ran
+   and nothing was suppressed, rather than re-deriving either by hand.
+9. **Permission sets** (Standards §5.4): both sets named with the App Code, unique across every
+   extension sharing the prefix. Check this independently — the compiler doesn't flag a name
+   collision with another extension.
 10. **AL Guidelines,** for anything the Standards Guide doesn't cover: the *Best Practices* and
     *Vibe Coding Rules* at <https://github.com/microsoft/alguidelines>. The Standards Guide wins on
     any conflict; report the conflict rather than picking a side.
