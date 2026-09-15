@@ -27,6 +27,8 @@ slidedecks/standaloneHTML/
 slidedecks/fonts/
 #Multilanguage design working notes — local only, never pushed to the remote
 translationDesign/
+#Plugin design working notes — local only, never pushed to the remote
+pluginDesign/
 
 ### macOS ###
 #Finder per-folder view-state file — local/cosmetic only, never useful to commit
