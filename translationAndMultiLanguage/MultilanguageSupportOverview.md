@@ -14,9 +14,7 @@ language-aware UAT — in both the full framework and the Lite edition.**
 
 ## 1. Why this exists
 
-Shortly after the framework launched, several MVPs in Europe sent the same message, in different
-words: **multilanguage support isn't a nice-to-have. It's a must-have.** They were right, and this
-document describes what changed because of it.
+Shortly after the framework launched, several MVPs (names in Credits section at the end) sent the same message, in different words: **multilanguage support isn't a nice-to-have. It's a must-have.** They were right, and this document describes what changed because of it.
 
 Their feedback came down to four requirements:
 
@@ -569,8 +567,7 @@ that the Partner Center markets must match and that each listed country needs it
 
 ## Credits and references
 
-**The feedback.** This work exists because MVPs across Europe took the time to say, clearly and
-early, what the framework was missing. Thank you.
+**The feedback.** This work exists because Business Central Microsoft MVPs, specifically Kamil Sacek, Luc van Vugt, KB, and Tom Kapitan took the time to say, clearly and early, what the framework was missing. Thank you.
 
 **Tools and projects the design builds on:**
 
