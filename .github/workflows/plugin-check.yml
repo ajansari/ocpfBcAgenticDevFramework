@@ -7,8 +7,7 @@ name: Plugin check
 on:
   push:
     paths:
-      - "BC_App_Build_Routine_Agent.md"
-      - "RunbookChangelog.md"
+      - "fullVersion/**"
       - "liteVersion/**"
       - "standardsGuide/**"
       - "agentPlugin/**"
@@ -16,8 +15,7 @@ on:
       - ".github/workflows/plugin-check.yml"
   pull_request:
     paths:
-      - "BC_App_Build_Routine_Agent.md"
-      - "RunbookChangelog.md"
+      - "fullVersion/**"
       - "liteVersion/**"
       - "standardsGuide/**"
       - "agentPlugin/**"

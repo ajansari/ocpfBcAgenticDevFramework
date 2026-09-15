@@ -1054,4 +1054,4 @@ that names a standard BC concept. Record every result in the project's translati
 
 *This document was created by AJ Ansari, Microsoft MVP, from OnlyCopilotFans. Update this document
 when new patterns are discovered or rules are revised. Its version history is tracked in
-`RunbookChangelog.md` alongside the runbook it accompanies.*
+`fullVersion/RunbookChangelog.md` alongside the runbook it accompanies.*

@@ -27,7 +27,7 @@ Repository: `https://github.com/ajansari/ocpfBcAgenticDevFramework` (default bra
 ## Step 2: Find the latest version
 
 1. **Fetch the latest runbook** for the project's edition:
-   - Full: `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/BC_App_Build_Routine_Agent.md`
+   - Full: `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/fullVersion/BC_App_Build_Routine_Agent.md`
    - Lite: `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/liteVersion/LITE_BC_App_Build_Routine_Agent.md`
 
    Use a terminal download (`curl -fsSL`) where available, and read its `**Version:**` line.
@@ -42,8 +42,9 @@ Repository: `https://github.com/ajansari/ocpfBcAgenticDevFramework` (default bra
 **If the project is current:** say so in one line, naming the version.
 
 **If a newer version exists:**
-1. **Fetch the matching changelog:** `RunbookChangelog.md` (Full) or
-   `liteVersion/LITE_RunbookChangeLog.md` (Lite).
+1. **Fetch the matching changelog:**
+   - Full: `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/fullVersion/RunbookChangelog.md`
+   - Lite: `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/liteVersion/LITE_RunbookChangeLog.md`
 2. **Summarize every entry newer than the project's version,** newest first. For each version, give
    its one-paragraph summary and the changes that affect a project already in progress.
 3. **Say where the project stands** (read `ProjectProgress.md`) and whether any change touches a

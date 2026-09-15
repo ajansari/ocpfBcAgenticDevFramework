@@ -4,6 +4,20 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 1.2.1 — September 15, 2026
+
+**Bundles:** full runbook v2.10.0.0, Lite v1.7.0.0, Standards Guide v1.3.0.0 (unchanged).
+
+- **Repository reorganization only — no runbook rule changed.** The full framework's four files
+  (`BC_App_Build_Routine_Agent.md`, `Outline_OCPFBCAgenticDevFW.md`, `RunbookChangelog.md`,
+  `RunbookSchematics.md`) moved from the repository root into `fullVersion/`, mirroring
+  `liteVersion/`. Updated to match: the `start` and `update-framework` skills' fetch URLs,
+  `agentPlugin/tools/syncPlugin.sh`'s canonical source paths, and cross-references in the Standards
+  Guide, the Lite runbook, and the GitHub Copilot code-reviewer agent.
+- **Why a patch release:** the `start` and `update-framework` skills fetch the full runbook and its
+  changelog from a fixed GitHub URL; that URL now includes `fullVersion/`. Bundling the fix keeps
+  every install fetching from the current path.
+
 ## 1.2.0 — September 15, 2026
 
 **Bundles:** full runbook v2.10.0.0, Lite v1.7.0.0, Standards Guide v1.3.0.0.

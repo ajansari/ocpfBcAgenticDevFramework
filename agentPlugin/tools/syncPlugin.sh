@@ -16,8 +16,8 @@ plugin="$repo_root/agentPlugin/ocpf-bc"
 
 # canonical source (relative to repo root) -> bundled copy (relative to plugin root)
 pairs=(
-  "BC_App_Build_Routine_Agent.md|skills/start/references/BC_App_Build_Routine_Agent.md"
-  "RunbookChangelog.md|skills/start/references/RunbookChangelog.md"
+  "fullVersion/BC_App_Build_Routine_Agent.md|skills/start/references/BC_App_Build_Routine_Agent.md"
+  "fullVersion/RunbookChangelog.md|skills/start/references/RunbookChangelog.md"
   "liteVersion/LITE_BC_App_Build_Routine_Agent.md|skills/start/references/LITE_BC_App_Build_Routine_Agent.md"
   "liteVersion/LITE_RunbookChangeLog.md|skills/start/references/LITE_RunbookChangeLog.md"
   "standardsGuide/ocpfALDevStandardsGuide.md|skills/al-standards/references/ocpfALDevStandardsGuide.md"

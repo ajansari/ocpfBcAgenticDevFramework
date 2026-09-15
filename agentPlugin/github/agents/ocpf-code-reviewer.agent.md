@@ -35,7 +35,7 @@ by default. Download them into a temporary folder **outside** the repository, fo
 ```bash
 mkdir -p /tmp/ocpf
 curl -fsSL https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/standardsGuide/ocpfALDevStandardsGuide.md -o /tmp/ocpf/ocpfALDevStandardsGuide.md
-curl -fsSL https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/BC_App_Build_Routine_Agent.md -o /tmp/ocpf/BC_App_Build_Routine_Agent.md
+curl -fsSL https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/fullVersion/BC_App_Build_Routine_Agent.md -o /tmp/ocpf/BC_App_Build_Routine_Agent.md
 curl -fsSL https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/liteVersion/LITE_BC_App_Build_Routine_Agent.md -o /tmp/ocpf/LITE_BC_App_Build_Routine_Agent.md
 ```
 

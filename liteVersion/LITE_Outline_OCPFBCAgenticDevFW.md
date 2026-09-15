@@ -3,7 +3,8 @@
 *A one-page map of the Lite routine (10 AL files or fewer). For the full routine, see
 `LITE_BC_App_Build_Routine_Agent.md`; for the AL rules it applies, see the shared
 `standardsGuide/ocpfALDevStandardsGuide.md`. For larger projects, use the full framework's
-`Outline_OCPFBCAgenticDevFW.md` and `BC_App_Build_Routine_Agent.md` instead.*
+`fullVersion/Outline_OCPFBCAgenticDevFW.md` and `fullVersion/BC_App_Build_Routine_Agent.md`
+instead.*
 
 ---
 

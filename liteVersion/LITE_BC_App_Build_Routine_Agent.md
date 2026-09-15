@@ -6,14 +6,14 @@
 **Last Updated:** September 15, 2026
 
 > Version history for this edition lives in `LITE_RunbookChangeLog.md`, tracked independently of
-> the full framework's own `RunbookChangelog.md` (though a change to one often has to be reflected
-> in the other) and of any one project built with it. Diagrams for this routine live in
-> `LITE_RunbookSchematics.md`. If either file is not found, create it.
+> the full framework's own `fullVersion/RunbookChangelog.md` (though a change to one often has to
+> be reflected in the other) and of any one project built with it. Diagrams for this routine live
+> in `LITE_RunbookSchematics.md`. If either file is not found, create it.
 
 > This is the lightweight sibling of the full **OCPF BC Agentic Development Framework**
-> (`BC_App_Build_Routine_Agent.md`, in the same repo). Same author, same underlying discipline —
-> half the steps, one model doing all the work, and no ceremony that a 10-files-or-fewer project
-> doesn't need.
+> (`fullVersion/BC_App_Build_Routine_Agent.md`, in the same repo). Same author, same underlying
+> discipline — half the steps, one model doing all the work, and no ceremony that a
+> 10-files-or-fewer project doesn't need.
 
 > **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development
 > Standards Guide** (v1.3.0.0), shared unchanged with the full framework. Lite is *not* a reduced
@@ -820,8 +820,8 @@ isn't optional: this runbook cites it as **Standards §** from Step 1 onward.
 - **Refresh only when asked** ("refresh the standards guide"). Report "updated from `<old sha>` to
   `<new sha>`" or "already up to date."
 - The guide is versioned independently of this runbook (both tracked in the framework's
-  `RunbookChangelog.md`). If a fetched guide's version doesn't match what this runbook expects,
-  say so rather than silently reconciling a citation that doesn't resolve.
+  `fullVersion/RunbookChangelog.md`). If a fetched guide's version doesn't match what this
+  runbook expects, say so rather than silently reconciling a citation that doesn't resolve.
 
 ## Repository Hygiene
 

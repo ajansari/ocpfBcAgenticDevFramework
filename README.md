@@ -61,8 +61,7 @@ At the heart of this project is a simple vision: that this framework should be *
 
 | File | Purpose |
 |---|---|
-| `Outline_OCPFBCAgenticDevFW.md` | A raw outline of the framework's Stages and Steps. Start here for a high-level understanding of how the framework is organized. |
-| `BC_App_Build_Routine_Agent.md` | The agent instructions file to drop into any new AL project in Visual Studio Code. Review and adapt it as needed, then kick off the process with the prompt below. |
+| `fullVersion/` | The **Full Framework** — the complete 14-step routine. See [Setup: Full Framework](#setup-full) below. |
 | `standardsGuide/ocpfALDevStandardsGuide.md` | The companion **OCPF AL Development Standards Guide** — the detailed AL rules the runbook cites as **Standards §** (coding standards, API page design, field inclusion, naming, ID allocation, gap analysis, anti-patterns). You don't need to copy this one by hand: the runbook fetches it from this repository into every project at PRE-01, and gitignores it there. Shared by both editions. |
 | `liteVersion/` | The **Lite Edition** — a 7-step version of the framework for small, fast-moving projects. See [Lite Edition](#lite-edition) below. |
 | `translationAndMultiLanguage/MultilanguageSupportOverview.md` | How the framework handles multilanguage — captions and XLIFF translation files, regional terminology (GST vs. VAT, CR/Adj Note vs. Credit Memo in Australia), agent-drafted translations with a human review gate, and language-aware UAT. Shared by both editions. |
@@ -237,7 +236,7 @@ you can run `/ocpf-bc:update-framework` in them anytime.
 
 - **Watch this repository** on GitHub: **Watch** → **Custom** → **Releases**. GitHub then emails
   you when a new version is published.
-- The [RunbookChangelog.md](RunbookChangelog.md) and
+- The [fullVersion/RunbookChangelog.md](fullVersion/RunbookChangelog.md) and
   [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md) files record what changed
   in each version.
 
@@ -247,18 +246,23 @@ you can run `/ocpf-bc:update-framework` in them anytime.
 <details open>
 <summary><h2>Setup: Full Framework (Manual)</h2></summary>
 
+| Full framework file | Purpose |
+|---|---|
+| `fullVersion/Outline_OCPFBCAgenticDevFW.md` | A raw outline of the framework's Stages and Steps. Start here for a high-level understanding of how the framework is organized. |
+| `fullVersion/BC_App_Build_Routine_Agent.md` | The agent instructions file to drop into any new AL project in Visual Studio Code. Review and adapt it as needed, then kick off the process with the prompt below. |
+
 ### Setup by Tooling
 
 Choose the setup that matches your development environment. Both paths use the same source file — only the filename and location change so each tool knows where to look for it.
 
 **Claude Code plugin (Visual Studio Code)**
-1. Copy `BC_App_Build_Routine_Agent.md` into your project's root folder.
+1. Copy `fullVersion/BC_App_Build_Routine_Agent.md` into your project's root folder.
 2. Rename the copy to `CLAUDE.md`.
 3. Open the project in VS Code with the Claude Code plugin active — it will automatically load `CLAUDE.md` as project instructions.
 
 **GitHub Copilot Chat (Visual Studio Code)**
 1. Create a `.github` subfolder in your project's root folder, if one doesn't already exist.
-2. Copy `BC_App_Build_Routine_Agent.md` into that `.github` subfolder.
+2. Copy `fullVersion/BC_App_Build_Routine_Agent.md` into that `.github` subfolder.
 3. Rename the copy to `copilot-instructions.md`.
 4. Copilot Chat will automatically pick up `copilot-instructions.md` for the workspace.
 

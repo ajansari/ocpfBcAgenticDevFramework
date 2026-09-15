@@ -2,24 +2,25 @@
 
 Tracks changes to the **Lite Edition** of the Agentic Development Framework
 (`LITE_BC_App_Build_Routine_Agent.md`) — independent of any single project built with it. This is
-a separate changelog from the full framework's own `RunbookChangelog.md` (one directory up), even
-though a change to one often has to be reflected in the other — Lite is a derived edition, not a
-fork, and the two are expected to stay in sync on anything that isn't specifically a
+a separate changelog from the full framework's own `fullVersion/RunbookChangelog.md` (a sibling
+folder), even though a change to one often has to be reflected in the other — Lite is a derived
+edition, not a fork, and the two are expected to stay in sync on anything that isn't specifically a
 process-reduction. The Lite Edition is versioned independently of the full framework; check the
 header of `LITE_BC_App_Build_Routine_Agent.md` for which full-framework version it's currently
 derived from.
 
 Entries are grouped by version, newest first, and describe the **cumulative** result of a
 version's changes — not the drafting history behind them; only the final, current form of a
-change is recorded, matching the convention `RunbookChangelog.md` uses for the full framework.
+change is recorded, matching the convention `fullVersion/RunbookChangelog.md` uses for the full
+framework.
 
 ---
 
 ## v1.7.0.0 — September 15, 2026
 
 **Permission set names now include something unique to the extension.** Derived from full
-framework v2.10.0.0; applies Standards Guide v1.3.0.0's new §5.4. See `RunbookChangelog.md`
-v2.10.0.0 for what went wrong and the facts verified.
+framework v2.10.0.0; applies Standards Guide v1.3.0.0's new §5.4. See
+`fullVersion/RunbookChangelog.md` v2.10.0.0 for what went wrong and the facts verified.
 
 ### Changed
 
@@ -39,7 +40,7 @@ v2.10.0.0 for what went wrong and the facts verified.
 
 **The human answers questions and approves prompts; the agent does the setup.** Derived from full
 framework v2.9.0.0; Standards Guide v1.2.0.0 unchanged. Four fixes from a real Lite 1.5.0.0
-project. See `RunbookChangelog.md` v2.9.0.0 for what went wrong and the facts verified.
+project. See `fullVersion/RunbookChangelog.md` v2.9.0.0 for what went wrong and the facts verified.
 
 ### Changed
 
@@ -80,9 +81,9 @@ project. See `RunbookChangelog.md` v2.9.0.0 for what went wrong and the facts ve
 ## v1.5.0.0 — September 14, 2026
 
 **Works with the OCPF agent plugin.** Derived from full framework v2.8.0.0; Standards Guide
-v1.2.0.0 unchanged. See `RunbookChangelog.md` v2.8.0.0 for the verified facts and reasoning. The
-manual setup is unchanged, and every change below applies only when the plugin set the project up
-(`.ocpf/framework.json` exists).
+v1.2.0.0 unchanged. See `fullVersion/RunbookChangelog.md` v2.8.0.0 for the verified facts and
+reasoning. The manual setup is unchanged, and every change below applies only when the plugin set
+the project up (`.ocpf/framework.json` exists).
 
 ### Added
 
@@ -95,7 +96,7 @@ manual setup is unchanged, and every change below applies only when the plugin s
   Step 1, recorded and named to the human.
 - **Operating Rule 6d — zero-install first.** Use what the editor already provides, then what's
   installed, and only then an install. Never ask the human to edit `PATH` or shell profiles. Added
-  after agents tripped on this twice; see `RunbookChangelog.md` v2.8.0.0.
+  after agents tripped on this twice; see `fullVersion/RunbookChangelog.md` v2.8.0.0.
 - **AL MCP Server:**
   - **Copilot Chat in VS Code:** uses the AL extension's built-in tools, with nothing to bootstrap.
   - **Other MCP hosts:** bootstrap with the extension's bundled `altool` and VS Code's runtime; no
@@ -113,9 +114,9 @@ manual setup is unchanged, and every change below applies only when the plugin s
 ## v1.4.0.0 — September 14, 2026
 
 **Multilanguage support.** Derived from full framework v2.7.0.0; applies Standards Guide v1.2.0.0's
-new Part 8 and Appendix D. See `RunbookChangelog.md` v2.7.0.0 for the verified facts and full
-reasoning, and `translationAndMultiLanguage/MultilanguageSupportOverview.md` for a user-facing
-explanation.
+new Part 8 and Appendix D. See `fullVersion/RunbookChangelog.md` v2.7.0.0 for the verified facts
+and full reasoning, and `translationAndMultiLanguage/MultilanguageSupportOverview.md` for a
+user-facing explanation.
 
 ### Added
 
@@ -188,7 +189,7 @@ and AL Guidelines added as reference sources; third-party resources credited und
 licenses.**
 
 Derived from full framework v2.6.0.0; applies Standards Guide v1.1.0.0's new §1.7 and Part 7 row.
-See `RunbookChangelog.md` v2.6.0.0 for the full reasoning.
+See `fullVersion/RunbookChangelog.md` v2.6.0.0 for the full reasoning.
 
 ### Added — Reference Sources
 

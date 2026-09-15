@@ -95,7 +95,7 @@ are only a fallback.
 
    | Edition | Runbook | Changelog |
    |---|---|---|
-   | Full | `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/BC_App_Build_Routine_Agent.md` | `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/RunbookChangelog.md` |
+   | Full | `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/fullVersion/BC_App_Build_Routine_Agent.md` | `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/fullVersion/RunbookChangelog.md` |
    | Lite | `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/liteVersion/LITE_BC_App_Build_Routine_Agent.md` | `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/liteVersion/LITE_RunbookChangeLog.md` |
 
    Download the files **byte for byte**, with a terminal tool such as `curl -fsSL <url> -o <file>`

@@ -1882,7 +1882,7 @@ answer.
 **Framework update check, once per session.** At the start of each session, before resuming work:
 1. Read `runbookVersion` and `declinedUpdateVersion` from `.ocpf/framework.json`.
 2. Read the `**Version:**` line of the latest published runbook. Download it; don't summarize it.
-   - Full: `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/BC_App_Build_Routine_Agent.md`
+   - Full: `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/fullVersion/BC_App_Build_Routine_Agent.md`
    - Lite: `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/liteVersion/LITE_BC_App_Build_Routine_Agent.md`
 3. Compare versions numerically, part by part.
    - **Latest is newer and isn't the skipped version:** tell the human in a sentence or two and
