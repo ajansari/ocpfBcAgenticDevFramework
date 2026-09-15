@@ -40,12 +40,18 @@ run() { "$@" >/dev/null 2>&1 </dev/null & }
 msg="$(printf '%s' "$message" | tr -d '\000-\037";\\')"
 seq=""
 
+# Terminal notifications only when Claude Code runs in a terminal: its VS Code extension
+# (CLAUDE_CODE_ENTRYPOINT=claude-vscode) can inherit TERM_PROGRAM from the terminal that opened
+# VS Code, but has no terminal to show them in.
+term="${TERM_PROGRAM:-}"
+[ "${CLAUDE_CODE_ENTRYPOINT:-cli}" = "cli" ] || term="none"
+
 if [ $desktop -eq 1 ]; then
-  case "${TERM_PROGRAM:-}" in
+  case "$term" in
     iTerm.app|WezTerm) seq="${seq}\\u001b]9;${title}: ${msg}\\u0007" ;;
     ghostty|WarpTerminal) seq="${seq}\\u001b]777;notify;${title};${msg}\\u0007" ;;
     *)
-      if [ -n "${KITTY_WINDOW_ID:-}" ] || [ "${TERM:-}" = "xterm-kitty" ]; then
+      if [ "$term" != "none" ] && { [ -n "${KITTY_WINDOW_ID:-}" ] || [ "${TERM:-}" = "xterm-kitty" ]; }; then
         seq="${seq}\\u001b]99;;${title}: ${msg}\\u001b\\\\"
       elif [ "$(uname -s)" = "Linux" ] && command -v notify-send >/dev/null 2>&1; then
         run notify-send "$title - $(basename "$PWD")" "$msg"

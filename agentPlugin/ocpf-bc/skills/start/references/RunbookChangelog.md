@@ -33,8 +33,12 @@ Standards Guide unchanged at **v1.7.0.0**. Ships with Lite **v1.12.0.0**. Plugin
   Script Editor, so clicking one opens Script Editor instead of the session.
 - **Claude Code hooks fire at the right moments.** In Claude Code 2.1.272, a `Stop` hook fired at the
   end of a turn and a `PreToolUse` hook matching `AskUserQuestion` fired the moment a question was
-  shown, in a live session. The runbook's `.claude/settings.local.json` hooks block ran the script
-  with `$CLAUDE_PROJECT_DIR` resolved.
+  shown, in a live session. The runbook's exec-form hooks block (`command` plus `args`) ran the
+  script with `${CLAUDE_PROJECT_DIR}` substituted, in a project path containing a space, each kind
+  arriving as its own argument; the hook inherited `CLAUDE_CODE_ENTRYPOINT`, which is
+  `claude-vscode` in the VS Code extension. Exec form also runs the Windows script with
+  `-ExecutionPolicy Bypass`, since Windows PowerShell 5.1 blocks local scripts by default (not
+  tested on Windows).
 - **Claude Code can show a terminal's own notification from a hook.** A hook returns
   `{"terminalSequence": ...}` and Claude Code emits it: OSC 9 (iTerm2, WezTerm, Windows Terminal),
   OSC 777 (Ghostty, Warp), OSC 99 (Kitty), or a bell. Hooks have no terminal of their own, so writing
@@ -81,8 +85,9 @@ Standards Guide unchanged at **v1.7.0.0**. Ships with Lite **v1.12.0.0**. Plugin
     `.claude/settings.local.json` (with `remoteControlAtStartup` in `~/.claude/settings.json` for
     every-session Remote Control, and a push from the agent at every turn end); VS Code user
     settings for Copilot Chat's own sounds and notifications; user-level `~/.copilot/hooks/` for
-    Copilot CLI sounds. User-level files are explained as machine-wide before they're written.
-    Removing a kind has its own steps. A one-time test asks whether each kind arrived and whether
+    Copilot CLI sounds. User-level files are explained as machine-wide before they're written, and
+    the keys the agent writes are listed in the record (`userSettingsWritten`), so removing a kind
+    removes only those and never a value the human set. A one-time test asks whether each kind arrived and whether
     clicking a notification opened the session.
 - **PRE-01 / Lite Step 1:** the question, the record, and the exit gate check; both runbooks' "How
   the agent uses it" say to read the record every session and ask when it's missing.

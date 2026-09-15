@@ -1055,8 +1055,9 @@ notifications aren't available and skip this.
      Enterprise, an Owner must have enabled Remote Control.
    - *Sound* — always (on Linux it needs `paplay` or `canberra-gtk-play`, otherwise the bell).
    - *Desktop notification* — GitHub Copilot Chat in VS Code or Copilot CLI (their own); Claude Code
-     on Windows or Linux, or in iTerm2, WezTerm, Ghostty, Warp, or Kitty. Never Claude Code's VS
-     Code extension or VS Code's terminal on macOS.
+     on Windows or Linux, or in iTerm2, WezTerm, Ghostty, Warp, or Kitty when `CLAUDE_CODE_ENTRYPOINT`
+     is `cli` (not inside tmux). Never Claude Code's VS Code extension or VS Code's terminal on
+     macOS.
    - *No notifications* — always; if picked with anything else, ask again.
 
    **With *Claude app*, explain Remote Control first:** pushes need it connected, and while
@@ -1074,6 +1075,7 @@ notifications aren't available and skip this.
   "notifyWhen": "every turn end, question, and approval",
   "channels": ["claudeApp", "sound", "desktop"],
   "remoteControl": "perSession",
+  "userSettingsWritten": [],
   "aiTools": ["claude-code"],
   "os": "macos",
   "decidedOn": "2026-09-15"
@@ -1102,24 +1104,29 @@ notifications aren't available and skip this.
      (macOS/Linux) or `ocpf-notify.ps1` (Windows, untested there) into it, from the plugin's
      `notifications` skill or `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/notifications/scripts/<file>`. It takes `sound`, `desktop`, or both (`-Sound`,
      `-Desktop` on Windows), and for Claude Code returns the terminal's own notification or bell.
-   - **Removing a kind:** remove its settings and hooks; set `remoteControlAtStartup` to `false` if it
-     was `allSessions`; reset the VS Code settings to their defaults.
+   - **Removing a kind:** remove its settings and hooks. Outside the project, remove only the keys
+     listed in the record's `userSettingsWritten` (the agent adds a key there when it writes one the
+     human hadn't already set) — remove, don't write `false` or a default.
 4. **Test once** and ask (Rule 6a) whether each chosen kind arrived and whether clicking a
    notification took the human to the session.
 
-Claude Code hooks (macOS/Linux; `<kinds>` is `sound`, `desktop`, or `sound desktop`). On Windows,
-give each hook `"shell": "powershell"` and the command
-`& "${CLAUDE_PROJECT_DIR}/scripts/ocpf-notify.ps1" -Sound -Desktop -Message "<message>"` with only the
-chosen switches:
+Claude Code hooks (macOS/Linux, exec form; keep only the chosen kinds, one array element each):
 
 ```json
 {
   "hooks": {
-    "Stop": [ { "hooks": [ { "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/scripts/ocpf-notify.sh\" <kinds> \"Your turn: the agent finished\"" } ] } ],
-    "PreToolUse": [ { "matcher": "AskUserQuestion", "hooks": [ { "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/scripts/ocpf-notify.sh\" <kinds> \"A question is waiting for your answer\"" } ] } ],
-    "Notification": [ { "matcher": "permission_prompt", "hooks": [ { "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/scripts/ocpf-notify.sh\" <kinds> \"An approval is waiting for you\"" } ] } ]
+    "Stop": [ { "hooks": [ { "type": "command", "command": "sh", "args": ["${CLAUDE_PROJECT_DIR}/scripts/ocpf-notify.sh", "sound", "desktop", "Your turn: the agent finished"] } ] } ],
+    "PreToolUse": [ { "matcher": "AskUserQuestion", "hooks": [ { "type": "command", "command": "sh", "args": ["${CLAUDE_PROJECT_DIR}/scripts/ocpf-notify.sh", "sound", "desktop", "A question is waiting for your answer"] } ] } ],
+    "Notification": [ { "matcher": "permission_prompt", "hooks": [ { "type": "command", "command": "sh", "args": ["${CLAUDE_PROJECT_DIR}/scripts/ocpf-notify.sh", "sound", "desktop", "An approval is waiting for you"] } ] } ]
   }
 }
+```
+
+On Windows, each hook runs PowerShell the same way, with only the chosen switches and each hook's
+own message:
+
+```json
+{ "type": "command", "command": "powershell.exe", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${CLAUDE_PROJECT_DIR}/scripts/ocpf-notify.ps1", "-Sound", "-Desktop", "-Message", "Your turn: the agent finished"] }
 ```
 
 GitHub Copilot CLI sound hooks (start the CLI from the project root):
@@ -1130,12 +1137,12 @@ GitHub Copilot CLI sound hooks (start the CLI from the project root):
   "hooks": {
     "agentStop": [
       { "type": "command", "timeoutSec": 15,
-        "bash": "grep -qs '\"sound\"' .ocpf/notifications.json && sh scripts/ocpf-notify.sh sound </dev/null; exit 0",
+        "bash": "grep -qs '\"sound\"' .ocpf/notifications.json && sh scripts/ocpf-notify.sh sound </dev/null >/dev/null; exit 0",
         "powershell": "if ((Test-Path .ocpf/notifications.json) -and (Get-Content .ocpf/notifications.json -Raw) -match '\"sound\"') { & powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ocpf-notify.ps1 -Sound }" }
     ],
     "notification": [
       { "type": "command", "timeoutSec": 15,
-        "bash": "grep -Eq '\"notification_type\" *: *\"(permission_prompt|elicitation_dialog)\"' && grep -qs '\"sound\"' .ocpf/notifications.json && sh scripts/ocpf-notify.sh sound </dev/null; exit 0",
+        "bash": "grep -Eq '\"notification_type\" *: *\"(permission_prompt|elicitation_dialog)\"' && grep -qs '\"sound\"' .ocpf/notifications.json && sh scripts/ocpf-notify.sh sound </dev/null >/dev/null; exit 0",
         "powershell": "$n = [Console]::In.ReadToEnd(); if ($n -match '\"notification_type\"\\s*:\\s*\"(permission_prompt|elicitation_dialog)\"' -and (Test-Path .ocpf/notifications.json) -and (Get-Content .ocpf/notifications.json -Raw) -match '\"sound\"') { & powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ocpf-notify.ps1 -Sound }" }
     ]
   }
