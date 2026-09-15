@@ -1646,7 +1646,7 @@ waiting? Choose any."* Offer only the options that can work here — check the e
 | Option | Offer it when |
 |---|---|
 | *Claude app* — a push to your phone | Claude Code signed in through a claude.ai Pro, Max, Team, or Enterprise account, with none of `ANTHROPIC_BASE_URL` (pointing anywhere but `api.anthropic.com`), `DISABLE_TELEMETRY`, `DO_NOT_TRACK`, `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC`, or `DISABLE_GROWTHBOOK` set. Not with an API key, Amazon Bedrock, Google Cloud's Agent Platform, Microsoft Foundry, or a Claude apps gateway. If the sign-in can't be checked, say in the option that it needs a claude.ai subscription, and on Team or Enterprise an Owner must have enabled Remote Control. |
-| *Sound* — a short sound on this computer | Always. On Linux it needs `paplay` or `canberra-gtk-play`; otherwise it's the terminal bell. |
+| *Sound* — a short sound on this computer | Always. On Linux it needs `paplay` or `canberra-gtk-play`; without them it's the terminal bell, which Claude Code's VS Code extension can't ring. |
 | *Desktop notification* | GitHub Copilot Chat in VS Code or GitHub Copilot CLI (their own notifications). Claude Code on Windows or Linux, or in iTerm2, WezTerm, Ghostty, Warp, or Kitty on any OS (the terminal's own notification, found from `TERM_PROGRAM`, `KITTY_WINDOW_ID`, or `TERM`, and only when `CLAUDE_CODE_ENTRYPOINT` is `cli` — the VS Code extension can inherit `TERM_PROGRAM` from the terminal that opened VS Code; inside tmux, the terminal isn't detected). **Not for Claude Code's VS Code extension or VS Code's terminal on macOS:** there's no suitable notification there, and a banner raised from a script opens Script Editor when clicked. |
 | *No notifications* | Always. If it's chosen with anything else, ask again. |
 
@@ -1676,7 +1676,7 @@ files:
 
 `channels` holds any of `claudeApp`, `sound`, and `desktop`, or nothing for *No notifications*;
 `remoteControl` is `perSession` or `allSessions`, present only with `claudeApp`;
-`userSettingsWritten` lists the user-level setting keys the agent wrote (step 3); `aiTools` holds any
+`userSettingsWritten` lists each user-level setting the agent wrote and its earlier value (step 3); `aiTools` holds any
 of `claude-code`, `copilot-chat`, and `copilot-cli`; `os` is `macos`, `windows`, or `linux`.
 
 **At the start of every session, read it:**
@@ -1709,14 +1709,15 @@ of `claude-code`, `copilot-chat`, and `copilot-cli`; `os` is `macos`, `windows`,
   `notifications` skill, or byte for byte from `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/notifications/scripts/<file>`. It takes `sound`, `desktop`, or both
   (`-Sound`, `-Desktop` on Windows). For Claude Code it returns the terminal's own notification or
   bell as hook output; sounds and Windows notifications run in the background. It always exits 0.
-- **Remember what was written outside the project.** When writing a user-level setting, add its
-  key to `userSettingsWritten` in the record — but not if the human had already set that value
-  themselves; say so and leave it theirs.
+- **Remember what was written outside the project.** When writing a user-level setting, add
+  `{ "key": "<setting>", "previous": <its earlier value, or null if it wasn't set> }` to
+  `userSettingsWritten` in the record. If the human already had a different value, ask before
+  replacing it. If they already had the same value, leave it theirs and don't record it.
 - **Removing a kind.** *Claude app*: remove the two push settings, and if `remoteControlAtStartup`
-  is in `userSettingsWritten`, remove that key (don't write `false`, so an organization's default
-  still applies). *Sound* or *Desktop notification*: rewrite the Claude Code hooks with only the
-  kinds left (remove them when none are), and remove the VS Code user settings listed in
-  `userSettingsWritten`, so VS Code's defaults apply again. The Copilot CLI hooks read the record
+  is in `userSettingsWritten`, put back its `previous` value, or remove the key when that's `null`
+  (don't write `false`, so an organization's default still applies). *Sound* or *Desktop
+  notification*: rewrite the Claude Code hooks with only the kinds left (remove them when none
+  are), and put back each VS Code user setting in `userSettingsWritten` the same way. The Copilot CLI hooks read the record
   every time, so they need no change.
 - **Not chosen:** leave each tool's defaults alone, and say what still happens by default: Claude
   Code notifies in iTerm2, Ghostty, and Kitty when it looks like the human is away; Copilot Chat

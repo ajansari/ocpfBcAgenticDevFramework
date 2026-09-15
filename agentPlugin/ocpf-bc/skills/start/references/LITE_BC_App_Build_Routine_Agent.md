@@ -1053,7 +1053,8 @@ notifications aren't available and skip this.
      none of `ANTHROPIC_BASE_URL`, `DISABLE_TELEMETRY`, `DO_NOT_TRACK`,
      `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC`, or `DISABLE_GROWTHBOOK` set. On Team or
      Enterprise, an Owner must have enabled Remote Control.
-   - *Sound* — always (on Linux it needs `paplay` or `canberra-gtk-play`, otherwise the bell).
+   - *Sound* — always (on Linux it needs `paplay` or `canberra-gtk-play`; otherwise the terminal
+     bell, which Claude Code's VS Code extension can't ring).
    - *Desktop notification* — GitHub Copilot Chat in VS Code or Copilot CLI (their own); Claude Code
      on Windows or Linux, or in iTerm2, WezTerm, Ghostty, Warp, or Kitty when `CLAUDE_CODE_ENTRYPOINT`
      is `cli` (not inside tmux). Never Claude Code's VS Code extension or VS Code's terminal on
@@ -1104,9 +1105,10 @@ notifications aren't available and skip this.
      (macOS/Linux) or `ocpf-notify.ps1` (Windows, untested there) into it, from the plugin's
      `notifications` skill or `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/notifications/scripts/<file>`. It takes `sound`, `desktop`, or both (`-Sound`,
      `-Desktop` on Windows), and for Claude Code returns the terminal's own notification or bell.
-   - **Removing a kind:** remove its settings and hooks. Outside the project, remove only the keys
-     listed in the record's `userSettingsWritten` (the agent adds a key there when it writes one the
-     human hadn't already set) — remove, don't write `false` or a default.
+   - **Removing a kind:** remove its settings and hooks. Outside the project, touch only the settings
+     in the record's `userSettingsWritten`, where the agent lists `{ "key", "previous" }` for each one
+     it writes (asking first if the human had a different value): put back `previous`, or remove the
+     key when that's `null` — never write `false` or a default.
 4. **Test once** and ask (Rule 6a) whether each chosen kind arrived and whether clicking a
    notification took the human to the session.
 
