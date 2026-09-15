@@ -129,7 +129,7 @@ flowchart TD
 
     subgraph PRE01["PRE-01 — State the Problem"]
         direction LR
-        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Ask working language; turn on<br/>turn-end notifications;<br/>fetch Standards Guide into<br/>standardsGuide/ + gitignore it;<br/>ask who approves (one person<br/>or separate roles); capture raw<br/>requirements verbatim into<br/>requirements/;<br/>create ProjectProgress.md<br/>(project root); write problem<br/>statement, capture vocabulary,<br/>initial entity list, flag<br/>ambiguities"] --> Out1[/"Output:<br/>standardsGuide/ (gitignored),<br/>requirements/ (if any),<br/>ProjectProgress.md (root),<br/>ProblemStatement.md"/]
+        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Ask working language; ask how<br/>to be notified (recorded in<br/>.ocpf/notifications.json);<br/>fetch Standards Guide into<br/>standardsGuide/ + gitignore it;<br/>ask who approves (one person<br/>or separate roles); capture raw<br/>requirements verbatim into<br/>requirements/;<br/>create ProjectProgress.md<br/>(project root); write problem<br/>statement, capture vocabulary,<br/>initial entity list, flag<br/>ambiguities"] --> Out1[/"Output:<br/>standardsGuide/ (gitignored),<br/>requirements/ (if any),<br/>ProjectProgress.md (root),<br/>ProblemStatement.md"/]
     end
     PRE01 --> Gate1{{"Exit gate:<br/>Standards Guide present<br/>and gitignored;<br/>Functional Consultant<br/>signs off (one approver:<br/>moves to PRE-02)"}}
 
@@ -379,7 +379,7 @@ flowchart LR
         Prog["Project Progress Tracker<br/>ProjectProgress.md (project root) —<br/>one status table, created at PRE-01"]
         Pack["Packaging & Versioning<br/>never delete a package;<br/>propose bumps, don't apply silently"]
         Std["OCPF AL Dev Standards Guide<br/>fetched at PRE-01 into standardsGuide/,<br/>gitignored — the rules cited as Standards §"]
-        Notif["Notifications<br/>on every turn end, question,<br/>and approval — each AI tool's own<br/>(Claude: app push + sound),<br/>set up at PRE-01"]
+        Notif["Notifications<br/>on every turn end, question,<br/>and approval — Claude app, sound,<br/>and/or desktop, chosen at PRE-01,<br/>read every session"]
         MCP["AL MCP Server, Symbols &<br/>Editor Sync — agent sets up at<br/>§1.10, human only approves;<br/>check editor after clean compiles"]
         Ana["Analyzers<br/>CodeCop, UICop, and PerTenantExtensionCop<br/>or AppSourceCop on every<br/>mandatory compile"]
         Hyg["Repository Hygiene<br/>packages tracked;<br/>.alpackages/, *.g.xlf,<br/>fetched references gitignored"]

@@ -72,7 +72,7 @@ documentation, and a human-run release test on top.*
 - Analyzers — CodeCop, UICop, and PerTenantExtensionCop *or* AppSourceCop, engaged on every mandatory compile
 - Symbols — downloaded by the agent, never the human
 - Keeping the Editor in Sync — stale red marks detected and refreshed
-- Notifications — each AI tool's own notification whenever the agent finishes a turn, asks a question, or waits for an approval
+- Notifications — Claude app, sound, and/or desktop notification, chosen at intake and remembered, whenever the agent finishes a turn, asks a question, or waits for an approval
 - OCPF AL Development Standards Guide — fetched at PRE-01, cited as **Standards §** throughout
 - Reference Sources — Microsoft Learn (BC Base App, BC System App, translation files, country/language availability) and AL Guidelines
 - BCQuality Knowledge Snapshot

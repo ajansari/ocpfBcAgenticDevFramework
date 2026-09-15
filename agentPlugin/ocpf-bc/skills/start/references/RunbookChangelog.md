@@ -22,16 +22,19 @@ specifically to keep a superseded decision on record — see the runbook's ALL A
 
 ## v2.15.0.0 — September 15, 2026
 
-**The human is notified every time the agent finishes a turn, asks a question, or waits for an
-approval** — through each AI tool's own notifications — so no time is lost because nobody noticed
-it was their turn. Standards Guide unchanged at **v1.7.0.0**. Ships with Lite **v1.12.0.0**.
+**The human chooses at intake how to be notified every time the agent finishes a turn, asks a
+question, or waits for an approval — Claude app, sound, desktop notification, any combination, or
+none — and the choice persists**, so no time is lost because nobody noticed it was their turn. Standards Guide unchanged at **v1.7.0.0**. Ships with Lite **v1.12.0.0**.
 Plugin **v1.7.0**.
 
 ### Facts verified before designing — not assumed
 
-- **An operating-system banner raised by a script is the wrong tool.** On macOS, `osascript`
-  notifications come from Script Editor, so clicking one opens Script Editor instead of the
-  session. The framework uses each AI tool's own notifications instead.
+- **A banner raised from a script is the wrong tool on macOS.** `osascript` notifications come from
+  Script Editor, so clicking one opens Script Editor instead of the session. *Desktop
+  notification* is offered for Claude Code only on Windows and Linux; on macOS, GitHub Copilot
+  Chat and Copilot CLI use their own.
+- **VS Code has its own chat sounds**, `accessibility.signals.chatResponseReceived` and
+  `accessibility.signals.chatUserActionRequired` (VS Code source). Not tested here.
 - **GitHub Copilot Chat in VS Code** has VS Code's own notifications,
   `chat.notifyWindowOnResponseReceived` and `chat.notifyWindowOnConfirmation` (`off`,
   `windowNotFocused` by default, or `always`); selecting one opens the chat session (VS Code
@@ -54,21 +57,24 @@ Plugin **v1.7.0**.
 ### Added
 
 - **ALL ALONG → Notifications** (both editions):
-  - **GitHub Copilot Chat in VS Code:** both VS Code settings set to `always` in
-    `.vscode/settings.json`.
-  - **GitHub Copilot CLI:** its built-in notifications; nothing to set up.
-  - **Claude Code:** one question — Claude app push, or sound only. A sound on every turn end,
-    question, and approval through hooks in `.claude/settings.local.json` (per developer, never
-    committed). With push, the two push settings there, `remoteControlAtStartup` in
-    `~/.claude/settings.json` with approval, and a short push from the agent at the end of every
-    turn that hands the ball back. A one-time test.
-- **PRE-01 / Lite Step 1:** notifications are turned on right after the working language, so every
-  later question notifies. The PRE-01 / Step 1 exit gate checks it.
-- **Repository Hygiene:** `.claude/settings.local.json` is always gitignored.
-- **`ocpf-notify.sh` and `ocpf-notify.ps1`** in the plugin's new `notifications` skill: a short
-  system sound (macOS `afplay`, Linux `paplay` or the terminal bell, Windows system sounds —
-  untested on Windows), with nothing to click. They always exit 0, so a sound that can't play never
-  interrupts the agent.
+  - **One intake question**, multi-select, right after the working language: *Claude app* (Claude
+    Code), *Sound*, *Desktop notification* (Copilot Chat or Copilot CLI on any OS; Claude Code on
+    Windows or Linux), or *No notifications*.
+  - **The answer is recorded in `.ocpf/notifications.json`**, per developer and always gitignored,
+    read at the start of every session, and asked again when it's missing.
+  - **Applied per AI tool:** Claude Code push settings and sound/desktop hooks in
+    `.claude/settings.local.json`, with `remoteControlAtStartup` in `~/.claude/settings.json` and a
+    push from the agent at every turn end for *Claude app*; VS Code user settings for Copilot
+    Chat's own sounds and notifications; user-level `~/.copilot/hooks/` for Copilot CLI sounds,
+    whose built-in desktop notifications need nothing. A one-time test.
+- **PRE-01 / Lite Step 1:** the question, the record, and the exit gate check; both runbooks' "How
+  the agent uses it" say to read the record every session.
+- **Repository Hygiene:** `.claude/settings.local.json` and `.ocpf/notifications.json` are always
+  gitignored.
+- **`ocpf-notify.sh` and `ocpf-notify.ps1`** in the plugin's new `notifications` skill: `sound`
+  (macOS `afplay`, Linux `paplay`, Windows system sounds), `desktop` (Linux `notify-send`, a
+  Windows notification; never on macOS), or both. Untested on Windows and Linux. They run in the
+  background and always exit 0.
 
 ---
 

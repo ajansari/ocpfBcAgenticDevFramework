@@ -18,18 +18,18 @@ framework.
 
 ## v1.12.0.0 — September 15, 2026
 
-**The human is notified every time the agent finishes a turn, asks a question, or waits for an
-approval**, through each AI tool's own notifications. Derived from full framework v2.15.0.0;
-Standards Guide unchanged at v1.7.0.0. See `fullVersion/RunbookChangelog.md` v2.15.0.0 for what
-was verified.
+**The human chooses at Step 1 how to be notified every time the agent finishes a turn, asks a
+question, or waits for an approval — Claude app, sound, desktop notification, any combination, or
+none — and the choice persists.** Derived from full framework v2.15.0.0; Standards Guide unchanged
+at v1.7.0.0. See `fullVersion/RunbookChangelog.md` v2.15.0.0 for what was verified.
 
 ### Added
 
-- **ALL ALONG → Notifications:** VS Code's own notifications for GitHub Copilot Chat, Copilot CLI's
-  built-in ones, and for Claude Code a Claude app push (if the human wants it) plus a short sound
-  through per-developer hooks, with a one-time test.
-- **Step 1:** notifications are turned on right after the working language; the exit gate checks
-  it. `.claude/settings.local.json` is always gitignored.
+- **ALL ALONG → Notifications:** the multi-select question, the per-developer record in
+  `.ocpf/notifications.json` read every session, and how each choice is applied in Claude Code,
+  GitHub Copilot Chat, and Copilot CLI, with a one-time test.
+- **Step 1:** the question right after the working language; the exit gate checks it.
+  `.claude/settings.local.json` and `.ocpf/notifications.json` are always gitignored.
 
 ---
 

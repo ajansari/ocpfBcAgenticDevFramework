@@ -1,6 +1,6 @@
 ---
 name: notifications
-description: Turn on notifications for a Business Central project following the OCPF BC Agentic Development Framework, so the developer knows whenever the agent finishes a turn, asks a question, or waits for an approval. Uses each AI tool's own notifications: VS Code's for GitHub Copilot Chat, GitHub Copilot CLI's built-in ones, and Claude app push plus a sound for Claude Code. Nothing to install. Use when the user asks to "turn on notifications", "notify me when you're done", "alert me when it's my turn", or runs /ocpf-bc:notifications on a project set up before notifications existed.
+description: Turn on notifications for a Business Central project following the OCPF BC Agentic Development Framework, so the developer knows whenever the agent finishes a turn, asks a question, or waits for an approval. Asks which kinds the developer wants — Claude app push, sound, desktop notification, or none — records the answer in .ocpf/notifications.json, and applies it through each AI tool's own notifications and hooks. Nothing to install. Use when the user asks to "turn on notifications", "notify me when you're done", "alert me when it's my turn", or runs /ocpf-bc:notifications on a project set up before notifications existed.
 ---
 
 # OCPF turn notifications
@@ -15,18 +15,19 @@ fetch the latest runbook's section from
 and follow it; the settings are the same for both editions.
 
 In short:
-- **GitHub Copilot Chat in VS Code:** `"chat.notifyWindowOnResponseReceived": "always"` and
-  `"chat.notifyWindowOnConfirmation": "always"` in `.vscode/settings.json`.
-- **GitHub Copilot CLI:** nothing to set up; its own desktop notifications are on by default.
-- **Claude Code:** ask whether the human wants Claude app push notifications. Copy
-  `ocpf-notify.sh` (macOS/Linux) or `ocpf-notify.ps1` (Windows, untested on Windows) from this
-  skill's `scripts/` folder into the project's `scripts/` folder, exactly — it plays a short sound
-  and shows nothing to click. Write the sound hooks, and with push the two push settings, into
-  `.claude/settings.local.json` (merge, and add it to `.gitignore`). With push, add
-  `"remoteControlAtStartup": true` to `~/.claude/settings.json`, and end every turn that hands the
-  ball back with a short push.
-- **Test once** and ask, through the options mechanism, whether it worked.
+1. **Ask one multi-select question** through the options mechanism: *"Would you like to be notified
+   at the end of every turn and whenever a question or approval is waiting? Choose any."* Offer
+   *Claude app* (Claude Code only), *Sound*, *Desktop notification* (GitHub Copilot Chat or
+   Copilot CLI on any OS; Claude Code only on Windows or Linux), and *No notifications*.
+2. **Record the answer in `.ocpf/notifications.json`** — per developer, always gitignored. The
+   runbook reads it at the start of every session.
+3. **Apply it** per the runbook's table: Claude Code push settings and sound/desktop hooks in
+   `.claude/settings.local.json` (plus `remoteControlAtStartup` in `~/.claude/settings.json` for
+   push); VS Code user settings for Copilot Chat's own sounds and notifications; user-level
+   `~/.copilot/hooks/` for Copilot CLI sound. Copy `ocpf-notify.sh` or `ocpf-notify.ps1` (untested
+   on Windows) from this skill's `scripts/` folder into the project's `scripts/` folder, exactly,
+   when a hook needs it.
+4. **Test once** and ask whether each chosen kind arrived.
 
-Never raise an operating-system banner from a script: on macOS, clicking one opens Script Editor
-instead of the session. Say what you're doing in one sentence rather than asking whether to do it,
-apart from the push question. Never ask the human to edit settings files by hand.
+Never raise an operating-system banner from a script on macOS: clicking one opens Script Editor
+instead of the session. Never ask the human to edit settings files or shell profiles by hand.
