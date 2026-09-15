@@ -53,6 +53,26 @@ done
 version="$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' "$plugin/.claude-plugin/plugin.json" | head -1)"
 echo "plugin version: $version"
 
+# The plugin ships two manifests: .claude-plugin/plugin.json (Claude Code, Claude apps, VS Code) and
+# .github/plugin/plugin.json (GitHub Copilot tooling and the awesome-copilot marketplace). Their
+# shared metadata must match.
+manifest_drift="$(python3 - "$plugin" <<'PY'
+import json, sys
+root = sys.argv[1]
+claude = json.load(open(f"{root}/.claude-plugin/plugin.json"))
+copilot = json.load(open(f"{root}/.github/plugin/plugin.json"))
+for key in ["name", "description", "version", "author", "homepage", "repository", "license", "keywords"]:
+    if claude.get(key) != copilot.get(key):
+        print(f"{key}: .claude-plugin={claude.get(key)!r} .github/plugin={copilot.get(key)!r}")
+PY
+)"
+if [[ -n "$manifest_drift" ]]; then
+  echo "Manifest mismatch between .claude-plugin/plugin.json and .github/plugin/plugin.json:" >&2
+  echo "$manifest_drift" >&2
+  exit 1
+fi
+echo "manifests agree"
+
 if [[ "$mode" == "check" && "$stale" -ne 0 ]]; then
   echo "Bundled copies are stale. Run agentPlugin/tools/syncPlugin.sh, bump the plugin version, and commit." >&2
   exit 1

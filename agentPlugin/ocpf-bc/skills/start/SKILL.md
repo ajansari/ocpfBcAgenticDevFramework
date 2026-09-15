@@ -154,8 +154,10 @@ using the AL Language extension already on the machine:
 - **Elsewhere,** it asks one question, then registers the extension's bundled AL MCP Server for the
   project.
 
-It records the outcome in `.ocpf/framework.json` (`alMcp`). Never install anything or ask the
-human to edit `PATH` or a shell profile here (runbook Operating Rule 6d).
+It records the outcome in `.ocpf/framework.json` (`alMcp`). If the human postpones it, or you
+skip the skill for any reason, set `"alMcp": "deferred"` yourself so the marker never stays at
+`not-checked`. Never install anything or ask the human to edit `PATH` or a shell profile here
+(runbook Operating Rule 6d).
 
 ## Step 8: Mention staying up to date
 
