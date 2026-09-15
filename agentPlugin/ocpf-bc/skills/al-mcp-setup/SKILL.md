@@ -104,7 +104,7 @@ the chat. The launcher then finds `al` on `PATH`.
   ```
 - **Copilot cloud agent:** add to `.github/workflows/copilot-setup-steps.yml`:
   ```yaml
-  - uses: actions/setup-dotnet@v4
+  - uses: actions/setup-dotnet@v5
     with:
       dotnet-version: "8.0.x"
   - run: |
