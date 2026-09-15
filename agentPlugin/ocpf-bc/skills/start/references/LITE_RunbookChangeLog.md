@@ -15,6 +15,26 @@ change is recorded, matching the convention `RunbookChangelog.md` uses for the f
 
 ---
 
+## v1.7.0.0 — September 15, 2026
+
+**Permission set names now include something unique to the extension.** Derived from full
+framework v2.10.0.0; applies Standards Guide v1.3.0.0's new §5.4. See `RunbookChangelog.md`
+v2.10.0.0 for what went wrong and the facts verified.
+
+### Changed
+
+- **Step 1 parameters:** **Permission Set Prefix** is replaced by **Permission Set App Code**
+  (asked) and **Permission Set Names** (derived): `<PREFIX> <APPCODE>, VIEW` and
+  `<PREFIX> <APPCODE>, EDIT`, each 20 characters or fewer.
+- **Step 1 intake:** question 6 asks for the App Code, and 6a asks whether other extensions already
+  use this prefix.
+- **Steps 2, 3, 6 and ALL ALONG → Permission Sets:** names are planned, pre-flighted, and reviewed
+  against §5.4. With namespaces, the compiler doesn't catch a name another extension also uses.
+- **Step 6 `Docs.md` deployment section:** lists users to reassign when a release renames a
+  permission set.
+
+---
+
 ## v1.6.0.0 — September 15, 2026
 
 **The human answers questions and approves prompts; the agent does the setup.** Derived from full

@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 1.6.0.0 (Lite, derived from the full framework v2.9.0.0)
+**Version:** 1.7.0.0 (Lite, derived from the full framework v2.10.0.0)
 **Last Updated:** September 15, 2026
 
 > Version history for this edition lives in `LITE_RunbookChangeLog.md`, tracked independently of
@@ -16,7 +16,7 @@
 > doesn't need.
 
 > **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development
-> Standards Guide** (v1.2.0.0), shared unchanged with the full framework. Lite is *not* a reduced
+> Standards Guide** (v1.3.0.0), shared unchanged with the full framework. Lite is *not* a reduced
 > set of AL rules: the same AL rules apply to a 5-file extension as to a 50-file one. What Lite
 > reduces is *process*. So this runbook states each rule in short form where you need it and cites
 > the guide as **Standards §** for the full version — the abbreviation tables, the complete
@@ -233,10 +233,16 @@ chat. Ask these before writing anything, if any still carry placeholder values:
 | 3 | Use an AL namespace? | *Yes (recommended)* / *No*; if yes, follow up with `<Publisher>.<ExtensionShort>` from answers 1–2. |
 | 4 | What Localization applies? | The countries the problem statement names, as codes (e.g. `US`), then `W1`. |
 | 5 | What AL object prefix? | Two or three short lowercase prefixes built from answers 1–2. |
+| 6 | What Permission Set App Code? | Two or three uppercase codes from answer 1 that fit `13 − (prefix length)` characters (e.g. `NAICS`); must differ from every other extension using this prefix. |
+| 6a | Do other extensions already use this prefix? | *No, this is the first* / *Yes* (then their permission set names or App Codes, as free text). On a match, ask 6 again. |
 
 A suggestion is a candidate the human picks, never an answer recorded for them: nothing goes into
 `ProjectParameters.md` until the human selects or types it. Never build one from an email domain
 or a guess at house style. A wrong guess here means renaming the whole project later.
+
+**Question 6 exists because permission sets named from the prefix alone** (`OCPF - READ`) collided
+across every extension with that prefix, and each one was fixed by hand after the error, without
+the runbook changing (AJ Ansari, September 15, 2026). Rules and evidence: **Standards §5.4**.
 
 **Deployment Target:** *SaaS PTE* / *OnPrem PTE* / *AppSource*, best fit first.
 
@@ -274,7 +280,8 @@ Versioning). Mention this once, plainly, now.
 | **Localization** | `<Localization>` | E.g. `W1`, `NA`, `EU`, `US`. Drives field/table inclusion. |
 | **AL Object Prefix** | `<prefix>` | Short, lowercase. Used in page names/identifiers. |
 | **APIPublisher / APIGroup Prefix / APIVersion** | — | `'<Publisher>'`, `<prefix>_`, `'v1.0'` — same values everywhere. |
-| **Permission Set Prefix** | `<PREFIX> - ` | Uppercase, no AL quotes. |
+| **Permission Set App Code** | `<APPCODE>` | Uppercase letters or digits, no spaces, unique among every extension that uses this prefix, at most `13 − (prefix length)` characters (**Standards §5.4**). |
+| **Permission Set Names** | `<PREFIX> <APPCODE>, VIEW` / `<PREFIX> <APPCODE>, EDIT` | Derived: `<PREFIX>` is the AL Object Prefix in uppercase. Each ≤ 20 characters, e.g. `OCPF NAICS, VIEW`. |
 | **Object ID range(s)** | — | Primary + any Additional, from the loop above. |
 | **Permission Sets required?** | `Yes`/`No` | `No` only if the extension owns **zero new tables**. The moment it owns one table, this is `Yes` — BC publish validation (`PTE0004`) requires it. If `Yes`, reserve ≥ 2 IDs in the primary range. |
 | **AL Runtime / BC Application Minimum / Symbol Source** | — | BC version asked above; runtime from Microsoft Learn. Symbol Source is filled in by the agent after downloading: version, W1 or localized, and where from. |
@@ -389,8 +396,10 @@ be able to produce every object correctly from this document alone. Two halves, 
 - Permission sets, if required (see Step 1): a read-only set and a read/write set (which includes
   the read-only set), with every table's `tabledata` grant enumerated per set — not just "sets
   exist." `PTE0004` fires at **publish**, not compile, and nothing automated catches a missing
-  grant, so this has to be right at design time. **Standards §5.3** covers both sets, the naming
-  convention, and the `D365` base permissions consumers need on top of them.
+  grant, so this has to be right at design time. Name them `<PREFIX> <APPCODE>, VIEW` and
+  `<PREFIX> <APPCODE>, EDIT` from `ProjectParameters.md`, each ≤ 20 characters with a caption ≤ 30.
+  **Standards §5.3–§5.4** cover both sets, the naming rule, and the `D365` base permissions
+  consumers need on top of them.
 - Special notes: singletons, header/line pairs, naming conflicts, deletion behavior for each
   entity (block-if-referenced / cascade / allow) — including any *other* table (standard BC
   included) that references this entity by `TableRelation`.
@@ -425,7 +434,8 @@ in Lite, but don't skip the checklist just because there's no one else to hand i
 - [ ] Every `using` namespace is sourced from the symbol file.
 - [ ] All entity/field names ≤ 30 characters.
 - [ ] Read vs. read/write designations match actual data mutability.
-- [ ] Permission sets are fully enumerated if required.
+- [ ] Permission sets are fully enumerated if required, and named with this extension's App Code
+      (**Standards §5.4**).
 - [ ] Every entity's deletion behavior is explicitly decided, not left to a template default.
 - [ ] Every target language has a named reviewer; every regional term is in the glossary, verified
       or marked for reviewer attention.
@@ -480,7 +490,9 @@ fix in a loop until clean.
     `OptionCaption` member counts match), **API caption locking** matches the Step 2 decision
     (**§8.6**), `Rec.`-qualification (`NoImplicitWith`, **§1.2**), dead-code check (no empty triggers, no
     `// TODO`, no commented-out fields, **§1.5**), 4-space indentation with no tabs (**§1.6**),
-    permission-set `tabledata` coverage for any table the object introduces (**§5.3**), and
+    permission-set `tabledata` coverage for any table the object introduces (**§5.3**),
+    permission set names built from the App Code, ≤ 20 characters (**§5.4** — with namespaces
+    the compiler won't flag a name another extension also uses), and
     **symbol verification** for every standard/base reference (**Appendix B**).
 
 **Outputs:** Batch plan, project scaffold, the pre-flight checklist.
@@ -606,7 +618,8 @@ human-run release test.
   code (**Standards §1.5**); no reference to anything with `ObsoleteState = Pending`/`Removed`,
   unconditionally and with no version check (**Standards §3.2–§3.3**); `Rec.`-prefix everywhere;
   correct `DelayedInsert`/`Editable` per data mutability (**§2.2**); every table covered by both
-  permission sets (re-verify independently — don't just trust Step 4). **Then run the full
+  permission sets (re-verify independently — don't just trust Step 4), and both sets named with
+  the App Code (**§5.4**). **Then run the full
   Anti-Patterns table — Standards Part 7 — against the codebase.** It's one table and it reads in
   a couple of minutes; it's the single highest-value thing the Standards Guide gives a Lite
   project, because most of what it catches is invisible until publish or until a consumer hits
@@ -642,7 +655,7 @@ human-run release test.
   - A short **user guide** section: what the feature is for, how to do each task, what to do when
     something is refused — written for the person clicking around in BC, not a developer.
   - A short **deployment** section: version requirements, install procedure, which permission sets
-    map to which roles, uninstall.
+    map to which roles, uninstall, and which users to reassign if a release renames a permission set.
 - **Write `TestScript.md`** — the green-team/red-team checklist from Step 5, made concrete against
   this extension's actual endpoints, for a human tester to run end to end at Step 7. With more
   than one required language, add a **language pass**: key pages, messages, and customer-facing
@@ -782,7 +795,7 @@ schema-breaking change go out without this warning.
 
 ## OCPF AL Development Standards Guide
 
-The companion rules document — `ocpfALDevStandardsGuide.md`, v1.2.0.0 — shared unchanged with the
+The companion rules document — `ocpfALDevStandardsGuide.md`, v1.3.0.0 — shared unchanged with the
 full framework. **Lite reduces process, not AL rules**, so this is the one fetched resource that
 isn't optional: this runbook cites it as **Standards §** from Step 1 onward.
 
@@ -1041,6 +1054,11 @@ automated catches a missing `tabledata` grant before then except the pre-flight 
 4, and 6. Verify coverage independently at each of those points; don't just trust the previous
 one.
 
+**Name them for this extension, not just the prefix:** `<PREFIX> <APPCODE>, VIEW` and
+`<PREFIX> <APPCODE>, EDIT`, 20 characters or fewer (**Standards §5.4**). A permission set's Role ID
+has no namespace, so two extensions shipping `OCPF - READ` collide in the tenant even though both
+compile cleanly.
+
 ## OCPF Plugin (Optional)
 
 **New September 14, 2026 (AJ Ansari).** This framework is also distributed as an agent plugin,
@@ -1094,7 +1112,7 @@ Never replace the project's runbook without an explicit yes.
 | Step 7 — Release for Testing | Step 12 |
 
 **Shared with the full framework, not reduced:** the OCPF AL Development Standards Guide. Both
-editions fetch the same v1.2.0.0 file and apply the same AL rules — Lite differs only in process.
+editions fetch the same v1.3.0.0 file and apply the same AL rules — Lite differs only in process.
 
 **Document count:** 4 tracked files (`DesignDoc.md`, `ChangeLog.md`, `Docs.md`, `TestScript.md`)
 versus the full framework's 20 (`ProblemStatement`, `ProjectParameters`, `FRD`, `TDD`,

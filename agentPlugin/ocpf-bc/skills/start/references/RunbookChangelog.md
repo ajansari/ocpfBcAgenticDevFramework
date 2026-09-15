@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the two documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v2.9.0.0**, the guide is at **v1.2.0.0** and Lite is at **v1.6.0.0** — but
+**v2.10.0.0**, the guide is at **v1.3.0.0** and Lite is at **v1.7.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 
 Entries are grouped by version, newest first, and describe the **cumulative** result of a
@@ -17,6 +17,69 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v2.10.0.0 — September 15, 2026
+
+**Permission set names now include something unique to the extension.** Standards Guide
+**v1.3.0.0** adds §5.4. Ships with Lite **v1.7.0.0**. Plugin **v1.2.0**.
+
+### What went wrong
+
+- **Every extension named its sets from the prefix alone.** Standards §5.3 said to name them from
+  the Permission Set Prefix (`<PREFIX> - READ`, `<PREFIX> - READ/WRITE`), so every extension built
+  with prefix `ocpf` shipped the same names and collided with the others.
+- **It was fixed by hand, again and again.** Each project was fixed after the error surfaced, each
+  with a different improvised pattern (`OCPF NAICS - READ`, `OCPF - IP Track Read`,
+  `OCPF - Bootcamp Read`). The runbook never changed, so every new extension hit the same problem.
+
+### Facts verified before designing — not assumed
+
+- **Identity:** in the tenant, a permission set is identified by its **Role ID**: the object name in
+  uppercase, `Code[20]`, with no namespace. `Access Control`, `Aggregate Permission Set`, and
+  `Tenant Permission Set` store it next to the App ID (BC 27 System symbols).
+- **Length:**
+  - An assignable permission set name is limited to **20 characters**; longer fails with `AL0305`
+    ([Permission set object](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-permissionset-object)).
+    Reproduced with a 21-character name.
+  - The platform's permission set **Name** is `Text[30]`. A 38-character caption compiles.
+- **The compiler hides the clash when namespaces are on.** Compiled with AL Language extension
+  18.0, app B depending on app A:
+  - both declaring `"OCPF - READ"` in different namespaces compiled cleanly;
+  - with no namespaces, it failed with `AL0197`.
+
+  Namespaces are the framework default, so the clash first shows up in the tenant.
+- **Microsoft's precedent:** Business Central 28's Base Application names its 86 assignable sets
+  `D365 <AREA>, VIEW` / `, EDIT` / `, SETUP`, all within 20 characters. Its affix guidance, for
+  several apps from one publisher, adds an app-level affix after the company affix
+  ([Prefix and suffix for naming in extensions](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-prefix-suffix)).
+- **Renaming a shipped set loses its assignments.** `Access Control` keys each assignment by Role
+  ID and App ID, so users assigned to a renamed set lose that access when the new version is
+  installed. **Permission Set by User** (page 9816) lists who holds a set.
+
+### Changed
+
+- **Standards §5.3:** names come from §5.4. The deployment note uses the new names.
+- **Standards §5.4 (new):** `<PREFIX> <APPCODE>, VIEW` and `<PREFIX> <APPCODE>, EDIT`, and:
+  - the App Code is unique across every extension using the prefix, at most `13 − prefix length`
+    characters;
+  - names are 20 characters or fewer, captions 30 or fewer;
+  - how to rename an installed extension's sets without silently dropping users.
+
+  Standards Part 7 gains a matching anti-pattern.
+- **Step 01 §1.3:** **Permission Set Prefix** is replaced by **Permission Set App Code** (asked)
+  and **Permission Set Names** (derived). The intake table adds question 6 (the App Code) and 6a
+  (other extensions already using this prefix).
+- **Step 03, Step 04, Step 05 post-generation pre-flight, Step 09 code review:** each checks the
+  names against §5.4, since the compiler won't.
+- **Step 11 `Deployment.md`:** lists users to reassign when a release renames a permission set.
+
+### Not changed
+
+- **Existing extensions aren't renamed automatically.** Renaming drops existing user
+  assignments. Move an older extension to §5.4 names in a planned release, following §5.4's
+  rename steps.
 
 ---
 

@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 2.9.0.0
+**Version:** 2.10.0.0
 **Last Updated:** September 15, 2026
 
 > Version history for this framework lives in `RunbookChangelog.md`, tracked independently of any
@@ -13,7 +13,7 @@
 >
 > **How the agent uses it:** Work the phases in order (DEFINE → DESIGN → BUILD → PROVE). Do not start a step until its predecessor's exit gate is met. Every step lists its **Inputs**, **Actions**, **Outputs**, and **Exit gate**. The *Project Parameters* block in Step 01 is the single source of truth for every name, ID, version, and quoting decision — never hardcode any of those values in AL; always derive them from that block. It is persisted as `docs/ProjectParameters.md`, not just discussed — every later step reads it from that file.
 >
-> **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide** (v1.2.0.0). This runbook drives the *sequence*; that guide holds the detailed AL *rules* the sequence applies (Parts 1–8, Appendices A–D). References below point to it as **Standards §**. It is fetched into the project at PRE-01 and kept for the life of the project — see ALL ALONG → OCPF AL Development Standards Guide for the fetch, refresh, and `.gitignore` policy. **Neither document restates the other:** the intake sheet, the phase/step sequence, every checklist, the compile cadence, and the ChangeLog format live only here; AL coding rules, API page design, field inclusion, naming, ID allocation, gap analysis, and anti-patterns live only there.
+> **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide** (v1.3.0.0). This runbook drives the *sequence*; that guide holds the detailed AL *rules* the sequence applies (Parts 1–8, Appendices A–D). References below point to it as **Standards §**. It is fetched into the project at PRE-01 and kept for the life of the project — see ALL ALONG → OCPF AL Development Standards Guide for the fetch, refresh, and `.gitignore` policy. **Neither document restates the other:** the intake sheet, the phase/step sequence, every checklist, the compile cadence, and the ChangeLog format live only here; AL coding rules, API page design, field inclusion, naming, ID allocation, gap analysis, and anti-patterns live only there.
 >
 > **Prime directive for the agent:** An ambiguous input produces ambiguous code. If a step's inputs are incomplete or contradictory, stop and ask the human — do not invent rules to fill the gap.
 >
@@ -208,12 +208,20 @@ If `Extension Name`, `Publisher`, `Use Namespace (y/n)`, `Namespace`, `Localizat
 | 3 | Should this project use an AL namespace? | *Yes (recommended)* / *No*. If yes, follow up with `<Publisher>.<ExtensionShort>` built from answers 1–2. |
 | 4 | What Localization applies? | The countries named in `ProblemStatement.md`, as codes (e.g. `US`), then `W1`. |
 | 5 | What AL object prefix should be used? | Two or three short lowercase prefixes built from answers 1–2. |
+| 6 | What Permission Set App Code identifies this extension? | Two or three uppercase codes built from answer 1 that fit `13 − (prefix length)` characters (e.g. `NAICS`). The question says the code must differ from every other extension using this prefix. |
+| 6a | Do other extensions already use this prefix? | *No, this is the first* / *Yes* (follow up in free text: their permission set names or App Codes). If the new code matches one, ask question 6 again. If the human isn't sure, recommend a more specific code. |
 
 **A suggestion is a candidate the human picks, never an answer recorded on their behalf.**
 Nothing goes into `docs/ProjectParameters.md` until the human has selected or typed it. Build
 suggestions only from what the human said or confirmed, never from an email domain or a guess at
 house style. Inferring these under time pressure already forced a full-project rename on a real
 project, after the inferred publisher and prefix turned out to be wrong.
+
+**Why question 6 exists** (AJ Ansari, September 15, 2026): permission sets named from the prefix
+alone (`OCPF - READ`) collided across every extension built with that prefix. Each extension was
+fixed by hand after the error surfaced, each with a different pattern, and the runbook never
+changed, so the next extension hit it again. The rule, the length limit, and the evidence are
+Standards §5.4.
 
 **Deployment Target:** *SaaS PTE* / *OnPrem PTE* / *AppSource*, with the one that fits the problem
 statement first.
@@ -318,7 +326,8 @@ Primary `90800`–`90899`; Additional allocation 1 `91500`–`91549`; Permission
 | **APIGroup Prefix** | `<prefix>_` | Lowercase prefix + underscore, no AL quotes. Example: `acme_` |
 | **APIVersion** | `'v<Major>.<Minor>'` | Single quotes in AL. Example: `'v1.0'` |
 | **Namespace** | `<Publisher>.<ExtensionShort>` | Same value as Section 1.1; N/A if Use Namespace = `No`. Example: `Contoso.AcmeAPIs` |
-| **Permission Set Prefix** | `<PREFIX> - ` | Uppercase, no AL quotes. Example: `ACME - ` |
+| **Permission Set App Code** | `<APPCODE>` | Uppercase letters or digits, no spaces, unique among **every** extension that uses this prefix (Standards §5.4). At most `13 − (prefix length)` characters, so every name fits the 20-character limit. Example: `SALESAPI` |
+| **Permission Set Names** | `<PREFIX> <APPCODE>, VIEW` / `<PREFIX> <APPCODE>, EDIT` | Derived, not asked: `<PREFIX>` is the AL Object Prefix in uppercase. No AL quotes here. Example: `ACME SALESAPI, VIEW` (19 characters) |
 
 **Entity-naming patterns** — all derived from the prefix above (examples use prefix `acme`):
 
@@ -685,7 +694,7 @@ human for sign-off, same as Step 02.
 
   Any API page or query added later (gap-fill, testing feedback) goes through steps 1–6 for the new objects only.
 - **Special design notes** — singletons (`EntityName = EntitySetName`), header/line pairs as two top-level pages, high-volume tables, naming conflicts.
-- **Permission sets** — if Parameter 1.2 = `Yes` (mandatory the moment the project owns any table — see Parameter 1.2): a read-only set and a read/write set (including the read-only set), both with IDs from the allocated range and names from the Permission Set Prefix (Standards §5.3). **The batch plan must ship each table's `tabledata` grant in the same batch that introduces the table — never deferred to a later batch.** BC PTE publish validation (`PTE0004`) requires every table in a published package to be covered by an in-package permission set; finding this at publish instead of at TDD time forces a batch-plan rewrite after code already exists (a real project hit exactly this and had to pull its permission sets forward from its last batch to its first).
+- **Permission sets** — if Parameter 1.2 = `Yes` (mandatory the moment the project owns any table — see Parameter 1.2): a read-only set and a read/write set (including the read-only set), both with IDs from the allocated range, named `<PREFIX> <APPCODE>, VIEW` and `<PREFIX> <APPCODE>, EDIT` from Parameter 1.3, each name ≤ 20 characters and each caption ≤ 30 (Standards §5.3–§5.4). **The batch plan must ship each table's `tabledata` grant in the same batch that introduces the table — never deferred to a later batch.** BC PTE publish validation (`PTE0004`) requires every table in a published package to be covered by an in-package permission set; finding this at publish instead of at TDD time forces a batch-plan rewrite after code already exists (a real project hit exactly this and had to pull its permission sets forward from its last batch to its first).
 
 **Outputs:** `TDD.md`; updated **Object Register** with every planned object and its ID.
 
@@ -712,7 +721,7 @@ the documents.
 - [ ] All entity names ≤ 30 characters; all field identifiers ≤ 30 characters.
 - [ ] Read vs. read/write designations match the mutability rules in Standards §2.2.
 - [ ] Growth buffers are planned within each module block (Standards §5.2).
-- [ ] Permission sets are planned if enabled (Parameter 1.2) — **with every table's `tabledata` grant explicitly enumerated per set**, not just "permission sets exist," and each grant assigned to the same batch that introduces its table (Standards §5.3).
+- [ ] Permission sets are planned if enabled (Parameter 1.2) — **with every table's `tabledata` grant explicitly enumerated per set**, not just "permission sets exist," and each grant assigned to the same batch that introduces its table (Standards §5.3). Permission set names follow `<PREFIX> <APPCODE>, VIEW` / `, EDIT`, each ≤ 20 characters, with an App Code no other extension using this prefix has (Standards §5.4).
 - [ ] Every target language in Parameter §1.9 is supported by BC in its country (checked against Microsoft's live page), has a named reviewer, and has a terminology source.
 - [ ] Every regional term PRE-02 listed is in the translation glossary, verified per Standards Appendix D or marked for reviewer attention.
 - [ ] Every API page and API query has a recorded group and caption-locking decision, with the decider named (Step 03; Standards §8.6).
@@ -747,7 +756,7 @@ Goal: generate AL batch by batch, lint clean — including symbol verification �
   holds the target version's symbols, rather than redoing any of it.)
 - Write the pre-flight validation checks to run for each batch — this is the canonical checklist every other reference to "the Step 05 checklist" in this runbook means; if you're re-stating it elsewhere, point here rather than re-enumerating. Split into two passes, since some checks are only possible before generation and some only after:
   - **Pre-generation** (on the TDD's planned names/fields, before any file exists — main role): identifier length ≤ 30, entity/EntitySet name length ≤ 30, reserved-keyword scan, localization field-range filter, `ObsoleteState` filter.
-  - **Post-generation** (on the actual generated files — light role, if §1.7 role assignment is configured): required-property presence, **no multilanguage (ML) properties and no `TextConst`** — `CaptionML`, `ToolTipML`, `OptionCaptionML`, or any other ML variant is a pre-flight failure; single-language `Caption`/`ToolTip`/`OptionCaption`/`Label` only (Standards §1.7 — AL0424 fires only when `TranslationFile` is enabled, so the compiler cannot be relied on to catch it), **translatable text** (Standards §8.3–§8.4: no string literal in `Error` / `Message` / `Confirm` / `StrMenu` / notifications / `ErrorInfo`; every label has an AA0074 suffix; every placeholder label has a `Comment`; tokens and telemetry `Locked`; every `OptionCaption` member count matches its option), **API caption locking** matches the per-object decision recorded at Step 03 (translatable objects set `EntityCaption`/`EntitySetCaption`; locked objects lock every `Caption` and leave `ToolTip`s translatable — Standards §8.6), `Rec.`-qualification (`NoImplicitWith`), dead-code check (no empty triggers, no `// TODO`, no commented-out fields), 4-space indentation with no tabs (Standards §1.6), permission-set `tabledata` coverage for every table the batch introduces (Standards §5.3 — `PTE0004` fires at **publish**, not at compile, so **nothing automated catches a missing grant** — pre-flight is the only defense; vacuously satisfied if this project introduces no tables — see Parameter 1.2), and **symbol verification** — every reference to a standard/base BC table, page, codeunit, method, property, or enum value confirmed against the downloaded symbol source, falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer, not assumed correct because it looks like plausible AL (Operating Rule 4).
+  - **Post-generation** (on the actual generated files — light role, if §1.7 role assignment is configured): required-property presence, **no multilanguage (ML) properties and no `TextConst`** — `CaptionML`, `ToolTipML`, `OptionCaptionML`, or any other ML variant is a pre-flight failure; single-language `Caption`/`ToolTip`/`OptionCaption`/`Label` only (Standards §1.7 — AL0424 fires only when `TranslationFile` is enabled, so the compiler cannot be relied on to catch it), **translatable text** (Standards §8.3–§8.4: no string literal in `Error` / `Message` / `Confirm` / `StrMenu` / notifications / `ErrorInfo`; every label has an AA0074 suffix; every placeholder label has a `Comment`; tokens and telemetry `Locked`; every `OptionCaption` member count matches its option), **API caption locking** matches the per-object decision recorded at Step 03 (translatable objects set `EntityCaption`/`EntitySetCaption`; locked objects lock every `Caption` and leave `ToolTip`s translatable — Standards §8.6), `Rec.`-qualification (`NoImplicitWith`), dead-code check (no empty triggers, no `// TODO`, no commented-out fields), 4-space indentation with no tabs (Standards §1.6), **permission set names** match `<PREFIX> <APPCODE>, VIEW` / `, EDIT` from Parameter 1.3, ≤ 20 characters, captions ≤ 30 (Standards §5.4 — with namespaces the compiler won't flag a name another extension also uses), permission-set `tabledata` coverage for every table the batch introduces (Standards §5.3 — `PTE0004` fires at **publish**, not at compile, so **nothing automated catches a missing grant** — pre-flight is the only defense; vacuously satisfied if this project introduces no tables — see Parameter 1.2), and **symbol verification** — every reference to a standard/base BC table, page, codeunit, method, property, or enum value confirmed against the downloaded symbol source, falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer, not assumed correct because it looks like plausible AL (Operating Rule 4).
 
 **Outputs:** Batch plan (ordered), project scaffold, pre-flight validation script/checklist (both passes).
 
@@ -903,7 +912,7 @@ every fix and normalizes whatever drift the findings call out.
   - report layouts free of typed-in user-facing text.
 
   Re-verify API caption locking independently against the Step 03 records — don't just trust Step 06's pre-flight.
-- **Best practices** — `Rec.` prefix everywhere (`NoImplicitWith`), required metadata present, correct `DelayedInsert` / `Editable` per data mutability, every table covered by both permission sets' `tabledata` grants (re-verify independently — don't just trust Step 06 Action 7).
+- **Best practices** — `Rec.` prefix everywhere (`NoImplicitWith`), required metadata present, correct `DelayedInsert` / `Editable` per data mutability, every table covered by both permission sets' `tabledata` grants (re-verify independently — don't just trust Step 06 Action 7), permission set names built from the App Code per Standards §5.4.
 - **AL Guidelines best-practice pass** (ALL ALONG → Reference Sources) — read the built code against AL Guidelines' current *Best Practices* and *Vibe Coding Rules* for anything the Standards Guide doesn't already cover. The Standards Guide wins on any conflict; surface a conflict to the human rather than silently picking a side.
 - **BCQuality knowledge-backed review** (ALL ALONG) — invoke the local BCQuality snapshot's
   `skills/entry.md` dispatch flow against the built extension as an additional, independent pass
@@ -990,7 +999,7 @@ every fix and normalizes whatever drift the findings call out.
   which kind(s) were created, what they cover, how to run them, and how to keep them current as
   the app (not just its API) changes.
 - Write the **user guide** as `UserGuide.md` — **Markdown, in the repo, always** (HTML with `@media print` rules only as an *additional* branded/print deliverable, never instead of the Markdown). This is a **separate document from `Documentation.md`** and must not be folded into it: `Documentation.md` is the integration/API reference written for a developer or BI consumer, whereas the user guide is written for the person clicking around in Business Central — what the feature is for, how to do each task in order, what each field means in business terms, and what to do when something is refused. If the only "user guide" produced is an API reference, this action has not been done.
-- Write one-page **deployment instructions** as `Deployment.md`, for an administrator: version requirements, install procedure, which permission sets map to which roles, verification steps, uninstall. Distinct from `Documentation.md`'s quick-start: this is the full admin install/upgrade/uninstall procedure, not a fast path to a first API call. If Parameter §1.9 has more than one language, include which Microsoft language apps (or partner language apps) an administrator must install for each language, and that the Allowed Languages list should include them.
+- Write one-page **deployment instructions** as `Deployment.md`, for an administrator: version requirements, install procedure, which permission sets map to which roles, verification steps, uninstall. If this release renames any permission set (for example, moving an older extension to Standards §5.4 names), list which users must be reassigned after the upgrade. Distinct from `Documentation.md`'s quick-start: this is the full admin install/upgrade/uninstall procedure, not a fast path to a first API call. If Parameter §1.9 has more than one language, include which Microsoft language apps (or partner language apps) an administrator must install for each language, and that the Allowed Languages list should include them.
 - **AppSource listing text** — only if §1.1 Deployment Target = `AppSource` (Standards §8.10). Draft, in English, the offer description's closing *Supported Countries/Regions* paragraph (the countries from Parameter §1.9) and *Supported Languages* paragraph (only languages whose translation files ship with every unit approved at Step 12). Write both into `Deployment.md`, and state plainly that the markets selected in Partner Center must match the countries paragraph. Every listed country needs its own test at Step 12.
 - **Languages in the test script.** When there's more than one required language, `HumanUnitTestScript.md` gains a **language pass**: the key pages, messages, errors, and customer-facing documents walked once per required language. Each pass records the tester's name and a pass/fail per case, with checks for untranslated text, truncation, regional terminology, and regional formats.
 - **Translated documents** — once the English versions above are final, produce each document in each language Parameter §1.9 lists for it, named `<Document>.<culture>.md` (e.g. `docs/UserGuide.fr-CA.md`). Use the glossary for every BC term. Each translated document's header names its English source and the date it was translated from, since the English version stays canonical. Each is reviewed by that language's named reviewer before Step 12.
@@ -1612,7 +1621,7 @@ Never change code that compiles clean just to clear stale marks.
 ## OCPF AL Development Standards Guide
 
 **New September 13, 2026 (AJ Ansari).** The runbook's companion rules document —
-`ocpfALDevStandardsGuide.md`, v1.2.0.0 — is distributed from this framework's own repository and
+`ocpfALDevStandardsGuide.md`, v1.3.0.0 — is distributed from this framework's own repository and
 fetched into every project that runs this routine, so the rules the runbook cites are on disk and
 readable for the life of the engagement rather than assumed to be in the agent's memory. This is
 the third of three fetched knowledge sources, alongside BCQuality and the OCPF BC AL Patterns
@@ -1656,7 +1665,7 @@ latest standards"). Re-run the fetch, overwrite the local copy, and report plain
 `<old sha>` to `<new sha>`" or "already up to date."
 
 **Version skew is worth naming, not papering over.** The guide carries its own version number
-(v1.2.0.0 as of runbook v2.9.0.0) and is versioned independently of this runbook, with
+(v1.3.0.0 as of runbook v2.10.0.0) and is versioned independently of this runbook, with
 both tracked in `RunbookChangelog.md`. If a fetched guide's version doesn't match what this
 runbook expects, say so — don't silently reconcile a citation that doesn't resolve.
 

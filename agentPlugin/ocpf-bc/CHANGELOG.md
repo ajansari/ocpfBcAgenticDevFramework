@@ -4,6 +4,14 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 1.2.0 — September 15, 2026
+
+**Bundles:** full runbook v2.10.0.0, Lite v1.7.0.0, Standards Guide v1.3.0.0.
+
+- **Unique permission set names.** The bundled runbooks and the Standards Guide (`al-standards`)
+  name permission sets `<PREFIX> <APPCODE>, VIEW` / `, EDIT`. The App Code is unique to each
+  extension, so extensions that share a prefix no longer collide (Standards §5.4).
+
 ## 1.1.0 — September 15, 2026
 
 **Bundles:** full runbook v2.9.0.0, Lite v1.6.0.0, Standards Guide v1.2.0.0 (unchanged).

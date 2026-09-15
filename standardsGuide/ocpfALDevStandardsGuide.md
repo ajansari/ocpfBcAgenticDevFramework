@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 1.2.0.0
-**Last Updated:** September 14, 2026
+**Version:** 1.3.0.0
+**Last Updated:** September 15, 2026
 
 > **Audience:** Human developers and agentic (AI) developers building Business Central AL
 > Per-Tenant Extensions (PTEs).
@@ -532,8 +532,8 @@ data must deliver:
 - A **read/write** permission set that includes the read-only set, plus write permissions on all
   editable pages.
 
-Both must be assigned IDs from the allocated range before development begins, named using the
-**Permission Set Prefix** from Step 01 §1.3 (e.g., `<PREFIX> - READ` and `<PREFIX> - READ/WRITE`).
+Both must be assigned IDs from the allocated range before development begins, and named per
+§5.4.
 
 **Every table the extension owns needs a `tabledata` grant in both sets.** BC PTE publish
 validation (`PTE0004`) requires every table in a published package to be covered by an in-package
@@ -543,8 +543,64 @@ missing grant. Ship each table's grant in the same batch that introduces the tab
 **Deployment note:** Extension permission sets grant access to extension objects only. Consumers
 also need the underlying BC base-table permissions:
 
-- Read-only consumers: assign `<PREFIX> - READ` + `D365 READ`.
-- Read/write consumers: assign `<PREFIX> - READ/WRITE` + `D365 BUS FULL ACCESS` (or equivalent).
+- Read-only consumers: assign `<PREFIX> <APPCODE>, VIEW` + `D365 READ`.
+- Read/write consumers: assign `<PREFIX> <APPCODE>, EDIT` + `D365 BUS FULL ACCESS` (or
+  equivalent).
+
+### 5.4 Permission Set Names Must Be Unique Across Every Extension You Build
+
+**The rule.** An extension's permission sets are named with the AL Object Prefix *and* the
+extension's own **Permission Set App Code** (runbook Step 01 §1.3):
+
+| Set | Name | Example (prefix `ocpf`, App Code `NAICS`) | Caption |
+|---|---|---|---|
+| Read-only | `<PREFIX> <APPCODE>, VIEW` | `permissionset 60488 "OCPF NAICS, VIEW"` | `'<Extension Name> - View'` |
+| Read/write | `<PREFIX> <APPCODE>, EDIT` | `permissionset 60489 "OCPF NAICS, EDIT"` | `'<Extension Name> - Edit'` |
+
+`<PREFIX>` is the AL Object Prefix in uppercase. Any further set follows the same pattern with
+another short role word (`SETUP`, `ADMIN`), within the same length limit; a five-letter role word
+leaves one character less for the App Code. A non-assignable
+building-block set uses the same `<PREFIX> <APPCODE>` start.
+
+**Why a prefix alone isn't enough.** Every extension built with the same prefix produced the same
+names (`OCPF - READ`), so they collided with each other. The fixes were made by hand, one
+extension at a time, each with a different pattern, and the next extension hit it again. Verified
+(AL Language extension 18.0 and BC 27 System symbols, September 15, 2026):
+- **A permission set's identity in the tenant is its Role ID:** the object name in uppercase,
+  `Code[20]`, with **no namespace**. `Access Control`, `Aggregate Permission Set`, and
+  `Tenant Permission Set` all store it next to the App ID. Two extensions that both ship
+  `OCPF - READ` put two rows with the same Role ID in front of every admin screen, assignment
+  import, and tool that picks a permission set by Role ID.
+- **The compiler doesn't catch it when the extensions use namespaces.** App B depending on app
+  A, both declaring `"OCPF - READ"`, compiled cleanly in different namespaces. Without
+  namespaces it failed with `AL0197` (duplicate object name). Namespaces are the framework
+  default, so this never surfaces before deployment.
+- **Microsoft uses the same shape for its own sets.** Business Central 28's Base Application
+  names its assignable sets `D365 <AREA>, VIEW` / `, EDIT` / `, SETUP` (`D365 CUSTOMER, EDIT`).
+  For several apps from one publisher, Microsoft's affix guidance adds an app-level affix after
+  the company affix (`fab-rentals-…`) —
+  [Prefix and suffix for naming in extensions](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-prefix-suffix).
+
+**Length limits.**
+- **Name: 20 characters or fewer** for an assignable set (`Assignable = true`), 30 for a
+  non-assignable one. Longer fails with `AL0305`
+  ([Permission set object](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-permissionset-object)).
+  So the App Code can be at most `20 − 7 − (length of the prefix)` characters: 9 with a
+  four-character prefix like `ocpf`.
+- **Caption: 30 characters or fewer.** The platform's permission set **Name** field is
+  `Text[30]`. A longer caption compiles, and Microsoft ships a few, but 79 of Base Application's 85
+  assignable captions stay within 30. Shorten the extension name in the caption when needed.
+
+**The App Code** is 2 or more uppercase letters or digits, no spaces, taken from the extension
+name (`NAICS Classification` → `NAICS`). It must differ from the App Code of **every other
+extension that uses the same prefix**, whoever built it, including extensions built before this
+rule existed (compare their permission set names).
+
+**Renaming the sets of an extension that's already installed** changes their Role IDs.
+`Access Control` records each user's assignment by Role ID and App ID, so users assigned to the old
+names lose that access when the new version is installed. Before shipping the rename, list who
+holds the old sets (the **Permission Set by User** page), reassign them right after the
+upgrade, and say so in the release's deployment notes.
 
 ---
 
@@ -627,6 +683,7 @@ them. Do not assume.
 | Using `%` in field identifiers | Invalid AL identifier character | Replace with a `Pct` suffix (§4.1) |
 | Using reserved keywords as identifiers (`area`, `group`, etc.) | Compiler error | Suffix with a type noun (§4.3) |
 | Identifier > 30 characters | Compiler error | Apply BC abbreviations (§4.2) |
+| Permission sets named from the prefix alone (`OCPF - READ`) | Every extension with that prefix ships the same Role ID; with namespaces the compiler doesn't notice | `<PREFIX> <APPCODE>, VIEW` / `, EDIT`, with an App Code unique across the prefix's extensions, name ≤ 20 characters (§5.4) |
 | Using estimated / guessed table numbers | Silent wrong-table references | Verify every table ID against symbol files (Appendix B) |
 | Including `ObsoleteState = Pending` fields with future removal dates | Exposes deprecated fields | Exclude all pending-obsolete fields unconditionally (§3.2) |
 | Including fields outside the allowed Localization range | Exposes irrelevant data; breaks portability | Apply the field rules in Part 3 per the Localization parameter |
