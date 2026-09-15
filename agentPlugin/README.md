@@ -138,7 +138,7 @@ field to the closest entry, and add any field that isn't covered here to this se
 | Hooks | None |
 | MCP servers | None bundled |
 | Commands | None (skills are invoked as `/ocpf-bc:<skill>`) |
-| Scripts | `al-mcp-setup/scripts/`: `al-mcp.sh`, `al-mcp.cmd`, `al-mcp-resolve.ps1` (start Microsoft's AL MCP Server), `al-mcp-call.sh`, `al-mcp-call.ps1` (run one AL MCP Server tool), and `al-analyze.sh`, `al-analyze.cmd`, `al-analyze-resolve.ps1` (compile with Microsoft's code analyzers); `notifications/scripts/`: `ocpf-notify.sh`, `ocpf-notify.ps1` (a short system sound and, on Windows and Linux, a desktop notification when it's the user's turn). They're copied into the user's project, through the AI tool's own permission prompts, and use the locally installed AL Language extension. They install nothing. |
+| Scripts | `al-mcp-setup/scripts/`: `al-mcp.sh`, `al-mcp.cmd`, `al-mcp-resolve.ps1` (start Microsoft's AL MCP Server), `al-mcp-call.sh`, `al-mcp-call.ps1` (run one AL MCP Server tool), and `al-analyze.sh`, `al-analyze.cmd`, `al-analyze-resolve.ps1` (compile with Microsoft's code analyzers); `notifications/scripts/`: `ocpf-notify.sh`, `ocpf-notify.ps1` (a short system sound and a desktop notification when it's the user's turn). They're copied into the user's project, through the AI tool's own permission prompts. The AL scripts use the locally installed AL Language extension; the notification scripts use the operating system's and terminal's own sounds and notifications. They install nothing. |
 
 #### External services, data, and permissions
 

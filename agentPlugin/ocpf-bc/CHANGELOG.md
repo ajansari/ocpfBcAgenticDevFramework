@@ -9,11 +9,14 @@ fetches the latest runbook from GitHub first, so a project isn't limited to the 
 **Bundles:** full runbook v2.15.0.0, Lite v1.12.0.0, Standards Guide v1.7.0.0.
 
 - **New `notifications` skill:** asks how the developer wants to be told it's their turn — Claude
-  app push, sound, desktop notification, or none — records it in `.ocpf/notifications.json`, and
-  applies it through each AI tool's own notifications and hooks. Includes `ocpf-notify.sh` and
-  `ocpf-notify.ps1` (sound; desktop notification on Linux and Windows). The runbooks ask at their
-  first step; the skill adds it to older projects.
-- **`start`:** notes that the runbook asks right after the working language.
+  app push, sound, desktop notification, or none — explains Remote Control before a Claude app
+  choice, records the answer in `.ocpf/notifications.json`, and applies it through each AI tool's
+  own notifications and hooks. Includes `ocpf-notify.sh` and `ocpf-notify.ps1`. The runbooks ask at
+  their first step; the skill adds it to older projects.
+- **`status`:** reports the recorded notification kinds, or offers the skill when none are set.
+- **`start`:** notes that the runbook asks right after the working language, and that choosing a
+  notification kind counts as asking for the settings it needs.
+- **Copilot Cowork package:** leaves out the `notifications` skill, which can't work there.
 
 ## 1.6.0 — September 15, 2026
 

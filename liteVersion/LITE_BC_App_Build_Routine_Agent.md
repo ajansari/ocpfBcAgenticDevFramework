@@ -44,7 +44,8 @@
 > any of those values in AL; always derive them from that block. It is persisted as
 > `ProjectParameters.md` in the project root, not just discussed — every later step reads it from
 > that file. At the start of every session, read `.ocpf/notifications.json` and keep notifying the
-> human the way it says (ALL ALONG → Notifications).
+> human the way it says; if it's missing, ask how they want to be notified (ALL ALONG →
+> Notifications).
 >
 > **One model does everything.** Lite drops the full framework's optional Main/Light/Reasoning
 > role split. There's no delegation mechanism to configure — the executing agent plans, generates,
@@ -196,11 +197,11 @@ design work.
 **Actions:**
 - **Ask the working language first — before anything else** (Operating Rule 8). Ask in English,
   through the options mechanism, with English listed first and free text for any other language.
-  It's asked alone, so every later box can be in the language chosen.
+  It's asked alone, so every later box can be in the language chosen. Continue in the language
+  chosen.
 - **Ask how to be notified right after that** (ALL ALONG → Notifications): Claude app, sound,
   desktop notification, any combination, or none. Record it in `.ocpf/notifications.json` and
   apply it, so every later question reaches the human even when they've stepped away.
-  Continue in the language chosen.
 - **Fetch the OCPF AL Development Standards Guide first, before anything else needs it.** Get
   `standardsGuide/ocpfALDevStandardsGuide.md` from
   `https://github.com/ajansari/ocpfBcAgenticDevFramework/` into a `standardsGuide/` folder in this
@@ -1041,24 +1042,38 @@ Never change code that compiles clean just to clear stale marks.
 
 **The human chooses at Step 1 how to be notified every time the agent finishes a turn, asks a
 question, or waits for an approval, and the choice persists.** The AI tool's own notifications and
-hooks do the work. The agent sets it up (Rule 6d); nothing is installed.
+hooks do the work. The agent sets it up (Rule 6d); nothing is installed. In documents mode, say
+notifications aren't available and skip this.
 
 1. **Ask right after the working language** (Rule 6a), one multi-select question: *"Would you like
    to be notified at the end of every turn and whenever a question or approval is waiting? Choose
    any."* Offer only what works here:
-   - *Claude app* (a push to your phone) — Claude Code only.
-   - *Sound* — always.
-   - *Desktop notification* — GitHub Copilot Chat in VS Code or Copilot CLI (their own, any OS),
-     or Claude Code on Windows or Linux. Never Claude Code on macOS: a script's banner opens
-     Script Editor when clicked.
-   - *No notifications* — always.
+   - *Claude app* (a push to your phone) — Claude Code signed in through a claude.ai Pro, Max, Team,
+     or Enterprise account, not an API key, Bedrock, Google Cloud, Foundry, or a gateway, and with
+     none of `ANTHROPIC_BASE_URL`, `DISABLE_TELEMETRY`, `DO_NOT_TRACK`,
+     `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC`, or `DISABLE_GROWTHBOOK` set. On Team or
+     Enterprise, an Owner must have enabled Remote Control.
+   - *Sound* — always (on Linux it needs `paplay` or `canberra-gtk-play`, otherwise the bell).
+   - *Desktop notification* — GitHub Copilot Chat in VS Code or Copilot CLI (their own); Claude Code
+     on Windows or Linux, or in iTerm2, WezTerm, Ghostty, Warp, or Kitty. Never Claude Code's VS
+     Code extension or VS Code's terminal on macOS.
+   - *No notifications* — always; if picked with anything else, ask again.
+
+   **With *Claude app*, explain Remote Control first:** pushes need it connected, and while
+   connected the session transcript is stored on Anthropic's servers (not available under
+   requirements such as Zero Data Retention). Then ask: *Only when I turn it on* (`/remote-control`
+   before stepping away) / *Every Claude Code session on this machine* (until turned off with
+   **Enable Remote Control for all sessions**).
 2. **Record it in `.ocpf/notifications.json`** (per developer, always gitignored). At the start of
-   every session, read it; if it's missing, ask again before the next step.
+   every session, read it: if it's missing, ask; if the current AI tool isn't in `aiTools`, apply the
+   recorded kinds for it and add it; if the human asks to change it, undo the dropped kinds, apply
+   the new ones, and rewrite the file.
 
 ```json
 {
   "notifyWhen": "every turn end, question, and approval",
   "channels": ["claudeApp", "sound", "desktop"],
+  "remoteControl": "perSession",
   "aiTools": ["claude-code"],
   "os": "macos",
   "decidedOn": "2026-09-15"
@@ -1067,29 +1082,35 @@ hooks do the work. The agent sets it up (Rule 6d); nothing is installed.
 
 3. **Apply it, per AI tool:**
    - **Claude app** (Claude Code): `"inputNeededNotifEnabled": true` and
-     `"agentPushNotifEnabled": true` in `.claude/settings.local.json`;
-     `"remoteControlAtStartup": true` in `~/.claude/settings.json` (honored only there); and a push
-     from the agent at the end of every turn that hands the ball back, naming what the human needs
-     to do. Questions and approvals push by themselves. The human installs the Claude app, signs
-     in, and allows its notifications.
+     `"agentPushNotifEnabled": true` in `.claude/settings.local.json`; with *Every session*, also
+     `"remoteControlAtStartup": true` in `~/.claude/settings.json` (honored only there). End every
+     turn that hands the ball back with a push naming what the human needs to do — this one depends
+     on the agent remembering, so suggest pairing it with *Sound*. The human installs the Claude app,
+     signs in, and allows its notifications.
    - **Sound:** Claude Code — hooks in `.claude/settings.local.json` running `ocpf-notify` with
-     `sound`. Copilot Chat — VS Code user settings `"accessibility.signals.chatResponseReceived"`
-     and `"accessibility.signals.chatUserActionRequired"`, each `{ "sound": "on" }`. Copilot CLI —
-     hooks in `~/.copilot/hooks/ocpf-notify.json`.
-   - **Desktop notification:** Claude Code on Windows or Linux — the same hooks with `desktop`
-     added. Copilot Chat — VS Code user settings `"chat.notifyWindowOnResponseReceived"` and
+     `sound`. Copilot Chat — VS Code user settings `"accessibility.signals.chatResponseReceived":
+     { "sound": "on" }` and `"accessibility.signals.chatUserActionRequired": { "sound": "on",
+     "announcement": "auto" }`. Copilot CLI — hooks in `~/.copilot/hooks/ocpf-notify.json`.
+   - **Desktop notification:** Claude Code — the same hooks with `desktop` added. Copilot Chat — VS
+     Code user settings `"chat.notifyWindowOnResponseReceived"` and
      `"chat.notifyWindowOnConfirmation"`, each `"always"`. Copilot CLI — built in, nothing to set.
    - **Files:** `.claude/settings.local.json` is per developer; merge and add it to `.gitignore`.
      `~/.claude/settings.json`, `~/.copilot/hooks/`, and VS Code's user `settings.json` are outside
-     the project, so the AI tool asks first; merge, keeping existing settings.
-   - **Script:** `ocpf-notify.sh` (macOS/Linux) or `ocpf-notify.ps1` (Windows, untested there) in
-     `scripts/`, from the plugin's `notifications` skill or `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/notifications/scripts/<file>`. It takes `sound`,
-     `desktop`, or both (`-Sound`, `-Desktop` on Windows).
-4. **Test once** and ask (Rule 6a) whether each chosen kind arrived.
+     the project: say first that they apply to every project on this machine, then let the AI tool
+     ask; merge, keeping existing settings.
+   - **Script:** add `scripts/` to `.gitignore` now if needed, then copy `ocpf-notify.sh`
+     (macOS/Linux) or `ocpf-notify.ps1` (Windows, untested there) into it, from the plugin's
+     `notifications` skill or `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/notifications/scripts/<file>`. It takes `sound`, `desktop`, or both (`-Sound`,
+     `-Desktop` on Windows), and for Claude Code returns the terminal's own notification or bell.
+   - **Removing a kind:** remove its settings and hooks; set `remoteControlAtStartup` to `false` if it
+     was `allSessions`; reset the VS Code settings to their defaults.
+4. **Test once** and ask (Rule 6a) whether each chosen kind arrived and whether clicking a
+   notification took the human to the session.
 
-Claude Code hooks (macOS/Linux; `<kinds>` is `sound`, `desktop`, or `sound desktop`; on Windows run
-`ocpf-notify.ps1` with `powershell.exe -NoProfile -ExecutionPolicy Bypass -File` and the chosen
-switches):
+Claude Code hooks (macOS/Linux; `<kinds>` is `sound`, `desktop`, or `sound desktop`). On Windows,
+give each hook `"shell": "powershell"` and the command
+`& "${CLAUDE_PROJECT_DIR}/scripts/ocpf-notify.ps1" -Sound -Desktop -Message "<message>"` with only the
+chosen switches:
 
 ```json
 {
@@ -1101,7 +1122,7 @@ switches):
 }
 ```
 
-GitHub Copilot CLI sound hooks:
+GitHub Copilot CLI sound hooks (start the CLI from the project root):
 
 ```json
 {
@@ -1122,10 +1143,10 @@ GitHub Copilot CLI sound hooks:
 ```
 
 Verified September 2026 in Claude Code 2.1.272: the `Stop` hook and a `PreToolUse` hook on
-`AskUserQuestion` both fired with these hooks. The push settings, VS Code settings, and Copilot CLI
-notifications are documented by Anthropic, Microsoft, and GitHub but untested here, as is Windows.
-Tools with neither notifications nor hooks (Claude Chat, Microsoft Copilot Cowork) can't notify;
-say so and record no channels.
+`AskUserQuestion` both fired with these hooks. Documented but untested here: Claude Code's
+`terminalSequence` output, push settings, and Remote Control requirements; the VS Code settings;
+Copilot CLI notifications and hooks; Windows and Linux. Tools with neither notifications nor hooks
+(Claude Chat, Microsoft Copilot Cowork) can't notify; say so and record no channels.
 
 ## Reference Sources — Microsoft Learn and AL Guidelines
 
@@ -1242,7 +1263,8 @@ before.
 `start` skill creates it. It records the edition, the runbook version, where the runbook copies
 were placed (`placedAs`), the source commit, the plugin version, a version the human chose to
 skip (`declinedUpdateVersion`), and the AL MCP Server outcome (`alMcp`). The `.ocpf/` folder
-follows the Step 1 framework-files answer.
+follows the Step 1 framework-files answer, except `.ocpf/notifications.json`, which is always
+gitignored.
 
 **Framework update check, once per session.** At the start of each session, before resuming work:
 1. Read `runbookVersion` and `declinedUpdateVersion` from `.ocpf/framework.json`.

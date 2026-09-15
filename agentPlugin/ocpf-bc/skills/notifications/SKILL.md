@@ -16,18 +16,29 @@ and follow it; the settings are the same for both editions.
 
 In short:
 1. **Ask one multi-select question** through the options mechanism: *"Would you like to be notified
-   at the end of every turn and whenever a question or approval is waiting? Choose any."* Offer
-   *Claude app* (Claude Code only), *Sound*, *Desktop notification* (GitHub Copilot Chat or
-   Copilot CLI on any OS; Claude Code only on Windows or Linux), and *No notifications*.
-2. **Record the answer in `.ocpf/notifications.json`** — per developer, always gitignored. The
+   at the end of every turn and whenever a question or approval is waiting? Choose any."* Offer only
+   what can work, per the runbook's table:
+   - *Claude app* — Claude Code signed in through a claude.ai subscription, with Remote Control
+     available (no API key, Bedrock, Google Cloud, Foundry, gateway, or the environment variables
+     the runbook lists).
+   - *Sound* — always.
+   - *Desktop notification* — Copilot Chat or Copilot CLI; Claude Code on Windows or Linux, or in
+     iTerm2, WezTerm, Ghostty, Warp, or Kitty. Not Claude Code's VS Code extension or VS Code's
+     terminal on macOS.
+   - *No notifications* — always.
+2. **With *Claude app*, explain Remote Control** (transcripts are stored on Anthropic's servers
+   while it's connected) and ask: only when the human turns it on, or every session on this machine.
+3. **Record the answer in `.ocpf/notifications.json`** — per developer, always gitignored. The
    runbook reads it at the start of every session.
-3. **Apply it** per the runbook's table: Claude Code push settings and sound/desktop hooks in
+4. **Apply it** per the runbook's table: Claude Code push settings and sound/desktop hooks in
    `.claude/settings.local.json` (plus `remoteControlAtStartup` in `~/.claude/settings.json` for
-   push); VS Code user settings for Copilot Chat's own sounds and notifications; user-level
-   `~/.copilot/hooks/` for Copilot CLI sound. Copy `ocpf-notify.sh` or `ocpf-notify.ps1` (untested
-   on Windows) from this skill's `scripts/` folder into the project's `scripts/` folder, exactly,
-   when a hook needs it.
-4. **Test once** and ask whether each chosen kind arrived.
+   every-session Remote Control); VS Code user settings for Copilot Chat's own sounds and
+   notifications; user-level `~/.copilot/hooks/` for Copilot CLI sound. Before writing a user-level
+   file, say it applies to every project on this machine. Add `scripts/` to `.gitignore`, then copy
+   `ocpf-notify.sh` or `ocpf-notify.ps1` (untested on Windows) from this skill's `scripts/` folder
+   into the project's `scripts/` folder, exactly, when a hook needs it.
+5. **Test once** and ask whether each chosen kind arrived and whether clicking a notification
+   opened the session.
 
 Never raise an operating-system banner from a script on macOS: clicking one opens Script Editor
 instead of the session. Never ask the human to edit settings files or shell profiles by hand.

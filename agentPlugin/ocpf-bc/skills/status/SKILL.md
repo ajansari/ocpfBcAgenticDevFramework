@@ -15,7 +15,8 @@ conversation memory.
 2. **The runbook**, as `CLAUDE.md`, `.github/copilot-instructions.md`, or the file named in
    `.ocpf/framework.json`: that step's **Exit gate** and outputs. Read it from the runbook; don't
    paraphrase from memory.
-3. **`.ocpf/framework.json`**, if present: edition, runbook version, and `alMcp`.
+3. **`.ocpf/framework.json`**, if present: edition, runbook version, and `alMcp`. Also
+   **`.ocpf/notifications.json`**, if present: the notification kinds this developer chose.
 4. **Recent context:** the latest entries in `ChangeLog.md`. For Full, also `docs/ProjectMemory.md`.
 5. **Parameters:** `docs/ProjectParameters.md` (Full) or `ProjectParameters.md` (Lite), only for
    the extension name.
@@ -35,5 +36,7 @@ Keep it to a compact block:
 - **AL MCP Server:** connected, not connected, or deferred, from `alMcp` and whether the session
   has the `al` server's tools. If it isn't connected and BUILD has started or is next, suggest the
   `al-mcp-setup` skill.
+- **Notifications:** the kinds recorded in `.ocpf/notifications.json` (Claude app, sound, desktop
+  notification, or none). If the file is missing, say "not set" and offer the `notifications` skill.
 
 Then stop. Don't start the next step unless the human asks.

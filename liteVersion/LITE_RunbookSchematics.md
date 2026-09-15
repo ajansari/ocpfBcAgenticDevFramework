@@ -72,7 +72,7 @@ met).
 flowchart TD
     subgraph DEFINE["PHASE: DEFINE"]
         direction TB
-        S1["Step 1<br/>Define the Problem<br/>& Lock Parameters"] --> G_S1{{"Standards Guide present<br/>+ gitignored; no placeholder<br/>remains; ProjectParameters.md<br/>+ onboarding Qs answered;<br/>app.json + symbols ready;<br/>human confirms sheet"}}
+        S1["Step 1<br/>Define the Problem<br/>& Lock Parameters"] --> G_S1{{"Standards Guide present<br/>+ gitignored; notifications<br/>chosen and tested; no placeholder<br/>remains; ProjectParameters.md<br/>+ onboarding Qs answered;<br/>app.json + symbols ready;<br/>human confirms sheet"}}
     end
 
     subgraph DESIGN["PHASE: DESIGN"]
@@ -121,7 +121,7 @@ flowchart TD
         direction LR
         In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Ask working language; ask how<br/>to be notified (recorded in<br/>.ocpf/notifications.json);<br/>fetch Standards Guide into<br/>standardsGuide/ + gitignore it;<br/>capture raw requirements<br/>verbatim; write problem<br/>statement + quick gap check<br/>(Standards Part 6); ask every<br/>intake question in grouped<br/>option boxes (up to 4 each),<br/>never inferred, then one confirm; persist<br/>ProjectParameters.md; then the<br/>agent writes app.json, connects<br/>AL tools, downloads symbols,<br/>checks the editor"] --> Out1[/"Output:<br/>standardsGuide/ (gitignored),<br/>requirements/ (if any),<br/>ProblemStatement.md,<br/>ProjectParameters.md,<br/>app.json, .alpackages/"/]
     end
-    S1 --> Gate1{{"Exit gate:<br/>Standards Guide present + gitignored,<br/>no placeholder remains,<br/>onboarding questions answered,<br/>app.json matches sheet,<br/>symbols in .alpackages/,<br/>human confirms sheet"}}
+    S1 --> Gate1{{"Exit gate:<br/>Standards Guide present + gitignored,<br/>notification choice recorded,<br/>applied, and tested,<br/>no placeholder remains,<br/>onboarding questions answered,<br/>app.json matches sheet,<br/>symbols in .alpackages/,<br/>human confirms sheet"}}
 
     Gate1 --> Next(["to DESIGN, Step 2"])
 

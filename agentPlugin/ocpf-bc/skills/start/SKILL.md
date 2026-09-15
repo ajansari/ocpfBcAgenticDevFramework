@@ -170,7 +170,8 @@ Once, briefly:
   VS Code's Copilot Chat, plugins update with extension auto-update. In Copilot CLI, run
   `copilot plugin update ocpf-bc`.
 
-Don't change the human's editor or tool settings yourself unless they ask you to.
+Don't change the human's editor or tool settings yourself unless they ask you to. Choosing a
+notification kind at the runbook's first step counts as asking, for the settings that kind needs.
 
 ## Step 9: Begin the routine
 

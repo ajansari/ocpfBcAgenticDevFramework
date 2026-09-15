@@ -25,9 +25,10 @@ at v1.7.0.0. See `fullVersion/RunbookChangelog.md` v2.15.0.0 for what was verifi
 
 ### Added
 
-- **ALL ALONG → Notifications:** the multi-select question, the per-developer record in
-  `.ocpf/notifications.json` read every session, and how each choice is applied in Claude Code,
-  GitHub Copilot Chat, and Copilot CLI, with a one-time test.
+- **ALL ALONG → Notifications:** the multi-select question (offering only options that can work),
+  Remote Control explained before *Claude app* with a per-session or every-session choice, the
+  per-developer record in `.ocpf/notifications.json` read every session, how each choice is applied
+  and removed in Claude Code, GitHub Copilot Chat, and Copilot CLI, and a one-time test.
 - **Step 1:** the question right after the working language; the exit gate checks it.
   `.claude/settings.local.json` and `.ocpf/notifications.json` are always gitignored.
 

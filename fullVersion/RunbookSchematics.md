@@ -68,7 +68,7 @@ met").
 flowchart TD
     subgraph DEFINE["PHASE: DEFINE"]
         direction TB
-        PRE01["PRE-01<br/>State the Problem<br/>(asks: who approves?)"] --> G_PRE01{{"Functional Consultant<br/>signs off (one approver:<br/>together with PRE-02)"}}
+        PRE01["PRE-01<br/>State the Problem<br/>(asks: how to notify you?<br/>who approves?)"] --> G_PRE01{{"Functional Consultant<br/>signs off (one approver:<br/>together with PRE-02)"}}
         G_PRE01 --> PRE02["PRE-02<br/>Structured Gap Analysis"]
         PRE02 --> G_PRE02{{"Technical Lead reviews,<br/>gaps closed/deferred"}}
         G_PRE02 --> S01["01 — Populate Intake Sheet<br/>(Project Parameters, incl. §1.6/§1.7)"]
@@ -131,7 +131,7 @@ flowchart TD
         direction LR
         In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Ask working language; ask how<br/>to be notified (recorded in<br/>.ocpf/notifications.json);<br/>fetch Standards Guide into<br/>standardsGuide/ + gitignore it;<br/>ask who approves (one person<br/>or separate roles); capture raw<br/>requirements verbatim into<br/>requirements/;<br/>create ProjectProgress.md<br/>(project root); write problem<br/>statement, capture vocabulary,<br/>initial entity list, flag<br/>ambiguities"] --> Out1[/"Output:<br/>standardsGuide/ (gitignored),<br/>requirements/ (if any),<br/>ProjectProgress.md (root),<br/>ProblemStatement.md"/]
     end
-    PRE01 --> Gate1{{"Exit gate:<br/>Standards Guide present<br/>and gitignored;<br/>Functional Consultant<br/>signs off (one approver:<br/>moves to PRE-02)"}}
+    PRE01 --> Gate1{{"Exit gate:<br/>Standards Guide present<br/>and gitignored; notification<br/>choice recorded, applied,<br/>tested; Functional Consultant<br/>signs off (one approver:<br/>moves to PRE-02)"}}
 
     Gate1 --> PRE02
     subgraph PRE02["PRE-02 — Structured Gap Analysis"]

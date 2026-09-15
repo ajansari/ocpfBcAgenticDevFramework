@@ -35,8 +35,9 @@ atk import openplugin --path "$plugin" --output "$work/project" \
 manifest="$work/project/appPackage/manifest.json"
 
 # Cowork runs in the cloud and supports only remote (HTTPS) MCP connectors, so the AL MCP Server
-# setup skill doesn't apply there. Remove it, and give the package a proper display name.
-rm -rf "$work/project/appPackage/skills/al-mcp-setup"
+# setup skill doesn't apply there, and it has no hooks or local notifications, so neither does the
+# notifications skill. Remove both, and give the package a proper display name.
+rm -rf "$work/project/appPackage/skills/al-mcp-setup" "$work/project/appPackage/skills/notifications"
 node - "$manifest" <<'EOF'
 const fs = require('fs');
 const file = process.argv[2];
@@ -46,7 +47,7 @@ m.description = {
   short: 'Guided routine for building Business Central AL extensions',
   full: 'The OnlyCopilotFans Business Central Agentic Development Framework. In Copilot Cowork it guides the DEFINE and DESIGN phases (problem statement, gap analysis, parameters, functional and technical design) with the latest Full or Lite runbook, and applies the OCPF AL Development Standards Guide. Building, compiling, and testing the extension continue in Visual Studio Code.'
 };
-m.agentSkills = (m.agentSkills || []).filter(s => !s.folder.endsWith('/al-mcp-setup'));
+m.agentSkills = (m.agentSkills || []).filter(s => !s.folder.endsWith('/al-mcp-setup') && !s.folder.endsWith('/notifications'));
 fs.writeFileSync(file, JSON.stringify(m, null, 4) + '\n');
 EOF
 
