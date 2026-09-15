@@ -16,6 +16,21 @@ framework.
 
 ---
 
+## v1.12.0.0 — September 15, 2026
+
+**The human gets a desktop notification every time the agent finishes a turn, asks a question, or
+waits for an approval.** Derived from full framework v2.15.0.0; Standards Guide unchanged at
+v1.7.0.0. See `fullVersion/RunbookChangelog.md` v2.15.0.0 for what was verified.
+
+### Added
+
+- **ALL ALONG → Notifications:** the notification script, per-developer hooks for Claude Code and
+  GitHub Copilot CLI, VS Code's own settings for Copilot Chat, and a one-time test.
+- **Step 1:** notifications are turned on right after the working language; the exit gate checks
+  it. `.claude/settings.local.json` is always gitignored.
+
+---
+
 ## v1.11.0.0 — September 15, 2026
 
 **Fixes from an independent review: the analyzer compile fails on warnings, the analyzer files are

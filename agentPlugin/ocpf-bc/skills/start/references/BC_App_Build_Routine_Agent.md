@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 2.14.0.0
+**Version:** 2.15.0.0
 **Last Updated:** September 15, 2026
 
 > Version history for this framework lives in `RunbookChangelog.md`, tracked independently of any
@@ -130,6 +130,7 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
   listed first and a free-text choice for any other language. Continue the rest of the engagement
   in the language chosen. Record it in `ProjectMemory.md` immediately; Step 01 §1.9 carries it
   into `docs/ProjectParameters.md`.
+- **Turn on notifications, right after the working language** (ALL ALONG → Notifications), so every question from here on — the approvers question included — reaches the human even when they've stepped away. Say what you're doing in one sentence; it's not a question.
 - **Ask who approves, second** (Rule 6a), because it decides how many sign-offs follow — starting
   with this step's own. *Who signs off on the design documents?* **One person for every role**
   (the Functional Consultant, Technical Lead, and Dev Manager sign-offs are all the same
@@ -174,7 +175,7 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
 
 **Outputs:** `standardsGuide/` (fetched, gitignored), `requirements/` (seeded, if any raw input was provided), `ProjectProgress.md` (seeded, project root), `ProblemStatement.md` — purpose, scope, out-of-scope, target consumers, initial entity list, open questions.
 
-**Exit gate:** The Standards Guide is present in `standardsGuide/` and gitignored. Functional Consultant signs off on the problem statement and initial entity list (Stage↔Step Map, Stage 1) — or, when **Approvers** is one person, this sign-off moves to the end of PRE-02 and is given together with that step's, on the problem statement and expanded list at once.
+**Exit gate:** The Standards Guide is present in `standardsGuide/` and gitignored. Notifications are set up and tested, or the human was told this tool can't send them (ALL ALONG → Notifications). Functional Consultant signs off on the problem statement and initial entity list (Stage↔Step Map, Stage 1) — or, when **Approvers** is one person, this sign-off moves to the end of PRE-02 and is given together with that step's, on the problem statement and expanded list at once.
 
 ## PRE-02 — Structured Gap Analysis
 
@@ -1326,6 +1327,9 @@ deliverable and should never end up in the project's own git remote (its GitHub,
 similar hosting), even though they sit in the working directory like any other file.
 
 **Always kept out of the project's git tracking — not a choice, not asked about per project:**
+- **`.claude/settings.local.json`** — each developer's own Claude Code settings, including the
+  notification hooks (ALL ALONG → Notifications). Added to `.gitignore` when those hooks are
+  written.
 - The fetched OCPF AL Development Standards Guide (ALL ALONG → OCPF AL Development Standards
   Guide) — lives **inside** the project root, in `standardsGuide/`, so it needs its own
   `.gitignore` entry to get this result. Added at PRE-01, when the guide itself is fetched. Same
@@ -1627,6 +1631,91 @@ VS Code restarts. The code is fine; VS Code's AL language server is working from
 
 Never change code that compiles clean just to clear stale marks.
 
+## Notifications — Tell the Human When It's Their Turn
+
+**Every time the agent finishes a turn, asks a question, or waits for an approval, the human gets a
+desktop notification** — so no time is lost because nobody noticed the ball was in their court.
+The AI tool's own hooks do this, not the agent remembering to: set it up once at PRE-01, right
+after the working language, so even the intake questions notify. It's the agent's job (Operating
+Rule 6d); nothing is installed.
+
+**1. The notification script.** Copy it into the project's `scripts/` folder (already gitignored,
+ALL ALONG → Repository Hygiene): with the OCPF plugin, from its `notifications` skill; without
+it, download it byte for byte from `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/notifications/scripts/<file>`.
+- **macOS or Linux:** `ocpf-notify.sh` — macOS's own notifications (`osascript`), Linux's
+  `notify-send`, or the terminal bell when neither is available.
+- **Windows:** `ocpf-notify.ps1` — a Windows notification, returning at once. Untested on Windows.
+
+**2. The hooks, per developer and never committed** — notification commands differ by operating
+system, so they stay out of the project's repository. Write the ones for the tools in use:
+
+| AI tool | Where | What fires |
+|---|---|---|
+| **Claude Code** (terminal or VS Code extension) | `.claude/settings.local.json`; add it to `.gitignore` | `Stop` (turn finished), `PreToolUse` matching `AskUserQuestion` (question asked), `Notification` matching `permission_prompt` (approval waiting) |
+| **GitHub Copilot CLI** | `~/.copilot/hooks/ocpf-notify.json` (user-level, the only uncommitted location; outside the project, so the AI tool asks first) | `agentStop` (turn finished), `notification` for `permission_prompt` and `elicitation_dialog`. Each command runs only where `scripts/ocpf-notify.*` exists, so other projects stay quiet. |
+| **GitHub Copilot Chat in VS Code** | `.vscode/settings.json`: `"chat.notifyWindowOnResponseReceived": "always"` and `"chat.notifyWindowOnConfirmation": "always"` | VS Code's own notifications for a finished response and for input or confirmation needed. No script, and nothing OS-specific. |
+
+Claude Code, macOS or Linux — checked end to end in Claude Code 2.1.272. On Windows, replace each
+command with `powershell.exe -NoProfile -ExecutionPolicy Bypass -File "$CLAUDE_PROJECT_DIR/scripts/ocpf-notify.ps1" "<message>"`
+(Claude Code runs hooks in Git Bash there; without Git Bash it uses PowerShell, so write
+`$env:CLAUDE_PROJECT_DIR` instead):
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/scripts/ocpf-notify.sh\" \"Your turn: the agent finished\"" } ] }
+    ],
+    "PreToolUse": [
+      { "matcher": "AskUserQuestion", "hooks": [ { "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/scripts/ocpf-notify.sh\" \"A question is waiting for your answer\"" } ] }
+    ],
+    "Notification": [
+      { "matcher": "permission_prompt", "hooks": [ { "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/scripts/ocpf-notify.sh\" \"An approval is waiting for you\"" } ] }
+    ]
+  }
+}
+```
+
+Merge these into an existing `.claude/settings.local.json` rather than replacing it.
+
+GitHub Copilot CLI:
+
+```json
+{
+  "version": 1,
+  "hooks": {
+    "agentStop": [
+      { "type": "command", "timeoutSec": 15,
+        "bash": "[ -f scripts/ocpf-notify.sh ] && sh scripts/ocpf-notify.sh 'Your turn: the agent finished' </dev/null; exit 0",
+        "powershell": "if (Test-Path scripts/ocpf-notify.ps1) { & powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ocpf-notify.ps1 'Your turn: the agent finished' }" }
+    ],
+    "notification": [
+      { "type": "command", "timeoutSec": 15,
+        "bash": "grep -Eq '\"notification_type\" *: *\"(permission_prompt|elicitation_dialog)\"' && [ -f scripts/ocpf-notify.sh ] && sh scripts/ocpf-notify.sh 'The agent needs your input' </dev/null; exit 0",
+        "powershell": "$n = [Console]::In.ReadToEnd(); if ($n -match '\"notification_type\"\\s*:\\s*\"(permission_prompt|elicitation_dialog)\"' -and (Test-Path scripts/ocpf-notify.ps1)) { & powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ocpf-notify.ps1 'The agent needs your input' }" }
+    ]
+  }
+}
+```
+
+**3. Test it once.** Run the script with a test message, then ask (Rule 6a): *Did a notification
+appear?* — *Yes* / *No*. On *No*, on macOS: notifications from `osascript` come from **Script
+Editor**, which macOS silently blocks until it's allowed in **System Settings → Notifications**;
+say so, since that permission is the human's to grant. Anywhere else, fall back to the terminal
+bell and say why.
+
+**What each tool covers, verified September 2026:**
+- **Claude Code:** the `Stop` hook and a `PreToolUse` hook on `AskUserQuestion` both fired, in
+  Claude Code 2.1.272. Its built-in notification, without hooks, reaches only Ghostty, Kitty, and
+  iTerm2 — not VS Code's terminal — and waits about 60 seconds before announcing an idle prompt.
+- **GitHub Copilot Chat in VS Code:** both settings are documented by VS Code; their default,
+  `windowNotFocused`, notifies only when VS Code isn't the active window.
+- **GitHub Copilot CLI:** `agentStop` and `notification` hooks are documented by GitHub; not tested
+  here. Whether a question from its `ask_user` tool raises `elicitation_dialog` isn't documented.
+- **On a phone:** Claude Code's Remote Control pushes the same moments to a phone. Offer it to a
+  human who steps away from the desk; it's their choice, not a default.
+- **Tools with no hooks** (Claude Chat, Microsoft Copilot Cowork): nothing to set up; say so.
+
 ## OCPF AL Development Standards Guide
 
 The runbook's companion rules document —
@@ -1674,7 +1763,7 @@ latest standards"). Re-run the fetch, overwrite the local copy, and report plain
 `<old sha>` to `<new sha>`" or "already up to date."
 
 **Version skew is worth naming, not papering over.** The guide carries its own version number
-(v1.7.0.0 as of runbook v2.14.0.0) and is versioned independently of this runbook, with
+(v1.7.0.0 as of runbook v2.15.0.0) and is versioned independently of this runbook, with
 both tracked in `RunbookChangelog.md`. If a fetched guide's version doesn't match what this
 runbook expects, say so — don't silently reconcile a citation that doesn't resolve.
 

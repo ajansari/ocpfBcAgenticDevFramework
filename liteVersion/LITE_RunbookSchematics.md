@@ -119,7 +119,7 @@ flowchart TD
 
     subgraph S1["STEP 1 — Define the Problem & Lock Parameters"]
         direction LR
-        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Fetch Standards Guide into<br/>standardsGuide/ + gitignore it;<br/>capture raw requirements<br/>verbatim; write problem<br/>statement + quick gap check<br/>(Standards Part 6); ask every<br/>intake question in grouped<br/>option boxes (up to 4 each),<br/>never inferred, then one confirm; persist<br/>ProjectParameters.md; then the<br/>agent writes app.json, connects<br/>AL tools, downloads symbols,<br/>checks the editor"] --> Out1[/"Output:<br/>standardsGuide/ (gitignored),<br/>requirements/ (if any),<br/>ProblemStatement.md,<br/>ProjectParameters.md,<br/>app.json, .alpackages/"/]
+        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Ask working language; turn on<br/>turn-end notifications;<br/>fetch Standards Guide into<br/>standardsGuide/ + gitignore it;<br/>capture raw requirements<br/>verbatim; write problem<br/>statement + quick gap check<br/>(Standards Part 6); ask every<br/>intake question in grouped<br/>option boxes (up to 4 each),<br/>never inferred, then one confirm; persist<br/>ProjectParameters.md; then the<br/>agent writes app.json, connects<br/>AL tools, downloads symbols,<br/>checks the editor"] --> Out1[/"Output:<br/>standardsGuide/ (gitignored),<br/>requirements/ (if any),<br/>ProblemStatement.md,<br/>ProjectParameters.md,<br/>app.json, .alpackages/"/]
     end
     S1 --> Gate1{{"Exit gate:<br/>Standards Guide present + gitignored,<br/>no placeholder remains,<br/>onboarding questions answered,<br/>app.json matches sheet,<br/>symbols in .alpackages/,<br/>human confirms sheet"}}
 
@@ -290,6 +290,7 @@ flowchart LR
         Pack["Packaging & Versioning<br/>never delete a package;<br/>propose bumps, don't apply silently"]
         Std["OCPF AL Dev Standards Guide<br/>fetched at Step 1, gitignored —<br/>the one fetch that isn't optional"]
         Hygiene["Repository Hygiene<br/>standardsGuide/, patterns/,<br/>.alpackages/ always gitignored;<br/>BCQuality outside the project;<br/>packages tracked"]
+        Notif["Notifications<br/>desktop alert on every turn end,<br/>question, and approval — AI tool<br/>hooks, set up at Step 1"]
         MCP["AL MCP Server, Symbols &<br/>Editor Sync — agent sets up at<br/>Step 1, human only approves;<br/>check editor after clean compiles"]
         Ana["Analyzers<br/>CodeCop, UICop, and PerTenantExtensionCop<br/>or AppSourceCop on every<br/>mandatory compile"]
         Ref["Reference Sources<br/>MS Learn Base App + System App,<br/>translation files, AL Guidelines —<br/>consulted online, not fetched"]
@@ -308,12 +309,12 @@ flowchart LR
     classDef phase fill:#d4e6f7,stroke:#4a7ab5,stroke-width:1px;
     classDef discipline fill:#fdf0d5,stroke:#c99a3a,stroke-width:1px;
     class DEFINE,DESIGN,BUILD,PROVE phase;
-    class Change,Pack,Std,Hygiene,MCP,Ana,Ref,Tr,BCQ,Pat,Perm,Plug discipline;
+    class Change,Pack,Std,Hygiene,Notif,MCP,Ana,Ref,Tr,BCQ,Pat,Perm,Plug discipline;
 ```
 
 ---
 
-*Generated from `LITE_BC_App_Build_Routine_Agent.md` v1.11.0.0; all 7 diagrams re-rendered clean.
+*Generated from `LITE_BC_App_Build_Routine_Agent.md` v1.12.0.0; all 7 diagrams re-rendered clean.
 Version history is in `LITE_RunbookChangeLog.md`. If the Lite runbook changes in a way that
 affects the phase/step structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*

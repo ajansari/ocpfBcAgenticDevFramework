@@ -129,7 +129,7 @@ flowchart TD
 
     subgraph PRE01["PRE-01 — State the Problem"]
         direction LR
-        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Fetch Standards Guide into<br/>standardsGuide/ + gitignore it;<br/>ask who approves (one person<br/>or separate roles); capture raw<br/>requirements verbatim into<br/>requirements/;<br/>create ProjectProgress.md<br/>(project root); write problem<br/>statement, capture vocabulary,<br/>initial entity list, flag<br/>ambiguities"] --> Out1[/"Output:<br/>standardsGuide/ (gitignored),<br/>requirements/ (if any),<br/>ProjectProgress.md (root),<br/>ProblemStatement.md"/]
+        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Ask working language; turn on<br/>turn-end notifications;<br/>fetch Standards Guide into<br/>standardsGuide/ + gitignore it;<br/>ask who approves (one person<br/>or separate roles); capture raw<br/>requirements verbatim into<br/>requirements/;<br/>create ProjectProgress.md<br/>(project root); write problem<br/>statement, capture vocabulary,<br/>initial entity list, flag<br/>ambiguities"] --> Out1[/"Output:<br/>standardsGuide/ (gitignored),<br/>requirements/ (if any),<br/>ProjectProgress.md (root),<br/>ProblemStatement.md"/]
     end
     PRE01 --> Gate1{{"Exit gate:<br/>Standards Guide present<br/>and gitignored;<br/>Functional Consultant<br/>signs off (one approver:<br/>moves to PRE-02)"}}
 
@@ -379,6 +379,7 @@ flowchart LR
         Prog["Project Progress Tracker<br/>ProjectProgress.md (project root) —<br/>one status table, created at PRE-01"]
         Pack["Packaging & Versioning<br/>never delete a package;<br/>propose bumps, don't apply silently"]
         Std["OCPF AL Dev Standards Guide<br/>fetched at PRE-01 into standardsGuide/,<br/>gitignored — the rules cited as Standards §"]
+        Notif["Notifications<br/>desktop alert on every turn end,<br/>question, and approval — AI tool<br/>hooks, set up at PRE-01"]
         MCP["AL MCP Server, Symbols &<br/>Editor Sync — agent sets up at<br/>§1.10, human only approves;<br/>check editor after clean compiles"]
         Ana["Analyzers<br/>CodeCop, UICop, and PerTenantExtensionCop<br/>or AppSourceCop on every<br/>mandatory compile"]
         Hyg["Repository Hygiene<br/>packages tracked;<br/>.alpackages/, *.g.xlf,<br/>fetched references gitignored"]
@@ -397,7 +398,7 @@ flowchart LR
     classDef phase fill:#d4e6f7,stroke:#4a7ab5,stroke-width:1px;
     classDef discipline fill:#fdf0d5,stroke:#c99a3a,stroke-width:1px;
     class DEFINE,DESIGN,BUILD,PROVE phase;
-    class Doc,Change,Retain,Test,Mem,Prog,Pack,Std,MCP,Ana,Hyg,Ref,Tr,BCQ,Pat,Plug discipline;
+    class Doc,Change,Retain,Test,Mem,Prog,Pack,Std,Notif,MCP,Ana,Hyg,Ref,Tr,BCQ,Pat,Plug discipline;
 ```
 
 ### 4.2 Model & Effort Assignment (§1.7)
@@ -454,7 +455,7 @@ flowchart TD
 
 ---
 
-*Generated from `BC_App_Build_Routine_Agent.md` v2.14.0.0; all 8 diagrams re-rendered clean. Version
+*Generated from `BC_App_Build_Routine_Agent.md` v2.15.0.0; all 8 diagrams re-rendered clean. Version
 history is in `RunbookChangelog.md`. If the runbook changes in a way that affects the
 phase/step/role structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*

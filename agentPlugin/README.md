@@ -133,12 +133,12 @@ field to the closest entry, and add any field that isn't covered here to this se
 
 | Component | Included |
 |---|---|
-| Skills (5) | `start`, `status`, `update-framework`, `al-standards`, `al-mcp-setup` |
+| Skills (6) | `start`, `status`, `update-framework`, `al-standards`, `al-mcp-setup`, `notifications` |
 | Sub-agents (2) | `ocpf-reasoning` (design drafting, reviews, diagnosis) and `ocpf-light` (checklist and symbol verification). Both are denied file-editing tools. |
 | Hooks | None |
 | MCP servers | None bundled |
 | Commands | None (skills are invoked as `/ocpf-bc:<skill>`) |
-| Scripts | `al-mcp-setup/scripts/`: `al-mcp.sh`, `al-mcp.cmd`, `al-mcp-resolve.ps1` (start Microsoft's AL MCP Server), `al-mcp-call.sh`, `al-mcp-call.ps1` (run one AL MCP Server tool), and `al-analyze.sh`, `al-analyze.cmd`, `al-analyze-resolve.ps1` (compile with Microsoft's code analyzers). They're copied into the user's project, through the AI tool's own permission prompts, and use the locally installed AL Language extension. They install nothing. |
+| Scripts | `al-mcp-setup/scripts/`: `al-mcp.sh`, `al-mcp.cmd`, `al-mcp-resolve.ps1` (start Microsoft's AL MCP Server), `al-mcp-call.sh`, `al-mcp-call.ps1` (run one AL MCP Server tool), and `al-analyze.sh`, `al-analyze.cmd`, `al-analyze-resolve.ps1` (compile with Microsoft's code analyzers); `notifications/scripts/`: `ocpf-notify.sh`, `ocpf-notify.ps1` (show a desktop notification with the operating system's own tools). They're copied into the user's project, through the AI tool's own permission prompts, and use the locally installed AL Language extension. They install nothing. |
 
 #### External services, data, and permissions
 
@@ -147,7 +147,7 @@ field to the closest entry, and add any field that isn't covered here to this se
 | External services / MCP connections | No remote MCP servers. Locally, `al-mcp-setup` registers Microsoft's AL MCP Server from the user's own AL Language extension, in the project's `.mcp.json`, after the user approves. |
 | Network access | Reads public files from GitHub (`raw.githubusercontent.com`, `api.github.com`): the runbooks, the Standards Guide, BCQuality, and the OCPF patterns library. Reads Microsoft Learn and AL Guidelines documentation. Microsoft's AL tools download Business Central symbols from Microsoft's public symbol feed (`pkgs.dev.azure.com/dynamicssmb2`) and AppSource with no sign-in, and reach the user's own Business Central environment only when the user signs in to publish or download symbols from it. |
 | Data collection | None. No telemetry or analytics; nothing is sent to the publisher. |
-| Files it writes | Only in the user's project, and only as the routine describes: `CLAUDE.md` and/or `.github/copilot-instructions.md`, the runbook changelog, `.ocpf/framework.json`, the project's design documents, AL code, and, after approval, `scripts/` and an `al` entry in `.mcp.json`. It never overwrites an existing `CLAUDE.md` or Copilot instructions file. |
+| Files it writes | Only in the user's project, and only as the routine describes: `CLAUDE.md` and/or `.github/copilot-instructions.md`, the runbook changelog, `.ocpf/framework.json`, the project's design documents, AL code, and, after approval, `scripts/`, an `al` entry in `.mcp.json`, and notification settings (`.claude/settings.local.json`, `.vscode/settings.json`). One file outside the project, with approval: `~/.copilot/hooks/ocpf-notify.json` for GitHub Copilot CLI users. It never overwrites an existing `CLAUDE.md` or Copilot instructions file. |
 | Setup and permissions | Nothing to configure at install. For BUILD and PROVE: VS Code with Microsoft's AL Language extension, which AL developers already have. Claude Code asks the user to approve file edits, commands, and the project MCP server as usual. |
 | Installs software? | No. It never installs runtimes or tools, and never asks users to edit `PATH` or shell profiles. |
 

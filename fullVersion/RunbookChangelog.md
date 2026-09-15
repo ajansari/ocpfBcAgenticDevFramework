@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the two documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v2.14.0.0**, the guide is at **v1.7.0.0** and Lite is at **v1.11.0.0** — but
+**v2.15.0.0**, the guide is at **v1.7.0.0** and Lite is at **v1.12.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 
 Entries are grouped by version, newest first, and describe the **cumulative** result of a
@@ -17,6 +17,49 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v2.15.0.0 — September 15, 2026
+
+**The human gets a desktop notification every time the agent finishes a turn, asks a question, or
+waits for an approval** — so no time is lost because nobody noticed it was their turn. Standards
+Guide unchanged at **v1.7.0.0**. Ships with Lite **v1.12.0.0**. Plugin **v1.7.0**.
+
+### Facts verified before designing — not assumed
+
+- **Claude Code's built-in notification doesn't cover this on its own.** Per its documentation, it
+  sends a desktop notification only in Ghostty, Kitty, and iTerm2 — not VS Code's integrated
+  terminal — and its idle notice fires about 60 seconds after a turn ends.
+- **Claude Code hooks do.** In Claude Code 2.1.272, a `Stop` hook fired at the end of a turn, and a
+  `PreToolUse` hook matching `AskUserQuestion` fired the moment a question was shown, in a live
+  session. The exact `.claude/settings.local.json` block the runbook prescribes ran the
+  notification script with `$CLAUDE_PROJECT_DIR` resolved.
+- **GitHub Copilot Chat in VS Code** has built-in OS notifications,
+  `chat.notifyWindowOnResponseReceived` and `chat.notifyWindowOnConfirmation`, each defaulting to
+  `windowNotFocused` (VS Code documentation). Not tested here.
+- **GitHub Copilot CLI** documents `agentStop` and `notification` hooks (`permission_prompt`,
+  `elicitation_dialog`, and others), with user-level hooks in `~/.copilot/hooks/`. Not tested
+  here: the CLI on this machine wasn't signed in. Whether its `ask_user` questions raise
+  `elicitation_dialog` isn't documented.
+- **On macOS, `osascript` notifications come from Script Editor**, which macOS silently blocks until
+  it's allowed in System Settings → Notifications (Claude Code documentation), so the setup ends
+  with a test the human confirms.
+
+### Added
+
+- **ALL ALONG → Notifications** (both editions): the notification script, the hooks per AI tool,
+  and a one-time test. Hooks are per developer and never committed, since the commands differ by
+  operating system: `.claude/settings.local.json` for Claude Code, `~/.copilot/hooks/` for Copilot
+  CLI, and VS Code's own settings for Copilot Chat. Claude Code's Remote Control is offered for
+  phone notifications.
+- **PRE-01 / Lite Step 1:** notifications are turned on right after the working language, so every
+  later question notifies. The PRE-01 / Step 1 exit gate checks it.
+- **Repository Hygiene:** `.claude/settings.local.json` is always gitignored.
+- **`ocpf-notify.sh` and `ocpf-notify.ps1`** in the plugin's new `notifications` skill: macOS
+  notifications, Linux `notify-send`, a Windows notification that returns at once (untested on
+  Windows), or the terminal bell. They always exit 0, so a notification that can't be shown never
+  interrupts the agent.
 
 ---
 

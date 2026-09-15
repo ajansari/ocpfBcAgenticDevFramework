@@ -178,7 +178,8 @@ Don't change the human's editor or tool settings yourself unless they ask you to
    mid-session may not auto-load until the next session.
 2. **Follow it from the first step:** PRE-01 for Full, Step 1 for Lite. This is exactly what the
    manual "Getting started prompt" does. The runbook's first question is the human's working
-   language.
+   language. Right after it, the runbook turns on "your turn" notifications (ALL ALONG →
+   Notifications), copying the script from this plugin's `notifications` skill.
 3. **Note the Standards Guide.** The runbook fetches it from GitHub at that first step. If GitHub
    is unreachable, it uses the copy bundled with this plugin's `al-standards` skill, as the
    runbook's ALL ALONG → OCPF Plugin section describes.

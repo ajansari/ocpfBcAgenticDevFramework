@@ -4,6 +4,16 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 1.7.0 — September 15, 2026
+
+**Bundles:** full runbook v2.15.0.0, Lite v1.12.0.0, Standards Guide v1.7.0.0.
+
+- **New `notifications` skill** with `ocpf-notify.sh` and `ocpf-notify.ps1`: a desktop notification
+  whenever the agent finishes a turn, asks a question, or waits for an approval, through Claude
+  Code and GitHub Copilot CLI hooks or VS Code's own Copilot Chat settings. The runbooks set it up
+  at their first step; the skill adds it to older projects.
+- **`start`:** notes that the runbook turns notifications on right after the working language.
+
 ## 1.6.0 — September 15, 2026
 
 **Bundles:** full runbook v2.14.0.0, Lite v1.11.0.0, Standards Guide v1.7.0.0.

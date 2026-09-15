@@ -197,6 +197,8 @@ Other commands:
 - `/ocpf-bc:status` shows where the project stands.
 - `/ocpf-bc:update-framework` checks for a newer runbook.
 - `/ocpf-bc:al-mcp-setup` connects the AL tools, if you skipped it at start.
+- `/ocpf-bc:notifications` turns on "your turn" desktop notifications in a project started before
+  the framework set them up automatically.
 
 In GitHub Copilot, the commands are the same.
 

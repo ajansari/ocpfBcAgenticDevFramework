@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 1.11.0.0 (Lite, derived from the full framework v2.14.0.0)
+**Version:** 1.12.0.0 (Lite, derived from the full framework v2.15.0.0)
 **Last Updated:** September 15, 2026
 
 > Version history for this edition lives in `LITE_RunbookChangeLog.md`, tracked independently of
@@ -196,6 +196,8 @@ design work.
 - **Ask the working language first — before anything else** (Operating Rule 8). Ask in English,
   through the options mechanism, with English listed first and free text for any other language.
   It's asked alone, so every later box can be in the language chosen.
+- **Turn on notifications right after that** (ALL ALONG → Notifications), so every later question
+  reaches the human even when they've stepped away. Say what you're doing; it's not a question.
   Continue in the language chosen.
 - **Fetch the OCPF AL Development Standards Guide first, before anything else needs it.** Get
   `standardsGuide/ocpfALDevStandardsGuide.md` from
@@ -345,7 +347,8 @@ replaced), `.gitignore` populated per the table above, `app.json`, and `.alpacka
 
 **Exit gate:** Every question was asked through the options mechanism. `app.json` matches the
 sheet, and the target version's symbols are in `.alpackages/`. The Standards Guide is present in
-`standardsGuide/` and gitignored. `ProjectParameters.md` exists in the project root with no placeholder remaining. Deployment Target
+`standardsGuide/` and gitignored. Notifications are set up and tested, or the human was told this
+tool can't send them. `ProjectParameters.md` exists in the project root with no placeholder remaining. Deployment Target
 is one allowed value. Namespace is consistent or correctly N/A. If
 Permission Sets required = `Yes`, ≥ 2 IDs are reserved. Onboarding questions are each answered.
 Every target language is classified against Microsoft's live page and, unless source wording is
@@ -874,6 +877,8 @@ isn't optional: this runbook cites it as **Standards §** from Step 1 onward.
   entry and commit the file.** Earlier Lite wording said "this runbook and `ChangeLog.md`" when it
   meant the framework's changelog. Check first whether the project has a remote — the file will
   appear as newly added to collaborators.
+- `.claude/settings.local.json` is always gitignored — each developer's own Claude Code settings,
+  including the notification hooks (ALL ALONG → Notifications).
 - `*.g.xlf` is always gitignored — it's rebuilt on every compile. The per-language files in
   `Translations/` are deliverables and always tracked.
 - `.alpackages/` is always gitignored, added at the end of Step 1 when symbols are first
@@ -1028,6 +1033,71 @@ stale marks look like and the fix. At the end of Step 1 there are no `.al` files
    the chat panel closes, reopen it and continue from its history.
 
 Never change code that compiles clean just to clear stale marks.
+
+## Notifications
+
+**The human gets a desktop notification every time the agent finishes a turn, asks a question, or
+waits for an approval** — set up once at Step 1, right after the working language, through the AI
+tool's own hooks. The agent's job (Rule 6d); nothing is installed.
+
+1. **Copy the script** into `scripts/` (gitignored): `ocpf-notify.sh` (macOS/Linux) or
+   `ocpf-notify.ps1` (Windows, untested there) — from the plugin's `notifications` skill, or
+   byte for byte from `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/notifications/scripts/<file>`.
+2. **Write the hooks, per developer, never committed:**
+   - **Claude Code:** `.claude/settings.local.json` (add it to `.gitignore`; merge, don't
+     replace). On Windows, run `ocpf-notify.ps1` with `powershell.exe -NoProfile
+     -ExecutionPolicy Bypass -File` instead.
+   - **GitHub Copilot CLI:** `~/.copilot/hooks/ocpf-notify.json`, user-level and outside the
+     project, so the AI tool asks first. Each command runs only where the script exists.
+   - **GitHub Copilot Chat in VS Code:** `.vscode/settings.json`:
+     `"chat.notifyWindowOnResponseReceived": "always"` and
+     `"chat.notifyWindowOnConfirmation": "always"`.
+3. **Test once** and ask (Rule 6a): *Did a notification appear?* On macOS, a *No* usually means
+   **Script Editor** isn't allowed in **System Settings → Notifications** — the human's to grant.
+
+Claude Code (macOS/Linux):
+
+```json
+{
+  "hooks": {
+    "Stop": [
+      { "hooks": [ { "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/scripts/ocpf-notify.sh\" \"Your turn: the agent finished\"" } ] }
+    ],
+    "PreToolUse": [
+      { "matcher": "AskUserQuestion", "hooks": [ { "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/scripts/ocpf-notify.sh\" \"A question is waiting for your answer\"" } ] }
+    ],
+    "Notification": [
+      { "matcher": "permission_prompt", "hooks": [ { "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/scripts/ocpf-notify.sh\" \"An approval is waiting for you\"" } ] }
+    ]
+  }
+}
+```
+
+GitHub Copilot CLI:
+
+```json
+{
+  "version": 1,
+  "hooks": {
+    "agentStop": [
+      { "type": "command", "timeoutSec": 15,
+        "bash": "[ -f scripts/ocpf-notify.sh ] && sh scripts/ocpf-notify.sh 'Your turn: the agent finished' </dev/null; exit 0",
+        "powershell": "if (Test-Path scripts/ocpf-notify.ps1) { & powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ocpf-notify.ps1 'Your turn: the agent finished' }" }
+    ],
+    "notification": [
+      { "type": "command", "timeoutSec": 15,
+        "bash": "grep -Eq '\"notification_type\" *: *\"(permission_prompt|elicitation_dialog)\"' && [ -f scripts/ocpf-notify.sh ] && sh scripts/ocpf-notify.sh 'The agent needs your input' </dev/null; exit 0",
+        "powershell": "$n = [Console]::In.ReadToEnd(); if ($n -match '\"notification_type\"\\s*:\\s*\"(permission_prompt|elicitation_dialog)\"' -and (Test-Path scripts/ocpf-notify.ps1)) { & powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ocpf-notify.ps1 'The agent needs your input' }" }
+    ]
+  }
+}
+```
+
+Verified September 2026: in Claude Code 2.1.272, the `Stop` hook and a `PreToolUse` hook on
+`AskUserQuestion` both fired. The Copilot CLI hooks and the VS Code settings are documented by
+GitHub and Microsoft but untested here. Claude Code's Remote Control can also push to a phone —
+offer it to a human who steps away. Tools with no hooks (Claude Chat, Microsoft Copilot Cowork)
+can't notify; say so.
 
 ## Reference Sources — Microsoft Learn and AL Guidelines
 
