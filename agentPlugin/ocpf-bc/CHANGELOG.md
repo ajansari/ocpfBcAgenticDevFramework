@@ -4,6 +4,25 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 1.1.0 — September 15, 2026
+
+**Bundles:** full runbook v2.9.0.0, Lite v1.6.0.0, Standards Guide v1.2.0.0 (unchanged).
+
+- **New one-shot helpers:** `al-mcp-call.sh` (macOS/Linux) and `al-mcp-call.ps1` (Windows).
+  - **Why:** Claude Code and Copilot CLI load MCP servers only when a session starts. The helper
+    runs one AL MCP Server tool through the launcher and exits, so the agent can download symbols
+    and compile in the same session it registered the server, without a restart.
+  - **Tested:** the macOS helper, end to end.
+  - **Not yet run:** the Windows helper.
+- **`al-mcp-setup`:**
+  - Copies the helpers.
+  - Never sends the human to the Command Palette, and never uses a third-party bridge extension.
+  - Keeps working in the same session, and downloads symbols when the project already has
+    `app.json`.
+  - No longer tells the human to restart or run `/mcp`.
+- **Bundled runbooks** updated to full v2.9.0.0 and Lite v1.6.0.0: interactive intake, symbols
+  downloaded by the agent before DESIGN, and stale editor marks detected and fixed.
+
 ## 1.0.1 — September 15, 2026
 
 **Bundles:** full runbook v2.8.0.0, Lite v1.5.0.0, Standards Guide v1.2.0.0 (unchanged).

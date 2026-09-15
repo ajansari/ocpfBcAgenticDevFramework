@@ -15,6 +15,48 @@ change is recorded, matching the convention `RunbookChangelog.md` uses for the f
 
 ---
 
+## v1.6.0.0 — September 15, 2026
+
+**The human answers questions and approves prompts; the agent does the setup.** Derived from full
+framework v2.9.0.0; Standards Guide v1.2.0.0 unchanged. Four fixes from a real Lite 1.5.0.0
+project. See `RunbookChangelog.md` v2.9.0.0 for what went wrong and the facts verified.
+
+### Changed
+
+- **Rule 6a:** every intake question counts as a decision, including values only the human knows
+  (names, publisher, prefix, namespace, localization, ID ranges, versions). Ask them through the
+  options mechanism, never open-ended in chat.
+- **Rule 6d:** never hand the human a setup task the agent can do. No Command Palette for AL MCP
+  setup (the AL extension has no such command), and no third-party bridge extensions.
+- **Rule 2:** the agent downloads symbols; the human never does.
+- **Step 1:**
+  - A table of what to offer for each identity question.
+  - Interactive Deployment Target, ID range loop, and BC version; `runtime` read from Microsoft
+    Learn.
+  - Once the sheet is confirmed, the agent writes `app.json` once, complete, connects the AL
+    tools, downloads symbols, and checks the editor, all before Step 2.
+- **Step 3:** confirms `app.json`, the AL tools, and symbols instead of setting them up.
+- **Step 5:** after every clean compile, check the editor for stale red marks.
+- **ALL ALONG → AL MCP Server:** no longer optional. It covers:
+  - the human only approving,
+  - fetching the launcher and the one-shot helper from the framework repository,
+  - registering with a relative path,
+  - working in the same session through the helper, with no restart.
+
+### Added
+
+- **ALL ALONG → Symbols:**
+  - The order to try: VS Code's tool, the AL MCP Server, then the sandbox.
+  - The MCP server's global download is W1 only.
+  - Confirm symbols by using them.
+- **ALL ALONG → Keeping the Editor in Sync:**
+  - Why compiled code can still show red.
+  - Prevention and automatic detection.
+  - The fix: automatic in Copilot Chat; otherwise one short message asking for **Developer: Reload
+    Window**.
+
+---
+
 ## v1.5.0.0 — September 14, 2026
 
 **Works with the OCPF agent plugin.** Derived from full framework v2.8.0.0; Standards Guide

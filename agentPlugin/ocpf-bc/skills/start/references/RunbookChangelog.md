@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the two documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v2.8.0.0**, the guide is at **v1.2.0.0** and Lite is at **v1.5.0.0** — but
+**v2.9.0.0**, the guide is at **v1.2.0.0** and Lite is at **v1.6.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 
 Entries are grouped by version, newest first, and describe the **cumulative** result of a
@@ -17,6 +17,125 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v2.9.0.0 — September 15, 2026
+
+**The human answers questions and approves prompts; the agent does the setup.** Four fixes from
+a real Lite 1.5.0.0 project (NAICS Classification, September 15, 2026). Two of them had also
+shown up on full-framework projects.
+
+Ships with Standards Guide **v1.2.0.0** (unchanged) and Lite **v1.6.0.0**. Plugin **v1.1.0**.
+
+### What went wrong
+
+1. **Intake wasn't interactive.** The extension name, publisher, and object ID ranges were asked
+   as open-ended chat questions. Rule 6a covered "decisions", and the agent didn't count a typed
+   value as one.
+2. **The human downloaded symbols by hand.** VS Code's AL log shows three manual downloads
+   (03:12, 03:25, 03:40). The agent then misread the packages as unusable and designed from
+   Microsoft Learn, recording posting events that don't exist.
+3. **The human was sent to the Command Palette** for an AL MCP command that doesn't exist. The
+   agent did the setup itself only after being told. The project's `.mcp.json` also ended up with
+   a third-party bridge extension's server and an absolute-path NuGet `al` entry with
+   `DOTNET_ROOT`.
+4. **Code compiled clean but VS Code still showed red "object ID" errors** until the window was
+   reloaded. **AL: Go!** had created `app.json` with its default range (03:12), the AL extension
+   loaded it, and the agent rewrote the range at 03:49.
+
+### Facts verified before designing — not assumed
+
+Checked against AL Language extension 18.0.2732683 on macOS, Microsoft Learn, and public issues:
+- **Symbols need no sign-in.** The AL MCP Server's `al_downloadsymbols` with
+  `globalSourcesOnly: true` downloaded System, Application, System Application, Business
+  Foundation, and Base Application for BC 27 in under 10 seconds, with no Business Central
+  connection ([Microsoft Learn](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/al-agent-tools/al-tool-download-symbols)).
+  VS Code's `al_downloadsymbols` tool has the same option.
+- **The MCP server's global download is W1 only.** It has no country option, and it ignored
+  `al.symbolsCountryRegion` in `.vscode/settings.json`, with the project loaded at launch and at
+  runtime ("Using symbols country/region: w1"). VS Code's own download supports that setting.
+- **There's no AL MCP command in the Command Palette.** The AL extension's `contributes.commands`
+  holds only sign-in and credential-reset commands for the separate Profiling and Snapshot MCP
+  servers. The bridge server in the project's `.mcp.json` comes from *AL Language Model Tools —
+  MCP Bridge*, a community VSIX that isn't on the Marketplace, needs VS Code relaunched with a
+  proposed API enabled, and is set up from the Command Palette.
+- **A server registered mid-session isn't usable until the next session** in Claude Code and
+  Copilot CLI. A one-shot stdio call works without a restart: the new `al-mcp-call.sh` helper
+  downloaded symbols (8.6 seconds), compiled (4.4 seconds), and exited without leaving processes
+  behind. A plain shell pipe didn't: it hung after the response, because the server never closes
+  its end.
+- **Stale red marks have two verified causes.**
+  - **`app.json` changed outside the editor.** The AL extension doesn't always re-read it. ID
+    ranges updated by `git pull` stayed stale until VS Code restarted
+    ([microsoft/vscode#147111](https://github.com/microsoft/vscode/issues/147111), attributed to
+    the AL extension).
+  - **Symbols downloaded by the MCP server.** The server reloads its own workspace ("Reloading
+    workspace after symbol download"), while VS Code's AL language server is a separate process.
+    VS Code's own `al_downloadsymbols` reloads VS Code's AL workspace (Microsoft Learn).
+- **No agent tool can reload the VS Code window.**
+  - The AL extension has no reload command. Its `vscode://` URI routes are Business Central's
+    web-client flows, and they prompt the user.
+  - Claude Code's VS Code integration offers `getDiagnostics` (the Problems panel), but no way
+    to run editor commands.
+  - Headless AL language server tests couldn't reproduce the marks: `altool launchlspserver`
+    publishes no diagnostics.
+
+  So the agent can **detect** stale marks everywhere it can read the editor, **fix** them itself
+  in Copilot Chat, and otherwise has to ask the human for **Developer: Reload Window**.
+- **Runtime follows from the BC version.** Microsoft Learn's *Choose runtime version in AL*
+  table maps them (runtime `17.0` ↔ Business Central 28.0), so the human isn't asked for it.
+
+### Changed
+
+- **Operating Rule 6a:** every intake question counts as a decision, including values only the
+  human knows. They go through the options mechanism, with the free-text entry carrying a typed
+  answer.
+- **Operating Rule 6d:** never hand the human a setup task the agent can do. The human's part is
+  approval prompts and a browser sign-in for live environments. Never send the human to the
+  Command Palette for AL MCP setup, and never route AL tooling through a third-party extension.
+  The "why" list now records four incidents.
+- **Step 01 intake:** a table of what to offer for each identity question; interactive
+  Deployment Target, ID range loop, and BC version; `runtime` read from Microsoft Learn; §1.6,
+  §1.8, and §1.9 asked the same way. A suggestion is a candidate the human picks, never an answer
+  recorded on their behalf, and never built from an email domain.
+- **Step 01 §1.10 (new): AL Project File, AL Tools & Symbols.** Once the sheet is confirmed, the
+  agent writes `app.json` once, complete, connects the AL tools, downloads symbols, and checks the
+  editor, all before Step 02. §1.4 **Symbol Source** is now filled in by the agent.
+- **Step 05:** confirms `app.json`, the AL tools, and symbols instead of setting them up.
+  BCQuality and the Patterns library stay here.
+- **Step 07:** after every compile with 0 errors, check the editor for stale marks; never change
+  code that compiles clean to clear them.
+- **Operating Rule 2:** the agent downloads symbols; the human never does.
+- **ALL ALONG → AL MCP Server:**
+  - The human only approves; no Command Palette; no bridge extensions.
+  - Without the plugin, fetch the launcher and helper from this repository.
+  - Register with a relative path.
+  - Keep working in the same session through the one-shot helper.
+  - Verify with `al_getpackagedependencies`.
+
+### Added
+
+- **ALL ALONG → Symbols:**
+  - The order to try: VS Code's own tool, the AL MCP Server, then the sandbox with one sign-in.
+  - The W1-only limit of the MCP server's global download.
+  - Confirm symbols by using them, never by unpacking `SymbolReference.json`.
+- **ALL ALONG → Keeping the Editor in Sync:**
+  - Causes and prevention.
+  - Automatic detection through `al_getdiagnostics` or Claude Code's `getDiagnostics`.
+  - The fix: automatic in Copilot Chat; otherwise one short end-of-reply message asking for
+    **Developer: Reload Window**.
+
+### Not changed
+
+- **The manual setup, and the plugin-only behavior's condition** (`.ocpf/framework.json`). The
+  new launcher and helper download works with or without the plugin.
+- **BCQuality and the Patterns library** are still fetched at Step 05.
+
+### Open
+
+- **`al-mcp-call.ps1` (Windows) hasn't been run on Windows yet.** The macOS helper is tested end
+  to end. Windows testing is already an open plugin item.
 
 ---
 

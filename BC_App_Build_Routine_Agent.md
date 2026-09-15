@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 2.8.0.0
-**Last Updated:** September 14, 2026
+**Version:** 2.9.0.0
+**Last Updated:** September 15, 2026
 
 > Version history for this framework lives in `RunbookChangelog.md`, tracked independently of any
 > one project built with it — check there for what changed between the version you have and the
@@ -24,7 +24,7 @@
 ## Operating Rules (apply in every phase)
 
 1. **Part 1 is authoritative.** Publisher, prefix, namespace, versions, ID ranges, localization — read them from the Project Parameters block (Step 01) and derive everything else. Never hardcode.
-2. **Verify against BC symbol files, not memory.** Table numbers, `using` namespaces, field IDs, `ObsoleteState` — confirm each in the symbol file named in Parameter 1.4. Agent knowledge of BC table numbers is not reliable; the verification procedure is Standards Appendix B. **Fallback when the downloaded symbols don't answer the question** (a module isn't in `.alpackages`, or you need to browse/discover rather than already knowing what to grep for): the entire BC BaseApp, for the current Business Central Online version, is documented at <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application> — every standard table, field, and field datatype/size — and the **System Application** (the foundation modules everything else builds on: Language, Translation, Email, Telemetry, and the rest) at <https://learn.microsoft.com/en-us/dynamics365/business-central/application/system-application/module/system-application>. Use them to corroborate or discover; the downloaded symbol file for the target version is still the authoritative source when the two ever disagree.
+2. **Verify against BC symbol files, not memory.** Table numbers, `using` namespaces, field IDs, `ObsoleteState` — confirm each in the symbol file named in Parameter 1.4. Agent knowledge of BC table numbers is not reliable; the verification procedure is Standards Appendix B. The agent downloads those symbols itself at Step 01 §1.10 (ALL ALONG → Symbols); the human never has to. **Fallback when the downloaded symbols don't answer the question** (a module isn't in `.alpackages`, or you need to browse/discover rather than already knowing what to grep for): the entire BC BaseApp, for the current Business Central Online version, is documented at <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application> — every standard table, field, and field datatype/size — and the **System Application** (the foundation modules everything else builds on: Language, Translation, Email, Telemetry, and the rest) at <https://learn.microsoft.com/en-us/dynamics365/business-central/application/system-application/module/system-application>. Use them to corroborate or discover; the downloaded symbol file for the target version is still the authoritative source when the two ever disagree.
 3. **Phase large scope into batches.** A batch is a self-contained, reviewable increment (by module or document-type group) — designed to be independently correct even though, under Operating Rule 4, it is not compiled on its own to prove it. Define batch boundaries during DESIGN and record them in the TDD.
 4. **Lint every batch as it's written, including symbol verification. Do not compile per batch — the whole extension compiles and packages once every batch from the TDD's batch plan is written, gating entry to PROVE.** Run the Step 05 pre-flight checklist immediately on each batch — both passes: pre-generation (on planned names/fields) and post-generation (on the actual files); Step 05 defines the full list — including **symbol verification**: for every reference to a standard/base object, field, method, property, or enum value, verify it against the downloaded symbol source (falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer), not just against what looks like plausible AL. That check exists specifically against hallucination: a pattern-matching lint pass draws on the same kind of intuition that produces a hallucinated reference in the first place, so checking against the actual symbols is the one thing that verifies against ground truth instead of a plausible-looking guess. Do not invoke the AL compiler as an automatic part of generating batches. The one mandatory compile-and-package of the originally-planned batches happens in Step 07, triggered the moment Step 06 finishes — not deferred further, and not skipped. **From that point, compiling and packaging is not a one-time event held back for a later step — it is the continuous rhythm of Step 07, Step 08's gap-fix loop, and Step 09's Code Review fixes, whenever any of them needs a code change: compile, package, deploy to a sandbox, test, diagnose and fix, then compile and package again, and repeat.** A human may also request an earlier spot-check compile mid-BUILD; that doesn't replace the mandatory one. **Gap-fill work is not part of that mandatory compile-and-package — it doesn't exist yet at that point.** Whether gap-fill arrives ad hoc (a human request mid-project, as actually happened on the pilot project) or as a Step 08 output, it gets pre-flighted and then compiled-and-packaged the same way, as its own pass, when it's actually done. Whenever any compile runs, treat any error as a systemic signal: fix the rule/template, then every file it touched — across every batch, not only the one where the error surfaced.
     **Trade-off, accepted deliberately (AJ Ansari, September 12, 2026, superseding the September 11, 2026 "compile once at the end" version of this rule):** even symbol-verified lint cannot catch everything a real compile does — cross-file type mismatches, full semantic validation, and rule interactions the compiler's own engine resolves are still invisible until an actual compile runs. Deferring the first real compile further than before means a systemic issue found late can touch more already-written files than catching it mid-BUILD would have. Accepted because generation speed matters more, and because symbol verification specifically closes the gap this decision was actually worried about — a reference to something that doesn't exist, dressed up as something that does.
@@ -33,6 +33,14 @@
 6. **Human-in-the-loop is a feature.** Pause for human approval before: writing the first file of a batch, applying a root-cause fix, starting a new batch, finalizing any design document, and installing any tool or runtime.
 6a. **Ask decisions in a selectable options box, not in prose.** When the agent needs the human to *decide something* — pick between design options, approve a version bump, choose a name, resolve an ambiguity — present it through the interactive multiple-choice mechanism the agent's harness provides (e.g., in Claude Code, the `AskUserQuestion` tool — substitute whatever the actual harness offers), with the recommended option first and a short reason on each. A decision buried in a paragraph of chat is easy to miss: it reads like the agent finished and is idling, so the project silently stalls waiting on an answer nobody realised was owed.
     **Use it only for decisions.** Do *not* wrap ordinary progress in it — finishing a step and waiting to be told to start the next one, reporting a clean compile, or handing back a result is normal conversation, not a decision point. Over-using the box makes it noise, which defeats the purpose.
+    **Every intake question counts as a decision, including the ones only the human can answer**
+    (AJ Ansari, September 15, 2026). Names, publisher, prefix, namespace, localization, object ID
+    ranges, and versions all go through the options mechanism. None is asked as an open-ended
+    question or a numbered list in chat. When the answer is a value only the human knows, the
+    mechanism's free-text entry carries it (in Claude Code, *Other*). Step 01 says what to offer
+    as options for each question. **Why:** on a real Lite project, the extension name, publisher,
+    and object ranges were asked as open-ended chat questions, which is exactly what this rule
+    exists to prevent.
 6b. **Don't install tooling without asking — and look harder first.** Before concluding a required compiler/runtime is missing and reaching for an install, check whether the human's own IDE already provisions one privately for the tool in question — e.g., VS Code's AL extension gets its .NET runtime from a companion ".NET Install Tool" extension, not a system-wide install, at a path that differs by OS: `~/Library/Application Support/Code/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/` on macOS, `~/.config/Code/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/` on Linux, `%APPDATA%\Code\User\globalStorage\ms-dotnettools.vscode-dotnet-runtime\` on Windows — check the one matching the actual machine, not just the first one you think of, *before* assuming none exists. If the human's own editor can already do the thing you're about to install a tool for, that's a strong signal the tool already exists somewhere you haven't looked. Installing anything is itself a human-in-the-loop decision (rule 6) regardless of what a fallback option elsewhere in this runbook lists as available — on a real project the agent skipped the search, wrongly installed a fresh runtime, and had to remove it.
 6c. **From Step 08 onward, check in after every step closes — proceed now, or pause?** (AJ
     Ansari, September 13, 2026.) When a step's own work is finished — its outputs written, its exit gate
@@ -73,11 +81,30 @@
     **The test before proposing any setup:** would a functional consultant who has only VS Code and
     the AL Language extension have to do anything by hand? If yes, look again.
 
-    **Why this is a rule, not advice:** agents have tripped on this twice.
+    **Never hand the human a setup task the agent can do itself** (AJ Ansari, September 15, 2026).
+    Connecting the AL tools, downloading symbols, and keeping the editor's view current are the
+    agent's job (ALL ALONG → AL MCP Server, Symbols, and Keeping the Editor in Sync). The human's
+    part is limited to:
+    - approving the AI tool's own permission prompts, and
+    - a browser sign-in when a tool reaches a live Business Central environment.
+
+    Ask for more only when something is actually broken and the agent has run out of options.
+    Then name the exact command, and first confirm it exists: for an AL command, check the AL
+    Language extension's `package.json` (`contributes.commands`). **Never send the human to the
+    Command Palette to set up the AL MCP Server.** The AL Language extension has no command that
+    sets one up or registers one. **Never route AL tooling through a third-party VS Code
+    extension** the human would have to install first.
+
+    **Why this is a rule, not advice:** agents have tripped on this four times.
     - First, an agent installed a .NET runtime the AL extension already had (Rule 6b's origin).
     - Then, while the OCPF plugin was being built, the agent designed AL MCP support around
       installing the .NET SDK and a NuGet tool, plus a `PATH` edit. The AL extension already
       provided everything needed.
+    - On a real Lite project (September 15, 2026), the agent had the human download symbols by
+      hand three times. Microsoft's public symbol feed needs no sign-in, and the AL MCP Server
+      downloads from it.
+    - On the same project, the agent sent the human to the Command Palette for an AL MCP command
+      that doesn't exist. Only after the human said so did it do the setup itself.
 
     A step a developer shrugs off can stop a functional consultant cold. An agent reaching for
     installs in front of a client makes the whole framework look careless.
@@ -160,37 +187,63 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
 
 ## 01 — Populate the Intake Sheet (Project Parameters)
 
-**Inputs:** Expanded entity list; platform/tenant constraints from the stakeholder; BC symbol file for the target version.
+**Inputs:** Expanded entity list; platform/tenant constraints from the stakeholder. (The BC symbol file for the target version is an output of this step: the agent downloads it at §1.10.)
 
 **Actions:** Complete **every** field below. Replace every placeholder. These values override all defaults for the rest of the routine. **This block is the authoritative source** — the single source of truth for every name, ID, version, prefix, namespace, and quoting decision in the project. The Standards Guide deliberately keeps no copy of it and defers to whatever is filled in here (Standards, "Authoritative-source rule"); nothing in AL code hardcodes a value that belongs in this block.
 
-**Ask first, don't infer.** If `Extension Name`, `Publisher`, `Use Namespace (y/n)`, `Namespace`,
-`Localization`, or `AL Object Prefix` (§1.3) still carry placeholder values, ask the human
-directly — as these five questions, before writing anything:
+**Ask first, don't infer — and ask interactively** (Operating Rule 6a; AJ Ansari, September 15,
+2026). **Every question in this step goes through the options mechanism, never as an open-ended
+question or a numbered list in chat.** That includes the identity questions below, the ID range
+loop, Deployment Target, §1.4's BC version, §1.6, §1.7, §1.8, and §1.9. Ask one question per box, or a
+few related ones together where the mechanism allows it (Claude Code's `AskUserQuestion` takes up
+to four per box).
 
-1. What is the Extension Name?
-2. Who is the Publisher?
-3. Should this project use an AL namespace? If yes, what should it be (e.g.
-   `<Publisher>.<ExtensionShort>`)?
-4. What Localization applies (`W1`, `US`, …)?
-5. What AL object prefix should be used?
+If `Extension Name`, `Publisher`, `Use Namespace (y/n)`, `Namespace`, `Localization`, or
+`AL Object Prefix` (§1.3) still carry placeholder values, ask these before writing anything:
 
-Do not infer these from context under time pressure (an email domain, a guess at house style) —
-that produces exactly the kind of full-project rename this framework has already had to do once
-on a real project, after the inferred publisher and prefix turned out to be wrong.
+| # | Question | Options to offer (free-text entry always available) |
+|---|---|---|
+| 1 | What is the Extension Name? | Up to three names built from the problem statement's own wording, each labelled as a suggestion. |
+| 2 | Who is the Publisher? | Only names the human has already written or uploaded, quoted verbatim, each with where it came from. If there are none, offer *I'll type it* (its description says to use the free-text entry) and *Decide after the other questions*. |
+| 3 | Should this project use an AL namespace? | *Yes (recommended)* / *No*. If yes, follow up with `<Publisher>.<ExtensionShort>` built from answers 1–2. |
+| 4 | What Localization applies? | The countries named in `ProblemStatement.md`, as codes (e.g. `US`), then `W1`. |
+| 5 | What AL object prefix should be used? | Two or three short lowercase prefixes built from answers 1–2. |
+
+**A suggestion is a candidate the human picks, never an answer recorded on their behalf.**
+Nothing goes into `docs/ProjectParameters.md` until the human has selected or typed it. Build
+suggestions only from what the human said or confirmed, never from an email domain or a guess at
+house style. Inferring these under time pressure already forced a full-project rename on a real
+project, after the inferred publisher and prefix turned out to be wrong.
+
+**Deployment Target:** *SaaS PTE* / *OnPrem PTE* / *AppSource*, with the one that fits the problem
+statement first.
 
 **Then collect Object ID ranges (§1.2) the same way — as a loop, not a single question,** since
 there can be more than one range:
 
-1. Ask for the starting Object ID.
-2. Ask for the ending Object ID.
-3. Show the resulting range and its size (e.g. "80300–80339 — 40 IDs") and ask the human to
-   confirm it.
-4. Ask: "Are there additional ranges?" (Y/N).
+1. **Starting Object ID.** Offer any range the human's material already names. Otherwise use the
+   free-text entry, with `50100` as an option described as "the AL template's default: use it only
+   if no range has been assigned to you."
+2. **Ending Object ID.** Offer the start plus 49 (50 IDs) and the start plus 99 (100 IDs), and
+   free text.
+3. **Confirm.** Show the resulting range and its size (e.g. "80300–80339 — 40 IDs"): *Yes, that's
+   right* / *No, re-enter it*.
+4. **Additional ranges?** *No* / *Yes*.
 5. If yes, repeat steps 1–4 for the next range. If no, stop — every confirmed range is final.
 
 The first confirmed range is the Primary allocation; every one after it is an Additional
 allocation — there can be more than one.
+
+**BC version (§1.4).** Offer the current Business Central online major version as recommended, and
+the one before it. Look the version up on Microsoft Learn; never answer from memory. If the human
+already has a sandbox, its version is the natural choice. Don't ask for `runtime`. Read it from
+Microsoft Learn's [Choose runtime version in AL](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-choosing-runtime)
+table (for example, runtime `17.0` ships with Business Central 28.0).
+
+**§1.6, §1.7, §1.8, and §1.9** are asked the same way: *Yes* / *No* (or the listed choices), with the
+recommended option first, and follow-up questions for the specifics of a *Yes*.
+
+**Once the human confirms the sheet, the agent sets up the AL project before DESIGN** — §1.10.
 
 **Tell the human, at intake, where their built packages will live.** This framework always
 writes `.app` packages to a fixed folder named **`outputAppPackage/`** in the project root —
@@ -288,7 +341,7 @@ Primary `90800`–`90899`; Additional allocation 1 `91500`–`91549`; Permission
 | **AL Runtime** | `<major.minor>` | No quotes. Set in `app.json "runtime"`. Example: `16.0` |
 | **BC Application Minimum** | `<major.minor.build.revision>` | No quotes. Set in `app.json` dependencies. Example: `27.0.0.0` |
 | **Recommended BC Version** | `<BC version>` | Informational; validation target. Example: `27.5+` |
-| **Symbol Source** | `<BC symbol file version>` | Symbol file used for verification (Standards Appendix B). Example: `BC v27.5 symbol file` |
+| **Symbol Source** | `<BC symbol file version>` | Symbol file used for verification (Standards Appendix B), including whether it's W1 or localized and where it came from. Filled in by the agent at §1.10, not asked. Example: `BC v27.5, W1, Microsoft public symbol feed` |
 
 > Localization is **not** repeated here — it is set once in Section 1.1.
 
@@ -543,9 +596,33 @@ keeping every engineering document in English only (Operating Rule 8).
 | **Translatable data** | `<TranslatableDataYN>` | `Yes`/`No`, with which tables/fields if `Yes`. |
 | **Translation tooling** | `<TranslationTooling>` | Decided at Step 05. |
 
-**Outputs:** `docs/ProjectParameters.md` — the completed Project Parameters block (above, all placeholders replaced), persisted as its own tracked document so every later step, and every role under §1.7, reads it from disk rather than depending on conversation history; an empty **Object Register** artifact seeded with the allocated ID ranges; the project's `.gitignore` populated per this section and per ALL ALONG → Repository Hygiene; **`docs/TranslationGlossary.md`**, created with the regional terms PRE-02 listed (ALL ALONG → Translations & Terminology) — unless the project chose *US wording, no translation files*.
+### 1.10 AL Project File, AL Tools & Symbols (the agent's job, before DESIGN)
 
-**Exit gate:** No placeholder remains. Deployment Target is one allowed value. Namespace matches between 1.1 and 1.3, or both are correctly N/A if Use Namespace = `No`. Localization is set. If Permission Sets required = `Yes`, ≥ 2 IDs are reserved in the primary range. §1.6's three questions are each answered `Yes`/`No` with specifics recorded for any `Yes`. §1.7 is answered or explicitly skipped — if configured, every one of the three roles has both a model and a thinking effort (or `N/A`) recorded, not model alone. §1.8 is answered (or defaults to `Yes`) and `.gitignore` reflects it. §1.9: every target language is classified against Microsoft's live page, has a required-at-release answer and a named reviewer; source language and wording are recorded; any mismatch with `Localization` is resolved. Human confirms the sheet.
+> **New in v2.9.0.0 (AJ Ansari, September 15, 2026).** Operating Rule 2 verifies every design
+> decision against downloaded symbols, so symbols have to be on disk before Step 02, not first
+> appear at Step 07. On a real Lite project, the agent had the human download symbols by hand
+> three times. It then misread the packages as unusable and designed from Microsoft Learn
+> instead, recording posting events that don't exist. Nothing here needs the human beyond the
+> AI tool's own approval prompts (Operating Rule 6d).
+
+Once the human confirms the sheet, and before Step 02:
+
+1. **Write `app.json` once, complete, from the confirmed sheet.** Include the name, publisher,
+   version, every `idRanges` entry from §1.2, `platform`, `application`, and `runtime` from §1.4,
+   and the `features` Step 05 lists. If `app.json` already exists (for example, the human ran
+   **AL: Go!**), keep its `id` GUID and replace the rest. Don't change `idRanges`, `platform`,
+   `application`, `runtime`, or `dependencies` again without re-running step 4 below.
+2. **Connect the AL tools** if this session doesn't have them yet (ALL ALONG → AL MCP Server).
+3. **Download symbols** (ALL ALONG → Symbols). Confirm `.alpackages/` holds Base Application and
+   System Application for the §1.4 major version. Record the result as §1.4's **Symbol Source**.
+4. **Keep the editor in sync** (ALL ALONG → Keeping the Editor in Sync). If VS Code's AL
+   extension loaded this project before the agent changed `app.json`, the editor keeps showing
+   the old ID ranges and missing symbols as red errors. Refresh it now, while no `.al` file
+   exists yet.
+
+**Outputs:** `docs/ProjectParameters.md` — the completed Project Parameters block (above, all placeholders replaced), persisted as its own tracked document so every later step, and every role under §1.7, reads it from disk rather than depending on conversation history; an empty **Object Register** artifact seeded with the allocated ID ranges; the project's `.gitignore` populated per this section and per ALL ALONG → Repository Hygiene; **`docs/TranslationGlossary.md`**, created with the regional terms PRE-02 listed (ALL ALONG → Translations & Terminology) — unless the project chose *US wording, no translation files*; `app.json` and `.alpackages/` per §1.10.
+
+**Exit gate:** Every question in this step was asked through the options mechanism. `app.json` matches the sheet, and symbols for the target version are in `.alpackages/` (§1.10). No placeholder remains. Deployment Target is one allowed value. Namespace matches between 1.1 and 1.3, or both are correctly N/A if Use Namespace = `No`. Localization is set. If Permission Sets required = `Yes`, ≥ 2 IDs are reserved in the primary range. §1.6's three questions are each answered `Yes`/`No` with specifics recorded for any `Yes`. §1.7 is answered or explicitly skipped — if configured, every one of the three roles has both a model and a thinking effort (or `N/A`) recorded, not model alone. §1.8 is answered (or defaults to `Yes`) and `.gitignore` reflects it. §1.9: every target language is classified against Microsoft's live page, has a required-at-release answer and a named reviewer; source language and wording are recorded; any mismatch with `Localization` is resolved. Human confirms the sheet.
 
 ---
 
@@ -659,14 +736,15 @@ Goal: generate AL batch by batch, lint clean — including symbol verification �
 **Actions:**
 - Confirm the object build order: which objects are built in which batch, smallest/simplest module first (Operating Rule 3).
 - Within a batch, order objects so lookup/reference tables precede the entities that reference them.
-- Prepare the scaffold: `app.json` (name, publisher, runtime, BC dependency, `"features": ["NoImplicitWith", "TranslationFile"]` — `TranslationFile` on every project, Standards §8.2), `launch.json`, folder structure per module, a `Translations/` folder, and `.gitignore` populated per §1.8 and ALL ALONG → Repository Hygiene (including `*.g.xlf`).
+- Prepare the scaffold: confirm `app.json` still matches `docs/ProjectParameters.md` (written at §1.10: name, publisher, ID ranges, runtime, BC dependency, `"features": ["NoImplicitWith", "TranslationFile"]` — `TranslationFile` on every project, Standards §8.2), `launch.json`, folder structure per module, a `Translations/` folder, and `.gitignore` populated per §1.8 and ALL ALONG → Repository Hygiene (including `*.g.xlf`). If `app.json` has to change here, follow ALL ALONG → Keeping the Editor in Sync.
 - **Agree the translation tooling** (Rule 6a; skip if Parameter §1.9 chose *US wording, no translation files*). Recommend the **XLIFF Sync** PowerShell module (`XliffSync`) as the agent's headless sync and checks, with the **XLIFF Sync** VS Code extension for reviewers. Offer **NAB AL Tools** as the alternative for developers who already use it. Before installing PowerShell, the module, or any extension, look for an existing installation first and ask (Operating Rules 6, 6b). Record the choice in Parameter §1.9. Whatever the tooling, the release gate (ALL ALONG → Translations & Terminology) is the same state scan.
-- Bootstrap the AL MCP Server, the BCQuality knowledge snapshot, and the OnlyCopilotFans (OCPF)
-  BC AL Patterns library for this project if not already done (ALL ALONG) — all three are
-  one-time-per-project setup, cheapest to do alongside the rest of the scaffold rather than as an
-  afterthought once BUILD is underway. (The Standards Guide is **not** in this group — it is
-  fetched much earlier, at PRE-01, because DEFINE and DESIGN both cite it. Confirm
-  `standardsGuide/` is present and gitignored here rather than re-fetching it.)
+- Bootstrap the BCQuality knowledge snapshot and the OnlyCopilotFans (OCPF) BC AL Patterns
+  library for this project if not already done (ALL ALONG) — both are one-time-per-project setup,
+  cheapest to do alongside the rest of the scaffold rather than as an afterthought once BUILD is
+  underway. (Two things are **not** in this group, because DEFINE and DESIGN already needed them:
+  the Standards Guide, fetched at PRE-01, and the AL tools and symbols, set up at Step 01 §1.10.
+  Confirm `standardsGuide/` is present and gitignored, the AL tools respond, and `.alpackages/`
+  holds the target version's symbols, rather than redoing any of it.)
 - Write the pre-flight validation checks to run for each batch — this is the canonical checklist every other reference to "the Step 05 checklist" in this runbook means; if you're re-stating it elsewhere, point here rather than re-enumerating. Split into two passes, since some checks are only possible before generation and some only after:
   - **Pre-generation** (on the TDD's planned names/fields, before any file exists — main role): identifier length ≤ 30, entity/EntitySet name length ≤ 30, reserved-keyword scan, localization field-range filter, `ObsoleteState` filter.
   - **Post-generation** (on the actual generated files — light role, if §1.7 role assignment is configured): required-property presence, **no multilanguage (ML) properties and no `TextConst`** — `CaptionML`, `ToolTipML`, `OptionCaptionML`, or any other ML variant is a pre-flight failure; single-language `Caption`/`ToolTip`/`OptionCaption`/`Label` only (Standards §1.7 — AL0424 fires only when `TranslationFile` is enabled, so the compiler cannot be relied on to catch it), **translatable text** (Standards §8.3–§8.4: no string literal in `Error` / `Message` / `Confirm` / `StrMenu` / notifications / `ErrorInfo`; every label has an AA0074 suffix; every placeholder label has a `Comment`; tokens and telemetry `Locked`; every `OptionCaption` member count matches its option), **API caption locking** matches the per-object decision recorded at Step 03 (translatable objects set `EntityCaption`/`EntitySetCaption`; locked objects lock every `Caption` and leave `ToolTip`s translatable — Standards §8.6), `Rec.`-qualification (`NoImplicitWith`), dead-code check (no empty triggers, no `// TODO`, no commented-out fields), 4-space indentation with no tabs (Standards §1.6), permission-set `tabledata` coverage for every table the batch introduces (Standards §5.3 — `PTE0004` fires at **publish**, not at compile, so **nothing automated catches a missing grant** — pre-flight is the only defense; vacuously satisfied if this project introduces no tables — see Parameter 1.2), and **symbol verification** — every reference to a standard/base BC table, page, codeunit, method, property, or enum value confirmed against the downloaded symbol source, falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer, not assumed correct because it looks like plausible AL (Operating Rule 4).
@@ -714,6 +792,12 @@ main role's.
 **Inputs:** Every batch from Step 06 (all lint-clean; not yet compiled via this step's mandatory pass, though an earlier human-requested spot-check may already have run — Operating Rule 4); the symbol-verified lint findings accumulated across BUILD; `TDD.md`; ChangeLog.
 
 **Actions:** First, **compile the whole extension once, then package it** (Operating Rule 4 — check for an already-provisioned runtime before installing anything, Operating Rule 6b). This is the mandatory compile-and-package the rest of BUILD deferred to this exact point; it is not optional and does not move further. If the human separately requested an earlier spot-check compile mid-BUILD, that was additional, not a substitute — this one still runs. Package naming, location (`outputAppPackage/`), the never-delete rule, and Schema Sync Mode/Force Sync guidance all apply from this very first package onward (ALL ALONG → Packaging & Versioning) — there is no "not a real package yet" grace period.
+
+**After every compile with 0 errors, check what the human's editor shows** (ALL ALONG → Keeping
+the Editor in Sync; AJ Ansari, September 15, 2026). If VS Code still marks AL errors the compiler
+didn't report, such as an object ID "outside the allowed ranges" or a symbol that "is missing",
+the editor's view is stale, not the code. Refresh the view; never change code that compiles
+clean to make stale red marks go away.
 
 **From here, Step 07 is a cycle, not a single event.** Packaging is not a milestone held back for later — it happens every time the extension changes during troubleshooting:
 1. Publish the current package to a BC sandbox tenant.
@@ -1345,52 +1429,85 @@ section needs is already on the machine of anyone developing AL in VS Code.
   If this session already has the server's tools (`al_compile`, `al_addproject`, …), don't register
   a duplicate; add this project with `al_addproject`.
 - **With the OCPF plugin:** its `al-mcp-setup` skill does this bootstrap in one step.
-  - It copies a launcher into `scripts/`: `al-mcp.sh` on macOS/Linux, or `al-mcp.cmd` plus
-    `al-mcp-resolve.ps1` on Windows. The launcher finds the newest AL extension and its runtime at
-    every launch, so extension updates never break it.
+  - It copies the launcher and the one-shot helper into `scripts/`: `al-mcp.sh` and
+    `al-mcp-call.sh` on macOS/Linux, or `al-mcp.cmd`, `al-mcp-resolve.ps1`, and `al-mcp-call.ps1`
+    on Windows. The launcher finds the newest AL extension and its runtime at every launch, so
+    extension updates never break it.
   - It adds `al` to the project's `.mcp.json` and records the outcome as `alMcp` in
     `.ocpf/framework.json`.
 - **Microsoft's `al` .NET tool on NuGet** (`Microsoft.Dynamics.BusinessCentral.Development.Tools`,
   same `launchmcpserver`) is for cloud sessions and machines without VS Code only. Install it in
   the cloud environment's setup script, not by asking the human.
 
+**When the AL tools are needed:** from Step 01 §1.10, which downloads symbols before DESIGN. Not
+from Step 05.
+
+**The human approves; the agent does everything else** (Operating Rule 6d; AJ Ansari, September
+15, 2026).
+- **No Command Palette.** The AL Language extension has no command that sets up or registers
+  the AL MCP Server. Its only MCP commands sign in to two separate servers, Profiling and
+  Snapshot debugging (verified in AL Language extension 18.0's `package.json`).
+- **No third-party bridge extensions.** One example is *AL Language Model Tools — MCP Bridge*, a
+  community VSIX. It isn't on the Marketplace, needs VS Code relaunched with a proposed API
+  enabled, and is set up from the Command Palette. Don't install, configure, or register one, and
+  don't depend on one that's already registered. A consultant won't have it.
+- **The human's only part:** approving the AI tool's permission prompts. That includes the prompt
+  Claude Code shows once for a new project MCP server, at the start of the next session.
+
 **Bootstrap once per new project** (idempotent — check for an existing registration before
 adding a duplicate):
-1. Locate `altool` inside the installed AL extension (its `bin/` folder) — it is not necessarily
-   on `PATH`. **On Windows**, `altool.exe` is a native binary — invoke it directly, no wrapper
-   needed. **On macOS or Linux**, the shipped `.exe` is Windows-only and won't run; invoke
-   `altool.dll` against a .NET runtime instead (prefer one already on `PATH`; otherwise check
-   whatever the IDE already privately provisions for its own AL tooling before installing
-   anything — Operating Rule 6b — noting that path itself differs by OS, e.g. VS Code's own
-   per-extension runtime storage lives under a different directory on macOS than on Linux).
-2. Confirm the project has a valid `app.json` and, if any MCP tool will publish or download
-   symbols from a live server, a `launch.json` with the target environment configured.
-2a. If bootstrapping needs a local wrapper script (e.g., because the host needs a fixed command
-    but the actual runtime/extension path must be re-discovered per machine — see the portable
-    pattern this project used), put it in a project-local folder such as `scripts/` and add that
-    folder to `.gitignore` (ALL ALONG → Repository Hygiene) — it's this framework's own tooling
-    plumbing, not part of the client's deliverable. **Consequence to document, not paper over:**
-    if the MCP host config that references the script (e.g., `.vscode/mcp.json`) *is* committed,
-    a fresh clone will have a config pointing at a script that doesn't exist yet — note this in the
-    project's own setup instructions, and re-run this bootstrap to regenerate the script locally
-    rather than assuming it's already there.
-3. Register the server with whatever MCP host the agent's harness provides, preferring
-   project-scoped config so it travels with the repository. Generic stdio descriptor (adapt keys
-   to the host's config format):
-   ```json
-   { "type": "stdio", "command": "<path to a runtime>", "args": ["<path to altool.dll>", "launchmcpserver", "--transport", "stdio"] }
+1. **Get the launcher.** With the plugin, the `al-mcp-setup` skill copies it. Without the plugin,
+   download these files byte for byte into the project's `scripts/` folder from
+   `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/al-mcp-setup/scripts/<file>`:
+   - **macOS or Linux:** `al-mcp.sh`, `al-mcp-call.sh`
+   - **Windows:** `al-mcp.cmd`, `al-mcp-resolve.ps1`, `al-mcp-call.ps1`
+
+   The launcher uses Microsoft's `al` tool if it's on `PATH` and runs. Otherwise it uses the
+   newest AL Language extension's `altool` on the .NET runtime VS Code provisioned for it. It needs
+   no `PATH` edit, no `DOTNET_ROOT`, and no absolute path in any config. Add `scripts/` to
+   `.gitignore` (ALL ALONG → Repository Hygiene): it's this framework's plumbing, not the client's
+   deliverable. **If GitHub isn't reachable,** write the equivalent yourself. Locate `altool` in
+   the AL extension's `bin/` folder. On Windows, run `altool.exe` directly. On macOS or Linux, run
+   `altool.dll` on the runtime VS Code provisioned (check its storage path for the actual OS,
+   Operating Rule 6b). Run it as `launchmcpserver --transport stdio`.
+2. **Check it:** `sh scripts/al-mcp.sh --help` (Windows: `scripts\al-mcp.cmd --help`) prints the
+   `launchmcpserver` usage. If it prints an `OCPF AL MCP launcher:` message instead, that says
+   what's missing. When the AL extension has never started on this machine, its .NET runtime isn't
+   provisioned yet. That's the one broken case where the human helps: open this project folder in
+   VS Code, where the AL extension starts because `app.json` exists, then check again.
+3. **Register it** with a relative launcher path. Claude Code and Copilot CLI read `.mcp.json`
+   in the project root; add the `al` entry and never overwrite other servers:
+   - **macOS or Linux:** `{ "mcpServers": { "al": { "command": "sh", "args": ["scripts/al-mcp.sh"] } } }`
+   - **Windows:** `{ "mcpServers": { "al": { "command": "cmd.exe", "args": ["/c", "scripts\\al-mcp.cmd"] } } }`
+   - **Other MCP hosts:** the same command in that host's configuration format.
+
+   **Consequence to document, not paper over:** if that config is committed but `scripts/` is
+   gitignored, a fresh clone points at a script that isn't there yet. Say so in the project's setup
+   notes, and re-run this bootstrap on the new machine.
+4. **Keep working in this session — no restart.** Claude Code and Copilot CLI load MCP servers
+   when a session starts, so a server registered mid-session isn't available until the next
+   session. Don't stop, and don't ask the human to restart. Until the `al` tools appear, call any
+   of them through the one-shot helper. It starts the same server with this project loaded, runs
+   one tool, prints the JSON-RPC response, and exits:
    ```
-   The command also accepts one or more AL project paths as positional arguments, and flags for
-   package cache path, ruleset, code analyzers, and output folder — check `altool launchmcpserver
-   --help` against the installed version rather than assuming a fixed flag set, since this
-   surface can grow between AL extension releases.
-4. Verify the connection by listing available tools — a lightweight capability check, not a
-   project compile. Compiling is not an automatic part of *batch generation* in Step 05/06
-   (Operating Rule 4) — the first real compile is Step 07's mandatory compile-and-package; do
-   not use this MCP verification step as a backdoor to it.
-5. Tools reaching a live BC cloud environment (publish, downloading non-global symbols) trigger
+   sh scripts/al-mcp-call.sh . al_downloadsymbols '{"globalSourcesOnly":true}'
+   sh scripts/al-mcp-call.sh . al_compile '{"options":{"onlyErrors":true}}'
+   powershell -NoProfile -ExecutionPolicy Bypass -File scripts\al-mcp-call.ps1 . al_getpackagedependencies
+   ```
+   Each call reloads the project, so it takes a few seconds. Measured on macOS: symbol download in
+   under 10 seconds, compile in about 5.
+5. **Verify** with a call that isn't a compile, such as `al_getpackagedependencies`, or by listing
+   tools once they appear. Compiling is not an automatic part of *batch generation* in Step 05/06
+   (Operating Rule 4). The first real compile is Step 07's mandatory compile-and-package, so don't
+   use this verification step as a backdoor to it.
+6. Tools reaching a live BC cloud environment (publish, downloading non-global symbols) trigger
    an interactive sign-in the first time they're needed, cached for the session; log out when the
    task reaching the cloud is done.
+
+`launchmcpserver` also accepts AL project paths as positional arguments, and flags for package
+cache path, ruleset, code analyzers, and output folder. Check `--help` against the installed
+version rather than assuming a fixed flag set, since this surface grows between AL extension
+releases.
 
 **Standing use during development:** once registered, prefer the MCP build/publish/symbol tools
 over an ad hoc terminal compiler invocation where the harness makes both available — they're the
@@ -1398,6 +1515,99 @@ first-party path and are kept current with the extension, where a hand-rolled wr
 isn't. Re-verify the tool surface (names, arguments) against the installed version rather than
 trusting a prior project's notes about it, since this is actively developed and can change
 between AL extension releases.
+
+## Symbols
+
+**The agent downloads symbols; the human never does** (Operating Rule 6d; AJ Ansari, September
+15, 2026). First at Step 01 §1.10, then whenever the dependencies change. Stop at the first option
+that works:
+1. **GitHub Copilot Chat in VS Code:** the AL extension's own `al_downloadsymbols` tool, with
+   `globalSourcesOnly: true` unless option 3 applies. It runs inside VS Code, so VS Code's AL
+   workspace reloads afterwards.
+2. **Any other agent:** the AL MCP Server's `al_downloadsymbols` with `globalSourcesOnly: true`.
+   If this session can't see the server yet, call it through the one-shot helper (ALL ALONG → AL
+   MCP Server, step 4).
+3. **From the sandbox,** when global sources aren't enough: `al_downloadsymbols` without
+   `globalSourcesOnly`, using the `launch.json` environment. The first time, it opens a browser
+   sign-in, which is the human's part. Use this route when:
+   - the project depends on a per-tenant or partner app that isn't on AppSource,
+   - `Localization` isn't `W1` and option 1 isn't available (see below), or
+   - the global download fails.
+
+**Verified September 15, 2026, AL Language extension 18.0:**
+- `globalSourcesOnly: true` downloads from Microsoft's public symbol feed and AppSource. It needs
+  no Business Central connection and no sign-in. Tested for BC 27: System, Application, System
+  Application, Business Foundation, and Base Application in under 10 seconds.
+- It takes the newest build of `app.json`'s major version (`27.0.0.0` → 27.5), unless
+  `enforceMinorVersion: true` is set.
+- **The AL MCP Server's global download is W1 only.** It has no country option and ignores
+  `al.symbolsCountryRegion`. VS Code's own download supports country-specific packages through
+  that setting (AL extension changelog). So, for a localized project:
+  - **In Copilot Chat:** set `"al.symbolsCountryRegion"` in `.vscode/settings.json` to the
+    lowercase country code (for example `"us"`) before option 1.
+  - **Elsewhere:** W1 symbols are enough to start DESIGN. Download from the sandbox (option 3)
+    before verifying any country-specific table or field.
+
+**Confirm symbols by using them, never by unpacking them.** Search for a known object with
+`al_symbolsearch` (the `Customer` table, for example), or compile. A package's
+`SymbolReference.json` can look far emptier than what the compiler resolves. On a real project,
+reading it led an agent to declare good symbols unusable and design from Microsoft Learn instead.
+
+**Download again** after adding a dependency, changing `platform` or `application`, or switching
+to localized symbols. Then follow Keeping the Editor in Sync.
+
+## Keeping the Editor in Sync
+
+**The symptom** (AJ Ansari, September 15, 2026, seen on both editions): the extension compiles
+clean, but VS Code still marks objects red. The usual messages say an object ID isn't within the
+allowed ranges, or a referenced symbol is missing. The marks stay until the window is reloaded or
+VS Code restarts. The code is fine; VS Code's AL language server is working from old information.
+- **`app.json` changed outside the editor.** The AL extension doesn't always re-read `app.json`
+  when something other than the editor changes it. ID ranges updated by `git pull` have stayed
+  stale until VS Code restarted ([microsoft/vscode#147111](https://github.com/microsoft/vscode/issues/147111),
+  attributed to the AL extension). An agent writing `app.json` on disk is the same situation. On
+  the real Lite project, **AL: Go!** created `app.json` with its default range, the AL extension
+  loaded it, and the agent then wrote the project's own range.
+- **Symbols downloaded outside VS Code.** After a download, the AL MCP Server reloads its own
+  workspace. VS Code's language server runs in a separate process and isn't told.
+
+**Prevent it:**
+1. Write `app.json` once, complete, at Step 01 §1.10, and download symbols in the same pass,
+   before any `.al` file exists.
+2. After that, change `idRanges`, `dependencies`, `platform`, `application`, or `runtime` only
+   when the project needs it, and run the check below each time.
+3. In Copilot Chat, download symbols with the AL extension's own tool (Symbols, option 1).
+
+**Detect it — the agent checks, the human doesn't have to notice:**
+- **When:** after each change listed above, and after every compile that reports 0 errors.
+- **How:**
+  - **GitHub Copilot Chat in VS Code:** `al_getdiagnostics` with severity `error` reads the
+    Problems panel.
+  - **Claude Code in VS Code:** the IDE integration's `getDiagnostics` tool
+    (`mcp__ide__getDiagnostics`) reads the same panel.
+- **Stale** means the panel shows AL errors that the latest `al_compile` or `al_build` didn't
+  report.
+- **Where the agent can't read the editor** (for example, a terminal-only session), tell the human
+  once, at the first clean compile, what stale marks look like and the fix below.
+- **At §1.10 there are no `.al` files to mark yet.** So if `app.json` existed before the agent
+  changed its ranges or versions, treat the editor as stale and fix it then.
+
+**Fix it:**
+1. **In Copilot Chat,** run the AL extension's own `al_downloadsymbols` once. It reloads VS
+   Code's AL workspace. Check again.
+2. **Anywhere else, or if the marks remain,** ask the human to reload the window. No agent tool
+   can do it: Claude Code's IDE tools don't run editor commands, and the AL extension has no
+   reload command. Put the request at the end of the reply, never mid-task, as one short message
+   in the working language, for example:
+   > VS Code is still showing errors from before I updated the project; the code itself compiles
+   > clean. To refresh it, press Ctrl+Shift+P (Cmd+Shift+P on a Mac) and run **Developer: Reload
+   > Window**. It takes a few seconds, and your files aren't touched. If the chat panel closes,
+   > reopen it and continue this conversation from its history.
+
+   **Developer: Reload Window** is built into VS Code, so it's always there (Operating Rule 6d).
+   When the human continues, check the panel again.
+
+Never change code that compiles clean just to clear stale marks.
 
 ## OCPF AL Development Standards Guide
 
@@ -1446,7 +1656,7 @@ latest standards"). Re-run the fetch, overwrite the local copy, and report plain
 `<old sha>` to `<new sha>`" or "already up to date."
 
 **Version skew is worth naming, not papering over.** The guide carries its own version number
-(v1.2.0.0 as of runbook v2.8.0.0) and is versioned independently of this runbook, with
+(v1.2.0.0 as of runbook v2.9.0.0) and is versioned independently of this runbook, with
 both tracked in `RunbookChangelog.md`. If a fetched guide's version doesn't match what this
 runbook expects, say so — don't silently reconcile a citation that doesn't resolve.
 

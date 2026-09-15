@@ -72,7 +72,7 @@ met).
 flowchart TD
     subgraph DEFINE["PHASE: DEFINE"]
         direction TB
-        S1["Step 1<br/>Define the Problem<br/>& Lock Parameters"] --> G_S1{{"Standards Guide present<br/>+ gitignored; no placeholder<br/>remains; ProjectParameters.md<br/>+ onboarding Qs answered;<br/>human confirms sheet"}}
+        S1["Step 1<br/>Define the Problem<br/>& Lock Parameters"] --> G_S1{{"Standards Guide present<br/>+ gitignored; no placeholder<br/>remains; ProjectParameters.md<br/>+ onboarding Qs answered;<br/>app.json + symbols ready;<br/>human confirms sheet"}}
     end
 
     subgraph DESIGN["PHASE: DESIGN"]
@@ -119,9 +119,9 @@ flowchart TD
 
     subgraph S1["STEP 1 — Define the Problem & Lock Parameters"]
         direction LR
-        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Fetch Standards Guide into<br/>standardsGuide/ + gitignore it;<br/>capture raw requirements<br/>verbatim; write problem<br/>statement + quick gap check<br/>(Standards Part 6); ask 5 identity<br/>questions + ID-range loop,<br/>don't infer; persist<br/>ProjectParameters.md"] --> Out1[/"Output:<br/>standardsGuide/ (gitignored),<br/>requirements/ (if any),<br/>ProblemStatement.md,<br/>ProjectParameters.md"/]
+        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Fetch Standards Guide into<br/>standardsGuide/ + gitignore it;<br/>capture raw requirements<br/>verbatim; write problem<br/>statement + quick gap check<br/>(Standards Part 6); ask every<br/>intake question in the options<br/>box (identity, ID-range loop,<br/>BC version), don't infer; persist<br/>ProjectParameters.md; then the<br/>agent writes app.json, connects<br/>AL tools, downloads symbols,<br/>checks the editor"] --> Out1[/"Output:<br/>standardsGuide/ (gitignored),<br/>requirements/ (if any),<br/>ProblemStatement.md,<br/>ProjectParameters.md,<br/>app.json, .alpackages/"/]
     end
-    S1 --> Gate1{{"Exit gate:<br/>Standards Guide present + gitignored,<br/>no placeholder remains,<br/>onboarding questions answered,<br/>human confirms sheet"}}
+    S1 --> Gate1{{"Exit gate:<br/>Standards Guide present + gitignored,<br/>no placeholder remains,<br/>onboarding questions answered,<br/>app.json matches sheet,<br/>symbols in .alpackages/,<br/>human confirms sheet"}}
 
     Gate1 --> Next(["to DESIGN, Step 2"])
 
@@ -172,7 +172,7 @@ flowchart TD
 
     subgraph S3["STEP 3 — Plan & Scaffold"]
         direction LR
-        In1[/"Inputs:<br/>DesignDoc.md,<br/>Object Register"/] --> Act1["Actions:<br/>Confirm batch plan (1, or 2 on<br/>a natural split), prepare scaffold,<br/>bootstrap AL MCP Server<br/>+ BCQuality snapshot<br/>+ OCPF Patterns library,<br/>write pre-flight checklist<br/>(pre-gen + post-gen — one model<br/>runs both passes)"] --> Out1[/"Output:<br/>Batch plan, scaffold,<br/>pre-flight checklist"/]
+        In1[/"Inputs:<br/>DesignDoc.md,<br/>Object Register"/] --> Act1["Actions:<br/>Confirm batch plan (1, or 2 on<br/>a natural split), prepare scaffold (confirm<br/>app.json, AL tools, symbols),<br/>fetch BCQuality snapshot<br/>+ OCPF Patterns library,<br/>write pre-flight checklist<br/>(pre-gen + post-gen — one model<br/>runs both passes)"] --> Out1[/"Output:<br/>Batch plan, scaffold,<br/>pre-flight checklist"/]
     end
     S3 --> Gate1{{"Exit gate:<br/>Batch order agreed,<br/>scaffold structurally complete<br/>(not compiled)"}}
 
@@ -288,7 +288,7 @@ flowchart LR
         Pack["Packaging & Versioning<br/>never delete a package;<br/>propose bumps, don't apply silently"]
         Std["OCPF AL Dev Standards Guide<br/>fetched at Step 1, gitignored —<br/>the one fetch that isn't optional"]
         Hygiene["Repository Hygiene<br/>standardsGuide/, BCQuality,<br/>patterns/ always gitignored"]
-        MCP["AL MCP Server (optional)<br/>bootstrap once, prefer its<br/>tools over ad hoc terminal use"]
+        MCP["AL MCP Server, Symbols &<br/>Editor Sync — agent sets up at<br/>Step 1, human only approves;<br/>check editor after clean compiles"]
         Ref["Reference Sources<br/>MS Learn Base App + System App,<br/>translation files, AL Guidelines —<br/>consulted online, not fetched"]
         Tr["Translations & Terminology<br/>glossary in DesignDoc.md;<br/>agent drafts, named reviewer approves;<br/>release gate: all units signed-off"]
         BCQ["BCQuality Knowledge Snapshot<br/>fetch once at Step 3, refresh<br/>only on explicit request"]

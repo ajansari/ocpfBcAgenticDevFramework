@@ -10,6 +10,15 @@ Language extension** in VS Code. It ships Microsoft's AL tools and the .NET runt
 - Don't install .NET, a NuGet tool, or anything else while the AL extension is present.
 - Never ask the human to edit `PATH`, shell profiles, or environment variables.
 
+**You do the setup; the human only approves.** The human's part is limited to the AI tool's own
+permission prompts.
+- **Never send the human to the Command Palette for this.** The AL Language extension has no
+  command that sets up or registers an AL MCP Server. Its only MCP commands sign in to the
+  separate Profiling and Snapshot servers.
+- **Never use a third-party bridge extension** (such as the *AL Language Model Tools — MCP Bridge*
+  VSIX), and don't depend on one that's already registered. It isn't on the Marketplace, and it
+  needs VS Code relaunched with a proposed API enabled.
+
 The AL extension exposes its tools in two ways. Which one applies depends on the tool you're
 running in.
 
@@ -51,14 +60,16 @@ Ask once, through the options mechanism:
 
 ## Step 4: Connect
 
-1. **Copy the launcher for this operating system** from this skill's `scripts/` folder into the
-   project's `scripts/` folder (create it if needed). Copy exactly; don't rewrite.
-   - **macOS or Linux:** `al-mcp.sh`
-   - **Windows:** `al-mcp.cmd` **and** `al-mcp-resolve.ps1` (the `.cmd` calls the `.ps1`)
+1. **Copy the launcher and the one-shot helper for this operating system** from this skill's
+   `scripts/` folder into the project's `scripts/` folder (create it if needed). Copy exactly;
+   don't rewrite.
+   - **macOS or Linux:** `al-mcp.sh` and `al-mcp-call.sh`
+   - **Windows:** `al-mcp.cmd`, `al-mcp-resolve.ps1` (the `.cmd` calls it), and `al-mcp-call.ps1`
 
    The launcher looks up the newest AL extension and its .NET runtime every time it starts, so AL
    extension updates never break it. If Microsoft's `al` .NET tool happens to be installed, it
-   uses that instead.
+   uses that instead. The helper runs one AL MCP Server tool through the launcher and exits
+   (step 5).
 2. **Add `scripts/` to the project's `.gitignore`** if it isn't there. It's framework plumbing, not
    the client's deliverable (runbook ALL ALONG → Repository Hygiene).
 3. **Add the `al` server to `.mcp.json` in the project root.** Create the file if needed. If it
@@ -78,18 +89,32 @@ Ask once, through the options mechanism:
    `launchmcpserver` usage.
    - **If it prints an `OCPF AL MCP launcher:` message instead,** relay that message; it says
      exactly what's missing, usually that the AL extension isn't installed.
-   - **If the extension is installed but its .NET runtime isn't there yet,** ask the human to open
-     an `.al` file in VS Code once so the extension provisions it, then check again.
-5. **Tell the human what to expect:** approval clicks only, no typing or installs.
+   - **If the extension is installed but its .NET runtime isn't there yet,** the AL extension has
+     never started on this machine. Ask the human to open this project folder in VS Code once
+     (it starts when the folder has an `app.json`), then check again. This is the only broken
+     case that needs the human.
+5. **Keep working in this session: no restart, nothing for the human to do.** Claude Code and
+   Copilot CLI load MCP servers when a session starts, so the new `al` server appears in the next
+   session. Until then, call any AL MCP Server tool through the helper. It starts the server with
+   the project loaded, runs one tool, prints the JSON-RPC response, and exits:
+   - **macOS or Linux:** `sh scripts/al-mcp-call.sh . al_getpackagedependencies`
+   - **Windows:** `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\al-mcp-call.ps1 . al_getpackagedependencies`
+
+   Arguments go in a third, JSON parameter, for example
+   `sh scripts/al-mcp-call.sh . al_downloadsymbols '{"globalSourcesOnly":true}'`. Each call takes a
+   few seconds. **If the project already has `app.json`,** run the first example now to confirm
+   the server answers, and if `.alpackages/` is missing, download symbols with the second: the
+   runbook needs them before DESIGN (ALL ALONG → Symbols). **In a new, empty folder,** the step 4
+   check is enough for now. The runbook writes `app.json` and downloads symbols at the end of
+   intake.
+6. **Tell the human what to expect, in one or two sentences:** approval clicks only.
    - **While you work:** the tool may ask permission before you edit `.mcp.json` (Claude Code
-     treats it as a sensitive file) or run the launcher check. Say so before you start, so the
-     prompt isn't a surprise.
-   - **Afterwards, approve the new `al` server when the tool asks.** In Claude Code, that happens
-     the next time a session starts in this folder; start a new session, or run `/mcp`. In Copilot
-     CLI, restart the session (`/restart`).
-6. **Record the outcome** as `"alMcp": "al-extension-mcp"` in `.ocpf/framework.json`.
-7. **Once connected,** add the project with `al_addproject` (the project root), as the runbook's AL
-   MCP Server section describes.
+     treats it as a sensitive file) or run a script.
+   - **Next session:** Claude Code asks once to approve the project's new `al` server.
+   - Don't mention `/mcp`, restarts, or the Command Palette. Nothing is waiting on them.
+7. **Record the outcome** as `"alMcp": "al-extension-mcp"` in `.ocpf/framework.json`.
+8. **Once the server's tools are in the session,** add the project with `al_addproject` (the
+   project root), as the runbook's AL MCP Server section describes.
 
 ## Cloud sessions
 

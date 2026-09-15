@@ -143,9 +143,9 @@ flowchart TD
     Gate2 --> S01
     subgraph S01["01 — Populate the Intake Sheet"]
         direction LR
-        In3[/"Inputs:<br/>Expanded entity list,<br/>symbol file"/] --> Act3["Actions:<br/>§1.1 Identity, §1.2 ID ranges,<br/>§1.3 Naming/API, §1.4 Platform,<br/>§1.6 Onboarding/Discoverability,<br/>§1.7 Model & Effort Assignment<br/>(model, then effort, asked<br/>separately per role)<br/>— ask, don't infer"] --> Out3[/"Output:<br/>docs/ProjectParameters.md,<br/>Object Register (seeded)"/]
+        In3[/"Inputs:<br/>Expanded entity list"/] --> Act3["Actions:<br/>§1.1 Identity, §1.2 ID ranges,<br/>§1.3 Naming/API, §1.4 Platform,<br/>§1.6 Onboarding/Discoverability,<br/>§1.7 Model & Effort Assignment<br/>(model, then effort, asked<br/>separately per role)<br/>— every question in the options<br/>box, don't infer; §1.10 agent<br/>writes app.json, connects AL tools,<br/>downloads symbols, checks editor"] --> Out3[/"Output:<br/>docs/ProjectParameters.md,<br/>Object Register (seeded),<br/>app.json, .alpackages/"/]
     end
-    S01 --> Gate3{{"Exit gate:<br/>No placeholders remain,<br/>human confirms sheet"}}
+    S01 --> Gate3{{"Exit gate:<br/>No placeholders remain,<br/>app.json + symbols ready,<br/>human confirms sheet"}}
 
     Gate3 --> Next(["to DESIGN, Step 02"])
 
@@ -216,7 +216,7 @@ flowchart TD
 
     subgraph S05["05 — Plan the Code"]
         direction LR
-        In1[/"Inputs:<br/>TDD.md, Object Register"/] --> Act1["Actions:<br/>Confirm batch order,<br/>prepare scaffold,<br/>bootstrap AL MCP Server<br/>+ BCQuality snapshot<br/>+ OCPF Patterns library,<br/>write pre-flight checks<br/>(pre-gen + post-gen passes)"] --> Out1[/"Output:<br/>Batch plan, scaffold,<br/>pre-flight checklist"/]
+        In1[/"Inputs:<br/>TDD.md, Object Register"/] --> Act1["Actions:<br/>Confirm batch order,<br/>prepare scaffold (confirm<br/>app.json, AL tools, symbols),<br/>fetch BCQuality snapshot<br/>+ OCPF Patterns library,<br/>write pre-flight checks<br/>(pre-gen + post-gen passes)"] --> Out1[/"Output:<br/>Batch plan, scaffold,<br/>pre-flight checklist"/]
     end
     S05 --> Gate1{{"Exit gate:<br/>Batch order agreed,<br/>scaffold structurally complete<br/>(not compiled)"}}
 
@@ -377,7 +377,7 @@ flowchart LR
         Prog["Project Progress Tracker<br/>ProjectProgress.md (project root) —<br/>one status table, created at PRE-01"]
         Pack["Packaging & Versioning<br/>never delete a package;<br/>propose bumps, don't apply silently"]
         Std["OCPF AL Dev Standards Guide<br/>fetched at PRE-01 into standardsGuide/,<br/>gitignored — the rules cited as Standards §"]
-        MCP["AL MCP Server<br/>bootstrap once, prefer its<br/>tools over ad hoc terminal use"]
+        MCP["AL MCP Server, Symbols &<br/>Editor Sync — agent sets up at<br/>§1.10, human only approves;<br/>check editor after clean compiles"]
         Ref["Reference Sources<br/>MS Learn Base App + System App,<br/>translation files, AL Guidelines —<br/>consulted online, not fetched"]
         Tr["Translations & Terminology<br/>glossary from Microsoft's translations;<br/>agent drafts, named reviewer approves;<br/>release gate: all units signed-off"]
         BCQ["BCQuality Knowledge Snapshot<br/>fetch once, refresh only<br/>on explicit request"]
