@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 1.6.0.0
+**Version:** 1.7.0.0
 **Last Updated:** September 15, 2026
 
 > **Audience:** Human developers and agentic (AI) developers building Business Central AL
@@ -236,8 +236,8 @@ var
   AL0424 fires only when `app.json`'s `features` includes `TranslationFile` — every project built
   with this framework has it (§8.2), so a clean, zero-warnings compile already proves the codebase
   is free of ML syntax. On a project *without* that flag, `CaptionML` compiles with no warning at
-  all, which is why the code review pass (Part 7) checks it explicitly rather than trusting the
-  compile alone.
+  all. Code review therefore still searches for ML syntax added since the last 0/0 compile, and
+  on any project without the flag.
 
 **Label attributes.** Use `Comment` to tell the translator what every placeholder (`%1`, `%2`, …)
 stands for — required whenever a string has a placeholder. Use `Locked = true` for strings that
@@ -264,6 +264,30 @@ Guidelines' current *Vibe Coding Rules* agree with this section (labels for ever
 > [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); reorganized into the table above. The
 > AL0424 message text follows the compiler's wording as reported in
 > [microsoft/AL issue #5789](https://github.com/microsoft/AL/issues/5789).
+
+
+### 1.8 File Naming
+
+Name every AL file after its object: the object name using only `A–Z`, `a–z`, and `0–9` (drop
+spaces and every other character), a dot, the object type, and `.al`. Microsoft's CodeCop enforces
+this as warning **AA0215**, so a wrongly named file fails the zero-warnings gate.
+
+| Object type | File name type | Example object → file name |
+|---|---|---|
+| Table / Table Extension | `Table` / `TableExt` | `table 50100 "ACME Sales Target"` → `ACMESalesTarget.Table.al` |
+| Page / Page Extension | `Page` / `PageExt` | `page 50101 "acmeCustomers"` → `acmeCustomers.Page.al` |
+| Codeunit | `Codeunit` | `codeunit 50102 "ACME Target Mgt."` → `ACMETargetMgt.Codeunit.al` |
+| Report / Query / XMLport | `Report` / `Query` / `Xmlport` | `query 50103 "acmeTargets"` → `acmeTargets.Query.al` |
+| Enum / Enum Extension | `Enum` / `EnumExt` | `enum 50104 "ACME Target Status"` → `ACMETargetStatus.Enum.al` |
+| Interface | `Interface` | `interface "ACME Target Provider"` → `ACMETargetProvider.Interface.al` |
+| Permission Set / Permission Set Extension | `PermissionSet` / `PermissionSetExt` | `permissionset 50105 "ACME TARGETS, VIEW"` → `ACMETARGETSVIEW.PermissionSet.al` |
+| Profile / Control Add-in / Request Page | `Profile` / `ControlAddin` / `RequestPage` | — |
+
+Folders are free: group files under `src/` by feature or object type as the project grows.
+
+> *Source:* [Best practices for AL code → File naming](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-bestpracticesforalcode#file-naming)
+> and [CodeCop Warning AA0215](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/analyzers/codecop-aa0215)
+> (Microsoft Learn, © Microsoft Corporation, CC BY 4.0); the type names follow Microsoft's type map.
 
 ---
 
@@ -540,11 +564,11 @@ Both must be assigned IDs from the allocated range before development begins, an
 §5.4.
 
 **Every table the extension owns needs a `tabledata` grant in both sets.** `PTE0004`
-("Table definitions must have a matching permission set") is a PerTenantExtensionCop rule, and BC
-publish validation enforces the same requirement independently — so a missing grant is caught at
-the mandatory compile (runbook Operating Rule 4, ALL ALONG → Analyzers) if that compile has the
-analyzer engaged, and at publish either way if it somehow wasn't. Ship each table's grant in the
-same batch that introduces the table rather than relying on either backstop to catch a gap late.
+("Table definitions must have a matching permission set") is a PerTenantExtensionCop rule, and
+`AS0103` is its AppSourceCop equivalent, so a missing grant is caught at the mandatory compile
+when that compile has the analyzer engaged (runbook Operating Rule 4, ALL ALONG → Analyzers). Ship
+each table's grant in the same batch that introduces the table rather than waiting for the compile
+to catch a gap late.
 
 **Deployment note:** Extension permission sets grant access to extension objects only. Consumers
 also need the underlying BC base-table permissions:

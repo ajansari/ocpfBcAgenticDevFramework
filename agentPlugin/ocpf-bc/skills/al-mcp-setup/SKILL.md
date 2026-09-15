@@ -51,7 +51,11 @@ Skip to [Cloud sessions](#cloud-sessions).
 ## Step 2: Check it isn't already connected
 
 If this session already has tools such as `al_compile` and `al_addproject`, the server is connected.
-Record `"alMcp": "al-extension-mcp"` and stop.
+Before stopping, make sure the project's `scripts/` folder has this operating system's analyzer
+compile script (`al-analyze.sh`, or `al-analyze.cmd` and `al-analyze-resolve.ps1` on Windows) —
+the runbook's mandatory compile needs it, and the server's own compile tools don't apply
+analyzers. Copy any that are missing, as in Step 4.1. Then record `"alMcp": "al-extension-mcp"`
+and stop.
 
 ## Step 3: Say what you're doing — don't ask
 
@@ -145,6 +149,10 @@ the chat. The launcher then finds `al` on `PATH`.
       dotnet tool install --global Microsoft.Dynamics.BusinessCentral.Development.Tools
       echo "$HOME/.dotnet/tools" >> "$GITHUB_PATH"
   ```
+
+Copy `al-analyze.sh` into the project's `scripts/` folder, as in Step 4.1. It finds the `al`
+tool's own analyzers and a .NET runtime it can run on, so the mandatory compile runs with
+analyzers here too.
 
 Cloud sessions can compile but can't complete Business Central's interactive sign-in, so
 publishing stays a local step.

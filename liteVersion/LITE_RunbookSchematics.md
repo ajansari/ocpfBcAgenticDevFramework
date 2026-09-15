@@ -172,16 +172,17 @@ flowchart TD
 
     subgraph S3["STEP 3 — Plan & Scaffold"]
         direction LR
-        In1[/"Inputs:<br/>DesignDoc.md,<br/>Object Register"/] --> Act1["Actions:<br/>Confirm batch plan (1, or 2 on<br/>a natural split) — the one approval<br/>to generate code; prepare scaffold (confirm<br/>app.json, AL tools, symbols),<br/>fetch BCQuality snapshot<br/>+ OCPF Patterns library,<br/>write pre-flight checklist<br/>(pre-gen + post-gen — one model<br/>runs both passes)"] --> Out1[/"Output:<br/>Batch plan, scaffold,<br/>pre-flight checklist"/]
+        In1[/"Inputs:<br/>DesignDoc.md,<br/>Object Register"/] --> Act1["Actions:<br/>Confirm batch plan (1, or 2 on<br/>a natural split) — the one approval<br/>to generate code; prepare scaffold (confirm<br/>app.json, AL tools, symbols;<br/>analyzer settings),<br/>fetch BCQuality snapshot<br/>+ OCPF Patterns library,<br/>write pre-flight checklist<br/>(pre-gen + post-gen — one model<br/>runs both passes)"] --> Out1[/"Output:<br/>Batch plan, scaffold,<br/>pre-flight checklist"/]
     end
     S3 --> Gate1{{"Exit gate:<br/>Batch plan approved (with 2 batches,<br/>run-through choice recorded),<br/>scaffold structurally complete<br/>(not compiled)"}}
 
     Gate1 --> S4
     subgraph S4["STEP 4 — Generate the Code (repeats per object)"]
         direction TB
-        B1["Generate this object's<br/>AL file from the Standards §1.3<br/>template — no per-object approval;<br/>stop on a pre-flight failure or<br/>Design Doc deviation"]
+        B1["Next object — no per-object<br/>approval; stop on a pre-flight<br/>failure or Design Doc deviation"]
         B1 --> PreGen["Pre-generation pre-flight:<br/>identifier length, reserved<br/>keywords, localization,<br/>ObsoleteState — on planned<br/>names/fields; fix Design Doc<br/>first if anything fails"]
-        PreGen --> PostGen["Post-generation pre-flight:<br/>required props, Rec.-qualification,<br/>dead code, indentation,<br/>permission-set coverage,<br/>symbol verification"]
+        PreGen --> Gen["Generate the AL file from<br/>the Standards §1.3 template"]
+        Gen --> PostGen["Post-generation pre-flight:<br/>required props, file name,<br/>Rec.-qualification, dead code,<br/>indentation, permission-set<br/>coverage, symbol verification"]
         PostGen --> MoreObjects{"More objects<br/>in the batch plan?"}
         MoreObjects -- "Yes" --> B1
     end
@@ -211,7 +212,7 @@ flowchart TD
     classDef endpoint fill:#f2f2f2,stroke:#888,stroke-width:1px;
     classDef decision fill:#fde2e2,stroke:#c0504d,stroke-width:1px;
     class In1,Out1 io;
-    class Act1,B1,PreGen,PostGen,PermVerify,Fix,Compile,Deploy,Test,Repackage,Diag act;
+    class Act1,B1,PreGen,Gen,PostGen,PermVerify,Fix,Compile,Deploy,Test,Repackage,Diag act;
     class Gate1,Gate2,Gate3,Approve gate;
     class Start,Next,Clean endpoint;
     class MoreObjects,Q decision;
@@ -312,7 +313,7 @@ flowchart LR
 
 ---
 
-*Generated from `LITE_BC_App_Build_Routine_Agent.md` v1.10.0.0; all 7 diagrams re-rendered clean.
+*Generated from `LITE_BC_App_Build_Routine_Agent.md` v1.11.0.0; all 7 diagrams re-rendered clean.
 Version history is in `LITE_RunbookChangeLog.md`. If the Lite runbook changes in a way that
 affects the phase/step structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*

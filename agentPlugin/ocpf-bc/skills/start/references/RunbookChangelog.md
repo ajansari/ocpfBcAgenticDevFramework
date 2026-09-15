@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the two documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v2.13.0.0**, the guide is at **v1.6.0.0** and Lite is at **v1.10.0.0** — but
+**v2.14.0.0**, the guide is at **v1.7.0.0** and Lite is at **v1.11.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 
 Entries are grouped by version, newest first, and describe the **cumulative** result of a
@@ -17,6 +17,73 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v2.14.0.0 — September 15, 2026
+
+**Fixes from an independent review of v2.11–v2.13: the analyzer compile now fails on warnings and
+works from the global `al` tool, the analyzer files are part of the scaffold, and files are named
+the way CodeCop expects.** Standards Guide **v1.7.0.0** adds §1.8 File Naming. Ships with Lite
+**v1.11.0.0**. Plugin **v1.6.0**.
+
+### Facts verified before designing — not assumed
+
+- **The AL compiler exits 0 when there are only warnings.** Reproduced with `al-analyze.sh`: a
+  project with an `AA0074` warning compiled with exit code 0. Trusting the exit code would have
+  let a build with warnings pass Operating Rule 5.
+- **CodeCop's `AA0215` warns on every file not named `<ObjectName>.<Type>.al`**, with the object
+  name reduced to `A–Z`, `a–z`, and `0–9` — Microsoft Learn, *Best practices for AL code → File
+  naming*. Reproduced: a table in `HasPerm.Table.al` warned that the valid name is
+  `OCPFHasPermTable.Table.al`; renamed files compiled with no warnings. Without a naming rule,
+  every project would have stalled on the zero-warnings gate.
+- **The global `al` tool's store is three folders deep** (`<version>/<package id>/<version>/tools/`),
+  so the old two-level search in `al-analyze.sh` never matched and fell through to the VS Code
+  extension, which a cloud session doesn't have. Checked on tool version 18.0.41.39415, which
+  ships both `net8.0` and `net10.0` builds.
+- **`PTE0004`'s Microsoft Learn page doesn't mention publish validation.** The Standards Guide's
+  "BC publish validation enforces the same requirement independently" was removed rather than
+  stated without a source.
+
+### Changed
+
+- **`al-analyze.sh`, `al-analyze.cmd`, `al-analyze-resolve.ps1`:**
+  - Exit `0` only with no errors and no warnings, `3` when the compile succeeded with warnings, `1`
+    on failure, with a one-line summary.
+  - The global tool's candidates (newest version, newest .NET target first) are tried before the
+    VS Code extension, falling back to the next when a runtime is missing. Tested on macOS through
+    both routes; the Windows scripts remain untested on Windows.
+  - The profile's own analyzer is checked in both profiles.
+- **ALL ALONG → Analyzers** (both editions) rewritten without the verification narrative. It says
+  what to read (warnings, not only the result), lists `AA0215` and `AL0424` among what the compile
+  proves, and records that the framework ships no ruleset: every analyzer rule stays on.
+- **Step 05 scaffold and exit gate:** `.vscode/settings.json` analyzers and, for AppSource,
+  `AppSourceCop.json`, plus a check that `scripts/al-analyze.*` is present.
+- **Step 05 post-generation checklist:** the file is named per Standards §1.8.
+- **Operating Rules 4 and 5, Step 06, Step 07, Packaging, and AL MCP Server step 5:** the
+  compile-cadence restatements compressed; Rule 4 is now one paragraph of about 120 words.
+- **Step 01:** Box 2's BC version question again says where `runtime` comes from (Microsoft Learn's
+  *Choose runtime version in AL*). §1.9 asks source wording first, since it decides whether the
+  per-language and document questions are asked. §1.7 *Customize* asks the three models in one box
+  and only the applicable effort questions in the next. A note covers questions with one or more
+  than four candidates.
+- **Step 09:** ML syntax is confirmed from the last 0/0 compile plus a search of files changed
+  since, matching Standards §1.7.
+- **Repository Hygiene:** the repeated "what `.gitignore` is" paragraph removed; §1.8 explains it.
+- **Smaller fixes:** plugin script lists include `al-analyze.*`; the editor-sync "stale"
+  definition names every compile route; Step 07's `al_searchtranslations` applies where the AL MCP
+  Server is connected; PRE-01 says languages are confirmed in §1.9; the schematics show the
+  pre-generation check before generation and drop the dated PROVE note.
+- **Corrected in earlier entries:** v2.11.0.0 no longer claims Standards Part 7 was changed.
+
+### Added
+
+- **Standards §1.8 File Naming (v1.7.0.0)**, with Microsoft's type names and examples. Standards
+  §1.7 says code review searches files changed since the last 0/0 compile; §5.3 names `AS0103`.
+
+### Not changed
+
+- **Option B**, a per-batch analysis compile, is still not adopted.
 
 ---
 
@@ -235,7 +302,7 @@ removed.
   missing permission-set grant is caught by the mandatory compile via `PTE0004` when the analyzer
   runs, not only at publish. The per-batch pre-flight check stays: it catches a gap before the next
   batch builds on it, cheaper than waiting for Step 07.
-- **Step 05 checklist, Standards §1.7, Standards Part 7, `ocpf-code-reviewer`, and Lite's
+- **Step 05 checklist, Standards §1.7, `ocpf-code-reviewer`, and Lite's
   equivalents:** corrected — `AL0424` already proves the codebase is free of ML syntax, since
   `TranslationFile` is always on. The manual search stays as a backstop for anything added since
   the last compile.

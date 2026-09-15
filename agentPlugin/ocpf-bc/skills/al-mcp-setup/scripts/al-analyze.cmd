@@ -10,7 +10,7 @@ rem Usage: al-analyze.cmd <project folder> <output .app path> [pte|appsource] [e
 rem   scripts\al-analyze.cmd . outputAppPackage\MyApp_1.0.0.0.app
 rem   scripts\al-analyze.cmd . outputAppPackage\MyApp_1.0.0.0.app appsource
 rem
-rem Profile picks the analyzer set - pass whichever matches Deployment Target (Parameter 1.1):
+rem Profile picks the analyzer set - pass whichever matches Deployment Target:
 rem   pte       (default) CodeCop, PerTenantExtensionCop, UICop - SaaS PTE or OnPrem PTE.
 rem   appsource CodeCop, AppSourceCop, UICop - Deployment Target = AppSource.
 rem Never both PerTenantExtensionCop and AppSourceCop in the same compile - Microsoft's own docs
@@ -21,8 +21,9 @@ rem The appsource profile also needs an AppSourceCop.json in the project root (m
 rem minimum) or the compile fails outright with AS0054 - this script doesn't create one; the
 rem runbook does that separately when Deployment Target is AppSource.
 rem
-rem Exits with the compiler's own exit code: 0 only when the compile is clean under every
-rem analyzer passed.
+rem Exit codes: 0 = no errors and no warnings (Operating Rule 5); 1 = compile failed or tools not
+rem found; 3 = compiled with warnings. The compiler itself exits 0 on warnings, so this script
+rem counts them. Untested on Windows.
 
 setlocal enabledelayedexpansion
 
@@ -55,19 +56,36 @@ if not defined OCPF_ALTOOL (
 
 if /i "%OCPF_PROFILE%"=="appsource" (
   set "OCPF_ANALYZER2=%OCPF_BINDIR%\Microsoft.Dynamics.Nav.AppSourceCop.dll"
-  if not exist "!OCPF_ANALYZER2!" (
-    echo OCPF AL analyze: expected analyzer not found next to altool: !OCPF_ANALYZER2! 1>&2
-    exit /b 1
-  )
 ) else (
   set "OCPF_ANALYZER2=%OCPF_BINDIR%\Microsoft.Dynamics.Nav.PerTenantExtensionCop.dll"
 )
+if not exist "!OCPF_ANALYZER2!" (
+  echo OCPF AL analyze: expected analyzer not found next to altool: !OCPF_ANALYZER2! 1>&2
+  exit /b 1
+)
 
+set "OCPF_LOG=%TEMP%\ocpf-al-analyze-%RANDOM%%RANDOM%.log"
 for %%d in ("%OCPF_DOTNET%") do set "DOTNET_ROOT=%%~dpd"
 "%OCPF_DOTNET%" "%OCPF_ALTOOL%" compile -- ^
   /project:"%OCPF_PROJECT%" /packagecachepath:"%OCPF_PROJECT%\.alpackages" /out:"%OCPF_OUT%" ^
   /analyzer:"%OCPF_BINDIR%\Microsoft.Dynamics.Nav.CodeCop.dll" ^
   /analyzer:"!OCPF_ANALYZER2!" ^
   /analyzer:"%OCPF_BINDIR%\Microsoft.Dynamics.Nav.UICop.dll" ^
-  %1 %2 %3 %4 %5 %6 %7 %8 %9
-exit /b %errorlevel%
+  %1 %2 %3 %4 %5 %6 %7 %8 %9 > "%OCPF_LOG%" 2>&1
+set "OCPF_STATUS=!errorlevel!"
+type "%OCPF_LOG%"
+
+if not "!OCPF_STATUS!"=="0" (
+  del "%OCPF_LOG%" >nul 2>&1
+  echo OCPF AL analyze: compile failed ^(compiler exit code !OCPF_STATUS!^). 1>&2
+  exit /b 1
+)
+findstr /r /c:": warning [A-Z][A-Z]*[0-9][0-9]*:" "%OCPF_LOG%" >nul
+if not errorlevel 1 (
+  del "%OCPF_LOG%" >nul 2>&1
+  echo OCPF AL analyze: compiled with warnings. Operating Rule 5 requires zero; fix them before treating this build as clean. 1>&2
+  exit /b 3
+)
+del "%OCPF_LOG%" >nul 2>&1
+echo OCPF AL analyze: clean - 0 errors, 0 warnings ^(%OCPF_PROFILE% profile^).
+exit /b 0

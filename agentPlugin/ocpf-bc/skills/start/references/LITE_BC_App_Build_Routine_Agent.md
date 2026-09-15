@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 1.10.0.0 (Lite, derived from the full framework v2.13.0.0)
+**Version:** 1.11.0.0 (Lite, derived from the full framework v2.14.0.0)
 **Last Updated:** September 15, 2026
 
 > Version history for this edition lives in `LITE_RunbookChangeLog.md`, tracked independently of
@@ -16,7 +16,7 @@
 > 10-files-or-fewer project doesn't need.
 
 > **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development
-> Standards Guide** (v1.6.0.0), shared unchanged with the full framework. Lite is *not* a reduced
+> Standards Guide** (v1.7.0.0), shared unchanged with the full framework. Lite is *not* a reduced
 > set of AL rules: the same AL rules apply to a 5-file extension as to a 50-file one. What Lite
 > reduces is *process*. So this runbook names each rule in one line where a checklist applies it and
 > cites the guide as **Standards §**; the rule's rationale, limits, tool behavior, and reference
@@ -95,22 +95,14 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
    + master data" vs. "documents"). At 10 files or fewer there is rarely a reason for the full
    framework's multi-batch phasing. Order objects within the batch so lookup/reference tables
    precede the entities that reference them.
-4. **Lint everything as it's written, including symbol verification. Do not compile until
-   generation is finished.** Run the Step 3 pre-flight checklist on every object as it's
-   generated — both passes, pre-generation (planned names/fields) and post-generation (the actual
-   file). Symbol verification means: for every reference to a standard/base object, field, method,
-   property, or enum value, verify it against the downloaded symbol source (falling back to the
-   MS Learn BaseApp docs above when the downloaded symbols don't answer) — not just because it
-   looks like plausible AL. That's the one check that verifies against ground truth instead of a
-   plausible-looking guess. The one mandatory compile-and-package happens in Step 5, the moment
-   Step 4 finishes — not deferred, not skipped. From that point, compiling and packaging is the
-   continuous rhythm of Step 5 and Step 6's fix loop: compile, package, deploy to a sandbox, test,
-   diagnose, fix, then compile and package again. Whenever a compile runs, treat any error as a
-   systemic signal — fix the rule, then every file it touched, not only the one where the error
-   surfaced.
-5. **Zero errors, zero warnings before PROVE.** Treat warnings as errors. Satisfied by
-   construction under Rule 4: the mandatory compile-and-package in Step 5 always runs, and must
-   reach 0/0, before Step 6 begins.
+4. **Lint everything as it's written; don't compile until generation is finished.** Run Step 3's
+   pre-flight checklist on every object as it's generated, both passes, including symbol
+   verification (Rule 2). The whole extension compiles and packages once, at Step 5, the moment
+   Step 4 finishes. After that, every code change goes through the same cycle: compile, package,
+   deploy to a sandbox, test, fix, repeat. Treat any compile error as systemic: fix the rule, then
+   every file it touched.
+5. **Zero errors, zero warnings before PROVE.** A warning is a defect. Step 5's compile must reach
+   0/0, with the analyzers and nothing suppressed (ALL ALONG → Analyzers), before Step 6 begins.
 6. **Human-in-the-loop is a feature — approve in batches, not one click at a time.** Pause for
    human approval before:
    - **generating code** — once, for the batch plan at Step 3, which covers both batches when there
@@ -170,9 +162,7 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
 
        Never ask the human to edit `PATH`, a shell profile, or environment variables; put paths in
        the configuration or launcher you create. Test: would a functional consultant with only VS
-       Code and the AL extension have to do anything by hand? If yes, look again. Agents have
-       tripped on this four times (see the full framework's Rule 6d), and it makes the framework
-       look careless in front of a client.
+       Code and the AL extension have to do anything by hand? If yes, look again.
 
        **Never hand the human a setup task the agent can do**.
        Connecting the AL tools, downloading symbols, and keeping the editor's view current are
@@ -249,6 +239,9 @@ time, ask the same questions in the same order.
 page — never from memory — so every country and language offered is one BC supports. If it can't
 be reached, say so and ask the human.
 
+**Option counts:** 2–4 options per question. With one suggestion, pair it with *I'll type it*;
+with more than four candidates, offer the four most likely and say others can be typed.
+
 A suggestion is a candidate the human picks, never an answer recorded for them: nothing goes into
 `ProjectParameters.md` until the human selects or types it. Never build one from an email domain
 or a guess at house style. A wrong guess here means renaming the whole project later.
@@ -272,7 +265,7 @@ or a guess at house style. A wrong guess here means renaming the whole project l
 | **5 — Setup & languages** | 17. Leave this framework's own files out of the project's repository? | *Yes (recommended)* / *No, track them*, with the one-sentence `.gitignore` explanation from the table below. |
 | | 18. Source language? | *`en-US` (recommended)*, with **Standards §8.1**'s reason in one sentence, or another language typed in. |
 | | 19. Languages for each Box 1 country *(multi-select, one question per country; more countries spill into the next box)* | Only the languages BC supports in that country, as ID and culture code (*"French (Canada) — FRC → `fr-CA`"*). |
-| **6 onward — Translation** | Per language: required at first release? Who reviews it? Then source wording, documents, and customer-language / translatable data, as the table below describes. | Two questions per language; the rest fill any free slots. |
+| **6 onward — Translation** | First, in one box: source wording (only when `en-US` is the sole target), customer-language documents, translatable data — source wording decides whether the rest is asked. Then, unless the answer was *US wording, no translation files*: per language, required at first release and who reviews it; then the two document questions. | As the table below describes; two questions per language, up to four per box. |
 | **Last — Confirm** | 20. Is this sheet right? | Show the complete sheet first, with every ID range's size and the derived permission set names. *Confirm the sheet* / *Change something* (ask only what changes). |
 
 The first ID range is the Primary allocation; any after it are Additional.
@@ -478,7 +471,10 @@ fix in a loop until clean.
   `ProjectParameters.md` — name, publisher, ID ranges, runtime, BC dependency,
   `"features": ["NoImplicitWith", "TranslationFile"]` (**Standards §8.2**) — then `launch.json`,
   folder structure, a `Translations/` folder, `.gitignore` per Step 1 (plus `*.g.xlf` and
-  `.alpackages/`). If `app.json` has to change, follow ALL ALONG → Keeping the Editor in Sync.
+  `.alpackages/`), and the analyzer files: `.vscode/settings.json` with the analyzers for the
+  Deployment Target, plus `AppSourceCop.json` for AppSource (ALL ALONG → Analyzers). Outside GitHub
+  Copilot Chat, confirm `scripts/al-analyze.*` is present, and copy or fetch it if not. If
+  `app.json` has to change, follow ALL ALONG → Keeping the Editor in Sync.
 - **Agree the translation tooling** (skip if *US wording, no translation files*). Recommend the
   XLIFF Sync PowerShell module (`XliffSync`) for the agent, plus the XLIFF Sync VS Code extension
   for reviewers. Offer NAB AL Tools as the alternative. Look for existing installations first, and
@@ -494,8 +490,8 @@ fix in a loop until clean.
   - **Pre-generation** (on the planned name/fields): identifier length ≤ 30, reserved-keyword
     scan, localization field-range filter, `ObsoleteState` filter.
   - **Post-generation** (on the actual file): `Caption`, `ToolTip`, and `ApplicationArea = All`
-    on every field (**Standards §1.4**); no ML properties and no `TextConst` (**§1.7**);
-    translatable text — no string literal in a user-facing message, AA0074 suffixes, a `Comment`
+    on every field (**Standards §1.4**); the file named after its object (**§1.8**); no ML
+    properties and no `TextConst` (**§1.7**); translatable text — no string literal in a user-facing message, AA0074 suffixes, a `Comment`
     on every placeholder label (**§8.3–§8.4**); API caption locking matches the Step 2 decision
     (**§8.6**); `Rec.`-qualification (**§1.2**); no empty triggers, `// TODO`, or commented-out
     fields (**§1.5**); 4-space indentation, no tabs (**§1.6**); `tabledata` coverage for any table
@@ -506,7 +502,8 @@ fix in a loop until clean.
 **Outputs:** Batch plan, project scaffold, the pre-flight checklist.
 
 **Exit gate:** Batch plan approved (and, with two batches, the run-through choice recorded);
-scaffold structurally complete (not compiled — Operating Rule 4); pre-flight checklist ready.
+scaffold structurally complete, analyzer settings and (for AppSource) `AppSourceCop.json` in place
+(not compiled — Operating Rule 4); pre-flight checklist ready.
 
 ## STEP 4 — Generate the Code
 
@@ -550,9 +547,9 @@ Step 5's mandatory compile-and-package.
 
 **Actions:** First, **compile the whole extension once, with the analyzers this framework
 requires, then package it** (ALL ALONG → Analyzers; check for an already-provisioned runtime
-before installing anything — Rule 6b). This is the mandatory compile-and-package; it is not
-optional. Package naming, location (`outputAppPackage/`), and the never-delete rule (ALL ALONG →
-Packaging & Versioning) apply from this very first package on.
+before installing anything — Rule 6b). This is Rule 4's mandatory compile-and-package. Package
+naming, location (`outputAppPackage/`), and the never-delete rule (ALL ALONG → Packaging &
+Versioning) apply from this very first package on.
 
 **After every compile with 0 errors, check what the human's editor shows** (ALL ALONG → Keeping
 the Editor in Sync). Red marks the compiler didn't report, like an object ID outside the allowed
@@ -581,8 +578,9 @@ compiles clean to clear them.
 that produces a new `.g.xlf`:
 1. **Full build only** — Incremental Build off, no RAD publish (**Standards §8.2**).
 2. **Sync** every target file from `.g.xlf`.
-3. **Verify any new BC term** per **Appendix D** (`al_searchtranslations` first) and update the
-   glossary. Terms already in the glossary aren't looked up again.
+3. **Verify any new BC term** per **Appendix D** (`al_searchtranslations` first where the AL MCP
+   Server is connected) and update the glossary. Terms already in the glossary aren't looked up
+   again.
 4. **Run the problem checks** and fix findings at their root. Missing translations aren't a
    finding yet.
 
@@ -827,7 +825,7 @@ schema-breaking change go out without this warning.
 
 ## OCPF AL Development Standards Guide
 
-The companion rules document — `ocpfALDevStandardsGuide.md`, v1.6.0.0 — shared unchanged with the
+The companion rules document — `ocpfALDevStandardsGuide.md`, v1.7.0.0 — shared unchanged with the
 full framework. **Lite reduces process, not AL rules**, so this is the one fetched resource that
 isn't optional: this runbook cites it as **Standards §** from Step 1 onward.
 
@@ -846,8 +844,8 @@ isn't optional: this runbook cites it as **Standards §** from Step 1 onward.
   stopping. Record `"source": "ocpf-bc plugin bundle"` and the guide's version in
   `SNAPSHOT.json`, tell the human plainly which version was used, and offer a refresh from GitHub
   once the network is back.
-- **Always gitignored**, never a per-project choice — same reasoning as `patterns/` and BCQuality
-  (see Repository Hygiene). Not covered by the Step 1 `.gitignore` question, which governs only
+- **Always gitignored**, never a per-project choice — same reasoning as `patterns/` (see
+  Repository Hygiene). Not covered by the Step 1 `.gitignore` question, which governs only
   this framework's own files (this runbook, `LITE_RunbookChangeLog.md`, `LITE_RunbookSchematics.md`).
 - **Refresh only when asked** ("refresh the standards guide"). Report "updated from `<old sha>` to
   `<new sha>`" or "already up to date."
@@ -911,8 +909,9 @@ for a new project server.
 **Bootstrap once per project:**
 1. **Get the launcher.** Without the plugin, download these byte for byte into `scripts/` from
    `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/al-mcp-setup/scripts/<file>`:
-   `al-mcp.sh` and `al-mcp-call.sh` (macOS/Linux), or `al-mcp.cmd`, `al-mcp-resolve.ps1`, and
-   `al-mcp-call.ps1` (Windows). Gitignore `scripts/`. The launcher finds the newest AL extension
+   `al-mcp.sh`, `al-mcp-call.sh`, and `al-analyze.sh` (macOS/Linux), or `al-mcp.cmd`,
+   `al-mcp-resolve.ps1`, `al-mcp-call.ps1`, `al-analyze.cmd`, and `al-analyze-resolve.ps1`
+   (Windows). Gitignore `scripts/`. The launcher finds the newest AL extension
    and its runtime on every launch, with no `PATH`, `DOTNET_ROOT`, or absolute paths. If GitHub is
    unreachable, write the equivalent: `altool launchmcpserver --transport stdio` from the AL
    extension's `bin/` folder (`altool.dll` on the runtime VS Code provisioned, on macOS/Linux).
@@ -937,54 +936,41 @@ work.**
 ## Analyzers
 
 **The mandatory Step 5 compile runs with Microsoft's bundled code analyzers engaged — not a plain
-compile.** Nothing is installed; these ship with the AL Language extension already. Every project
-runs **CodeCop** and **UICop**, plus exactly one of these two, by Parameter 1.1 Deployment Target,
-never both:
+compile.** They ship with the AL Language extension; nothing is installed. Every project runs
+**CodeCop** and **UICop**, plus exactly one of these, by Deployment Target:
 
 | Deployment Target | Third analyzer |
 |---|---|
 | `SaaS PTE` or `OnPrem PTE` | **PerTenantExtensionCop** |
 | `AppSource` | **AppSourceCop** |
 
-**Never enable both together.** Microsoft's own docs: *"Several rules enforced by the AppSourceCop
-analyzer are incompatible with rules enforced by the PerTenantExtensionCop. Make sure to enable
-only one of these at a time."* Confirmed: loading both on a plain PTE project buried it in
-AppSource-only errors unrelated to the code. **AppSourceCop also needs an `AppSourceCop.json`** in
-the project root — at minimum `{ "mandatoryAffixes": ["<prefix>"] }` — or it fails outright with
-`AS0054`. Create it at Step 3 scaffolding, alongside `app.json`, only for AppSource.
+- **Never both PerTenantExtensionCop and AppSourceCop** — Microsoft documents them as incompatible.
+- **AppSourceCop needs `AppSourceCop.json`** in the project root — at minimum
+  `{ "mandatoryAffixes": ["<prefix>"] }` — or the compile fails with `AS0054`.
+- **Both files are created at Step 3's scaffold:** `.vscode/settings.json` with
+  `"al.enableCodeAnalysis": true` and `"al.codeAnalyzers"` set to the three analyzers, and
+  `AppSourceCop.json` for AppSource. The settings also give the human live feedback in the editor.
 
-This catches, at compile time, checks the runbook previously only verified by hand: `PTE0004` (a
-table missing a matching permission set — Standards §5.3; AppSourceCop's equivalent is `AS0103`),
-`PTE0008` (a page control or action missing `ApplicationArea`; AppSource: `AS0062`), and `AA0074`
-(a `Label` missing its suffix, from CodeCop either way). It does not replace symbol verification
-or a design-time decision a compiler can't judge, such as permission-set App Code uniqueness
-across extensions (Standards §5.4).
+**What the compile then proves:** `PTE0004` / `AS0103` (missing permission set, **Standards
+§5.3**), `PTE0008` / `AS0062` (missing `ApplicationArea`), `AA0074` (label suffix), `AA0215` (file
+name, **§1.8**), and `AL0424` (ML syntax, **§1.7**). It doesn't replace symbol verification or
+App Code uniqueness across extensions (**§5.4**).
 
-**How to run it, verified on AL Language extension 18.0.2732683 (September 2026):**
-- **GitHub Copilot Chat in VS Code:** its own `al_build` tool takes a `codeAnalyzers` argument, or
-  reads the workspace's `al.codeAnalyzers` setting. Set `"al.enableCodeAnalysis": true` and
-  `"al.codeAnalyzers"` — the table above, never both `PerTenantExtensionCop` and `AppSourceCop` —
-  in `.vscode/settings.json` at Step 3 scaffolding. This also gives the human live red-squiggle
-  feedback in the editor, independent of anything the agent runs later.
-- **Claude Code, Copilot CLI, or any other MCP host: do not use the AL MCP Server's
-  `al_build`/`al_compile` for this.** Tested six ways — the tool call's `codeAnalyzers` argument
-  and the server's `--codeanalyzers` launch flag, symbolic names and literal DLL paths alike — and
-  every one silently produced a clean result on code that should have failed `PTE0004` and
-  `PTE0008`. Writing the same settings into `.vscode/settings.json` didn't change that either — the
-  MCP server doesn't read them; do it anyway, for the reason above. Invoking the compiler directly
-  does work. With the plugin, run
-  `scripts/al-analyze.sh <project folder> <output .app path> [pte|appsource]` (Windows:
-  `scripts\al-analyze.cmd <project folder> <output .app path> [pte|appsource]`; defaults to `pte`
-  when omitted); it finds the same AL extension the launcher does and resolves the analyzer DLLs
-  beside it. Without the plugin, fetch it the same way as the AL MCP Server launcher (ALL ALONG →
-  AL MCP Server, step 1). Its exit code is the compiler's own: 0 only when clean under every
-  analyzer.
-- **Re-verify before trusting either route on a newer AL extension release** — test a known-certain
-  case (a table with no permission set) and confirm `PTE0004` actually appears, the same way
-  you'd verify a symbol (Rule 2).
+**How to run it** (verified on AL Language extension 18.0.2732683; on a newer release, compile a
+table with no permission set and confirm `PTE0004` appears):
+- **GitHub Copilot Chat in VS Code:** the built-in `al_build`, which reads the settings above.
+- **Claude Code, Copilot CLI, or any other MCP host: not the AL MCP Server's
+  `al_build`/`al_compile`** — they don't apply analyzers by argument, launch flag, or settings.
+  Run `scripts/al-analyze.sh <project folder> <output .app path> [pte|appsource]` (Windows:
+  `scripts\al-analyze.cmd`, same arguments; defaults to `pte`). The plugin copies it into
+  `scripts/`; otherwise, or if it's missing, fetch it beside the launcher (ALL ALONG → AL MCP
+  Server, step 1).
+- **Read the warnings, not just the result.** The compiler and `al_build` succeed with warnings.
+  `al-analyze` exits `0` only with no errors and no warnings, `3` with warnings, `1` on failure.
+  Any warning fails Rule 5.
 
-**Zero-warnings still means zero.** A 0/0 compile proves the checks above only if nothing was
-suppressed: no `#pragma warning disable`, no ruleset downgrade of `PTE0004`, `AL0424`, or `AA0074`.
+**Zero warnings means zero.** No `#pragma warning disable` and no ruleset: every analyzer rule stays
+on, and a project that follows the Standards Guide compiles clean under them.
 
 ## Symbols
 
@@ -1086,7 +1072,7 @@ augments review judgment; it doesn't replace it.
   `references: []` for the agent's own, capped at medium confidence). Integrate every finding the
   same way as any other Step 6 finding — never applied blind. No network access is needed once the
   snapshot exists.
-- Always gitignored — see Repository Hygiene above.
+- It lives outside the project root, so there's nothing to gitignore (Repository Hygiene above).
 
 ## OCPF BC AL Patterns Library
 
@@ -1196,7 +1182,7 @@ Never replace the project's runbook without an explicit yes.
 | Step 7 — Release for Testing | Step 12 |
 
 **Shared with the full framework, not reduced:** the OCPF AL Development Standards Guide. Both
-editions fetch the same v1.6.0.0 file and apply the same AL rules — Lite differs only in process.
+editions fetch the same v1.7.0.0 file and apply the same AL rules — Lite differs only in process.
 
 **Document count:** 4 maintained documents (`DesignDoc.md`, `ChangeLog.md`, `Docs.md`,
 `TestScript.md`), plus Step 1's two kickoff artifacts (`ProblemStatement.md`,

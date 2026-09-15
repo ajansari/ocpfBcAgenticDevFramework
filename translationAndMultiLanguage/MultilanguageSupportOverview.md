@@ -78,16 +78,17 @@ language, using single-language properties or `Label`. Translations live only in
 - The ML syntax is deprecated — compiler warning **AL0424**.
 - ML properties and `TextConst` are **not included in the generated `.xlf` file**, so no XLIFF
   workflow can ever translate them.
-- **The compiler won't reliably catch it.** AL0424 only fires when `app.json` includes the
-  `TranslationFile` feature. Without that flag, `CaptionML` compiles with no warning at all — so a
-  "zero warnings" build proves nothing here.
+- **The compiler catches it on every framework project.** AL0424 fires when `app.json` includes
+  the `TranslationFile` feature, which every project built with the framework has. Without that
+  flag, `CaptionML` compiles with no warning at all.
 
 **How it's enforced:**
 
 - **At generation:** any ML property or `TextConst` fails the agent's post-generation pre-flight
   check.
-- **At Code Review:** every AL file is searched for all nine constructs — **whoever wrote it**,
-  agent or human. Each hit is a finding, refactored to the single-language property with any
+- **At every compile:** the zero-warnings gate fails on AL0424.
+- **At Code Review:** confirmed from that compile, plus a search for any of the nine constructs in
+  files changed since — **whoever wrote them**, agent or human. Each hit is a finding, refactored to the single-language property with any
   other-language text moved into the right `.xlf` rather than discarded.
 - **In the Anti-Patterns table** (Standards Part 7), which both editions run in full at Code Review.
 

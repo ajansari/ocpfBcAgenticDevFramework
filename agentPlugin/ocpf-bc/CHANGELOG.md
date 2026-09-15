@@ -4,6 +4,18 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 1.6.0 — September 15, 2026
+
+**Bundles:** full runbook v2.14.0.0, Lite v1.11.0.0, Standards Guide v1.7.0.0.
+
+- **`al-analyze.*` scripts:** exit `3` when the compile succeeds with warnings (the compiler
+  itself exits 0), find the global `al` tool's analyzers (the tool-store search was one folder
+  short), and fall back to the VS Code extension when a runtime is missing.
+- **`al-mcp-setup`:** copies any missing `al-analyze.*` even when the AL MCP Server is already
+  connected, and in cloud sessions.
+- **`ocpf-code-reviewer`:** relies on a 0/0 compile only when a build log or CI run shows it;
+  otherwise checks `tabledata` coverage and ML syntax by hand, and names `AS0103` for AppSource.
+
 ## 1.5.0 — September 15, 2026
 
 **Bundles:** full runbook v2.13.0.0, Lite v1.10.0.0, Standards Guide v1.6.0.0.

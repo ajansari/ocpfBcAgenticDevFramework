@@ -216,7 +216,7 @@ flowchart TD
 
     subgraph S05["05 — Plan the Code"]
         direction LR
-        In1[/"Inputs:<br/>TDD.md, Object Register"/] --> Act1["Actions:<br/>Confirm batch order; ONE<br/>approval: run through all<br/>batches or ask per batch;<br/>prepare scaffold (confirm<br/>app.json, AL tools, symbols),<br/>fetch BCQuality snapshot<br/>+ OCPF Patterns library,<br/>write pre-flight checks<br/>(pre-gen + post-gen passes)"] --> Out1[/"Output:<br/>Batch plan, scaffold,<br/>pre-flight checklist"/]
+        In1[/"Inputs:<br/>TDD.md, Object Register"/] --> Act1["Actions:<br/>Confirm batch order; ONE<br/>approval: run through all<br/>batches or ask per batch;<br/>prepare scaffold (confirm<br/>app.json, AL tools, symbols;<br/>analyzer settings),<br/>fetch BCQuality snapshot<br/>+ OCPF Patterns library,<br/>write pre-flight checks<br/>(pre-gen + post-gen passes)"] --> Out1[/"Output:<br/>Batch plan, scaffold,<br/>pre-flight checklist"/]
     end
     S05 --> Gate1{{"Exit gate:<br/>Batch order and run-through<br/>choice agreed, scaffold<br/>structurally complete<br/>(not compiled)"}}
 
@@ -224,9 +224,10 @@ flowchart TD
 
     subgraph S06["06 — Code Generation (repeats per batch)"]
         direction TB
-        B1["Generate batch's AL files<br/>from standard template —<br/>pause first only if the human<br/>chose to be asked per batch"]
+        B1["Start the batch — pause first<br/>only if the human chose to be<br/>asked per batch"]
         B1 --> PreGen["Pre-generation pre-flight<br/>(Main role): identifier length,<br/>reserved keywords, localization,<br/>ObsoleteState — on planned<br/>names/fields; fix TDD if needed"]
-        PreGen --> PostGen["Post-generation pre-flight<br/>(Light role): required props,<br/>Rec.-qualification, dead code,<br/>indentation, permission-set<br/>coverage, symbol verification —<br/>reports findings, Main role fixes"]
+        PreGen --> Gen["Generate the batch's AL files<br/>from the standard template"]
+        Gen --> PostGen["Post-generation pre-flight<br/>(Light role): required props, file<br/>names, Rec.-qualification, dead code,<br/>indentation, permission-set<br/>coverage, symbol verification —<br/>reports findings, Main role fixes"]
         PostGen --> Stop{"Pre-flight failure the TDD<br/>doesn't answer, or a<br/>TDD deviation?"}
         Stop -- "Yes" --> AskHuman["Stop and ask the human;<br/>log any deviation first"]
         AskHuman --> MoreBatches
@@ -266,7 +267,7 @@ flowchart TD
     classDef endpoint fill:#f2f2f2,stroke:#888,stroke-width:1px;
     classDef decision fill:#fde2e2,stroke:#c0504d,stroke-width:1px;
     class In1,Out1 io;
-    class Act1,B1,Fix,Compile,Deploy,Test,Repackage,APITest,Manual,AskHuman act;
+    class Act1,B1,Gen,Fix,Compile,Deploy,Test,Repackage,APITest,Manual,AskHuman act;
     class PostGen light;
     class PreGen act;
     class Diag reasoning;
@@ -278,12 +279,9 @@ flowchart TD
 
 ### 3.4 PROVE
 
-> **Restructured September 13, 2026 (AJ Ansari).** Old Step 09 ("Package and Test the App") is gone —
-> compiling and packaging is now a continuous cycle that started back in Step 07 (BUILD), not a
-> milestone reserved for here. A new Step 12 ("Release to Users for Testing") closes PROVE
-> instead, running the same green/red-team checklist by hand, against the `HumanUnitTestScript.md`
-> that Step 11 (formerly Step 12) actually wrote — old Step 09 tried to run that checklist before
-> the script it depends on existed.
+Compiling and packaging is already a continuous cycle from Step 07; PROVE adds fidelity checks,
+review, and documentation, and closes with a human-run release test against the
+`HumanUnitTestScript.md` that Step 11 wrote.
 
 ```mermaid
 flowchart TD
@@ -456,7 +454,7 @@ flowchart TD
 
 ---
 
-*Generated from `BC_App_Build_Routine_Agent.md` v2.13.0.0; all 8 diagrams re-rendered clean. Version
+*Generated from `BC_App_Build_Routine_Agent.md` v2.14.0.0; all 8 diagrams re-rendered clean. Version
 history is in `RunbookChangelog.md`. If the runbook changes in a way that affects the
 phase/step/role structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*

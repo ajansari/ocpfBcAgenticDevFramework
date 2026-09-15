@@ -4,36 +4,30 @@
 # Compiles the project with Microsoft's bundled code analyzers actually engaged, using tools
 # already on this machine. Nothing is installed.
 #
-# Verified necessary (AL Language extension 18.0.2732683, September 2026): the AL MCP Server's
-# own al_build/al_compile tools do not apply their codeAnalyzers argument or the server's
-# --codeanalyzers launch flag — six different attempts (symbolic names, literal DLL paths, both
-# as a tool-call argument and as a server launch flag) produced zero analyzer diagnostics for
-# code that should fail. Invoking the compiler directly, as this script does, reliably engages
-# the analyzers: confirmed catching PTE0004 (missing permission set) and PTE0008 (missing
-# ApplicationArea) with PerTenantExtensionCop, and AA0074 (label suffix) with CodeCop. Re-verify
-# against a newer AL extension release before assuming the MCP tool argument still doesn't work.
+# Why not the AL MCP Server's al_build/al_compile: they don't apply analyzers (AL Language extension
+# 18.0.2732683; see the runbook's ALL ALONG → Analyzers). Re-verify against newer releases.
 #
 # Usage: sh al-analyze.sh <project folder> <output .app path> [pte|appsource] [extra alc args...]
 #   sh scripts/al-analyze.sh . outputAppPackage/MyApp_1.0.0.0.app
 #   sh scripts/al-analyze.sh . outputAppPackage/MyApp_1.0.0.0.app appsource
 #
-# Profile picks the analyzer set — pass whichever matches Deployment Target (Parameter 1.1):
+# Profile picks the analyzer set — pass whichever matches Deployment Target:
 #   pte       (default) CodeCop, PerTenantExtensionCop, UICop — SaaS PTE or OnPrem PTE.
 #   appsource CodeCop, AppSourceCop, UICop — Deployment Target = AppSource.
-# Never both PerTenantExtensionCop and AppSourceCop in the same compile: Microsoft's own docs say
-# "several rules enforced by the AppSourceCop analyzer are incompatible with rules enforced by the
-# PerTenantExtensionCop. Make sure to enable only one of these at a time." Confirmed in practice:
-# loading both on a plain PTE-shaped project buried it in AppSource-only errors unrelated to the
-# actual code (missing app.json fields, wrong ID range, no AppSourceCop.json).
+# Never both PerTenantExtensionCop and AppSourceCop in the same compile: Microsoft documents their
+# rules as incompatible ("enable only one of these at a time").
 #
 # The appsource profile also needs an AppSourceCop.json in the project root (mandatoryAffixes at
 # minimum) or the compile fails outright with AS0054 — this script doesn't create one; the runbook
 # does that separately when Deployment Target is AppSource.
 #
-# Prints the compiler's own diagnostics (errors and warnings) to stdout/stderr and exits with the
-# compiler's exit code: 0 only when the compile is clean under every analyzer passed. This is the
-# framework's actual "compile to 0 errors, 0 warnings" step, not a side check — run it in place of
-# a plain al_build/al_compile call for Operating Rule 4's mandatory compile-and-package.
+# Prints the compiler's own diagnostics, then a one-line summary. Exit codes:
+#   0  compiled with no errors and no warnings under every analyzer passed (Operating Rule 5);
+#   1  the compile failed, or the tools couldn't be found;
+#   3  compiled, but with warnings. The compiler itself exits 0 on warnings, so this script counts
+#      them: a warning still fails the framework's zero-warnings gate.
+# Run it in place of a plain al_build/al_compile call for Operating Rule 4's mandatory
+# compile-and-package.
 
 set -u
 
@@ -52,71 +46,98 @@ esac
 # Everything left in "$@" from here on is the caller's own extra alc arguments — never touched by
 # the profile selection below, so paths containing spaces still pass through safely.
 
-# Locate altool.dll (or the global al tool) and the analyzer DLLs that ship beside it — same
-# directory either way, whether that's the AL extension's bin/ folder or the global tool's own
-# store folder. Prefer the global `al` tool if it works, matching al-mcp.sh's own precedence.
-altool=""
-if command -v al >/dev/null 2>&1 && al --version >/dev/null 2>&1; then
-  # The global tool is a native apphost; its DLLs live in the NuGet tool-store layout beside it.
-  store="$HOME/.dotnet/tools/.store/microsoft.dynamics.businesscentral.development.tools"
-  newest="$(ls -d "$store"/*/*/tools/net*/any/altool.dll 2>/dev/null | sort -V | tail -n 1)"
-  [ -n "$newest" ] && altool="$newest"
-fi
-if [ -z "$altool" ]; then
-  for extdir in "$HOME/.vscode/extensions" "$HOME/.vscode-insiders/extensions" "$HOME/.vscode-server/extensions"; do
-    [ -d "$extdir" ] || continue
-    newest="$(ls -d "$extdir"/ms-dynamics-smb.al-* 2>/dev/null | sort -V | tail -n 1)"
-    if [ -n "$newest" ] && [ -f "$newest/bin/altool.dll" ]; then
-      altool="$newest/bin/altool.dll"
-      break
+# Find a .NET runtime (full path to dotnet) that has the ASP.NET Core runtime for a .NET major
+# version: a system dotnet first, then the private runtime VS Code's .NET Install Tool provisioned.
+find_dotnet() {
+  if command -v dotnet >/dev/null 2>&1 && dotnet --list-runtimes 2>/dev/null | grep -q "^Microsoft.AspNetCore.App $1\."; then
+    command -v dotnet
+    return 0
+  fi
+  for rtstore in \
+    "$HOME/Library/Application Support/Code/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/.dotnet" \
+    "$HOME/Library/Application Support/Code - Insiders/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/.dotnet" \
+    "$HOME/.config/Code/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/.dotnet" \
+    "$HOME/.config/Code - Insiders/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/.dotnet"; do
+    [ -d "$rtstore" ] || continue
+    candidate="$(ls -d "$rtstore"/"$1".*aspnetcore 2>/dev/null | sort -V | tail -n 1)"
+    if [ -n "$candidate" ] && [ -x "$candidate/dotnet" ]; then
+      echo "$candidate/dotnet"
+      return 0
     fi
   done
+  return 1
+}
+
+# Candidate altool.dll files, best first. The analyzer DLLs ship in the same folder as each one.
+#   1. The global `al` .NET tool, if it works (matching al-mcp.sh's precedence). Its tool store is
+#      <version>/<package id>/<version>/tools/<net TFM>/any/ — newest version, newest TFM first.
+#   2. The newest AL Language extension's bin/ folder, across VS Code editions.
+candidates=""
+if command -v al >/dev/null 2>&1 && al --version >/dev/null 2>&1; then
+  toolstore="$HOME/.dotnet/tools/.store/microsoft.dynamics.businesscentral.development.tools"
+  candidates="$(ls -d "$toolstore"/*/*/*/tools/net*/any/altool.dll 2>/dev/null | sort -V -r)"
 fi
-[ -n "$altool" ] || fail "no AL Language extension found. Install 'AL Language extension for Microsoft Dynamics 365 Business Central' in VS Code, or the 'al' .NET tool."
+for extdir in "$HOME/.vscode/extensions" "$HOME/.vscode-insiders/extensions" "$HOME/.vscode-server/extensions"; do
+  [ -d "$extdir" ] || continue
+  newest="$(ls -d "$extdir"/ms-dynamics-smb.al-* 2>/dev/null | sort -V | tail -n 1)"
+  if [ -n "$newest" ] && [ -f "$newest/bin/altool.dll" ]; then
+    candidates="$candidates
+$newest/bin/altool.dll"
+    break
+  fi
+done
+[ -n "$(echo "$candidates" | tr -d '[:space:]')" ] || fail "no AL Language extension found. Install 'AL Language extension for Microsoft Dynamics 365 Business Central' in VS Code, or the 'al' .NET tool."
+
+# Use the first candidate that has its analyzers and a runtime it can run on.
+altool=""; dotnet=""; missing=""
+while IFS= read -r cand; do
+  [ -n "$cand" ] || continue
+  cbin="$(dirname "$cand")"
+  [ -f "$cbin/Microsoft.Dynamics.Nav.CodeCop.dll" ] && [ -f "$cbin/Microsoft.Dynamics.Nav.UICop.dll" ] || { missing="analyzers not found beside $cand"; continue; }
+  cmajor="$(sed -n 's/.*"version": *"\([0-9][0-9]*\)\..*/\1/p' "${cand%.dll}.runtimeconfig.json" 2>/dev/null | head -n 1)"
+  [ -n "$cmajor" ] || { missing="couldn't read the .NET version for $cand"; continue; }
+  if cdotnet="$(find_dotnet "$cmajor")"; then
+    altool="$cand"; dotnet="$cdotnet"
+    break
+  fi
+  missing="no .NET $cmajor runtime found for $cand. Open an AL project in VS Code once so the AL extension can provision it."
+done <<EOF
+$candidates
+EOF
+[ -n "$altool" ] || fail "$missing"
 
 bindir="$(dirname "$altool")"
 codecop="$bindir/Microsoft.Dynamics.Nav.CodeCop.dll"
 uicop="$bindir/Microsoft.Dynamics.Nav.UICop.dll"
 ptecop="$bindir/Microsoft.Dynamics.Nav.PerTenantExtensionCop.dll"
 appsourcecop="$bindir/Microsoft.Dynamics.Nav.AppSourceCop.dll"
-for dll in "$codecop" "$uicop"; do
-  [ -f "$dll" ] || fail "expected analyzer not found next to altool: $dll (AL extension layout may have changed — check bin/ for the current analyzer DLL names)"
-done
-
-# The .NET major version altool targets, e.g. 10 from "version": "10.0.0".
-major="$(sed -n 's/.*"version": *"\([0-9][0-9]*\)\..*/\1/p' "${altool%.dll}.runtimeconfig.json" | head -n 1)"
-[ -n "$major" ] || fail "couldn't read the .NET version from ${altool%.dll}.runtimeconfig.json"
-
-dotnet=""
-if command -v dotnet >/dev/null 2>&1 && dotnet --list-runtimes 2>/dev/null | grep -q "^Microsoft.AspNetCore.App $major\."; then
-  dotnet="$(command -v dotnet)"
-fi
-if [ -z "$dotnet" ]; then
-  for store in \
-    "$HOME/Library/Application Support/Code/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/.dotnet" \
-    "$HOME/Library/Application Support/Code - Insiders/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/.dotnet" \
-    "$HOME/.config/Code/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/.dotnet" \
-    "$HOME/.config/Code - Insiders/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/.dotnet"; do
-    [ -d "$store" ] || continue
-    candidate="$(ls -d "$store"/"$major".*aspnetcore 2>/dev/null | sort -V | tail -n 1)"
-    if [ -n "$candidate" ] && [ -x "$candidate/dotnet" ]; then
-      dotnet="$candidate/dotnet"
-      break
-    fi
-  done
-fi
-[ -n "$dotnet" ] || fail "no .NET $major runtime found for the AL extension. Open an AL project in VS Code once so the AL extension can provision it."
 
 DOTNET_ROOT="$(dirname "$dotnet")"
 export DOTNET_ROOT
 if [ "$profile" = "appsource" ]; then
-  [ -f "$appsourcecop" ] || fail "expected analyzer not found next to altool: $appsourcecop"
-  exec "$dotnet" "$altool" compile -- \
-    /project:"$project" /packagecachepath:"$project/.alpackages" /out:"$outfile" \
-    /analyzer:"$codecop" /analyzer:"$appsourcecop" /analyzer:"$uicop" "$@"
+  profilecop="$appsourcecop"
 else
-  [ -f "$ptecop" ] || fail "expected analyzer not found next to altool: $ptecop"
-  exec "$dotnet" "$altool" compile -- \
-    /project:"$project" /packagecachepath:"$project/.alpackages" /out:"$outfile" \
-    /analyzer:"$codecop" /analyzer:"$ptecop" /analyzer:"$uicop" "$@"
+  profilecop="$ptecop"
 fi
+[ -f "$profilecop" ] || fail "expected analyzer not found next to altool: $profilecop"
+
+log="$(mktemp "${TMPDIR:-/tmp}/ocpf-al-analyze.XXXXXX")" || fail "couldn't create a temporary log file"
+trap 'rm -f "$log"' EXIT
+"$dotnet" "$altool" compile -- \
+  /project:"$project" /packagecachepath:"$project/.alpackages" /out:"$outfile" \
+  /analyzer:"$codecop" /analyzer:"$profilecop" /analyzer:"$uicop" "$@" > "$log" 2>&1
+status=$?
+cat "$log"
+
+errors="$(grep -c ': error [A-Z][A-Z]*[0-9][0-9]*:' "$log")"
+warnings="$(grep -c ': warning [A-Z][A-Z]*[0-9][0-9]*:' "$log")"
+if [ "$status" -ne 0 ]; then
+  echo "OCPF AL analyze: compile failed ($errors error(s), $warnings warning(s); compiler exit code $status)." >&2
+  exit 1
+fi
+if [ "$warnings" -gt 0 ]; then
+  echo "OCPF AL analyze: compiled with $warnings warning(s). Operating Rule 5 requires zero; fix them before treating this build as clean." >&2
+  exit 3
+fi
+echo "OCPF AL analyze: clean — 0 errors, 0 warnings ($profile profile)."
+exit 0

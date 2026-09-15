@@ -71,8 +71,8 @@ Work through every AL file (`*.al`) and the translation files. Don't sample.
    hand-written code, for `CaptionML`, `ToolTipML`, `OptionCaptionML`, `InstructionalTextML`,
    `PromotedActionCategoriesML`, `RequestFilterHeadingML`, `AboutTitleML`, `AboutTextML`, and
    `TextConst`. Every hit is a finding. `TranslationFile` is on for every project (Standards §8.2),
-   so a 0/0 compile already proves this via `AL0424` — search anyway for anything added since the
-   last compile, hand-written code included.
+   so a 0/0 compile proves this via `AL0424` — but search every file anyway, since you can't see
+   that compile.
 7. **Translations** (Standards Part 8), unless the parameters say *US wording, no translation
    files*:
    - no hard-coded user-facing strings in `Error`, `Message`, `Confirm`, `StrMenu`, notifications,
@@ -83,10 +83,11 @@ Work through every AL file (`*.al`) and the translation files. Don't sample.
    - glossary terms used consistently;
    - text likely to truncate in longer languages.
 8. **Best practices:** required metadata, correct `DelayedInsert` and `Editable` per data
-   mutability (Standards §2.2). `Rec.` qualification (`NoImplicitWith`) and permission-set
-   `tabledata` coverage (Standards §5.3) are already proven by a 0/0 compile run with the
-   analyzers the framework requires (`PTE0004` catches a missing grant) — confirm that compile ran
-   and nothing was suppressed, rather than re-deriving either by hand.
+   mutability (Standards §2.2), and file names (Standards §1.8). A 0/0 compile with the
+   framework's analyzers proves `Rec.` qualification (`NoImplicitWith`) and permission-set
+   `tabledata` coverage (Standards §5.3; `PTE0004`, or `AS0103` for AppSource). You usually can't
+   see that compile from here: rely on it only if a build log or CI run in the repository shows it
+   with nothing suppressed. Otherwise check both by hand, and say which you did.
 9. **Permission sets** (Standards §5.4): both sets named with the App Code, unique across every
    extension sharing the prefix. Check this independently — the compiler doesn't flag a name
    collision with another extension.

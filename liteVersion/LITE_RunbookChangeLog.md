@@ -16,6 +16,31 @@ framework.
 
 ---
 
+## v1.11.0.0 — September 15, 2026
+
+**Fixes from an independent review: the analyzer compile fails on warnings, the analyzer files are
+part of the scaffold, and files are named the way CodeCop expects.** Derived from full framework
+v2.14.0.0; uses Standards Guide v1.7.0.0. See `fullVersion/RunbookChangelog.md` v2.14.0.0 for
+what was verified.
+
+### Changed
+
+- **ALL ALONG → Analyzers** rewritten: read warnings, not only the result (`al-analyze` exits `3`
+  on warnings); `AA0215` and `AL0424` listed; no ruleset.
+- **Step 3 scaffold and exit gate:** analyzer settings, `AppSourceCop.json` for AppSource, and a
+  check that `scripts/al-analyze.*` is present. The post-generation checklist checks file names
+  (**Standards §1.8**).
+- **Operating Rules 4 and 5** compressed.
+- **Step 1:** source wording is asked before the per-language questions it can skip; a note covers
+  questions with one or more than four candidates.
+- **Smaller fixes:** BCQuality described as outside the project rather than gitignored; the AL MCP
+  launcher list includes `al-analyze.*`; Rule 6d's pointer to incidents that now live only in the
+  changelog removed; Step 5's `al_searchtranslations` applies where the AL MCP Server is connected.
+- **Corrected in earlier entries:** v1.9.0.0 now says the Step 6 → Step 7 hand-off gained the
+  translated-documents return point.
+
+---
+
 ## v1.10.0.0 — September 15, 2026
 
 **Step 1 asks the same questions in far fewer boxes, and the runbook stops restating the Standards
@@ -57,7 +82,8 @@ Standards Guide v1.5.0.0. See `fullVersion/RunbookChangelog.md` v2.12.0.0 for wh
   together (*Apply all* / *Apply selected* / *Discuss first*); a design-rule change gets its own
   box. Step 6's fixes follow the same pattern.
 - **Rule 6c:** check in only after a step that hands the human something to act on (Step 5's tested
-  package); otherwise one line and continue. The Step 6 → Step 7 hand-off is unchanged.
+  package); otherwise one line and continue. The Step 6 → Step 7 hand-off stays, and its return
+  points now include translated documents.
 - **Step 5 translation cadence:** sync, terminology for new terms, and problem checks on every
   build; drafting, full checks, and per-language testing once the source text is stable.
 - **Translated documents move from Step 6 to Step 7**, once the functional test pass is green. Step
