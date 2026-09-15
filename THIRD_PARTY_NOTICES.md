@@ -64,6 +64,20 @@ September 14, 2026. The upstream project's current license always governs.*
     <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-work-with-translation-files>
   - Compiler Warning AL0424 —
     <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/diagnostics/diagnostic-al424>
+  - CodeCop Warning AA0074 —
+    <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/analyzers/codecop-aa0074>
+  - Technical validation checklist —
+    <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-checklist-submission>
+  - Country/Regional Availability and Supported Languages —
+    <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-countries-and-translations>
+  - Multilanguage and localization —
+    <https://learn.microsoft.com/en-us/dynamics365/business-central/about-locale-language>
+  - Translations Overview —
+    <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-translations-overview>
+  - Marketing Validation Checklist, Language, Branding, and Images, and Offer Description —
+    <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/readiness/readiness-checklist-marketing>
+  - Development of validated localization apps —
+    <https://learn.microsoft.com/en-us/dynamics365/business-central/about-validated-localization-apps>
 - **License:** documentation © Microsoft Corporation, licensed under
   [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/);
   code samples under MIT — per the public Business Central docs repository,
@@ -72,7 +86,53 @@ September 14, 2026. The upstream project's current license always governs.*
 - **Quoted or adapted material:** `standardsGuide/ocpfALDevStandardsGuide.md` §1.7 quotes the
   AL0424 warning text and adapts Microsoft Learn's list of multilanguage (ML) properties excluded
   from `.xlf` files into a table. Attribution, a link to the source, the license, and a note that
-  the list was reorganized sit directly below that section, as CC BY 4.0 requires.
+  the list was reorganized sit directly below that section, as CC BY 4.0 requires. Standards Part
+  8 summarizes the AA0074 suffix list, the Incremental Build / RAD translation behavior, the
+  AppSource translation-file requirement, and the country/language support facts, with the same
+  attribution block at the end of Part 8.
+  `translationAndMultiLanguage/MultilanguageSupportOverview.md` summarizes facts from these pages
+  and carries its own attribution.
+
+### Microsoft Learn — Globalization documentation
+- **Sources:** Microsoft Terminology —
+  <https://learn.microsoft.com/en-us/globalization/reference/microsoft-terminology>; Microsoft
+  Localization Style Guides —
+  <https://learn.microsoft.com/en-us/globalization/reference/microsoft-style-guides>
+- **License:** documentation © Microsoft Corporation, licensed under
+  [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/) — per
+  <https://github.com/MicrosoftDocs/globalization>. The downloadable Terminology Collection and the
+  style guide PDFs are governed by the terms published with them.
+- **Used for:** terminology fallback and per-language style guidance (Standards §8.5, Appendix D).
+  Linked; the agent consults them during a project. Nothing from them is copied into this
+  repository.
+
+### Microsoft API v2.0 source (ALAppExtensions)
+- **Source:** <https://github.com/microsoft/ALAppExtensions/tree/main/Apps/W1/APIV2>
+- **License:** MIT — Copyright (c) Microsoft Corporation
+- **Used for:** counting how Microsoft locks or translates captions on its API pages and queries.
+  Standards §8.6 and the multilanguage overview cite the resulting counts. No code is copied.
+
+### Microsoft Business Central translation files and artifacts
+- **What:**
+  - the XLIFF translation files inside Microsoft's Business Central `.app` packages — Base
+    Application, System Application, Business Foundation, and Microsoft language apps;
+  - Microsoft's public Business Central artifacts that contain those packages.
+- **License:** Microsoft proprietary content — not open source.
+- **Used for:** terminology verification (Standards §8.5, Appendix D). The agent reads them from the
+  user's own `.alpackages/`, or fetches a single Microsoft language app from Microsoft's public
+  artifacts after telling the user — under the user's own Microsoft license and Microsoft's terms
+  for those artifacts. The framework never commits, copies wholesale, or redistributes them.
+- **Cited in this repository:** Standards §8.1 and the multilanguage overview cite aggregate string
+  counts and a few short examples from the US Base Application (`en-US`) and the English
+  (Australia) and English (United Kingdom) language apps (v28.5 Australian sandbox artifact). No
+  files are reproduced.
+
+### BcContainerHelper
+- **Source:** <https://github.com/microsoft/navcontainerhelper>
+- **License:** MIT — Copyright (c) Microsoft Corporation
+- **Used for:** Standards Appendix D names its `Get-BCArtifactUrl` command as the way to locate
+  Microsoft's public Business Central artifacts. Installed by the user only if they choose to use
+  it; no code is copied.
 
 ### Microsoft AL GitHub issue tracker
 - **Source:** <https://github.com/microsoft/AL/issues/5789>
@@ -82,6 +142,26 @@ September 14, 2026. The upstream project's current license always governs.*
 ---
 
 ## Tools invoked or recommended (installed by you, never redistributed here)
+
+### XLIFF Sync — VS Code extension
+- **Source:** <https://github.com/rvanbekkum/vsc-xliff-sync>
+- **License:** MIT — Copyright (c) 2022 Rob van Bekkum
+- **Used for:** the recommended translation reviewer's tool (runbook Step 05 / Lite Step 3;
+  Standards Appendix C). Installed from the VS Code Marketplace by the user, with permission.
+
+### XLIFF Sync — PowerShell module (`XliffSync`)
+- **Source:** <https://github.com/rvanbekkum/ps-xliff-sync>
+- **License:** MIT — Copyright (c) 2020 Rob van Bekkum
+- **Used for:** the recommended headless translation sync and technical checks the agent runs
+  (runbook Step 07 / Lite Step 5). Installed from the PowerShell Gallery by the user, with
+  permission. Standards §8.7 describes its translation-state behavior, based on reading its source
+  code; no code is copied.
+
+### NAB AL Tools
+- **Source:** <https://github.com/jwikman/nab-al-tools>
+- **License:** MIT — Copyright (c) 2019 Johannes Wikman
+- **Used for:** named as the alternative translation-management tool for developers who already use
+  it. No content is used.
 
 ### mermaid-cli
 - **Source:** <https://github.com/mermaid-js/mermaid-cli>

@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 1.3.0.0 (Lite, derived from the full framework v2.6.0.0)
+**Version:** 1.4.0.0 (Lite, derived from the full framework v2.7.0.0)
 **Last Updated:** September 14, 2026
 
 > Version history for this edition lives in `LITE_RunbookChangeLog.md`, tracked independently of
@@ -16,7 +16,7 @@
 > doesn't need.
 
 > **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development
-> Standards Guide** (v1.1.0.0), shared unchanged with the full framework. Lite is *not* a reduced
+> Standards Guide** (v1.2.0.0), shared unchanged with the full framework. Lite is *not* a reduced
 > set of AL rules: the same AL rules apply to a 5-file extension as to a 50-file one. What Lite
 > reduces is *process*. So this runbook states each rule in short form where you need it and cites
 > the guide as **Standards §** for the full version — the abbreviation tables, the complete
@@ -127,6 +127,12 @@ repository into `standardsGuide/` and gitignores it there.
        transition. Don't do both.
 7. **Log every deviation immediately.** Any departure from the Design Doc — human or agent — goes
    in `ChangeLog.md` before the next batch starts.
+8. **Work in the human's chosen working language.** The first question of Step 1 asks which
+   language the human wants to work in. Every later question, options box, and explanation is in
+   that language. **Always in English, regardless:** this runbook, the Standards Guide, AL code
+   and names, commit messages, `DesignDoc.md`, and `ChangeLog.md`. **Kept verbatim in their
+   original language:** raw requirements and tester feedback. When the human names a BC concept in
+   their own language, map it through the glossary in `DesignDoc.md` rather than guessing.
 
 ---
 
@@ -140,6 +146,9 @@ design work.
 **Inputs:** Stakeholder conversation notes; the business need in plain language.
 
 **Actions:**
+- **Ask the working language first — before anything else** (Operating Rule 8). Ask in English,
+  through the options mechanism, with English listed first and free text for any other language.
+  Continue in the language chosen.
 - **Fetch the OCPF AL Development Standards Guide first, before anything else needs it.** Get
   `standardsGuide/ocpfALDevStandardsGuide.md` from
   `https://github.com/ajansari/ocpfBcAgenticDevFramework/` into a `standardsGuide/` folder in this
@@ -152,8 +161,10 @@ design work.
   Never commit this folder to `.gitignore`. Re-apply this the moment any later requirements or
   change-request input arrives, not only at kickoff.
 - Write a short problem statement: what business outcome is required, who the consumers are
-  (users, other systems, AI tools, BI/reporting), and what's explicitly out of scope. Capture the
-  domain vocabulary the design will anchor to.
+  (users, other systems, AI tools, BI/reporting), which countries and languages they work in, and
+  what's explicitly out of scope. Capture the domain vocabulary the design will anchor to —
+  including any standard BC term whose wording differs between those countries (for example VAT /
+  GST / Tax; Credit Memo / CR/Adj Note — Microsoft's actual US and Australian terms).
 - Produce an initial entity/object list — at 10 files or fewer this is usually a handful of
   tables/pages, not a multi-page inventory. As the agent, run a **quick gap check** against
   standard BC modules before treating the list as final: is there a posted/archived counterpart
@@ -210,7 +221,13 @@ Versioning). Mention this once, plainly, now.
 | **Permission Sets required?** | `Yes`/`No` | `No` only if the extension owns **zero new tables**. The moment it owns one table, this is `Yes` — BC publish validation (`PTE0004`) requires it. If `Yes`, reserve ≥ 2 IDs in the primary range. |
 | **AL Runtime / BC Application Minimum / Symbol Source** | — | From `app.json` target and the symbol file you'll build against. |
 | **Onboarding extras** | `Yes`/`No` each | Assisted Setup Wizard? Role Center Activity Cues? Departments/"My Business Central" placement? Ask all three; `No` to any is a final answer, not a placeholder — most small extensions answer `No` to all three, but ask anyway. |
-| **Framework files in `.gitignore`?** | `Yes` (default) | Explain briefly what `.gitignore` does, then ask: exclude this runbook/ChangeLog from *this project's* git tracking (recommended), or track them alongside the project's own code? |
+| **Framework files in `.gitignore`?** | `Yes` (default) | Explain briefly what `.gitignore` does, then ask: exclude **this framework's own files** — this runbook (under whatever name it was given: `CLAUDE.md`, `.github/copilot-instructions.md`, or `LITE_BC_App_Build_Routine_Agent.md`), `LITE_RunbookChangeLog.md`, and `LITE_RunbookSchematics.md`, if present — from *this project's* git tracking (recommended), or track them alongside the project's own code? **This never covers the project's own `ChangeLog.md`**, which is one of Lite's four tracked documents and is always committed. |
+| **Working language** | — | From the first question of this step. |
+| **Target languages** | table | **Country first, then language, as a loop** (rules: **Standards §8.8**). Read Microsoft's live [Country/Regional Availability and Supported Languages](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-countries-and-translations) page first — never from memory. For each country, offer only the languages BC supports there, shown as ID and culture code (*"French (Canada) — FRC → `fr-CA`"*). Classify each as Microsoft-translated, partner-translated (ask which partner app — it's the terminology source), or not supported by BC (every right-to-left language included). Don't offer an unsupported language; offer the country's English instead, and only record it if the human insists. For each language: required at first release? Who reviews it — a named fluent person, never the agent? Flag any mismatch with **Localization**. |
+| **Source language** | `en-US` (default) | Offer `en-US` first, labelled recommended, with the one-line reasons in **Standards §8.1**. If the human chooses another, state the consequences before recording it. |
+| **Source wording** | `W1` | Microsoft's W1 English wording in source, with one translation file per target language (`en-US` included). Only when `en-US` is the **sole** target **and Deployment Target isn't `AppSource`** (AppSource requires translation files — **Standards §8.10**), also offer *US wording in source, no translation files* — simpler now, but another market later means changing source strings. |
+| **Documents in other languages** | per document | Recommend translating `Docs.md`'s user-guide section and `TestScript.md` into each required language; `DesignDoc.md` and `ChangeLog.md` stay English. |
+| **Customer-language documents / translatable data** | `Yes`/`No` each | Do invoices or emails follow the customer's language? Does the extension store user-entered text needing per-language versions? (**Standards §8.9**) |
 
 **Quoting reference** (applies everywhere): `app.json`/`launch.json` use standard JSON strings;
 AL string property values use single quotes (`APIPublisher = 'Contoso';`); AL object names use
@@ -241,7 +258,8 @@ replaced), `.gitignore` populated per the table above.
 `ProjectParameters.md` exists in the project root with no placeholder remaining. Deployment Target
 is one allowed value. Namespace is consistent or correctly N/A. If
 Permission Sets required = `Yes`, ≥ 2 IDs are reserved. Onboarding questions are each answered.
-Human confirms the sheet.
+Every target language is classified against Microsoft's live page, with a required-at-release
+answer and a named reviewer; source language and wording are recorded. Human confirms the sheet.
 
 ---
 
@@ -265,6 +283,8 @@ be able to produce every object correctly from this document alone. Two halves, 
   category-by-category table: master data and open documents editable, posted entries and
   registers read-only).
 - Non-functional requirements: compilation cleanliness, performance, compliance.
+- Languages and markets: every target language, what's required at first release,
+  customer-language documents, translatable data.
 
 **Part B — How (technical):**
 - System identity: Publisher, namespace, prefix, APIPublisher/APIGroup/APIVersion, AL runtime, BC
@@ -301,6 +321,27 @@ be able to produce every object correctly from this document alone. Two halves, 
 - Special notes: singletons, header/line pairs, naming conflicts, deletion behavior for each
   entity (block-if-referenced / cascade / allow) — including any *other* table (standard BC
   included) that references this entity by `TableRelation`.
+- **Translatable text** (**Standards §8.3**): every message a `Label` with an AA0074 suffix and a
+  `Comment` for each placeholder; which labels are `Locked`; translation file names
+  (`Translations/<ExtensionName>.<culture>.xlf`).
+- **Translation glossary** — a table in `DesignDoc.md` (skip if the project chose *US wording, no
+  translation files*): BC concept · W1 source term · one column per target language · where each
+  term came from · status (`verified` / `reviewer attention`). Fill every row with **Standards
+  Appendix D** — Microsoft's own translations first — never from model memory.
+- **API caption locking — decided interactively** (**Standards §8.6**; skip if there are no API
+  pages or queries):
+  1. Classify every API page and API query as **Business**, **Technical — admin**, or **Technical
+     — internal plumbing**, each with a one-line reason. List anything that could go more than one
+     way as **Unsure**.
+  2. Ask about each Unsure object first (*Business* / *Technical — admin* / *Technical — internal
+     plumbing*).
+  3. Ask about Business: *Translatable (recommended)* / *Locked*.
+  4. Ask about Technical: *Admin translatable, plumbing locked (recommended)* / *All translatable* /
+     *All locked*.
+
+  Each recommendation cites Microsoft's precedent from §8.6. Skip empty groups. Record the group,
+  the locked decision, and who decided, per object in Part B. Repeat for any API object added
+  later.
 
 **Self-check, before calling this step done** (same agent, same pass — no separate reviewer role
 in Lite, but don't skip the checklist just because there's no one else to hand it to):
@@ -313,6 +354,9 @@ in Lite, but don't skip the checklist just because there's no one else to hand i
 - [ ] Read vs. read/write designations match actual data mutability.
 - [ ] Permission sets are fully enumerated if required.
 - [ ] Every entity's deletion behavior is explicitly decided, not left to a template default.
+- [ ] Every target language has a named reviewer; every regional term is in the glossary, verified
+      or marked for reviewer attention.
+- [ ] Every API page and query has a recorded group and caption-locking decision.
 
 **Outputs:** `DesignDoc.md`; an **Object Register** table (inside `DesignDoc.md` is fine at this
 scale — every planned object with its ID, source table, and R/W status).
@@ -335,7 +379,12 @@ fix in a loop until clean.
 - Confirm the batch plan from Operating Rule 3 (one batch, or two on a natural split) and object
   order within it (lookups before the things that reference them).
 - Prepare the scaffold: `app.json` (name, publisher, runtime, BC dependency,
-  `"features": ["NoImplicitWith"]`), `launch.json`, folder structure, `.gitignore` per Step 1.
+  `"features": ["NoImplicitWith", "TranslationFile"]` — **Standards §8.2**), `launch.json`, folder
+  structure, a `Translations/` folder, `.gitignore` per Step 1 (plus `*.g.xlf`).
+- **Agree the translation tooling** (skip if *US wording, no translation files*). Recommend the
+  XLIFF Sync PowerShell module (`XliffSync`) for the agent, plus the XLIFF Sync VS Code extension
+  for reviewers. Offer NAB AL Tools as the alternative. Look for existing installations first, and
+  ask before installing anything (Rule 6b).
 - Bootstrap the AL MCP Server if the harness supports it (see ALL ALONG), the BCQuality knowledge
   snapshot, and the OCPF BC AL Patterns library (both ALL ALONG) — one-time-per-project setup,
   cheapest done now alongside the rest of the scaffold. (The Standards Guide is **not** in this
@@ -350,7 +399,10 @@ fix in a loop until clean.
     multilanguage (ML) properties and no `TextConst`** — `CaptionML`, `ToolTipML`,
     `OptionCaptionML`, or any other ML variant fails pre-flight; single-language label syntax only
     (**§1.7** — AL0424 fires only when `TranslationFile` is enabled, so the compiler won't reliably
-    catch it), `Rec.`-qualification (`NoImplicitWith`, **§1.2**), dead-code check (no empty triggers, no
+    catch it), **translatable text** (**§8.3–§8.4**: no string literals in `Error`/`Message`/
+    `Confirm`/`StrMenu`/notifications, AA0074 suffixes, a `Comment` on every placeholder label,
+    `OptionCaption` member counts match), **API caption locking** matches the Step 2 decision
+    (**§8.6**), `Rec.`-qualification (`NoImplicitWith`, **§1.2**), dead-code check (no empty triggers, no
     `// TODO`, no commented-out fields, **§1.5**), 4-space indentation with no tabs (**§1.6**),
     permission-set `tabledata` coverage for any table the object introduces (**§5.3**), and
     **symbol verification** for every standard/base reference (**Appendix B**).
@@ -376,7 +428,9 @@ fix in a loop until clean.
    Write `Caption` and `ToolTip` as self-describing schema for API consumers, not UI filler — they
    flow into OData `$metadata` and are what a developer or AI agent reads when discovering the
    endpoint (**Standards §2.5–§2.6**). Single-language label syntax only — never `CaptionML`,
-   `ToolTipML`, any other ML property, or `TextConst` (**Standards §1.7**).
+   `ToolTipML`, any other ML property, or `TextConst` (**Standards §1.7**). Messages as `Label`s
+   (**§8.3**), W1 source wording from the glossary, API caption locking per Step 2 (**§8.6**).
+   **Source text only** — no translation file is touched until Step 5.
 5. Run the post-generation pre-flight pass immediately on this file. **Do not invoke the AL
    compiler** (Operating Rule 4).
 6. Don't move to the next object until this one's pre-flight, including symbol verification, is
@@ -416,6 +470,18 @@ never-delete rule (ALL ALONG → Packaging & Versioning) apply from this very fi
 5. **Compile and package again**, redeploy, retest. Repeat until 0 errors / 0 warnings and the
    human confirms sandbox testing is clean.
 
+**Translations run inside this cycle** (skip if *US wording, no translation files*). Every build
+that produces a new `.g.xlf`:
+1. **Full build only** — Incremental Build and RAD publishing ignore translations
+   (**Standards §8.2**).
+2. **Sync** every target file from `.g.xlf`.
+3. **Verify any new BC term** per **Appendix D** and update the glossary.
+4. **Draft** every `needs-translation` / `needs-adaptation` unit and set it to
+   `needs-review-translation`. The agent never sets `signed-off` (**§8.7**).
+5. **Run the technical translation checks** and fix findings at their root.
+6. **Package and test in each language** — switch **My Settings → Language** (and **Region**) and
+   look for untranslated text, truncation, and wrong regional terms.
+
 **API test checklist** (used here, and again at Step 7 — endpoint URL shapes are in **Standards
 Appendix A**):
 - **Green-team (happy path):** `$metadata` returns the expected schema; read a collection; read a
@@ -434,7 +500,8 @@ published and manually tested on a sandbox; `ChangeLog.md` current; `DesignDoc.m
 every rule change.
 
 **Exit gate:** Full extension compiles clean; human confirms sandbox testing is clean; no known
-systemic issue outstanding.
+systemic issue outstanding; no unit in a language required at first release is
+`needs-translation` or `needs-adaptation`, and translation checks are clean.
 
 ---
 
@@ -468,7 +535,10 @@ human-run release test.
   nothing here: AL0424 only fires when `app.json` enables `TranslationFile`. Read the code against
   AL Guidelines' *Best Practices* and *Vibe Coding Rules* for anything the Standards Guide doesn't
   already cover (the Standards Guide wins on any conflict — surface it rather than picking a side
-  silently). Then invoke the BCQuality snapshot's `skills/entry.md` dispatch flow (fetched at Step 3) as
+  silently). **Translations:** run every technical translation check with all rules enabled, then
+  review against **Standards Part 8** — no hard-coded user-facing strings, `Comment`s on
+  placeholders, glossary terms used consistently, likely truncation in longer languages, and API
+  caption locking re-verified against the Step 2 records. Then invoke the BCQuality snapshot's `skills/entry.md` dispatch flow (fetched at Step 3) as
   an additional, independent pass, and fold its findings in the same way as your own — never
   applied blind. If the fetch didn't happen or the snapshot is missing, say so rather than
   silently skipping this pass.
@@ -493,14 +563,22 @@ human-run release test.
   - A short **deployment** section: version requirements, install procedure, which permission sets
     map to which roles, uninstall.
 - **Write `TestScript.md`** — the green-team/red-team checklist from Step 5, made concrete against
-  this extension's actual endpoints, for a human tester to run end to end at Step 7.
+  this extension's actual endpoints, for a human tester to run end to end at Step 7. With more
+  than one required language, add a **language pass**: key pages, messages, and customer-facing
+  documents walked once per required language, checking for untranslated text, truncation,
+  regional terms, and formats.
+- **Translated documents**, if Step 1 asked for them, are produced once the English versions are
+  final: `Docs.<culture>.md` (user-guide section) and `TestScript.<culture>.md`. Use the glossary
+  for every BC term, and name the English source version in each file's header. Each is reviewed by
+  that language's reviewer.
 
-**Outputs:** `DesignDoc.md` (updated in place), `Docs.md`, `TestScript.md`. Together with
-`ChangeLog.md` from Step 1 onward, that's the full Lite document set — four files.
+**Outputs:** `DesignDoc.md` (updated in place, glossary included), `Docs.md`, `TestScript.md`, and
+any translated documents Step 1 requires. Together with `ChangeLog.md` from Step 1 onward, that's
+the full Lite document set — four files, plus translations.
 
 **Exit gate:** Every gap classified and resolved or explicitly deferred (logged in
 `ChangeLog.md`); dead-code scan clean; no obsolete references; `Docs.md`'s diagram renders;
-`TestScript.md` is executable by a non-developer.
+`TestScript.md` is executable by a non-developer; translation checks clean.
 
 ## STEP 7 — Release for Testing
 
@@ -528,6 +606,16 @@ human-run release test.
   green-team and red-team case, by hand.
 - Verify permission sets as part of the same pass: read-only grants read everywhere; read/write
   includes it plus write on editable pages.
+- **Language passes:** for each language required at first release, a tester fluent in it runs
+  the language pass, with the right Microsoft or partner language app installed in the sandbox.
+- **Translation approval — the release gate** (skip if *US wording, no translation files*):
+  - Each language's named reviewer approves its translations — directly in their tooling, or by
+    telling the agent exactly which units they approve. The agent sets `signed-off` only on those
+    units.
+  - Log each approval in `ChangeLog.md`: reviewer by name, language, count, and date.
+  - Then **scan every target file** for a language required at first release: every unit must be
+    `signed-off` or `final` (**Standards §8.7**).
+  - A fix that changes source text sends affected units back through Step 5 and review.
 - Record every finding directly in `ChangeLog.md` — verbatim first, then triaged: **implement now**
   (its own entry, fixed via the Step 5 cycle), **defer** (its own entry, marked deferred, with
   reasoning — Lite doesn't keep a separate `Roadmap.md`), or **reject** (record why).
@@ -540,7 +628,8 @@ human-run release test.
 **Outputs:** `ChangeLog.md` updated with every test finding and its resolution.
 
 **Exit gate:** All green-team tests pass; all red-team tests fail gracefully; permission sets
-verified. **If everything passes, the package that was actually tested is the one deployed to
+verified; every required language has passed its language pass and its state scan shows every unit
+`signed-off` or `final`. **If everything passes, the package that was actually tested is the one deployed to
 Production** — bump its Build segment (e.g. `0.0.5.0` → `0.0.5.1`) or copy it to an immutable
 filename first, so the shipped artifact stays permanently identifiable. This is marking the
 release candidate, not building a new one — no recompile, no new testing required to do it.
@@ -612,7 +701,7 @@ schema-breaking change go out without this warning.
 
 ## OCPF AL Development Standards Guide
 
-The companion rules document — `ocpfALDevStandardsGuide.md`, v1.1.0.0 — shared unchanged with the
+The companion rules document — `ocpfALDevStandardsGuide.md`, v1.2.0.0 — shared unchanged with the
 full framework. **Lite reduces process, not AL rules**, so this is the one fetched resource that
 isn't optional: this runbook cites it as **Standards §** from Step 1 onward.
 
@@ -629,7 +718,7 @@ isn't optional: this runbook cites it as **Standards §** from Step 1 onward.
   at nothing.
 - **Always gitignored**, never a per-project choice — same reasoning as `patterns/` and BCQuality
   (see Repository Hygiene). Not covered by the Step 1 `.gitignore` question, which governs only
-  this runbook and `ChangeLog.md`.
+  this framework's own files (this runbook, `LITE_RunbookChangeLog.md`, `LITE_RunbookSchematics.md`).
 - **Refresh only when asked** ("refresh the standards guide"). Report "updated from `<old sha>` to
   `<new sha>`" or "already up to date."
 - The guide is versioned independently of this runbook (both tracked in the framework's
@@ -645,8 +734,19 @@ isn't optional: this runbook cites it as **Standards §** from Step 1 onward.
 - The OCPF Patterns library lives **inside** the root, in `patterns/`, but is always gitignored —
   it's the human's own portable, cross-project methodology, refetchable at will, not part of what
   a client is paying to receive.
-- This runbook and `ChangeLog.md` are gitignored by default, per the Step 1 answer; a human who
-  wants the project's repo to be self-contained can opt to track them instead.
+- This framework's own files — this runbook, `LITE_RunbookChangeLog.md`, and
+  `LITE_RunbookSchematics.md` — are gitignored by default, per the Step 1 answer; a human who wants
+  the project's repo to be self-contained can opt to track them instead.
+- **The project's own `ChangeLog.md` is always tracked**, never gitignored. It's one of Lite's four
+  documents, and it carries every deviation, root cause, test finding, and translation approval.
+- **If a project built on an earlier Lite version has `ChangeLog.md` in `.gitignore`, remove that
+  entry and commit the file.** Earlier Lite wording said "this runbook and `ChangeLog.md`" when it
+  meant the framework's changelog. Check first whether the project has a remote — the file will
+  appear as newly added to collaborators.
+- `*.g.xlf` is always gitignored — it's rebuilt on every compile. The per-language files in
+  `Translations/` are deliverables and always tracked.
+- Microsoft's translation files, read for terminology (**Standards Appendix D**), are Microsoft's
+  proprietary content and are never committed.
 - If any of the above is already tracked when this policy is adopted, add the `.gitignore`
   entries and actually untrack them (`git rm --cached`, not `git rm` — files stay on disk).
   Check first whether the project has a remote already, since untracking rewrites what a `git
@@ -672,7 +772,9 @@ says.
 |---|---|---|
 | **BC Base Application docs** — <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application> | Standard Base App tables, fields, datatypes/sizes | Operating Rule 2 fallback |
 | **BC System Application docs** — <https://learn.microsoft.com/en-us/dynamics365/business-central/application/system-application/module/system-application> | System Application modules — check before building what the platform already provides | Operating Rule 2 fallback; Step 2 |
-| **Working with translation files** — <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-work-with-translation-files> | XLIFF translation in AL; why ML properties are banned | Standards §1.7 |
+| **Working with translation files** — <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-work-with-translation-files> | XLIFF translation in AL; why ML properties are banned | Standards §1.7, Part 8 |
+| **Country/Regional Availability and Supported Languages** — <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-countries-and-translations> | Which languages BC supports in each country, and who translates them — read live every time | Step 1; Standards §8.8 |
+| **Microsoft Terminology** — <https://learn.microsoft.com/en-us/globalization/reference/microsoft-terminology> and **Localization Style Guides** — <https://learn.microsoft.com/en-us/globalization/reference/microsoft-style-guides> | Terminology fallback and per-language style, when BC's own translations have no match | Standards §8.5, Appendix D |
 | **AL Guidelines** — <https://alguidelines.dev> (<https://github.com/microsoft/alguidelines>, MIT) | AL best practices, design patterns, agent-oriented *Vibe Coding Rules* | Step 2 (patterns); Step 6 (review) |
 
 **Precedence:** the downloaded symbol file beats Microsoft Learn on anything symbol-verifiable; the
@@ -737,6 +839,26 @@ material, not a third-party knowledge base.
   during this project looks like it will recur on future projects, flag it to the human as a
   candidate for a new pattern file — contributing back is the human's call, not the agent's.
 
+## Translations & Terminology
+
+The rules are **Standards Part 8**; Lite applies them with the same gates as the full framework,
+just fewer documents. Skip everything here if Step 1 chose *US wording, no translation files*.
+
+- **The glossary lives in `DesignDoc.md`** and is filled only by **Standards Appendix D** — never
+  from model memory. Update it whenever a new BC term appears in source text.
+- **The agent drafts, a named person approves.** Drafts are `needs-review-translation`. Only the
+  language's reviewer approves (`signed-off`) — directly, or by naming exactly which units the
+  agent should mark. Every approval is logged in `ChangeLog.md` by name.
+- **Bulk approval with a named scope is fine.** For a same-language file (`en-US` → `en-US`), the
+  agent may list unchanged units containing no glossary term for one approval decision.
+- **The release gate is a plain state scan.** Every unit in every language required at first
+  release is `signed-off` or `final`. Tools write `translated` themselves, so `translated` never
+  counts as approved.
+- **Changed source text invalidates approval** — sync moves the unit to `needs-adaptation`, and it
+  goes back through drafting and review.
+- Microsoft's translation files are read, never committed. XLIFF Sync and NAB AL Tools are
+  credited in the framework's `THIRD_PARTY_NOTICES.md`.
+
 ## Permission Sets — the one rule worth restating
 
 The moment this project owns even one table, Permission Sets required = `Yes` — it stops being a
@@ -760,13 +882,15 @@ one.
 | Step 7 — Release for Testing | Step 12 |
 
 **Shared with the full framework, not reduced:** the OCPF AL Development Standards Guide. Both
-editions fetch the same v1.1.0.0 file and apply the same AL rules — Lite differs only in process.
+editions fetch the same v1.2.0.0 file and apply the same AL rules — Lite differs only in process.
 
 **Document count:** 4 tracked files (`DesignDoc.md`, `ChangeLog.md`, `Docs.md`, `TestScript.md`)
-versus the full framework's 19 (`ProblemStatement`, `ProjectParameters`, `FRD`, `TDD`,
+versus the full framework's 20 (`ProblemStatement`, `ProjectParameters`, `FRD`, `TDD`,
 `SanityCheck`, `ChangeLog`, `ProjectMemory`, `ProjectProgress`, `GapAnalysis`, `CodeReview`,
 `PostDevTDD`, `Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`,
-`AutomatedTestScripts`, `ReleaseTestResults`, `TestingFeedback`, `Roadmap`).
+`AutomatedTestScripts`, `ReleaseTestResults`, `TestingFeedback`, `Roadmap`,
+`TranslationGlossary`). Lite keeps its translation glossary inside `DesignDoc.md`; translated copies
+of `Docs.md` and `TestScript.md` don't count as separate documents.
 
 ---
 

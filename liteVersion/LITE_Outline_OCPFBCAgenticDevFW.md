@@ -57,7 +57,8 @@ release test.*
 - Repository Hygiene
 - **OCPF AL Development Standards Guide** — fetched at Step 1, cited as **Standards §** throughout
 - AL MCP Server (optional)
-- Reference Sources — Microsoft Learn (BC Base App, BC System App, translation files) and AL Guidelines
+- Translations & Terminology — glossary in `DesignDoc.md`, named reviewers, release gate on approved translations
+- Reference Sources — Microsoft Learn (BC Base App, BC System App, translation files, country/language availability) and AL Guidelines
 - BCQuality Knowledge Snapshot
 - OCPF BC AL Patterns Library
 - Permission Sets discipline

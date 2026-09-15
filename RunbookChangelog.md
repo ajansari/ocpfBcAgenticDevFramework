@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the two documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v2.6.0.0**, the guide is at **v1.1.0.0** and Lite is at **v1.3.0.0** — but
+**v2.7.0.0**, the guide is at **v1.2.0.0** and Lite is at **v1.4.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 
 Entries are grouped by version, newest first, and describe the **cumulative** result of a
@@ -17,6 +17,218 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v2.7.0.0 — September 14, 2026
+
+**Multilanguage support, end to end.**
+- Work with the agent in your own language.
+- Countries and languages chosen from Microsoft's live availability data.
+- Regional terminology verified against Microsoft's own BC translations.
+- Agent-drafted translations with a named human reviewer and a release gate.
+- Caption locking on API pages and queries decided interactively.
+- UAT in every required language.
+
+Ships with Standards Guide **v1.2.0.0** and Lite **v1.4.0.0**. A user-facing explanation is in
+`translationAndMultiLanguage/MultilanguageSupportOverview.md`.
+
+### Why
+
+After the framework launched, several European MVPs said the same thing: multilanguage support is a
+must-have, not a nice-to-have.
+- UAT has to happen with translations in place.
+- Captions must use `Caption` plus XLIFF, never `CaptionML`.
+- AppSource requires translation files.
+- Regional variants matter: Business Central in Australia says **GST**, not VAT, and uses its own
+  credit memo term. The feedback called it "Credit Note"; Microsoft's Australian translation file
+  says **"CR/Adj Note"** (below).
+
+v2.6.0.0 shipped the `CaptionML` ban; this version ships everything else. AJ Ansari's decisions are
+recorded below where they shaped the design.
+
+### Facts verified before designing — not assumed
+
+- **Microsoft's `en-US` source text is W1 English.** The US Base Application (v27.5) ships an
+  `en-US` → `en-US` translation file in which **5,468 of 145,199 strings differ** from source
+  (`Set up VAT` → `Set up Tax`, `County` → `State`). Regional wording lives in translation files,
+  even for American English — so the framework does the same.
+- **Business Central supports languages per country, in three cases.** Microsoft-translated,
+  partner-translated, or not supported — from Microsoft Learn's *Country/Regional Availability and
+  Supported Languages* page. **No right-to-left language is supported**; Microsoft lists Israel as
+  "no RTL; English only".
+- **Microsoft's API caption locking follows who reads the API.**
+  - API v2.0 business pages and queries: 0 of 1,526 captions locked.
+  - API v2.0 admin (`automation`) pages: 1 of 157.
+  - Base Application internal runtime pages: 21 of 21 locked.
+  - Counted from `microsoft/ALAppExtensions` and the v27.5 Base Application.
+- **XLIFF Sync's state behavior, from its source code** (`rvanbekkum/ps-xliff-sync`): it writes only
+  `needs-translation`, `needs-adaptation`, and `translated`, and writes `translated` itself when it
+  imports or copies text. It leaves other states such as `needs-review-translation` untouched and
+  doesn't report them as missing. So `translated` can't mean "approved", and a tool's checks can't
+  serve as the release gate.
+- **Where Microsoft's translations live**, from Microsoft's public Business Central artifact for
+  Australia (sandbox 28.5.54151.54677), read via HTTP range requests rather than a full download:
+  - it ships **one Microsoft language app per Microsoft-translated language** (e.g. `English
+    language (Australia)`), each containing `Base Application.<culture>.xlf`;
+  - "Base Application (AU)" itself contains `Base Application.en-AU.xlf`, the same size as the one
+    in the language app.
+- **Microsoft's regional English, measured:**
+  - `en-AU` differs from source in 9,273 of 132,917 strings. `VAT` → `GST` in 3,071 strings, but 178
+    keep `VAT`. `Credit Memo` → **`CR/Adj Note`** in 450 strings.
+  - `en-GB` differs in 4,838 of 128,333 strings. `VAT` and `Credit Memo` are kept; the differences
+    include British spelling (`Customize` → `Customise`).
+  - Adaptation is per string, not search-and-replace.
+- **AppSource:**
+  - Microsoft's technical validation checklist: "The extension submitted must use translation
+    files."
+  - Its marketing validation guidance: the app "can be in any language" (with an English document
+    if not English); the offer description must end with *Supported Countries/Regions* and
+    *Supported Languages* paragraphs in English; Partner Center markets must match.
+  - **No language is mandated per market** — except in the Validated Localization app program,
+    which requires local-language translation.
+- **CodeCop AA0074** label suffixes: `Msg`, `Tok`, `Err`, `Qst`, `Lbl`, `Txt`.
+
+### Added — Standards Guide v1.2.0.0
+
+- **New Part 8 — Translation & Multilanguage Rules:**
+  - §8.1 source language (`en-US`, recommended and default) and W1 source wording, with the US-only
+    exception;
+  - §8.2 translation files — `TranslationFile` on every project, `Translations/<ExtensionName>.<culture>.xlf`,
+    `en-US` gets its own file, `.g.xlf` never edited and gitignored, full builds only for language
+    testing;
+  - §8.3 labels, AA0074 suffixes, placeholder `Comment`s, `Locked`, `MaxLength`;
+  - §8.4 `OptionCaption` member parity;
+  - §8.5 terminology — Microsoft's translations are the authority, with the source order and the
+    never-redistribute rule;
+  - §8.6 API page and query caption locking — groups, recommendations, Microsoft precedents,
+    `EntityCaption` / `EntitySetCaption`, tooltips always translatable;
+  - §8.7 translation states — only `signed-off` / `final` count as approved, and the agent never
+    approves its own drafts;
+  - §8.8 language support by market, including right-to-left;
+  - §8.9 customer-language documents, report layouts, translatable data, text expansion.
+- **§8.10 AppSource** — translation files mandatory (so the US-only no-translation-files option
+  isn't offered); no language mandated per market; *Supported Countries/Regions* and *Supported
+  Languages* paragraphs in English, listing only languages that ship with every unit approved;
+  test in every listed country.
+- **§8.1** cites the measured US, Australian, and British differences.
+- **New Appendix D — Terminology Verification Procedure**, the translation equivalent of Appendix B.
+  It looks in a fixed order: the localized Base Application symbols, then the System Application
+  and Business Foundation symbols, then Microsoft's language app for the language — fetched from
+  Microsoft's public artifacts (located with BcContainerHelper's `Get-BCArtifactUrl`), one app only,
+  after telling the human — then the partner app. If Microsoft's file can't be obtained, the agent
+  stops and asks rather than proceeding from memory.
+- **§1.3 template** gains `EntityCaption` / `EntitySetCaption`, plus a note on the locked variant.
+- **Part 7 gains nine anti-pattern rows:** hard-coded message text; placeholders without
+  `Comment`; `OptionCaption` member mismatch; editing `.g.xlf`; BC terms chosen from memory;
+  shipping unapproved units; undecided API caption locking; testing translations with Incremental
+  Build or RAD; regional wording in source.
+- **Appendix C** gains XLIFF Sync (both), and NAB AL Tools as an alternative.
+- **"What is deliberately not here"** gains three rows pointing at the runbook's intake,
+  classification, and translation-cycle steps.
+
+### Added — full runbook
+
+- **Operating Rule 8 — work in the human's chosen working language.**
+  - The runbook, AL code and names, commit messages, and engineering documents stay English.
+  - Raw requirements and tester feedback stay verbatim in their original language.
+- **PRE-01** asks the working language first, before anything else, and the problem statement names
+  countries and languages. **PRE-02** gains a regional-terminology gap category.
+- **Step 01 §1.9 — Languages & Translation**, interactive:
+  - **Countries, then languages**, as a loop, read live from Microsoft's availability page. Each
+    language is classified into the three cases; unsupported languages (right-to-left included) are
+    not offered by default; mismatches with `Localization` are raised.
+  - **Source language:** `en-US` offered first and recommended, and the default.
+  - **Source wording:** W1. When `en-US` is the sole target, the developer may choose US wording
+    with no translation files — **a choice added in implementation**: without it, every US-only
+    project would carry an `en-US` translation file.
+  - **Per language:** required at first release? Named reviewer?
+  - **Documents:** which ones get translated.
+  - **Beyond the interface:** customer-language documents and translatable data.
+  - **`docs/TranslationGlossary.md`** is created at this step (canonical document list: 19 → 20).
+- **Step 02** adds languages and markets as requirements. **Step 04** adds four sanity-check rows.
+- **Step 03 — interactive API caption classification** (AJ Ansari's decision):
+  - every API page and query is classified Business / Technical admin / Technical internal
+    plumbing;
+  - Unsure objects are resolved first, one at a time;
+  - then one Business question and one Technical question, each recommendation citing Microsoft's
+    precedent;
+  - recorded per object, with the decider named.
+- **Step 05:**
+  - `TranslationFile` and `Translations/` in the scaffold, and `*.g.xlf` gitignored.
+  - Translation tooling agreed: XLIFF Sync recommended, NAB AL Tools the alternative, nothing
+    installed without asking.
+  - New post-generation pre-flight checks for translatable text and API caption locking.
+- **Step 06** generates source text only.
+- **Step 07** gains the translation cycle:
+  - full build → sync → terminology verification (light role) → draft to `needs-review-translation`
+    (main role) → technical checks → test in each language;
+  - optional pseudo-translation.
+  - Exit gate: no `needs-translation` / `needs-adaptation` units in required languages.
+- **Step 08** adds language gaps. **Step 09** adds a full translation review. **Step 10** updates the
+  glossary as built.
+- **Step 11:**
+  - language passes in `HumanUnitTestScript.md`;
+  - translated documents named `<Document>.<culture>.md`, each reviewed;
+  - `Deployment.md` lists the language apps each language needs.
+- **AppSource projects:** §1.9 doesn't offer the US-only no-translation-files option. Step 11
+  drafts the English *Supported Countries/Regions* and *Supported Languages* paragraphs into
+  `Deployment.md`. Step 12 tests in every listed country.
+- **Step 12:**
+  - language passes by fluent testers;
+  - the **release gate** — the reviewer approves, then a state scan requires every unit in every
+    required language to be `signed-off` or `final`, recorded in `ReleaseTestResults.md`.
+- **New ALL ALONG section — Translations & Terminology:**
+  - the glossary format;
+  - roles (terminology is the light role's, drafting the main role's, approval never an AI role's);
+  - two approval routes, both logged by name in the ChangeLog;
+  - bulk approval with a named scope;
+  - the tooling-independent state scan;
+  - changed source invalidating approval;
+  - languages that follow later;
+  - licensing.
+- **Repository Hygiene:** `*.g.xlf` gitignored, target files tracked, Microsoft's translation files
+  never committed. **Reference Sources** gains the country/language availability page, Microsoft
+  Terminology, and the Localization Style Guides.
+- **Outline and schematics:** ALL ALONG entries and a Translations & Terminology diagram node; all 15
+  diagrams (8 full, 7 Lite) re-rendered clean. The step structure is unchanged.
+
+### Changed — Lite v1.4.0.0
+
+The same design with Lite's lighter process:
+- **Operating Rule 8** and the working-language question at Step 1.
+- **Language rows in Step 1's Parameters table.**
+- **Step 2:** the glossary and the API caption classification live inside `DesignDoc.md`.
+- **Step 3:** scaffold, tooling, and pre-flight additions. **Step 4:** source text only.
+- **Step 5:** the translation cycle. **Step 6:** the translation review and translated
+  `Docs.<culture>.md` / `TestScript.<culture>.md`.
+- **Step 7:** language passes and the same state-scan release gate, with approvals logged in
+  `ChangeLog.md`.
+- **Also:** a condensed ALL ALONG → Translations & Terminology section, and Repository Hygiene and
+  Reference Sources additions.
+- The document count is still four; the full framework's comparison count is updated to 20.
+- **Fixed — Lite's `.gitignore` question contradicted Lite's own document set.** Step 1's question,
+  Repository Hygiene, and the Standards Guide section all said "this runbook and `ChangeLog.md`"
+  are gitignored by default. Yet the Step Map and the Lite outline list `ChangeLog.md` as one of
+  Lite's **four tracked documents**, and the full framework's equivalent question (§1.8) covers
+  only the framework's *own* files. The wording meant the framework's changelog. It now names the
+  framework files explicitly (this runbook, `LITE_RunbookChangeLog.md`, `LITE_RunbookSchematics.md`)
+  and states that the project's `ChangeLog.md` is always tracked. That matters more now, because
+  translation approvals are logged there. Projects built on earlier Lite versions are told to
+  remove any `ChangeLog.md` ignore entry.
+
+### Also
+
+- **README:** multilanguage support in the Background section, the overview in Contents, and the
+  roadmap item marked complete.
+- **`THIRD_PARTY_NOTICES.md`** gains:
+  - XLIFF Sync — VS Code extension and PowerShell module (MIT, Rob van Bekkum);
+  - NAB AL Tools (MIT, Johannes Wikman);
+  - Microsoft API v2.0 source in `microsoft/ALAppExtensions` (MIT);
+  - the Microsoft Learn globalization docs (CC BY 4.0);
+  - four more Microsoft Learn Business Central pages;
+  - Microsoft's BC translation files (proprietary — read, never redistributed).
+- **Standards Part 8** carries CC BY 4.0 attribution for the Microsoft Learn facts it summarizes.
 
 ---
 

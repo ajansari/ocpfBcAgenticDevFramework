@@ -7,8 +7,8 @@ language-aware UAT — in both the full framework and the Lite edition.**
 
 | | |
 |---|---|
-| **Already in the framework** | Runbook v2.6.0.0 · Lite v1.3.0.0 · Standards Guide v1.1.0.0 — the ban on multilanguage (ML) syntax (§3) |
-| **Arriving with multilanguage support** | Runbook v2.7.0.0 · Lite v1.4.0.0 · Standards Guide v1.2.0.0 — everything else in this document |
+| **Multilanguage support** | Runbook v2.7.0.0 · Lite v1.4.0.0 · Standards Guide v1.2.0.0 — everything in this document |
+| **Shipped first** | Runbook v2.6.0.0 · Lite v1.3.0.0 · Standards Guide v1.1.0.0 — the ban on multilanguage (ML) syntax (§3) |
 
 ---
 
@@ -22,11 +22,15 @@ Their feedback came down to four requirements:
 
 1. **UAT happens with translations in place**, not in English with translations bolted on later.
 2. **Captions use `Caption` plus XLIFF (`.xlf`) files** — never `CaptionML`, which is deprecated.
-3. **AppSource requires XLIFF translation files**, so an app built any other way isn't on the path
-   to AppSource.
+3. **AppSource requires XLIFF translation files** — Microsoft's
+   [technical validation checklist](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-checklist-submission)
+   says so plainly — so an app built any other way isn't on the path to AppSource.
 4. **Regional variants of a language are different languages in practice.** Australia speaks
-   English, but Business Central in Australia says **GST**, not VAT, and **Credit Note**, not Credit
-   Memo. An app that says "VAT" to an Australian user isn't just unpolished — it's wrong.
+   English, but Business Central in Australia says **GST**, not VAT, and uses its own term for a
+   credit memo. An app that says "VAT" to an Australian user isn't just unpolished — it's wrong.
+   (The feedback called that term "Credit Note". Microsoft's own Australian translation actually
+   says **"CR/Adj Note"** — §12 shows the evidence. That's precisely why the framework checks terms
+   against Microsoft's files instead of trusting anyone's memory, ours included.)
 
 Thank you to everyone who raised this. The design below is better for it.
 
@@ -50,9 +54,9 @@ Thank you to everyone who raised this. The design below is better for it.
 
 ---
 
-## 3. Already in the framework: no multilanguage (ML) syntax
+## 3. No multilanguage (ML) syntax
 
-This part didn't wait for the full multilanguage release. It's in the framework today.
+This part didn't wait for the full multilanguage release — it shipped first, in v2.6.0.0.
 
 **The rule** (Standards Guide §1.7): all user-facing text — captions, tooltips, option captions,
 instructional text, and every message, error, and confirmation — is written once, in the source
@@ -208,14 +212,22 @@ It mirrors Microsoft:
   reach Australia without touching AL source.
 
 The one cost, stated upfront at intake: a developer building a US-only app will find "VAT" in
-their own source code and may find that odd. The agent explains why before they commit to it.
+their own source code and may find that odd. So when `en-US` is the *only* target language — and
+the app isn't headed to AppSource, which requires translation files — the agent offers a choice:
+
+- **W1 wording plus an `en-US` translation file** (recommended) — any market later is a
+  translation task.
+- **US wording directly in source, with no translation files** — simpler today, but a second
+  market later means revising source strings.
+
+Every other project uses W1 wording.
 
 ---
 
 ## 6. Getting regional terminology right
 
 A translation that's grammatically correct but doesn't use the term BC users see everywhere else
-on screen — "Credit Memo" for an Australian user, say — fails users just as badly as no
+on screen — "Credit Memo" for an Australian user, whose BC says "CR/Adj Note" — fails users just as badly as no
 translation.
 So the framework never lets the AI model decide Business Central terminology from memory. It
 applies the same discipline it already uses for table numbers and field IDs: **verify against
@@ -234,7 +246,13 @@ Microsoft's ground truth.**
 
 **Localization matters for rank 1.** Microsoft's Base Application translations are specific to a
 localization: symbols downloaded from a US environment contain the US English file, not the
-Australian one. For each target market, the agent needs Microsoft's translations for *that* market.
+Australian one. The Australian Base Application carries the Australian file; every other
+Microsoft-translated language comes in a Microsoft **language app** (§12 has the evidence). So for
+each target language, the agent reads the localized Base Application if it carries that language,
+and otherwise Microsoft's language app for it — fetched from Microsoft's public Business Central
+artifacts, with the developer's agreement. It records which file and version each term came from.
+**If it can't obtain Microsoft's file for a language, it stops and asks**, rather than filling the
+gap from memory.
 
 ### Terminology verification
 
@@ -274,28 +292,43 @@ for years:
 - **[XLIFF Sync for VS Code](https://github.com/rvanbekkum/vsc-xliff-sync)** (MIT) — the human
   reviewer's tool, for jumping between units that need attention and editing them in place.
 
-**[NAB AL Tools](https://github.com/jwikman/nab-al-tools)** by **Johannes Wikman** (MIT) is being
-evaluated alongside it before the tooling choice is final.
+Developers who already work with **[NAB AL Tools](https://github.com/jwikman/nab-al-tools)** by
+**Johannes Wikman** (MIT) can choose it instead. The agent asks which tooling to use, recommends
+XLIFF Sync, and never installs PowerShell, a module, or an extension without asking first. The
+release gate below doesn't depend on which tool is chosen.
 
-The agent never installs PowerShell, a module, or an extension without asking first — the same
-rule it follows for any tooling.
+The generated `.g.xlf` is treated as a build output and gitignored. The per-language files in
+`Translations/` are deliverables and always committed.
 
 ### The lifecycle of a translation
 
-Each translation unit moves through states the XLIFF standard already defines:
+Each translation unit moves through states the XLIFF 1.2 standard already defines:
 
-| Stage | Who | State |
+| State | Meaning | Written by |
 |---|---|---|
-| New or changed source text | XLIFF Sync, after a build | `needs-translation` |
-| Drafted | The agent, using the glossary and Microsoft's translations | `needs-review-translation` |
-| A technical check fails | XLIFF Sync | flagged as needing work |
-| **Approved** | **The named human reviewer for that language** | `translated` (the value Microsoft's own files use) |
+| `needs-translation` | New source text, not yet translated | Translation tooling, on sync |
+| `needs-adaptation` | A technical check failed, or the source text changed | Translation tooling |
+| `needs-review-translation` | Drafted, awaiting review | The agent |
+| `translated` | Text present, **not approved** | Translation tooling, e.g. when importing or copying |
+| **`signed-off`** | **Approved** | **The named reviewer for that language** |
 
-- **Every target language has a named reviewer**, recorded at intake — a person, not a role.
-- **Release gate:** a package can't be marked as the release candidate while any unit in any
-  required language is still awaiting translation, review, or rework.
-- **Changing source text resets its translations.** A translation approved for old wording can
-  never quietly ship against new wording.
+**Why approval is `signed-off`, not `translated`.** XLIFF Sync writes `translated` itself when it
+imports or copies text, so that state can't prove a person read the translation. Reading XLIFF
+Sync's source code also showed that it leaves `needs-review-translation` alone and doesn't report it
+as missing. So the framework's gate is its own simple scan of the files, rather than a tool's
+opinion.
+
+- **Every target language has a named reviewer**, recorded at intake — a person, not a role. The
+  agent never approves its own drafts.
+- **Reviewers approve in their own tooling**, or by telling the agent exactly which units they
+  approve. Every approval is logged by name. For an `en-US` → `en-US` file, where most units are
+  unchanged copies, a reviewer can approve the unchanged units containing no glossary term in one
+  decision.
+- **Release gate:** a package can't be marked as the release candidate until every unit in every
+  language required at first release is `signed-off` (or `final`).
+- **Changing source text resets its translations.** On the next sync, the unit drops to
+  `needs-adaptation` and goes back through drafting and review. A translation approved for old
+  wording can never quietly ship against new wording.
 
 ### Built into the compile-and-test cycle
 
@@ -428,10 +461,9 @@ are kept word for word in whatever language they were written.
 
 | Phase | Step | What multilanguage adds |
 |---|---|---|
-| | *Before PRE-01* | The language you want to work in |
-| DEFINE | PRE-01 — State the Problem | Start the translation glossary from the domain vocabulary |
-| | PRE-02 — Gap Analysis | Regional terminology: for every BC concept the app names, the right term in each market |
-| | 01 — Project Parameters | Countries, languages, source language, reviewers, document languages, data and customer-language needs |
+| DEFINE | PRE-01 — State the Problem | **First question:** the language you want to work in. The problem statement names the countries and languages users work in |
+| | PRE-02 — Gap Analysis | Regional terminology: every BC concept the app names whose wording differs between markets |
+| | 01 — Project Parameters | Countries, languages, source language and wording, reviewers, document languages, data and customer-language needs; the translation glossary is created |
 | DESIGN | 02 — FRD | Languages as a requirement; customer-language documents; translatable data |
 | | 03 — TDD | Label conventions, source wording, file naming; API caption classification (§8) |
 | | 04 — Sanity Check | Every language supported in its market; glossary complete; every API object classified; every reviewer named |
@@ -451,8 +483,7 @@ its single design document rather than a separate file.
 
 | Step | What multilanguage adds |
 |---|---|
-| *Before Step 1* | The language you want to work in |
-| 1 — Define & Lock Parameters | Countries, languages, source language, reviewers |
+| 1 — Define & Lock Parameters | **First question:** the language you want to work in. Then countries, languages, source language and wording, reviewers |
 | 2 — Design Doc & Self-Check | Languages, glossary, and API caption classification, inside `DesignDoc.md` |
 | 3 — Plan & Scaffold | `TranslationFile`, `Translations/`, tooling, pre-flight checks |
 | 4 — Generate the Code | Source text only |
@@ -462,21 +493,77 @@ its single design document rather than a separate file.
 
 ---
 
-## 12. Still being confirmed
+## 12. The evidence behind the design
 
-A few details are being checked against Microsoft's current packages and documentation before the
-release. If you know the answer to any of these from experience, I'd love to hear it.
+Two questions came up while building this. Both have objective answers, checked against Microsoft's
+own packages and documentation on September 14, 2026.
 
-- **Where Microsoft's application translations live today.** Microsoft now delivers application
-  languages as installable language apps, and several localizations (including the UK) have moved
-  to the W1 Base Application. Does the terminology source need to read Microsoft's language apps,
-  the localized Base Application, or both?
-- **Confirming that the generated `.g.xlf` source language can't be overridden** in current
-  compiler builds.
-- **The exact XLIFF state values** each XLIFF Sync tool reads and writes, so the review gate lines
-  up with them precisely.
-- **How AppSource ties translation expectations to the markets an app is listed in.**
-- **XLIFF Sync or NAB AL Tools** as the framework's standard tooling.
+### Where do Microsoft's Business Central translations actually live?
+
+**In Microsoft's language apps, and in each localized Base Application for its own market's
+languages.** Evidence from Microsoft's public Business Central artifact for Australia (sandbox
+28.5.54151.54677, the same artifacts BcContainerHelper downloads):
+
+- It contains **a separate Microsoft language app for each Microsoft-translated language** —
+  `English language (Australia)`, `English language (United Kingdom)`, `German language (Germany)`,
+  `French language (Canada)`, and 20 more. Each app's manifest says it "adds the \<language\> to
+  Dynamics 365 Business Central". Each contains `Base Application.<culture>.xlf`.
+- **The Australian Base Application itself** ("Base Application (AU)") contains
+  `Base Application.en-AU.xlf` — byte-for-byte the same size as the one in the English (Australia)
+  language app. Symbols downloaded from an Australian environment therefore already include the
+  Australian wording.
+- **The System Application** ships translation files for 26 languages inside its own package.
+
+So the framework's agent looks in three places, in order:
+1. The localized Base Application symbols for that market.
+2. The System Application and Business Foundation symbols.
+3. Microsoft's language app for any language the local Base Application doesn't carry — fetched from
+   Microsoft's public artifacts only with the developer's agreement.
+
+**What Microsoft's Australian and British files actually say:**
+
+| | Australia (`en-AU`) | United Kingdom (`en-GB`) |
+|---|---|---|
+| Strings differing from source | 9,273 of 132,917 | 4,838 of 128,333 |
+| "VAT" | → **GST** in 3,071 strings — but **178 stay "VAT"** (e.g. *Work with VAT*) | stays **VAT** (3,109 of 3,116) |
+| "Credit Memo" | → **"CR/Adj Note"** in 450 strings (*Sales CR/Adj Note*, *Purchase CR/Adj Note*) | stays **Credit Memo** (409 of 413) |
+| "County" | → **State** | unchanged |
+| Other | — | British spelling: *Customize* → *Customise*, *licenses* → *licences* |
+
+Two lessons for anyone translating a BC extension:
+- **Regional English is more than a few swapped words.** It's thousands of strings, including
+  spelling.
+- **Microsoft's adaptations aren't blanket search-and-replace.** Some "VAT" strings stay "VAT" even
+  in Australia, and the Australian credit memo term isn't the one most people would guess. Only
+  Microsoft's own files can tell you — which is why the framework reads them, per term, instead of
+  relying on memory.
+
+### Does AppSource require specific languages for specific markets?
+
+**No — for a standard AppSource app, Microsoft requires translation files and an accurate
+declaration, not particular languages.**
+
+- **Technical validation:** "The extension submitted must use translation files."
+  ([Technical validation checklist](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-checklist-submission))
+- **Marketing validation:** "Your app can be in any language; if not in English, a document with
+  English translation is required."
+  ([Language, Branding, and Images](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/readiness/readiness-checklist-a-languange-branding))
+- **The offer description must end with Supported Countries/Regions and Supported Languages
+  paragraphs**, and those must be written in English. The markets selected in Partner Center must
+  match the countries paragraph. Microsoft adds: "Remember to test your app on every country you
+  intend to support, as each country's base code is slightly different."
+  ([Offer Description](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/readiness/readiness-checklist-c-offer-description),
+  [Marketing Validation Checklist](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/readiness/readiness-checklist-marketing))
+- **The exception is Microsoft's Validated Localization app program.** There, translation into the
+  local languages is mandatory — for the localization app, its documentation, and the base app if
+  the language isn't already supported.
+  ([Development of validated localization apps](https://learn.microsoft.com/en-us/dynamics365/business-central/about-validated-localization-apps))
+
+**What the framework does with that:** for an AppSource project, it always produces translation
+files (the US-only "no translation files" option isn't offered). It drafts the Supported
+Countries/Regions and Supported Languages paragraphs in English from the project's actual language
+decisions — only languages whose translations are approved and shipping — and reminds the developer
+that the Partner Center markets must match and that each listed country needs its own test.
 
 ---
 
@@ -487,11 +574,14 @@ early, what the framework was missing. Thank you.
 
 **Tools and projects the design builds on:**
 
+- [BcContainerHelper](https://github.com/microsoft/navcontainerhelper) — Microsoft Corporation, MIT
+  License; its `Get-BCArtifactUrl` locates the public Business Central artifacts examined in §12
+  (artifact contents are Microsoft's proprietary content, read for analysis only)
 - [XLIFF Sync for VS Code](https://github.com/rvanbekkum/vsc-xliff-sync) and
   [XLIFF Sync PowerShell module](https://github.com/rvanbekkum/ps-xliff-sync) — Rob van Bekkum, MIT
   License
-- [NAB AL Tools](https://github.com/jwikman/nab-al-tools) — Johannes Wikman, MIT License (under
-  evaluation)
+- [NAB AL Tools](https://github.com/jwikman/nab-al-tools) — Johannes Wikman, MIT License (supported
+  alternative)
 - [AL Guidelines](https://alguidelines.dev) ([source](https://github.com/microsoft/alguidelines)) —
   Microsoft and the BC community, MIT License
 - [Microsoft API v2.0 source](https://github.com/microsoft/ALAppExtensions/tree/main/Apps/W1/APIV2)
@@ -502,6 +592,12 @@ early, what the framework was missing. Thank you.
 
 - [Working with translation files](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-work-with-translation-files)
 - [Compiler Warning AL0424](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/diagnostics/diagnostic-al424)
+- [Technical validation checklist](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-checklist-submission),
+  [Marketing Validation Checklist](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/readiness/readiness-checklist-marketing),
+  [Language, Branding, and Images](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/readiness/readiness-checklist-a-languange-branding),
+  and [Offer Description](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/readiness/readiness-checklist-c-offer-description) (AppSource)
+- [Development of validated localization apps](https://learn.microsoft.com/en-us/dynamics365/business-central/about-validated-localization-apps)
+- [Translations Overview](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-translations-overview)
 - [Country/Regional Availability and Supported Languages](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-countries-and-translations)
 - [Multilanguage and localization](https://learn.microsoft.com/en-us/dynamics365/business-central/about-locale-language)
 - [Base Application reference](https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application)

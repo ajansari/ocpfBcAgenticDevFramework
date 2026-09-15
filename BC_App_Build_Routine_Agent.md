@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 2.6.0.0
+**Version:** 2.7.0.0
 **Last Updated:** September 14, 2026
 
 > Version history for this framework lives in `RunbookChangelog.md`, tracked independently of any
@@ -13,7 +13,7 @@
 >
 > **How the agent uses it:** Work the phases in order (DEFINE → DESIGN → BUILD → PROVE). Do not start a step until its predecessor's exit gate is met. Every step lists its **Inputs**, **Actions**, **Outputs**, and **Exit gate**. The *Project Parameters* block in Step 01 is the single source of truth for every name, ID, version, and quoting decision — never hardcode any of those values in AL; always derive them from that block. It is persisted as `docs/ProjectParameters.md`, not just discussed — every later step reads it from that file.
 >
-> **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide** (v1.1.0.0). This runbook drives the *sequence*; that guide holds the detailed AL *rules* the sequence applies (Parts 1–7, Appendices A–C). References below point to it as **Standards §**. It is fetched into the project at PRE-01 and kept for the life of the project — see ALL ALONG → OCPF AL Development Standards Guide for the fetch, refresh, and `.gitignore` policy. **Neither document restates the other:** the intake sheet, the phase/step sequence, every checklist, the compile cadence, and the ChangeLog format live only here; AL coding rules, API page design, field inclusion, naming, ID allocation, gap analysis, and anti-patterns live only there.
+> **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide** (v1.2.0.0). This runbook drives the *sequence*; that guide holds the detailed AL *rules* the sequence applies (Parts 1–8, Appendices A–D). References below point to it as **Standards §**. It is fetched into the project at PRE-01 and kept for the life of the project — see ALL ALONG → OCPF AL Development Standards Guide for the fetch, refresh, and `.gitignore` policy. **Neither document restates the other:** the intake sheet, the phase/step sequence, every checklist, the compile cadence, and the ChangeLog format live only here; AL coding rules, API page design, field inclusion, naming, ID allocation, gap analysis, and anti-patterns live only there.
 >
 > **Prime directive for the agent:** An ambiguous input produces ambiguous code. If a step's inputs are incomplete or contradictory, stop and ask the human — do not invent rules to fill the gap.
 
@@ -51,6 +51,7 @@
     own note on the hand-off moment, which replaces this generic check-in for that one specific
     transition.
 7. **Log every deviation immediately.** Any departure from FRD or TDD goes in the ChangeLog before the next batch starts (see *All Along*).
+8. **Work in the human's chosen working language.** The very first question of the routine (PRE-01) asks which language the human wants to work in. From then on, every question, options box (Rule 6a), explanation, and status message is in that language. **Always in English, regardless:** this runbook and the Standards Guide, AL code, object and identifier names, commit messages, and the engineering documents (`FRD`, `TDD`, `SanityCheck`, `PostDevTDD`, `ChangeLog`, `GapAnalysis`, `CodeReview`, `ProjectMemory`) — so no second-language copy can drift from them. **Kept verbatim in their original language:** raw requirements (`requirements/`) and tester feedback (`TestingFeedback.md`). When the human names a BC concept in their own language, map it to the standard object through the translation glossary (ALL ALONG → Translations & Terminology) rather than guessing.
 
 ---
 
@@ -63,6 +64,11 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
 **Inputs:** Stakeholder conversation notes; the business need in plain language.
 
 **Actions:**
+- **Ask the working language first — before any other question or action in the routine**
+  (Operating Rule 8). Ask it in English, through the options mechanism (Rule 6a), with English
+  listed first and a free-text choice for any other language. Continue the rest of the engagement
+  in the language chosen. Record it in `ProjectMemory.md` immediately; Step 01 §1.9 carries it
+  into `docs/ProjectParameters.md`.
 - **Fetch the OCPF AL Development Standards Guide into the project, before anything else needs
   it** (AJ Ansari, September 13, 2026). Every phase from PRE-02 onward cites it as **Standards §**
   — PRE-02's own gap-analysis checklist is Standards Part 6 — so it has to be on disk from the
@@ -94,7 +100,7 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
   the project root — always, not `docs/`** (AJ Ansari, September 13, 2026) — one row per step of the whole
   routine, every row blank except this one, marked `In Progress`. This is the very first file
   artifact of the entire engagement.
-- Write a problem statement: what business outcome is required, who the consumers are (users, other systems, AI tools, BI/reporting), and what is explicitly out of scope.
+- Write a problem statement: what business outcome is required, who the consumers are (users, other systems, AI tools, BI/reporting), which **countries and languages** the users work in (confirmed formally at Step 01 §1.9), and what is explicitly out of scope.
 - Capture the domain vocabulary the design will anchor to (entity names, categories, known pain points).
 - Produce an initial entity/object list from stakeholder domain knowledge.
 - As the agent: identify duplicates, ambiguous terms, and outdated/legacy terminology in the initial list; ask clarifying questions about scope and consumer use cases. Do not resolve ambiguities silently.
@@ -115,6 +121,7 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
 - **Modern vs. legacy tables** — replace legacy price tables etc. with current equivalents; use modern entity names (Standards §6.5).
 - **Tax framework tables** — decide per the target localization; do not assume (Standards §6.6).
 - **Global vs. localized scope** — mark each entity as global or jurisdiction-specific.
+- **Regional terminology** — for every standard BC concept the extension will name in captions or messages, note whether its wording differs across the countries named in `ProblemStatement.md` (for example VAT / GST / Tax; Credit Memo / CR/Adj Note; County / State — Microsoft's actual US and Australian terms). Don't resolve the terms here — list them; Step 01 §1.9 creates the translation glossary and Standards Appendix D verifies each term.
 
 **Outputs:** Expanded, de-duplicated entity list with each entity tagged (analytical / master / setup / document / posted / lookup), R/W intent noted, and global-vs-localized noted. Gap log: what was added and why.
 
@@ -422,9 +429,81 @@ bootstrap creates (e.g., an AL MCP Server launcher) are **always** excluded from
 git tracking regardless of the answer here — see ALL ALONG → Repository Hygiene. That part isn't
 a choice the human makes per project.
 
-**Outputs:** `docs/ProjectParameters.md` — the completed Project Parameters block (above, all placeholders replaced), persisted as its own tracked document so every later step, and every role under §1.7, reads it from disk rather than depending on conversation history; an empty **Object Register** artifact seeded with the allocated ID ranges; the project's `.gitignore` populated per this section and per ALL ALONG → Repository Hygiene.
+### 1.9 Languages & Translation
 
-**Exit gate:** No placeholder remains. Deployment Target is one allowed value. Namespace matches between 1.1 and 1.3, or both are correctly N/A if Use Namespace = `No`. Localization is set. If Permission Sets required = `Yes`, ≥ 2 IDs are reserved in the primary range. §1.6's three questions are each answered `Yes`/`No` with specifics recorded for any `Yes`. §1.7 is answered or explicitly skipped — if configured, every one of the three roles has both a model and a thinking effort (or `N/A`) recorded, not model alone. §1.8 is answered (or defaults to `Yes`) and `.gitignore` reflects it. Human confirms the sheet.
+> **New in v2.7.0.0 (AJ Ansari, September 14, 2026),** prompted by feedback from European MVPs:
+> multilanguage support is a must-have. Ask these interactively (Rule 6a), in the working language
+> (Operating Rule 8), after §1.8. The rules each answer applies are Standards Part 8.
+
+**1. Countries, then languages — a loop, country first.**
+- Before asking, **read Microsoft's live *Country/Regional Availability and Supported Languages*
+  page** — <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-countries-and-translations>.
+  Never answer from memory or from a copy; Microsoft updates it several times a year. If the page
+  can't be reached, say so and ask the human, rather than guessing.
+- Ask: *"Which country will users of this extension work in?"* Then, for that country, offer
+  **only the languages Business Central supports there**, showing both the three-letter ID BC
+  people recognize and the culture code that will be recorded (e.g. *"French (Canada) — FRC →
+  `fr-CA`"*).
+- **Classify each chosen language** per Standards §8.8 — Microsoft-translated, partner-translated,
+  or not supported by BC — and say what that means in one sentence:
+  - **Partner-translated:** ask which partner localization or language app the customer uses,
+    since it becomes that language's terminology source.
+  - **Not supported by BC** (including every right-to-left language): say plainly that BC's own
+    interface won't appear in that language, and offer the country's English instead. Only if the
+    human insists, record it as outside platform support, and ask them to confirm with the
+    partner localization first.
+- Ask *"Is there another country?"* Repeat until the answer is no, then show the full list for
+  confirmation.
+- **Cross-check against §1.1 `Localization`.** If they don't line up — `Localization = AU` with no
+  `en-AU`, or the reverse — raise the mismatch rather than accepting it.
+
+**2. Source language.** Ask which language the AL source text is written in. Offer **`en-US`
+first, labelled recommended**, with the reasons in one or two sentences (Standards §8.1). If the
+human doesn't answer or isn't sure, it's `en-US`. If they choose another language, state the
+consequences from Standards §8.1 before recording it.
+
+**3. Source wording.**
+- **Any target other than `en-US` alone:** source wording is Microsoft's W1 English (Standards
+  §8.1). Say so and explain the one-line reason — every market's wording then comes from its own
+  translation file.
+- **`en-US` is the only target language and §1.1 Deployment Target isn't `AppSource`** (AppSource
+  requires translation files — Standards §8.10): ask, recommended option first:
+  - *W1 wording in source, plus an `en-US` translation file (recommended)* — another market later
+    needs no source changes.
+  - *US wording directly in source, no translation files* — simpler now; adding any other market
+    later means revising source strings.
+
+**4. For each target language:** is it **required at first release**, or can it follow later? And
+**who reviews it?** A named person who reads the language fluently — never a role, never the agent
+(Standards §8.7). Skip this for a project that chose *US wording, no translation files*.
+
+**5. Documents.** Which user-facing documents are produced in which languages? Recommend
+translating `UserGuide`, `HumanUnitTestScript`, and `Deployment` for each required language, and
+keeping every engineering document in English only (Operating Rule 8).
+
+**6. Beyond the interface.**
+- Do customer-facing documents (invoices, emails) need to follow the **customer's** language
+  rather than the user's (Standards §8.9)?
+- Does the extension store user-entered text that needs **per-language versions** (the translation
+  table pattern, Standards §8.9)?
+
+*API page and query caption locking isn't asked here — no objects exist yet. It's decided at Step
+03, once the object inventory does.*
+
+| Parameter | Placeholder | Guidance |
+|---|---|---|
+| **Working language** | `<WorkingLanguage>` | From PRE-01. |
+| **Target languages** | table | One row per language: culture code · three-letter ID · country · support case (Microsoft / partner / not supported by BC) · required at first release (Yes/No) · reviewer (name) · terminology source (Microsoft, or the named partner app). |
+| **Source language** | `<SourceLanguage>` | `en-US` unless the human chose otherwise, with the consequences noted. |
+| **Source wording** | `<SourceWording>` | `W1` (with a translation file per target, `en-US` included) or `US, no translation files` (only when `en-US` is the sole target). |
+| **Document languages** | table | Document → languages. |
+| **Customer-language documents** | `<CustomerLanguageDocsYN>` | `Yes`/`No`, with which documents if `Yes`. |
+| **Translatable data** | `<TranslatableDataYN>` | `Yes`/`No`, with which tables/fields if `Yes`. |
+| **Translation tooling** | `<TranslationTooling>` | Decided at Step 05. |
+
+**Outputs:** `docs/ProjectParameters.md` — the completed Project Parameters block (above, all placeholders replaced), persisted as its own tracked document so every later step, and every role under §1.7, reads it from disk rather than depending on conversation history; an empty **Object Register** artifact seeded with the allocated ID ranges; the project's `.gitignore` populated per this section and per ALL ALONG → Repository Hygiene; **`docs/TranslationGlossary.md`**, created with the regional terms PRE-02 listed (ALL ALONG → Translations & Terminology) — unless the project chose *US wording, no translation files*.
+
+**Exit gate:** No placeholder remains. Deployment Target is one allowed value. Namespace matches between 1.1 and 1.3, or both are correctly N/A if Use Namespace = `No`. Localization is set. If Permission Sets required = `Yes`, ≥ 2 IDs are reserved in the primary range. §1.6's three questions are each answered `Yes`/`No` with specifics recorded for any `Yes`. §1.7 is answered or explicitly skipped — if configured, every one of the three roles has both a model and a thinking effort (or `N/A`) recorded, not model alone. §1.8 is answered (or defaults to `Yes`) and `.gitignore` reflects it. §1.9: every target language is classified against Microsoft's live page, has a required-at-release answer and a named reviewer; source language and wording are recorded; any mismatch with `Localization` is resolved. Human confirms the sheet.
 
 ---
 
@@ -449,6 +528,7 @@ sign-off. Sign-off is unchanged either way — it's the human's, never the draft
 - Design rules — the non-negotiable constraints governing every object.
 - Entity / object inventory — every object with source table, type, and read vs. read/write designation (use the mutability rules in Standards §2.2).
 - Non-functional requirements — compilation cleanliness, performance, compliance, deployment.
+- **Languages and markets** — from Parameter §1.9: every target language, whether it's required at first release, customer-language document requirements, and any translatable business data. Written as requirements ("Australian users see Australian BC terminology throughout"), not as tooling.
 
 Then **review and validate against the DEFINE artifacts:** every entity in the expanded list appears in the FRD inventory (or is listed as deferred with a reason); every consumer use case from PRE-01 is addressed. For every platform capability the FRD assumes, verify BC can actually do it — do not write requirements based on assumed platform behavior.
 
@@ -475,6 +555,16 @@ human for sign-off, same as Step 02.
 - **`using` directives** — the exact namespace for every object, copied from the symbol file (Standards §1.1, §3.4).
 - **Standard object template** — the exact AL API page pattern every generated object must follow (Standards §1.3).
 - **Design patterns beyond the Standards Guide** — where the design needs a pattern the Standards Guide doesn't cover (error handling, events, facades, no. series, and similar), consult AL Guidelines (ALL ALONG → Reference Sources) and cite the specific guideline in the TDD rather than inventing one.
+- **Translatable text** — per Standards Part 8: every message, error, and confirmation planned as a `Label` with its AA0074 suffix and a `Comment` for each placeholder; which labels are `Locked`; `MaxLength` where length is constrained; source wording per Parameter §1.9 and the glossary; translation file names (`Translations/<ExtensionName>.<culture>.xlf`, one per target language). Reference the glossary — don't copy it into the TDD.
+- **API caption locking — decided interactively, per object** (Standards §8.6). Skip if the project has no API pages or queries. Once the object inventory is complete, and before any code exists:
+  1. **Classify** every `PageType = API` page and `QueryType = API` query as **Business**, **Technical — admin**, or **Technical — internal plumbing**, with a one-line reason each. Put anything that reasonably fits more than one group in an **Unsure** list — typically the extension's own setup table, integration mapping or staging tables, dashboard queries, and technical objects where admin vs. plumbing isn't clear.
+  2. **Show the classification**, grouped, one object per line.
+  3. **Resolve each Unsure object first**, one at a time (Rule 6a): *Business* / *Technical — admin* / *Technical — internal plumbing*. Doing this first means each group question below is asked against its final list.
+  4. **Ask about Business** (Rule 6a): *Translatable (recommended)* / *Locked*. The recommendation text must cite Microsoft's precedent from Standards §8.6 — e.g. "Microsoft's API v2.0 leaves all 1,526 captions on its business pages and queries translatable."
+  5. **Ask about Technical** (Rule 6a): *Admin translatable, internal plumbing locked (recommended)* / *All technical translatable* / *All technical locked* — citing both §8.6 precedents, and listing which objects fall under admin and which under plumbing.
+  6. Skip any question whose group is empty. **Record per object** in the per-object spec: group, locked `Yes`/`No`, and who decided — by name.
+
+  Any API page or query added later (gap-fill, testing feedback) goes through steps 1–6 for the new objects only.
 - **Special design notes** — singletons (`EntityName = EntitySetName`), header/line pairs as two top-level pages, high-volume tables, naming conflicts.
 - **Permission sets** — if Parameter 1.2 = `Yes` (mandatory the moment the project owns any table — see Parameter 1.2): a read-only set and a read/write set (including the read-only set), both with IDs from the allocated range and names from the Permission Set Prefix (Standards §5.3). **The batch plan must ship each table's `tabledata` grant in the same batch that introduces the table — never deferred to a later batch.** BC PTE publish validation (`PTE0004`) requires every table in a published package to be covered by an in-package permission set; finding this at publish instead of at TDD time forces a batch-plan rewrite after code already exists (a real project hit exactly this and had to pull its permission sets forward from its last batch to its first).
 
@@ -504,6 +594,10 @@ the documents.
 - [ ] Read vs. read/write designations match the mutability rules in Standards §2.2.
 - [ ] Growth buffers are planned within each module block (Standards §5.2).
 - [ ] Permission sets are planned if enabled (Parameter 1.2) — **with every table's `tabledata` grant explicitly enumerated per set**, not just "permission sets exist," and each grant assigned to the same batch that introduces its table (Standards §5.3).
+- [ ] Every target language in Parameter §1.9 is supported by BC in its country (checked against Microsoft's live page), has a named reviewer, and has a terminology source.
+- [ ] Every regional term PRE-02 listed is in the translation glossary, verified per Standards Appendix D or marked for reviewer attention.
+- [ ] Every API page and API query has a recorded group and caption-locking decision, with the decider named (Step 03; Standards §8.6).
+- [ ] Every planned message, error, and confirmation is a `Label`, and every placeholder label has a `Comment` (Standards §8.3).
 - [ ] Every entity's deletion behavior (block-if-referenced / cascade / allow) is explicitly decided and stated — not left to whatever the template defaults to. This includes fields on *other* tables (including standard BC tables extended via `tableextension`) that reference this entity by `TableRelation`: deciding a table's deletion behavior means re-checking every known referencing field, not just this app's own child tables.
 
 **Outputs:** `SanityCheck.md` — every check, finding, resolution.
@@ -523,7 +617,8 @@ Goal: generate AL batch by batch, lint clean — including symbol verification �
 **Actions:**
 - Confirm the object build order: which objects are built in which batch, smallest/simplest module first (Operating Rule 3).
 - Within a batch, order objects so lookup/reference tables precede the entities that reference them.
-- Prepare the scaffold: `app.json` (name, publisher, runtime, BC dependency, `"features": ["NoImplicitWith"]`), `launch.json`, folder structure per module, and `.gitignore` populated per §1.8 and ALL ALONG → Repository Hygiene.
+- Prepare the scaffold: `app.json` (name, publisher, runtime, BC dependency, `"features": ["NoImplicitWith", "TranslationFile"]` — `TranslationFile` on every project, Standards §8.2), `launch.json`, folder structure per module, a `Translations/` folder, and `.gitignore` populated per §1.8 and ALL ALONG → Repository Hygiene (including `*.g.xlf`).
+- **Agree the translation tooling** (Rule 6a; skip if Parameter §1.9 chose *US wording, no translation files*). Recommend the **XLIFF Sync** PowerShell module (`XliffSync`) as the agent's headless sync and checks, with the **XLIFF Sync** VS Code extension for reviewers. Offer **NAB AL Tools** as the alternative for developers who already use it. Before installing PowerShell, the module, or any extension, look for an existing installation first and ask (Operating Rules 6, 6b). Record the choice in Parameter §1.9. Whatever the tooling, the release gate (ALL ALONG → Translations & Terminology) is the same state scan.
 - Bootstrap the AL MCP Server, the BCQuality knowledge snapshot, and the OnlyCopilotFans (OCPF)
   BC AL Patterns library for this project if not already done (ALL ALONG) — all three are
   one-time-per-project setup, cheapest to do alongside the rest of the scaffold rather than as an
@@ -532,7 +627,7 @@ Goal: generate AL batch by batch, lint clean — including symbol verification �
   `standardsGuide/` is present and gitignored here rather than re-fetching it.)
 - Write the pre-flight validation checks to run for each batch — this is the canonical checklist every other reference to "the Step 05 checklist" in this runbook means; if you're re-stating it elsewhere, point here rather than re-enumerating. Split into two passes, since some checks are only possible before generation and some only after:
   - **Pre-generation** (on the TDD's planned names/fields, before any file exists — main role): identifier length ≤ 30, entity/EntitySet name length ≤ 30, reserved-keyword scan, localization field-range filter, `ObsoleteState` filter.
-  - **Post-generation** (on the actual generated files — light role, if §1.7 role assignment is configured): required-property presence, **no multilanguage (ML) properties and no `TextConst`** — `CaptionML`, `ToolTipML`, `OptionCaptionML`, or any other ML variant is a pre-flight failure; single-language `Caption`/`ToolTip`/`OptionCaption`/`Label` only (Standards §1.7 — AL0424 fires only when `TranslationFile` is enabled, so the compiler cannot be relied on to catch it), `Rec.`-qualification (`NoImplicitWith`), dead-code check (no empty triggers, no `// TODO`, no commented-out fields), 4-space indentation with no tabs (Standards §1.6), permission-set `tabledata` coverage for every table the batch introduces (Standards §5.3 — `PTE0004` fires at **publish**, not at compile, so **nothing automated catches a missing grant** — pre-flight is the only defense; vacuously satisfied if this project introduces no tables — see Parameter 1.2), and **symbol verification** — every reference to a standard/base BC table, page, codeunit, method, property, or enum value confirmed against the downloaded symbol source, falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer, not assumed correct because it looks like plausible AL (Operating Rule 4).
+  - **Post-generation** (on the actual generated files — light role, if §1.7 role assignment is configured): required-property presence, **no multilanguage (ML) properties and no `TextConst`** — `CaptionML`, `ToolTipML`, `OptionCaptionML`, or any other ML variant is a pre-flight failure; single-language `Caption`/`ToolTip`/`OptionCaption`/`Label` only (Standards §1.7 — AL0424 fires only when `TranslationFile` is enabled, so the compiler cannot be relied on to catch it), **translatable text** (Standards §8.3–§8.4: no string literal in `Error` / `Message` / `Confirm` / `StrMenu` / notifications / `ErrorInfo`; every label has an AA0074 suffix; every placeholder label has a `Comment`; tokens and telemetry `Locked`; every `OptionCaption` member count matches its option), **API caption locking** matches the per-object decision recorded at Step 03 (translatable objects set `EntityCaption`/`EntitySetCaption`; locked objects lock every `Caption` and leave `ToolTip`s translatable — Standards §8.6), `Rec.`-qualification (`NoImplicitWith`), dead-code check (no empty triggers, no `// TODO`, no commented-out fields), 4-space indentation with no tabs (Standards §1.6), permission-set `tabledata` coverage for every table the batch introduces (Standards §5.3 — `PTE0004` fires at **publish**, not at compile, so **nothing automated catches a missing grant** — pre-flight is the only defense; vacuously satisfied if this project introduces no tables — see Parameter 1.2), and **symbol verification** — every reference to a standard/base BC table, page, codeunit, method, property, or enum value confirmed against the downloaded symbol source, falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer, not assumed correct because it looks like plausible AL (Operating Rule 4).
 
 **Outputs:** Batch plan (ordered), project scaffold, pre-flight validation script/checklist (both passes).
 
@@ -546,7 +641,7 @@ Goal: generate AL batch by batch, lint clean — including symbol verification �
 1. Pause for human approval before writing the first file.
 2. Extract source-table and field data for this batch's objects from the symbol file.
 3. Run the Step 05 **pre-generation** pre-flight pass on the planned names/fields (main role — this is TDD housekeeping, distinct from the file-level lint in Action 5 below); fix the TDD before generating if anything fails.
-4. Generate the batch's AL files from the standard template (Standards §1.3), substituting only Step 01 parameter values. Every file: one `namespace` (omitted entirely if Parameter 1.1 `Use Namespace` = `No`), one `using` (from symbol file), `ODataKeyFields = SystemId`, exactly one of `DelayedInsert = true` / `Editable = false`, and `Caption` + `ToolTip` + `ApplicationArea = All` on every field (Standards §1.1–§1.4, §2.1–§2.6). Captions and ToolTips written as self-describing schema for API consumers (Standards §2.5–§2.6), in single-language label syntax only — never `CaptionML`, `ToolTipML`, any other ML property, or `TextConst` (Standards §1.7). No dead code, no empty triggers, no commented-out fields, no `// TODO` (Standards §1.5).
+4. Generate the batch's AL files from the standard template (Standards §1.3), substituting only Step 01 parameter values. Every file: one `namespace` (omitted entirely if Parameter 1.1 `Use Namespace` = `No`), one `using` (from symbol file), `ODataKeyFields = SystemId`, exactly one of `DelayedInsert = true` / `Editable = false`, and `Caption` + `ToolTip` + `ApplicationArea = All` on every field (Standards §1.1–§1.4, §2.1–§2.6). Captions and ToolTips written as self-describing schema for API consumers (Standards §2.5–§2.6), in single-language label syntax only — never `CaptionML`, `ToolTipML`, any other ML property, or `TextConst` (Standards §1.7). Every message a `Label` per Standards §8.3, source wording per Parameter §1.9 and the glossary, API caption locking per the Step 03 decision (Standards §8.6). **Source text only** — no translation file is created or edited during generation; translation starts at Step 07, once a build has produced `.g.xlf`. No dead code, no empty triggers, no commented-out fields, no `// TODO` (Standards §1.5).
 5. **Run the Step 05 post-generation pre-flight pass on the batch immediately** — dot the i's, cross the t's on each file as you go, plus a manual read against the AZ AL Dev Tools rules (Standards Appendix C). If §1.7 role assignment is configured, this pass is done by the **light role** — it reports findings only, it does not edit code; the main role applies every fix. **Do not invoke the AL compiler** (Operating Rule 4).
 6. Do not proceed to the next batch until this one's pre-flight (including symbol verification) is clean. Do not compile per batch. Once every batch from the TDD's batch plan is generated, move to Step 07 — that step opens with the one mandatory compile-and-package (Operating Rule 4); it is not optional and not deferred further. (Gap-fill work, if any comes later, is a separate pass through this same Step 05/06/07 discipline when it's actually written — see Operating Rule 4.)
 7. **Before moving past this step, verify permission-set coverage explicitly** (light role, same checklist nature as Action 5) — don't just trust that it was "planned." Check that every table built across every batch has a matching `tabledata` grant in both the read-only and read/write permission sets (Standards §5.3; vacuously satisfied if this project introduces no tables — see Parameter 1.2). This is a design-time check, independent of whether or when a compile happens: `PTE0004` (missing permission set) only fires at **publish**, and nothing else automated catches it. A real project didn't catch this until publish and had to rewrite its batch plan as a result — catch it here instead.
@@ -588,6 +683,33 @@ main role's.
 4. Fix the **root cause** (rule / template / filter), regenerate the affected files, and log the issue + resolution in the ChangeLog before moving on. Update the TDD whenever a rule changes. Pause for human approval of each root-cause diagnosis before applying it.
 5. **Compile and package again**, redeploy to the sandbox, retest. Repeat steps 1–5 until the extension compiles with 0 errors / 0 warnings and the human confirms sandbox testing is clean.
 
+**Translations are part of this cycle, from the first full build onward** (skip if Parameter §1.9
+chose *US wording, no translation files*). Each time a build produces a new `.g.xlf`, before
+packaging:
+1. **Full build only.** Confirm Incremental Build is off, and never test languages from a RAD
+   publish — Microsoft documents that both ignore translations (Standards §8.2).
+2. **Sync** every target file in `Translations/` from `.g.xlf` with the agreed tooling (e.g.
+   `Sync-XliffTranslations`). New units arrive as `needs-translation`; changed source text drops
+   its unit to `needs-adaptation` (Standards §8.7).
+3. **Verify terminology** for any new BC term per Standards Appendix D, and update the glossary
+   (light role, if §1.7 is configured — it's a lookup against ground truth, like symbol
+   verification).
+4. **Draft** every unit in `needs-translation` or `needs-adaptation`, using the glossary. Set each
+   drafted unit to `needs-review-translation` (main role). The agent never sets `signed-off`.
+5. **Run the technical checks** with every rule enabled (e.g. `Test-XliffTranslations
+   -checkForMissing -checkForProblems`). Fix each finding at its root — often the source label,
+   not the translation.
+6. **Package, publish, and test in each language** — the tester switches **My Settings →
+   Language** (and **Region** for formats) and walks the changed pages, messages, and reports.
+   Look for untranslated text, which usually means a hard-coded string; truncation; and the wrong
+   regional term.
+7. **Optional, early:** a pseudo-translation pass — a throwaway target file whose text is
+   deliberately longer and accented — surfaces hard-coded strings and truncation before real
+   translations exist. Never package it for anyone but the developer.
+
+Reviewers can review in parallel as drafts land (ALL ALONG → Translations & Terminology); approval
+isn't required to close this step, only to release at Step 12.
+
 **The API test checklist** — defined once, here, and used three times over the rest of the routine: optionally by the agent at the end of this step (below), as the source Step 11 writes `HumanUnitTestScript.md` from, and authoritatively by humans at Step 12 (Release to Users for Testing):
 - **Green-team (happy path):** `$metadata` returns the expected schema; read a collection; read a single record by `SystemId`; create a record on an editable endpoint; update a field; confirm a read-only endpoint rejects writes. Endpoint URL shapes are in Standards Appendix A.
 - **Red-team (boundary):** write to a read-only endpoint; send a non-existent field; send an invalid key; delete a record with dependencies; call with missing permissions — confirm each fails *gracefully with a clean, actionable error*.
@@ -596,9 +718,9 @@ main role's.
 - **If no working connection is available, say so plainly and suggest a manual alternative instead of leaving it undone** — testing the API by hand via **Postman**, or through a low-code caller like **Power Automate**, **Power Apps**, or **Copilot Studio**.
 - This is a cheap, early pass, not a substitute for the authoritative one: the same checklist runs again at Step 12, by a human, after Code Review and documentation have had their say — whether or not this optional agent-run pass ever happened.
 
-**Outputs:** All batches compiling and packaging with **0 errors, 0 warnings**; at least one package published and manually tested on a sandbox; ChangeLog current; TDD updated for every rule change; an agent-run API test result, if a live MCP connection was available and the human opted in.
+**Outputs:** All batches compiling and packaging with **0 errors, 0 warnings**; at least one package published and manually tested on a sandbox; ChangeLog current; TDD updated for every rule change; an agent-run API test result, if a live MCP connection was available and the human opted in; every target translation file synced, drafted, and passing technical checks, with the glossary current.
 
-**Exit gate:** Full extension compiles clean; the human confirms sandbox testing is clean; no known systemic issue outstanding; ChangeLog and TDD reconciled (Operating Rule 5).
+**Exit gate:** Full extension compiles clean; the human confirms sandbox testing is clean; no known systemic issue outstanding; ChangeLog and TDD reconciled (Operating Rule 5); no translation unit in any language required at first release is in `needs-translation` or `needs-adaptation`, and the technical translation checks are clean.
 
 ---
 
@@ -620,6 +742,7 @@ Spec stale) to the actual documents.
 - Rule in the FRD the TDD did not implement — TDD gap.
 - Rule implemented differently from the TDD — is there a ChangeLog entry?
 - Implementation decision that contradicts the FRD — FRD update needed.
+- **Languages** — a language the FRD requires at first release without a complete, synced translation file; a translation file for a language no longer in scope; an API page or query whose caption locking doesn't match its recorded decision.
 
 Classify every gap as **Intentional** (document the reasoning), **Oversight** (fix now or schedule), or **Spec stale** (code is right, update the FRD/TDD).
 
@@ -645,6 +768,15 @@ every fix and normalizes whatever drift the findings call out.
 - **"Marked for obsoletion"** — any reference to a field, table, procedure, or event with `ObsoleteState = Pending` or `Removed`; any subscription to an obsolete event (Standards §3.2–§3.3). Exclusion is unconditional — no version check, no exception.
 - **Standards compliance** — run the full Anti-Patterns table (Standards Part 7) against the codebase.
 - **Deprecated multilanguage syntax** — search every AL file, **including any code a human wrote or pasted in, not only agent-generated files**, for `CaptionML`, `ToolTipML`, `OptionCaptionML`, `InstructionalTextML`, `PromotedActionCategoriesML`, `RequestFilterHeadingML`, `AboutTitleML`, `AboutTextML`, and `TextConst`. Every hit is a finding, refactored per Standards §1.7. Called out separately from the Part 7 pass because a clean compile proves nothing here: AL0424 only fires when `app.json` enables `TranslationFile`, so on a project without it this syntax compiles silently.
+- **Translations** (skip if Parameter §1.9 chose *US wording, no translation files*) — run the full technical translation checks across every target file with all rules enabled (e.g. `Test-BcAppXliffTranslations -translationRulesEnableAll`). Then review against Standards Part 8:
+  - no hard-coded user-facing strings;
+  - every placeholder label has a `Comment`;
+  - `Locked` used only where §8.3 and the Step 03 decisions say;
+  - glossary terms used consistently in every language;
+  - text likely to truncate in longer languages (German typically runs about 30% longer than English);
+  - report layouts free of typed-in user-facing text.
+
+  Re-verify API caption locking independently against the Step 03 records — don't just trust Step 06's pre-flight.
 - **Best practices** — `Rec.` prefix everywhere (`NoImplicitWith`), required metadata present, correct `DelayedInsert` / `Editable` per data mutability, every table covered by both permission sets' `tabledata` grants (re-verify independently — don't just trust Step 06 Action 7).
 - **AL Guidelines best-practice pass** (ALL ALONG → Reference Sources) — read the built code against AL Guidelines' current *Best Practices* and *Vibe Coding Rules* for anything the Standards Guide doesn't already cover. The Standards Guide wins on any conflict; surface a conflict to the human rather than silently picking a side.
 - **BCQuality knowledge-backed review** (ALL ALONG) — invoke the local BCQuality snapshot's
@@ -664,6 +796,7 @@ every fix and normalizes whatever drift the findings call out.
 **Actions:**
 - Produce a new **as-built TDD version** (`PostDevTDD.md`) reflecting the architecture as actually implemented: final system identity, final object inventory with all properties, every naming convention and abbreviation as applied, all special cases and exceptions, and a deviation summary that references the ChangeLog.
 - Produce a new **FRD baseline** for future development: fold in every implementation decision that diverged from the original FRD — even where the implementation is better — so the next planning session starts from truth, not a stale spec.
+- Bring **`docs/TranslationGlossary.md`** and Parameter §1.9 up to date with what was actually built: every term in use, every language actually shipped, and the final API caption-locking decisions (recorded in `PostDevTDD.md`).
 
 **Outputs:** `PostDevTDD.md` (as-built reference), updated `FRD.md` (new baseline). Original TDD retained as historical context; ChangeLog is the bridge between them.
 
@@ -731,11 +864,14 @@ every fix and normalizes whatever drift the findings call out.
   which kind(s) were created, what they cover, how to run them, and how to keep them current as
   the app (not just its API) changes.
 - Write the **user guide** as `UserGuide.md` — **Markdown, in the repo, always** (HTML with `@media print` rules only as an *additional* branded/print deliverable, never instead of the Markdown). This is a **separate document from `Documentation.md`** and must not be folded into it: `Documentation.md` is the integration/API reference written for a developer or BI consumer, whereas the user guide is written for the person clicking around in Business Central — what the feature is for, how to do each task in order, what each field means in business terms, and what to do when something is refused. If the only "user guide" produced is an API reference, this action has not been done.
-- Write one-page **deployment instructions** as `Deployment.md`, for an administrator: version requirements, install procedure, which permission sets map to which roles, verification steps, uninstall. Distinct from `Documentation.md`'s quick-start: this is the full admin install/upgrade/uninstall procedure, not a fast path to a first API call.
+- Write one-page **deployment instructions** as `Deployment.md`, for an administrator: version requirements, install procedure, which permission sets map to which roles, verification steps, uninstall. Distinct from `Documentation.md`'s quick-start: this is the full admin install/upgrade/uninstall procedure, not a fast path to a first API call. If Parameter §1.9 has more than one language, include which Microsoft language apps (or partner language apps) an administrator must install for each language, and that the Allowed Languages list should include them.
+- **AppSource listing text** — only if §1.1 Deployment Target = `AppSource` (Standards §8.10). Draft, in English, the offer description's closing *Supported Countries/Regions* paragraph (the countries from Parameter §1.9) and *Supported Languages* paragraph (only languages whose translation files ship with every unit approved at Step 12). Write both into `Deployment.md`, and state plainly that the markets selected in Partner Center must match the countries paragraph. Every listed country needs its own test at Step 12.
+- **Languages in the test script.** When there's more than one required language, `HumanUnitTestScript.md` gains a **language pass**: the key pages, messages, errors, and customer-facing documents walked once per required language. Each pass records the tester's name and a pass/fail per case, with checks for untranslated text, truncation, regional terminology, and regional formats.
+- **Translated documents** — once the English versions above are final, produce each document in each language Parameter §1.9 lists for it, named `<Document>.<culture>.md` (e.g. `docs/UserGuide.fr-CA.md`). Use the glossary for every BC term. Each translated document's header names its English source and the date it was translated from, since the English version stays canonical. Each is reviewed by that language's named reviewer before Step 12.
 
-**Outputs:** `Documentation.md` (consumer/API reference, includes the Mermaid schema diagram), `HumanUnitTestScript.md`, **`UserGuide.md`** (end-user, Markdown), `Deployment.md`, and `AutomatedTestScripts.md` (only if the human opted in above). Four mandatory documents — check all four exist before claiming the step is complete; the fifth is conditional.
+**Outputs:** `Documentation.md` (consumer/API reference, includes the Mermaid schema diagram), `HumanUnitTestScript.md`, **`UserGuide.md`** (end-user, Markdown), `Deployment.md`, and `AutomatedTestScripts.md` (only if the human opted in above). Four mandatory documents — check all four exist before claiming the step is complete; the fifth is conditional. Plus every translated document Parameter §1.9 requires.
 
-**Exit gate:** Reference is generated from actual code and current; test script executable by a non-developer; Dev Manager review; the human has been asked about Automated Test Scripts (answer recorded either way); app ready to hand to Step 12 for release testing.
+**Exit gate:** Reference is generated from actual code and current; test script executable by a non-developer; Dev Manager review; the human has been asked about Automated Test Scripts (answer recorded either way); every translated document §1.9 requires exists and has been reviewed; app ready to hand to Step 12 for release testing.
 
 ## 12 — Release to Users for Testing
 
@@ -781,13 +917,16 @@ every fix and normalizes whatever drift the findings call out.
 - Real users/testers — not the agent, not a simulated pass — run `HumanUnitTestScript.md` end to end: every green-team (happy path) case and every red-team (boundary) case, executed by hand this time (Step 07 may have already run the same checklist once, automatically, as an early check — this is the authoritative pass). Testers work from `UserGuide.md` for how each feature is supposed to behave; the sandbox install itself is a live dry run of `Deployment.md`'s procedure — confirm it matches what a real admin would follow.
 - Verify permission sets as part of the same pass: the read-only set grants read on all pages; the read/write set includes it plus write on the editable pages; the underlying `D365` base permissions consumers also need are confirmed (Standards §5.3).
 - If `AutomatedTestScripts.md` was created at Step 11, also run those and record results the same way.
+- **AppSource: test in every listed country** (Standards §8.10) — Microsoft notes each country's base code differs. Publish to a sandbox of each country in the Supported Countries/Regions paragraph and run at least the green-team cases there. Confirm the Supported Languages paragraph still matches the languages that pass the gate below.
+- **Language passes, by people who speak each language.** For every language required at first release, a tester fluent in that language runs `HumanUnitTestScript.md`'s language pass in a sandbox with the matching language app installed. Microsoft-translated languages need Microsoft's language app; partner-translated languages need the partner's. Record results per language in `ReleaseTestResults.md`. Wording findings go through the Testing Feedback Log like any other finding.
+- **Translation approval — the release gate** (skip if Parameter §1.9 chose *US wording, no translation files*). For every language required at first release, the named reviewer approves the translations (ALL ALONG → Translations & Terminology). Then run the **state scan**: every translation unit in every required language must be `signed-off` or `final` (Standards §8.7). Record the scan result — language, unit count, approved count, reviewer — in `ReleaseTestResults.md`. Any fix after approval that changes source text sends the affected units back through Step 07's translation cycle and review.
 - Record every finding via the Testing Feedback Log (ALL ALONG) — verbatim, then triaged: implement now (its own ChangeLog Issue, fixed via the Step 07 cycle — fix, compile and package again, redeploy, retest), schedule (`Roadmap.md`), or reject.
 - **If a fix here changes any object, field, or behavior, treat the artifacts Steps 09–11 already produced as stale, not as already covered:** re-run the affected parts of Step 09 (Code Review on the changed files), Step 10 (as-built TDD/FRD), and Step 11 (regenerate `Documentation.md` and its ER diagram from the now-changed code — Step 11's own rule is "from the code, not from memory," and that's now-changed code). A trivial fix might touch none of these; say explicitly which ones a given fix actually requires re-running, rather than skipping the check by default.
 - Repeat until every green-team test passes and every red-team test fails gracefully.
 
 **Outputs:** `docs/ReleaseTestResults.md` — every test case, its result, and a link to any ChangeLog issue it produced.
 
-**Exit gate:** All green-team tests pass; all red-team tests fail gracefully; permission sets verified. **If everything passes, the package that was actually tested is the one deployed to the Production company** — bump its Build segment (e.g. `0.0.5.0` → `0.0.5.1`) or copy it to an immutable filename first (ALL ALONG → Packaging & Versioning) so the shipped artifact stays permanently identifiable and is never itself overwritten by a later cycle build; this is marking the release candidate, not building a new one — no code is recompiled and no new testing is required to do it. **Before that deploy, restate the Schema Sync Mode assessment for this exact package** (ALL ALONG → Packaging & Versioning) — **Add** if this release is additive-only, **Force Sync** with an explicit data-loss warning if anything was removed, shrunk, retyped, or re-keyed since the last production release.
+**Exit gate:** All green-team tests pass; all red-team tests fail gracefully; permission sets verified; every language required at first release has passed its language pass and its state scan shows every unit `signed-off` or `final`. **If everything passes, the package that was actually tested is the one deployed to the Production company** — bump its Build segment (e.g. `0.0.5.0` → `0.0.5.1`) or copy it to an immutable filename first (ALL ALONG → Packaging & Versioning) so the shipped artifact stays permanently identifiable and is never itself overwritten by a later cycle build; this is marking the release candidate, not building a new one — no code is recompiled and no new testing is required to do it. **Before that deploy, restate the Schema Sync Mode assessment for this exact package** (ALL ALONG → Packaging & Versioning) — **Add** if this release is additive-only, **Force Sync** with an explicit data-loss warning if anything was removed, shrunk, retyped, or re-keyed since the last production release.
 
 ---
 
@@ -797,7 +936,7 @@ Run these in parallel with the phased work — they are not a final step.
 
 ## Document
 
-- Keep every required project document current as work proceeds, not retroactively — this list is canonical; the Standards Guide keeps no second copy of it: `ProblemStatement`, `ProjectParameters`, `FRD`, `TDD`, `SanityCheck`, `PostDevTDD`, `ChangeLog`, `GapAnalysis` / `CodeReview`, `Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`, `AutomatedTestScripts` (if created), `ReleaseTestResults`, `TestingFeedback`, `Roadmap`, `ProjectMemory`, `ProjectProgress` — all four mandatory Step 11 outputs (`Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`) belong on this list, not just the first of them, as does `AutomatedTestScripts` if the human opted in at Step 11, and `ReleaseTestResults` (Step 12). `ProjectParameters` is produced at Step 01, right after `ProblemStatement` — it is the one entry on this list a project cannot proceed without, since every other document and every AL file derives its identity from it.
+- Keep every required project document current as work proceeds, not retroactively — this list is canonical; the Standards Guide keeps no second copy of it: `ProblemStatement`, `ProjectParameters`, `FRD`, `TDD`, `SanityCheck`, `PostDevTDD`, `ChangeLog`, `GapAnalysis` / `CodeReview`, `Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`, `AutomatedTestScripts` (if created), `ReleaseTestResults`, `TestingFeedback`, `Roadmap`, `ProjectMemory`, `ProjectProgress`, `TranslationGlossary` (unless Parameter §1.9 chose *US wording, no translation files*) — all four mandatory Step 11 outputs (`Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`) belong on this list, not just the first of them, as does `AutomatedTestScripts` if the human opted in at Step 11, and `ReleaseTestResults` (Step 12). `ProjectParameters` is produced at Step 01, right after `ProblemStatement` — it is the one entry on this list a project cannot proceed without, since every other document and every AL file derives its identity from it.
 - Maintain the **Object Register** as a standalone artifact — every object, its ID, module, source table, and R/W status — updated as objects are planned and built. Never use an object ID outside the ranges allocated at Parameter 1.2; the allocation strategy the register records is Standards Part 5.
 
 ## Track Changes — the ChangeLog
@@ -918,6 +1057,70 @@ This is **not** a narrative document and must not become one — that is exactly
   what's planned, what's done, what's left — as ordinary text; no tool or file update is needed
   for this finer-grained, in-session view. `ProjectProgress.md` tracks step-level status only,
   never sub-step task lists.
+
+## Translations & Terminology
+
+**New in v2.7.0.0 (AJ Ansari, September 14, 2026).** The discipline that keeps an extension's
+translations correct, reviewed, and current across every step. The *rules* are Standards Part 8;
+this section is *how the routine applies them*. Everything here is skipped for a project whose
+Parameter §1.9 chose *US wording, no translation files*, except Operating Rule 8 and Standards
+§1.7.
+
+**The translation glossary — `docs/TranslationGlossary.md`.** Created at Step 01, current at every
+step after. One table, one row per standard BC concept the extension names:
+
+| BC concept | Source term (W1) | `<culture>` term *(one column per target language)* | Source of each term (Microsoft file + version, partner app, or style guide) | Status (`verified` / `reviewer attention`) |
+|---|---|---|---|---|
+
+- Every row is filled by Standards Appendix D — never from model memory.
+- Update it the moment a new BC term appears in source text (Step 06 onward), and at Step 10.
+- It works in both directions. When the human names a concept in their own language (Operating
+  Rule 8), find the standard object through it.
+
+**Roles (§1.7).** If role assignment is configured:
+- **Terminology verification** is the **light role's** job — a lookup against Microsoft's files,
+  like symbol verification.
+- **Drafting translations and updating target files** is the **main role's**, since the files are
+  deliverables.
+- **Approving translations** is never an AI role's.
+
+**Review and approval.**
+- **Each language's named reviewer** (Parameter §1.9) approves its translations. There are two
+  ways to do it:
+  - the reviewer edits and approves in the translation tooling directly, setting `signed-off`; or
+  - the reviewer tells the agent, explicitly, which units or which reviewed batch they approve, and
+    the agent sets `signed-off` on exactly those units.
+- **Either way, log each approval in `ChangeLog.md`** — reviewer by name, language, units
+  approved, date. The agent never sets `signed-off` on its own judgment, and never on units the
+  reviewer didn't name (Standards §8.7).
+- **Bulk approval is fine, with a named scope.** For a same-language file (`en-US` source →
+  `en-US` target), most units are unchanged copies. The agent may list the unchanged units that
+  contain no glossary term and ask the reviewer to approve that list in one decision (Rule 6a).
+  Adapted units and units containing glossary terms are reviewed individually.
+- **Reviewers can work in parallel** with Steps 07–11. Approval is only *required* at the Step 12
+  gate.
+
+**The release gate — a state scan, independent of tooling.** Before Step 12 closes, for every
+language required at first release: count the translation units in its target file whose state
+isn't `signed-off` or `final`. The gate passes only at zero. It's a plain scan of the XLIFF file,
+not a tool's opinion. XLIFF Sync, for instance, writes `translated` itself when it imports or copies
+text — and reports `needs-review-translation` units as neither missing nor needing work — so its
+own checks can't stand in for this scan.
+
+**Source changes invalidate approval.** After any source-text change, the next sync moves affected
+units to `needs-adaptation`. They go back through drafting and review before the gate can pass
+again — even at Step 12, even for a one-word fix.
+
+**Languages that can follow later.** A target language not required at first release is still
+synced every cycle, so it never falls behind structurally. Drafting and review can wait. It joins
+the gate for whichever release it's required in; record that in `Roadmap.md`.
+
+**Licensing.**
+- XLIFF Sync and NAB AL Tools are MIT-licensed tools the human installs; nothing from them is
+  copied into a project.
+- Microsoft's translation files are read for terminology and never committed (ALL ALONG →
+  Repository Hygiene).
+- Credits are in the framework's `THIRD_PARTY_NOTICES.md`.
 
 ## Packaging & Versioning
 
@@ -1056,6 +1259,11 @@ similar hosting), even though they sit in the working directory like any other f
   git tracking, same reasoning as BCQuality: it's AJ Ansari's own portable, cross-project
   methodology, refetchable at will from `https://github.com/ajansari/ocpfBCALPatterns`, not
   something a client's repo has any reason to carry a copy of.
+- **`*.g.xlf`** — the compiler regenerates it on every build (Standards §8.2). The per-language
+  target files in `Translations/` **are** deliverables and always tracked.
+- **Microsoft's translation files**, read for terminology verification (Standards Appendix D) —
+  Microsoft's proprietary content. Read them where they are, inside `.alpackages/` packages, or
+  extract them outside the project's tracked tree. Never commit them.
 
 **Gitignored by default, human can opt out at intake (Step 01 §1.8):** this runbook itself, its
 changelog, and its schematics, if generated. The recommended default keeps them out of the
@@ -1130,7 +1338,7 @@ between AL extension releases.
 ## OCPF AL Development Standards Guide
 
 **New September 13, 2026 (AJ Ansari).** The runbook's companion rules document —
-`ocpfALDevStandardsGuide.md`, v1.1.0.0 — is distributed from this framework's own repository and
+`ocpfALDevStandardsGuide.md`, v1.2.0.0 — is distributed from this framework's own repository and
 fetched into every project that runs this routine, so the rules the runbook cites are on disk and
 readable for the life of the engagement rather than assumed to be in the agent's memory. This is
 the third of three fetched knowledge sources, alongside BCQuality and the OCPF BC AL Patterns
@@ -1168,7 +1376,7 @@ latest standards"). Re-run the fetch, overwrite the local copy, and report plain
 `<old sha>` to `<new sha>`" or "already up to date."
 
 **Version skew is worth naming, not papering over.** The guide carries its own version number
-(v1.1.0.0 as of runbook v2.6.0.0) and is versioned independently of this runbook, with
+(v1.2.0.0 as of runbook v2.7.0.0) and is versioned independently of this runbook, with
 both tracked in `RunbookChangelog.md`. If a fetched guide's version doesn't match what this
 runbook expects, say so — don't silently reconcile a citation that doesn't resolve.
 
@@ -1184,7 +1392,10 @@ plainly rather than answering from memory of what a reference says.
 |---|---|---|
 | **BC Base Application docs** (Microsoft Learn) — <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application> | Every standard Base App table, field, and datatype/size | Operating Rule 2 fallback; Standards Appendix B |
 | **BC System Application docs** (Microsoft Learn) — <https://learn.microsoft.com/en-us/dynamics365/business-central/application/system-application/module/system-application> | The System Application modules (Language, Translation, Email, Telemetry, and others) — check here before building something the platform already provides | Operating Rule 2 fallback; Standards Appendix B; Step 03 design |
-| **Working with translation files** (Microsoft Learn) — <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-work-with-translation-files> | How XLIFF translation works in AL; why ML properties are banned | Standards §1.7 |
+| **Working with translation files** (Microsoft Learn) — <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-work-with-translation-files> | How XLIFF translation works in AL; why ML properties are banned | Standards §1.7, Part 8 |
+| **Country/Regional Availability and Supported Languages** (Microsoft Learn) — <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-countries-and-translations> | Where BC is available, who localizes each country, and which languages Microsoft or partners translate. **Read live every time** — never from memory or a copy | Step 01 §1.9; Standards §8.8 |
+| **Microsoft Terminology Collection** — <https://learn.microsoft.com/en-us/globalization/reference/microsoft-terminology> | Microsoft product terminology in about 100 languages, when BC's own translation files have no match | Standards §8.5, Appendix D |
+| **Microsoft Localization Style Guides** — <https://learn.microsoft.com/en-us/globalization/reference/microsoft-style-guides> | Tone, formality, punctuation, and formats per language | Standards §8.5, Appendix D |
 | **AL Guidelines** — <https://alguidelines.dev> (source: <https://github.com/microsoft/alguidelines>, MIT) | Community-driven, Microsoft-hosted AL best practices, design patterns, and agent-oriented *Vibe Coding Rules* | Step 03 (patterns beyond the Standards Guide); Step 09 (best-practice pass) |
 
 **Precedence.** The downloaded symbol file beats Microsoft Learn on anything symbol-verifiable

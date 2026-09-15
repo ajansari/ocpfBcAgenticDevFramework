@@ -15,6 +15,77 @@ change is recorded, matching the convention `RunbookChangelog.md` uses for the f
 
 ---
 
+## v1.4.0.0 — September 14, 2026
+
+**Multilanguage support.** Derived from full framework v2.7.0.0; applies Standards Guide v1.2.0.0's
+new Part 8 and Appendix D. See `RunbookChangelog.md` v2.7.0.0 for the verified facts and full
+reasoning, and `translationAndMultiLanguage/MultilanguageSupportOverview.md` for a user-facing
+explanation.
+
+### Added
+
+- **Operating Rule 8 — working language.** Step 1 asks it first. `DesignDoc.md`, `ChangeLog.md`,
+  AL code, and commit messages stay English; raw requirements and tester feedback stay verbatim.
+- **Step 1:**
+  - the problem statement names countries, languages, and regional terms;
+  - new Parameters rows — working language, target languages (country first, read live from
+    Microsoft's availability page, classified into three support cases, each with a
+    required-at-release answer and a named reviewer), source language (`en-US` recommended and
+    default), source wording (W1, or US wording with no translation files when `en-US` is the sole
+    target), document languages, customer-language documents, and translatable data;
+  - the exit gate checks them.
+- **Step 2:**
+  - languages as a requirement;
+  - translatable-text conventions;
+  - a **translation glossary table inside `DesignDoc.md`**, filled by Standards Appendix D;
+  - the **interactive API caption classification** (Business / Technical admin / Technical
+    plumbing, Unsure resolved first, recommendations citing Microsoft);
+  - two self-check rows.
+- **Step 3:**
+  - `TranslationFile`, `Translations/`, and `*.g.xlf` gitignored;
+  - translation tooling agreed (XLIFF Sync recommended, NAB AL Tools alternative, ask before
+    installing);
+  - pre-flight checks for translatable text and API caption locking.
+- **Step 4:** source text only.
+- **Step 5:** the translation cycle — full build, sync, verify terms, draft to
+  `needs-review-translation`, technical checks, test in each language. The exit gate adds no
+  untranslated or needs-adaptation units in required languages.
+- **Step 6:**
+  - a translation review;
+  - a language pass in `TestScript.md`;
+  - translated `Docs.<culture>.md` and `TestScript.<culture>.md` where requested.
+- **Step 7:**
+  - language passes by fluent testers;
+  - the **release gate** — the reviewer approves (logged by name in `ChangeLog.md`), then a state
+    scan requires every unit in every required language to be `signed-off` or `final`.
+- **ALL ALONG:**
+  - a new Translations & Terminology section;
+  - Repository Hygiene — `*.g.xlf` ignored, target files tracked, Microsoft's translation files
+    never committed;
+  - Reference Sources — the country/language availability page, Microsoft Terminology, and style
+    guides.
+- **Step Map:** the full framework's document count is updated to 20; Lite stays at four.
+- **AppSource:** the US-only no-translation-files option isn't offered when Deployment Target is
+  `AppSource` (Standards §8.10).
+
+### Fixed — the `.gitignore` question named the wrong `ChangeLog.md`
+
+Step 1's `.gitignore` question, ALL ALONG → Repository Hygiene, and the Standards Guide section all
+said "this runbook and `ChangeLog.md`" are gitignored by default. That contradicted Lite's own Step
+Map and outline, which list `ChangeLog.md` among the **four tracked documents**, and the full
+framework's equivalent question, which covers only the framework's own files.
+
+- They now name the framework files explicitly: this runbook, `LITE_RunbookChangeLog.md`, and
+  `LITE_RunbookSchematics.md`.
+- They state that the project's `ChangeLog.md` is **always tracked** — it now also records
+  translation approvals.
+- Projects on an earlier Lite version are told to remove any `ChangeLog.md` ignore entry and commit
+  the file.
+- `LITE_Outline_OCPFBCAgenticDevFW.md` and the ALL ALONG diagram in `LITE_RunbookSchematics.md`
+  updated; all 7 Lite diagrams re-rendered clean.
+
+---
+
 ## v1.3.0.0 — September 14, 2026
 
 **Deprecated multilanguage (ML) syntax banned in generation and flagged in review; System App docs

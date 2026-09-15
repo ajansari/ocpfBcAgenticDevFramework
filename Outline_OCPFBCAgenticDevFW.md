@@ -67,7 +67,8 @@ documentation, and a human-run release test on top.*
 - Packaging & Versioning
 - Repository Hygiene
 - AL MCP Server
-- Reference Sources — Microsoft Learn (BC Base App, BC System App, translation files) and AL Guidelines
+- Translations & Terminology — translation glossary, named reviewers, release gate on approved translations
+- Reference Sources — Microsoft Learn (BC Base App, BC System App, translation files, country/language availability) and AL Guidelines
 - BCQuality Knowledge Snapshot
 - OCPF BC AL Patterns Library
 

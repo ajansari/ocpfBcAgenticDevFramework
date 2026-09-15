@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 1.1.0.0
+**Version:** 1.2.0.0
 **Last Updated:** September 14, 2026
 
 > **Audience:** Human developers and agentic (AI) developers building Business Central AL
@@ -10,7 +10,7 @@
 >
 > **Purpose:** The detailed, project-agnostic *rules* for writing AL in a PTE — coding standards,
 > API page design, field inclusion and exclusion, identifier naming, module and ID allocation,
-> gap analysis, and anti-patterns.
+> gap analysis, anti-patterns, and translation and multilanguage rules.
 >
 > **Relationship to the runbook:** This guide is the companion to `BC_App_Build_Routine_Agent.md`,
 > the OnlyCopilotFans Agentic Dev Framework runbook. **The runbook drives the *sequence*** — what
@@ -44,6 +44,9 @@ rather than keeping a second, silently-diverging copy:
 | Verifying against symbol files rather than model memory | Runbook **Operating Rule 2** (procedure in Appendix B below) |
 | The ChangeLog entry format | Runbook **ALL ALONG → Track Changes** |
 | The Object Register | Runbook **ALL ALONG → Document** |
+| The language and translation intake questions (working language, countries, languages, source language, reviewers, document languages) | Runbook **Step 01 §1.9**, asked interactively |
+| The interactive API caption-locking classification | Runbook **Step 03** (the rules it applies are §8.6 below) |
+| When translations are synced, drafted, checked, and tested; the translation release gate | Runbook **Step 07**, **Step 12**, and **ALL ALONG → Translations & Terminology** |
 
 ---
 
@@ -104,6 +107,8 @@ page <ObjectID> "<EntitySetName>"
     APIVersion = '<version>';
     EntityName = '<entityNameSingular>';
     EntitySetName = '<entitySetNamePlural>';
+    EntityCaption = '<Human-readable singular name>';     // Translatable API objects only (§8.6)
+    EntitySetCaption = '<Human-readable plural name>';    // Translatable API objects only (§8.6)
     SourceTable = <SourceTableName>;
     ODataKeyFields = SystemId;
     DelayedInsert = true;   // Editable pages only. Use "Editable = false;" for read-only pages.
@@ -134,6 +139,11 @@ page <ObjectID> "<EntitySetName>"
 ```
 
 > Omit the `namespace` line if Step 01's `Use Namespace` parameter is `No` (§1.1).
+>
+> **Caption locking (§8.6):** the template shows a *translatable* API page, the default for
+> business and admin objects. For an object recorded as *locked* (internal plumbing), omit
+> `EntityCaption` / `EntitySetCaption` and add `Locked = true` to the page `Caption` and every
+> field `Caption`. `ToolTip`s stay translatable either way.
 
 ### 1.4 Mandatory Field Properties
 
@@ -188,7 +198,7 @@ var
     PostedMsg: Label 'Document %1 was posted.', Comment = '%1 = Document No.';
 
 // Wrong — multilanguage (ML) syntax; deprecated, and never reaches the .xlf file
-CaptionML = ENU = 'Credit Memo No.', ENA = 'Credit Note No.';
+CaptionML = ENU = 'Credit Memo No.', ENA = 'CR/Adj Note No.';
 ToolTipML = ENU = 'Specifies the number of the credit memo.';
 
 var
@@ -631,6 +641,252 @@ them. Do not assume.
 | Hardcoding publisher, prefix, namespace, or version in AL code | Values diverge from the project parameters | Always derive from the runbook's Step 01 block — never hardcode |
 | Reaching for a `FlowField` when "auto-populated but editable" is what's wanted | A `FlowField` is always read-only and always live-recalculated; a user can never override it | Use a real stored field seeded by `OnValidate`/`OnInsert` that never overwrites a value the user already entered |
 | Using `CaptionML`, `ToolTipML`, `OptionCaptionML`, or any other multilanguage (ML) property, or the `TextConst` data type — whoever wrote it | Deprecated (AL0424); never included in the `.xlf` file, so the text can't be translated; blocks AppSource; compiles with **no warning** unless `TranslationFile` is enabled | Single-language `Caption` / `ToolTip` / `OptionCaption` / `Label` in the default language; translations go in `.xlf` files (§1.7) |
+| Hard-coded text in `Error`, `Message`, `Confirm`, `StrMenu`, notifications, or `ErrorInfo` | String literals aren't labels, so they never reach the `.xlf` file and can't be translated | A `Label` with an AA0074 suffix (§8.3) |
+| A label with a placeholder (`%1`, `#1`) and no `Comment` | Translators must guess what the placeholder holds and can reorder or drop it | `Comment = '%1 = <meaning>'` on every placeholder label (§8.3) |
+| An `OptionCaption` translation with a different member count than the option | Option values shift or disappear in that language | Same number of comma-separated members in every language (§8.4) |
+| Editing the generated `.g.xlf` by hand | Overwritten by the next build | Edit only the per-language target files (§8.2) |
+| Choosing a BC term in a translation from model memory | Wording that doesn't match what BC users see everywhere else in that market | Use Microsoft's own translation for the term (§8.5, Appendix D) |
+| Shipping units in `needs-translation`, `needs-adaptation`, `needs-review-translation`, or `translated` state | Untranslated or unapproved text reaches users; `translated` can be written by tools, so it doesn't prove human approval | Release only when every unit in every required language is `signed-off` or `final` (§8.7) |
+| Locking business or admin API captions — or leaving internal plumbing translatable — without a recorded decision | Business users see untranslated names in low-code tools, or translators spend effort on text no person reads | Classify every API page and query, and record the locking decision per object (§8.6) |
+| Testing translations with Incremental Build or RAD publishing | Microsoft documents that both ignore translations, so the test proves nothing | A full build before any language test (§8.2) |
+| Writing regional wording (`Tax`, `State`, `GST`) into the source text for a standard BC concept | A second market becomes a source-code change; alignment with Microsoft's translations breaks | Microsoft's W1 wording in source; regional wording in each language's `.xlf` (§8.1) |
+
+---
+
+## Part 8 — Translation & Multilanguage Rules
+
+> **Scope.** Applies to every project with at least one target language recorded at runbook Step
+> 01 §1.9. §1.7 (no ML syntax) applies to every project, whether or not it's translated. *When*
+> each rule is applied — intake, the build cycle, review, release — is the runbook's concern.
+
+### 8.1 Source Language and Source Wording
+
+- **Source language is `en-US` by default and by recommendation.** The runbook lets the developer
+  choose otherwise; if they do, record the choice and its consequences (below).
+  - The generated `.g.xlf` declares `source-language="en-US"`.
+  - Microsoft's own apps use `en-US` as their source language, and aligning with Microsoft's
+    translations (§8.5) matches on source text.
+  - A user whose language has no translation file sees the source text.
+- **Source wording is Microsoft's W1 (international) English** for every standard BC concept —
+  the words Microsoft's own source strings use. For example: `VAT`, not `Tax` or `GST`; `County`,
+  not `State`; `Credit Memo`, not `CR/Adj Note`.
+- **Regional wording lives in translation files, never in source.** Microsoft does the same even
+  for English markets:
+
+  | Microsoft file | Strings differing from source | Examples |
+  |---|---|---|
+  | US Base Application v27.5, `en-US` | 5,468 of 145,199 | `Set up VAT` → `Set up Tax`; `County` → `State` |
+  | English (Australia) language app v28.5, `en-AU` | 9,273 of 132,917 | `VAT` → `GST` (3,071 strings, while 178 keep `VAT`); `Sales Credit Memo` → `Sales CR/Adj Note` |
+  | English (United Kingdom) language app v28.5, `en-GB` | 4,838 of 128,333 | `VAT` and `Credit Memo` kept; `Customize` → `Customise`, `licenses` → `licences` |
+
+  Adaptations are per string, not search-and-replace — which is why §8.5 requires Microsoft's
+  translation for each term.
+- **Single-market exception — US English only.** When the *only* target language is `en-US` **and
+  the Deployment Target isn't AppSource** (AppSource requires translation files — §8.10), the
+  developer may choose to write US wording directly in source and ship no translation file. This is
+  the simpler path, and the runbook offers it — but W1 wording plus an `en-US.xlf` stays
+  recommended, because adding any other market later then requires no source changes.
+
+**If a non-`en-US` source language is chosen:** an `en-US.xlf` is required whenever English users
+exist, alignment with Microsoft's translations by source text isn't available, and any user without
+a translation file sees non-English text.
+
+### 8.2 Translation Files
+
+- **`app.json`:** `"features"` includes `"TranslationFile"` on every project. It also switches on
+  AL0424 (§1.7).
+- **Folder and naming:** all translation files live in `Translations/` in the project root. One
+  file per target language, named `<ExtensionName>.<culture>.xlf` — for example,
+  `Acme APIs.de-DE.xlf`. **`en-US` gets its own file too**, whenever it's a target language and
+  source wording is W1 (§8.1).
+- **Never edit `<ExtensionName>.g.xlf`.** The compiler regenerates it on every build. Only the
+  per-language target files are edited, and they're kept in sync with `.g.xlf` by tooling.
+- **`.g.xlf` is a build output; target files are deliverables.** Target `.xlf` files are
+  git-tracked. `*.g.xlf` is gitignored — it's regenerated from source on every build, and tracking
+  it only adds noise to every diff.
+- **Full builds only for language testing.** Microsoft documents that when Incremental Build is
+  enabled, or when publishing with RAD, translations are ignored.
+- **Culture codes, not Windows language IDs.** Files and parameters use `xx-YY` culture codes
+  (`en-AU`, `fr-CA`). The three-letter IDs (ENA, FRC) may be shown to people for recognition only.
+
+### 8.3 Labels, Placeholders, and Locked Text
+
+- **Every piece of user-facing text is a `Label` or a single-language text property** (§1.7). That
+  includes every `Error`, `Message`, `Confirm`, `StrMenu`, notification, and `ErrorInfo` message —
+  never a string literal.
+- **Label names end in a CodeCop AA0074 suffix:**
+
+  | Suffix | Use |
+  |---|---|
+  | `Msg` | Message |
+  | `Err` | Error |
+  | `Qst` | `Confirm` or `StrMenu` |
+  | `Lbl` | Label, caption |
+  | `Txt` | Text |
+  | `Tok` | Token — short technical values such as `GET` or `HTTPS`, always `Locked = true` |
+
+- **Every label with a placeholder carries a `Comment`** naming each placeholder:
+  `Comment = '%1 = Customer No., %2 = Document No.'`.
+- **`Locked = true`** for text that must never be translated: tokens, telemetry messages and event
+  IDs, fixed technical values, and captions recorded as locked under §8.6.
+- **`MaxLength`** on any label whose translation lands somewhere length-limited.
+
+### 8.4 Option and Enum Captions
+
+- An `OptionCaption` translation has **exactly the same number of comma-separated members** as the
+  option it describes, in the same order.
+- Enum value captions are translated per value; never concatenate captions to build text.
+
+### 8.5 Terminology — Microsoft's Translations Are the Authority
+
+When a string names a standard BC concept, its translation in each language uses **the term
+Microsoft's own BC translation for that language uses** — not a term chosen from model memory,
+general dictionaries, or another product's conventions. The procedure is **Appendix D**.
+
+**Sources, in order of authority:**
+
+1. **Microsoft's BC translation files for that language and market.** Where they are:
+   - **The localized Base Application** carries its own market's language — for example, "Base
+     Application (AU)" contains `Base Application.en-AU.xlf`, and the US Base Application contains
+     `Base Application.en-US.xlf`. Symbols downloaded from an environment of that localization
+     include it.
+   - **The System Application and Business Foundation packages** carry every Microsoft-translated
+     language (26 languages in the System Application).
+   - **Microsoft's language apps** — one per Microsoft-translated language, named
+     `English language (Australia)`, `German language (Germany)`, and so on — each contain
+     `Base Application.<culture>.xlf`. They're in Microsoft's public Business Central artifacts
+     (the `Extensions` folder of a country artifact), which BcContainerHelper's `Get-BCArtifactUrl`
+     locates.
+2. **The customer's partner localization or language app**, for a language whose application
+   translation Microsoft doesn't provide (§8.8).
+3. **Microsoft Terminology Collection** —
+   <https://learn.microsoft.com/en-us/globalization/reference/microsoft-terminology>
+4. **Microsoft Localization Style Guides**, for tone, formality, punctuation, and formats —
+   <https://learn.microsoft.com/en-us/globalization/reference/microsoft-style-guides>
+
+Every term chosen for a standard BC concept is recorded in the project's translation glossary, with
+the source it came from. Terms from sources 3–4 are marked for reviewer attention.
+
+**Microsoft's translation files are Microsoft's proprietary content.** Read them as a reference.
+Never commit them to a repository, copy them wholesale into an extension's translation files, or
+redistribute them.
+
+### 8.6 API Pages and API Queries — Translatable or Locked Captions
+
+Every `PageType = API` page and `QueryType = API` query is classified into exactly one group, and
+its caption-locking decision is recorded per object:
+
+| Group | Definition | Recommended | Microsoft precedent |
+|---|---|---|---|
+| **Business** | Exposes business data people work with: master data, documents, ledger entries, business setup, business reporting queries | **Translatable** | API v2.0 business pages and queries: 0 of 1,526 captions locked. Base Application Power Automate and Dataverse pages: 0 of 98. |
+| **Technical — admin** | Platform or infrastructure a person manages or configures through the API: the extension's own users, permissions, job scheduling, feature switches | **Translatable** | API v2.0 `automation` pages (users, permission sets, extension deployment, scheduled jobs): 1 of 157 captions locked. |
+| **Technical — internal plumbing** | Infrastructure no person configures: logs, sync or integration state, webhooks, telemetry, diagnostics | **Locked** | Base Application runtime pages (webhook logs, API routes, webhook supported resources): 21 of 21 locked. |
+
+- **Translatable objects** set `EntityCaption` and `EntitySetCaption` — the names Power Automate
+  and similar tools show people — as Microsoft's API v2.0 pages and queries do. Captions follow
+  §2.5 and §4.
+- **Locked objects** set `Locked = true` on the page or query `Caption` and every field `Caption`,
+  and omit `EntityCaption` / `EntitySetCaption`.
+- **`ToolTip`s stay translatable in both cases.** Microsoft's locked-caption pages leave tooltips
+  translatable.
+- The developer may override a recommendation per group. Every classification and decision is
+  recorded, with the name of the person who made it.
+
+*Precedent counts: Microsoft API v2.0 source (`microsoft/ALAppExtensions`, `Apps/W1/APIV2`, MIT
+License, © Microsoft Corporation) and the Business Central 27.5 US Base Application, counted
+September 14, 2026.*
+
+### 8.7 Translation States and Approval
+
+Every translation unit in a target file carries an XLIFF 1.2 `state`. The framework uses these
+states, and only these:
+
+| State | Meaning | Written by |
+|---|---|---|
+| `needs-translation` | No translation yet | Translation tooling, on sync |
+| `needs-adaptation` | A technical check failed, or the source text changed since translation | Translation tooling, on test or sync |
+| `translated` | Text present but **not approved** — for example, copied or imported by a tool | Translation tooling |
+| `needs-review-translation` | Drafted by the agent; awaiting human review | The agent |
+| `signed-off` | **Approved by the named reviewer for that language** | The reviewer, or the agent only on that reviewer's explicit, recorded instruction |
+| `final` | Approved and frozen | The reviewer |
+
+- **Only `signed-off` and `final` count as approved.** Tools write `translated` themselves (XLIFF
+  Sync does when importing or copying from source), so `translated` never proves a person reviewed
+  the text.
+- **The agent never approves its own drafts.**
+- **A changed source text invalidates approval.** XLIFF Sync moves such units to
+  `needs-adaptation` on sync; the unit must be reviewed and approved again.
+
+### 8.8 Language Support by Market
+
+What can be offered in a country follows Microsoft's *Country/Regional Availability and Supported
+Languages* page
+(<https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-countries-and-translations>),
+read live — never from memory, and never from a copy kept in a project or in this guide:
+
+| Case | Definition | Rule |
+|---|---|---|
+| **Microsoft-translated** | Microsoft provides the application translation for the language | Supported. Terminology source 1 (§8.5). |
+| **Partner-translated** | Microsoft translates the platform, but the application translation comes from a partner | Supported. Terminology source 2 — the customer's partner app — or sources 3–4 when unavailable, with reviewer attention required. |
+| **Not supported by BC** | The language isn't in Microsoft's supported-languages table | Not offered by default. If a developer requires it, record it as outside platform support. |
+
+- **Right-to-left languages aren't supported by Business Central's interface.** Microsoft's page
+  lists Israel as "no RTL; English only", and no right-to-left language appears in its
+  supported-languages table. Whether right-to-left *data* stores and prints correctly must be
+  tested in a sandbox before it's promised.
+- **Where no regional English exists, English means `en-US`.**
+
+### 8.9 Beyond Captions
+
+- **Customer-facing documents** follow the customer's language, or the company's default document
+  language, when the project records that requirement — not the language of the user who posts
+  them.
+- **Report layouts:** only report labels are translated. Never type user-facing text directly into
+  a Word or RDLC layout.
+- **Translatable business data** (user-entered text that needs per-language versions) follows BC's
+  translation-table pattern, as Item Translations does — see AL Guidelines, *Multilanguage
+  Application Data*.
+- **Text expansion:** captions and messages must tolerate translations roughly 30% longer than
+  English, especially in cues, action captions, and narrow columns.
+- **Teaching tips** (`AboutTitle`, `AboutText`) are translatable captions like any other.
+
+### 8.10 AppSource
+
+Applies when the runbook's Deployment Target is `AppSource`.
+
+- **Translation files are mandatory.** Microsoft's technical validation checklist: "The extension
+  submitted must use translation files." The §8.1 US-only no-translation-files exception doesn't
+  apply.
+- **No specific language is mandatory per market** for a standard AppSource app. Microsoft's
+  marketing validation guidance says the app "can be in any language; if not in English, a document
+  with English translation is required." The exception is Microsoft's Validated Localization app
+  program, which requires translation into local languages — of the localization app, its
+  documentation, and the base app where the language isn't already supported.
+- **Declare exactly what ships.** The offer description ends with *Supported Countries/Regions* and
+  *Supported Languages* paragraphs, written in English:
+  - list only languages whose translation files ship with every unit approved (§8.7);
+  - the Partner Center markets must match the countries paragraph.
+- **Test in every listed country.** Microsoft: "each country's base code is slightly different."
+
+> *Sources and attribution:* the CodeCop AA0074 suffix list, the Incremental Build / RAD behavior,
+> the AppSource technical and marketing language requirements, the Validated Localization app
+> translation requirements, and the country and language support facts are summarized and briefly
+> quoted from Microsoft Learn —
+> [CodeCop Warning AA0074](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/analyzers/codecop-aa0074),
+> [Working with translation files](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-work-with-translation-files),
+> [Technical validation checklist](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-checklist-submission),
+> [Language, Branding, and Images](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/readiness/readiness-checklist-a-languange-branding),
+> [Offer Description](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/readiness/readiness-checklist-c-offer-description),
+> [Development of validated localization apps](https://learn.microsoft.com/en-us/dynamics365/business-central/about-validated-localization-apps),
+> and [Country/Regional Availability and Supported Languages](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-countries-and-translations)
+> — © Microsoft Corporation, licensed under
+> [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); reorganized into the tables above.
+> String counts and examples in §8.1 come from reading Microsoft's own translation files — the US
+> Base Application symbol package (v27.5) and the English (Australia) and English (United Kingdom)
+> language apps in Microsoft's public Business Central artifact for Australia (sandbox
+> 28.5.54151.54677) — on September 14, 2026. Those files are Microsoft proprietary content; only
+> aggregate counts and short examples are cited. XLIFF state behavior of XLIFF Sync is from its
+> source code (`rvanbekkum/ps-xliff-sync`, MIT License, © Rob van Bekkum).
 
 ---
 
@@ -694,7 +950,48 @@ if the two ever disagree.
 | AL Language (Microsoft) | AL IntelliSense, compiler, symbol files |
 | AL Object ID Ninja | Manages object ID ranges across team members |
 | AZ AL Dev Tools | Linting, unused variable detection, code quality — the rule set the runbook's Step 06 post-generation pass reads against |
+| XLIFF Sync (VS Code extension, Rob van Bekkum) | Translation reviewer's tool — sync target files, jump to missing or needs-work units, technical translation checks |
+| XLIFF Sync PowerShell module (`XliffSync`, Rob van Bekkum) | The agent's headless translation sync and checks (`Sync-XliffTranslations`, `Test-XliffTranslations`, `Test-BcAppXliffTranslations`) |
+| NAB AL Tools (Johannes Wikman) | Alternative translation-management extension, for developers who already use it |
 | Git | Version control |
+
+---
+
+## Appendix D — Terminology Verification Procedure
+
+The translation equivalent of Appendix B. Run it for every target language, for every source string
+that names a standard BC concept. Record every result in the project's translation glossary.
+
+1. **Locate Microsoft's translation files for the language**, in this order. An `.app` file is a
+   short header followed by a standard zip archive; list its `Translations/` folder.
+   1. **The project's localized Base Application symbols** (`.alpackages/`) — they carry that
+      localization's own language(s), e.g. `Base Application.en-AU.xlf` in "Base Application (AU)".
+   2. **The System Application and Business Foundation symbols** — for System Application and
+      Business Foundation strings, in every Microsoft-translated language.
+   3. **Microsoft's language app for the language**, when step 1 doesn't carry it — for example,
+      `fr-CA` for an extension built on a US localization. It's the
+      `Microsoft_<Language> language (<Country>)` app in the `Extensions` folder of Microsoft's
+      public Business Central artifact for a matching BC version. Locate the artifact with
+      BcContainerHelper's `Get-BCArtifactUrl` (or its public artifact index), and fetch only that
+      one app — a few megabytes — rather than the whole artifact. **Tell the human before
+      downloading**, and follow Operating Rule 6b if any tooling would need installing.
+   4. For a **partner-translated** language (§8.8), the customer's partner language or localization
+      app.
+
+   - **Record which package and version each file came from.** Prefer the same major BC version the
+     project targets.
+   - **If no Microsoft file for the language can be obtained, stop and say so.** Ask the human for
+     an environment or package that has it. Never proceed from memory of what Microsoft's term is.
+2. **Find Microsoft's matching unit** — by exact source text first, then by the object and field
+   or property the string refers to (the `Xliff Generator` note).
+3. **Use Microsoft's target text for the term.** Keep the rest of the sentence natural in the
+   target language; the rule governs the BC term, not word-for-word copying.
+4. **Record** the source term, the target term, the Microsoft file and version, and the date in the
+   glossary.
+5. **No Microsoft match:** use the customer's partner localization app (§8.8), then the Microsoft
+   Terminology Collection and style guides (§8.5). Mark the glossary row **reviewer attention**.
+6. **Never commit or redistribute** the Microsoft files read in step 1 (§8.5). Read them where they
+   are, or extract them outside the project's git-tracked tree.
 
 ---
 
