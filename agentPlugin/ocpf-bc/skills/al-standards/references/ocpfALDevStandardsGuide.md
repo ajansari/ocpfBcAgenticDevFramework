@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 1.5.0.0
+**Version:** 1.6.0.0
 **Last Updated:** September 15, 2026
 
 > **Audience:** Human developers and agentic (AI) developers building Business Central AL
@@ -18,7 +18,9 @@
 > that sequence applies.** The runbook cites it as **Standards §**. Where the two ever appear to
 > disagree about *process*, the runbook wins; where they appear to disagree about an *AL rule*,
 > this guide wins — but neither should happen, because neither document restates the other's
-> content (see *What is deliberately not here* below).
+> content. The runbook names an AL rule in one line where a checklist applies it and cites
+> **Standards §**; the rule's rationale, limits, tool behavior, and reference links live only here.
+> The runbook's process lives only there (see *What is deliberately not here* below).
 >
 > **Authoritative-source rule:** Every name, ID, version, prefix, namespace, and quoting decision
 > comes from the **Project Parameters** block that the runbook fills in interactively at **Step
@@ -34,7 +36,7 @@ rather than keeping a second, silently-diverging copy:
 
 | Topic | Where it actually lives |
 |---|---|
-| The intake sheet / project parameters (extension identity, ID ranges, naming & API parameters, platform & runtime, feature flags, onboarding, model roles, `.gitignore` policy) | Runbook **Step 01**, asked interactively |
+| The intake sheet / project parameters (extension identity, ID ranges, naming & API parameters, platform & runtime, feature flags, onboarding, model roles, `.gitignore` policy), and how its questions are grouped and asked | Runbook **Step 01** and **Operating Rule 6a**, asked interactively |
 | Required project documents, and the phase/stage lifecycle | Runbook **ALL ALONG → Document**, and its DEFINE → DESIGN → BUILD → PROVE phase structure |
 | What makes a TDD self-sufficient | Runbook **Step 03** |
 | The sanity-check checklist | Runbook **Step 04** |
@@ -44,7 +46,7 @@ rather than keeping a second, silently-diverging copy:
 | Verifying against symbol files rather than model memory | Runbook **Operating Rule 2** (procedure in Appendix B below) |
 | The ChangeLog entry format | Runbook **ALL ALONG → Track Changes** |
 | The Object Register | Runbook **ALL ALONG → Document** |
-| The language and translation intake questions (working language, countries, languages, source language, reviewers, document languages) | Runbook **Step 01 §1.9**, asked interactively |
+| The language and translation intake questions (working language, countries, languages, source language, reviewers, document languages) | Runbook **PRE-01** and **Step 01** (Box 1 and §1.9), asked interactively |
 | The interactive API caption-locking classification | Runbook **Step 03** (the rules it applies are §8.6 below) |
 | When translations are synced, drafted, checked, and tested; the translation release gate | Runbook **Step 07**, **Step 12**, and **ALL ALONG → Translations & Terminology** |
 
@@ -873,7 +875,8 @@ states, and only these:
 
 - **Only `signed-off` and `final` count as approved.** Tools write `translated` themselves (XLIFF
   Sync does when importing or copying from source), so `translated` never proves a person reviewed
-  the text.
+  the text. XLIFF Sync's own checks also report `needs-review-translation` units as neither missing
+  nor needing work, so no tool's check stands in for a scan of the states themselves.
 - **The agent never approves its own drafts.**
 - **A changed source text invalidates approval.** XLIFF Sync moves such units to
   `needs-adaptation` on sync; the unit must be reviewed and approved again.

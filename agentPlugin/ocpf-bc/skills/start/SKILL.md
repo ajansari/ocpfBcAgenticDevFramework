@@ -16,8 +16,10 @@ It never overwrites an existing file.
 Repository: `https://github.com/ajansari/ocpfBcAgenticDevFramework` (default branch `main`).
 
 Throughout, when you need the human to **decide** something, use the harness's selectable options
-mechanism (for example `AskUserQuestion` in Claude Code), with the recommended option first and a
-short reason on each. Ordinary progress updates are plain messages.
+mechanism, with the recommended option first and a short reason on each: `AskUserQuestion` in
+Claude Code, the `askQuestions` tool in GitHub Copilot Chat in VS Code, or `ask_user` in GitHub
+Copilot CLI (its choice questions take no typed answer, so add an *I'll type it* choice where a
+typed answer is possible). Ordinary progress updates are plain messages.
 
 ## Step 1: Work out where you're running
 

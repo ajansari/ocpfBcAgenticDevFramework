@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 2.12.0.0
+**Version:** 2.13.0.0
 **Last Updated:** September 15, 2026
 
 > Version history for this framework lives in `RunbookChangelog.md`, tracked independently of any
@@ -13,7 +13,7 @@
 >
 > **How the agent uses it:** Work the phases in order (DEFINE → DESIGN → BUILD → PROVE). Do not start a step until its predecessor's exit gate is met. Every step lists its **Inputs**, **Actions**, **Outputs**, and **Exit gate**. The *Project Parameters* block in Step 01 is the single source of truth for every name, ID, version, and quoting decision — never hardcode any of those values in AL; always derive them from that block. It is persisted as `docs/ProjectParameters.md`, not just discussed — every later step reads it from that file.
 >
-> **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide** (v1.5.0.0). This runbook drives the *sequence*; that guide holds the detailed AL *rules* the sequence applies (Parts 1–8, Appendices A–D). References below point to it as **Standards §**. It is fetched into the project at PRE-01 and kept for the life of the project — see ALL ALONG → OCPF AL Development Standards Guide for the fetch, refresh, and `.gitignore` policy. **Neither document restates the other:** the intake sheet, the phase/step sequence, every checklist, the compile cadence, and the ChangeLog format live only here; AL coding rules, API page design, field inclusion, naming, ID allocation, gap analysis, and anti-patterns live only there.
+> **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide** (v1.6.0.0). This runbook drives the *sequence*; that guide holds the detailed AL *rules* the sequence applies (Parts 1–8, Appendices A–D). References below point to it as **Standards §**. It is fetched into the project at PRE-01 and kept for the life of the project — see ALL ALONG → OCPF AL Development Standards Guide for the fetch, refresh, and `.gitignore` policy. **Neither document restates the other:** this runbook names each AL rule in one line where a checklist applies it and cites **Standards §**; the rule's rationale, limits, tool behavior, and reference links live only in the guide. The intake sheet, the phase/step sequence, every checklist, the compile cadence, and the ChangeLog format live only here; AL coding rules, API page design, field inclusion, naming, ID allocation, gap analysis, and anti-patterns live only there.
 >
 > **Prime directive for the agent:** An ambiguous input produces ambiguous code. If a step's inputs are incomplete or contradictory, stop and ask the human — do not invent rules to fill the gap.
 >
@@ -24,7 +24,7 @@
 ## Operating Rules (apply in every phase)
 
 1. **Part 1 is authoritative.** Publisher, prefix, namespace, versions, ID ranges, localization — read them from the Project Parameters block (Step 01) and derive everything else. Never hardcode.
-2. **Verify against BC symbol files, not memory.** Table numbers, `using` namespaces, field IDs, `ObsoleteState` — confirm each in the symbol file named in Parameter 1.4. Agent knowledge of BC table numbers is not reliable; the verification procedure is Standards Appendix B. The agent downloads those symbols itself at Step 01 §1.10 (ALL ALONG → Symbols); the human never has to. **Fallback when the downloaded symbols don't answer the question** (a module isn't in `.alpackages`, or you need to browse/discover rather than already knowing what to grep for): the entire BC BaseApp, for the current Business Central Online version, is documented at <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application> — every standard table, field, and field datatype/size — and the **System Application** (the foundation modules everything else builds on: Language, Translation, Email, Telemetry, and the rest) at <https://learn.microsoft.com/en-us/dynamics365/business-central/application/system-application/module/system-application>. Use them to corroborate or discover; the downloaded symbol file for the target version is still the authoritative source when the two ever disagree.
+2. **Verify against BC symbol files, not memory.** Table numbers, `using` namespaces, field IDs, `ObsoleteState` — confirm each in the symbol file named in Parameter 1.4. Agent knowledge of BC table numbers is not reliable; the verification procedure is Standards Appendix B. The agent downloads those symbols itself at Step 01 §1.10 (ALL ALONG → Symbols); the human never has to. **Fallback when the downloaded symbols don't answer the question:** Microsoft Learn's Base Application and System Application reference (Standards Appendix B; links in ALL ALONG → Reference Sources). The downloaded symbols win when the two disagree.
 3. **Phase large scope into batches.** A batch is a self-contained, reviewable increment (by module or document-type group) — designed to be independently correct even though, under Operating Rule 4, it is not compiled on its own to prove it. Define batch boundaries during DESIGN and record them in the TDD.
 4. **Lint every batch as it's written, including symbol verification. Do not compile per batch — the whole extension compiles and packages once every batch from the TDD's batch plan is written, gating entry to PROVE.** Run the Step 05 pre-flight checklist immediately on each batch — both passes: pre-generation (on planned names/fields) and post-generation (on the actual files); Step 05 defines the full list — including **symbol verification**: for every reference to a standard/base object, field, method, property, or enum value, verify it against the downloaded symbol source (falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer), not just against what looks like plausible AL. That check exists specifically against hallucination: checking against the actual symbols is the one thing that verifies against ground truth instead of a plausible-looking guess. Do not invoke the AL compiler as an automatic part of generating batches — a real compile still catches cross-file type mismatches and full semantic validation that symbol-verified lint can't, so deferring it to one mandatory pass trades a small risk of a late, wider-reaching fix for faster generation. The one mandatory compile-and-package of the originally-planned batches happens in Step 07, triggered the moment Step 06 finishes — not deferred further, and not skipped. **From that point, compiling and packaging is the continuous rhythm of Step 07, Step 08's gap-fix loop, and Step 09's Code Review fixes, whenever any of them needs a code change: compile, package, deploy to a sandbox, test, diagnose and fix, then compile and package again, and repeat** — never a one-time event held back for a later step. A human may also request an earlier spot-check compile mid-BUILD; that doesn't replace the mandatory one. Gap-fill work is pre-flighted and compiled-and-packaged the same way, as its own pass, once it actually exists — it isn't part of the mandatory compile-and-package, since it doesn't exist yet at that point. Whenever any compile runs, treat any error as a systemic signal: fix the rule/template, then every file it touched — across every batch, not only the one where the error surfaced.
 5. **Zero errors, zero warnings before PROVE.** Treat warnings as errors during development — a warning about an obsolete field or a missing property is a defect, not cosmetic noise. Satisfied by construction under Rule 4: the one mandatory compile-and-package (Step 07) always runs, and must reach 0/0, before Step 08 begins.
@@ -44,6 +44,16 @@
     it (in Claude Code, *Other*). Step 01 says what to offer as options for each question. Why: an
     open-ended chat question is easy to half-answer or skip past — exactly the failure this rule
     exists to prevent.
+    **The mechanism, per harness:**
+    - **Claude Code — `AskUserQuestion`:** up to four questions per box, 2–4 options each, with a
+      free-text *Other* added automatically; multi-select where several answers apply.
+    - **GitHub Copilot Chat in VS Code — the `askQuestions` tool:** several questions in one
+      carousel, each single-select, multi-select, or free text.
+    - **GitHub Copilot CLI — the `ask_user` tool:** a choice question there takes no typed answer,
+      so add an explicit *I'll type it* choice and follow it with a free-text question.
+    - **Anything else:** its closest equivalent. Where the mechanism takes one question at a time,
+      ask the same questions one after another. Only when a harness has no question mechanism at
+      all, ask one question per message with its options labelled, and say why.
 6b. **Don't install tooling without asking — and look harder first.** Before concluding a required compiler/runtime is missing and reaching for an install, check whether the human's own IDE already provisions one privately for the tool in question — e.g., VS Code's AL extension gets its .NET runtime from a companion ".NET Install Tool" extension, not a system-wide install, at a path that differs by OS: `~/Library/Application Support/Code/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/` on macOS, `~/.config/Code/User/globalStorage/ms-dotnettools.vscode-dotnet-runtime/` on Linux, `%APPDATA%\Code\User\globalStorage\ms-dotnettools.vscode-dotnet-runtime\` on Windows — check the one matching the actual machine, not just the first one you think of, *before* assuming none exists. If the human's own editor can already do the thing you're about to install a tool for, that's a strong signal the tool already exists somewhere you haven't looked. Installing anything is itself a human-in-the-loop decision (rule 6) regardless of what a fallback option elsewhere in this runbook lists as available — on a real project the agent skipped the search, wrongly installed a fresh runtime, and had to remove it.
 6c. **From Step 08 onward, check in only after a step that hands the human something to act on.**
     When a PROVE step's own work is finished — its outputs written, its exit gate met, and the
@@ -157,7 +167,7 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
   the project root — always, not `docs/`** — one row per step of the whole
   routine, every row blank except this one, marked `In Progress`. This is the very first file
   artifact of the entire engagement.
-- Write a problem statement: what business outcome is required, who the consumers are (users, other systems, AI tools, BI/reporting), which **countries and languages** the users work in (confirmed formally at Step 01 §1.9), and what is explicitly out of scope.
+- Write a problem statement: what business outcome is required, who the consumers are (users, other systems, AI tools, BI/reporting), which **countries and languages** the users work in (confirmed once, in Step 01's first box), and what is explicitly out of scope.
 - Capture the domain vocabulary the design will anchor to (entity names, categories, known pain points).
 - Produce an initial entity/object list from stakeholder domain knowledge.
 - As the agent: identify duplicates, ambiguous terms, and outdated/legacy terminology in the initial list; ask clarifying questions about scope and consumer use cases. Do not resolve ambiguities silently.
@@ -190,64 +200,45 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
 
 **Actions:** Complete **every** field below. Replace every placeholder. These values override all defaults for the rest of the routine. **This block is the authoritative source** — the single source of truth for every name, ID, version, prefix, namespace, and quoting decision in the project. The Standards Guide deliberately keeps no copy of it and defers to whatever is filled in here (Standards, "Authoritative-source rule"); nothing in AL code hardcodes a value that belongs in this block.
 
-**Ask first, don't infer — and ask interactively** (Operating Rule 6a). **Every question in this step goes through the options mechanism, never as an open-ended
-question or a numbered list in chat.** That includes the identity questions below, the ID range
-loop, Deployment Target, §1.4's BC version, §1.6, §1.7, §1.8, and §1.9. Ask one question per box, or a
-few related ones together where the mechanism allows it (Claude Code's `AskUserQuestion` takes up
-to four per box).
+**Ask first, don't infer — and ask interactively** (Operating Rule 6a). Every question in this step
+goes through the options mechanism Rule 6a names for this harness, never as an open-ended question
+or a numbered list in chat. **Use as few boxes as the questions allow:** a box holds up to four
+questions, each with its own options, and questions share a box only when none depends on another's
+answer. Where the harness asks one question at a time, ask the same questions in the same order.
 
-If `Extension Name`, `Publisher`, `Use Namespace (y/n)`, `Namespace`, `Localization`, or
-`AL Object Prefix` (§1.3) still carry placeholder values, ask these before writing anything:
-
-| # | Question | Options to offer (free-text entry always available) |
-|---|---|---|
-| 1 | What is the Extension Name? | Up to three names built from the problem statement's own wording, each labelled as a suggestion. |
-| 2 | Who is the Publisher? | Only names the human has already written or uploaded, quoted verbatim, each with where it came from. If there are none, offer *I'll type it* (its description says to use the free-text entry) and *Decide after the other questions*. |
-| 3 | Should this project use an AL namespace? | *Yes (recommended)* / *No*. If yes, follow up with `<Publisher>.<ExtensionShort>` built from answers 1–2. |
-| 4 | What Localization applies? | The countries named in `ProblemStatement.md`, as codes (e.g. `US`), then `W1`. |
-| 5 | What AL object prefix should be used? | Two or three short lowercase prefixes built from answers 1–2. |
-| 6 | What Permission Set App Code identifies this extension? | Two or three uppercase codes built from answer 1 that fit `13 − (prefix length)` characters (e.g. `NAICS`). The question says the code must differ from every other extension using this prefix. |
-| 6a | Do other extensions already use this prefix? | *No, this is the first* / *Yes* (follow up in free text: their permission set names or App Codes). If the new code matches one, ask question 6 again. If the human isn't sure, recommend a more specific code. |
+**Before the first box,** read `ProblemStatement.md` for suggestions, and read Microsoft's live
+*Country/Regional Availability and Supported Languages* page (§1.9) so every country and language
+offered is one Business Central supports.
 
 **A suggestion is a candidate the human picks, never an answer recorded on their behalf.**
 Nothing goes into `docs/ProjectParameters.md` until the human has selected or typed it. Build
 suggestions only from what the human said or confirmed, never from an email domain or a guess at
-house style. Inferring these under time pressure already forced a full-project rename on a real
-project, after the inferred publisher and prefix turned out to be wrong.
+house style — an inferred publisher and prefix once forced a full-project rename.
 
-**Why question 6 exists**: permission sets named from the prefix
-alone (`OCPF - READ`) collided across every extension built with that prefix. Each extension was
-fixed by hand after the error surfaced, each with a different pattern, and the runbook never
-changed, so the next extension hit it again. The rule, the length limit, and the evidence are
-Standards §5.4.
+| Box | Questions | Options to offer (free-text entry always available, Rule 6a) |
+|---|---|---|
+| **1 — Identity** | 1. What is the Extension Name? | Up to three names built from the problem statement's own wording, each labelled as a suggestion. |
+| | 2. Who is the Publisher? | Only names the human has already written or uploaded, quoted verbatim, each with where it came from. If there are none: *I'll type it* / *Decide after the other questions* — then ask it again, alone, before Box 2. |
+| | 3. What is the Deployment Target? | *SaaS PTE* / *OnPrem PTE* / *AppSource*, the best fit for the problem statement first. |
+| | 4. Which countries will users work in? *(multi-select)* | The countries `ProblemStatement.md` names that Business Central is available in. **Countries are asked only here** — Localization and §1.9 reuse the answer. |
+| **2 — Naming** *(built from Box 1)* | 5. What AL object prefix should be used? | Two or three short lowercase prefixes built from the name and publisher. |
+| | 6. Which namespace? | `<Publisher>.<ExtensionShort>` built from Box 1 *(recommended)* / one alternative spelling / *No namespace* (only for a deliberate reason, e.g. a BC version that predates namespaces). One answer records both **Use Namespace** and **Namespace**. |
+| | 7. What Localization applies? | Up to three of the Box 1 countries as codes (e.g. `US`), then `W1`. |
+| | 8. Which Business Central version? | The current Business Central online major version *(recommended)* and the one before it, looked up on Microsoft Learn, never from memory. A sandbox the human already has is the natural choice. Don't ask for `runtime` (§1.4). |
+| **3 — Permission sets & IDs** *(built from Box 2)* | 9. What Permission Set App Code identifies this extension? | Two or three uppercase codes built from the name that fit `13 − (prefix length)` characters (e.g. `NAICS`). The question says the code must differ from every other extension using this prefix (Standards §5.4). |
+| | 10. Do other extensions already use this prefix? | *No, this is the first* / *Yes — I'll type their App Codes or permission set names*. If one matches answer 9, ask 9 again, alone. If the human isn't sure, recommend a more specific code. |
+| | 11. Which Object ID range? | Complete ranges, each with its size: any range the human's material names (e.g. *80300–80339 — 40 IDs*); *50100–50149 — 50 IDs*, described as "the AL template's default: only if no range has been assigned to you"; or type one as `start–end`. A typed range whose start is above its end is asked again. |
+| | 12. Is there another Object ID range? | *No* / *Yes*. Each *Yes* opens a box with questions 11 and 12 again, for the next range. |
+| **4 — Onboarding** *(§1.6)* | 13–15. Assisted Setup Wizard? Role Center Activity Cues? Departments / "My Business Central" placement? | *No* / *Yes* for each, with §1.6's one-line description of what it is. A box of follow-ups then asks the specifics of each *Yes*, offering choices drawn from the problem statement. |
+| | 16. Permission Sets required? *(only if the entity list has no new table)* | *No — the extension adds no tables* / *Yes*. Not asked when the extension owns a table: then it's `Yes` (§1.2). |
+| **5 — Working setup** | 17. Split work across models? *(§1.7)* | *One model for everything (recommended)* / *Recommended split* / *Customize each role*. |
+| | 18. Leave this framework's own files out of the project's repository? *(§1.8)* | *Yes (recommended)* / *No, track them*, with §1.8's one-sentence explanation in the question. |
+| | 19. Which language is the AL source text written in? *(§1.9)* | *`en-US` (recommended)*, with Standards §8.1's reason in one sentence, or another language typed in. |
+| **6 onward — Languages** *(§1.9)* | The per-country, per-language, and document questions in §1.9. | As §1.9 lists. |
+| **Last — Confirm** | 20. Is this sheet right? | Show the complete sheet first — every Object ID range with its size and the derived permission set names. *Confirm the sheet* / *Change something* (then ask only the questions being changed). |
 
-**Deployment Target:** *SaaS PTE* / *OnPrem PTE* / *AppSource*, with the one that fits the problem
-statement first.
-
-**Then collect Object ID ranges (§1.2) the same way — as a loop, not a single question,** since
-there can be more than one range:
-
-1. **Starting Object ID.** Offer any range the human's material already names. Otherwise use the
-   free-text entry, with `50100` as an option described as "the AL template's default: use it only
-   if no range has been assigned to you."
-2. **Ending Object ID.** Offer the start plus 49 (50 IDs) and the start plus 99 (100 IDs), and
-   free text.
-3. **Confirm.** Show the resulting range and its size (e.g. "80300–80339 — 40 IDs"): *Yes, that's
-   right* / *No, re-enter it*.
-4. **Additional ranges?** *No* / *Yes*.
-5. If yes, repeat steps 1–4 for the next range. If no, stop — every confirmed range is final.
-
-The first confirmed range is the Primary allocation; every one after it is an Additional
-allocation — there can be more than one.
-
-**BC version (§1.4).** Offer the current Business Central online major version as recommended, and
-the one before it. Look the version up on Microsoft Learn; never answer from memory. If the human
-already has a sandbox, its version is the natural choice. Don't ask for `runtime`. Read it from
-Microsoft Learn's [Choose runtime version in AL](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-choosing-runtime)
-table (for example, runtime `17.0` ships with Business Central 28.0).
-
-**§1.6, §1.7, §1.8, and §1.9** are asked the same way: *Yes* / *No* (or the listed choices), with the
-recommended option first, and follow-up questions for the specifics of a *Yes*.
+**Why question 9 exists**: permission sets named from the prefix alone (`OCPF - READ`) collided
+across every extension built with that prefix (Standards §5.4).
 
 **Once the human confirms the sheet, the agent sets up the AL project before DESIGN** — §1.10.
 
@@ -295,24 +286,24 @@ up front, not discovered by surprise the first time a build finishes.
 
 ### 1.2 Object ID Allocation
 
-Collected as the loop described above — one row per confirmed range, in the order confirmed:
+Collected by Box 3's questions 11–12 — one row per range, in the order given:
 
 | Block | From | To | Notes |
 |---|---|---|---|
-| **Primary allocation** | `<fromObjectId>` | `<toObjectId>` | The first range confirmed; the main scope. |
-| **Additional allocation 1** *(if any)* | `<additionalFrom1>` | `<additionalTo1>` | Second confirmed range, if the human said yes to "additional ranges?" |
+| **Primary allocation** | `<fromObjectId>` | `<toObjectId>` | The first range given; the main scope. |
+| **Additional allocation 1** *(if any)* | `<additionalFrom1>` | `<additionalTo1>` | Second range, if the human answered *Yes* to "another range?" |
 | **Additional allocation N** *(if any)* | … | … | Repeat one row per further "yes" — there is no fixed limit. |
 
 | Parameter | Value | Guidance |
 |---|---|---|
-| **Permission Sets required?** | `Yes` / `No` | `No` is a valid answer **only when the extension introduces zero new tables of its own** (e.g., a pure page/report extension on standard objects) — the one case where BC PTE publish validation (`PTE0004`) doesn't require an in-package permission set. The moment the project owns even one table, this must be `Yes`; it stops being a free choice. If `Yes`, reserve ≥ 2 IDs inside the primary range and deliver per Standards §5.3. |
+| **Permission Sets required?** | `Yes` / `No` | `No` only when the extension introduces zero new tables of its own, e.g. a pure page or report extension (Standards §5.3). The moment the project owns a table, it's `Yes` — not asked (Box 4, question 16). If `Yes`, reserve ≥ 2 IDs inside the primary range. |
 
 > **Rule:** Never use object IDs outside the allocated ranges. Maintain the object register as a separate project artifact. If the project plans any new table, `Permission Sets required` must be `Yes` and they must be planned before code generation — do not accept `No` alongside a table in the entity list without flagging the contradiction back to the human.
 
-**Worked example** (the loop ran twice): starting ID `90800`, ending ID `90899` → shown as
-"90800–90899 — 100 IDs," confirmed → "additional ranges?" → Yes → starting ID `91500`, ending ID
-`91549` → shown as "91500–91549 — 50 IDs," confirmed → "additional ranges?" → No → stop. Final:
-Primary `90800`–`90899`; Additional allocation 1 `91500`–`91549`; Permission Sets required = `Yes`.
+**Worked example** (two ranges): Box 3 — the human types `90800–90899` and answers *Yes* to
+"another range?" → the next box — the human types `91500–91549` and answers *No*. The confirmation
+sheet shows "90800–90899 — 100 IDs" and "91500–91549 — 50 IDs". Final: Primary `90800`–`90899`;
+Additional allocation 1 `91500`–`91549`; Permission Sets required = `Yes`.
 
 ### 1.3 Naming & API Parameters
 
@@ -364,11 +355,11 @@ Primary `90800`–`90899`; Additional allocation 1 `91500`–`91549`; Permission
 ### 1.6 Onboarding & Discoverability
 
 > These decisions shape real objects — a wizard page, Role Center cue fields, department/Tell Me
-> entries — so ask them at intake, not part-way through DESIGN when the object inventory is
-> already being drafted around their absence. Ask the same way as the §1.1 identity questions:
-> an explicit question each, before assuming an answer either way.
+> entries — so they're asked at intake (Box 4), not part-way through DESIGN when the object
+> inventory is already being drafted around their absence.
 
-Ask these three questions:
+The three questions, each *No* / *Yes* with this description, and the specifics of a *Yes* asked in
+one follow-up box:
 
 1. Should this extension include an **Assisted Setup Wizard**? If yes, what should it configure
    (e.g., number series, default setup values, sample/demo data, permission set assignment)?
@@ -401,23 +392,21 @@ a mechanism-agnostic capability, not tied to any one harness. This runbook uses 
 three fixed roles, kept deliberately generic (no vendor/model names) since it travels to projects
 on other harnesses:
 
-Ask: "This framework can split work across up to three roles, each potentially a different model.
-Do you want to configure this, or should everything run through one model?"
+Ask it as Box 5's question 17, one question with three options:
+- ***One model for everything (recommended)*** — no role assignment; this section doesn't apply.
+- ***Recommended split*** — name the models this harness actually offers: a capable general model
+  for Main, a fast lower-cost model for Light, the strongest reasoning model for Reasoning, High
+  thinking effort for all three. Recorded exactly as named.
+- ***Customize each role*** — then ask each role's **model** and **thinking effort** as two
+  separate questions, never one merged question, in two boxes: Main model, Main effort, Light
+  model, Light effort; then Reasoning model, Reasoning effort. Every effort question offers
+  **High first, as recommended, for every role, regardless of the model chosen** — see the rule
+  below. If a chosen model has no effort setting, record `N/A` rather than leaving it blank.
 
-If configuring, go through the three roles **one at a time** — Main, then Light, then Reasoning —
-and for each one, ask **two separate questions in sequence, never merged into one prompt:**
+If the harness can't run sub-agents at all, say so in the question and offer only *One model*.
 
-1. *"Which model should the `<Role>` role use?"*
-2. *"What thinking effort should the `<Role>` role run at — High or Medium?"* — its own
-   interactive prompt (Rule 6a), asked immediately after the model is chosen for that role, never
-   inferred from which model was just picked. **Recommend High as the first-listed option, for
-   every role, regardless of which model was just chosen** — see the unifying rule below. If the
-   model just chosen has no such setting at all, that's `N/A`, still recorded explicitly rather
-   than left blank.
-
-Repeat the pair for each of the three roles before moving on. What each role is *for*, so the
-human is choosing a model (and, per the rule below, confirming or overriding High) with the actual
-job in mind:
+What each role is *for*, so the human is choosing a model (and confirming or overriding High) with
+the actual job in mind:
 
 1. **Main role** — does the bulk of the work: all BUILD code generation, all actual code edits
    (including applying what the other two roles report), and end-to-end ownership of the
@@ -484,83 +473,62 @@ they appear as `ocpf-bc:ocpf-light` and `ocpf-bc:ocpf-reasoning`. They already c
 section's division of labor: they report, draft, or diagnose, and are denied file-editing tools.
 If role assignment is configured, delegate each role's tasks to its sub-agent, passing the
 configured model and thinking effort where the harness allows a per-delegation override.
-Where it doesn't, tell the human which model the sub-agent will actually run on. If
-the harness can't run sub-agents at all (Claude Chat, Microsoft Copilot Cowork, the github.com
-cloud agent), say so at this question and continue with one model. This doesn't change the
+Where it doesn't, tell the human which model the sub-agent will actually run on. Harnesses that
+can't run sub-agents at all include Claude Chat, Microsoft Copilot Cowork, and the github.com cloud
+agent. This doesn't change the
 default: with no role assignment, everything still runs through the main model.
 
 | Parameter | Placeholder | Guidance |
 |---|---|---|
-| **Model/role assignment** | `<ModelRolesYN>` | `No` (default — one model for everything) or a 3-row table: Main role / Light role / Reasoning role → the **model and thinking effort** (High recommended / Medium / N/A) assigned to each, asked as two separate questions per role. |
+| **Model/role assignment** | `<ModelRolesYN>` | `No` (default — one model for everything) or a 3-row table: Main role / Light role / Reasoning role → the **model and thinking effort** (High recommended / Medium / N/A) assigned to each — from *Recommended split*, or asked as two separate questions per role under *Customize*. |
 
 ### 1.8 Framework File Tracking (`.gitignore`)
 
-> Ask once, at intake. **Explain what `.gitignore` is and does in the same breath as asking it —
-> don't assume the human already knows.** Many stakeholders directing a build have never needed
-> to know Git internals; this decision affects them (whether their own project's remote — its
-> copy on GitHub, Azure DevOps, or wherever else it's hosted — carries a copy of this runbook), so
-> they need enough context to actually choose, not just a yes/no with no explanation.
-
-Ask: "`.gitignore` is a file Git reads to decide which files to leave alone — anything listed in
-it stays on disk exactly as normal and is fully usable locally, but is never tracked, committed,
-or pushed to a remote repository such as GitHub or Azure DevOps. This framework's own files — this
-runbook, its changelog, and its schematics if generated — can be excluded from *this project's*
-git tracking this way (the recommended default), or included if you'd rather this project's own
-repo carry its own copy of them. Which do you want?"
+Box 5's question 18. Explain `.gitignore` in the question itself, since many people directing a
+build have never needed to know Git: *"`.gitignore` lists files Git leaves out of commits and
+pushes — they stay on disk and work normally. Should this framework's own files (this runbook, its
+changelog, and its schematics) be left out of this project's repository?"*
+- ***Yes, leave them out (recommended)*** — the framework is distributed from its own repository;
+  its methodology isn't part of what the client receives.
+- ***No, track them*** — a teammate cloning the project sees exactly how it was built.
 
 | Parameter | Placeholder | Guidance |
 |---|---|---|
 | **Framework files in `.gitignore`?** | `<FrameworkGitignoreYN>` | `Yes` (**default, recommended**) excludes this runbook, its changelog, and its schematics (if present) from this project's git tracking. `No` tracks them alongside the project's own code. In a project set up by the OCPF plugin, the same answer also covers the `.ocpf/` folder (ALL ALONG → OCPF Plugin). |
 
-**Why the recommended default is `Yes`:** this framework is distributed from its own dedicated
-repository; the methodology, naming conventions, and hard-won lessons it encodes are not
-themselves part of what a client is paying to receive when this framework builds their extension.
-Defaulting to excluded keeps that methodology from silently ending up inside every client or
-shared remote repo (GitHub, Azure DevOps, or otherwise) this framework is ever pointed at. A
-human who *wants* a project's repo to be
-self-contained — e.g., so a teammate cloning it fresh can see exactly how it was built without
-separately fetching the framework — can say so here and get that instead; both are legitimate,
-this just isn't a decision to make silently either way.
-
-This choice governs only the three framework documents named above. The fetched Standards Guide
-(`standardsGuide/` — see ALL ALONG → OCPF AL Development Standards Guide), the BCQuality snapshot
-(kept entirely outside the project root — see ALL ALONG → BCQuality Knowledge Snapshot), the
-fetched patterns library (`patterns/`), and any local tooling helper script this framework's own
-bootstrap creates (e.g., an AL MCP Server launcher) are **always** excluded from this project's
-git tracking regardless of the answer here — see ALL ALONG → Repository Hygiene. That part isn't
-a choice the human makes per project.
+This choice covers only those framework files. `standardsGuide/`, `patterns/`, `.alpackages/`, and
+the agent's tooling scripts are always gitignored, and the BCQuality snapshot lives outside the
+project — none of that is asked (ALL ALONG → Repository Hygiene).
 
 ### 1.9 Languages & Translation
 
-> Ask these interactively (Rule 6a), in the working language (Operating Rule 8), after §1.8. The
-> rules each answer applies are Standards Part 8.
+> Asked in the working language (Operating Rule 8), as Box 5's question 19 and the boxes after
+> it. The rules each answer applies are Standards Part 8.
 
-**1. Countries, then languages — a loop, country first.**
-- Before asking, **read Microsoft's live *Country/Regional Availability and Supported Languages*
-  page** — <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-countries-and-translations>.
-  Never answer from memory or from a copy; Microsoft updates it several times a year. If the page
-  can't be reached, say so and ask the human, rather than guessing.
-- Ask: *"Which country will users of this extension work in?"* Then, for that country, offer
-  **only the languages Business Central supports there**, showing both the three-letter ID BC
-  people recognize and the culture code that will be recorded (e.g. *"French (Canada) — FRC →
-  `fr-CA`"*).
+**Microsoft's live page is the only source for countries and languages:** *Country/Regional
+Availability and Supported Languages* —
+<https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-countries-and-translations>.
+Read it before Box 1, never answer from memory or from a copy (Microsoft updates it several times a
+year), and if it can't be reached, say so and ask the human rather than guessing.
+
+**1. Languages, per country — Box 6.** One multi-select question per country from Box 1 (up to
+four per box), offering **only the languages Business Central supports in that country**, each
+showing the three-letter ID BC people recognize and the culture code that will be recorded (e.g.
+*"French (Canada) — FRC → `fr-CA`"*). Countries aren't asked again.
 - **Classify each chosen language** per Standards §8.8 — Microsoft-translated, partner-translated,
   or not supported by BC — and say what that means in one sentence:
-  - **Partner-translated:** ask which partner localization or language app the customer uses,
-    since it becomes that language's terminology source.
-  - **Not supported by BC** (including every right-to-left language): say plainly that BC's own
-    interface won't appear in that language, and offer the country's English instead. Only if the
-    human insists, record it as outside platform support, and ask them to confirm with the
-    partner localization first.
-- Ask *"Is there another country?"* Repeat until the answer is no, then show the full list for
-  confirmation.
+  - **Partner-translated:** ask, in the next box, which partner localization or language app the
+    customer uses, since it becomes that language's terminology source.
+  - **Not supported by BC** (including every right-to-left language): don't offer it. If the human
+    types it, say plainly that BC's own interface won't appear in that language and offer the
+    country's English instead. Only if the human insists, record it as outside platform support,
+    and ask them to confirm with the partner localization first.
 - **Cross-check against §1.1 `Localization`.** If they don't line up — `Localization = AU` with no
   `en-AU`, or the reverse — raise the mismatch rather than accepting it.
 
-**2. Source language.** Ask which language the AL source text is written in. Offer **`en-US`
-first, labelled recommended**, with the reasons in one or two sentences (Standards §8.1). If the
-human doesn't answer or isn't sure, it's `en-US`. If they choose another language, state the
-consequences from Standards §8.1 before recording it.
+**2. Source language — Box 5, question 19.** Offer **`en-US` first, labelled recommended**, with the
+reason in one sentence (Standards §8.1). If the human isn't sure, it's `en-US`. If they choose
+another language, state the consequences from Standards §8.1 before recording it.
 
 **3. Source wording.**
 - **Any target other than `en-US` alone:** source wording is Microsoft's W1 English (Standards
@@ -573,19 +541,28 @@ consequences from Standards §8.1 before recording it.
   - *US wording directly in source, no translation files* — simpler now; adding any other market
     later means revising source strings.
 
-**4. For each target language:** is it **required at first release**, or can it follow later? And
-**who reviews it?** A named person who reads the language fluently — never a role, never the agent
-(Standards §8.7). Skip this for a project that chose *US wording, no translation files*.
+**4. For each target language — two questions, so two languages per box:** is it **required at
+first release** (*Required at first release* / *Can follow later*)? And **who reviews it?** Offer
+names the human has already mentioned, or *I'll type it* — a named person who reads the language
+fluently, never a role, never the agent (Standards §8.7). A partner-translated language's app
+question (item 1) joins the same box. Skip this for a project that chose *US wording, no
+translation files*.
 
-**5. Documents.** Which user-facing documents are produced in which languages? Recommend
-translating `UserGuide` and `Deployment` for each required language, and keeping every engineering
-document in English only (Operating Rule 8). For `HumanUnitTestScript`, ask whether each language's
-testers need a translated script, or can run the language pass from the English script, which names
-the terms they should see in their language — recommend the English script when the testers read
-English. Translated documents are produced at Step 12, once the functional test pass is green, so
-fixes found in testing don't make them stale.
+**5. Documents** — two questions, only when there's a target language other than the source.
+- *Which user-facing documents are translated into each required language?* (multi-select):
+  *`UserGuide` (recommended)* / *`Deployment` (recommended)* / *None*. Engineering documents stay
+  in English only (Operating Rule 8).
+- *Do testers need a translated `HumanUnitTestScript`?* *No — they run the language pass from the
+  English script, which names the terms each language should show (recommended when testers read
+  English)* / *Yes, one per required language*.
 
-**6. Beyond the interface.**
+Translated documents are produced at Step 12, once the functional test pass is green, so fixes
+found in testing don't make them stale.
+
+Items 3 and 5 and the two questions in item 6 are independent of each other: ask them together, up
+to four per box, alongside any per-language questions that fit.
+
+**6. Beyond the interface** — *No* / *Yes* each, with the specifics of a *Yes* as free text.
 - Do customer-facing documents (invoices, emails) need to follow the **customer's** language
   rather than the user's (Standards §8.9)?
 - Does the extension store user-entered text that needs **per-language versions** (the translation
@@ -676,7 +653,7 @@ human for sign-off, same as Step 02.
 - **Batch / phase plan** — which modules or document-type groups are built in which order; smallest and simplest batch first (Operating Rule 3).
 - **Per-object spec** — for every object: ID, type, name, source table name *and* verified source table number, `PageType`, `APIPublisher`, `APIGroup`, `EntityName`, `EntitySetName`, `ODataKeyFields = SystemId`, and exactly one of `DelayedInsert = true` / `Editable = false` per Standards §2.2.
 - **Per-field spec** — every field by source name and camelCase identifier, with each conversion decision shown (Standards §4.1); which fields are excluded and why (Standards Part 3, driven by the Localization parameter); abbreviations applied (Standards §4.2); reserved-keyword resolutions (Standards §4.3).
-- **Computed-field pattern, decided per field, not defaulted:** a `FlowField` is always read-only and always live-recalculated — it cannot be overridden. A field that should *suggest* a value but let the user override it (e.g. a price or date derived from other fields) must be a real **stored** field, seeded by an `OnValidate`/`OnInsert` trigger, that never overwrites a value the user has already entered — the same pattern as an R-1-style suggested-date rule. Decide and state explicitly which pattern each calculated-looking field uses; do not reach for `FlowField` out of habit when "auto-populated but editable" is what's actually wanted.
+- **Computed-field pattern, decided per field, not defaulted:** state for each calculated-looking field whether it's a `FlowField` or a stored field seeded by a trigger that never overwrites a user's value (Standards Part 7).
 - **`SourceTableView` filters** — for every document-type-filtered page, with the correct `const()` quoting (quote only multi-word enum values) (Standards §2.3).
 - **`using` directives** — the exact namespace for every object, copied from the symbol file (Standards §1.1, §3.4).
 - **Standard object template** — the exact AL API page pattern every generated object must follow (Standards §1.3).
@@ -692,7 +669,7 @@ human for sign-off, same as Step 02.
 
   Any API page or query added later (gap-fill, testing feedback) goes through steps 1–6 for the new objects only.
 - **Special design notes** — singletons (`EntityName = EntitySetName`), header/line pairs as two top-level pages, high-volume tables, naming conflicts.
-- **Permission sets** — if Parameter 1.2 = `Yes` (mandatory the moment the project owns any table — see Parameter 1.2): a read-only set and a read/write set (including the read-only set), both with IDs from the allocated range, named `<PREFIX> <APPCODE>, VIEW` and `<PREFIX> <APPCODE>, EDIT` from Parameter 1.3, each name ≤ 20 characters and each caption ≤ 30 (Standards §5.3–§5.4). **The batch plan must ship each table's `tabledata` grant in the same batch that introduces the table — never deferred to a later batch.** BC PTE publish validation (`PTE0004`) requires every table in a published package to be covered by an in-package permission set; finding this at publish instead of at TDD time forces a batch-plan rewrite after code already exists (a real project hit exactly this and had to pull its permission sets forward from its last batch to its first).
+- **Permission sets** — if Parameter 1.2 = `Yes`: a read-only set and a read/write set (including the read-only set), IDs from the allocated range, named from Parameter 1.3 (Standards §5.3–§5.4). **Each table's `tabledata` grant ships in the same batch that introduces the table** (Standards §5.3).
 
 **Outputs:** `TDD.md`; updated **Object Register** with every planned object and its ID.
 
@@ -719,7 +696,7 @@ the documents.
 - [ ] All entity names ≤ 30 characters; all field identifiers ≤ 30 characters.
 - [ ] Read vs. read/write designations match the mutability rules in Standards §2.2.
 - [ ] Growth buffers are planned within each module block (Standards §5.2).
-- [ ] Permission sets are planned if enabled (Parameter 1.2) — **with every table's `tabledata` grant explicitly enumerated per set**, not just "permission sets exist," and each grant assigned to the same batch that introduces its table (Standards §5.3). Permission set names follow `<PREFIX> <APPCODE>, VIEW` / `, EDIT`, each ≤ 20 characters, with an App Code no other extension using this prefix has (Standards §5.4).
+- [ ] Permission sets are planned if enabled (Parameter 1.2), with every table's `tabledata` grant enumerated per set and assigned to the batch that introduces its table (Standards §5.3); names and App Code from Parameter 1.3, each name ≤ 20 characters (Standards §5.4).
 - [ ] Every target language in Parameter §1.9 is supported by BC in its country (checked against Microsoft's live page), has a named reviewer, and has a terminology source.
 - [ ] Every regional term PRE-02 listed is in the translation glossary, verified per Standards Appendix D or marked for reviewer attention.
 - [ ] Every API page and API query has a recorded group and caption-locking decision, with the decider named (Step 03; Standards §8.6).
@@ -755,7 +732,7 @@ Goal: generate AL batch by batch, lint clean — including symbol verification �
   holds the target version's symbols, rather than redoing any of it.)
 - Write the pre-flight validation checks to run for each batch — this is the canonical checklist every other reference to "the Step 05 checklist" in this runbook means; if you're re-stating it elsewhere, point here rather than re-enumerating. Split into two passes, since some checks are only possible before generation and some only after:
   - **Pre-generation** (on the TDD's planned names/fields, before any file exists — main role): identifier length ≤ 30, entity/EntitySet name length ≤ 30, reserved-keyword scan, localization field-range filter, `ObsoleteState` filter.
-  - **Post-generation** (on the actual generated files — light role, if §1.7 role assignment is configured): required-property presence, **no multilanguage (ML) properties and no `TextConst`** — `CaptionML`, `ToolTipML`, `OptionCaptionML`, or any other ML variant is a pre-flight failure; single-language `Caption`/`ToolTip`/`OptionCaption`/`Label` only (Standards §1.7 — `TranslationFile` is on for every project, Standards §8.2, so a clean compile already proves this via `AL0424`; catch it here anyway, before the batch's files reach a compile), **translatable text** (Standards §8.3–§8.4: no string literal in `Error` / `Message` / `Confirm` / `StrMenu` / notifications / `ErrorInfo`; every label has an AA0074 suffix; every placeholder label has a `Comment`; tokens and telemetry `Locked`; every `OptionCaption` member count matches its option), **API caption locking** matches the per-object decision recorded at Step 03 (translatable objects set `EntityCaption`/`EntitySetCaption`; locked objects lock every `Caption` and leave `ToolTip`s translatable — Standards §8.6), `Rec.`-qualification (`NoImplicitWith`), dead-code check (no empty triggers, no `// TODO`, no commented-out fields), 4-space indentation with no tabs (Standards §1.6), **permission set names** match `<PREFIX> <APPCODE>, VIEW` / `, EDIT` from Parameter 1.3, ≤ 20 characters, captions ≤ 30 (Standards §5.4 — with namespaces the compiler won't flag a name another extension also uses), permission-set `tabledata` coverage for every table the batch introduces (Standards §5.3 — the analyzer-enabled compile at Step 07 catches a missing grant with `PTE0004`, but a batch generated wrong builds the next batch on top of the gap; catch it here, before that happens — vacuously satisfied if this project introduces no tables — see Parameter 1.2), and **symbol verification** — every reference to a standard/base BC table, page, codeunit, method, property, or enum value confirmed against the downloaded symbol source, falling back to the MS Learn BaseApp docs per Operating Rule 2 when the downloaded symbols don't answer, not assumed correct because it looks like plausible AL (Operating Rule 4).
+  - **Post-generation** (on the actual generated files — light role, if §1.7 role assignment is configured): required-property presence; **no multilanguage (ML) properties and no `TextConst`** (Standards §1.7); **translatable text** — no string literal in a user-facing message, AA0074 suffixes, a `Comment` on every placeholder label (Standards §8.3–§8.4); **API caption locking** matches the per-object decision recorded at Step 03 (Standards §8.6); `Rec.`-qualification (`NoImplicitWith`); no empty triggers, `// TODO`, or commented-out fields (Standards §1.5); 4-space indentation, no tabs (Standards §1.6); **permission set names** from Parameter 1.3, ≤ 20 characters, captions ≤ 30 (Standards §5.4); `tabledata` coverage for every table the batch introduces (Standards §5.3; vacuously satisfied if none); and **symbol verification** of every reference to a standard object, method, property, or enum value (Operating Rule 2, Standards Appendix B). The analyzer-enabled compile at Step 07 proves several of these again (ALL ALONG → Analyzers); checking here keeps the next batch from building on a gap.
 
 **Outputs:** Batch plan (ordered), project scaffold, pre-flight validation script/checklist (both passes).
 
@@ -811,8 +788,7 @@ chose *US wording, no translation files*). The cheap, mechanical work runs on ev
 work that goes stale whenever captions and messages change waits until the source text settles.
 
 **Every build that produces a new `.g.xlf`, before packaging:**
-1. **Full build only.** Confirm Incremental Build is off, and never test languages from a RAD
-   publish — Microsoft documents that both ignore translations (Standards §8.2).
+1. **Full build only** — Incremental Build off, no RAD publish (Standards §8.2).
 2. **Sync** every target file in `Translations/` from `.g.xlf` with the agreed tooling (e.g.
    `Sync-XliffTranslations`). New units arrive as `needs-translation`; changed source text drops
    its unit to `needs-adaptation` (Standards §8.7).
@@ -897,7 +873,7 @@ every fix and normalizes whatever drift the findings call out.
 - **Code quality** — every object follows the standard template; structure, naming, and formatting identical across all batches (early and late batches often drift — normalize).
 - **Dead code** — empty triggers, commented-out blocks, placeholder `// TODO` (Standards §1.5).
 - **Redundant code** — duplicate field exposures, duplicate `using` directives, objects more complex than needed.
-- **"Marked for obsoletion"** — any reference to a field, table, procedure, or event with `ObsoleteState = Pending` or `Removed`; any subscription to an obsolete event (Standards §3.2–§3.3). Exclusion is unconditional — no version check, no exception.
+- **"Marked for obsoletion"** — any reference to a field, table, procedure, or event with `ObsoleteState = Pending` or `Removed`; any subscription to an obsolete event (Standards §3.2–§3.3).
 - **Standards compliance** — run the full Anti-Patterns table (Standards Part 7) against the codebase.
 - **Deprecated multilanguage syntax** — `TranslationFile` is on for every project (Standards §8.2), so a clean compile already proves the whole codebase is free of `CaptionML`, `ToolTipML`, and the rest via `AL0424` — this bullet is a confirmation, not the only defense. If the last compile was 0/0 with no `#pragma warning disable` or ruleset downgrade of `AL0424`, this passes; note that explicitly rather than re-scanning file by file.
 - **Translations** (skip if Parameter §1.9 chose *US wording, no translation files*) — run the full technical translation checks across every target file with all rules enabled (e.g. `Test-BcAppXliffTranslations -translationRulesEnableAll`). Then review against Standards Part 8:
@@ -1227,13 +1203,10 @@ step after. One table, one row per standard BC concept the extension names:
 **The release gate — a state scan, independent of tooling.** Before Step 12 closes, for every
 language required at first release: count the translation units in its target file whose state
 isn't `signed-off` or `final`. The gate passes only at zero. It's a plain scan of the XLIFF file,
-not a tool's opinion. XLIFF Sync, for instance, writes `translated` itself when it imports or copies
-text — and reports `needs-review-translation` units as neither missing nor needing work — so its
-own checks can't stand in for this scan.
+never a tool's check (Standards §8.7).
 
-**Source changes invalidate approval.** After any source-text change, the next sync moves affected
-units to `needs-adaptation`. They go back through drafting and review before the gate can pass
-again — even at Step 12, even for a one-word fix.
+**Source changes invalidate approval** (Standards §8.7): affected units go back through drafting
+and review before the gate can pass again — even at Step 12, even for a one-word fix.
 
 **Languages that can follow later.** A target language not required at first release is still
 synced every build, so it never falls behind structurally. Drafting and review can wait. It joins
@@ -1395,11 +1368,7 @@ similar hosting), even though they sit in the working directory like any other f
 **Gitignored by default, human can opt out at intake (Step 01 §1.8):** this runbook itself, its
 changelog, and its schematics, if generated — and, in a project set up by the OCPF plugin, the
 `.ocpf/` folder (its marker file and backups of earlier runbook copies; ALL ALONG → OCPF Plugin).
-The recommended default keeps them out of the project's remote (GitHub, Azure DevOps, etc.) — this framework is distributed from its own dedicated repository, and the
-methodology and hard-won lessons it encodes are not themselves part of the deliverable. A human
-who wants a project's own repo to be self-contained (e.g., so a teammate cloning it fresh can see
-exactly how it was built) can say so at intake and get that instead — see §1.8 for the exact
-question and explanation to give them.
+§1.8 has the question and both options' reasons.
 
 **If any of the above is already tracked when this policy is adopted** (e.g., a project that
 started before this section existed): add the entries to `.gitignore`, then actually untrack them
@@ -1686,7 +1655,7 @@ Never change code that compiles clean just to clear stale marks.
 ## OCPF AL Development Standards Guide
 
 The runbook's companion rules document —
-`ocpfALDevStandardsGuide.md`, v1.5.0.0 — is distributed from this framework's own repository and
+`ocpfALDevStandardsGuide.md`, v1.6.0.0 — is distributed from this framework's own repository and
 fetched into every project that runs this routine, so the rules the runbook cites are on disk and
 readable for the life of the engagement rather than assumed to be in the agent's memory. This is
 the third of three fetched knowledge sources, alongside BCQuality and the OCPF BC AL Patterns
@@ -1730,7 +1699,7 @@ latest standards"). Re-run the fetch, overwrite the local copy, and report plain
 `<old sha>` to `<new sha>`" or "already up to date."
 
 **Version skew is worth naming, not papering over.** The guide carries its own version number
-(v1.5.0.0 as of runbook v2.12.0.0) and is versioned independently of this runbook, with
+(v1.6.0.0 as of runbook v2.13.0.0) and is versioned independently of this runbook, with
 both tracked in `RunbookChangelog.md`. If a fetched guide's version doesn't match what this
 runbook expects, say so — don't silently reconcile a citation that doesn't resolve.
 
@@ -1756,11 +1725,7 @@ plainly rather than answering from memory of what a reference says.
 (Operating Rule 2). The Standards Guide beats AL Guidelines on any AL rule. Surface a conflict to
 the human rather than silently reconciling it.
 
-**AL Guidelines — one known conflict, excluded outright.** Its legacy *NAV Patterns → C/AL Coding
-Guidelines* section predates AL and XLIFF, and includes pages recommending `CaptionML` (*"CaptionML
-on System Pages"*) and `OptionCaptionML` (*"Using OptionCaptionML"*). Never follow those: they are
-superseded by Standards §1.7. Treat the rest of the C/AL-tagged section as historical context, not
-current AL guidance.
+**AL Guidelines' legacy *C/AL Coding Guidelines* pages are never followed** (Standards §1.7).
 
 **Credit.** Every third-party resource this framework references, fetches, or recommends — with
 its license and what that license asks of us — is listed in `THIRD_PARTY_NOTICES.md` at the root

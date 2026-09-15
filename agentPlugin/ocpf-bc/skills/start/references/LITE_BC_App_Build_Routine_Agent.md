@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 1.9.0.0 (Lite, derived from the full framework v2.12.0.0)
+**Version:** 1.10.0.0 (Lite, derived from the full framework v2.13.0.0)
 **Last Updated:** September 15, 2026
 
 > Version history for this edition lives in `LITE_RunbookChangeLog.md`, tracked independently of
@@ -16,11 +16,12 @@
 > 10-files-or-fewer project doesn't need.
 
 > **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development
-> Standards Guide** (v1.5.0.0), shared unchanged with the full framework. Lite is *not* a reduced
+> Standards Guide** (v1.6.0.0), shared unchanged with the full framework. Lite is *not* a reduced
 > set of AL rules: the same AL rules apply to a 5-file extension as to a 50-file one. What Lite
-> reduces is *process*. So this runbook states each rule in short form where you need it and cites
-> the guide as **Standards §** for the full version — the abbreviation tables, the complete
-> anti-pattern list, the field-exclusion rules, the endpoint patterns. Fetch it at Step 1 (see
+> reduces is *process*. So this runbook names each rule in one line where a checklist applies it and
+> cites the guide as **Standards §**; the rule's rationale, limits, tool behavior, and reference
+> links live only in the guide — the abbreviation tables, the complete anti-pattern list, the
+> field-exclusion rules, the endpoint patterns. Fetch it at Step 1 (see
 > ALL ALONG → OCPF AL Development Standards Guide) and keep it open for the life of the project.
 
 > **When to use Lite:** a Business Central AL Per-Tenant Extension with **10 or fewer AL files**
@@ -87,15 +88,9 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
    `ObsoleteState` — confirm each in the symbol file named in the Parameters block. Agent
    knowledge of BC table numbers is not reliable. The agent downloads those symbols itself at
    the end of Step 1 (ALL ALONG → Symbols); the human never has to. **Fallback** when the
-   downloaded symbols don't answer the question (a module isn't in `.alpackages`, or you need to
-   browse rather than already knowing what to grep for): the BC BaseApp is documented in full at
-   <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application>,
-   and the System Application (Language, Translation, Email, Telemetry, and its other foundation
-   modules) at
-   <https://learn.microsoft.com/en-us/dynamics365/business-central/application/system-application/module/system-application>.
-   Use them to corroborate or discover; the downloaded symbol file for the target version is still
-   authoritative when the two disagree. The step-by-step verification procedure is Standards
-   Appendix B.
+   downloaded symbols don't answer: Microsoft Learn's Base Application and System Application
+   reference (**Standards Appendix B**; links in ALL ALONG → Reference Sources). The downloaded
+   symbols win when the two disagree.
 3. **Treat the whole extension as one batch — two only if there's a natural split** (e.g., "setup
    + master data" vs. "documents"). At 10 files or fewer there is rarely a reason for the full
    framework's multi-batch phasing. Order objects within the batch so lookup/reference tables
@@ -137,7 +132,16 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
        knows: names, publisher, prefix, namespace, localization, ID ranges, versions. Ask them
        through the options mechanism, never as open-ended questions or a numbered list in chat;
        the mechanism's free-text entry (Claude Code: *Other*) carries a typed answer. Step 1 says
-       what to offer.
+       what to offer. **The mechanism, per harness:**
+       - **Claude Code — `AskUserQuestion`:** up to four questions per box, 2–4 options each, a
+         free-text *Other* added automatically; multi-select where several answers apply.
+       - **GitHub Copilot Chat in VS Code — the `askQuestions` tool:** several questions in one
+         carousel, each single-select, multi-select, or free text.
+       - **GitHub Copilot CLI — the `ask_user` tool:** a choice question there takes no typed
+         answer, so add an explicit *I'll type it* choice and follow it with a free-text question.
+       - **Anything else:** its closest equivalent, one question at a time if that's all it takes.
+         Only when a harness has no question mechanism at all, ask one question per message with
+         its options labelled, and say why.
    6b. **Don't install tooling without asking — and look harder first.** Before concluding a
        required compiler/runtime is missing, check whether the human's own IDE already provisions
        one privately (e.g., VS Code's AL extension gets its .NET runtime from a companion
@@ -201,6 +205,7 @@ design work.
 **Actions:**
 - **Ask the working language first — before anything else** (Operating Rule 8). Ask in English,
   through the options mechanism, with English listed first and free text for any other language.
+  It's asked alone, so every later box can be in the language chosen.
   Continue in the language chosen.
 - **Fetch the OCPF AL Development Standards Guide first, before anything else needs it.** Get
   `standardsGuide/ocpfALDevStandardsGuide.md` from
@@ -234,47 +239,46 @@ design work.
   from conversation history.
 
 **Ask first, don't infer — and ask interactively** (Rule 6a). Every question in this step goes
-through the options mechanism, one question per box or a few related ones together (Claude
-Code's `AskUserQuestion` takes up to four). Never as open-ended questions or a numbered list in
-chat. Ask these before writing anything, if any still carry placeholder values:
+through the options mechanism Rule 6a names for this harness, never as an open-ended question or a
+numbered list in chat. **Use as few boxes as the questions allow:** up to four questions per box,
+sharing a box only when none depends on another's answer. Where the harness asks one question at a
+time, ask the same questions in the same order.
 
-| # | Question | Options to offer (free-text entry always available) |
-|---|---|---|
-| 1 | What is the Extension Name? | Up to three names built from the problem statement's own wording, labelled as suggestions. |
-| 2 | Who is the Publisher? | Only names the human already wrote or uploaded, quoted verbatim with their source. If none: *I'll type it* (use the free-text entry) / *Decide after the other questions*. |
-| 3 | Use an AL namespace? | *Yes (recommended)* / *No*; if yes, follow up with `<Publisher>.<ExtensionShort>` from answers 1–2. |
-| 4 | What Localization applies? | The countries the problem statement names, as codes (e.g. `US`), then `W1`. |
-| 5 | What AL object prefix? | Two or three short lowercase prefixes built from answers 1–2. |
-| 6 | What Permission Set App Code? | Two or three uppercase codes from answer 1 that fit `13 − (prefix length)` characters (e.g. `NAICS`); must differ from every other extension using this prefix. |
-| 6a | Do other extensions already use this prefix? | *No, this is the first* / *Yes* (then their permission set names or App Codes, as free text). On a match, ask 6 again. |
+**Before the first box,** read `ProblemStatement.md` for suggestions, and read Microsoft's live
+[Country/Regional Availability and Supported Languages](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-countries-and-translations)
+page — never from memory — so every country and language offered is one BC supports. If it can't
+be reached, say so and ask the human.
 
 A suggestion is a candidate the human picks, never an answer recorded for them: nothing goes into
 `ProjectParameters.md` until the human selects or types it. Never build one from an email domain
 or a guess at house style. A wrong guess here means renaming the whole project later.
 
-**Question 6 exists because permission sets named from the prefix alone** (`OCPF - READ`) collided
-across every extension with that prefix, and each one was fixed by hand after the error, without
-the runbook changing. Rules and evidence: **Standards §5.4**.
+| Box | Questions | Options to offer (free-text entry always available) |
+|---|---|---|
+| **1 — Identity** | 1. Extension Name? | Up to three names built from the problem statement's wording, labelled as suggestions. |
+| | 2. Publisher? | Only names the human already wrote or uploaded, quoted verbatim with their source. If none: *I'll type it* / *Decide after the other questions* (then ask it alone before Box 2). |
+| | 3. Deployment Target? | *SaaS PTE* / *OnPrem PTE* / *AppSource*, best fit first. |
+| | 4. Which countries will users work in? *(multi-select)* | The countries the problem statement names that BC is available in. Countries are asked only here. |
+| **2 — Naming** *(built from Box 1)* | 5. AL object prefix? | Two or three short lowercase prefixes built from the name and publisher. |
+| | 6. Which namespace? | `<Publisher>.<ExtensionShort>` *(recommended)* / one alternative / *No namespace*. Records both Use Namespace and Namespace. |
+| | 7. Localization? | Up to three of the Box 1 countries as codes (e.g. `US`), then `W1`. |
+| | 8. BC version? | The current Business Central online major version *(recommended)* and the one before it, looked up on Microsoft Learn, never from memory; a sandbox the human already has is the natural choice. Don't ask for `runtime`: read it from Microsoft Learn's [Choose runtime version in AL](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-choosing-runtime) table. |
+| **3 — Permission sets & IDs** *(built from Box 2)* | 9. Permission Set App Code? | Two or three uppercase codes from the name that fit `13 − (prefix length)` characters (e.g. `NAICS`); must differ from every other extension using this prefix (**Standards §5.4**). |
+| | 10. Do other extensions already use this prefix? | *No, this is the first* / *Yes — I'll type their App Codes or permission set names*. On a match, ask 9 again, alone. |
+| | 11. Object ID range? | Complete ranges with their size: one from the human's material (e.g. *80300–80339 — 40 IDs*); *50100–50149 — 50 IDs* ("the AL template's default: only if no range has been assigned to you"); or type `start–end`. |
+| | 12. Another Object ID range? | *No* / *Yes*. Each *Yes* opens a box with 11 and 12 again. |
+| **4 — Onboarding** | 13–15. Assisted Setup Wizard? Role Center Activity Cues? Departments / "My Business Central" placement? | *No* / *Yes* each; a *Yes* gets its specifics in one follow-up box. |
+| | 16. Permission Sets required? *(only if the entity list has no new table)* | *No — the extension adds no tables* / *Yes*. Not asked once the extension owns a table: then it's `Yes`. |
+| **5 — Setup & languages** | 17. Leave this framework's own files out of the project's repository? | *Yes (recommended)* / *No, track them*, with the one-sentence `.gitignore` explanation from the table below. |
+| | 18. Source language? | *`en-US` (recommended)*, with **Standards §8.1**'s reason in one sentence, or another language typed in. |
+| | 19. Languages for each Box 1 country *(multi-select, one question per country; more countries spill into the next box)* | Only the languages BC supports in that country, as ID and culture code (*"French (Canada) — FRC → `fr-CA`"*). |
+| **6 onward — Translation** | Per language: required at first release? Who reviews it? Then source wording, documents, and customer-language / translatable data, as the table below describes. | Two questions per language; the rest fill any free slots. |
+| **Last — Confirm** | 20. Is this sheet right? | Show the complete sheet first, with every ID range's size and the derived permission set names. *Confirm the sheet* / *Change something* (ask only what changes). |
 
-**Deployment Target:** *SaaS PTE* / *OnPrem PTE* / *AppSource*, best fit first.
+The first ID range is the Primary allocation; any after it are Additional.
 
-**Then collect the Object ID range(s) as a loop**, since there can be more than one:
-1. **Starting ID:** any range the human's material names; otherwise free text, with `50100`
-   offered as "the AL template's default: only if no range has been assigned to you."
-2. **Ending ID:** the start plus 49 (50 IDs), the start plus 99 (100 IDs), or free text.
-3. **Confirm** the range and its size (e.g. "80300–80339 — 40 IDs"): *Yes* / *No, re-enter it*.
-4. **Additional ranges?** *No* / *Yes*. If yes, repeat; if no, stop.
-
-The first confirmed range is the Primary allocation; any after it are Additional.
-
-**BC version:** the current Business Central online major version (recommended) and the one
-before it, looked up on Microsoft Learn, never from memory. A sandbox the human already has is the
-natural choice. Don't ask for `runtime`: read it from Microsoft Learn's
-[Choose runtime version in AL](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-choosing-runtime)
-table (runtime `17.0` ships with Business Central 28.0).
-
-The onboarding extras, the `.gitignore` question, and the language questions below are asked the
-same way: listed choices, recommended first, with follow-ups for the specifics of a *Yes*.
+**Question 9 exists because permission sets named from the prefix alone** (`OCPF - READ`) collided
+across every extension with that prefix (**Standards §5.4**).
 
 **Tell the human where their built packages will land:** always `outputAppPackage/` in the
 project root — never `out/`, `output/`, or anything ad hoc (see ALL ALONG → Packaging &
@@ -294,17 +298,17 @@ Versioning). Mention this once, plainly, now.
 | **APIPublisher / APIGroup Prefix / APIVersion** | — | `'<Publisher>'`, `<prefix>_`, `'v1.0'` — same values everywhere. |
 | **Permission Set App Code** | `<APPCODE>` | Uppercase letters or digits, no spaces, unique among every extension that uses this prefix, at most `13 − (prefix length)` characters (**Standards §5.4**). |
 | **Permission Set Names** | `<PREFIX> <APPCODE>, VIEW` / `<PREFIX> <APPCODE>, EDIT` | Derived: `<PREFIX>` is the AL Object Prefix in uppercase. Each ≤ 20 characters, e.g. `OCPF NAICS, VIEW`. |
-| **Object ID range(s)** | — | Primary + any Additional, from the loop above. |
-| **Permission Sets required?** | `Yes`/`No` | `No` only if the extension owns **zero new tables**. The moment it owns one table, this is `Yes` — BC publish validation (`PTE0004`) requires it. If `Yes`, reserve ≥ 2 IDs in the primary range. |
-| **AL Runtime / BC Application Minimum / Symbol Source** | — | BC version asked above; runtime from Microsoft Learn. Symbol Source is filled in by the agent after downloading: version, W1 or localized, and where from. |
-| **Onboarding extras** | `Yes`/`No` each | Assisted Setup Wizard? Role Center Activity Cues? Departments/"My Business Central" placement? Ask all three; `No` to any is a final answer, not a placeholder — most small extensions answer `No` to all three, but ask anyway. |
-| **Framework files in `.gitignore`?** | `Yes` (default) | Explain briefly what `.gitignore` does, then ask: exclude **this framework's own files** — this runbook (under whatever name it was given: `CLAUDE.md`, `.github/copilot-instructions.md`, or `LITE_BC_App_Build_Routine_Agent.md`), `LITE_RunbookChangeLog.md`, `LITE_RunbookSchematics.md`, and the plugin's `.ocpf/` folder, if present — from *this project's* git tracking (recommended), or track them alongside the project's own code? **This never covers the project's own `ChangeLog.md`**, which is one of Lite's four maintained documents and is always committed. |
+| **Object ID range(s)** | — | Primary + any Additional, from Box 3. |
+| **Permission Sets required?** | `Yes`/`No` | `No` only if the extension owns **zero new tables** (**Standards §5.3**); otherwise `Yes`, not asked. If `Yes`, reserve ≥ 2 IDs in the primary range. |
+| **AL Runtime / BC Application Minimum / Symbol Source** | — | BC version from Box 2; runtime from Microsoft Learn. Symbol Source is filled in by the agent after downloading: version, W1 or localized, and where from. |
+| **Onboarding extras** | `Yes`/`No` each | Assisted Setup Wizard? Role Center Activity Cues? Departments/"My Business Central" placement? Box 4; `No` to any is a final answer, not a placeholder — most small extensions answer `No` to all three, but ask anyway. |
+| **Framework files in `.gitignore`?** | `Yes` (default) | Box 5, asked as: *"`.gitignore` lists files Git leaves out of commits and pushes — they stay on disk and work normally. Should this framework's own files be left out of this project's repository?"* Covers this runbook (under whatever name it was given: `CLAUDE.md`, `.github/copilot-instructions.md`, or `LITE_BC_App_Build_Routine_Agent.md`), `LITE_RunbookChangeLog.md`, `LITE_RunbookSchematics.md`, and the plugin's `.ocpf/` folder, if present. **Never the project's own `ChangeLog.md`**, which is always committed. |
 | **Working language** | — | From the first question of this step. |
-| **Target languages** | table | **Country first, then language, as a loop** (rules: **Standards §8.8**). Read Microsoft's live [Country/Regional Availability and Supported Languages](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-countries-and-translations) page first — never from memory. For each country, offer only the languages BC supports there, shown as ID and culture code (*"French (Canada) — FRC → `fr-CA`"*). Classify each as Microsoft-translated, partner-translated (ask which partner app — it's the terminology source), or not supported by BC (every right-to-left language included). Don't offer an unsupported language; offer the country's English instead, and only record it if the human insists. For each language: required at first release? Who reviews it — a named fluent person, never the agent? Flag any mismatch with **Localization**. |
+| **Target languages** | table | Box 5's question 19, for the countries from Box 1 — never asked again (rules: **Standards §8.8**). Classify each chosen language as Microsoft-translated, partner-translated (ask which partner app, in the next box — it's the terminology source), or not supported by BC (every right-to-left language included). Don't offer an unsupported language; if typed, offer the country's English instead, and only record it if the human insists. Then, per language, two questions: *Required at first release* / *Can follow later*; and who reviews it — names the human mentioned, or *I'll type it*; a named fluent person, never the agent. Flag any mismatch with **Localization**. |
 | **Source language** | `en-US` (default) | Offer `en-US` first, labelled recommended, with the one-line reasons in **Standards §8.1**. If the human chooses another, state the consequences before recording it. |
 | **Source wording** | `W1` | Microsoft's W1 English wording in source, with one translation file per target language (`en-US` included). Only when `en-US` is the **sole** target **and Deployment Target isn't `AppSource`** (AppSource requires translation files — **Standards §8.10**), also offer *US wording in source, no translation files* — simpler now, but another market later means changing source strings. |
-| **Documents in other languages** | per document | Recommend translating `Docs.md`'s user-guide section into each required language; `DesignDoc.md` and `ChangeLog.md` stay English. For `TestScript.md`, ask whether testers need a translated copy or can run the language pass from the English script, which names the terms they should see — recommend the English script when testers read English. Translated documents are produced at Step 7, once the functional test pass is green. |
-| **Customer-language documents / translatable data** | `Yes`/`No` each | Do invoices or emails follow the customer's language? Does the extension store user-entered text needing per-language versions? (**Standards §8.9**) |
+| **Documents in other languages** | per document | Only with a target language other than the source. Two questions: translate `Docs.md`'s user-guide section into each required language (*Yes (recommended)* / *No*); and does `TestScript.md` need a translated copy (*No — testers run the language pass from the English script, which names the terms they should see (recommended when testers read English)* / *Yes*)? `DesignDoc.md` and `ChangeLog.md` stay English. Translated documents are produced at Step 7, once the functional test pass is green. |
+| **Customer-language documents / translatable data** | `Yes`/`No` each | Two questions: do invoices or emails follow the customer's language? Does the extension store user-entered text needing per-language versions? (**Standards §8.9**) |
 
 **Quoting reference** (applies everywhere): `app.json`/`launch.json` use standard JSON strings;
 AL string property values use single quotes (`APIPublisher = 'Contoso';`); AL object names use
@@ -389,14 +393,11 @@ be able to produce every object correctly from this document alone. Two halves, 
   exactly one of `DelayedInsert = true` / `Editable = false`.
 - **Per-field spec** — source name and camelCase identifier for every field (conversion rules:
   **Standards §4.1**); which fields are excluded and why (**Standards Part 3**, driven by the
-  Localization parameter — obsolete-pending fields are excluded unconditionally, with no timeline
-  evaluation); abbreviations applied (**§4.2**); reserved-keyword resolutions (**§4.3** — `area` →
+  Localization parameter, and **§3.2** for obsolete fields); abbreviations applied (**§4.2**); reserved-keyword resolutions (**§4.3** — `area` →
   `areaCode`, and the rest).
-- **Computed-field pattern, decided per field:** a `FlowField` is always read-only and always
-  live-recalculated — it cannot be overridden. A field that should *suggest* a value the user can
-  override (a derived price or date) must be a real **stored** field, seeded by an
-  `OnValidate`/`OnInsert` trigger that never overwrites a value the user already entered. State
-  explicitly which pattern each calculated-looking field uses.
+- **Computed-field pattern, decided per field:** state for each calculated-looking field whether
+  it's a `FlowField` or a stored field seeded by a trigger that never overwrites a user's value
+  (**Standards Part 7**).
 - `SourceTableView` filters for any document-type-filtered page, with correct `const()` quoting —
   quote multi-word enum values, never single-word ones; either mistake is a parser error
   (**Standards §2.3**).
@@ -407,12 +408,8 @@ be able to produce every object correctly from this document alone. Two halves, 
   rather than inventing a pattern.
 - Permission sets, if required (see Step 1): a read-only set and a read/write set (which includes
   the read-only set), with every table's `tabledata` grant enumerated per set — not just "sets
-  exist." The mandatory compile at Step 5 catches a missing grant via `PTE0004` (ALL ALONG →
-  Analyzers), but get it right at design time rather than relying on that backstop. Name them
-  `<PREFIX> <APPCODE>, VIEW` and
-  `<PREFIX> <APPCODE>, EDIT` from `ProjectParameters.md`, each ≤ 20 characters with a caption ≤ 30.
-  **Standards §5.3–§5.4** cover both sets, the naming rule, and the `D365` base permissions
-  consumers need on top of them.
+  exist" — named from `ProjectParameters.md`, each ≤ 20 characters with a caption ≤ 30
+  (**Standards §5.3–§5.4**).
 - Special notes: singletons, header/line pairs, naming conflicts, deletion behavior for each
   entity (block-if-referenced / cascade / allow) — including any *other* table (standard BC
   included) that references this entity by `TableRelation`.
@@ -496,20 +493,15 @@ fix in a loop until clean.
   is doing both passes:
   - **Pre-generation** (on the planned name/fields): identifier length ≤ 30, reserved-keyword
     scan, localization field-range filter, `ObsoleteState` filter.
-  - **Post-generation** (on the actual file): required-property presence (**Standards §1.4** —
-    `Caption`, `ToolTip`, `ApplicationArea = All` on every field, no exceptions), **no
-    multilanguage (ML) properties and no `TextConst`** — `CaptionML`, `ToolTipML`,
-    `OptionCaptionML`, or any other ML variant fails pre-flight; single-language label syntax only
-    (**§1.7** — `TranslationFile` is on for every project, so a clean compile already proves this
-    via `AL0424`; catch it here anyway, before the file reaches a compile), **translatable text** (**§8.3–§8.4**: no string literals in `Error`/`Message`/
-    `Confirm`/`StrMenu`/notifications, AA0074 suffixes, a `Comment` on every placeholder label,
-    `OptionCaption` member counts match), **API caption locking** matches the Step 2 decision
-    (**§8.6**), `Rec.`-qualification (`NoImplicitWith`, **§1.2**), dead-code check (no empty triggers, no
-    `// TODO`, no commented-out fields, **§1.5**), 4-space indentation with no tabs (**§1.6**),
-    permission-set `tabledata` coverage for any table the object introduces (**§5.3**),
-    permission set names built from the App Code, ≤ 20 characters (**§5.4** — with namespaces
-    the compiler won't flag a name another extension also uses), and
-    **symbol verification** for every standard/base reference (**Appendix B**).
+  - **Post-generation** (on the actual file): `Caption`, `ToolTip`, and `ApplicationArea = All`
+    on every field (**Standards §1.4**); no ML properties and no `TextConst` (**§1.7**);
+    translatable text — no string literal in a user-facing message, AA0074 suffixes, a `Comment`
+    on every placeholder label (**§8.3–§8.4**); API caption locking matches the Step 2 decision
+    (**§8.6**); `Rec.`-qualification (**§1.2**); no empty triggers, `// TODO`, or commented-out
+    fields (**§1.5**); 4-space indentation, no tabs (**§1.6**); `tabledata` coverage for any table
+    the object introduces (**§5.3**); permission set names from the App Code, ≤ 20 characters
+    (**§5.4**); and **symbol verification** for every standard reference (**Appendix B**). The
+    analyzer-enabled compile at Step 5 proves several of these again (ALL ALONG → Analyzers).
 
 **Outputs:** Batch plan, project scaffold, the pre-flight checklist.
 
@@ -542,9 +534,7 @@ scaffold structurally complete (not compiled — Operating Rule 4); pre-flight c
 6. Don't move to the next object until this one's pre-flight, including symbol verification, is
    clean.
 - **Before moving past this step, verify permission-set coverage explicitly** across every table
-  generated — don't just trust that it was planned. Step 5's mandatory compile catches a gap via
-  `PTE0004` (ALL ALONG → Analyzers) if it somehow slipped through, but that's a backstop, not a
-  substitute for catching it now (vacuously satisfied if the extension owns no tables).
+  generated (**Standards §5.3**; vacuously satisfied if the extension owns no tables).
 
 **Outputs:** Every AL file, lint-clean including symbol verification; ChangeLog entries for any
 deviation from `DesignDoc.md`. The extension is **not** compiled yet.
@@ -589,8 +579,7 @@ compiles clean to clear them.
 
 **Translations run inside this cycle** (skip if *US wording, no translation files*). Every build
 that produces a new `.g.xlf`:
-1. **Full build only** — Incremental Build and RAD publishing ignore translations
-   (**Standards §8.2**).
+1. **Full build only** — Incremental Build off, no RAD publish (**Standards §8.2**).
 2. **Sync** every target file from `.g.xlf`.
 3. **Verify any new BC term** per **Appendix D** (`al_searchtranslations` first) and update the
    glossary. Terms already in the glossary aren't looked up again.
@@ -838,7 +827,7 @@ schema-breaking change go out without this warning.
 
 ## OCPF AL Development Standards Guide
 
-The companion rules document — `ocpfALDevStandardsGuide.md`, v1.5.0.0 — shared unchanged with the
+The companion rules document — `ocpfALDevStandardsGuide.md`, v1.6.0.0 — shared unchanged with the
 full framework. **Lite reduces process, not AL rules**, so this is the one fetched resource that
 isn't optional: this runbook cites it as **Standards §** from Step 1 onward.
 
@@ -1066,9 +1055,8 @@ says.
 | **AL Guidelines** — <https://alguidelines.dev> (<https://github.com/microsoft/alguidelines>, MIT) | AL best practices, design patterns, agent-oriented *Vibe Coding Rules* | Step 2 (patterns); Step 6 (review) |
 
 **Precedence:** the downloaded symbol file beats Microsoft Learn on anything symbol-verifiable; the
-Standards Guide beats AL Guidelines on any AL rule. **Known conflict, excluded outright:** AL
-Guidelines' legacy *NAV Patterns → C/AL Coding Guidelines* pages recommending `CaptionML` and
-`OptionCaptionML` predate AL and XLIFF — never follow them (Standards §1.7).
+Standards Guide beats AL Guidelines on any AL rule. AL Guidelines' legacy *C/AL Coding
+Guidelines* pages are never followed (Standards §1.7).
 
 Every third-party resource the framework references, fetches, or recommends is credited, with its
 license, in `THIRD_PARTY_NOTICES.md` at the root of the framework repository.
@@ -1140,26 +1128,20 @@ just fewer documents. Skip everything here if Step 1 chose *US wording, no trans
 - **Bulk approval with a named scope is fine.** For a same-language file (`en-US` → `en-US`), the
   agent may list unchanged units containing no glossary term for one approval decision.
 - **The release gate is a plain state scan.** Every unit in every language required at first
-  release is `signed-off` or `final`. Tools write `translated` themselves, so `translated` never
-  counts as approved.
-- **Changed source text invalidates approval** — sync moves the unit to `needs-adaptation`, and it
-  goes back through drafting and review.
+  release is `signed-off` or `final` (**Standards §8.7**).
+- **Changed source text invalidates approval** (**§8.7**): the unit goes back through drafting and
+  review.
 - Microsoft's translation files are read, never committed. XLIFF Sync and NAB AL Tools are
   credited in the framework's `THIRD_PARTY_NOTICES.md`.
 
-## Permission Sets — the one rule worth restating
+## Permission Sets
 
-The moment this project owns even one table, Permission Sets required = `Yes` — it stops being a
-free choice. The mandatory compile at Step 5 catches a missing `tabledata` grant via `PTE0004`
-(ALL ALONG → Analyzers), and BC publish validation enforces the same requirement independently —
-but don't rely on either as the first catch: verify coverage at the pre-flight checks in Steps 3
-and 4, so a gap doesn't wait until compile to surface. Step 6 relies on the last 0/0 compile for
-coverage, after confirming it ran with the analyzers and nothing was suppressed.
-
-**Name them for this extension, not just the prefix:** `<PREFIX> <APPCODE>, VIEW` and
-`<PREFIX> <APPCODE>, EDIT`, 20 characters or fewer (**Standards §5.4**). A permission set's Role ID
-has no namespace, so two extensions shipping `OCPF - READ` collide in the tenant even though both
-compile cleanly.
+- **Required the moment this project owns one table** (**Standards §5.3**).
+- **Coverage is verified at the pre-flight checks in Steps 3 and 4**, so a gap doesn't wait for the
+  compile. Step 6 relies on the last 0/0 compile, after confirming it ran with the analyzers and
+  nothing was suppressed (ALL ALONG → Analyzers).
+- **Named for this extension, not just the prefix:** `<PREFIX> <APPCODE>, VIEW` and
+  `<PREFIX> <APPCODE>, EDIT`, 20 characters or fewer (**Standards §5.4**).
 
 ## OCPF Plugin (Optional)
 
@@ -1214,7 +1196,7 @@ Never replace the project's runbook without an explicit yes.
 | Step 7 — Release for Testing | Step 12 |
 
 **Shared with the full framework, not reduced:** the OCPF AL Development Standards Guide. Both
-editions fetch the same v1.5.0.0 file and apply the same AL rules — Lite differs only in process.
+editions fetch the same v1.6.0.0 file and apply the same AL rules — Lite differs only in process.
 
 **Document count:** 4 maintained documents (`DesignDoc.md`, `ChangeLog.md`, `Docs.md`,
 `TestScript.md`), plus Step 1's two kickoff artifacts (`ProblemStatement.md`,

@@ -106,11 +106,12 @@ agent-oriented *Vibe Coding Rules* already agree with the framework's approach.
 Languages are part of the project's intake, alongside the extension name, publisher, and ID
 ranges. The agent asks:
 
-1. **Which countries will this app be used in?** Asked as a loop, since there's often more than
-   one.
+1. **Which countries will this app be used in?** Asked once, in the first intake box, as a
+   multi-select list built from the problem statement.
 2. **For each country, which languages?** The agent offers only languages Business Central
-   supports there.
-3. **Confirm the list.**
+   supports there, several countries to a box.
+3. **For each language: required at first release, and who reviews it?** The whole parameter sheet
+   is then shown for one confirmation.
 
 The agent shows the three-letter language IDs BC people already recognise, and records the XLIFF
 culture codes the files actually use:

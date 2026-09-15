@@ -4,6 +4,15 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 1.5.0 — September 15, 2026
+
+**Bundles:** full runbook v2.13.0.0, Lite v1.10.0.0, Standards Guide v1.6.0.0.
+
+- **`start`:** names the question mechanism for Claude Code, GitHub Copilot Chat in VS Code, and
+  GitHub Copilot CLI.
+- **Bundled runbooks:** intake grouped into far fewer option boxes, and AL rules cited from the
+  Standards Guide instead of restated. See `RunbookChangelog.md` v2.13.0.0.
+
 ## 1.4.0 — September 15, 2026
 
 **Bundles:** full runbook v2.12.0.0, Lite v1.9.0.0, Standards Guide v1.5.0.0.

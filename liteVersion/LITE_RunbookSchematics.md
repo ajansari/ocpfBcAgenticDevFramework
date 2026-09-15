@@ -119,7 +119,7 @@ flowchart TD
 
     subgraph S1["STEP 1 — Define the Problem & Lock Parameters"]
         direction LR
-        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Fetch Standards Guide into<br/>standardsGuide/ + gitignore it;<br/>capture raw requirements<br/>verbatim; write problem<br/>statement + quick gap check<br/>(Standards Part 6); ask every<br/>intake question in the options<br/>box (identity, ID-range loop,<br/>BC version), don't infer; persist<br/>ProjectParameters.md; then the<br/>agent writes app.json, connects<br/>AL tools, downloads symbols,<br/>checks the editor"] --> Out1[/"Output:<br/>standardsGuide/ (gitignored),<br/>requirements/ (if any),<br/>ProblemStatement.md,<br/>ProjectParameters.md,<br/>app.json, .alpackages/"/]
+        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Fetch Standards Guide into<br/>standardsGuide/ + gitignore it;<br/>capture raw requirements<br/>verbatim; write problem<br/>statement + quick gap check<br/>(Standards Part 6); ask every<br/>intake question in grouped<br/>option boxes (up to 4 each),<br/>never inferred, then one confirm; persist<br/>ProjectParameters.md; then the<br/>agent writes app.json, connects<br/>AL tools, downloads symbols,<br/>checks the editor"] --> Out1[/"Output:<br/>standardsGuide/ (gitignored),<br/>requirements/ (if any),<br/>ProblemStatement.md,<br/>ProjectParameters.md,<br/>app.json, .alpackages/"/]
     end
     S1 --> Gate1{{"Exit gate:<br/>Standards Guide present + gitignored,<br/>no placeholder remains,<br/>onboarding questions answered,<br/>app.json matches sheet,<br/>symbols in .alpackages/,<br/>human confirms sheet"}}
 
@@ -312,7 +312,7 @@ flowchart LR
 
 ---
 
-*Generated from `LITE_BC_App_Build_Routine_Agent.md` v1.9.0.0; all 7 diagrams re-rendered clean.
+*Generated from `LITE_BC_App_Build_Routine_Agent.md` v1.10.0.0; all 7 diagrams re-rendered clean.
 Version history is in `LITE_RunbookChangeLog.md`. If the Lite runbook changes in a way that
 affects the phase/step structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*

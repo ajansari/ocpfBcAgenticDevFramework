@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the two documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v2.12.0.0**, the guide is at **v1.5.0.0** and Lite is at **v1.9.0.0** — but
+**v2.13.0.0**, the guide is at **v1.6.0.0** and Lite is at **v1.10.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 
 Entries are grouped by version, newest first, and describe the **cumulative** result of a
@@ -17,6 +17,74 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v2.13.0.0 — September 15, 2026
+
+**Intake asks the same questions in far fewer boxes, and the runbook stops restating the Standards
+Guide.** Standards Guide **v1.6.0.0** takes sole ownership of the rules the runbooks repeated.
+Ships with Lite **v1.10.0.0**. Plugin **v1.5.0**.
+
+### Why
+
+The independent review (`pluginDesign/ReviewReport.md`, gitignored) counted about 30 intake prompts,
+most of them one question per box, with countries asked three times and four boxes spent on each
+Object ID range. It also found ten rules whose rationale, limits, and tool behavior sat in both a
+runbook and the Standards Guide, although both documents claimed "neither restates the other".
+
+### Facts verified before designing — not assumed
+
+- **Each harness's question mechanism.** Claude Code's `AskUserQuestion` takes up to four
+  questions per call, 2–4 options each, and adds a free-text *Other* itself. GitHub Copilot Chat in
+  VS Code has an `askQuestions` tool that shows several questions in one carousel, each
+  single-select, multi-select, or free text. GitHub Copilot CLI's `ask_user` tool can't take a
+  typed answer on a choice question (github/copilot-cli issue #3323), so an explicit *I'll type it*
+  choice is needed there.
+
+### Changed
+
+- **Step 01 intake is grouped into boxes** of up to four independent questions: Identity (name,
+  publisher, Deployment Target, countries), Naming (prefix, namespace, Localization, BC version),
+  Permission sets & IDs (App Code, prefix reuse, Object ID range, another range), Onboarding (§1.6's
+  three questions, plus Permission Sets required only when the extension adds no table), Working
+  setup (§1.7, §1.8, source language), the §1.9 language boxes, and one confirmation of the whole
+  sheet. Questions whose options depend on an earlier answer stay in a later box. Every value is
+  still picked or typed by the human; nothing is inferred.
+- **Countries are asked once**, in Box 1, as a multi-select built from the problem statement and
+  checked against Microsoft's live availability page. Localization and §1.9 reuse the answer; the
+  §1.9 country loop is gone.
+- **An Object ID range is one question** whose options are complete ranges with their size. The
+  separate start, end, and confirm boxes are gone; the final sheet confirmation shows every range
+  with its size.
+- **Namespace is one question** (the suggested namespace, an alternative, or none), replacing
+  yes/no plus a follow-up.
+- **§1.7 is one question with a preset:** *One model for everything (recommended)* / *Recommended
+  split* / *Customize each role*. Only *Customize* asks model and effort per role — still two
+  separate questions per role, High still recommended for every role — in two boxes.
+- **§1.8** explains `.gitignore` in one sentence inside the question; the repeated rationale in
+  §1.8 and Repository Hygiene is cut to one clause per option.
+- **Operating Rule 6a** names the mechanism for Claude Code, GitHub Copilot Chat in VS Code, and
+  GitHub Copilot CLI, and the closest equivalent elsewhere. The `start` skill names them too.
+- **"Neither restates the other" is now true.** The runbook names each AL rule in one line where a
+  checklist applies it and cites **Standards §**; rationale, limits, tool behavior, and links live
+  only in the Standards Guide. Trimmed: Operating Rule 2's Microsoft Learn fallback, the §1.2
+  Permission Sets row, Step 03's computed-field and permission-set bullets, the Step 04 checklist
+  item, Step 05's post-generation checklist, Step 09's obsolete-reference line, Step 07's full-build
+  note, the translation release gate, and the AL Guidelines conflict note.
+
+### Added
+
+- **Standards §8.7 (v1.6.0.0):** XLIFF Sync's checks report `needs-review-translation` units as
+  neither missing nor needing work — moved here from the runbook, its only home now. The guide's
+  relationship note and *What is deliberately not here* table state the one-line-and-cite
+  convention.
+
+### Not changed
+
+- Every intake question still goes through the options mechanism, and a suggestion is still never
+  recorded until the human picks or types it.
+- PRE-01 still asks the working language alone, in English, before anything else.
 
 ---
 

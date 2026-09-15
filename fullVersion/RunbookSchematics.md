@@ -143,7 +143,7 @@ flowchart TD
     Gate2 --> S01
     subgraph S01["01 — Populate the Intake Sheet"]
         direction LR
-        In3[/"Inputs:<br/>Expanded entity list"/] --> Act3["Actions:<br/>§1.1 Identity, §1.2 ID ranges,<br/>§1.3 Naming/API, §1.4 Platform,<br/>§1.6 Onboarding/Discoverability,<br/>§1.7 Model & Effort Assignment<br/>(model, then effort, asked<br/>separately per role)<br/>— every question in the options<br/>box, don't infer; §1.10 agent<br/>writes app.json, connects AL tools,<br/>downloads symbols, checks editor"] --> Out3[/"Output:<br/>docs/ProjectParameters.md,<br/>Object Register (seeded),<br/>app.json, .alpackages/"/]
+        In3[/"Inputs:<br/>Expanded entity list"/] --> Act3["Actions:<br/>Intake in grouped option boxes,<br/>up to 4 questions each, never<br/>inferred: identity + countries,<br/>naming + BC version, permission<br/>sets + ID ranges, onboarding,<br/>§1.7 preset + .gitignore, §1.9<br/>languages, then one confirm;<br/>§1.10 agent<br/>writes app.json, connects AL tools,<br/>downloads symbols, checks editor"] --> Out3[/"Output:<br/>docs/ProjectParameters.md,<br/>Object Register (seeded),<br/>app.json, .alpackages/"/]
     end
     S01 --> Gate3{{"Exit gate:<br/>No placeholders remain,<br/>app.json + symbols ready,<br/>human confirms sheet"}}
 
@@ -456,7 +456,7 @@ flowchart TD
 
 ---
 
-*Generated from `BC_App_Build_Routine_Agent.md` v2.12.0.0; all 8 diagrams re-rendered clean. Version
+*Generated from `BC_App_Build_Routine_Agent.md` v2.13.0.0; all 8 diagrams re-rendered clean. Version
 history is in `RunbookChangelog.md`. If the runbook changes in a way that affects the
 phase/step/role structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*

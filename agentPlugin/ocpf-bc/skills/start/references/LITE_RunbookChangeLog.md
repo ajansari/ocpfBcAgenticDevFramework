@@ -16,6 +16,29 @@ framework.
 
 ---
 
+## v1.10.0.0 — September 15, 2026
+
+**Step 1 asks the same questions in far fewer boxes, and the runbook stops restating the Standards
+Guide.** Derived from full framework v2.13.0.0; uses Standards Guide v1.6.0.0. See
+`fullVersion/RunbookChangelog.md` v2.13.0.0 for what was verified.
+
+### Changed
+
+- **Step 1 intake is grouped into boxes** of up to four independent questions: Identity (with
+  countries, asked only once), Naming (prefix, namespace, Localization, BC version), Permission
+  sets & IDs (an Object ID range is one question with its size shown), Onboarding, Setup &
+  languages (`.gitignore`, source language, languages per country), the per-language and
+  translation questions, and one confirmation of the whole sheet. Nothing is inferred.
+- **Operating Rule 6a** names the mechanism for Claude Code (`AskUserQuestion`), GitHub Copilot Chat
+  in VS Code (`askQuestions`), and GitHub Copilot CLI (`ask_user`, with an explicit *I'll type it*
+  choice), and the closest equivalent elsewhere.
+- **One line and a citation per AL rule:** Rule 2's fallback, Step 2's computed-field and
+  permission-set bullets, Step 3's post-generation checklist, Step 4's permission check, Step 5's
+  full-build note, the AL Guidelines conflict note, and the translation gate now cite **Standards
+  §** instead of restating it. The Permission Sets section is three bullets.
+
+---
+
 ## v1.9.0.0 — September 15, 2026
 
 **Fewer one-at-a-time approvals, translation drafting that waits for stable source text, and the
