@@ -290,7 +290,7 @@ flowchart LR
         Pack["Packaging & Versioning<br/>never delete a package;<br/>propose bumps, don't apply silently"]
         Std["OCPF AL Dev Standards Guide<br/>fetched at Step 1, gitignored —<br/>the one fetch that isn't optional"]
         Hygiene["Repository Hygiene<br/>standardsGuide/, patterns/,<br/>.alpackages/ always gitignored;<br/>BCQuality outside the project;<br/>packages tracked"]
-        Notif["Notifications<br/>desktop alert on every turn end,<br/>question, and approval — AI tool<br/>hooks, set up at Step 1"]
+        Notif["Notifications<br/>on every turn end, question,<br/>and approval — each AI tool's own<br/>(Claude: app push + sound),<br/>set up at Step 1"]
         MCP["AL MCP Server, Symbols &<br/>Editor Sync — agent sets up at<br/>Step 1, human only approves;<br/>check editor after clean compiles"]
         Ana["Analyzers<br/>CodeCop, UICop, and PerTenantExtensionCop<br/>or AppSourceCop on every<br/>mandatory compile"]
         Ref["Reference Sources<br/>MS Learn Base App + System App,<br/>translation files, AL Guidelines —<br/>consulted online, not fetched"]

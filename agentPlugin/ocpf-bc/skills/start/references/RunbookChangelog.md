@@ -22,43 +22,52 @@ specifically to keep a superseded decision on record — see the runbook's ALL A
 
 ## v2.15.0.0 — September 15, 2026
 
-**The human gets a desktop notification every time the agent finishes a turn, asks a question, or
-waits for an approval** — so no time is lost because nobody noticed it was their turn. Standards
-Guide unchanged at **v1.7.0.0**. Ships with Lite **v1.12.0.0**. Plugin **v1.7.0**.
+**The human is notified every time the agent finishes a turn, asks a question, or waits for an
+approval** — through each AI tool's own notifications — so no time is lost because nobody noticed
+it was their turn. Standards Guide unchanged at **v1.7.0.0**. Ships with Lite **v1.12.0.0**.
+Plugin **v1.7.0**.
 
 ### Facts verified before designing — not assumed
 
-- **Claude Code's built-in notification doesn't cover this on its own.** Per its documentation, it
-  sends a desktop notification only in Ghostty, Kitty, and iTerm2 — not VS Code's integrated
-  terminal — and its idle notice fires about 60 seconds after a turn ends.
-- **Claude Code hooks do.** In Claude Code 2.1.272, a `Stop` hook fired at the end of a turn, and a
-  `PreToolUse` hook matching `AskUserQuestion` fired the moment a question was shown, in a live
-  session. The exact `.claude/settings.local.json` block the runbook prescribes ran the
-  notification script with `$CLAUDE_PROJECT_DIR` resolved.
-- **GitHub Copilot Chat in VS Code** has built-in OS notifications,
-  `chat.notifyWindowOnResponseReceived` and `chat.notifyWindowOnConfirmation`, each defaulting to
-  `windowNotFocused` (VS Code documentation). Not tested here.
-- **GitHub Copilot CLI** documents `agentStop` and `notification` hooks (`permission_prompt`,
-  `elicitation_dialog`, and others), with user-level hooks in `~/.copilot/hooks/`. Not tested
-  here: the CLI on this machine wasn't signed in. Whether its `ask_user` questions raise
-  `elicitation_dialog` isn't documented.
-- **On macOS, `osascript` notifications come from Script Editor**, which macOS silently blocks until
-  it's allowed in System Settings → Notifications (Claude Code documentation), so the setup ends
-  with a test the human confirms.
+- **An operating-system banner raised by a script is the wrong tool.** On macOS, `osascript`
+  notifications come from Script Editor, so clicking one opens Script Editor instead of the
+  session. The framework uses each AI tool's own notifications instead.
+- **GitHub Copilot Chat in VS Code** has VS Code's own notifications,
+  `chat.notifyWindowOnResponseReceived` and `chat.notifyWindowOnConfirmation` (`off`,
+  `windowNotFocused` by default, or `always`); selecting one opens the chat session (VS Code
+  documentation). Not tested here.
+- **GitHub Copilot CLI** shows its own desktop notifications for attention prompts and idle
+  sessions, including on macOS, while the terminal isn't focused; `COPILOT_DISABLE_DESKTOP_NOTIFICATIONS`
+  turns them off (Copilot CLI changelog). Not tested here: the CLI on this machine wasn't signed in.
+- **Claude Code's VS Code extension has no notifications of its own** — open feature requests
+  anthropics/claude-code #57230 and #29928 — and its terminal notifications reach only iTerm2,
+  Ghostty, and Kitty. Claude's own notification is a **Remote Control push to the Claude app**:
+  `inputNeededNotifEnabled` pushes permission prompts and questions, and `agentPushNotifEnabled`
+  lets Claude push when it decides to. Pushes arrive only while Remote Control is connected, and
+  Claude Code honors `remoteControlAtStartup: true` only from user settings, never from a project
+  (Claude Code documentation).
+- **Claude Code hooks fire at the right moments.** In Claude Code 2.1.272, a `Stop` hook fired at the
+  end of a turn and a `PreToolUse` hook matching `AskUserQuestion` fired the moment a question was
+  shown, in a live session. The exact `.claude/settings.local.json` block the runbook prescribes
+  ran the sound script with `$CLAUDE_PROJECT_DIR` resolved.
 
 ### Added
 
-- **ALL ALONG → Notifications** (both editions): the notification script, the hooks per AI tool,
-  and a one-time test. Hooks are per developer and never committed, since the commands differ by
-  operating system: `.claude/settings.local.json` for Claude Code, `~/.copilot/hooks/` for Copilot
-  CLI, and VS Code's own settings for Copilot Chat. Claude Code's Remote Control is offered for
-  phone notifications.
+- **ALL ALONG → Notifications** (both editions):
+  - **GitHub Copilot Chat in VS Code:** both VS Code settings set to `always` in
+    `.vscode/settings.json`.
+  - **GitHub Copilot CLI:** its built-in notifications; nothing to set up.
+  - **Claude Code:** one question — Claude app push, or sound only. A sound on every turn end,
+    question, and approval through hooks in `.claude/settings.local.json` (per developer, never
+    committed). With push, the two push settings there, `remoteControlAtStartup` in
+    `~/.claude/settings.json` with approval, and a short push from the agent at the end of every
+    turn that hands the ball back. A one-time test.
 - **PRE-01 / Lite Step 1:** notifications are turned on right after the working language, so every
   later question notifies. The PRE-01 / Step 1 exit gate checks it.
 - **Repository Hygiene:** `.claude/settings.local.json` is always gitignored.
-- **`ocpf-notify.sh` and `ocpf-notify.ps1`** in the plugin's new `notifications` skill: macOS
-  notifications, Linux `notify-send`, a Windows notification that returns at once (untested on
-  Windows), or the terminal bell. They always exit 0, so a notification that can't be shown never
+- **`ocpf-notify.sh` and `ocpf-notify.ps1`** in the plugin's new `notifications` skill: a short
+  system sound (macOS `afplay`, Linux `paplay` or the terminal bell, Windows system sounds —
+  untested on Windows), with nothing to click. They always exit 0, so a sound that can't play never
   interrupts the agent.
 
 ---

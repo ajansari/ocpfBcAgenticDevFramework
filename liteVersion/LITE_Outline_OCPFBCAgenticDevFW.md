@@ -61,7 +61,7 @@ release test.*
 - Analyzers — CodeCop, UICop, and PerTenantExtensionCop *or* AppSourceCop, engaged on every mandatory compile
 - Symbols — downloaded by the agent, never the human
 - Keeping the Editor in Sync — stale red marks detected and refreshed
-- Notifications — a desktop notification whenever the agent finishes a turn, asks a question, or waits for an approval
+- Notifications — each AI tool's own notification whenever the agent finishes a turn, asks a question, or waits for an approval
 - Reference Sources — Microsoft Learn (BC Base App, BC System App, translation files, country/language availability) and AL Guidelines
 - BCQuality Knowledge Snapshot
 - OCPF BC AL Patterns Library

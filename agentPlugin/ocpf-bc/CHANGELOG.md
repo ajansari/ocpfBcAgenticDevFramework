@@ -8,10 +8,11 @@ fetches the latest runbook from GitHub first, so a project isn't limited to the 
 
 **Bundles:** full runbook v2.15.0.0, Lite v1.12.0.0, Standards Guide v1.7.0.0.
 
-- **New `notifications` skill** with `ocpf-notify.sh` and `ocpf-notify.ps1`: a desktop notification
-  whenever the agent finishes a turn, asks a question, or waits for an approval, through Claude
-  Code and GitHub Copilot CLI hooks or VS Code's own Copilot Chat settings. The runbooks set it up
-  at their first step; the skill adds it to older projects.
+- **New `notifications` skill:** tells the developer whenever the agent finishes a turn, asks a
+  question, or waits for an approval, using each AI tool's own notifications — VS Code's for
+  GitHub Copilot Chat, Copilot CLI's built-in ones, and a Claude app push plus a short sound
+  (`ocpf-notify.sh` / `ocpf-notify.ps1`) for Claude Code. The runbooks set it up at their first
+  step; the skill adds it to older projects.
 - **`start`:** notes that the runbook turns notifications on right after the working language.
 
 ## 1.6.0 — September 15, 2026

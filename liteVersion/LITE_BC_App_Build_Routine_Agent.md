@@ -197,7 +197,8 @@ design work.
   through the options mechanism, with English listed first and free text for any other language.
   It's asked alone, so every later box can be in the language chosen.
 - **Turn on notifications right after that** (ALL ALONG → Notifications), so every later question
-  reaches the human even when they've stepped away. Say what you're doing; it's not a question.
+  reaches the human even when they've stepped away. Say what you're doing; the only question is
+  Claude Code's push-or-sound choice.
   Continue in the language chosen.
 - **Fetch the OCPF AL Development Standards Guide first, before anything else needs it.** Get
   `standardsGuide/ocpfALDevStandardsGuide.md` from
@@ -1036,68 +1037,51 @@ Never change code that compiles clean just to clear stale marks.
 
 ## Notifications
 
-**The human gets a desktop notification every time the agent finishes a turn, asks a question, or
-waits for an approval** — set up once at Step 1, right after the working language, through the AI
-tool's own hooks. The agent's job (Rule 6d); nothing is installed.
+**The human is notified every time the agent finishes a turn, asks a question, or waits for an
+approval** — through each AI tool's own notifications, never an operating-system banner raised by
+a script (on macOS, clicking one opens Script Editor). Set up once at Step 1, right after the
+working language. The agent's job (Rule 6d); nothing is installed.
 
-1. **Copy the script** into `scripts/` (gitignored): `ocpf-notify.sh` (macOS/Linux) or
-   `ocpf-notify.ps1` (Windows, untested there) — from the plugin's `notifications` skill, or
-   byte for byte from `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/notifications/scripts/<file>`.
-2. **Write the hooks, per developer, never committed:**
-   - **Claude Code:** `.claude/settings.local.json` (add it to `.gitignore`; merge, don't
-     replace). On Windows, run `ocpf-notify.ps1` with `powershell.exe -NoProfile
-     -ExecutionPolicy Bypass -File` instead.
-   - **GitHub Copilot CLI:** `~/.copilot/hooks/ocpf-notify.json`, user-level and outside the
-     project, so the AI tool asks first. Each command runs only where the script exists.
-   - **GitHub Copilot Chat in VS Code:** `.vscode/settings.json`:
-     `"chat.notifyWindowOnResponseReceived": "always"` and
-     `"chat.notifyWindowOnConfirmation": "always"`.
-3. **Test once** and ask (Rule 6a): *Did a notification appear?* On macOS, a *No* usually means
-   **Script Editor** isn't allowed in **System Settings → Notifications** — the human's to grant.
-
-Claude Code (macOS/Linux):
-
-```json
-{
-  "hooks": {
-    "Stop": [
-      { "hooks": [ { "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/scripts/ocpf-notify.sh\" \"Your turn: the agent finished\"" } ] }
-    ],
-    "PreToolUse": [
-      { "matcher": "AskUserQuestion", "hooks": [ { "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/scripts/ocpf-notify.sh\" \"A question is waiting for your answer\"" } ] }
-    ],
-    "Notification": [
-      { "matcher": "permission_prompt", "hooks": [ { "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/scripts/ocpf-notify.sh\" \"An approval is waiting for you\"" } ] }
-    ]
-  }
-}
-```
-
-GitHub Copilot CLI:
+- **GitHub Copilot Chat in VS Code:** VS Code's own notification, which opens the chat session when
+  clicked. In `.vscode/settings.json`: `"chat.notifyWindowOnResponseReceived": "always"` and
+  `"chat.notifyWindowOnConfirmation": "always"`.
+- **GitHub Copilot CLI:** its own desktop notifications for attention prompts and idle sessions.
+  Nothing to set up; don't set `COPILOT_DISABLE_DESKTOP_NOTIFICATIONS`.
+- **Claude Code** (VS Code extension or terminal) — its VS Code extension has no notifications, so
+  a Claude app push plus a short sound:
+  1. **Ask once** (Rule 6a): *Get Claude app push notifications on your phone?* — *Yes
+     (recommended if you have the Claude app)* / *Sound only*.
+  2. **Copy the sound script** into `scripts/` (gitignored): `ocpf-notify.sh` (macOS/Linux) or
+     `ocpf-notify.ps1` (Windows, untested there) — from the plugin's `notifications` skill, or byte
+     for byte from `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/notifications/scripts/<file>`. It shows nothing, so there's nothing to click.
+  3. **Write `.claude/settings.local.json`** (per developer; merge, add to `.gitignore`). *Sound
+     only* leaves out the two push settings. On Windows, run `ocpf-notify.ps1` with
+     `powershell.exe -NoProfile -ExecutionPolicy Bypass -File` instead.
+  4. **With push:** add `"remoteControlAtStartup": true` to `~/.claude/settings.json` (Claude Code
+     accepts it only from user settings; the AI tool asks first), and tell the human to install
+     the Claude app, sign in, and allow its notifications.
+  5. **With push, end every turn that hands the ball back with a short push** saying what the human
+     needs to do (Claude Code's push notification tool). Questions and approvals push by
+     themselves, and Claude Code skips pushes while the human is focused on the session.
+  6. **Test once** and ask (Rule 6a): *Did you hear the sound and get the push?*
 
 ```json
 {
-  "version": 1,
+  "inputNeededNotifEnabled": true,
+  "agentPushNotifEnabled": true,
   "hooks": {
-    "agentStop": [
-      { "type": "command", "timeoutSec": 15,
-        "bash": "[ -f scripts/ocpf-notify.sh ] && sh scripts/ocpf-notify.sh 'Your turn: the agent finished' </dev/null; exit 0",
-        "powershell": "if (Test-Path scripts/ocpf-notify.ps1) { & powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ocpf-notify.ps1 'Your turn: the agent finished' }" }
-    ],
-    "notification": [
-      { "type": "command", "timeoutSec": 15,
-        "bash": "grep -Eq '\"notification_type\" *: *\"(permission_prompt|elicitation_dialog)\"' && [ -f scripts/ocpf-notify.sh ] && sh scripts/ocpf-notify.sh 'The agent needs your input' </dev/null; exit 0",
-        "powershell": "$n = [Console]::In.ReadToEnd(); if ($n -match '\"notification_type\"\\s*:\\s*\"(permission_prompt|elicitation_dialog)\"' -and (Test-Path scripts/ocpf-notify.ps1)) { & powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ocpf-notify.ps1 'The agent needs your input' }" }
-    ]
+    "Stop": [ { "hooks": [ { "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/scripts/ocpf-notify.sh\"" } ] } ],
+    "PreToolUse": [ { "matcher": "AskUserQuestion", "hooks": [ { "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/scripts/ocpf-notify.sh\"" } ] } ],
+    "Notification": [ { "matcher": "permission_prompt", "hooks": [ { "type": "command", "command": "sh \"$CLAUDE_PROJECT_DIR/scripts/ocpf-notify.sh\"" } ] } ]
   }
 }
 ```
 
 Verified September 2026: in Claude Code 2.1.272, the `Stop` hook and a `PreToolUse` hook on
-`AskUserQuestion` both fired. The Copilot CLI hooks and the VS Code settings are documented by
-GitHub and Microsoft but untested here. Claude Code's Remote Control can also push to a phone —
-offer it to a human who steps away. Tools with no hooks (Claude Chat, Microsoft Copilot Cowork)
-can't notify; say so.
+`AskUserQuestion` both fired with this settings block. The push settings, the VS Code settings, and
+the Copilot CLI notifications are documented by Anthropic, Microsoft, and GitHub but untested here.
+Tools with neither notifications nor hooks (Claude Chat, Microsoft Copilot Cowork) can't notify; say
+so.
 
 ## Reference Sources — Microsoft Learn and AL Guidelines
 

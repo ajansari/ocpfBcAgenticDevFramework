@@ -379,7 +379,7 @@ flowchart LR
         Prog["Project Progress Tracker<br/>ProjectProgress.md (project root) —<br/>one status table, created at PRE-01"]
         Pack["Packaging & Versioning<br/>never delete a package;<br/>propose bumps, don't apply silently"]
         Std["OCPF AL Dev Standards Guide<br/>fetched at PRE-01 into standardsGuide/,<br/>gitignored — the rules cited as Standards §"]
-        Notif["Notifications<br/>desktop alert on every turn end,<br/>question, and approval — AI tool<br/>hooks, set up at PRE-01"]
+        Notif["Notifications<br/>on every turn end, question,<br/>and approval — each AI tool's own<br/>(Claude: app push + sound),<br/>set up at PRE-01"]
         MCP["AL MCP Server, Symbols &<br/>Editor Sync — agent sets up at<br/>§1.10, human only approves;<br/>check editor after clean compiles"]
         Ana["Analyzers<br/>CodeCop, UICop, and PerTenantExtensionCop<br/>or AppSourceCop on every<br/>mandatory compile"]
         Hyg["Repository Hygiene<br/>packages tracked;<br/>.alpackages/, *.g.xlf,<br/>fetched references gitignored"]

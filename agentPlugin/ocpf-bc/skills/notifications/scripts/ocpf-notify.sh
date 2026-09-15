@@ -1,33 +1,30 @@
 #!/bin/sh
-# OCPF turn notification for macOS and Linux (from the ocpf-bc plugin's notifications skill).
+# OCPF "your turn" sound for macOS and Linux (from the ocpf-bc plugin's notifications skill).
 #
-# Shows a desktop notification so the developer knows the ball is in their court. An AI tool's hook
-# runs it when the agent finishes a turn, asks a question, or needs an approval. Nothing is
-# installed; it uses what the operating system already has.
+# Plays a short system sound so the developer hears that the ball is in their court. An AI tool's
+# hook runs it when the agent finishes a turn, asks a question, or waits for an approval. It shows
+# no banner, so there's nothing to click. Nothing is installed; it uses what the operating system
+# already has.
 #
-# Usage: sh scripts/ocpf-notify.sh [message]
-#   sh scripts/ocpf-notify.sh "Your turn: the agent finished"
+# Usage: sh scripts/ocpf-notify.sh
 #
-# Hook input on stdin is read and discarded, so the calling tool never blocks. Always exits 0: a
-# notification that can't be shown must never interrupt the agent.
+# Hook input on stdin is read and discarded, and the sound plays in the background, so the calling
+# tool never waits. Always exits 0: a sound that can't play must never interrupt the agent.
 
-message="${1:-Your turn: the agent is waiting for you}"
-title="OCPF BC agent"
-project="$(basename "$PWD")"
-
-# Drain any hook input without waiting on an interactive terminal.
 [ -t 0 ] || cat >/dev/null 2>&1
+
+play() { "$@" >/dev/null 2>&1 </dev/null & }
 
 case "$(uname -s)" in
   Darwin)
-    # Single quotes and backslashes can't break out of the AppleScript string.
-    esc() { printf '%s' "$1" | sed 's/\\/\\\\/g; s/"/\\"/g'; }
-    osascript -e "display notification \"$(esc "$message")\" with title \"$(esc "$title")\" subtitle \"$(esc "$project")\" sound name \"Glass\"" >/dev/null 2>&1 \
-      || printf '\a' >/dev/tty 2>/dev/null
+    play afplay /System/Library/Sounds/Glass.aiff
     ;;
   Linux)
-    if command -v notify-send >/dev/null 2>&1; then
-      notify-send "$title — $project" "$message" >/dev/null 2>&1 || printf '\a' >/dev/tty 2>/dev/null
+    sound=/usr/share/sounds/freedesktop/stereo/complete.oga
+    if command -v paplay >/dev/null 2>&1 && [ -f "$sound" ]; then
+      play paplay "$sound"
+    elif command -v canberra-gtk-play >/dev/null 2>&1; then
+      play canberra-gtk-play -i complete
     else
       printf '\a' >/dev/tty 2>/dev/null
     fi
