@@ -29,6 +29,8 @@ slidedecks/fonts/
 translationDesign/
 #Plugin design working notes — local only, never pushed to the remote
 pluginDesign/
+#Built plugin packages (Copilot Cowork .zip) — attach to a GitHub release instead of committing
+agentPlugin/dist/
 
 ### macOS ###
 #Finder per-folder view-state file — local/cosmetic only, never useful to commit

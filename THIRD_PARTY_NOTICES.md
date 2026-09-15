@@ -187,7 +187,32 @@ September 14, 2026. The upstream project's current license always governs.*
   Code Marketplace; the AL MCP Server (`altool launchmcpserver`) ships inside it.
 - **License:** Microsoft's own license terms for the extension (not open source).
 - **Used for:** compiling, packaging, symbols, and diagnostics. Invoked from your own
-  installation; never redistributed.
+  installation, either through the extension's built-in GitHub Copilot tools or through its
+  bundled AL MCP Server, which the `ocpf-bc` plugin's launcher script starts. Never redistributed.
+
+### AL Development Tools .NET tool (Microsoft)
+- **Source:** `Microsoft.Dynamics.BusinessCentral.Development.Tools` on NuGet
+  (<https://www.nuget.org/packages/Microsoft.Dynamics.BusinessCentral.Development.Tools>). It
+  installs the `al` command, which includes the AL MCP Server (`al launchmcpserver`).
+- **License:** Microsoft Software License Terms, as linked from the package's own `LICENSE.txt` (not
+  open source).
+- **Used for:** optional, only for cloud sessions and machines without VS Code. There, the
+  framework runs `al launchmcpserver` from this tool instead of from the AL Language extension. You
+  install it yourself, in a cloud environment's setup script or with approval; this repository
+  never redistributes it.
+
+### .NET SDK
+- **Source:** <https://dotnet.microsoft.com/download> (source: <https://github.com/dotnet/sdk>)
+- **License:** MIT — Copyright (c) .NET Foundation and Contributors
+- **Used for:** installing the AL Development Tools .NET tool above. Installed by you, if you
+  choose that route.
+
+### Microsoft 365 Agents Toolkit CLI (`atk`)
+- **Source:** `@microsoft/m365agentstoolkit-cli` on npm
+  (<https://github.com/OfficeDev/microsoft-365-agents-toolkit>)
+- **License:** MIT
+- **Used for:** maintainers only. `atk import openplugin` converts the `ocpf-bc` plugin into a
+  Microsoft 365 app package for Copilot Cowork. Framework users never need it.
 
 ### Business Central symbol packages
 - Microsoft's `.app` symbol packages (Base Application, System Application, and so on) are
@@ -198,8 +223,9 @@ September 14, 2026. The upstream project's current license always governs.*
 
 ## Trademarks
 
-Microsoft, Dynamics 365, Business Central, Visual Studio Code, AppSource, and GitHub are
-trademarks of the Microsoft group of companies. Claude is a trademark of Anthropic. All other
+Microsoft, Dynamics 365, Business Central, Microsoft 365, Copilot, Visual Studio Code, AppSource,
+and GitHub are trademarks of the Microsoft group of companies. Claude and Claude Code are trademarks
+of Anthropic. All other
 names are the property of their respective owners. Their mention here is for identification and
 credit only and implies no endorsement.
 

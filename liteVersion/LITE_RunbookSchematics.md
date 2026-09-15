@@ -294,6 +294,7 @@ flowchart LR
         BCQ["BCQuality Knowledge Snapshot<br/>fetch once at Step 3, refresh<br/>only on explicit request"]
         Pat["OCPF BC AL Patterns Library<br/>fetch once into patterns/,<br/>check before diagnosing from scratch"]
         Perm["Permission Sets<br/>Yes the moment 1 table exists;<br/>re-verify at Steps 3, 4, and 6"]
+        Plug["OCPF Plugin (optional)<br/>only if .ocpf/framework.json exists:<br/>per-session update check (apply on yes),<br/>Standards fallback, zero-install AL tools"]
     end
 
     Continuous -.-> DEFINE
@@ -304,7 +305,7 @@ flowchart LR
     classDef phase fill:#d4e6f7,stroke:#4a7ab5,stroke-width:1px;
     classDef discipline fill:#fdf0d5,stroke:#c99a3a,stroke-width:1px;
     class DEFINE,DESIGN,BUILD,PROVE phase;
-    class Change,Pack,Std,Hygiene,MCP,Ref,Tr,BCQ,Pat,Perm discipline;
+    class Change,Pack,Std,Hygiene,MCP,Ref,Tr,BCQ,Pat,Perm,Plug discipline;
 ```
 
 ---

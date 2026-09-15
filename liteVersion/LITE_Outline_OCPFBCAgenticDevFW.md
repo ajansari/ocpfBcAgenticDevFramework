@@ -61,6 +61,7 @@ release test.*
 - Reference Sources — Microsoft Learn (BC Base App, BC System App, translation files, country/language availability) and AL Guidelines
 - BCQuality Knowledge Snapshot
 - OCPF BC AL Patterns Library
+- OCPF Plugin (optional) — update check, Standards Guide fallback, zero-install AL tool setup
 - Permission Sets discipline
 
 ---

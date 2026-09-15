@@ -1,0 +1,4 @@
+# Line endings for the agent plugin's launcher scripts: Windows scripts need CRLF, shell scripts LF.
+agentPlugin/**/*.cmd text eol=crlf
+agentPlugin/**/*.ps1 text eol=crlf
+agentPlugin/**/*.sh text eol=lf

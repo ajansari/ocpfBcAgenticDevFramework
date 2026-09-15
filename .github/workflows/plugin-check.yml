@@ -1,0 +1,53 @@
+name: Plugin check
+
+# Keeps the ocpf-bc agent plugin consistent with the framework documents it bundles.
+# Fails when a runbook, changelog, or the Standards Guide changed without re-running
+# agentPlugin/tools/syncPlugin.sh, or when the plugin or marketplace manifest is invalid.
+
+on:
+  push:
+    paths:
+      - "BC_App_Build_Routine_Agent.md"
+      - "RunbookChangelog.md"
+      - "liteVersion/**"
+      - "standardsGuide/**"
+      - "agentPlugin/**"
+      - ".claude-plugin/**"
+      - ".github/workflows/plugin-check.yml"
+  pull_request:
+    paths:
+      - "BC_App_Build_Routine_Agent.md"
+      - "RunbookChangelog.md"
+      - "liteVersion/**"
+      - "standardsGuide/**"
+      - "agentPlugin/**"
+      - ".claude-plugin/**"
+      - ".github/workflows/plugin-check.yml"
+
+permissions:
+  contents: read
+
+jobs:
+  check:
+    runs-on: ubuntu-latest
+    steps:
+      - uses: actions/checkout@v4
+
+      - name: Bundled copies match the canonical documents
+        run: bash agentPlugin/tools/syncPlugin.sh --check
+
+      - name: Manifests are valid JSON
+        run: |
+          python3 -m json.tool .claude-plugin/marketplace.json > /dev/null
+          python3 -m json.tool agentPlugin/ocpf-bc/.claude-plugin/plugin.json > /dev/null
+          python3 -m json.tool agentPlugin/ocpf-bc/.mcp.json > /dev/null
+
+      - uses: actions/setup-node@v4
+        with:
+          node-version: 22
+
+      - name: Claude Code plugin validation
+        run: |
+          npm install -g @anthropic-ai/claude-code
+          claude plugin validate ./agentPlugin/ocpf-bc --strict
+          claude plugin validate . --strict

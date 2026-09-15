@@ -382,6 +382,7 @@ flowchart LR
         Tr["Translations & Terminology<br/>glossary from Microsoft's translations;<br/>agent drafts, named reviewer approves;<br/>release gate: all units signed-off"]
         BCQ["BCQuality Knowledge Snapshot<br/>fetch once, refresh only<br/>on explicit request"]
         Pat["OCPF BC AL Patterns Library<br/>fetch once into patterns/,<br/>check before diagnosing from scratch"]
+        Plug["OCPF Plugin (optional)<br/>only if .ocpf/framework.json exists:<br/>per-session update check (apply on yes),<br/>Standards fallback, zero-install AL tools, sub-agents"]
     end
 
     Continuous -.-> DEFINE
@@ -392,7 +393,7 @@ flowchart LR
     classDef phase fill:#d4e6f7,stroke:#4a7ab5,stroke-width:1px;
     classDef discipline fill:#fdf0d5,stroke:#c99a3a,stroke-width:1px;
     class DEFINE,DESIGN,BUILD,PROVE phase;
-    class Doc,Change,Retain,Test,Mem,Prog,Pack,Std,MCP,Ref,Tr,BCQ,Pat discipline;
+    class Doc,Change,Retain,Test,Mem,Prog,Pack,Std,MCP,Ref,Tr,BCQ,Pat,Plug discipline;
 ```
 
 ### 4.2 Model & Effort Assignment (§1.7)
