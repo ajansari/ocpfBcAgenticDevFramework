@@ -30,7 +30,9 @@ The AL Language extension provides its AL tools to Copilot Chat directly: `al_bu
 `al_publish`, `al_downloadsymbols`, `al_symbolsearch`, `al_getdiagnostics`, `al_getnextobjectid`,
 `al_symbolrelations`, `al_debug`, `al_setbreakpoint`, `al_snapshotdebugging`.
 - **If you have those tools,** tell the human the AL tools are ready. Record
-  `"alMcp": "al-extension-tools"` in `.ocpf/framework.json` if it exists, and stop.
+  `"alMcp": "al-extension-tools"` in `.ocpf/framework.json` if it exists, and stop. (The runbook
+  turns on Microsoft's code analyzers for these tools later, in `.vscode/settings.json` at
+  scaffolding — ALL ALONG → Analyzers. Nothing to do for that here.)
 - **If you don't,** the AL Language extension isn't installed or isn't active yet. Ask the human to
   install **AL Language extension for Microsoft Dynamics 365 Business Central** from the Extensions
   view, or to open an `.al` file so it activates. Stop there. Every AL developer needs that
@@ -51,25 +53,32 @@ Skip to [Cloud sessions](#cloud-sessions).
 If this session already has tools such as `al_compile` and `al_addproject`, the server is connected.
 Record `"alMcp": "al-extension-mcp"` and stop.
 
-## Step 3: Offer it with one question
+## Step 3: Say what you're doing — don't ask
 
-Ask once, through the options mechanism:
-- **Connect the AL tools for this project (recommended).** Uses the AL Language extension already
-  installed; nothing is installed. Adds a small launcher script and one MCP entry to the project.
-- **Not now.** Record `"alMcp": "deferred"`. The runbook offers it again when BUILD starts.
+Connecting the AL tools is the agent's job, not a decision for the human (runbook Operating Rule
+6d). Tell the human in one sentence: you're connecting Microsoft's AL tools using the AL Language
+extension already installed, nothing will be installed, and a few small scripts plus one MCP entry
+will be added to the project. Then continue.
+
+If the human says to hold off, record `"alMcp": "deferred"` and stop. The runbook needs these tools
+at the end of intake anyway, to download symbols before design (full framework Step 01 §1.10, Lite
+end of Step 1), and connects them then.
 
 ## Step 4: Connect
 
-1. **Copy the launcher and the one-shot helper for this operating system** from this skill's
-   `scripts/` folder into the project's `scripts/` folder (create it if needed). Copy exactly;
-   don't rewrite.
-   - **macOS or Linux:** `al-mcp.sh` and `al-mcp-call.sh`
-   - **Windows:** `al-mcp.cmd`, `al-mcp-resolve.ps1` (the `.cmd` calls it), and `al-mcp-call.ps1`
+1. **Copy the launcher, the one-shot helper, and the analyzer compile script for this operating
+   system** from this skill's `scripts/` folder into the project's `scripts/` folder (create it if
+   needed). Copy exactly; don't rewrite.
+   - **macOS or Linux:** `al-mcp.sh`, `al-mcp-call.sh`, and `al-analyze.sh`
+   - **Windows:** `al-mcp.cmd`, `al-mcp-resolve.ps1` (the `.cmd` calls it), `al-mcp-call.ps1`,
+     `al-analyze.cmd`, and `al-analyze-resolve.ps1` (the analyze `.cmd` calls it)
 
    The launcher looks up the newest AL extension and its .NET runtime every time it starts, so AL
    extension updates never break it. If Microsoft's `al` .NET tool happens to be installed, it
    uses that instead. The helper runs one AL MCP Server tool through the launcher and exits
-   (step 5).
+   (step 5). The analyzer script runs the runbook's mandatory compile with Microsoft's code
+   analyzers attached, because the AL MCP Server's own `al_build`/`al_compile` tools don't apply
+   them (runbook ALL ALONG → Analyzers).
 2. **Add `scripts/` to the project's `.gitignore`** if it isn't there. It's framework plumbing, not
    the client's deliverable (runbook ALL ALONG → Repository Hygiene).
 3. **Add the `al` server to `.mcp.json` in the project root.** Create the file if needed. If it

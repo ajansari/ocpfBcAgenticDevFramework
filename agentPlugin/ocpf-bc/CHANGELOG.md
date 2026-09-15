@@ -4,6 +4,19 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 1.4.0 — September 15, 2026
+
+**Bundles:** full runbook v2.12.0.0, Lite v1.9.0.0, Standards Guide v1.5.0.0.
+
+- **`al-mcp-setup` and `start`:** connecting the AL tools is the agent's job, so the skill says what
+  it's doing instead of asking. A postponed setup now points at the runbook's §1.10 (Lite: end of
+  Step 1). The skill copies the analyzer scripts (`al-analyze.*`) into the project alongside the
+  launchers, and notes that GitHub Copilot Chat takes its analyzers from `.vscode/settings.json`.
+- **`ocpf-code-reviewer`:** framework projects gitignore `.alpackages/`, so the reviewer checks
+  symbols only when present and otherwise marks the item as not verified.
+- **Bundled runbooks:** batched approvals, a single approver option, translation drafting once
+  source text is stable, and `.alpackages/` always gitignored. See `RunbookChangelog.md` v2.12.0.0.
+
 ## 1.3.0 — September 15, 2026
 
 **Bundles:** full runbook v2.11.0.0, Lite v1.8.0.0, Standards Guide v1.4.0.0.

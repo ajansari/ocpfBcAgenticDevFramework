@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the two documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v2.11.0.0**, the guide is at **v1.4.0.0** and Lite is at **v1.8.0.0** — but
+**v2.12.0.0**, the guide is at **v1.5.0.0** and Lite is at **v1.9.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 
 Entries are grouped by version, newest first, and describe the **cumulative** result of a
@@ -17,6 +17,91 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v2.12.0.0 — September 15, 2026
+
+**Fewer one-at-a-time human waits, translation work that no longer repeats inside every fix
+cycle, and the drift the independent review found, resolved.** Standards Guide **v1.5.0.0** adds
+`al_searchtranslations` to Appendix D. Ships with Lite **v1.9.0.0**. Plugin **v1.4.0**.
+
+### Why
+
+The independent review (`pluginDesign/ReviewReport.md`, gitignored) estimated that a typical Full
+run asks the human for something 70–95 times before release testing, many of them serial "read and
+approve" waits on the same person. It also found translation drafting and per-language testing
+repeated on every build of Step 07's fix loop, while captions were still changing, and several
+places where the runbooks, outlines, plugin skills, and schematics had drifted apart.
+
+### Facts verified before designing — not assumed
+
+- **Symbols downloaded from a sandbox are full Microsoft packages, not just symbols.** Checked on
+  BC 28.4: the Base Application package carried 8,579 Microsoft `.al` source files, and the System
+  Application package carried translation files for 26 languages. That is Microsoft's proprietary
+  content (Standards §8.5), so `.alpackages/` can't be tracked for "reproducibility". Microsoft's
+  AL-Go templates for per-tenant and AppSource apps gitignore `.alpackages/` too.
+- **The AL MCP Server's `al_searchtranslations` finds Microsoft's translations inside symbol
+  packages without unzipping them**, with its arguments inside a `parameters` object (`query`,
+  `locale`, optional `objectName`, `kinds`, `limit`). On BC 28.4 sandbox symbols, the System
+  Application answered in `fr-CA`; the US Base Application returned `en-US` target text and an
+  empty `translatedText` for `fr-CA`, because non-US Base Application translations ship in
+  Microsoft's language apps. Symbols from Microsoft's public symbol feed carry no translation files,
+  so the tool finds nothing there (AL Language extension 18.0.2732683).
+
+### Changed
+
+- **`.alpackages/` is always gitignored** (Repository Hygiene, §1.10, Step 05 scaffold, Packaging &
+  Versioning). The "tracked for reproducibility" asides are removed, which resolves the conflict
+  v2.11.0.0 flagged. Packages this project builds (`outputAppPackage/*.app`) stay tracked; never add
+  a blanket `*.app` entry.
+- **Operating Rule 6 — approvals come in batches.** Code generation is approved once, for the whole
+  batch plan at Step 05: *Run through all batches, stopping on any pre-flight failure or TDD
+  deviation (recommended)* or *Ask me before each batch*. Step 06 follows that choice.
+- **Step 07 — one decision per test round, not per fix.** Every diagnosis from a round is listed
+  separately and approved together: *Apply all* / *Apply selected* / *Discuss first*. Nothing is
+  applied before the answer. A fix that would change the FRD, the TDD, or a design rule gets its own
+  box. Steps 08 and 09 present their fixes the same way.
+- **Rule 6c — check in only when there's something to act on.** After a PROVE step that produced a
+  new package or findings to decide on, the proceed-or-pause box stays. Otherwise (Step 10, or
+  Steps 08–09 when nothing changed) the agent says so in one line and continues; the human can say
+  "stop" at any time. The Step 11 → Step 12 hand-off is unchanged.
+- **One PROVE review.** The Dev Manager reviews `PostDevTDD.md`, the FRD baseline, and Step 11's
+  documents once, named in the Step 12 hand-off message and recorded in `ReleaseTestResults.md`.
+  Steps 10 and 11 no longer each wait on a separate review.
+- **Step 07 translation cadence.** Every build: full build, sync, terminology for new BC terms
+  only, and the problem checks. Drafting, the full checks (missing translations included), and
+  per-language testing wait for stable source text: the first build the human confirms clean on the
+  sandbox, again before Step 07 closes, and again after any later fix that changes source text. The
+  optional pseudo-translation pass and the Step 07 and Step 12 translation gates are unchanged.
+- **Translated documents move from Step 11 to Step 12**, produced once the functional test pass is
+  green, so a fix found in testing doesn't make every translated copy stale. §1.9 now recommends
+  translating `UserGuide` and `Deployment`, and asks whether testers need a translated
+  `HumanUnitTestScript` or can run the language pass from the English script, which names the
+  terms each language should show.
+- **Outlines, `al-mcp-setup`, `start`, and `ocpf-code-reviewer`:** the outlines' ALL ALONG lists
+  match the runbooks' sections; `al-mcp-setup` connects the AL tools without asking and points a
+  postponed setup at §1.10 / Lite Step 1; the code reviewer no longer expects `.alpackages/` in the
+  repository.
+- **`RunbookSchematics.md`:** gates and nodes updated for the above, the Step 06 cross-batch
+  permission-check node removed (gone from the runbook since v2.11.0.0), and Analyzers and
+  Repository Hygiene nodes added to ALL ALONG. All 8 diagrams re-rendered clean.
+
+### Added
+
+- **PRE-01 asks who approves** — *One person for every role* or *Separate people for different
+  roles* — recorded in `ProjectMemory.md` and carried to §1.1 as **Approvers**. With one approver,
+  PRE-01 and PRE-02 get one sign-off, and `TDD.md` and `SanityCheck.md` get one sign-off at Step 04.
+  The FRD sign-off stays separate, because the TDD depends on it.
+- **Standards Appendix D (v1.5.0.0):** `al_searchtranslations` is the first lookup; opening the
+  `.app` files directly and Microsoft's language apps remain for whatever it doesn't answer.
+
+### Not changed
+
+- Every approval still happens before anything is applied, and every item stays individually
+  listed and selectable.
+- The Step 12 release gate: named reviewers, language passes, and the `signed-off`/`final` state
+  scan.
 
 ---
 

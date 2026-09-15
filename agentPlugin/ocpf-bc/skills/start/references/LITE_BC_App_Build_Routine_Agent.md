@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 1.8.0.0 (Lite, derived from the full framework v2.11.0.0)
+**Version:** 1.9.0.0 (Lite, derived from the full framework v2.12.0.0)
 **Last Updated:** September 15, 2026
 
 > Version history for this edition lives in `LITE_RunbookChangeLog.md`, tracked independently of
@@ -16,7 +16,7 @@
 > 10-files-or-fewer project doesn't need.
 
 > **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development
-> Standards Guide** (v1.4.0.0), shared unchanged with the full framework. Lite is *not* a reduced
+> Standards Guide** (v1.5.0.0), shared unchanged with the full framework. Lite is *not* a reduced
 > set of AL rules: the same AL rules apply to a 5-file extension as to a 50-file one. What Lite
 > reduces is *process*. So this runbook states each rule in short form where you need it and cites
 > the guide as **Standards §** for the full version — the abbreviation tables, the complete
@@ -116,8 +116,18 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
 5. **Zero errors, zero warnings before PROVE.** Treat warnings as errors. Satisfied by
    construction under Rule 4: the mandatory compile-and-package in Step 5 always runs, and must
    reach 0/0, before Step 6 begins.
-6. **Human-in-the-loop is a feature.** Pause for human approval before: writing the first file,
-   applying a root-cause fix, finalizing the Design Doc, and installing any tool or runtime.
+6. **Human-in-the-loop is a feature — approve in batches, not one click at a time.** Pause for
+   human approval before:
+   - **generating code** — once, for the batch plan at Step 3, which covers both batches when there
+     are two, unless the human chose to be asked before the second;
+   - **applying root-cause fixes** — all the diagnoses from one test round or review, presented
+     together for one decision (Step 5), with any fix that changes a design rule in `DesignDoc.md`
+     asked separately;
+   - **finalizing the Design Doc;**
+   - **installing any tool or runtime.**
+
+   An approved run-through still stops by itself on any pre-flight failure or deviation from
+   `DesignDoc.md`, and the human can say "stop" at any time.
    6a. **Ask decisions in a selectable options box, not in prose.** When the agent needs the human
        to *decide* something — pick a design option, approve a version bump, resolve an ambiguity —
        present it through the interactive multiple-choice mechanism the agent's harness provides
@@ -133,11 +143,13 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
        one privately (e.g., VS Code's AL extension gets its .NET runtime from a companion
        extension, not a system install). Installing anything is itself a human-in-the-loop
        decision regardless of what a fallback elsewhere in this runbook lists as available.
-   6c. **From Step 5 onward, check in after every step closes — proceed now, or pause?** Once a
-       step's outputs are written and its exit gate is met, put the choice itself through the
-       selectable-options mechanism (Rule 6a): proceed directly into the next step, or stop here
-       so the human has room to review, run, or publish what was just produced. State how to
-       resume. Steps 1–4 are unaffected — ordinary conversational hand-off governs there.
+   6c. **From Step 5 onward, check in only after a step that hands the human something to act
+       on.** Step 5 always does (a tested package): once its exit gate is met, put the choice
+       through the selectable-options mechanism (Rule 6a) — proceed directly into Step 6, or stop
+       here so the human has room to review, run, or publish the package. State how to resume. A
+       step that produces nothing the human must act on yet gets one line instead (e.g., "done;
+       starting Step 6 — say stop to pause"). Steps 1–4 are unaffected — Rule 6's own approval
+       gates pace them.
        **The Step 6 → Step 7 boundary is a special case of this rule, not an addition to it** —
        see Step 7's own hand-off note, which replaces this generic check-in for that one
        transition. Don't do both.
@@ -286,12 +298,12 @@ Versioning). Mention this once, plainly, now.
 | **Permission Sets required?** | `Yes`/`No` | `No` only if the extension owns **zero new tables**. The moment it owns one table, this is `Yes` — BC publish validation (`PTE0004`) requires it. If `Yes`, reserve ≥ 2 IDs in the primary range. |
 | **AL Runtime / BC Application Minimum / Symbol Source** | — | BC version asked above; runtime from Microsoft Learn. Symbol Source is filled in by the agent after downloading: version, W1 or localized, and where from. |
 | **Onboarding extras** | `Yes`/`No` each | Assisted Setup Wizard? Role Center Activity Cues? Departments/"My Business Central" placement? Ask all three; `No` to any is a final answer, not a placeholder — most small extensions answer `No` to all three, but ask anyway. |
-| **Framework files in `.gitignore`?** | `Yes` (default) | Explain briefly what `.gitignore` does, then ask: exclude **this framework's own files** — this runbook (under whatever name it was given: `CLAUDE.md`, `.github/copilot-instructions.md`, or `LITE_BC_App_Build_Routine_Agent.md`), `LITE_RunbookChangeLog.md`, `LITE_RunbookSchematics.md`, and the plugin's `.ocpf/` folder, if present — from *this project's* git tracking (recommended), or track them alongside the project's own code? **This never covers the project's own `ChangeLog.md`**, which is one of Lite's four tracked documents and is always committed. |
+| **Framework files in `.gitignore`?** | `Yes` (default) | Explain briefly what `.gitignore` does, then ask: exclude **this framework's own files** — this runbook (under whatever name it was given: `CLAUDE.md`, `.github/copilot-instructions.md`, or `LITE_BC_App_Build_Routine_Agent.md`), `LITE_RunbookChangeLog.md`, `LITE_RunbookSchematics.md`, and the plugin's `.ocpf/` folder, if present — from *this project's* git tracking (recommended), or track them alongside the project's own code? **This never covers the project's own `ChangeLog.md`**, which is one of Lite's four maintained documents and is always committed. |
 | **Working language** | — | From the first question of this step. |
 | **Target languages** | table | **Country first, then language, as a loop** (rules: **Standards §8.8**). Read Microsoft's live [Country/Regional Availability and Supported Languages](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-countries-and-translations) page first — never from memory. For each country, offer only the languages BC supports there, shown as ID and culture code (*"French (Canada) — FRC → `fr-CA`"*). Classify each as Microsoft-translated, partner-translated (ask which partner app — it's the terminology source), or not supported by BC (every right-to-left language included). Don't offer an unsupported language; offer the country's English instead, and only record it if the human insists. For each language: required at first release? Who reviews it — a named fluent person, never the agent? Flag any mismatch with **Localization**. |
 | **Source language** | `en-US` (default) | Offer `en-US` first, labelled recommended, with the one-line reasons in **Standards §8.1**. If the human chooses another, state the consequences before recording it. |
 | **Source wording** | `W1` | Microsoft's W1 English wording in source, with one translation file per target language (`en-US` included). Only when `en-US` is the **sole** target **and Deployment Target isn't `AppSource`** (AppSource requires translation files — **Standards §8.10**), also offer *US wording in source, no translation files* — simpler now, but another market later means changing source strings. |
-| **Documents in other languages** | per document | Recommend translating `Docs.md`'s user-guide section and `TestScript.md` into each required language; `DesignDoc.md` and `ChangeLog.md` stay English. |
+| **Documents in other languages** | per document | Recommend translating `Docs.md`'s user-guide section into each required language; `DesignDoc.md` and `ChangeLog.md` stay English. For `TestScript.md`, ask whether testers need a translated copy or can run the language pass from the English script, which names the terms they should see — recommend the English script when testers read English. Translated documents are produced at Step 7, once the functional test pass is green. |
 | **Customer-language documents / translatable data** | `Yes`/`No` each | Do invoices or emails follow the customer's language? Does the extension store user-entered text needing per-language versions? (**Standards §8.9**) |
 
 **Quoting reference** (applies everywhere): `app.json`/`launch.json` use standard JSON strings;
@@ -322,7 +334,8 @@ nothing here needs the human beyond the AI tool's own approval prompts.
    (for example from **AL: Go!**), keep its `id` GUID and replace the rest.
 2. **Connect the AL tools** if this session doesn't have them (ALL ALONG → AL MCP Server).
 3. **Download symbols** (ALL ALONG → Symbols). Confirm `.alpackages/` holds Base Application and
-   System Application for the target version, and record the Symbol Source.
+   System Application for the target version, and record the Symbol Source. Add `.alpackages/` to
+   `.gitignore` now (ALL ALONG → Repository Hygiene).
 4. **Keep the editor in sync** (ALL ALONG → Keeping the Editor in Sync). If `app.json` existed
    before you changed it, VS Code's AL extension still has the old ranges. Refresh it now, before
    any `.al` file exists.
@@ -460,12 +473,15 @@ fix in a loop until clean.
 
 **Actions:**
 - Confirm the batch plan from Operating Rule 3 (one batch, or two on a natural split) and object
-  order within it (lookups before the things that reference them).
+  order within it (lookups before the things that reference them). **This is the one approval to
+  generate code** (Rule 6). With two batches, ask once (Rule 6a): **Run through both batches,
+  stopping on any pre-flight failure or Design Doc deviation (recommended)** / **Ask me before
+  the second batch**. Record the answer in `ChangeLog.md`.
 - Prepare the scaffold: confirm `app.json` (written at the end of Step 1) still matches
   `ProjectParameters.md` — name, publisher, ID ranges, runtime, BC dependency,
   `"features": ["NoImplicitWith", "TranslationFile"]` (**Standards §8.2**) — then `launch.json`,
-  folder structure, a `Translations/` folder, `.gitignore` per Step 1 (plus `*.g.xlf`). If
-  `app.json` has to change, follow ALL ALONG → Keeping the Editor in Sync.
+  folder structure, a `Translations/` folder, `.gitignore` per Step 1 (plus `*.g.xlf` and
+  `.alpackages/`). If `app.json` has to change, follow ALL ALONG → Keeping the Editor in Sync.
 - **Agree the translation tooling** (skip if *US wording, no translation files*). Recommend the
   XLIFF Sync PowerShell module (`XliffSync`) for the agent, plus the XLIFF Sync VS Code extension
   for reviewers. Offer NAB AL Tools as the alternative. Look for existing installations first, and
@@ -497,15 +513,17 @@ fix in a loop until clean.
 
 **Outputs:** Batch plan, project scaffold, the pre-flight checklist.
 
-**Exit gate:** Batch order agreed; scaffold structurally complete (not compiled — Operating Rule
-4); pre-flight checklist ready.
+**Exit gate:** Batch plan approved (and, with two batches, the run-through choice recorded);
+scaffold structurally complete (not compiled — Operating Rule 4); pre-flight checklist ready.
 
 ## STEP 4 — Generate the Code
 
 **Inputs:** `DesignDoc.md`, `ProjectParameters.md`, symbol file, batch plan, pre-flight checklist.
 
 **Actions — per object, in order:**
-1. Pause for human approval before writing the first file.
+1. **Approval came at Step 3** — don't ask again per object. With two batches, pause before the
+   second only if the human chose that. Stop and ask on any pre-flight failure the Design Doc
+   can't resolve, or any deviation from `DesignDoc.md`.
 2. Extract source-table and field data for this object from the symbol file.
 3. Run the pre-generation pre-flight pass; fix the Design Doc before generating if anything fails.
 4. Generate the AL file **from the standard template in Standards §1.3**, substituting only Step 1
@@ -559,9 +577,13 @@ compiles clean to clear them.
    Library) for a matching, already-documented pattern. If nothing matches, ask: is this a one-off
    or a pattern (search every generated file for the same class of issue)? Where did it come from
    — the generation rule, the Design Doc, or the source data? What rule should have caught it?
-4. Fix the **root cause**, regenerate the affected files, and log the issue + resolution in
-   `ChangeLog.md` before moving on. Update `DesignDoc.md` whenever a rule changes. Pause for human
-   approval of each root-cause diagnosis before applying it.
+4. **Approve the round's fixes together, then apply them.** Once every problem from this test
+   round has a diagnosis, present them all in one message — each listed separately with its root
+   cause and proposed fix — and ask once (Rule 6a): **Apply all** / **Apply selected** / **Discuss
+   first**. Nothing is applied before that answer. A diagnosis that would change a design rule in
+   `DesignDoc.md` gets its own separate box. Then fix each approved **root cause**, regenerate the
+   affected files, and log the issue + resolution in `ChangeLog.md` before moving on. Update
+   `DesignDoc.md` whenever a rule changes.
 5. **Compile and package again**, redeploy, retest. Repeat until 0 errors / 0 warnings and the
    human confirms sandbox testing is clean.
 
@@ -570,11 +592,20 @@ that produces a new `.g.xlf`:
 1. **Full build only** — Incremental Build and RAD publishing ignore translations
    (**Standards §8.2**).
 2. **Sync** every target file from `.g.xlf`.
-3. **Verify any new BC term** per **Appendix D** and update the glossary.
-4. **Draft** every `needs-translation` / `needs-adaptation` unit and set it to
+3. **Verify any new BC term** per **Appendix D** (`al_searchtranslations` first) and update the
+   glossary. Terms already in the glossary aren't looked up again.
+4. **Run the problem checks** and fix findings at their root. Missing translations aren't a
+   finding yet.
+
+**Once the source text is stable** — the first build the human confirms clean on the sandbox,
+again before this step closes, and again after any later fix that changes source text — draft and
+test each language. Drafting earlier only means redrafting whatever a caption change sends back to
+`needs-adaptation`.
+1. **Draft** every `needs-translation` / `needs-adaptation` unit and set it to
    `needs-review-translation`. The agent never sets `signed-off` (**§8.7**).
-5. **Run the technical translation checks** and fix findings at their root.
-6. **Package and test in each language** — switch **My Settings → Language** (and **Region**) and
+2. **Run every technical translation check**, missing translations included, and fix findings at
+   their root.
+3. **Package and test in each language** — switch **My Settings → Language** (and **Region**) and
    look for untranslated text, truncation, and wrong regional terms.
 
 **API test checklist** (used here, and again at Step 7 — endpoint URL shapes are in **Standards
@@ -644,8 +675,9 @@ human-run release test.
   naming or exception that emerged during BUILD, a short deviation summary pointing at the
   relevant `ChangeLog.md` entries. There's no separate as-built document in Lite; one file, kept
   current, is the point.
-- Any fix this step produces follows the Step 5 cycle (recompile, repackage, redeploy, retest)
-  before this step closes; a comment/formatting-only fix doesn't need a fresh package.
+- Present this step's fixes together for one approval, as in Step 5. Any fix this step produces
+  follows the Step 5 cycle (recompile, repackage, redeploy, retest) before this step closes; a
+  comment/formatting-only fix doesn't need a fresh package.
 - **Write `Docs.md`** — one combined reference covering everything the full framework splits
   across four documents:
   - *API/dev reference*, generated from the actual code, not memory: one section per object, one
@@ -664,15 +696,15 @@ human-run release test.
   this extension's actual endpoints, for a human tester to run end to end at Step 7. With more
   than one required language, add a **language pass**: key pages, messages, and customer-facing
   documents walked once per required language, checking for untranslated text, truncation,
-  regional terms, and formats.
-- **Translated documents**, if Step 1 asked for them, are produced once the English versions are
-  final: `Docs.<culture>.md` (user-guide section) and `TestScript.<culture>.md`. Use the glossary
-  for every BC term, and name the English source version in each file's header. Each is reviewed by
-  that language's reviewer.
+  regional terms, and formats. Each case names the glossary terms the tester should see, so a
+  tester who reads English can run it without a translated copy.
+- **Translated documents aren't produced here.** Step 7 produces them once its functional test
+  pass is green, so a fix found in testing doesn't make every translated copy stale too.
 
-**Outputs:** `DesignDoc.md` (updated in place, glossary included), `Docs.md`, `TestScript.md`, and
-any translated documents Step 1 requires. Together with `ChangeLog.md` from Step 1 onward, that's
-the full Lite document set — four files, plus translations.
+**Outputs:** `DesignDoc.md` (updated in place, glossary included), `Docs.md`, and `TestScript.md`.
+Together with `ChangeLog.md` from Step 1 onward, that's Lite's four maintained documents; translated
+documents follow at Step 7. Step 1's `ProblemStatement.md` and
+`ProjectParameters.md` are also tracked, but written once at kickoff rather than kept current.
 
 **Exit gate:** Every gap classified and resolved or explicitly deferred (logged in
 `ChangeLog.md`); dead-code scan clean; no obsolete references; `Docs.md`'s diagram renders;
@@ -690,8 +722,9 @@ the full Lite document set — four files, plus translations.
 > congratulate the human on reaching this point; (b) state plainly that this is the logical end of
 > the Lite framework's own work — Step 7 runs by human hands from here; (c) say concretely what
 > they need to do next (run `TestScript.md` end to end, record every finding in `ChangeLog.md`);
-> and (d) say how to bring the agent back in — either when testing surfaces something to fix, or
-> once everything passes and it's time to mark the release candidate.
+> and (d) say how to bring the agent back in — when testing surfaces something to fix, when the
+> functional pass is green and translated documents are due (if Step 1 asked for any), or once
+> everything passes and it's time to mark the release candidate.
 >
 > Everything below this note is what happens *after* that hand-off — the human's test run, and
 > the agent's part in recording and fixing what it turns up.
@@ -704,6 +737,10 @@ the full Lite document set — four files, plus translations.
   green-team and red-team case, by hand.
 - Verify permission sets as part of the same pass: read-only grants read everywhere; read/write
   includes it plus write on editable pages.
+- **Translated documents, once the functional pass is green** (if Step 1 asked for them): the
+  agent produces `Docs.<culture>.md` (user-guide section) and, if chosen, `TestScript.<culture>.md`.
+  It uses the glossary for every BC term and names the English source version in each file's
+  header. Each is reviewed by that language's reviewer before the language pass that uses it.
 - **Language passes:** for each language required at first release, a tester fluent in it runs
   the language pass, with the right Microsoft or partner language app installed in the sandbox.
 - **Translation approval — the release gate** (skip if *US wording, no translation files*):
@@ -719,16 +756,17 @@ the full Lite document set — four files, plus translations.
   reasoning — Lite doesn't keep a separate `Roadmap.md`), or **reject** (record why).
 - **If a fix here changes any object, field, or behavior, treat Step 6's outputs as stale, not
   already covered** — re-run the affected parts of the review and regenerate `Docs.md`'s reference
-  and diagram from the now-changed code. Say explicitly which parts a given fix actually requires
-  re-running.
+  and diagram from the now-changed code, plus any translated document already produced from what
+  changed. Say explicitly which parts a given fix actually requires re-running.
 - Repeat until every green-team test passes and every red-team test fails gracefully.
 
 **Outputs:** `ChangeLog.md` updated with every test finding and its resolution.
 
 **Exit gate:** All green-team tests pass; all red-team tests fail gracefully; permission sets
-verified; every required language has passed its language pass and its state scan shows every unit
-`signed-off` or `final`. **If everything passes, the package that was actually tested is the one deployed to
-Production** — bump its Build segment (e.g. `0.0.5.0` → `0.0.5.1`) or copy it to an immutable
+verified; every translated document Step 1 asked for exists and has been reviewed; every required
+language has passed its language pass and its state scan shows every unit `signed-off` or `final`.
+**If everything passes, the package that was actually tested is the one deployed to Production** —
+bump its Build segment (e.g. `0.0.5.0` → `0.0.5.1`) or copy it to an immutable
 filename first, so the shipped artifact stays permanently identifiable. This is marking the
 release candidate, not building a new one — no recompile, no new testing required to do it.
 **Before that deploy, restate the Schema Sync Mode assessment** (ALL ALONG → Packaging &
@@ -776,8 +814,9 @@ hand-typed. Written to `outputAppPackage/` in the project root — always this n
 `output/`. Mention the folder once at Step 1, and state the full path again every time a build
 completes (e.g. "Package built: `outputAppPackage/IP_Tracking_1.0.0.0.app`.").
 
-**`outputAppPackage/*.app` is git-tracked, never gitignored.** Track every `.app` like any other
-deliverable.
+**`outputAppPackage/*.app` is git-tracked, never gitignored.** Track every built `.app` like any
+other deliverable. Downloaded symbols in `.alpackages/` are the exception: always gitignored (ALL
+ALONG → Repository Hygiene). Never add a blanket `*.app` entry, which would hide built packages too.
 
 **Never delete or overwrite a package from a different version.** A repackage at a new version
 writes a new file next to the old ones — it never replaces or "cleans up" anything already there,
@@ -799,7 +838,7 @@ schema-breaking change go out without this warning.
 
 ## OCPF AL Development Standards Guide
 
-The companion rules document — `ocpfALDevStandardsGuide.md`, v1.4.0.0 — shared unchanged with the
+The companion rules document — `ocpfALDevStandardsGuide.md`, v1.5.0.0 — shared unchanged with the
 full framework. **Lite reduces process, not AL rules**, so this is the one fetched resource that
 isn't optional: this runbook cites it as **Standards §** from Step 1 onward.
 
@@ -847,6 +886,10 @@ isn't optional: this runbook cites it as **Standards §** from Step 1 onward.
   appear as newly added to collaborators.
 - `*.g.xlf` is always gitignored — it's rebuilt on every compile. The per-language files in
   `Translations/` are deliverables and always tracked.
+- `.alpackages/` is always gitignored, added at the end of Step 1 when symbols are first
+  downloaded. Symbols are refetched in seconds (ALL ALONG → Symbols), and a sandbox download
+  carries Microsoft's own source and translation files, which are never committed. Microsoft's
+  AL-Go templates ignore it too.
 - Microsoft's translation files, read for terminology (**Standards Appendix D**), are Microsoft's
   proprietary content and are never committed.
 - If any of the above is already tracked when this policy is adopted, add the `.gitignore`
@@ -1109,8 +1152,9 @@ just fewer documents. Skip everything here if Step 1 chose *US wording, no trans
 The moment this project owns even one table, Permission Sets required = `Yes` — it stops being a
 free choice. The mandatory compile at Step 5 catches a missing `tabledata` grant via `PTE0004`
 (ALL ALONG → Analyzers), and BC publish validation enforces the same requirement independently —
-but don't rely on either as the first catch: verify coverage at the pre-flight checks in Steps 3,
-4, and 6 too, independently at each point, so a gap doesn't wait until compile to surface.
+but don't rely on either as the first catch: verify coverage at the pre-flight checks in Steps 3
+and 4, so a gap doesn't wait until compile to surface. Step 6 relies on the last 0/0 compile for
+coverage, after confirming it ran with the analyzers and nothing was suppressed.
 
 **Name them for this extension, not just the prefix:** `<PREFIX> <APPCODE>, VIEW` and
 `<PREFIX> <APPCODE>, EDIT`, 20 characters or fewer (**Standards §5.4**). A permission set's Role ID
@@ -1170,10 +1214,11 @@ Never replace the project's runbook without an explicit yes.
 | Step 7 — Release for Testing | Step 12 |
 
 **Shared with the full framework, not reduced:** the OCPF AL Development Standards Guide. Both
-editions fetch the same v1.4.0.0 file and apply the same AL rules — Lite differs only in process.
+editions fetch the same v1.5.0.0 file and apply the same AL rules — Lite differs only in process.
 
-**Document count:** 4 tracked files (`DesignDoc.md`, `ChangeLog.md`, `Docs.md`, `TestScript.md`)
-versus the full framework's 20 (`ProblemStatement`, `ProjectParameters`, `FRD`, `TDD`,
+**Document count:** 4 maintained documents (`DesignDoc.md`, `ChangeLog.md`, `Docs.md`,
+`TestScript.md`), plus Step 1's two kickoff artifacts (`ProblemStatement.md`,
+`ProjectParameters.md`), versus the full framework's 20 (`ProblemStatement`, `ProjectParameters`, `FRD`, `TDD`,
 `SanityCheck`, `ChangeLog`, `ProjectMemory`, `ProjectProgress`, `GapAnalysis`, `CodeReview`,
 `PostDevTDD`, `Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`,
 `AutomatedTestScripts`, `ReleaseTestResults`, `TestingFeedback`, `Roadmap`,

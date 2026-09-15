@@ -55,15 +55,18 @@ release test.*
 - `ChangeLog.md` — one log for deviations, root causes, and testing feedback (no separate
   Testing Feedback Log or Roadmap in Lite)
 - Packaging & Versioning
-- Repository Hygiene
 - **OCPF AL Development Standards Guide** — fetched at Step 1, cited as **Standards §** throughout
-- AL MCP Server (optional)
-- Translations & Terminology — glossary in `DesignDoc.md`, named reviewers, release gate on approved translations
+- Repository Hygiene
+- AL MCP Server — needed from the end of Step 1; set up by the agent, the human only approves
+- Analyzers — CodeCop, UICop, and PerTenantExtensionCop *or* AppSourceCop, engaged on every mandatory compile
+- Symbols — downloaded by the agent, never the human
+- Keeping the Editor in Sync — stale red marks detected and refreshed
 - Reference Sources — Microsoft Learn (BC Base App, BC System App, translation files, country/language availability) and AL Guidelines
 - BCQuality Knowledge Snapshot
 - OCPF BC AL Patterns Library
-- OCPF Plugin (optional) — update check, Standards Guide fallback, zero-install AL tool setup
+- Translations & Terminology — glossary in `DesignDoc.md`, named reviewers, release gate on approved translations
 - Permission Sets discipline
+- OCPF Plugin (optional) — update check, Standards Guide fallback, zero-install AL tool setup
 
 ---
 

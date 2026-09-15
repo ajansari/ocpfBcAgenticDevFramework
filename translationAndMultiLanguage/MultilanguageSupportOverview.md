@@ -8,6 +8,7 @@ language-aware UAT — in both the full framework and the Lite edition.**
 | | |
 |---|---|
 | **Multilanguage support** | Runbook v2.7.0.0 · Lite v1.4.0.0 · Standards Guide v1.2.0.0 — everything in this document |
+| **Translation cadence** | Runbook v2.12.0.0 · Lite v1.9.0.0 · Standards Guide v1.5.0.0 — drafting waits for stable source text; translated documents follow release testing's functional pass (§7, §10) |
 | **Shipped first** | Runbook v2.6.0.0 · Lite v1.3.0.0 · Standards Guide v1.1.0.0 — the ban on multilanguage (ML) syntax (§3) |
 
 ---
@@ -235,7 +236,7 @@ Microsoft's ground truth.**
 
 | | Source | What it's authoritative for |
 |---|---|---|
-| 1 | **Microsoft's own BC translation files** | The exact words BC users in that market already see. A project's downloaded symbol packages already contain many of them — the System Application package alone ships translation files for 26 languages, including `en-AU`, `en-CA`, `en-GB`, `en-NZ`, `fr-CA`, `de-AT`, `de-CH`, and `nl-BE`. |
+| 1 | **Microsoft's own BC translation files** | The exact words BC users in that market already see. Symbol packages downloaded from a sandbox already contain many of them (symbols from Microsoft's public symbol feed carry none) — the System Application package alone ships translation files for 26 languages, including `en-AU`, `en-CA`, `en-GB`, `en-NZ`, `fr-CA`, `de-AT`, `de-CH`, and `nl-BE`. |
 | 2 | [Working with translation files](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-work-with-translation-files) (Microsoft Learn) | How XLIFF works in AL. |
 | 3 | Business Central [Base Application](https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application) and [System Application](https://learn.microsoft.com/en-us/dynamics365/business-central/application/system-application/module/system-application) reference (Microsoft Learn) | Which standard objects and modules exist. |
 | 4 | [Microsoft Terminology Collection](https://learn.microsoft.com/en-us/globalization/reference/microsoft-terminology) | General Microsoft product terminology in about 100 languages, when BC's own files have no match. |
@@ -258,7 +259,8 @@ For every string in the extension that names a standard BC concept, in every tar
 agent:
 
 1. Finds Microsoft's matching source string, by exact text first, then by the object or field it
-   refers to.
+   refers to. It searches first with the AL MCP Server's `al_searchtranslations`, which reads the
+   translation files inside the project's symbol packages without unpacking them.
 2. Uses Microsoft's translation for that language.
 3. Records the pair in the project's **translation glossary**, with the Microsoft file and version
    it came from.
@@ -330,9 +332,11 @@ opinion.
 
 ### Built into the compile-and-test cycle
 
-Translation isn't a phase tacked on at the end. From the first full build onward, every cycle
-runs: **build → sync translation files → agent drafts → technical checks → package → test in the
-sandbox with the user's language switched.**
+Translation isn't a phase tacked on at the end. From the first full build onward, every build
+runs the cheap, mechanical part: **build → sync translation files → technical checks.** Once the
+source text is stable — the first build the tester confirms clean on the sandbox, again before the
+compile-and-test step closes, and again after any later fix that changes source text — the agent
+**drafts, packages, and tests in the sandbox with the user's language switched.**
 
 - **Source text is finished before translation starts.** The agent doesn't translate batch by
   batch while code is still being generated — `.g.xlf` only exists after a build, and translating
@@ -434,13 +438,14 @@ designs for:
 
 The developer chooses which documents are produced in which languages. The recommendation:
 
-- **Translate the documents people outside the development team use:** the user guide, the UAT
-  test script, and deployment instructions. Files are named by language, e.g.
-  `UserGuide.fr-CA.md`.
+- **Translate the documents people outside the development team use:** the user guide and
+  deployment instructions. Files are named by language, e.g. `UserGuide.fr-CA.md`. The UAT test
+  script is translated only if testers need it; it names the terms each language should show, so
+  a tester who reads English can run the language pass from the English script.
 - **Keep engineering documents in one language** — the design documents, change log, and code
   review — so two versions can never drift apart.
-- **Translate once the source document is final**, and keep the source version as the canonical
-  one.
+- **Translate once release testing's functional pass is green**, so fixes found in testing don't
+  make every translated copy stale, and keep the source version as the canonical one.
 
 ### Working with the agent in your own language
 
@@ -467,12 +472,12 @@ are kept word for word in whatever language they were written.
 | | 04 — Sanity Check | Every language supported in its market; glossary complete; every API object classified; every reviewer named |
 | BUILD | 05 — Plan the Code | `TranslationFile` enabled; `Translations/` folder; tooling agreed; translation pre-flight checks |
 | | 06 — Code Generation | Source text only |
-| | 07 — Compile, Package, Test | Sync → draft → check → package → test in each language |
+| | 07 — Compile, Package, Test | Every build: sync → check. Once source text is stable: draft → package → test in each language |
 | PROVE | 08 — Gap-Fit Test | Every required language complete |
 | | 09 — Code Review | Full translation checks; ML-syntax scan |
 | | 10 — Update Design Docs | Glossary and language settings reflect what was built |
-| | 11 — Document the Code | Translated user-facing documents |
-| | 12 — Release to Users for Testing | UAT by a speaker of each language; every translation approved before release |
+| | 11 — Document the Code | A language pass in the test script |
+| | 12 — Release to Users for Testing | Translated user-facing documents once the functional pass is green; UAT by a speaker of each language; every translation approved before release |
 
 ### Lite edition
 
@@ -485,9 +490,9 @@ its single design document rather than a separate file.
 | 2 — Design Doc & Self-Check | Languages, glossary, and API caption classification, inside `DesignDoc.md` |
 | 3 — Plan & Scaffold | `TranslationFile`, `Translations/`, tooling, pre-flight checks |
 | 4 — Generate the Code | Source text only |
-| 5 — Compile, Package, Test | Sync → draft → check → test in each language |
-| 6 — Review & Finalize Docs | Full translation checks; translated user-facing docs if requested |
-| 7 — Release for Testing | UAT in each language; every translation approved before release |
+| 5 — Compile, Package, Test | Every build: sync → check. Once source text is stable: draft → test in each language |
+| 6 — Review & Finalize Docs | Full translation checks; a language pass in the test script |
+| 7 — Release for Testing | Translated user-facing docs if requested, once the functional pass is green; UAT in each language; every translation approved before release |
 
 ---
 

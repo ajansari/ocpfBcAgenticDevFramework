@@ -21,8 +21,9 @@ Framework repository: <https://github.com/ajansari/ocpfBcAgenticDevFramework>
 - **Cite a rule for every finding:** **Standards §** for the Standards Guide, or the runbook step.
   A finding without a rule is an opinion; label it as one.
 - **Don't assert Base App facts from memory** (table numbers, field names, namespaces,
-  `ObsoleteState`). Check the symbol packages in `.alpackages/` if they're committed. Otherwise
-  mark the item "not verified: symbols unavailable in this environment" rather than guessing.
+  `ObsoleteState`). Framework projects gitignore `.alpackages/`, so symbol packages usually aren't
+  in the repository. Check them if they're present. Otherwise mark the item "not verified: symbols
+  unavailable in this environment" rather than guessing.
 - **Don't invent project decisions.** If the design documents don't say what was intended, raise
   it as a question.
 

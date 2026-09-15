@@ -16,6 +16,40 @@ framework.
 
 ---
 
+## v1.9.0.0 — September 15, 2026
+
+**Fewer one-at-a-time approvals, translation drafting that waits for stable source text, and the
+drift the independent review found, resolved.** Derived from full framework v2.12.0.0; uses
+Standards Guide v1.5.0.0. See `fullVersion/RunbookChangelog.md` v2.12.0.0 for what was verified.
+
+### Changed
+
+- **`.alpackages/` is always gitignored** (Repository Hygiene, Step 1, Step 3 scaffold, Packaging &
+  Versioning). Symbols downloaded from a sandbox contain Microsoft's source and translation files.
+- **Operating Rule 6 — approvals come in batches.** The Step 3 batch plan is the one approval to
+  generate code; with two batches, the human chooses to run through both or be asked before the
+  second. Step 4 no longer pauses per object, but stops on any pre-flight failure or Design Doc
+  deviation.
+- **Step 5 — one decision per test round.** Every diagnosis from a round is listed and approved
+  together (*Apply all* / *Apply selected* / *Discuss first*); a design-rule change gets its own
+  box. Step 6's fixes follow the same pattern.
+- **Rule 6c:** check in only after a step that hands the human something to act on (Step 5's tested
+  package); otherwise one line and continue. The Step 6 → Step 7 hand-off is unchanged.
+- **Step 5 translation cadence:** sync, terminology for new terms, and problem checks on every
+  build; drafting, full checks, and per-language testing once the source text is stable.
+- **Translated documents move from Step 6 to Step 7**, once the functional test pass is green. Step
+  1 asks whether testers need a translated `TestScript.md`, or can run the language pass from the
+  English script.
+- **Permission Sets:** coverage is verified at Steps 3 and 4; Step 6 relies on the analyzer-enabled
+  compile, matching Step 6's own text.
+- **Document set:** Step 6 and the Step Map name `ProblemStatement.md` and `ProjectParameters.md` as
+  tracked kickoff artifacts alongside the four maintained documents.
+- **Outline and schematics:** the AL MCP Server is needed from Step 1, not optional; ALL ALONG lists
+  Analyzers, Symbols, and Keeping the Editor in Sync; schematics gates updated and all 7 diagrams
+  re-rendered clean.
+
+---
+
 ## v1.8.0.0 — September 15, 2026
 
 **The mandatory compile now runs with Microsoft's own code analyzers engaged, and a round of

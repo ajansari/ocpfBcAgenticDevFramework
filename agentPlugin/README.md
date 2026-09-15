@@ -138,7 +138,7 @@ field to the closest entry, and add any field that isn't covered here to this se
 | Hooks | None |
 | MCP servers | None bundled |
 | Commands | None (skills are invoked as `/ocpf-bc:<skill>`) |
-| Scripts | `al-mcp-setup/scripts/`: `al-mcp.sh`, `al-mcp.cmd`, `al-mcp-resolve.ps1`. With the user's approval, they're copied into the user's project to start Microsoft's AL MCP Server from the locally installed AL Language extension. They install nothing. |
+| Scripts | `al-mcp-setup/scripts/`: `al-mcp.sh`, `al-mcp.cmd`, `al-mcp-resolve.ps1` (start Microsoft's AL MCP Server), `al-mcp-call.sh`, `al-mcp-call.ps1` (run one AL MCP Server tool), and `al-analyze.sh`, `al-analyze.cmd`, `al-analyze-resolve.ps1` (compile with Microsoft's code analyzers). They're copied into the user's project, through the AI tool's own permission prompts, and use the locally installed AL Language extension. They install nothing. |
 
 #### External services, data, and permissions
 

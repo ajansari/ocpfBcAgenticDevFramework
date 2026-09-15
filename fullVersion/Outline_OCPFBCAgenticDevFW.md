@@ -64,10 +64,15 @@ documentation, and a human-run release test on top.*
 - Retain Explanations
 - Testing Feedback Log
 - Project Memory
+- Project Progress Tracker — `ProjectProgress.md`, one status row per step, in the project root
+- Translations & Terminology — translation glossary, named reviewers, release gate on approved translations
 - Packaging & Versioning
 - Repository Hygiene
-- AL MCP Server
-- Translations & Terminology — translation glossary, named reviewers, release gate on approved translations
+- AL MCP Server — set up by the agent at Step 01 §1.10; the human only approves
+- Analyzers — CodeCop, UICop, and PerTenantExtensionCop *or* AppSourceCop, engaged on every mandatory compile
+- Symbols — downloaded by the agent, never the human
+- Keeping the Editor in Sync — stale red marks detected and refreshed
+- OCPF AL Development Standards Guide — fetched at PRE-01, cited as **Standards §** throughout
 - Reference Sources — Microsoft Learn (BC Base App, BC System App, translation files, country/language availability) and AL Guidelines
 - BCQuality Knowledge Snapshot
 - OCPF BC AL Patterns Library

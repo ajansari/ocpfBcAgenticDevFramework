@@ -151,8 +151,8 @@ are only a fallback.
 Follow the `al-mcp-setup` skill. It connects Microsoft's AL tools **with nothing to install**,
 using the AL Language extension already on the machine:
 - **In GitHub Copilot Chat,** the extension's built-in tools are already there.
-- **Elsewhere,** it asks one question, then registers the extension's bundled AL MCP Server for the
-  project.
+- **Elsewhere,** it says what it's doing (no question — connecting the tools is the agent's job),
+  then registers the extension's bundled AL MCP Server for the project.
 
 It records the outcome in `.ocpf/framework.json` (`alMcp`). If the human postpones it, or you
 skip the skill for any reason, set `"alMcp": "deferred"` yourself so the marker never stays at

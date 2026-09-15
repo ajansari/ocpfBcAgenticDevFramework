@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 1.4.0.0
+**Version:** 1.5.0.0
 **Last Updated:** September 15, 2026
 
 > **Audience:** Human developers and agentic (AI) developers building Business Central AL
@@ -1023,8 +1023,21 @@ if the two ever disagree.
 The translation equivalent of Appendix B. Run it for every target language, for every source string
 that names a standard BC concept. Record every result in the project's translation glossary.
 
-1. **Locate Microsoft's translation files for the language**, in this order. An `.app` file is a
-   short header followed by a standard zip archive; list its `Translations/` folder.
+1. **Locate Microsoft's translation files for the language**, in this order.
+   - **Search first with the AL MCP Server's `al_searchtranslations`** — it searches the XLIFF
+     inside every package in `.alpackages/`, no unzipping. Pass the arguments inside a `parameters`
+     object: `query` (the source term), `locale` (e.g. `fr-CA`), and optionally `objectName`,
+     `kinds`, and `limit`. Each result gives the package (`appName`), the `sourceText`, and
+     Microsoft's `translatedText`. A result whose `translatedText` is empty means that package
+     doesn't carry the language: continue down the list below for that term. Symbols from
+     Microsoft's public symbol feed carry no translation files, so this only finds anything when
+     the symbols were downloaded from a sandbox. Checked on BC 28.4 sandbox symbols: the System
+     Application answered in all 26 of its languages, including `fr-CA`; the US Base Application
+     answered in `en-US` only.
+   - **Otherwise, open the files directly.** An `.app` file is a short header followed by a
+     standard zip archive; list its `Translations/` folder.
+
+   The sources, in order:
    1. **The project's localized Base Application symbols** (`.alpackages/`) — they carry that
       localization's own language(s), e.g. `Base Application.en-AU.xlf` in "Base Application (AU)".
    2. **The System Application and Business Foundation symbols** — for System Application and
