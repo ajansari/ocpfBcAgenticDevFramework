@@ -24,7 +24,7 @@ specifically to keep a superseded decision on record — see the runbook's ALL A
 
 **Fixes from an independent review of v2.11–v2.13: the analyzer compile now fails on warnings and
 works from the global `al` tool, the analyzer files are part of the scaffold, and files are named
-the way CodeCop expects.** Standards Guide **v1.7.0.0** adds §1.8 File Naming. Ships with Lite
+the way CodeCop expects.** Standards Guide **v1.7.0.0** adds §1.8 File Naming and §2.7 camelCase API naming, which changes the `APIGroup` pattern for new projects. Ships with Lite
 **v1.11.0.0**. Plugin **v1.6.0**.
 
 ### Facts verified before designing — not assumed

@@ -701,7 +701,7 @@ the documents.
 - [ ] Every obsolete / pending field is excluded.
 - [ ] Every `using` namespace is sourced from the symbol file.
 - [ ] All document-type-filtered pages use the correct `const()` quoting pattern.
-- [ ] All entity names ≤ 30 characters; all field identifiers ≤ 30 characters.
+- [ ] All entity names ≤ 30 characters and camelCase, with `APIPublisher` and `APIGroup` camelCase too (Standards §2.7); all field identifiers ≤ 30 characters.
 - [ ] Read vs. read/write designations match the mutability rules in Standards §2.2.
 - [ ] Growth buffers are planned within each module block (Standards §5.2).
 - [ ] Permission sets are planned if enabled (Parameter 1.2), with every table's `tabledata` grant enumerated per set and assigned to the batch that introduces its table (Standards §5.3); names and App Code from Parameter 1.3, each name ≤ 20 characters (Standards §5.4).
@@ -739,7 +739,7 @@ Goal: generate AL batch by batch, lint clean — including symbol verification �
   Confirm `standardsGuide/` is present and gitignored, the AL tools respond, and `.alpackages/`
   holds the target version's symbols, rather than redoing any of it.)
 - Write the pre-flight validation checks to run for each batch — this is the canonical checklist every other reference to "the Step 05 checklist" in this runbook means; if you're re-stating it elsewhere, point here rather than re-enumerating. Split into two passes, since some checks are only possible before generation and some only after:
-  - **Pre-generation** (on the TDD's planned names/fields, before any file exists — main role): identifier length ≤ 30, entity/EntitySet name length ≤ 30, reserved-keyword scan, localization field-range filter, `ObsoleteState` filter.
+  - **Pre-generation** (on the TDD's planned names/fields, before any file exists — main role): identifier length ≤ 30, entity/EntitySet name length ≤ 30, API names camelCase (Standards §2.7), reserved-keyword scan, localization field-range filter, `ObsoleteState` filter.
   - **Post-generation** (on the actual generated files — light role, if §1.7 role assignment is configured): required-property presence; the file named after its object (Standards §1.8); **no multilanguage (ML) properties and no `TextConst`** (Standards §1.7); **translatable text** — no string literal in a user-facing message, AA0074 suffixes, a `Comment` on every placeholder label (Standards §8.3–§8.4); **API caption locking** matches the per-object decision recorded at Step 03 (Standards §8.6); `Rec.`-qualification (`NoImplicitWith`); no empty triggers, `// TODO`, or commented-out fields (Standards §1.5); 4-space indentation, no tabs (Standards §1.6); **permission set names** from Parameter 1.3, ≤ 20 characters, captions ≤ 30 (Standards §5.4); `tabledata` coverage for every table the batch introduces (Standards §5.3; vacuously satisfied if none); and **symbol verification** of every reference to a standard object, method, property, or enum value (Operating Rule 2, Standards Appendix B). The analyzer-enabled compile at Step 07 proves several of these again (ALL ALONG → Analyzers); checking here keeps the next batch from building on a gap.
 
 **Outputs:** Batch plan (ordered), project scaffold, pre-flight validation script/checklist (both passes).
@@ -1508,9 +1508,9 @@ Deployment Target:
 
 **What the compile then proves:** `PTE0004` / `AS0103` (a table missing a matching permission set,
 Standards §5.3), `PTE0008` / `AS0062` (a page control or action missing `ApplicationArea`),
-`AA0074` (a `Label` missing its suffix, Standards §8.4), `AA0215` (a file not named per Standards
-§1.8), and `AL0424` (ML syntax, Standards §1.7). It doesn't replace symbol verification (Operating
-Rule 2), permission set App Code uniqueness across extensions (Standards §5.4), or any judgment a
+`AA0074` (a `Label` missing its suffix, Standards §8.4), `AA0101` (API names not camelCase,
+Standards §2.7), `AA0215` (a file not named per Standards §1.8), and `AL0424` (ML syntax,
+Standards §1.7). It doesn't replace symbol verification (Operating Rule 2), permission set App Code uniqueness across extensions (Standards §5.4), or any judgment a
 compiler can't make, such as caption quality or the Step 03 caption-locking decisions.
 
 **How to run it** (verified on AL Language extension 18.0.2732683; re-verify on a newer release by

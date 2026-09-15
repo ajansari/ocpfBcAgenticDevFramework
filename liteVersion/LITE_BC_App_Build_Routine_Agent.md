@@ -489,8 +489,9 @@ fix in a loop until clean.
   any of it.)
 - Write the pre-flight checklist for each object — one list, run twice per object since one model
   is doing both passes:
-  - **Pre-generation** (on the planned name/fields): identifier length ≤ 30, reserved-keyword
-    scan, localization field-range filter, `ObsoleteState` filter.
+  - **Pre-generation** (on the planned name/fields): identifier length ≤ 30, API names camelCase
+    (**Standards §2.7**), reserved-keyword scan, localization field-range filter, `ObsoleteState`
+    filter.
   - **Post-generation** (on the actual file): `Caption`, `ToolTip`, and `ApplicationArea = All`
     on every field (**Standards §1.4**); the file named after its object (**§1.8**); no ML
     properties and no `TextConst` (**§1.7**); translatable text — no string literal in a user-facing message, AA0074 suffixes, a `Comment`
@@ -954,9 +955,10 @@ compile.** They ship with the AL Language extension; nothing is installed. Every
   `AppSourceCop.json` for AppSource. The settings also give the human live feedback in the editor.
 
 **What the compile then proves:** `PTE0004` / `AS0103` (missing permission set, **Standards
-§5.3**), `PTE0008` / `AS0062` (missing `ApplicationArea`), `AA0074` (label suffix), `AA0215` (file
-name, **§1.8**), and `AL0424` (ML syntax, **§1.7**). It doesn't replace symbol verification or
-App Code uniqueness across extensions (**§5.4**).
+§5.3**), `PTE0008` / `AS0062` (missing `ApplicationArea`), `AA0074` (label suffix), `AA0101`
+(API names not camelCase, **§2.7**), `AA0215` (file name, **§1.8**), and `AL0424` (ML syntax,
+**§1.7**). It doesn't replace symbol verification or App Code uniqueness across extensions
+(**§5.4**).
 
 **How to run it** (verified on AL Language extension 18.0.2732683; on a newer release, compile a
 table with no permission set and confirm `PTE0004` appears):
