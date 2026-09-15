@@ -104,8 +104,8 @@ page <ObjectID> "<EntitySetName>"
 {
     PageType = API;
     Caption = '<Complete sentence describing what this entity represents.>';
-    APIPublisher = '<publisher>';
-    APIGroup = '<prefix>_<groupName>';
+    APIPublisher = '<apiPublisher>';       // camelCase (§2.7)
+    APIGroup = '<prefix><GroupName>';      // camelCase, no underscore (§2.7)
     APIVersion = '<version>';
     EntityName = '<entityNameSingular>';
     EntitySetName = '<entitySetNamePlural>';
@@ -387,6 +387,27 @@ ToolTip = 'Specifies the G/L Account No.';
 // Bad — no information value
 ToolTip = 'G/L Account No.';
 ```
+
+
+### 2.7 API Naming — camelCase
+
+`APIPublisher`, `APIGroup`, `EntityName`, and `EntitySetName` are camelCase: letters and digits
+only, first letter lowercase, each later word capitalized, no underscores or spaces. They form the
+endpoint URL, and Microsoft's CodeCop enforces the casing as warning **AA0101**.
+
+| Property | Pattern | Example (publisher `Contoso`, prefix `acme`) |
+|---|---|---|
+| `APIPublisher` | The publisher in camelCase | `'contoso'`; `Only Copilot Fans` → `'onlyCopilotFans'` |
+| `APIGroup` | Prefix + group name in PascalCase | `'acmeCoreFinancial'` |
+| `EntityName` | Prefix + singular name in PascalCase | `'acmeGeneralLedgerEntry'` |
+| `EntitySetName` | Prefix + plural name in PascalCase | `'acmeGeneralLedgerEntries'` |
+
+**Changing an existing extension's values changes its endpoint URLs** and breaks every consumer
+calling them. Apply this to new API pages; for a published extension, change it only as a
+planned, versioned API change.
+
+> *Source:* [CodeCop Warning AA0101](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/analyzers/codecop-aa0101)
+> (Microsoft Learn, © Microsoft Corporation, CC BY 4.0).
 
 ---
 

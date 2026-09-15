@@ -129,8 +129,8 @@ trap 'rm -f "$log"' EXIT
 status=$?
 cat "$log"
 
-errors="$(grep -c ': error [A-Z][A-Z]*[0-9][0-9]*:' "$log")"
-warnings="$(grep -c ': warning [A-Z][A-Z]*[0-9][0-9]*:' "$log")"
+errors="$(grep -Ec '(^|: )error [A-Z]+[0-9]+:' "$log")"
+warnings="$(grep -Ec '(^|: )warning [A-Z]+[0-9]+:' "$log")"
 if [ "$status" -ne 0 ]; then
   echo "OCPF AL analyze: compile failed ($errors error(s), $warnings warning(s); compiler exit code $status)." >&2
   exit 1

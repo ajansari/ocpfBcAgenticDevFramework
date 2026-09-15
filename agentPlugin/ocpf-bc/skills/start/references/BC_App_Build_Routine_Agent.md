@@ -277,7 +277,7 @@ up front, not discovered by surprise the first time a build finishes.
 | Context | Quote style | Example |
 |---|---|---|
 | `app.json` / `launch.json` values | Standard JSON strings | `"publisher": "Contoso"` |
-| AL string property values | Single quotes | `APIPublisher = 'Contoso';` |
+| AL string property values | Single quotes | `APIPublisher = 'contoso';` |
 | AL object names | Double quotes | `page 90800 "acmeCustomers"` |
 | BC source field names containing spaces | Double quotes on the field name | `Rec."Document No."` |
 
@@ -317,18 +317,18 @@ Additional allocation 1 `91500`–`91549`; Permission Sets required = `Yes`.
 | Parameter | Placeholder | Guidance & Example |
 |---|---|---|
 | **AL Object Prefix** | `<prefix>` | Short, lowercase, no quotes. Used in page names and identifiers. Example: `acme` |
-| **APIPublisher** | `'<Publisher>'` | Single quotes in AL page metadata. Example: `'Contoso'` |
-| **APIGroup Prefix** | `<prefix>_` | Lowercase prefix + underscore, no AL quotes. Example: `acme_` |
+| **APIPublisher** | `'<apiPublisher>'` | Derived, not asked: the Publisher in camelCase (Standards §2.7). Single quotes in AL page metadata. Example: `'contoso'` |
+| **APIGroup Prefix** | `<prefix>` | The AL Object Prefix; each group name follows it in PascalCase, no underscore (Standards §2.7). Example: `acme` |
 | **APIVersion** | `'v<Major>.<Minor>'` | Single quotes in AL. Example: `'v1.0'` |
 | **Namespace** | `<Publisher>.<ExtensionShort>` | Same value as Section 1.1; N/A if Use Namespace = `No`. Example: `Contoso.AcmeAPIs` |
 | **Permission Set App Code** | `<APPCODE>` | Uppercase letters or digits, no spaces, unique among **every** extension that uses this prefix (Standards §5.4). At most `13 − (prefix length)` characters, so every name fits the 20-character limit. Example: `SALESAPI` |
 | **Permission Set Names** | `<PREFIX> <APPCODE>, VIEW` / `<PREFIX> <APPCODE>, EDIT` | Derived, not asked: `<PREFIX>` is the AL Object Prefix in uppercase. No AL quotes here. Example: `ACME SALESAPI, VIEW` (19 characters) |
 
-**Entity-naming patterns** — all derived from the prefix above (examples use prefix `acme`):
+**Entity-naming patterns** — all derived from the prefix above, all camelCase per Standards §2.7 (examples use prefix `acme`):
 
 | Element | Pattern | Example |
 |---|---|---|
-| `APIGroup` | `'<prefix>_<camelCaseGroupName>'` | `'acme_coreFinancial'` |
+| `APIGroup` | `'<prefix><PascalCaseGroupName>'` | `'acmeCoreFinancial'` |
 | `EntityName` (singular) | `<prefix><PascalCaseSingular>` | `'acmeGeneralLedgerEntry'` |
 | `EntitySetName` (plural) | `<prefix><PascalCasePlural>` | `'acmeGeneralLedgerEntries'` |
 | `ODataKeyFields` | `SystemId` | Always. On every page. |
@@ -614,7 +614,7 @@ Once the human confirms the sheet, and before Step 02:
 
 **Outputs:** `docs/ProjectParameters.md` — the completed Project Parameters block (above, all placeholders replaced), persisted as its own tracked document so every later step, and every role under §1.7, reads it from disk rather than depending on conversation history; an empty **Object Register** artifact seeded with the allocated ID ranges; the project's `.gitignore` populated per this section and per ALL ALONG → Repository Hygiene; **`docs/TranslationGlossary.md`**, created with the regional terms PRE-02 listed (ALL ALONG → Translations & Terminology) — unless the project chose *US wording, no translation files*; `app.json` and `.alpackages/` per §1.10.
 
-**Exit gate:** Every question in this step was asked through the options mechanism. `app.json` matches the sheet, and symbols for the target version are in `.alpackages/` (§1.10). No placeholder remains. **Approvers** is recorded (asked at PRE-01). Deployment Target is one allowed value. Namespace matches between 1.1 and 1.3, or both are correctly N/A if Use Namespace = `No`. Localization is set. If Permission Sets required = `Yes`, ≥ 2 IDs are reserved in the primary range. §1.6's three questions are each answered `Yes`/`No` with specifics recorded for any `Yes`. §1.7 is answered or explicitly skipped — if configured, every one of the three roles has both a model and a thinking effort (or `N/A`) recorded, not model alone. §1.8 is answered (or defaults to `Yes`) and `.gitignore` reflects it. §1.9: every target language is classified against Microsoft's live page, has a required-at-release answer and a named reviewer; source language and wording are recorded; any mismatch with `Localization` is resolved. Human confirms the sheet.
+**Exit gate:** Every question in this step was asked through the options mechanism. `app.json` matches the sheet, and symbols for the target version are in `.alpackages/` (§1.10). No placeholder remains. **Approvers** is recorded (asked at PRE-01). Deployment Target is one allowed value. Namespace matches between 1.1 and 1.3, or both are correctly N/A if Use Namespace = `No`. Localization is set. If Permission Sets required = `Yes`, ≥ 2 IDs are reserved in the primary range. §1.6's three questions are each answered `Yes`/`No` with specifics recorded for any `Yes`. §1.7 is answered or explicitly skipped — if configured, every one of the three roles has both a model and a thinking effort (or `N/A`) recorded, not model alone. §1.8 is answered (or defaults to `Yes`) and `.gitignore` reflects it. §1.9: every target language is classified against Microsoft's live page and — unless source wording is *US wording, no translation files* — has a required-at-release answer and a named reviewer; source language and wording are recorded; any mismatch with `Localization` is resolved. Human confirms the sheet.
 
 ---
 

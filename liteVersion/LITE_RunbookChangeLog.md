@@ -31,11 +31,17 @@ what was verified.
   check that `scripts/al-analyze.*` is present. The post-generation checklist checks file names
   (**Standards §1.8**).
 - **Operating Rules 4 and 5** compressed.
+- **API naming is camelCase** (**Standards §2.7**, CodeCop `AA0101`): `APIGroup` becomes
+  `'<prefix><GroupName>'` (e.g. `acmeCoreFinancial`, no underscore) and `APIPublisher` the
+  publisher in camelCase. Published extensions keep their URLs unless their owner plans a
+  versioned API change.
 - **Step 1:** source wording is asked before the per-language questions it can skip; a note covers
   questions with one or more than four candidates.
 - **Smaller fixes:** BCQuality described as outside the project rather than gitignored; the AL MCP
   launcher list includes `al-analyze.*`; Rule 6d's pointer to incidents that now live only in the
-  changelog removed; Step 5's `al_searchtranslations` applies where the AL MCP Server is connected.
+  changelog removed; Step 5's `al_searchtranslations` applies where the AL MCP Server is connected;
+  the per-language questions and exit gate skip the reviewer for *US wording, no translation
+  files*; the schematic's Hygiene node no longer lists BCQuality as gitignored.
 - **Corrected in earlier entries:** v1.9.0.0 now says the Step 6 → Step 7 hand-off gained the
   translated-documents return point.
 

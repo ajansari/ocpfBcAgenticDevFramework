@@ -78,6 +78,17 @@ September 14, 2026. The upstream project's current license always governs.*
     <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/readiness/readiness-checklist-marketing>
   - Development of validated localization apps —
     <https://learn.microsoft.com/en-us/dynamics365/business-central/about-validated-localization-apps>
+  - Best practices for AL code (File naming) —
+    <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-bestpracticesforalcode>
+  - CodeCop Warning AA0215 —
+    <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/analyzers/codecop-aa0215>
+  - CodeCop Warning AA0101 —
+    <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/analyzers/codecop-aa0101>
+  - PerTenantExtensionCop Error PTE0004 —
+    <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/analyzers/pertenantextensioncop-pte0004>
+  - AppSourceCop analyzer rules, including AS0103 and the note that AppSourceCop and
+    PerTenantExtensionCop must not be enabled together —
+    <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/analyzers/appsourcecop>
 - **License:** documentation © Microsoft Corporation, licensed under
   [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/);
   code samples under MIT — per the public Business Central docs repository,
@@ -89,7 +100,10 @@ September 14, 2026. The upstream project's current license always governs.*
   the list was reorganized sit directly below that section, as CC BY 4.0 requires. Standards Part
   8 summarizes the AA0074 suffix list, the Incremental Build / RAD translation behavior, the
   AppSource translation-file requirement, and the country/language support facts, with the same
-  attribution block at the end of Part 8.
+  attribution block at the end of Part 8. Standards §1.8 adapts the file-naming notation and type
+  map from *Best practices for AL code* and *CodeCop Warning AA0215*, and §2.7 summarizes *CodeCop
+  Warning AA0101*, each with the same attribution block. The runbooks' ALL ALONG → Analyzers
+  summarizes the PerTenantExtensionCop and AppSourceCop pages.
   `translationAndMultiLanguage/MultilanguageSupportOverview.md` summarizes facts from these pages
   and carries its own attribution.
 

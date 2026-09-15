@@ -29,7 +29,7 @@ setlocal enabledelayedexpansion
 
 if "%~2"=="" (
   echo OCPF AL analyze: usage: al-analyze.cmd ^<project folder^> ^<output .app path^> [pte^|appsource] [extra alc args...] 1>&2
-  exit /b 2
+  exit /b 1
 )
 set "OCPF_PROJECT=%~1"
 set "OCPF_OUT=%~2"
@@ -80,7 +80,7 @@ if not "!OCPF_STATUS!"=="0" (
   echo OCPF AL analyze: compile failed ^(compiler exit code !OCPF_STATUS!^). 1>&2
   exit /b 1
 )
-findstr /r /c:": warning [A-Z][A-Z]*[0-9][0-9]*:" "%OCPF_LOG%" >nul
+findstr /r /c:": warning [A-Z][A-Z]*[0-9][0-9]*:" /c:"^warning [A-Z][A-Z]*[0-9][0-9]*:" "%OCPF_LOG%" >nul
 if not errorlevel 1 (
   del "%OCPF_LOG%" >nul 2>&1
   echo OCPF AL analyze: compiled with warnings. Operating Rule 5 requires zero; fix them before treating this build as clean. 1>&2

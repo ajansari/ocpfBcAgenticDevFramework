@@ -10,11 +10,14 @@ fetches the latest runbook from GitHub first, so a project isn't limited to the 
 
 - **`al-analyze.*` scripts:** exit `3` when the compile succeeds with warnings (the compiler
   itself exits 0), find the global `al` tool's analyzers (the tool-store search was one folder
-  short), and fall back to the VS Code extension when a runtime is missing.
+  short), fall back to the VS Code extension when a runtime is missing, and count diagnostics
+  printed without a file location. `al-analyze.cmd` exits 1 on a usage error, like the `.sh`.
 - **`al-mcp-setup`:** copies any missing `al-analyze.*` even when the AL MCP Server is already
   connected, and in cloud sessions.
 - **`ocpf-code-reviewer`:** relies on a 0/0 compile only when a build log or CI run shows it;
   otherwise checks `tabledata` coverage and ML syntax by hand, and names `AS0103` for AppSource.
+- **Bundled runbooks and Standards Guide:** file naming (Standards §1.8) and camelCase API naming
+  (Standards §2.7) so projects pass CodeCop with every rule on. See `RunbookChangelog.md` v2.14.0.0.
 
 ## 1.5.0 — September 15, 2026
 

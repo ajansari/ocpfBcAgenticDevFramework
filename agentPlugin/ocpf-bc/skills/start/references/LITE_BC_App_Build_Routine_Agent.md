@@ -288,7 +288,7 @@ Versioning). Mention this once, plainly, now.
 | **Namespace** | `<Publisher>.<ExtensionShort>` | N/A if Use Namespace = `No`. PascalCase, no spaces. |
 | **Localization** | `<Localization>` | E.g. `W1`, `NA`, `EU`, `US`. Drives field/table inclusion. |
 | **AL Object Prefix** | `<prefix>` | Short, lowercase. Used in page names/identifiers. |
-| **APIPublisher / APIGroup Prefix / APIVersion** | — | `'<Publisher>'`, `<prefix>_`, `'v1.0'` — same values everywhere. |
+| **APIPublisher / APIGroup Prefix / APIVersion** | — | Derived: the Publisher in camelCase (`'contoso'`), the prefix followed by a PascalCase group name (`'acmeCoreFinancial'`, no underscore), and `'v1.0'` — same values everywhere (**Standards §2.7**). |
 | **Permission Set App Code** | `<APPCODE>` | Uppercase letters or digits, no spaces, unique among every extension that uses this prefix, at most `13 − (prefix length)` characters (**Standards §5.4**). |
 | **Permission Set Names** | `<PREFIX> <APPCODE>, VIEW` / `<PREFIX> <APPCODE>, EDIT` | Derived: `<PREFIX>` is the AL Object Prefix in uppercase. Each ≤ 20 characters, e.g. `OCPF NAICS, VIEW`. |
 | **Object ID range(s)** | — | Primary + any Additional, from Box 3. |
@@ -297,19 +297,20 @@ Versioning). Mention this once, plainly, now.
 | **Onboarding extras** | `Yes`/`No` each | Assisted Setup Wizard? Role Center Activity Cues? Departments/"My Business Central" placement? Box 4; `No` to any is a final answer, not a placeholder — most small extensions answer `No` to all three, but ask anyway. |
 | **Framework files in `.gitignore`?** | `Yes` (default) | Box 5, asked as: *"`.gitignore` lists files Git leaves out of commits and pushes — they stay on disk and work normally. Should this framework's own files be left out of this project's repository?"* Covers this runbook (under whatever name it was given: `CLAUDE.md`, `.github/copilot-instructions.md`, or `LITE_BC_App_Build_Routine_Agent.md`), `LITE_RunbookChangeLog.md`, `LITE_RunbookSchematics.md`, and the plugin's `.ocpf/` folder, if present. **Never the project's own `ChangeLog.md`**, which is always committed. |
 | **Working language** | — | From the first question of this step. |
-| **Target languages** | table | Box 5's question 19, for the countries from Box 1 — never asked again (rules: **Standards §8.8**). Classify each chosen language as Microsoft-translated, partner-translated (ask which partner app, in the next box — it's the terminology source), or not supported by BC (every right-to-left language included). Don't offer an unsupported language; if typed, offer the country's English instead, and only record it if the human insists. Then, per language, two questions: *Required at first release* / *Can follow later*; and who reviews it — names the human mentioned, or *I'll type it*; a named fluent person, never the agent. Flag any mismatch with **Localization**. |
+| **Target languages** | table | Box 5's question 19, for the countries from Box 1 — never asked again (rules: **Standards §8.8**). Classify each chosen language as Microsoft-translated, partner-translated (ask which partner app, in the next box — it's the terminology source), or not supported by BC (every right-to-left language included). Don't offer an unsupported language; if typed, offer the country's English instead, and only record it if the human insists. Then, unless source wording is *US wording, no translation files*, per language, two questions: *Required at first release* / *Can follow later*; and who reviews it — names the human mentioned, or *I'll type it*; a named fluent person, never the agent. Flag any mismatch with **Localization**. |
 | **Source language** | `en-US` (default) | Offer `en-US` first, labelled recommended, with the one-line reasons in **Standards §8.1**. If the human chooses another, state the consequences before recording it. |
 | **Source wording** | `W1` | Microsoft's W1 English wording in source, with one translation file per target language (`en-US` included). Only when `en-US` is the **sole** target **and Deployment Target isn't `AppSource`** (AppSource requires translation files — **Standards §8.10**), also offer *US wording in source, no translation files* — simpler now, but another market later means changing source strings. |
 | **Documents in other languages** | per document | Only with a target language other than the source. Two questions: translate `Docs.md`'s user-guide section into each required language (*Yes (recommended)* / *No*); and does `TestScript.md` need a translated copy (*No — testers run the language pass from the English script, which names the terms they should see (recommended when testers read English)* / *Yes*)? `DesignDoc.md` and `ChangeLog.md` stay English. Translated documents are produced at Step 7, once the functional test pass is green. |
 | **Customer-language documents / translatable data** | `Yes`/`No` each | Two questions: do invoices or emails follow the customer's language? Does the extension store user-entered text needing per-language versions? (**Standards §8.9**) |
 
 **Quoting reference** (applies everywhere): `app.json`/`launch.json` use standard JSON strings;
-AL string property values use single quotes (`APIPublisher = 'Contoso';`); AL object names use
+AL string property values use single quotes (`APIPublisher = 'contoso';`); AL object names use
 double quotes (`page 90800 "acmeCustomers"`); BC field names with spaces use double quotes
 (`Rec."Document No."`).
 
-**Entity-naming patterns** (prefix `acme` as example): `APIGroup = 'acme_coreFinancial'`,
-`EntityName = 'acmeGeneralLedgerEntry'`, `EntitySetName = 'acmeGeneralLedgerEntries'`,
+**Entity-naming patterns** (prefix `acme` as example, all camelCase — **Standards §2.7**):
+`APIGroup = 'acmeCoreFinancial'`, `EntityName = 'acmeGeneralLedgerEntry'`,
+`EntitySetName = 'acmeGeneralLedgerEntries'`,
 `ODataKeyFields = SystemId` always. Both names ≤ 30 characters including the prefix — when one
 doesn't fit, shorten it with the BC standard abbreviations in **Standards §4.2**, not with
 improvised ones (`Gen`, `Bus`, `Prod`, `CrMemo`, `Dtld`…; **Standards §4.4** has worked examples
@@ -347,8 +348,9 @@ sheet, and the target version's symbols are in `.alpackages/`. The Standards Gui
 `standardsGuide/` and gitignored. `ProjectParameters.md` exists in the project root with no placeholder remaining. Deployment Target
 is one allowed value. Namespace is consistent or correctly N/A. If
 Permission Sets required = `Yes`, ≥ 2 IDs are reserved. Onboarding questions are each answered.
-Every target language is classified against Microsoft's live page, with a required-at-release
-answer and a named reviewer; source language and wording are recorded. Human confirms the sheet.
+Every target language is classified against Microsoft's live page and, unless source wording is
+*US wording, no translation files*, has a required-at-release answer and a named reviewer; source
+language and wording are recorded. Human confirms the sheet.
 
 ---
 

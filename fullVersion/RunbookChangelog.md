@@ -32,6 +32,11 @@ the way CodeCop expects.** Standards Guide **v1.7.0.0** adds §1.8 File Naming. 
 - **The AL compiler exits 0 when there are only warnings.** Reproduced with `al-analyze.sh`: a
   project with an `AA0074` warning compiled with exit code 0. Trusting the exit code would have
   let a build with warnings pass Operating Rule 5.
+- **CodeCop's `AA0101` warns when an API page's `APIPublisher`, `APIGroup`, `EntityName`, or
+  `EntitySetName` isn't camelCase.** Reproduced by an independent review: `APIGroup =
+  'ocpf_coreFinancial'` and `APIPublisher = 'Contoso'` each warned; `'ocpfCoreFinancial'` with a
+  lowercase publisher compiled clean. The framework's own pattern could never pass the
+  zero-warnings gate.
 - **CodeCop's `AA0215` warns on every file not named `<ObjectName>.<Type>.al`**, with the object
   name reduced to `A–Z`, `a–z`, and `0–9` — Microsoft Learn, *Best practices for AL code → File
   naming*. Reproduced: a table in `HasPerm.Table.al` warned that the valid name is
@@ -54,6 +59,7 @@ the way CodeCop expects.** Standards Guide **v1.7.0.0** adds §1.8 File Naming. 
     VS Code extension, falling back to the next when a runtime is missing. Tested on macOS through
     both routes; the Windows scripts remain untested on Windows.
   - The profile's own analyzer is checked in both profiles.
+  - Errors and warnings printed without a file location are counted too.
 - **ALL ALONG → Analyzers** (both editions) rewritten without the verification narrative. It says
   what to read (warnings, not only the result), lists `AA0215` and `AL0424` among what the compile
   proves, and records that the framework ships no ruleset: every analyzer rule stays on.
@@ -80,6 +86,15 @@ the way CodeCop expects.** Standards Guide **v1.7.0.0** adds §1.8 File Naming. 
 
 - **Standards §1.8 File Naming (v1.7.0.0)**, with Microsoft's type names and examples. Standards
   §1.7 says code review searches files changed since the last 0/0 compile; §5.3 names `AS0103`.
+- **Standards §2.7 API Naming — camelCase (v1.7.0.0).** `APIPublisher`, `APIGroup`, `EntityName`,
+  and `EntitySetName` are camelCase with no underscores, as CodeCop `AA0101` requires. **This
+  changes the framework's `APIGroup` pattern** from `'<prefix>_<groupName>'` (e.g.
+  `acme_coreFinancial`) to `'<prefix><GroupName>'` (e.g. `acmeCoreFinancial`), and `APIPublisher`
+  becomes the publisher in camelCase (`contoso`). New projects use the new pattern. An extension
+  already published keeps its endpoint URLs unless its owner plans a versioned API change, since
+  renaming breaks every consumer calling them.
+- **`THIRD_PARTY_NOTICES.md`:** the Microsoft Learn pages behind §1.8, §2.7, and the analyzer
+  guidance.
 
 ### Not changed
 

@@ -289,7 +289,7 @@ flowchart LR
         Change["ChangeLog.md — the single log<br/>merges ChangeLog + Testing<br/>Feedback + Roadmap into one file"]
         Pack["Packaging & Versioning<br/>never delete a package;<br/>propose bumps, don't apply silently"]
         Std["OCPF AL Dev Standards Guide<br/>fetched at Step 1, gitignored —<br/>the one fetch that isn't optional"]
-        Hygiene["Repository Hygiene<br/>standardsGuide/, BCQuality, patterns/,<br/>.alpackages/ always gitignored;<br/>packages tracked"]
+        Hygiene["Repository Hygiene<br/>standardsGuide/, patterns/,<br/>.alpackages/ always gitignored;<br/>BCQuality outside the project;<br/>packages tracked"]
         MCP["AL MCP Server, Symbols &<br/>Editor Sync — agent sets up at<br/>Step 1, human only approves;<br/>check editor after clean compiles"]
         Ana["Analyzers<br/>CodeCop, UICop, and PerTenantExtensionCop<br/>or AppSourceCop on every<br/>mandatory compile"]
         Ref["Reference Sources<br/>MS Learn Base App + System App,<br/>translation files, AL Guidelines —<br/>consulted online, not fetched"]
