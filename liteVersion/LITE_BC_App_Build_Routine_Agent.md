@@ -904,28 +904,49 @@ work.**
 
 ## Analyzers
 
-**The mandatory Step 5 compile runs with Microsoft's bundled code analyzers engaged — CodeCop,
-PerTenantExtensionCop, and UICop, plus AppSourceCop when Deployment Target is AppSource — not a
-plain compile.** Nothing is installed; these ship with the AL Language extension already. This
-catches, at compile time, checks the runbook previously only verified by hand: `PTE0004` (a table
-missing a matching permission set — Standards §5.3), `PTE0008` (a page control or action missing
-`ApplicationArea`), and `AA0074` (a `Label` missing its suffix). It does not replace symbol
-verification or a design-time decision a compiler can't judge, such as permission-set App Code
-uniqueness across extensions (Standards §5.4).
+**The mandatory Step 5 compile runs with Microsoft's bundled code analyzers engaged — not a plain
+compile.** Nothing is installed; these ship with the AL Language extension already. Every project
+runs **CodeCop** and **UICop**, plus exactly one of these two, by Parameter 1.1 Deployment Target,
+never both:
+
+| Deployment Target | Third analyzer |
+|---|---|
+| `SaaS PTE` or `OnPrem PTE` | **PerTenantExtensionCop** |
+| `AppSource` | **AppSourceCop** |
+
+**Never enable both together.** Microsoft's own docs: *"Several rules enforced by the AppSourceCop
+analyzer are incompatible with rules enforced by the PerTenantExtensionCop. Make sure to enable
+only one of these at a time."* Confirmed: loading both on a plain PTE project buried it in
+AppSource-only errors unrelated to the code. **AppSourceCop also needs an `AppSourceCop.json`** in
+the project root — at minimum `{ "mandatoryAffixes": ["<prefix>"] }` — or it fails outright with
+`AS0054`. Create it at Step 3 scaffolding, alongside `app.json`, only for AppSource.
+
+This catches, at compile time, checks the runbook previously only verified by hand: `PTE0004` (a
+table missing a matching permission set — Standards §5.3; AppSourceCop's equivalent is `AS0103`),
+`PTE0008` (a page control or action missing `ApplicationArea`; AppSource: `AS0062`), and `AA0074`
+(a `Label` missing its suffix, from CodeCop either way). It does not replace symbol verification
+or a design-time decision a compiler can't judge, such as permission-set App Code uniqueness
+across extensions (Standards §5.4).
 
 **How to run it, verified on AL Language extension 18.0.2732683 (September 2026):**
 - **GitHub Copilot Chat in VS Code:** its own `al_build` tool takes a `codeAnalyzers` argument, or
   reads the workspace's `al.codeAnalyzers` setting. Set `"al.enableCodeAnalysis": true` and
-  `"al.codeAnalyzers"` in `.vscode/settings.json` at Step 3 scaffolding.
+  `"al.codeAnalyzers"` — the table above, never both `PerTenantExtensionCop` and `AppSourceCop` —
+  in `.vscode/settings.json` at Step 3 scaffolding. This also gives the human live red-squiggle
+  feedback in the editor, independent of anything the agent runs later.
 - **Claude Code, Copilot CLI, or any other MCP host: do not use the AL MCP Server's
   `al_build`/`al_compile` for this.** Tested six ways — the tool call's `codeAnalyzers` argument
   and the server's `--codeanalyzers` launch flag, symbolic names and literal DLL paths alike — and
   every one silently produced a clean result on code that should have failed `PTE0004` and
-  `PTE0008`. Invoking the compiler directly does work. With the plugin, run
-  `scripts/al-analyze.sh <project folder> <output .app path>` (Windows: `scripts\al-analyze.cmd`);
-  it finds the same AL extension the launcher does and resolves the analyzer DLLs beside it.
-  Without the plugin, fetch it the same way as the AL MCP Server launcher (ALL ALONG → AL MCP
-  Server, step 1). Its exit code is the compiler's own: 0 only when clean under every analyzer.
+  `PTE0008`. Writing the same settings into `.vscode/settings.json` didn't change that either — the
+  MCP server doesn't read them; do it anyway, for the reason above. Invoking the compiler directly
+  does work. With the plugin, run
+  `scripts/al-analyze.sh <project folder> <output .app path> [pte|appsource]` (Windows:
+  `scripts\al-analyze.cmd <project folder> <output .app path> [pte|appsource]`; defaults to `pte`
+  when omitted); it finds the same AL extension the launcher does and resolves the analyzer DLLs
+  beside it. Without the plugin, fetch it the same way as the AL MCP Server launcher (ALL ALONG →
+  AL MCP Server, step 1). Its exit code is the compiler's own: 0 only when clean under every
+  analyzer.
 - **Re-verify before trusting either route on a newer AL extension release** — test a known-certain
   case (a table with no permission set) and confirm `PTE0004` actually appears, the same way
   you'd verify a symbol (Rule 2).

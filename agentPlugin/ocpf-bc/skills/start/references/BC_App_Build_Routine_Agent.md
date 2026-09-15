@@ -1478,33 +1478,59 @@ actively developed and can change between AL extension releases.
 ## Analyzers
 
 **The mandatory Step 07 / Lite Step 5 compile runs with Microsoft's bundled code analyzers
-engaged — CodeCop, PerTenantExtensionCop, and UICop, plus AppSourceCop when Deployment Target is
-AppSource — not a plain compile.** These analyzers already ship with the AL Language extension;
-nothing is installed to turn them on (Operating Rule 6d). Doing this catches, at compile time,
-several checks this runbook previously only verified by hand: `PTE0004` (a table missing a
-matching permission set — Standards §5.3), `PTE0008` (a page control or action missing
-`ApplicationArea`), and `AA0074` (a `Label` missing its suffix). It does not replace symbol
-verification (Operating Rule 2) or any design-time decision a compiler can't judge — caption and
-tooltip quality, permission-set App Code uniqueness across extensions (Standards §5.4, which the
-compiler doesn't check), or the Step 03 caption-locking decisions.
+engaged — not a plain compile.** These analyzers already ship with the AL Language extension;
+nothing is installed to turn them on (Operating Rule 6d). Every project runs **CodeCop** and
+**UICop**, plus exactly one of these two, chosen by Parameter 1.1 Deployment Target and never both
+together:
+
+| Deployment Target | Third analyzer |
+|---|---|
+| `SaaS PTE` or `OnPrem PTE` | **PerTenantExtensionCop** |
+| `AppSource` | **AppSourceCop** |
+
+**Never enable PerTenantExtensionCop and AppSourceCop in the same compile.** Microsoft's own docs
+say so directly: *"Several rules enforced by the AppSourceCop analyzer are incompatible with rules
+enforced by the PerTenantExtensionCop. Make sure to enable only one of these at a time."*
+Confirmed in practice: loading both on a plain PTE-shaped project buried it in AppSource-only
+errors that have nothing to do with the actual code — missing `app.json` fields (`brief`,
+`description`, `EULA`, …), an ID range outside AppSource's allocated block, and no
+`AppSourceCop.json`. **The AppSourceCop profile needs an `AppSourceCop.json` in the project root**
+— at minimum `{ "mandatoryAffixes": ["<prefix>"] }` using Parameter 1.3's AL Object Prefix — or the
+compile fails outright with `AS0054` before it evaluates a single file. Create it at Step 05 / Lite
+Step 3 scaffolding, alongside `app.json`, only when Deployment Target is AppSource.
+
+Doing this catches, at compile time, several checks this runbook previously only verified by
+hand: `PTE0004` (a table missing a matching permission set — Standards §5.3; AppSourceCop's
+equivalent is `AS0103`), `PTE0008` (a page control or action missing `ApplicationArea`; AppSource:
+`AS0062`), and `AA0074` (a `Label` missing its suffix, from CodeCop, unaffected by which of the two
+is chosen). It does not replace symbol verification (Operating Rule 2) or any design-time decision
+a compiler can't judge — caption and tooltip quality, permission-set App Code uniqueness across
+extensions (Standards §5.4, which the compiler doesn't check), or the Step 03 caption-locking
+decisions.
 
 **How to run it, verified on AL Language extension 18.0.2732683 (September 2026) — don't assume
 the easier-looking route works without checking:**
 - **GitHub Copilot Chat in VS Code:** its own `al_build` tool takes a `codeAnalyzers` argument
   (well-known values `${CodeCop}`, `${PerTenantExtensionCop}`, `${UICop}`, `${AppSourceCop}`), or
   reads the workspace's `al.codeAnalyzers` setting when the argument is omitted. Set
-  `"al.enableCodeAnalysis": true` and `"al.codeAnalyzers"` in `.vscode/settings.json` once, at
-  Step 05 / Lite Step 3 scaffolding.
+  `"al.enableCodeAnalysis": true` and `"al.codeAnalyzers"` — the two-analyzer-plus-one list from
+  the table above, never both `PerTenantExtensionCop` and `AppSourceCop` — in
+  `.vscode/settings.json` once, at Step 05 / Lite Step 3 scaffolding. This durable setting also
+  gives the human live red-squiggle feedback in the editor from these same analyzers as they work,
+  independent of anything the agent runs later.
 - **Claude Code, Copilot CLI, or any other MCP host: do not use the AL MCP Server's
   `al_build`/`al_compile` tools for this.** Tested six ways — the tool call's `codeAnalyzers`
   argument and the server's `--codeanalyzers` launch flag, each with symbolic names (`${CodeCop}`)
   and literal DLL paths — and every one produced a clean result on code that should have failed
-  `PTE0004` and `PTE0008`. Invoking the compiler directly does work: with the plugin, run
-  `scripts/al-analyze.sh <project folder> <output .app path>` (Windows:
-  `scripts\al-analyze.cmd <project folder> <output .app path>`) — it locates the same AL
-  extension the launcher does, resolves the analyzer DLLs that ship beside it, and runs
-  `altool compile --` with them attached. Without the plugin, fetch it the same way as the AL MCP
-  Server launcher (ALL ALONG → AL MCP Server, step 1), from
+  `PTE0004` and `PTE0008`. Writing the same `al.enableCodeAnalysis`/`al.codeAnalyzers` settings
+  into `.vscode/settings.json` didn't change that either — the MCP server doesn't read them; do it
+  anyway, for the reason in the bullet above. Invoking the compiler directly does work: with the
+  plugin, run `scripts/al-analyze.sh <project folder> <output .app path> [pte|appsource]` (Windows:
+  `scripts\al-analyze.cmd <project folder> <output .app path> [pte|appsource]`; the profile
+  argument defaults to `pte` when omitted) — it locates the same AL extension the launcher does,
+  resolves the analyzer DLLs that ship beside it, and runs `altool compile --` with the right pair
+  attached. Without the plugin, fetch it the same way as the AL MCP Server launcher (ALL ALONG →
+  AL MCP Server, step 1), from
   `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/al-mcp-setup/scripts/al-analyze.sh`
   (or `al-analyze.cmd` + `al-analyze-resolve.ps1` on Windows), or invoke `altool compile --
   /analyzer:<path>` yourself with the analyzer DLLs found beside `altool.dll` in the AL

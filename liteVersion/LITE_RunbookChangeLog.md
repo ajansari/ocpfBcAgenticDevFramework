@@ -31,8 +31,10 @@ v2.11.0.0 for what was verified and the full reasoning.
 - **Step 3 and Step 6:** corrected — `AL0424` already proves the codebase is free of ML syntax,
   since `TranslationFile` is always on. The manual search stays as a backstop for anything added
   since the last compile.
-- **Step 5:** the mandatory compile now explicitly runs with CodeCop, PerTenantExtensionCop, and
-  UICop.
+- **Step 5:** the mandatory compile now explicitly runs with CodeCop and UICop, plus exactly one
+  of PerTenantExtensionCop (SaaS/OnPrem PTE) or AppSourceCop (AppSource) by Deployment Target —
+  never both; Microsoft documents them as incompatible. An `AppSourceCop.json` is scaffolded at
+  Step 3 when the target is AppSource.
 - **Step 6:** the `Rec.`-qualification and permission-set-coverage re-checks replaced with one
   check — the last compile was 0/0, with the required analyzers, and nothing suppressed.
 - **Operating Rules and ALL ALONG:** dated attributions and incident narrative moved to this

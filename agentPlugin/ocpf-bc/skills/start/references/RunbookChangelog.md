@@ -61,6 +61,13 @@ removed.
   question raised when §5.4 shipped (v2.10.0.0): two apps declaring the identical bare permission
   set name, one depending on the other, compiled clean with `${PerTenantExtensionCop}` attached.
   §5.4's naming rule stands as the only defense.
+- **PerTenantExtensionCop and AppSourceCop must never run together.** Microsoft's own
+  AppSourceCop reference states it directly: "Several rules enforced by the AppSourceCop analyzer
+  are incompatible with rules enforced by the PerTenantExtensionCop. Make sure to enable only one
+  of these at a time." Reproduced: loading both on a plain PTE-shaped project buried it in
+  AppSource-only errors unrelated to the code (missing `app.json` fields, an ID range outside
+  AppSource's allocated block, no `AppSourceCop.json`). The AppSourceCop profile also fails
+  outright with `AS0054` without an `AppSourceCop.json` declaring `mandatoryAffixes`.
 
 ### Changed
 
@@ -82,8 +89,10 @@ removed.
 - **Step 06:** Action 7's final cross-batch permission-set re-check removed — the per-batch check
   (Step 05, kept) and Step 07's mandatory compile (now analyzer-enabled) already cover it without
   a third pass. Step 06's Outputs and Exit gate updated to match.
-- **Step 07 and Lite Step 5:** the mandatory compile now explicitly runs with CodeCop,
-  PerTenantExtensionCop, and UICop (AppSourceCop added for an AppSource target).
+- **Step 07 and Lite Step 5:** the mandatory compile now explicitly runs with CodeCop and UICop,
+  plus exactly one of PerTenantExtensionCop (SaaS/OnPrem PTE) or AppSourceCop (AppSource) chosen
+  by Deployment Target — never both. An `AppSourceCop.json` is scaffolded at Step 05 / Lite Step 3
+  when the target is AppSource.
 - **Step 09, `ocpf-code-reviewer`, and Lite Step 6's equivalent:** the re-verification of
   `Rec.`-qualification, ML syntax, and permission-set coverage replaced with one check — the last
   compile was 0/0, with the required analyzers, and nothing suppressed. Obsolete-reference
@@ -102,7 +111,8 @@ removed.
 - **`agentPlugin/ocpf-bc/skills/al-mcp-setup/scripts/al-analyze.sh`** (macOS/Linux) and
   **`al-analyze.cmd` + `al-analyze-resolve.ps1`** (Windows, untested on Windows): locate the same
   AL extension the MCP launcher does, resolve the analyzer DLLs beside it, and run
-  `altool compile --` directly. Exits with the compiler's own code.
+  `altool compile --` directly with a `pte` (default) or `appsource` profile — never both
+  PerTenantExtensionCop and AppSourceCop in one invocation. Exits with the compiler's own code.
 
 ### Not changed
 

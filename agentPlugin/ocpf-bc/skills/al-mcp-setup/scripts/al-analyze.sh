@@ -13,12 +13,22 @@
 # ApplicationArea) with PerTenantExtensionCop, and AA0074 (label suffix) with CodeCop. Re-verify
 # against a newer AL extension release before assuming the MCP tool argument still doesn't work.
 #
-# Usage: sh al-analyze.sh <project folder> <output .app path> [extra alc arguments...]
+# Usage: sh al-analyze.sh <project folder> <output .app path> [pte|appsource] [extra alc args...]
 #   sh scripts/al-analyze.sh . outputAppPackage/MyApp_1.0.0.0.app
-#   sh scripts/al-analyze.sh . outputAppPackage/MyApp_1.0.0.0.app /analyzer:/path/to/AppSourceCop.dll
+#   sh scripts/al-analyze.sh . outputAppPackage/MyApp_1.0.0.0.app appsource
 #
-# Analyzers included by default: CodeCop, PerTenantExtensionCop, UICop. Add AppSourceCop yourself
-# (see above) only when Deployment Target is AppSource — its rules are stricter than a PTE needs.
+# Profile picks the analyzer set — pass whichever matches Deployment Target (Parameter 1.1):
+#   pte       (default) CodeCop, PerTenantExtensionCop, UICop — SaaS PTE or OnPrem PTE.
+#   appsource CodeCop, AppSourceCop, UICop — Deployment Target = AppSource.
+# Never both PerTenantExtensionCop and AppSourceCop in the same compile: Microsoft's own docs say
+# "several rules enforced by the AppSourceCop analyzer are incompatible with rules enforced by the
+# PerTenantExtensionCop. Make sure to enable only one of these at a time." Confirmed in practice:
+# loading both on a plain PTE-shaped project buried it in AppSource-only errors unrelated to the
+# actual code (missing app.json fields, wrong ID range, no AppSourceCop.json).
+#
+# The appsource profile also needs an AppSourceCop.json in the project root (mandatoryAffixes at
+# minimum) or the compile fails outright with AS0054 — this script doesn't create one; the runbook
+# does that separately when Deployment Target is AppSource.
 #
 # Prints the compiler's own diagnostics (errors and warnings) to stdout/stderr and exits with the
 # compiler's exit code: 0 only when the compile is clean under every analyzer passed. This is the
@@ -32,9 +42,15 @@ fail() {
   exit 1
 }
 
-[ $# -ge 2 ] || fail "usage: al-analyze.sh <project folder> <output .app path> [extra alc arguments...]"
+[ $# -ge 2 ] || fail "usage: al-analyze.sh <project folder> <output .app path> [pte|appsource] [extra alc args...]"
 project="$1"; shift
 outfile="$1"; shift
+profile="pte"
+case "${1:-}" in
+  pte|appsource) profile="$1"; shift ;;
+esac
+# Everything left in "$@" from here on is the caller's own extra alc arguments — never touched by
+# the profile selection below, so paths containing spaces still pass through safely.
 
 # Locate altool.dll (or the global al tool) and the analyzer DLLs that ship beside it — same
 # directory either way, whether that's the AL extension's bin/ folder or the global tool's own
@@ -59,8 +75,11 @@ fi
 [ -n "$altool" ] || fail "no AL Language extension found. Install 'AL Language extension for Microsoft Dynamics 365 Business Central' in VS Code, or the 'al' .NET tool."
 
 bindir="$(dirname "$altool")"
-for name in CodeCop PerTenantExtensionCop UICop; do
-  dll="$bindir/Microsoft.Dynamics.Nav.$name.dll"
+codecop="$bindir/Microsoft.Dynamics.Nav.CodeCop.dll"
+uicop="$bindir/Microsoft.Dynamics.Nav.UICop.dll"
+ptecop="$bindir/Microsoft.Dynamics.Nav.PerTenantExtensionCop.dll"
+appsourcecop="$bindir/Microsoft.Dynamics.Nav.AppSourceCop.dll"
+for dll in "$codecop" "$uicop"; do
   [ -f "$dll" ] || fail "expected analyzer not found next to altool: $dll (AL extension layout may have changed — check bin/ for the current analyzer DLL names)"
 done
 
@@ -90,9 +109,14 @@ fi
 
 DOTNET_ROOT="$(dirname "$dotnet")"
 export DOTNET_ROOT
-exec "$dotnet" "$altool" compile -- \
-  /project:"$project" /packagecachepath:"$project/.alpackages" /out:"$outfile" \
-  /analyzer:"$bindir/Microsoft.Dynamics.Nav.CodeCop.dll" \
-  /analyzer:"$bindir/Microsoft.Dynamics.Nav.PerTenantExtensionCop.dll" \
-  /analyzer:"$bindir/Microsoft.Dynamics.Nav.UICop.dll" \
-  "$@"
+if [ "$profile" = "appsource" ]; then
+  [ -f "$appsourcecop" ] || fail "expected analyzer not found next to altool: $appsourcecop"
+  exec "$dotnet" "$altool" compile -- \
+    /project:"$project" /packagecachepath:"$project/.alpackages" /out:"$outfile" \
+    /analyzer:"$codecop" /analyzer:"$appsourcecop" /analyzer:"$uicop" "$@"
+else
+  [ -f "$ptecop" ] || fail "expected analyzer not found next to altool: $ptecop"
+  exec "$dotnet" "$altool" compile -- \
+    /project:"$project" /packagecachepath:"$project/.alpackages" /out:"$outfile" \
+    /analyzer:"$codecop" /analyzer:"$ptecop" /analyzer:"$uicop" "$@"
+fi
