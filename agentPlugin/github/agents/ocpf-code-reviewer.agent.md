@@ -36,11 +36,12 @@ by default. Download them into a temporary folder **outside** the repository, fo
 ```bash
 mkdir -p /tmp/ocpf
 curl -fsSL https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/standardsGuide/ocpfALDevStandardsGuide.md -o /tmp/ocpf/ocpfALDevStandardsGuide.md
+curl -fsSL https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/opsGuide/ocpfOperationsGuide.md -o /tmp/ocpf/ocpfOperationsGuide.md
 curl -fsSL https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/fullVersion/BC_App_Build_Routine_Agent.md -o /tmp/ocpf/BC_App_Build_Routine_Agent.md
 curl -fsSL https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/liteVersion/LITE_BC_App_Build_Routine_Agent.md -o /tmp/ocpf/LITE_BC_App_Build_Routine_Agent.md
 ```
 
-- **Use the project's copies when present.** If the repository has `standardsGuide/` or a runbook
+- **Use the project's copies when present.** If the repository has `standardsGuide/`, `opsGuide/`, or a runbook
   (`CLAUDE.md`, `.github/copilot-instructions.md`, `BC_App_Build_Routine_Agent.md`,
   `LITE_BC_App_Build_Routine_Agent.md`), use those instead: they're the versions this project
   follows.

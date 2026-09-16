@@ -21,6 +21,7 @@ pairs=(
   "liteVersion/LITE_BC_App_Build_Routine_Agent.md|skills/start/references/LITE_BC_App_Build_Routine_Agent.md"
   "liteVersion/LITE_RunbookChangeLog.md|skills/start/references/LITE_RunbookChangeLog.md"
   "standardsGuide/ocpfALDevStandardsGuide.md|skills/al-standards/references/ocpfALDevStandardsGuide.md"
+  "opsGuide/ocpfOperationsGuide.md|skills/start/references/ocpfOperationsGuide.md"
 )
 
 mode="sync"

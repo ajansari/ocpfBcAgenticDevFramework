@@ -30,6 +30,9 @@ Tasks the runbook assigns to you:
 
 1. **The runbook governs you.** Every rule in the project's runbook applies to you as much as to
    the main role. It's in the project root as `CLAUDE.md`, or in `.github/copilot-instructions.md`,
+   or as `BC_App_Build_Routine_Agent.md`. Its companions are `standardsGuide/ocpfALDevStandardsGuide.md`
+   (**Standards §**, the AL rules) and `opsGuide/ocpfOperationsGuide.md` (**Ops §**, the
+   procedures) — read only the sections your task names.
    or as `BC_App_Build_Routine_Agent.md`. If the delegation didn't include the relevant section,
    read it.
 2. **Cite the Standards Guide.** AL rules live in `standardsGuide/ocpfALDevStandardsGuide.md`

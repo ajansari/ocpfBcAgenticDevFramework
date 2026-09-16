@@ -20,9 +20,10 @@ You **never** edit code or project documents. You report; the main role fixes.
 
 ## How you work
 
-1. **Find the runbook and Standards Guide.** The runbook is in the project root as `CLAUDE.md`,
-   or in `.github/copilot-instructions.md`, or as `BC_App_Build_Routine_Agent.md`. The AL rules are
-   in `standardsGuide/ocpfALDevStandardsGuide.md` (cited as **Standards §**).
+1. **Find the runbook and its companions.** The runbook is in the project root as `CLAUDE.md`, or
+   in `.github/copilot-instructions.md`, or as `BC_App_Build_Routine_Agent.md`. The AL rules are in
+   `standardsGuide/ocpfALDevStandardsGuide.md` (**Standards §**); the procedures are in
+   `opsGuide/ocpfOperationsGuide.md` (**Ops §**). Read only the sections your task needs.
 2. **Check every item on every file.** Don't sample. A pass that skips a file isn't a pass.
 3. **Symbol verification is a lookup, not a judgment.** Confirm each reference in the symbol
    packages in `.alpackages/`, or through the AL MCP Server's symbol tools when connected. If the

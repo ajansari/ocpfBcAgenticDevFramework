@@ -41,6 +41,10 @@ Repository: `https://github.com/ajansari/ocpfBcAgenticDevFramework` (default bra
 
 **If the project is current:** say so in one line, naming the version.
 
+**Also compare the companions.** The runbook's header names the Standards Guide and Operations
+Guide versions it expects. If a local copy's major version differs, say so: the runbook's
+**Standards §** and **Ops §** citations point at sections that may have moved.
+
 **If a newer version exists:**
 1. **Fetch the matching changelog:**
    - Full: `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/fullVersion/RunbookChangelog.md`
@@ -69,6 +73,13 @@ Repository: `https://github.com/ajansari/ocpfBcAgenticDevFramework` (default bra
      line), update that runbook file and leave `CLAUDE.md` alone.
 3. **Download and overwrite the project's changelog file** (`RunbookChangelog.md` or
    `LITE_RunbookChangeLog.md`). It's the framework's history, not the project's.
+3a. **Refresh both companion guides to the versions the new runbook expects** — its header names
+   them. Overwrite `standardsGuide/ocpfALDevStandardsGuide.md` and
+   `opsGuide/ocpfOperationsGuide.md` from
+   `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/standardsGuide/ocpfALDevStandardsGuide.md`
+   and `.../main/opsGuide/ocpfOperationsGuide.md`, updating each folder's `SNAPSHOT.json`. A runbook
+   and a companion from different majors don't go together: the runbook cites **Ops §** sections by
+   name.
 4. **Update `.ocpf/framework.json`:** set `runbookVersion`, `source`, `commitSha`, and `fetchedAt`,
    and clear `declinedUpdateVersion`.
 5. **Record the change in the project's own continuity documents,** as the runbook asks for any

@@ -181,9 +181,11 @@ notification kind at the runbook's first step counts as asking, for the settings
    manual "Getting started prompt" does. The runbook's first question is the human's working
    language. Right after it, the runbook asks how the human wants to be notified when it's their
    turn (ALL ALONG → Notifications), using this plugin's `notifications` skill scripts.
-3. **Note the Standards Guide.** The runbook fetches it from GitHub at that first step. If GitHub
-   is unreachable, it uses the copy bundled with this plugin's `al-standards` skill, as the
-   runbook's ALL ALONG → OCPF Plugin section describes.
+3. **Note the two companion guides.** The runbook fetches both at that first step: the **Standards
+   Guide** into `standardsGuide/` and the **Operations Guide** into `opsGuide/`. If GitHub is
+   unreachable, use the copies bundled with this plugin — the Standards Guide in the `al-standards`
+   skill's `references/`, the Operations Guide in this skill's `references/` — and say which
+   versions were used, as the runbook's ALL ALONG → OCPF AL Development Standards Guide describes.
 
 ## Documents mode (no code project)
 
