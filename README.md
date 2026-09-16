@@ -10,6 +10,13 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 *Last Updated: Wednesday, September 16, 2026*
 
+> ## 🌐 [Official Website](https://ajansari.github.io/ocpfBcAgenticDevFramework/)
+>
+> **<https://ajansari.github.io/ocpfBcAgenticDevFramework/>**
+>
+> What the framework is, how it works, and what it produces. **Start here if you're new** — then
+> come back for setup.
+
 ## Table of Contents
 
 - [Background](#background)
@@ -39,82 +46,75 @@ It comes in two editions: the **full framework** (14 steps) for substantial proj
 <details open>
 <summary><h1>Setup: Agent Plugin (Recommended)</h1></summary>
 
-The framework is also an **agent plugin**, `ocpf-bc`. It's the easiest way in: install it once,
-then start any project with one command. The plugin:
+> ### Two steps. Install once, then one command per project.
+>
+> | | |
+> |---|---|
+> | **1. Install the plugin** | Once per machine. Pick **one** row from the table below. |
+> | **2. Start your project** | Open your AL folder and run `/ocpf-bc:start`. |
 
-- **helps you choose Full or Lite** for the project, and explains why;
-- **installs the latest runbook** from this repository, so you never start on a stale copy;
-- **connects Microsoft's AL tools** for compiling, symbols, and publishing, with nothing to install;
-- **adds ready-made sub-agents** for the full framework's Reasoning and Light roles;
-- **checks for framework updates every session** and asks before applying them.
+That's it. From there the plugin **helps you choose Full or Lite**, **installs the latest runbook**,
+**connects Microsoft's AL tools** with nothing to install, **adds sub-agents** for the full
+framework's Reasoning and Light roles, and **checks for updates** each session before changing
+anything.
 
-Prefer to set things up by hand? The manual setup below still works exactly as before.
+*Prefer to do it by hand? The [manual setup](#setup-full) still works exactly as before.*
 
-### Which option should I use?
+## Step 1 — Install
 
-You build Business Central extensions in **Visual Studio Code** with the **AL Language**
-extension, so the recommended options are the two that run there:
+**You only need ONE of these.** You build Business Central extensions in **Visual Studio Code** with
+the **AL Language** extension, so the two starred rows are the recommended paths.
 
-- **Claude Code in VS Code**, or
-- **GitHub Copilot Chat in VS Code.**
+| Your tool | How to install |
+|---|---|
+| ⭐ **Claude Code in VS Code** | `/plugins` → **Marketplaces** → add `ajansari/ocpfBcAgenticDevFramework` → **Plugins** tab → **ocpf-bc** → **Install** (choose **User** scope) |
+| ⭐ **GitHub Copilot Chat in VS Code** | Add the marketplace to VS Code settings, then install from the Extensions view — [two lines, below](#copilot-chat-install) |
+| **Claude Code CLI** | `/plugin marketplace add ajansari/ocpfBcAgenticDevFramework`<br>`/plugin install ocpf-bc@onlycopilotfans` |
+| **GitHub Copilot CLI** | `copilot plugin marketplace add ajansari/ocpfBcAgenticDevFramework`<br>`copilot plugin install ocpf-bc@onlycopilotfans` |
+| Anywhere else | See **Other places you can run it**, below |
 
-Their command-line versions (Claude Code CLI, GitHub Copilot CLI) work just as well if you prefer
-a terminal. The other places listed below can run parts of the framework.
+**Claude Code in VS Code — one-click shortcut.** Paste this into your browser to do the whole thing
+at once:
 
-### Install
+```
+vscode://anthropic.claude-code/install-plugin?plugin=ocpf-bc&marketplace=ajansari/ocpfBcAgenticDevFramework
+```
 
-Install the plugin **once**. It's then available in every project.
+<a id="copilot-chat-install"></a>
+**GitHub Copilot Chat in VS Code — the two lines.** Add this to your VS Code settings (JSON):
 
-**Claude Code in VS Code**
-1. In the Claude Code panel, type `/plugins` to open **Manage plugins**.
-2. On the **Marketplaces** tab, add `ajansari/ocpfBcAgenticDevFramework`.
-3. On the **Plugins** tab, find **ocpf-bc** and select **Install**. Choose **User** scope to have
-   it in every project.
+```json
+"chat.plugins.marketplaces": ["ajansari/ocpfBcAgenticDevFramework"]
+```
 
-Or open this link, which does steps 2–3 for you:
-`vscode://anthropic.claude-code/install-plugin?plugin=ocpf-bc&marketplace=ajansari/ocpfBcAgenticDevFramework`
+Then: Extensions view → search `@agentPlugins` → **ocpf-bc** → **Install**. If you don't see agent
+plugins at all, check that `chat.plugins.enabled` is turned on.
 
-**Claude Code, from Anthropic's community marketplace**
-`ocpf-bc` has been **approved** for Anthropic's community plugin directory and is awaiting its
-appearance in the public catalog, which syncs nightly. Once it's listed, you'll be able to install
-it without adding this repository as a marketplace first:
+> **Good to know:** plugins installed in the Claude Code CLI and the VS Code extension are shared,
+> and also show up in the Claude Desktop app's **Code** tab. VS Code picks up plugins installed by
+> Copilot CLI automatically. So installing once usually covers your whole setup.
+
+<details>
+<summary><b>Other places you can run it</b> — github.com, Claude apps, Copilot Cowork, and Anthropic's directory</summary>
+
+<br>
+
+**Anthropic's community marketplace (Claude Code)** — `ocpf-bc` has been **approved** for Anthropic's
+community plugin directory and is awaiting its appearance in the public catalog, which syncs
+nightly. Once listed, you'll be able to install it without adding this repository first:
+
 ```
 claude plugin marketplace add anthropics/claude-plugins-community
 claude plugin install <listing-name>@claude-community
 ```
-> **Note:** `<listing-name>` is a placeholder. It will be replaced with the plugin's actual
-> directory name as soon as the entry appears in the public catalog. **Until then, use one of the
-> options below** — they install the same plugin and work today.
 
-Both routes install the same plugin from this repository. Adding this repository directly (below)
-picks up new versions the moment they're pushed; the community directory syncs on its own schedule.
+> `<listing-name>` is a placeholder, replaced once the entry appears. **Until then, use a row from
+> the table above** — same plugin, works today. Installing from this repository directly also picks
+> up new versions the moment they're pushed; the community directory syncs on its own schedule.
 
-**Claude Code CLI**
-```
-/plugin marketplace add ajansari/ocpfBcAgenticDevFramework
-/plugin install ocpf-bc@onlycopilotfans
-```
-Plugins you install in the CLI or the VS Code extension are shared, and also appear in the Claude
-Desktop app's **Code** tab (**+** → **Plugins**).
+**GitHub.com (Copilot cloud agent)** — *not yet fully vetted.* In your **AL project's** repository,
+commit `.github/copilot/settings.json`:
 
-**GitHub Copilot Chat in VS Code**
-1. Open your VS Code settings (JSON) and add:
-   ```json
-   "chat.plugins.marketplaces": ["ajansari/ocpfBcAgenticDevFramework"]
-   ```
-2. In the Extensions view, search `@agentPlugins`, find **ocpf-bc**, and select **Install**.
-
-If you don't see agent plugins, check that the `chat.plugins.enabled` setting is on.
-
-**GitHub Copilot CLI**
-```
-copilot plugin marketplace add ajansari/ocpfBcAgenticDevFramework
-copilot plugin install ocpf-bc@onlycopilotfans
-```
-VS Code picks up plugins installed by Copilot CLI automatically.
-
-**GitHub.com (Copilot cloud agent)**: *not yet fully vetted*
-In your **AL project's** repository, commit `.github/copilot/settings.json`:
 ```json
 {
   "extraKnownMarketplaces": {
@@ -123,64 +123,59 @@ In your **AL project's** repository, commit `.github/copilot/settings.json`:
   "enabledPlugins": { "ocpf-bc@onlycopilotfans": true }
 }
 ```
-Things to know about github.com:
-- **Autonomous work:** the cloud agent works on its own toward a pull request. Use it for
-  well-defined tasks against an approved design (for example, "implement batch B3 per the TDD"),
-  rather than the whole step-by-step routine with its approval gates.
-- **Network access:** add `learn.microsoft.com` to the repository's Copilot **Internet access**
-  allowlist. It isn't on the default list.
-- **Code review:** there's an optional **OCPF Code Reviewer** agent. Copy
-  [`agentPlugin/github/agents/ocpf-code-reviewer.agent.md`](agentPlugin/github/agents/ocpf-code-reviewer.agent.md)
-  into your project's `.github/agents/` folder. It reviews your extension against the Standards
-  Guide and writes `CodeReview.md`.
 
-**Claude apps (Chat and Cowork, on web, desktop, and mobile)**: *not yet fully vetted*
-In Claude, open **Customize** → **Plugins** → **+** → **Add marketplace** → **Add from a
-repository**, and enter `ajansari/ocpfBcAgenticDevFramework`. Then install **ocpf-bc**. There's no
-AL compiler or VS Code project here, so the plugin guides the **DEFINE and DESIGN** phases and
-produces the documents. BUILD and PROVE continue in VS Code.
+| Thing to know | Detail |
+|---|---|
+| **Autonomous work** | The cloud agent works on its own toward a pull request. Use it for well-defined tasks against an approved design ("implement batch B3 per the TDD"), not the whole step-by-step routine with its approval gates. |
+| **Network access** | Add `learn.microsoft.com` to the repository's Copilot **Internet access** allowlist. It isn't on the default list. |
+| **Code review** | Optional **OCPF Code Reviewer** agent — copy [`agentPlugin/github/agents/ocpf-code-reviewer.agent.md`](agentPlugin/github/agents/ocpf-code-reviewer.agent.md) into your project's `.github/agents/` folder. It reviews your extension against the Standards Guide and writes `CodeReview.md`. |
 
-**Microsoft Copilot Cowork (Microsoft 365 Copilot)**: *not yet fully vetted*
-Download `ocpf-bc-cowork-<version>.zip` from this repository's
-[Releases](https://github.com/ajansari/ocpfBcAgenticDevFramework/releases). In Cowork, select
-**+** → **Customize** → **Plugins** → **Upload plugin**, then choose who can use it.
-- **Licensing:** Cowork needs a Microsoft 365 Copilot license and Cowork billing enabled by your
-  admin.
-- **What it covers:** like the Claude apps, it covers DEFINE and DESIGN. Cowork doesn't support
-  custom plugins on mobile.
+**Claude apps (Chat and Cowork — web, desktop, mobile)** — *not yet fully vetted.* In Claude:
+**Customize** → **Plugins** → **+** → **Add marketplace** → **Add from a repository**, enter
+`ajansari/ocpfBcAgenticDevFramework`, then install **ocpf-bc**. There's no AL compiler or VS Code
+project here, so it guides **DEFINE and DESIGN** and produces the documents; BUILD and PROVE
+continue in VS Code.
 
-### Start a project
+**Microsoft Copilot Cowork (Microsoft 365 Copilot)** — *not yet fully vetted.* Download
+`ocpf-bc-cowork-<version>.zip` from
+[Releases](https://github.com/ajansari/ocpfBcAgenticDevFramework/releases), then in Cowork select
+**+** → **Customize** → **Plugins** → **Upload plugin** and choose who can use it.
 
-Open your AL project folder, or a new empty folder, and run:
+| Thing to know | Detail |
+|---|---|
+| **Licensing** | Needs a Microsoft 365 Copilot license and Cowork billing enabled by your admin. |
+| **What it covers** | DEFINE and DESIGN, like the Claude apps. Cowork doesn't support custom plugins on mobile. |
+
+</details>
+
+## Step 2 — Start a project
+
+Open your AL project folder — or an empty one — and run:
 
 ```
 /ocpf-bc:start
 ```
 
-Or just ask: *"Start a Business Central project with the OCPF framework."*
+Or just ask: *"Start a Business Central project with the OCPF framework."* In GitHub Copilot, the
+commands are identical.
 
-The plugin then walks you through setup:
+**The plugin then walks you through four things:**
 
-1. **Full or Lite.** It asks about the project (how many objects, how many people and sign-off
-   roles, whether it's heading to AppSource) and recommends an edition. Lite is for small
-   extensions of roughly 5–10 AL files with one person and one AI model. Full is for everything
-   bigger. You can switch later without losing work.
-2. **Where the runbook goes.** It places the latest runbook as `CLAUDE.md`, as
-   `.github/copilot-instructions.md`, or both, for mixed teams. If either file already exists, it
-   asks you what to do; it never overwrites.
-3. **AL tools, with nothing to install.** It connects Microsoft's AL tools (build, compile,
-   symbols, publish) using the AL Language extension you already have. In GitHub Copilot Chat
-   they're already built in. In Claude Code, you approve the connection once when asked.
-4. **The routine begins,** starting with the working language you'd like to use.
+| | What happens | What you do |
+|---|---|---|
+| **1** | **Full or Lite.** It asks about the project — object count, people and sign-off roles, whether it's heading to AppSource — and recommends an edition with its reasoning. | Confirm or override. You can switch later without losing work. |
+| **2** | **Where the runbook goes.** It places the latest runbook as `CLAUDE.md`, `.github/copilot-instructions.md`, or both for mixed teams. | Nothing, unless a file already exists — then it asks. **It never overwrites.** |
+| **3** | **AL tools, nothing to install.** It connects Microsoft's AL tools using the AL Language extension you already have. | In Copilot Chat, nothing — they're built in. In Claude Code, approve the connection once. |
+| **4** | **The routine begins.** | Tell it your working language. |
 
-Other commands:
-- `/ocpf-bc:status` shows where the project stands.
-- `/ocpf-bc:update-framework` checks for a newer runbook.
-- `/ocpf-bc:al-mcp-setup` connects the AL tools, if you skipped it at start.
-- `/ocpf-bc:notifications` turns on "your turn" notifications in a project started before
-  the framework set them up automatically.
+**Other commands, for later:**
 
-In GitHub Copilot, the commands are the same.
+| Command | What it does |
+|---|---|
+| `/ocpf-bc:status` | Shows where the project stands |
+| `/ocpf-bc:update-framework` | Checks for a newer runbook |
+| `/ocpf-bc:al-mcp-setup` | Connects the AL tools, if you skipped it at start |
+| `/ocpf-bc:notifications` | Turns on "your turn" notifications in an older project |
 
 </details>
 
