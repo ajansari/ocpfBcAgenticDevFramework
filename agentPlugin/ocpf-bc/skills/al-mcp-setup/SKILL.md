@@ -54,7 +54,8 @@ If this session already has tools such as `al_compile` and `al_addproject`, the 
 Before stopping, make sure the project's `scripts/` folder has this operating system's analyzer
 compile script (`al-analyze.sh`, or `al-analyze.cmd` and `al-analyze-resolve.ps1` on Windows) —
 the runbook's mandatory compile needs it, and `al_build` never applies analyzers while `al_compile`
-produces no `.app`. Copy any that are missing, as in Step 4.1. Then record `"alMcp": "al-extension-mcp"`
+produces no `.app` (observed on AL Language extension 18.0.2732683; re-verify on a newer
+release). Copy any that are missing, as in Step 4.1. Then record `"alMcp": "al-extension-mcp"`
 and stop.
 
 ## Step 3: Say what you're doing — don't ask
@@ -83,7 +84,8 @@ end of Step 1), and connects them then.
    (step 5). The analyzer script runs the runbook's mandatory compile with Microsoft's code
    analyzers attached: the AL MCP Server's `al_build` never applies them, and its `al_compile`
    applies them only with one exact argument shape, returning a clean pass on failing code
-   otherwise — and it produces no `.app` (runbook ALL ALONG → Analyzers, Ops § Analyzers).
+   otherwise — and it produces no `.app` (observed on AL Language extension 18.0.2732683;
+   re-verify on a newer release — runbook ALL ALONG → Analyzers, Ops § Analyzers).
 2. **Add `scripts/` to the project's `.gitignore`** if it isn't there. It's framework plumbing, not
    the client's deliverable (runbook ALL ALONG → Repository Hygiene).
 3. **Add the `al` server to `.mcp.json` in the project root.** Create the file if needed. If it

@@ -94,7 +94,7 @@ flowchart TD
         S6["Step 6<br/>Review, Gap-Check<br/>& Finalize Docs"] --> G_S6{{"Gaps resolved/deferred;<br/>dead-code clean; Docs.md<br/>diagram renders; TestScript.md<br/>executable by a non-developer"}}
         G_S6 --> HandOff{{"Formal hand-off message —<br/>replaces the generic Rule 6c<br/>check-in for this boundary"}}
         HandOff --> S7["Step 7<br/>Release for Testing"]
-        S7 --> G_S7{{"Green tests pass,<br/>red tests fail gracefully,<br/>translations approved →<br/>same package ships to Production"}}
+        S7 --> G_S7{{"Upgrade path passes (or first<br/>release), green tests pass,<br/>red tests fail gracefully,<br/>translations approved →<br/>same package ships to Production"}}
     end
 
     G_S1 --> S2
@@ -243,9 +243,9 @@ flowchart TD
     HandOff --> S7
     subgraph S7["STEP 7 — Release for Testing"]
         direction LR
-        In2[/"Inputs:<br/>Latest package,<br/>TestScript.md, Docs.md"/] --> Act2["Actions:<br/>Real users run TestScript.md<br/>by hand on the sandbox —<br/>green + red team, permission-set<br/>verification; translated docs once<br/>that pass is green, then language<br/>passes and translation approval;<br/>record findings in ChangeLog.md<br/>(implement / defer / reject)"] --> Out2[/"Output:<br/>ChangeLog.md updated with<br/>every test finding"/]
+        In2[/"Inputs:<br/>Latest package,<br/>TestScript.md, Docs.md"/] --> Act2["Actions:<br/>Upgrade path tested FIRST if not<br/>the first release; real users run<br/>TestScript.md by hand on the sandbox<br/>— green + red team, permission-set<br/>verification; translated docs once<br/>that pass is green, then language<br/>passes and translation approval;<br/>record findings in ChangeLog.md<br/>(implement / defer / reject)"] --> Out2[/"Output:<br/>ChangeLog.md updated with<br/>every test finding"/]
     end
-    S7 --> ReleaseCheck{"All green pass,<br/>all red fail gracefully?"}
+    S7 --> ReleaseCheck{"Upgrade path passes (or<br/>first release), all green pass,<br/>all red fail gracefully?"}
     ReleaseCheck -- "No" --> GapCycle2["Step 5 cycle again —<br/>fix, compile, package, redeploy;<br/>re-run whatever Step 6 parts<br/>the fix touches"]
     GapCycle2 --> S7
     ReleaseCheck -- "Yes" --> Gate2

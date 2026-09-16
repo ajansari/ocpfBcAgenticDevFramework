@@ -104,7 +104,7 @@ flowchart TD
         S11 --> G_S11{{"4 docs exist (+ 1 conditional),<br/>ready for release testing"}}
         G_S11 --> HandOff2{{"Formal hand-off message —<br/>the framework's own work is done;<br/>one Dev Manager review of<br/>PostDevTDD, FRD, Step 11 docs"}}
         HandOff2 --> S12["12 — Release to Users<br/>for Testing"]
-        S12 --> G_S12{{"Dev Manager review done,<br/>green tests pass,<br/>red tests fail gracefully →<br/>same package ships to Production"}}
+        S12 --> G_S12{{"Dev Manager review done,<br/>upgrade path passes (or first<br/>release), green tests pass,<br/>red tests fail gracefully →<br/>same package ships to Production"}}
     end
 
     G_S01 --> S02
@@ -328,9 +328,9 @@ flowchart TD
     HandOff --> S12
     subgraph S12["12 — Release to Users for Testing"]
         direction LR
-        In6[/"Inputs:<br/>Latest package, HumanUnitTestScript.md,<br/>AutomatedTestScripts.md if any,<br/>UserGuide.md, Deployment.md"/] --> Act6["Actions:<br/>Dev Manager review; real users<br/>run the script by hand on the<br/>sandbox — green + red team,<br/>permission-set verification;<br/>translated docs once that pass<br/>is green, then language passes;<br/>triage findings via Testing<br/>Feedback Log"] --> Out6[/"Output:<br/>ReleaseTestResults.md"/]
+        In6[/"Inputs:<br/>Latest package, HumanUnitTestScript.md,<br/>AutomatedTestScripts.md if any,<br/>UserGuide.md, Deployment.md"/] --> Act6["Actions:<br/>Dev Manager review; upgrade path<br/>tested FIRST if not the first release;<br/>real users run the script by hand on<br/>the sandbox — green + red team,<br/>permission-set verification;<br/>translated docs once that pass<br/>is green, then language passes;<br/>triage findings via Testing<br/>Feedback Log"] --> Out6[/"Output:<br/>ReleaseTestResults.md"/]
     end
-    S12 --> ReleaseCheck{"All green pass,<br/>all red fail gracefully?"}
+    S12 --> ReleaseCheck{"Upgrade path passes (or<br/>first release), all green pass,<br/>all red fail gracefully?"}
     ReleaseCheck -- "No" --> GapCycle12["Step 07 cycle again —<br/>fix, compile, package,<br/>redeploy; re-run Step 09/10/11<br/>on whatever the fix touched"]
     GapCycle12 --> S12
     ReleaseCheck -- "Yes" --> Gate6

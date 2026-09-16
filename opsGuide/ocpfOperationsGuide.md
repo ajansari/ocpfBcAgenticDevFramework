@@ -498,7 +498,8 @@ compiling a table with no permission set and confirming `PTE0004` appears:
 - **Claude Code, Copilot CLI, or any other MCP host: `scripts/al-analyze.*` is the mandatory
   compile, not the AL MCP Server's own tools.** `al_build` never applies analyzers (observed on AL Language
   extension 18.0.2732683; re-verify on a newer release) — whatever is passed as `codeAnalyzers`, as
-  the `--codeanalyzers` launch flag, or in workspace settings, and its schema advertises both — and
+  the `--codeanalyzers` launch flag, or in workspace settings, even though its schema advertises
+  `enableCodeAnalysis` and `codeAnalyzers` — and
   reports `succeeded: true` while packaging code that has analyzer *errors*. `al_compile` does
   apply them, but only when `enableCodeAnalysis: true` **and** a `codeAnalyzers` list of the
   well-known tokens (`${CodeCop}`, `${PerTenantExtensionCop}`, `${UICop}`, `${AppSourceCop}`) are

@@ -681,13 +681,13 @@ have been run and pass, or it's recorded why they couldn't be.
 
 **Actions:**
 - Confirm the latest package is published to a BC sandbox tenant — republish if anything changed.
-- Real users/testers — not the agent, not a simulated pass — run `TestScript.md` end to end: every
-  green-team and red-team case, by hand.
 - **If this isn't the first release, test the upgrade path first** (**Standards §9.6**): install the
   previous version on a clean sandbox with data in the fields this version changes, publish and
   install this one, verify the migrated data, install it again to confirm the upgrade tag makes the
   second run a no-op, and check that a fresh install doesn't run upgrade code at all. A failed
   upgrade path fails this step — by the time anyone notices, the tenant's data is already wrong.
+- Real users/testers — not the agent, not a simulated pass — run `TestScript.md` end to end: every
+  green-team and red-team case, by hand.
 - Verify permission sets as part of the same pass: read-only grants read everywhere; read/write
   includes it plus write on editable pages.
 - **Translated documents, once the functional pass is green** (if Step 1 asked for them): the

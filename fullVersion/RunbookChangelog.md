@@ -111,7 +111,9 @@ until a submission is rejected.
 
 **Ops § Automated Tests** now documents `al_run_tests` against its live schema: flat top-level
 arguments, `codeunitId` the only required one, `projectPath` reading the connection from
-`launch.json`, one codeunit per call so the agent iterates the Object Register itself, and the full
+`launch.json` — with the target environment named explicitly alongside it and stated out loud
+rather than left to a server default — one codeunit per call so the agent iterates the Object
+Register itself, and the full
 optional set (`company`, `tenant`, `authentication`, `useInteractiveLogin`, `noCache`, the
 on-premises trio, and the `BC_SERVER_*` environment variables). `environmentType` is never
 `Production`. A failing test codeunit fails the step like a compiler error; an unconnected server is

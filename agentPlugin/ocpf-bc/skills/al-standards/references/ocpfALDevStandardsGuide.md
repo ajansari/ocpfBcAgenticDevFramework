@@ -1204,8 +1204,10 @@ having to do traditional code modifications."*
   it doesn't catch is a wrong **`ElementName`** — the fourth argument, which Microsoft says *"only
   requires a value for database trigger events, that is, when the ObjectType is set to table and
   the EventName argument is a validate trigger event, such as `OnAfterValidateEvent`."* Name the
-  wrong field there and it compiles cleanly and the subscriber silently never runs, so read the
-  field's exact name from the symbol file:
+  wrong field there and the subscriber silently never runs — Microsoft's own AL repository carries
+  this as a reported defect ([microsoft/AL#5377](https://github.com/microsoft/AL/issues/5377)),
+  and Learn documents only when the argument is *required*, not what a wrong value does — so read
+  the field's exact name from the symbol file rather than relying on the compiler to catch it:
   `[EventSubscriber(ObjectType::Table, Database::"Purchase Line", 'OnAfterValidateEvent', 'Location Code', false, false)]`.
 - **For a table trigger event the object is `Database::"…"`, never `Table::"…"`.** Microsoft calls
   this one out explicitly: *"For a table event, specify `ObjectId` by name with
