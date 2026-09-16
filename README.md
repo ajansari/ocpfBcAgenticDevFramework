@@ -8,7 +8,7 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 *by AJ Ansari*
 
-*Last Updated: Tuesday, September 15, 2026*
+*Last Updated: Wednesday, September 16, 2026*
 
 ## Table of Contents
 
@@ -109,6 +109,21 @@ Install the plugin **once**. It's then available in every project.
 
 Or open this link, which does steps 2–3 for you:
 `vscode://anthropic.claude-code/install-plugin?plugin=ocpf-bc&marketplace=ajansari/ocpfBcAgenticDevFramework`
+
+**Claude Code, from Anthropic's community marketplace**
+`ocpf-bc` has been **approved** for Anthropic's community plugin directory and is awaiting its
+appearance in the public catalog, which syncs nightly. Once it's listed, you'll be able to install
+it without adding this repository as a marketplace first:
+```
+claude plugin marketplace add anthropics/claude-plugins-community
+claude plugin install <listing-name>@claude-community
+```
+> **Note:** `<listing-name>` is a placeholder. It will be replaced with the plugin's actual
+> directory name as soon as the entry appears in the public catalog. **Until then, use one of the
+> options below** — they install the same plugin and work today.
+
+Both routes install the same plugin from this repository. Adding this repository directly (below)
+picks up new versions the moment they're pushed; the community directory syncs on its own schedule.
 
 **Claude Code CLI**
 ```
@@ -331,5 +346,6 @@ Same pattern as the full framework — only the source file changes.
 - ~~Add support for BCQuality~~ ✅ Completed
 - ~~Add support for multi language translations~~ ✅ Completed — see [Multilanguage Support](translationAndMultiLanguage/MultilanguageSupportOverview.md)
 - ~~Distribute as an agent plugin for Claude and GitHub Copilot~~ ✅ Completed — see [Setup: Agent Plugin](#setup-plugin)
+- ~~List the plugin in Anthropic's community plugin directory~~ ✅ Completed — September 2026
 
 </details>
