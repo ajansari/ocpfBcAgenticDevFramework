@@ -86,11 +86,21 @@ until a submission is rejected.
   new companies, register on first install — with tag values behind methods and Microsoft's
   `[Prefix]-[ID]-[Description]-[YYYYMMDD]` convention; the two-version `ObsoleteState` cycle that
   replaces deleting a shipped field; keeping web-service and printing side effects out of the
-  upgrade session via `Session.GetExecutionContext()`; and a four-step procedure for actually
-  testing an upgrade path.
+  upgrade session via `Session.GetExecutionContext()`; and a procedure for actually testing an
+  upgrade path, which **Step 12 and Lite Step 7 now run** before the human tests anything else —
+  install the previous version, migrate, re-install to prove the tag no-ops, and check a fresh
+  install separately. A failed upgrade path fails the step: it's the one defect class that can't be
+  fixed after the fact, because the tenant's data is already wrong by the time anyone notices.
+  **Obsoleting is not deleting.** `ObsoleteState = Removed` stops AL accepting new references but
+  leaves the field and its data in the database — Microsoft, on AS0016: *"Tables and fields marked
+  as [Obsolete Removed] are and not deleted from the database. This is why they are also validated
+  by this rule."* So a `Removed` field keeps its `DataClassification`, and a release that only
+  obsoletes fields is additive for Schema Sync Mode.
 - **Standards Part 10 — Events and Extensibility.** Subscribing (subscribers are `local`, in their
   own codeunit, no UI, no `Error()` on someone else's transaction, verified against symbols before
-  use) and publishing (`IntegrationEvent` as the default, `BusinessEvent` only for a stable
+  use — including the `ElementName` argument, which only a *validate trigger event* needs and which
+  fails silently rather than at compile time when it names the wrong field, and `Database::"…"`
+  rather than `Table::"…"` for a table event) and publishing (`IntegrationEvent` as the default, `BusinessEvent` only for a stable
   business fact, `InternalEvent` for own use; signature-only publishers; explicit raising; `var`
   and `Handled` parameters). A published event signature is a promise — changing one follows the
   same two-version cycle as §9.4.
@@ -125,9 +135,19 @@ exit gates.
   mid-project is lost at the next session boundary and gets asked a second time.
 - **Step 12's exit gate** says *production environment*, not *Production company*, and names the
   production deploy as the human's, through Extension Management.
-- **Two claims narrowed to what was verified:** `AS0054` fails the compile (dropping an unverified
-  claim about *when* in the compile), and `PTE0008`/`AS0062` is described as observed on a page
-  field, noting it lands on UI pages rather than API pages.
+- **Claims narrowed, pinned, or dropped to match the evidence:** `AS0054` fails the compile
+  (dropping an unverified claim about *when* in the compile); `PTE0008`/`AS0062` keeps Microsoft's
+  own rule title with the observation as a parenthetical; the `al_build` analyzer behavior is now
+  pinned to AL extension 18.0.2732683 with a re-verify instruction wherever an agent reads it,
+  since it contradicts the tool's own advertised schema; and an unsourced claim that a misspelled
+  event name "compiles and never fires" was replaced with the failure Microsoft does document — a
+  wrong `ElementName`.
+- **Ops § Automated Tests is no longer wholly Full-only.** Running AL test codeunits applies to both
+  editions — Lite Step 6 sends the agent there — so only the Automated Test Scripts *offer* stays
+  marked Full only.
+- **`README.md`, both plugin manifests, and the marketplace entry** describe the framework as it now
+  is: the Standards Guide's full part list, all 16 Ops sections, and AL extensions "per-tenant or
+  for AppSource" rather than per-tenant alone.
 
 ---
 

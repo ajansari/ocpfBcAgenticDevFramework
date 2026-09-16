@@ -8,7 +8,7 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 *by AJ Ansari*
 
-*Last Updated: Monday, September 14, 2026*
+*Last Updated: Tuesday, September 15, 2026*
 
 ## Table of Contents
 
@@ -62,8 +62,8 @@ At the heart of this project is a simple vision: that this framework should be *
 | File | Purpose |
 |---|---|
 | `fullVersion/` | The **Full Framework** — the complete 14-step routine. See [Setup: Full Framework](#setup-full) below. |
-| `standardsGuide/ocpfALDevStandardsGuide.md` | The companion **OCPF AL Development Standards Guide** — the detailed AL rules the runbook cites as **Standards §** (coding standards, API page design, field inclusion, naming, ID allocation, gap analysis, anti-patterns). You don't need to copy this one by hand: the runbook fetches it from this repository into every project at PRE-01, and gitignores it there. Shared by both editions. |
-| `opsGuide/ocpfOperationsGuide.md` | The companion **OCPF Operations Guide** — the procedures both editions share, cited as **Ops §** (how the agent asks and gets approval, intake, project setup, the AL tools, analyzers, symbols, editor sync, notifications, packaging, repository hygiene, translations, fetched companions, and the plugin). Fetched into each project alongside the Standards Guide. |
+| `standardsGuide/ocpfALDevStandardsGuide.md` | The companion **OCPF AL Development Standards Guide** — the detailed AL rules the runbook cites as **Standards §** (coding standards, API page design, field inclusion, naming, ID allocation, gap analysis, anti-patterns, translation and multilanguage, upgrade and data migration, events and extensibility, and the AppSource manifest and submission requirements). You don't need to copy this one by hand: the runbook fetches it from this repository into every project at PRE-01, and gitignores it there. Shared by both editions. |
+| `opsGuide/ocpfOperationsGuide.md` | The companion **OCPF Operations Guide** — the procedures both editions share, cited as **Ops §** (how the agent asks and gets approval, intake, roles, project setup, the AL tools, analyzers, symbols, editor sync, notifications, packaging, repository hygiene, translations, automated tests, fetched companions, reference sources, and the plugin). Fetched into each project alongside the Standards Guide. |
 | `liteVersion/` | The **Lite Edition** — a 7-step version of the framework for small, fast-moving projects. See [Lite Edition](#lite-edition) below. |
 | `translationAndMultiLanguage/MultilanguageSupportOverview.md` | How the framework handles multilanguage — captions and XLIFF translation files, regional terminology (GST vs. VAT, CR/Adj Note vs. Credit Memo in Australia), agent-drafted translations with a human review gate, and language-aware UAT. Shared by both editions. |
 | `agentPlugin/` | The optional **agent plugin**, `ocpf-bc`, for Claude Code, GitHub Copilot, and other tools. See [Setup: Agent Plugin](#setup-plugin). This repository is also its plugin marketplace (`.claude-plugin/marketplace.json`). |

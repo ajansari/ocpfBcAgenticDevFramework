@@ -50,7 +50,7 @@
 10. [Packaging](#ops--packaging)
 11. [Repository Hygiene](#ops--repository-hygiene)
 12. [Translations](#ops--translations)
-13. [Automated Tests](#ops--automated-tests-full-only) *(Full only)*
+13. [Automated Tests](#ops--automated-tests) *(the Scripts offer is Full only; running AL tests is both)*
 14. [Fetched Companions](#ops--fetched-companions)
 15. [Reference Sources](#ops--reference-sources)
 16. [Plugin](#ops--plugin)
@@ -482,8 +482,9 @@ Deployment Target parameter:
   give the human live analyzer feedback in the editor.
 
 **What the compile then proves:** `PTE0004` / `AS0103` (a table missing a matching permission set,
-**Standards §5.3**), `PTE0008` / `AS0062` (observed on a page field missing `ApplicationArea`; API pages don't carry the
-property, so this one lands on UI pages the project adds),
+**Standards §5.3**), `PTE0008` / `AS0062` ("Page controls and actions must use the ApplicationArea property" — observed
+on a page field missing it; API pages don't carry the property, so this lands on UI pages the
+project adds),
 `AA0074` (a `Label` missing its suffix, **§8.4**), `AA0101` (API names not camelCase, **§2.7**),
 `AA0215` (a file not named after its object, **§1.8**), and `AL0424` (deprecated multilanguage
 syntax, **§1.7**). It doesn't replace symbol verification (Operating Rule 2), permission set App
@@ -495,8 +496,9 @@ compiling a table with no permission set and confirming `PTE0004` appears:
 - **GitHub Copilot Chat in VS Code:** the built-in `al_build`, which reads the
   `.vscode/settings.json` analyzers when its `codeAnalyzers` argument is omitted.
 - **Claude Code, Copilot CLI, or any other MCP host: `scripts/al-analyze.*` is the mandatory
-  compile, not the AL MCP Server's own tools.** `al_build` never applies analyzers — whatever is
-  passed as `codeAnalyzers`, as the `--codeanalyzers` launch flag, or in workspace settings — and
+  compile, not the AL MCP Server's own tools.** `al_build` never applies analyzers (observed on AL Language
+  extension 18.0.2732683; re-verify on a newer release) — whatever is passed as `codeAnalyzers`, as
+  the `--codeanalyzers` launch flag, or in workspace settings, and its schema advertises both — and
   reports `succeeded: true` while packaging code that has analyzer *errors*. `al_compile` does
   apply them, but only when `enableCodeAnalysis: true` **and** a `codeAnalyzers` list of the
   well-known tokens (`${CodeCop}`, `${PerTenantExtensionCop}`, `${UICop}`, `${AppSourceCop}`) are
@@ -975,7 +977,13 @@ in the framework's `THIRD_PARTY_NOTICES.md`.
 
 ---
 
-## Ops § Automated Tests (Full only)
+## Ops § Automated Tests
+
+**Scope:** the *offer* of Automated Test Scripts below is **Full only**. *Running AL test
+codeunits* at the end of this section applies to **both editions** — Lite Step 6 sends the agent
+here.
+
+### Offering Automated Test Scripts (Full only)
 
 At the documentation step, the Full edition asks whether the human also wants **Automated Test
 Scripts**, alongside — not instead of — the human unit test script. This is a genuine question, not
@@ -1032,8 +1040,13 @@ al_run_tests  { "codeunitId": 60310,
                 "company": "<company>" }
 ```
 
-- **`projectPath` is the least error-prone way to connect:** the tool reads the connection from the
-  project's `launch.json` rather than from arguments that can drift out of step with it.
+- **Name the target explicitly, every time.** `codeunitId` is the only required argument, so
+  everything about *where* the tests run comes from what else is passed — never from a default.
+  `projectPath` is the tool's own documented route to the connection ("Optional project folder
+  path. Used to read connection settings from `launch.json`"), and it's the least error-prone
+  source because `launch.json` is the file the human already maintains. Pass `environmentName` and
+  `environmentType` alongside it and state the resolved target out loud before running, rather than
+  trusting whichever environment the server would otherwise pick.
 - **One codeunit per call.** `codeunitId` is a single integer, so the agent iterates the test
   codeunits in the Object Register and aggregates the results itself. `testMethods` narrows a run
   to named methods while fixing one failure — never for the run that reports the build green.

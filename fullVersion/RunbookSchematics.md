@@ -275,7 +275,7 @@ flowchart TD
     class Gate1,Gate2,Gate3 gate;
     class Start,Next,Clean endpoint;
     class Approve gate;
-    class MoreBatches,Stop,Q,APICheck decision;
+    class MoreBatches,Stop,Q,Offer decision;
 ```
 
 ### 3.4 PROVE

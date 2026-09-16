@@ -1121,13 +1121,19 @@ tags can't collide with another publisher's.
 
 ### 9.4 Deprecating a Field or Table — the Two-Version Cycle
 
-**Never delete a field or table that has shipped.** Deleting one destroys the tenant's data and is
-a breaking change AppSourceCop rejects. Retire it across two versions instead:
+**Never delete a field or table that has shipped.** *Obsoleting* and *deleting* are different acts
+with different consequences, and conflating them is how data gets lost: obsoleting is the supported
+retirement path and keeps the data, while physically removing the field from the source drops the
+column and is a breaking change AppSourceCop rejects. Retire it across two versions instead:
 
 | Version | What it does |
 |---|---|
 | **n** | Add the replacement field. Mark the old one `ObsoleteState = Pending`, with an `ObsoleteReason` naming the replacement and an `ObsoleteTag` carrying the version. Ship upgrade code that copies the data (§9.3). Keep writing to the new field only. |
-| **n+1** *(a later release, not the next build)* | `ObsoleteState = Removed`. The field stops being part of the schema; its data is gone. |
+| **n+1** *(a later release, not the next build)* | `ObsoleteState = Removed`. AL then refuses new references to it — `Pending` is a warning, `Removed` an error — but **the field and its data stay in the database.** Microsoft, on AppSourceCop AS0016: *"Tables and fields marked as [Obsolete Removed] are and not deleted from the database. This is why they are also validated by this rule."* So keep `DataClassification` set on it; AS0016 still checks it. |
+
+**A `Removed` field is retired, not erased.** Nothing here drops a column, so a release that only
+obsoletes fields is additive as far as Schema Sync Mode is concerned (**Ops § Packaging**) — it's
+deleting the field from the source that would force a destructive sync.
 
 Leave at least one full release between the two so every tenant has run the copying upgrade.
 `ObsoleteReason` is read by a human deciding what to do, so write the replacement's name in it, not
@@ -1148,7 +1154,7 @@ document fires them, and a subscriber that calls an external service will do so 
 
 ### 9.6 Upgrades Get Tested, Not Hoped For
 
-An upgrade path is testable and must be tested before release (runbook Step 11):
+An upgrade path is testable and must be tested before release — **runbook Step 12 / Lite Step 7**, before the human runs anything else:
 1. Install the **previous** version on a clean sandbox, and create data in the fields that will
    change — in **more than one company** where `PerCompany` code exists.
 2. Publish and install the new version.
@@ -1159,8 +1165,9 @@ An upgrade path is testable and must be tested before release (runbook Step 11):
 > *Sources and attribution:* Part 9's trigger table, upgrade-tag API and pattern, tag naming
 > convention, execution-context guidance, and the "no data changes / no upgrade code" and upgrade
 > definition statements are summarized, with short quotations, from Microsoft Learn —
-> [Upgrading extensions](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-upgrading-extensions)
-> and [Writing extension install code](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-extension-install-code)
+> [Upgrading extensions](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-upgrading-extensions),
+> [Writing extension install code](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-extension-install-code),
+> and [AppSourceCop Error AS0016](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/analyzers/appsourcecop-as0016)
 > — © Microsoft Corporation, licensed under
 > [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
 
@@ -1192,8 +1199,17 @@ having to do traditional code modifications."*
   that rule; you're aborting someone else's transaction.
 - **A subscriber's cost is the publisher's cost.** Anything heavy belongs in a job queue entry, not
   inline in a posting routine.
-- **Verify the event exists in the symbols before subscribing** (Operating Rule 2, Appendix B).
-  A misspelled event name compiles in some AL versions and simply never fires.
+- **Verify the publisher in the symbols before subscribing** (Operating Rule 2, Appendix B) — the
+  event method, its object, and its parameter list. The compiler catches a bad event *name*; what
+  it doesn't catch is a wrong **`ElementName`** — the fourth argument, which Microsoft says *"only
+  requires a value for database trigger events, that is, when the ObjectType is set to table and
+  the EventName argument is a validate trigger event, such as `OnAfterValidateEvent`."* Name the
+  wrong field there and it compiles cleanly and the subscriber silently never runs, so read the
+  field's exact name from the symbol file:
+  `[EventSubscriber(ObjectType::Table, Database::"Purchase Line", 'OnAfterValidateEvent', 'Location Code', false, false)]`.
+- **For a table trigger event the object is `Database::"…"`, never `Table::"…"`.** Microsoft calls
+  this one out explicitly: *"For a table event, specify `ObjectId` by name with
+  `Database::<ObjectName>`, not `Table::<ObjectName>`."*
 
 ### 10.2 Publishing Events from This Extension
 
@@ -1203,7 +1219,7 @@ variation is foreseeable.
 
 | Attribute | Use it for |
 |---|---|
-| `[IntegrationEvent(IncludeSender, GlobalVarAccess)]` | **The default.** Extension points for other apps and PTEs to subscribe to. |
+| `[IntegrationEvent(IncludeSender, GlobalVarAccess)]` | **The default** — `[IntegrationEvent(false, false)]` unless a subscriber genuinely needs the sender. Microsoft: *"Avoid `GlobalVarAccess`. Use event parameters instead, or mark page or table variables as `protected`."* Extension points for other apps and PTEs to subscribe to. |
 | `[BusinessEvent(IncludeSender)]` | A business-level fact that is part of the published contract and won't change shape. **A business event can never be changed or removed** without breaking subscribers — so use it only for a genuine, stable business occurrence. |
 | `[InternalEvent(IncludeSender)]` | A hook for this extension's own code, or for apps listed in `internalsVisibleTo`. Not an extension point for third parties. |
 
@@ -1248,6 +1264,8 @@ the customer needed one is not.
 > signature-only publisher rule, the explicit-raise rule, the trigger-event behavior, and the
 > `internalsVisibleTo` note are summarized, with short quotations, from Microsoft Learn —
 > [Events in Business Central](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-events-in-al),
+> [EventSubscriber attribute](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/attributes/devenv-eventsubscriber-attribute),
+> [IntegrationEvent attribute](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/attributes/devenv-integrationevent-attribute),
 > [JSON files](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-json-files),
 > and [Technical validation checklist](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-checklist-submission)
 > — © Microsoft Corporation, licensed under

@@ -683,6 +683,11 @@ have been run and pass, or it's recorded why they couldn't be.
 - Confirm the latest package is published to a BC sandbox tenant — republish if anything changed.
 - Real users/testers — not the agent, not a simulated pass — run `TestScript.md` end to end: every
   green-team and red-team case, by hand.
+- **If this isn't the first release, test the upgrade path first** (**Standards §9.6**): install the
+  previous version on a clean sandbox with data in the fields this version changes, publish and
+  install this one, verify the migrated data, install it again to confirm the upgrade tag makes the
+  second run a no-op, and check that a fresh install doesn't run upgrade code at all. A failed
+  upgrade path fails this step — by the time anyone notices, the tenant's data is already wrong.
 - Verify permission sets as part of the same pass: read-only grants read everywhere; read/write
   includes it plus write on editable pages.
 - **Translated documents, once the functional pass is green** (if Step 1 asked for them): the
@@ -710,7 +715,8 @@ have been run and pass, or it's recorded why they couldn't be.
 
 **Outputs:** `ChangeLog.md` updated with every test finding and its resolution.
 
-**Exit gate:** All green-team tests pass; all red-team tests fail gracefully; permission sets
+**Exit gate:** All green-team tests pass; all red-team tests fail gracefully; the upgrade path
+passes, or this is the first release (**Standards §9.6**); permission sets
 verified; every translated document Step 1 asked for exists and has been reviewed; every required
 language has passed its language pass and its state scan shows every unit `signed-off` or `final`
 (Ops § Translations).
@@ -831,7 +837,8 @@ for a remote first, since collaborators will see the files as deleted.
   (SaaS/OnPrem PTE) or **AppSourceCop** (AppSource) — never both.
 - `.vscode/settings.json`, and `AppSourceCop.json` for AppSource, are created at Step 3.
 - Outside Copilot Chat, run `scripts/al-analyze.*`. The AL MCP Server's `al_build` never applies
-  analyzers, and its `al_compile` only does so with one exact argument shape — anything else
+  analyzers (observed on AL extension 18.0.2732683; re-verify on a newer release), and its
+  `al_compile` only does so with one exact argument shape — anything else
   returns a clean pass on failing code, and it produces no `.app` (**Ops § Analyzers**).
 - **Read the warnings, not just the result** — `al-analyze` exits `3` on warnings, and any warning
   fails Rule 5. No suppressions, and no ruleset.

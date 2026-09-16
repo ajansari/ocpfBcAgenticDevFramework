@@ -43,6 +43,8 @@ Derived from full framework **v3.3.0.0**; Standards Guide **v1.9.0.0**; Operatio
   triggers, upgrade tags, and the two-version obsolete cycle (**Standards Part 9**) — and the event
   inventory, published and subscribed (**Standards Part 10**). "No upgrade code needed" is written
   down with its reason rather than left silent.
+- **Step 7 tests the upgrade path** before the human tests anything else, whenever this isn't the
+  first release (**Standards §9.6**) — and a failed upgrade path fails the step.
 - **Step 6 runs the AL tests.** If the project has test codeunits, the agent runs them with
   `al_run_tests` against the sandbox, one codeunit per call (**Ops § Automated Tests**), never
   against production. A failing test fails the step; an unconnected server is said plainly instead
