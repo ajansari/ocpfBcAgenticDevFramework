@@ -1,7 +1,7 @@
 name: Plugin check
 
 # Keeps the ocpf-bc agent plugin consistent with the framework documents it bundles.
-# Fails when a runbook, changelog, or the Standards Guide changed without re-running
+# Fails when a runbook, changelog, the Standards Guide, or the Operations Guide changed without re-running
 # agentPlugin/tools/syncPlugin.sh, or when the plugin or marketplace manifest is invalid.
 
 on:

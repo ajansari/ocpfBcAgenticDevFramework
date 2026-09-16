@@ -186,7 +186,7 @@ design work.
   `.gitignore`** — see ALL ALONG → OCPF AL Development Standards Guide. The gap check below leans on
   Standards Part 6, and this step's notification and intake procedures are Ops §, so neither can
   wait for Step 3 the way the other fetched libraries do. Tell the human you're doing it.
-- **Ask how to be notified right after that** (Ops § Notifications — read it now): Claude app, sound,
+- **Ask how to be notified, right after the working language** (Ops § Notifications — read it now): Claude app, sound,
   desktop notification, any combination, or none. Record it in `.ocpf/notifications.json` and
   apply it, so every later question reaches the human even when they've stepped away.
 - **Capture any raw requirements input verbatim, before interpreting it.** If the human pastes raw

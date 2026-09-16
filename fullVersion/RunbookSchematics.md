@@ -129,7 +129,7 @@ flowchart TD
 
     subgraph PRE01["PRE-01 — State the Problem"]
         direction LR
-        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Ask working language; ask how<br/>to be notified (recorded in<br/>.ocpf/notifications.json);<br/>fetch both companion guides<br/>(Standards + Ops) + gitignore;<br/>ask who approves (one person<br/>or separate roles); capture raw<br/>requirements verbatim into<br/>requirements/;<br/>create ProjectProgress.md<br/>(project root); write problem<br/>statement, capture vocabulary,<br/>initial entity list, flag<br/>ambiguities"] --> Out1[/"Output:<br/>standardsGuide/ + opsGuide/<br/>(gitignored),<br/>requirements/ (if any),<br/>ProjectProgress.md (root),<br/>ProblemStatement.md"/]
+        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Ask working language; fetch both<br/>companion guides (Standards + Ops)<br/>+ gitignore; ask how to be notified<br/>(recorded in .ocpf/notifications.json);<br/>ask who approves (one person<br/>or separate roles); capture raw<br/>requirements verbatim into<br/>requirements/;<br/>create ProjectProgress.md<br/>(project root); write problem<br/>statement, capture vocabulary,<br/>initial entity list, flag<br/>ambiguities"] --> Out1[/"Output:<br/>standardsGuide/ + opsGuide/<br/>(gitignored),<br/>requirements/ (if any),<br/>ProjectProgress.md (root),<br/>ProblemStatement.md"/]
     end
     PRE01 --> Gate1{{"Exit gate:<br/>Both companion guides<br/>present and gitignored; notification<br/>choice recorded, applied,<br/>tested; Functional Consultant<br/>signs off (one approver:<br/>moves to PRE-02)"}}
 

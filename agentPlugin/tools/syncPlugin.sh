@@ -1,11 +1,10 @@
 #!/usr/bin/env bash
 # Copies the framework's canonical documents into the ocpf-bc plugin's bundled references.
 #
-# The runbooks, Standards Guide, and Operations Guide at the repository root are the single source
-# of truth. The
-# plugin carries copies only as an offline fallback: the start skill fetches the latest from
-# GitHub first. Run this before every push that changes a runbook, a changelog, or the
-# Standards Guide.
+# The runbooks, the Standards Guide, and the Operations Guide at the repository root are the single
+# source of truth. The plugin carries copies only as an offline fallback: the start skill fetches
+# the latest from GitHub first. Run this before every push that changes a runbook, a changelog, the
+# Standards Guide, or the Operations Guide.
 #
 #   agentPlugin/tools/syncPlugin.sh           copy the canonical files into the plugin
 #   agentPlugin/tools/syncPlugin.sh --check   report drift and exit 1 if any copy is stale (CI)
