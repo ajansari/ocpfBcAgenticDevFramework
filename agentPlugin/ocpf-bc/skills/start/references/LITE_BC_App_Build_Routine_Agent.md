@@ -749,7 +749,7 @@ bump. The non-negotiables:
 
 Two companions are fetched at Step 1 and kept for the life of the project: the **Standards Guide**
 (`standardsGuide/ocpfALDevStandardsGuide.md`, v1.8.0.0), cited as **Standards §**, and the
-**Operations Guide** (`opsGuide/ocpfOperationsGuide.md`, v1.0.0.0), cited as **Ops §** and shared
+**Operations Guide** (`opsGuide/ocpfOperationsGuide.md`, v1.1.0.0), cited as **Ops §** and shared
 unchanged with the full framework.
 
 **Full procedure: Ops § Fetched Companions** — fetching, refreshing, the plugin's offline copies,

@@ -613,11 +613,11 @@ Spec stale) in `GapAnalysis.md`.
 
 Classify every gap as **Intentional** (record the reasoning), **Oversight** (fix now or schedule), or **Spec stale** (the code is right, so the FRD/TDD needs updating). **Record every classification in `GapAnalysis.md` and edit no design document here** — Step 10 rewrites the TDD as `PostDevTDD.md` and re-baselines the FRD once, from this file, so the same edit isn't made twice.
 
-**If a gap is classified Oversight and needs a code fix, apply the same Step 07 cycle before closing this step** — present every Oversight fix from this step for one approval, the way Step 07 presents a test round's diagnoses, then fix the root cause, compile and package again, redeploy to the sandbox, retest. A documentation-only correction (Spec stale, or Intentional-with-a-doc-update) does not require a new package; a code change does, every time, no matter how small — packaging is still the default rhythm here, not something reserved for a later step (Operating Rule 4).
+**If a gap is classified Oversight and needs a code fix, apply the same Step 07 cycle before closing this step** — present every Oversight fix from this step for one approval, the way Step 07 presents a test round's diagnoses, then fix the root cause, compile and package again, redeploy to the sandbox, retest. A Spec-stale gap, or an Intentional one needing only a document update, is recorded here and needs no new package — the document edit happens at Step 10; a code change does, every time, no matter how small — packaging is still the default rhythm here, not something reserved for a later step (Operating Rule 4).
 
 **Outputs:** `GapAnalysis.md` — every gap, its classification, its resolution. Gap-fill work items — built with the same discipline as main batches, drawing on the growth IDs each module block reserved (Standards §5.2): pre-flighted per Step 05, then compiled, packaged, and troubleshot per Step 07's pattern, as their own pass — the Step 07 compile-and-package that closed BUILD already ran and doesn't cover code that didn't exist yet (Operating Rule 4). Ad hoc gap-fill requested mid-project, outside a formal Step 08, follows the same pattern.
 
-**Exit gate:** Every gap classified and resolved or scheduled; every code-touching resolution recompiled, repackaged, and retested; no unexplained divergence from FRD/TDD.
+**Exit gate:** Every gap classified and resolved or scheduled — a Spec-stale gap is resolved *by being recorded* in `GapAnalysis.md`, and Step 10 applies it; every code-touching resolution recompiled, repackaged, and retested; no unexplained divergence from FRD/TDD.
 
 ## 09 — Code Review
 
@@ -661,7 +661,7 @@ every fix and normalizes whatever drift the findings call out.
 **Inputs:** `TDD.md`, `FRD.md`, ChangeLog, `GapAnalysis.md`, `CodeReview.md`.
 
 **Actions:**
-- **Apply every *Spec stale* classification `GapAnalysis.md` recorded at Step 08** — this is where
+- **Apply every *Spec stale* classification that `GapAnalysis.md` recorded at Step 08** — this is where
   those document edits happen, once, rather than twice.
 - Produce a new **as-built TDD version** (`PostDevTDD.md`) reflecting the architecture as actually implemented: final system identity, final object inventory with all properties, every naming convention and abbreviation as applied, all special cases and exceptions, and a deviation summary that references the ChangeLog.
 - Produce a new **FRD baseline** for future development: fold in every implementation decision that diverged from the original FRD — even where the implementation is better — so the next planning session starts from truth, not a stale spec.
@@ -821,8 +821,9 @@ what the human said.
   Step 07 — including Step 07's own first move: **check `patterns/` (ALL ALONG → OCPF BC AL
   Patterns Library) for an already-documented match before diagnosing from scratch.** The **main
   role** applies the fix once the diagnosis is confirmed, and separately owns
-  the triage act itself — recording the implement/schedule/reject decision in `TestingFeedback.md`
-  and cross-referencing the ChangeLog/Roadmap entry it produced. Don't skip straight to a patch on
+  the triage act itself — recording the implement/schedule/reject decision in `TestingFeedback.md`.
+  The ChangeLog Issue or Roadmap item names this entry (above); the feedback entry carries no
+  back-link. Don't skip straight to a patch on
   a guess — this is exactly where a wrong first diagnosis is cheapest to catch, and a wrong one
   should stay in the log marked superseded, not be quietly deleted, the same as any other
   ChangeLog correction.
@@ -838,15 +839,14 @@ agent that opens this repo.
 - **Keep it short — an anchor, not a narrative.** Where each live document lives, any decision
   awaiting sign-off, and a one-line pointer per past milestone. **It doesn't carry the current
   step:** `ProjectProgress.md` owns that, and this file points at it, so there's no second copy to
-  keep in sync. The full
-  story of *why* a decision was made belongs in `ChangeLog.md`; `ProjectMemory.md` just says
-  *where to look*. If it starts reading like a second ChangeLog, trim it.
+  keep in sync. The full story of *why* a decision was made belongs in `ChangeLog.md`;
+  `ProjectMemory.md` just says *where to look*. If it starts reading like a second ChangeLog, trim it.
 - **Every row in "Open decisions" names who it's awaiting** — `(awaiting: <name>)`. This is not
   redundant with `git blame`: blame tells you who last edited the line, not who the project is
   actually waiting on for a forward-looking decision. With a single contributor every row will
   say the same name — write it anyway, so the convention is already in place the day a second
   person joins.
-- Update it at the close of every step or batch — the same moment the ChangeLog gets its entry.
+- Update it at the close of every step or batch — the same moment the ChangeLog gets its entry — whenever a document moves, a decision opens or closes, or a milestone lands.
 - If the executing agent *also* has its own persistent cross-session memory capability, that
   memory may point at `docs/ProjectMemory.md` (e.g. "always read this file first") but must not
   duplicate its content. A fact that lives only in an agent's private memory and nowhere in
@@ -1022,7 +1022,7 @@ change.
 
 The companion rules document — `ocpfALDevStandardsGuide.md`, v1.8.0.0 — holds the AL rules this
 runbook cites as **Standards §**, from PRE-02 onward. Its sibling, the **Operations Guide**
-(`ocpfOperationsGuide.md`, v1.0.0.0), holds the procedures, cited as **Ops §**.
+(`ocpfOperationsGuide.md`, v1.1.0.0), holds the procedures, cited as **Ops §**.
 
 **Fetch both at PRE-01, before anything else needs them** — `standardsGuide/` and `opsGuide/` in
 this project's root, both always gitignored. **Full procedure: Ops § Fetched Companions**, which

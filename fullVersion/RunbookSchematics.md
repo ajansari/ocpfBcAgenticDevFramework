@@ -374,7 +374,7 @@ flowchart LR
         Doc["Document<br/>keep every required doc<br/>current, not retroactively"]
         Change["Track Changes — ChangeLog<br/>every FRD/TDD deviation logged<br/>before the next batch"]
         Retain["Retain Explanations<br/>who decided, and why —<br/>not just the outcome"]
-        Test["Testing Feedback Log<br/>verbatim findings, triaged<br/>explicitly, cross-referenced"]
+        Test["Testing Feedback Log<br/>verbatim findings, triaged<br/>explicitly, linked one way from<br/>the ChangeLog/Roadmap"]
         Mem["Project Memory<br/>docs/ProjectMemory.md —<br/>anchor, not a narrative"]
         Prog["Project Progress Tracker<br/>ProjectProgress.md (project root) —<br/>one status table, created at PRE-01"]
         Pack["Packaging & Versioning<br/>never delete a package;<br/>propose bumps, don't apply silently"]

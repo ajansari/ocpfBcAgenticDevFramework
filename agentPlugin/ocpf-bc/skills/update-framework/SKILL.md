@@ -26,7 +26,7 @@ Repository: `https://github.com/ajansari/ocpfBcAgenticDevFramework` (default bra
 
 ## Step 2: Find the latest version
 
-1. **Fetch the latest runbook** for the project's edition:
+1. **Fetch the version line of the latest runbook** for the project's edition:
    - Full: `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/fullVersion/BC_App_Build_Routine_Agent.md`
    - Lite: `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/liteVersion/LITE_BC_App_Build_Routine_Agent.md`
 

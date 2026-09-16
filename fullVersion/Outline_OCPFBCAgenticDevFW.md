@@ -47,7 +47,7 @@ documentation, and a human-run release test on top.*
 
 | Step | Role |
 |---|---|
-| **08** — Gap-Fit Test, Fidelity Validation | Reasoning Sub-Agent compares → Main Agent applies |
+| **08** — Gap-Fit Test, Fidelity Validation | Reasoning Sub-Agent compares → Main Agent records the classification (Step 10 applies it) |
 | **09** — Code Review | Reasoning Sub-Agent reviews → Main Agent applies |
 | **10** — Update Design Documents | Main Agent |
 | **11** — Document the Code | Main Agent |

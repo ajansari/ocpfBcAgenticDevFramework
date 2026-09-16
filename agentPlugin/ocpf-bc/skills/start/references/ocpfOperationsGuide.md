@@ -1112,7 +1112,8 @@ section entirely. The `.ocpf/` folder follows the intake answer about framework 
    - **Newer, and not the skipped version:** say so in a sentence or two and offer **Update now /
      Not now / Skip this version**. **Raise it at a step boundary, not mid-step** — an update that
      lands between two Actions of one step is the one most likely to change the rules under work
-     already half-done. "Update now" follows the plugin's `update-framework` skill:
+     already half-done. When a session resumes mid-step, hold the offer until that step's exit gate
+     is met rather than dropping it. "Update now" follows the plugin's `update-framework` skill:
      summarize the changelog entries in between, flagging any that touch a completed step; back up
      each current copy to `.ocpf/previous/`; replace every copy in `placedAs`, the project's runbook
      changelog, and the fetched companions the new version expects; update the marker; record it in
