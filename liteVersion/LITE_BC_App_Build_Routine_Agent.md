@@ -15,28 +15,19 @@
 > discipline — half the steps, one model doing all the work, and no ceremony that a
 > 10-files-or-fewer project doesn't need.
 
-> **Companion document:** `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development
-> Standards Guide** (v1.7.0.0), shared unchanged with the full framework. Lite is *not* a reduced
-> set of AL rules: the same AL rules apply to a 5-file extension as to a 50-file one. What Lite
-> reduces is *process*. So this runbook names each rule in one line where a checklist applies it and
-> cites the guide as **Standards §**; the rule's rationale, limits, tool behavior, and reference
-> links live only in the guide — the abbreviation tables, the complete anti-pattern list, the
-> field-exclusion rules, the endpoint patterns. Fetch it at Step 1 (see
-> ALL ALONG → OCPF AL Development Standards Guide) and keep it open for the life of the project.
-
-> **When to use Lite:** a Business Central AL Per-Tenant Extension with **10 or fewer AL files**
-> — typically a handful of API pages over standard tables, maybe one or two new tables, a single
-> developer or functional consultant driving it, one AI model doing the work. **Graduate to the
-> full framework** the moment any of these stops being true: the object count grows past ~10, the
-> project needs multiple sign-off roles (Dev Manager, Technical Lead, Functional Consultant as
-> separate people), you want to split work across more than one AI model, or the extension is
-> heading to AppSource (which tends to demand the fuller documentation trail). Nothing is lost by
-> switching later — Lite's Design Doc and ChangeLog map directly onto the full framework's TDD and
-> ChangeLog.
-
-> **What this is:** a single, ordered routine an AI agent follows to build a small BC AL PTE from
-> a business problem through to a tested, documented app ready for release — in **7 steps**
-> instead of the full framework's 14.
+> **Companion documents, both fetched at Step 1 and shared unchanged with the full framework:**
+> - `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
+>   (v1.7.0.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
+>   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
+> - `opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v1.0.0.0), cited as
+>   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
+>   analyzers, symbols, editor sync, notifications, packaging, repository hygiene, translations,
+>   fetched companions, and the plugin.
+>
+> **Read an Ops § section at the step that names it**, in that step's Actions or its exit gate —
+> not the whole guide at once, and never from memory of a section you haven't opened here. This
+> runbook states each rule in short form where you need it and cites the guides for the full
+> version.
 >
 > **How the agent uses it:** work the phases in order (DEFINE → DESIGN → BUILD → PROVE). Don't
 > start a step until its predecessor's exit gate is met. The *Project Parameters* block in Step 1
@@ -126,16 +117,8 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
        knows: names, publisher, prefix, namespace, localization, ID ranges, versions. Ask them
        through the options mechanism, never as open-ended questions or a numbered list in chat;
        the mechanism's free-text entry (Claude Code: *Other*) carries a typed answer. Step 1 says
-       what to offer. **The mechanism, per harness:**
-       - **Claude Code — `AskUserQuestion`:** up to four questions per box, 2–4 options each, a
-         free-text *Other* added automatically; multi-select where several answers apply.
-       - **GitHub Copilot Chat in VS Code — the `askQuestions` tool:** several questions in one
-         carousel, each single-select, multi-select, or free text.
-       - **GitHub Copilot CLI — the `ask_user` tool:** a choice question there takes no typed
-         answer, so add an explicit *I'll type it* choice and follow it with a free-text question.
-       - **Anything else:** its closest equivalent, one question at a time if that's all it takes.
-         Only when a harness has no question mechanism at all, ask one question per message with
-         its options labelled, and say why.
+       what to offer. **Which mechanism each harness offers, and the option-count limits, are
+       Ops § Asking and Approvals.**
    6b. **Don't install tooling without asking — and look harder first.** Before concluding a
        required compiler/runtime is missing, check whether the human's own IDE already provisions
        one privately (e.g., VS Code's AL extension gets its .NET runtime from a companion
@@ -152,28 +135,16 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
        see Step 7's own hand-off note, which replaces this generic check-in for that one
        transition. Don't do both.
    6d. **Zero-install first — never turn setup into the human's job.** Before proposing any
-       install or any manual setup step (editing `PATH`, a shell profile, or an environment
-       variable), stop at the first option that works:
-       1. **What the editor already provides.** The **AL Language extension** gives GitHub Copilot
-          Chat in VS Code its AL tools built in (`al_build`, `al_publish`, `al_downloadsymbols`,
-          `al_symbolsearch`, `al_getdiagnostics`, …). For Claude Code or Copilot CLI, its bundled
-          AL MCP Server runs on the .NET runtime VS Code already provisioned (ALL ALONG → AL MCP
-          Server).
-       2. **What's already installed.**
-       3. **Only then, an install,** asked for under Rule 6b.
+       install, or any manual setup (editing `PATH`, a shell profile, or an environment variable),
+       work through the ladder in **Ops § Asking and Approvals**: what the editor already provides,
+       then what's already installed, then — only then — an install asked for under Rule 6b.
 
-       Never ask the human to edit `PATH`, a shell profile, or environment variables; put paths in
-       the configuration or launcher you create. Test: would a functional consultant with only VS
-       Code and the AL extension have to do anything by hand? If yes, look again.
-
-       **Never hand the human a setup task the agent can do**.
-       Connecting the AL tools, downloading symbols, and keeping the editor's view current are
-       the agent's job (ALL ALONG → AL MCP Server, Symbols, Keeping the Editor in Sync). The
-       human only approves the AI tool's permission prompts, and signs in when a tool reaches a
-       live Business Central environment. Ask for more only when something is actually broken,
-       and then name a command you've confirmed exists. **Never send the human to the Command
-       Palette to set up the AL MCP Server:** the AL Language extension has no such command. Never
-       route AL tooling through a third-party VS Code extension.
+       **Never hand the human a setup task the agent can do.** Connecting the AL tools, downloading
+       symbols, keeping the editor's view current, and setting up notifications are the agent's job;
+       the human approves the AI tool's prompts and signs in when a tool reaches a live Business
+       Central environment. **Never send the human to the Command Palette to set up the AL MCP
+       Server** — the AL Language extension has no such command — and never route AL tooling through
+       a third-party VS Code extension.
 7. **Log every deviation immediately.** Any departure from the Design Doc — human or agent — goes
    in `ChangeLog.md` before the next batch starts.
 8. **Work in the human's chosen working language.** The first question of Step 1 asks which
@@ -199,15 +170,16 @@ design work.
   through the options mechanism, with English listed first and free text for any other language.
   It's asked alone, so every later box can be in the language chosen. Continue in the language
   chosen.
-- **Ask how to be notified right after that** (ALL ALONG → Notifications): Claude app, sound,
+- **Ask how to be notified right after that** (Ops § Notifications — read it now): Claude app, sound,
   desktop notification, any combination, or none. Record it in `.ocpf/notifications.json` and
   apply it, so every later question reaches the human even when they've stepped away.
-- **Fetch the OCPF AL Development Standards Guide first, before anything else needs it.** Get
-  `standardsGuide/ocpfALDevStandardsGuide.md` from
-  `https://github.com/ajansari/ocpfBcAgenticDevFramework/` into a `standardsGuide/` folder in this
-  project's root, and **add `standardsGuide/` to `.gitignore`** — see ALL ALONG → OCPF AL
-  Development Standards Guide. The gap check below already leans on Standards Part 6, so this
-  can't wait for Step 3 the way the other fetched libraries do. Tell the human you're doing it.
+- **Fetch both companion guides first, before anything else needs them.** Get
+  `standardsGuide/ocpfALDevStandardsGuide.md` into `standardsGuide/` and
+  `opsGuide/ocpfOperationsGuide.md` into `opsGuide/`, from
+  `https://github.com/ajansari/ocpfBcAgenticDevFramework/`, and **add both folders to
+  `.gitignore`** — see ALL ALONG → OCPF AL Development Standards Guide. The gap check below leans on
+  Standards Part 6, and this step's notification and intake procedures are Ops §, so neither can
+  wait for Step 3 the way the other fetched libraries do. Tell the human you're doing it.
 - **Capture any raw requirements input verbatim, before interpreting it.** If the human pastes raw
   requirements in chat, or uploads a file, save it untouched in a `requirements/` folder (a
   descriptive filename, or the file's own name for an upload) before doing anything else with it.
@@ -233,54 +205,19 @@ design work.
   defaults for the rest of the routine, and every later step reads them from that file rather than
   from conversation history.
 
-**Ask first, don't infer — and ask interactively** (Rule 6a). Every question in this step goes
-through the options mechanism Rule 6a names for this harness, never as an open-ended question or a
-numbered list in chat. **Use as few boxes as the questions allow:** up to four questions per box,
-sharing a box only when none depends on another's answer. Where the harness asks one question at a
-time, ask the same questions in the same order.
+**Ask first, don't infer — and ask interactively** (Rule 6a). **How to ask — the boxes, what to
+offer for each question, and the language questions — is Ops § Intake. Read it before the first
+box.** In short: every question goes through the options mechanism, grouped into as few boxes as the
+questions allow (identity, naming, permission sets and IDs, onboarding, setup and languages, then
+the translation questions); countries are asked once; a suggestion is a candidate the human picks,
+never an answer recorded for them; and the whole sheet is confirmed once at the end. Lite skips the
+full framework's model-split question.
 
-**Before the first box,** read `ProblemStatement.md` for suggestions, and read Microsoft's live
-[Country/Regional Availability and Supported Languages](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-countries-and-translations)
-page — never from memory — so every country and language offered is one BC supports. If it can't
-be reached, say so and ask the human.
+**The Permission Set App Code question exists because** permission sets named from the prefix alone
+(`OCPF - READ`) collided across every extension with that prefix (**Standards §5.4**).
 
-**Option counts:** 2–4 options per question. With one suggestion, pair it with *I'll type it*;
-with more than four candidates, offer the four most likely and say others can be typed.
-
-A suggestion is a candidate the human picks, never an answer recorded for them: nothing goes into
-`ProjectParameters.md` until the human selects or types it. Never build one from an email domain
-or a guess at house style. A wrong guess here means renaming the whole project later.
-
-| Box | Questions | Options to offer (free-text entry always available) |
-|---|---|---|
-| **1 — Identity** | 1. Extension Name? | Up to three names built from the problem statement's wording, labelled as suggestions. |
-| | 2. Publisher? | Only names the human already wrote or uploaded, quoted verbatim with their source. If none: *I'll type it* / *Decide after the other questions* (then ask it alone before Box 2). |
-| | 3. Deployment Target? | *SaaS PTE* / *OnPrem PTE* / *AppSource*, best fit first. |
-| | 4. Which countries will users work in? *(multi-select)* | The countries the problem statement names that BC is available in. Countries are asked only here. |
-| **2 — Naming** *(built from Box 1)* | 5. AL object prefix? | Two or three short lowercase prefixes built from the name and publisher. |
-| | 6. Which namespace? | `<Publisher>.<ExtensionShort>` *(recommended)* / one alternative / *No namespace*. Records both Use Namespace and Namespace. |
-| | 7. Localization? | Up to three of the Box 1 countries as codes (e.g. `US`), then `W1`. |
-| | 8. BC version? | The current Business Central online major version *(recommended)* and the one before it, looked up on Microsoft Learn, never from memory; a sandbox the human already has is the natural choice. Don't ask for `runtime`: read it from Microsoft Learn's [Choose runtime version in AL](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-choosing-runtime) table. |
-| **3 — Permission sets & IDs** *(built from Box 2)* | 9. Permission Set App Code? | Two or three uppercase codes from the name that fit `13 − (prefix length)` characters (e.g. `NAICS`); must differ from every other extension using this prefix (**Standards §5.4**). |
-| | 10. Do other extensions already use this prefix? | *No, this is the first* / *Yes — I'll type their App Codes or permission set names*. On a match, ask 9 again, alone. |
-| | 11. Object ID range? | Complete ranges with their size: one from the human's material (e.g. *80300–80339 — 40 IDs*); *50100–50149 — 50 IDs* ("the AL template's default: only if no range has been assigned to you"); or type `start–end`. |
-| | 12. Another Object ID range? | *No* / *Yes*. Each *Yes* opens a box with 11 and 12 again. |
-| **4 — Onboarding** | 13–15. Assisted Setup Wizard? Role Center Activity Cues? Departments / "My Business Central" placement? | *No* / *Yes* each; a *Yes* gets its specifics in one follow-up box. |
-| | 16. Permission Sets required? *(only if the entity list has no new table)* | *No — the extension adds no tables* / *Yes*. Not asked once the extension owns a table: then it's `Yes`. |
-| **5 — Setup & languages** | 17. Leave this framework's own files out of the project's repository? | *Yes (recommended)* / *No, track them*, with the one-sentence `.gitignore` explanation from the table below. |
-| | 18. Source language? | *`en-US` (recommended)*, with **Standards §8.1**'s reason in one sentence, or another language typed in. |
-| | 19. Languages for each Box 1 country *(multi-select, one question per country; more countries spill into the next box)* | Only the languages BC supports in that country, as ID and culture code (*"French (Canada) — FRC → `fr-CA`"*). |
-| **6 onward — Translation** | First, in one box: source wording (only when `en-US` is the sole target), customer-language documents, translatable data — source wording decides whether the rest is asked. Then, unless the answer was *US wording, no translation files*: per language, required at first release and who reviews it; then the two document questions. | As the table below describes; two questions per language, up to four per box. |
-| **Last — Confirm** | 20. Is this sheet right? | Show the complete sheet first, with every ID range's size and the derived permission set names. *Confirm the sheet* / *Change something* (ask only what changes). |
-
-The first ID range is the Primary allocation; any after it are Additional.
-
-**Question 9 exists because permission sets named from the prefix alone** (`OCPF - READ`) collided
-across every extension with that prefix (**Standards §5.4**).
-
-**Tell the human where their built packages will land:** always `outputAppPackage/` in the
-project root — never `out/`, `output/`, or anything ad hoc (see ALL ALONG → Packaging &
-Versioning). Mention this once, plainly, now.
+**Tell the human where their built packages will land:** always `outputAppPackage/` in the project
+root (ALL ALONG → Packaging & Versioning). Mention it once, plainly, now.
 
 ### Project Parameters
 
@@ -329,19 +266,13 @@ EntitySetName`. Use modern BC names, not legacy ones (e.g. table "Job" → `Enti
 > keeps no copy of these parameters, so the two can never drift apart — everything it says about
 > names, IDs, prefixes, and versions means "whatever is filled in here."
 
-**Once the human confirms the sheet, set up the AL project before DESIGN** — the agent's job,
-never the human's (Rule 6d). Step 2 verifies against symbols, so they must be on disk now, and
-nothing here needs the human beyond the AI tool's own approval prompts.
-1. **Write `app.json` once, complete,** from the sheet: name, publisher, version, every ID range,
-   `platform`, `application`, `runtime`, and the `features` Step 3 lists. If one already exists
-   (for example from **AL: Go!**), keep its `id` GUID and replace the rest.
+**Once the human confirms the sheet, set up the AL project before DESIGN** — the agent's job, never
+the human's (Rule 6d). **Full procedure: Ops § Project Setup.**
+1. **Write `app.json` once, complete,** from the sheet, keeping an existing `id` GUID.
 2. **Connect the AL tools** if this session doesn't have them (ALL ALONG → AL MCP Server).
-3. **Download symbols** (ALL ALONG → Symbols). Confirm `.alpackages/` holds Base Application and
-   System Application for the target version, and record the Symbol Source. Add `.alpackages/` to
-   `.gitignore` now (ALL ALONG → Repository Hygiene).
-4. **Keep the editor in sync** (ALL ALONG → Keeping the Editor in Sync). If `app.json` existed
-   before you changed it, VS Code's AL extension still has the old ranges. Refresh it now, before
-   any `.al` file exists.
+3. **Download symbols**, record the Symbol Source, and gitignore `.alpackages/` (ALL ALONG →
+   Symbols).
+4. **Keep the editor in sync** (ALL ALONG → Keeping the Editor in Sync).
 
 **Outputs:** `standardsGuide/` (fetched, gitignored), `requirements/` (if any raw input was
 captured), `ProblemStatement.md` (purpose, scope, out-of-scope, entity list, open questions),
@@ -349,8 +280,8 @@ captured), `ProblemStatement.md` (purpose, scope, out-of-scope, entity list, ope
 replaced), `.gitignore` populated per the table above, `app.json`, and `.alpackages/`.
 
 **Exit gate:** Every question was asked through the options mechanism. `app.json` matches the
-sheet, and the target version's symbols are in `.alpackages/`. The Standards Guide is present in
-`standardsGuide/` and gitignored. The notification choice is recorded in
+sheet, and the target version's symbols are in `.alpackages/`. Both companion guides are present, in `standardsGuide/` and
+`opsGuide/`, and gitignored. The notification choice is recorded in
 `.ocpf/notifications.json`, applied, and tested. `ProjectParameters.md` exists in the project root with no placeholder remaining. Deployment Target
 is one allowed value. Namespace is consistent or correctly N/A. If
 Permission Sets required = `Yes`, ≥ 2 IDs are reserved. Onboarding questions are each answered.
@@ -511,7 +442,7 @@ fix in a loop until clean.
 **Outputs:** Batch plan, project scaffold, the pre-flight checklist.
 
 **Exit gate:** Batch plan approved (and, with two batches, the run-through choice recorded);
-scaffold structurally complete, analyzer settings and (for AppSource) `AppSourceCop.json` in place
+scaffold structurally complete, analyzer settings and (for AppSource) `AppSourceCop.json` in place per Ops § Analyzers
 (not compiled — Operating Rule 4); pre-flight checklist ready.
 
 ## STEP 4 — Generate the Code
@@ -583,26 +514,12 @@ compiles clean to clear them.
 5. **Compile and package again**, redeploy, retest. Repeat until 0 errors / 0 warnings and the
    human confirms sandbox testing is clean.
 
-**Translations run inside this cycle** (skip if *US wording, no translation files*). Every build
-that produces a new `.g.xlf`:
-1. **Full build only** — Incremental Build off, no RAD publish (**Standards §8.2**).
-2. **Sync** every target file from `.g.xlf`.
-3. **Verify any new BC term** per **Appendix D** (`al_searchtranslations` first where the AL MCP
-   Server is connected) and update the glossary. Terms already in the glossary aren't looked up
-   again.
-4. **Run the problem checks** and fix findings at their root. Missing translations aren't a
-   finding yet.
-
-**Once the source text is stable** — the first build the human confirms clean on the sandbox,
-again before this step closes, and again after any later fix that changes source text — draft and
-test each language. Drafting earlier only means redrafting whatever a caption change sends back to
-`needs-adaptation`.
-1. **Draft** every `needs-translation` / `needs-adaptation` unit and set it to
-   `needs-review-translation`. The agent never sets `signed-off` (**§8.7**).
-2. **Run every technical translation check**, missing translations included, and fix findings at
-   their root.
-3. **Package and test in each language** — switch **My Settings → Language** (and **Region**) and
-   look for untranslated text, truncation, and wrong regional terms.
+**Translations run inside this cycle** (skip if *US wording, no translation files*). **The cycle is
+Ops § Translations — read it at the first full build.** In short: every build syncs the target
+files, verifies any new BC term, and runs the problem checks; drafting, the full checks, and
+per-language testing wait until the source text is stable — the first build the human confirms clean
+on the sandbox, again before this step closes, and again after any later fix that changes source
+text.
 
 **API test checklist** (used here, and again at Step 7 — endpoint URL shapes are in **Standards
 Appendix A**):
@@ -621,7 +538,7 @@ a manual alternative.
 published and manually tested on a sandbox; `ChangeLog.md` current; `DesignDoc.md` updated for
 every rule change.
 
-**Exit gate:** Full extension compiles clean; human confirms sandbox testing is clean; no known
+**Exit gate:** Full extension compiles clean, with the analyzers and nothing suppressed (Ops § Analyzers); human confirms sandbox testing is clean; no known
 systemic issue outstanding; no unit in a language required at first release is
 `needs-translation` or `needs-adaptation`, and translation checks are clean.
 
@@ -775,6 +692,9 @@ warning if anything was removed, shrunk, retyped, or re-keyed since the last pro
 
 Run these throughout, not as a final step.
 
+**Each section below carries its non-negotiables and points at the Operations Guide for the
+procedure.** Read the named **Ops §** section at the step that needs it.
+
 ## ChangeLog.md — the single running log
 
 Lite merges what the full framework splits across a ChangeLog, a Testing Feedback Log, and a
@@ -800,457 +720,155 @@ references its `ChangeLog.md` entries.
 
 ## Packaging & Versioning
 
-Packaging first happens at Step 5's mandatory compile-and-package, and recurs every time the
-extension changes from there through Step 7 — every fix gets a fresh package before redeploying
-to the sandbox for the next test round.
+**Full procedure: Ops § Packaging.** Read it at Step 5's first package and before Step 7's release
+bump. The non-negotiables:
 
-**Naming and location — fixed:** every package is named
-`<ExtensionName, spaces → underscores>_<version>.app`, read from `app.json` at build time, never
-hand-typed. Written to `outputAppPackage/` in the project root — always this name, never `out/` or
-`output/`. Mention the folder once at Step 1, and state the full path again every time a build
-completes (e.g. "Package built: `outputAppPackage/IP_Tracking_1.0.0.0.app`.").
-
-**`outputAppPackage/*.app` is git-tracked, never gitignored.** Track every built `.app` like any
-other deliverable. Downloaded symbols in `.alpackages/` are the exception: always gitignored (ALL
-ALONG → Repository Hygiene). Never add a blanket `*.app` entry, which would hide built packages too.
-
-**Never delete or overwrite a package from a different version.** A repackage at a new version
-writes a new file next to the old ones — it never replaces or "cleans up" anything already there,
-even something that looks superseded. Consecutive builds *at the same version*, during the Step
-5–7 cycle, legitimately overwrite each other — that's expected, not the destructive case. What
-must stay permanently identifiable is the specific package that passes Step 7: bump its Build
-segment or copy it to an immutable filename before it ships.
-
-**Version bumps require a proposal and approval — never a silent `app.json` edit.** Propose a
-specific bump with reasoning: **Major** (breaking/structural — rare pre-release), **Minor** (new
-features/objects, backward-compatible — the common case), **Build** (repackage, no new
-functionality), **Revision** (a small hotfix, no new features).
-
-**Flag Schema Sync Mode on every completed build.** Uploading a `.app` through Extension
-Management offers **Add** (default — refuses an incompatible schema change, no data loss) or
-**Force Sync** (overwrites even a destructive change — table/field removals, a changed key,
-incompatible retyping — can lose data). Say plainly which mode a given build needs; never let a
-schema-breaking change go out without this warning.
+- **Fixed name and location:** `<ExtensionName, spaces → underscores>_<version>.app` in
+  **`outputAppPackage/`**, read from `app.json` at build time. Say the exact path every time a build
+  completes.
+- **Built packages are tracked, never gitignored** — no blanket `*.app` entry.
+- **Never delete or overwrite a package from a different version.** Repeated builds at the same
+  in-progress version legitimately overwrite that file; the protection is across versions.
+- **The package that passes Step 7 ships** — bump its Build segment or copy it to an immutable name,
+  and say which one passed.
+- **Version bumps are proposed and approved**, never a silent `app.json` edit.
+- **Flag Schema Sync Mode on every completed build:** **Add** for additive-only, **Force Sync** with
+  a data-loss warning otherwise.
 
 ## OCPF AL Development Standards Guide
 
-The companion rules document — `ocpfALDevStandardsGuide.md`, v1.7.0.0 — shared unchanged with the
-full framework. **Lite reduces process, not AL rules**, so this is the one fetched resource that
-isn't optional: this runbook cites it as **Standards §** from Step 1 onward.
+Two companions are fetched at Step 1 and kept for the life of the project: the **Standards Guide**
+(`standardsGuide/ocpfALDevStandardsGuide.md`, v1.7.0.0), cited as **Standards §**, and the
+**Operations Guide** (`opsGuide/ocpfOperationsGuide.md`, v1.0.0.0), cited as **Ops §** and shared
+unchanged with the full framework.
 
-- **Fetch at Step 1**, not Step 3 with the other libraries — the Step 1 gap check already needs
-  Standards Part 6. Get `standardsGuide/ocpfALDevStandardsGuide.md` from
-  `https://github.com/ajansari/ocpfBcAgenticDevFramework/` into `standardsGuide/` in the project
-  root. Write a `SNAPSHOT.json` beside it recording source, ref, commit SHA, and fetch timestamp.
-  Tell the human you're doing it.
-- Lives **inside** the project root, like `patterns/` — it's a single Markdown file with no `.al`
-  objects, so there's no `alc` compile-breaking reason to push it outside the tree.
-- **If the repo isn't reachable**, say so and ask the human for a copy — don't proceed from memory
-  of what the standards say. This is stricter than the patterns library, which degrades
-  gracefully: an absent Standards Guide means every `Standards §` citation in this runbook points
-  at nothing. **Exception, when the OCPF plugin is installed**:
-  the plugin bundles a copy of the guide in its `al-standards` skill. Use that copy instead of
-  stopping. Record `"source": "ocpf-bc plugin bundle"` and the guide's version in
-  `SNAPSHOT.json`, tell the human plainly which version was used, and offer a refresh from GitHub
-  once the network is back.
-- **Always gitignored**, never a per-project choice — same reasoning as `patterns/` (see
-  Repository Hygiene). Not covered by the Step 1 `.gitignore` question, which governs only
-  this framework's own files (this runbook, `LITE_RunbookChangeLog.md`, `LITE_RunbookSchematics.md`).
-- **Refresh only when asked** ("refresh the standards guide"). Report "updated from `<old sha>` to
-  `<new sha>`" or "already up to date."
-- The guide is versioned independently of this runbook (both tracked in the framework's
-  `fullVersion/RunbookChangelog.md`). If a fetched guide's version doesn't match what this
-  runbook expects, say so rather than silently reconciling a citation that doesn't resolve.
+**Full procedure: Ops § Fetched Companions** — fetching, refreshing, the plugin's offline copies,
+and what to do when GitHub is unreachable.
+
+- Both live inside the project root and are **always gitignored** — not covered by Step 1's
+  framework-files question.
+- **Neither is optional:** a missing copy is a real gap. Say so and ask the human for a copy rather
+  than working from memory of a rule.
+- **Version skew is named, not papered over.**
 
 ## Repository Hygiene
 
-- The Standards Guide lives **inside** the root, in `standardsGuide/`, and is always gitignored —
-  added at Step 1 when it's fetched.
-- The BCQuality snapshot lives **outside** the project root entirely (see below) — not a
-  candidate for this project's git tracking at all.
-- The OCPF Patterns library lives **inside** the root, in `patterns/`, but is always gitignored —
-  it's the human's own portable, cross-project methodology, refetchable at will, not part of what
-  a client is paying to receive.
-- This framework's own files — this runbook, `LITE_RunbookChangeLog.md`,
-  `LITE_RunbookSchematics.md`, and the plugin's `.ocpf/` folder if present — are gitignored by
-  default, per the Step 1 answer; a human who wants the project's repo to be self-contained can opt to track them instead.
-- **The project's own `ChangeLog.md` is always tracked**, never gitignored. It's one of Lite's four
-  documents, and it carries every deviation, root cause, test finding, and translation approval.
-- **If a project built on an earlier Lite version has `ChangeLog.md` in `.gitignore`, remove that
-  entry and commit the file.** Earlier Lite wording said "this runbook and `ChangeLog.md`" when it
-  meant the framework's changelog. Check first whether the project has a remote — the file will
-  appear as newly added to collaborators.
-- `.claude/settings.local.json` and `.ocpf/notifications.json` are always gitignored — each
-  developer's own Claude Code settings and notification choice (ALL ALONG → Notifications), even
-  when the Step 1 answer tracks the framework's files.
-- `*.g.xlf` is always gitignored — it's rebuilt on every compile. The per-language files in
-  `Translations/` are deliverables and always tracked.
-- `.alpackages/` is always gitignored, added at the end of Step 1 when symbols are first
-  downloaded. Symbols are refetched in seconds (ALL ALONG → Symbols), and a sandbox download
-  carries Microsoft's own source and translation files, which are never committed. Microsoft's
-  AL-Go templates ignore it too.
-- Microsoft's translation files, read for terminology (**Standards Appendix D**), are Microsoft's
-  proprietary content and are never committed.
-- If any of the above is already tracked when this policy is adopted, add the `.gitignore`
-  entries and actually untrack them (`git rm --cached`, not `git rm` — files stay on disk).
-  Check first whether the project has a remote already, since untracking rewrites what a `git
-  pull` shows collaborators.
+**Full procedure: Ops § Repository Hygiene.** Read it at Step 1 and Step 3.
+
+**Always gitignored, not a per-project choice:** `.claude/settings.local.json`,
+`.ocpf/notifications.json`, `standardsGuide/`, `opsGuide/`, `patterns/`, `scripts/`, `.alpackages/`,
+`*.g.xlf`, and Microsoft's translation files. BCQuality lives outside the project root entirely.
+
+**Always tracked:** `DesignDoc.md`, `ChangeLog.md`, `Docs.md`, `TestScript.md`, the Step 1 kickoff
+artifacts, the AL source, `Translations/*.xlf`, and every package in `outputAppPackage/`.
+
+**Gitignored by default, with Step 1's question:** this runbook, `LITE_RunbookChangeLog.md`,
+`LITE_RunbookSchematics.md`, and the plugin's `.ocpf/` folder — except `.ocpf/notifications.json`.
+**Never the project's own `ChangeLog.md`**, one of Lite's four maintained documents.
+
+**If any of this is already tracked,** add the entry, then untrack with `git rm --cached` — checking
+for a remote first, since collaborators will see the files as deleted.
 
 ## AL MCP Server
 
-**Zero-install first (Operating Rule 6d).** Needed from the end of Step 1, when the agent
-downloads symbols.
-- **GitHub Copilot Chat in VS Code:** the AL Language extension's tools (`al_build`, `al_publish`,
-  `al_downloadsymbols`, `al_symbolsearch`, `al_getdiagnostics`, …) are already built in, so there's
-  nothing to bootstrap.
-- **Claude Code, Copilot CLI, or another MCP host:** bootstrap below with the AL extension's bundled
-  `altool` and VS Code's already-provisioned .NET runtime. If the server's tools (`al_compile`,
-  `al_addproject`, …) are already there, don't register a duplicate; add the project with
-  `al_addproject`.
-- **With the OCPF plugin:** its `al-mcp-setup` skill does the bootstrap in one step.
-- **Microsoft's `al` .NET tool on NuGet** is for cloud sessions and machines without VS Code only.
+**Full procedure: Ops § AL Tools.** Read it at the end of Step 1, when the tools are first needed.
 
-**The human approves; the agent does everything else**. The AL
-Language extension has **no Command Palette command** that sets up or registers this server; its
-only MCP commands sign in to the separate Profiling and Snapshot servers. Don't use, install, or
-depend on a third-party bridge extension (such as the *AL Language Model Tools — MCP Bridge*
-VSIX): it isn't on the Marketplace, and it needs VS Code relaunched with a proposed API enabled.
-The human's only part is approving the AI tool's prompts, including the one Claude Code shows once
-for a new project server.
-
-**Bootstrap once per project:**
-1. **Get the launcher.** Without the plugin, download these byte for byte into `scripts/` from
-   `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/al-mcp-setup/scripts/<file>`:
-   `al-mcp.sh`, `al-mcp-call.sh`, and `al-analyze.sh` (macOS/Linux), or `al-mcp.cmd`,
-   `al-mcp-resolve.ps1`, `al-mcp-call.ps1`, `al-analyze.cmd`, and `al-analyze-resolve.ps1`
-   (Windows). Gitignore `scripts/`. The launcher finds the newest AL extension
-   and its runtime on every launch, with no `PATH`, `DOTNET_ROOT`, or absolute paths. If GitHub is
-   unreachable, write the equivalent: `altool launchmcpserver --transport stdio` from the AL
-   extension's `bin/` folder (`altool.dll` on the runtime VS Code provisioned, on macOS/Linux).
-2. **Check it:** `sh scripts/al-mcp.sh --help` (Windows: `scripts\al-mcp.cmd --help`) prints the
-   usage. An `OCPF AL MCP launcher:` message names what's missing instead. If the AL extension has
-   never started on this machine, ask the human to open the project folder in VS Code once.
-3. **Register it** in `.mcp.json` at the project root (Claude Code and Copilot CLI), adding the
-   `al` entry without overwriting other servers: `{ "mcpServers": { "al": { "command": "sh",
-   "args": ["scripts/al-mcp.sh"] } } }`, or on Windows `"command": "cmd.exe", "args": ["/c",
-   "scripts\\al-mcp.cmd"]`.
-4. **Keep working in this session — no restart.** A server registered mid-session only appears in
-   the next session. Until then, call any tool through the one-shot helper, which starts the
-   server, runs one tool, prints the response, and exits in a few seconds:
-   `sh scripts/al-mcp-call.sh . al_downloadsymbols '{"globalSourcesOnly":true}'` (Windows:
-   `powershell -NoProfile -ExecutionPolicy Bypass -File scripts\al-mcp-call.ps1 . <tool> '<JSON>'`).
-5. **Verify** with a non-compile call such as `al_getpackagedependencies` — not a project compile.
-
-Prefer the server's build/publish/symbol tools over an ad hoc terminal invocation — **except for
-the analysis compile itself (ALL ALONG → Analyzers): its `codeAnalyzers` argument doesn't reliably
-work.**
+- Nothing is installed: Copilot Chat has the AL tools built in; Claude Code and Copilot CLI use the
+  extension's bundled AL MCP Server. With the plugin, `al-mcp-setup` does it in one step.
+- **The human only approves the AI tool's prompts.** No Command Palette command exists for this, and
+  no third-party bridge extension is used.
+- A server registered mid-session appears only next session; until then use the one-shot helper.
 
 ## Analyzers
 
-**The mandatory Step 5 compile runs with Microsoft's bundled code analyzers engaged — not a plain
-compile.** They ship with the AL Language extension; nothing is installed. Every project runs
-**CodeCop** and **UICop**, plus exactly one of these, by Deployment Target:
+**Full procedure: Ops § Analyzers.** Read it at Step 3's scaffold and at Step 5's compile.
 
-| Deployment Target | Third analyzer |
-|---|---|
-| `SaaS PTE` or `OnPrem PTE` | **PerTenantExtensionCop** |
-| `AppSource` | **AppSourceCop** |
-
-- **Never both PerTenantExtensionCop and AppSourceCop** — Microsoft documents them as incompatible.
-- **AppSourceCop needs `AppSourceCop.json`** in the project root — at minimum
-  `{ "mandatoryAffixes": ["<prefix>"] }` — or the compile fails with `AS0054`.
-- **Both files are created at Step 3's scaffold:** `.vscode/settings.json` with
-  `"al.enableCodeAnalysis": true` and `"al.codeAnalyzers"` set to the three analyzers, and
-  `AppSourceCop.json` for AppSource. The settings also give the human live feedback in the editor.
-
-**What the compile then proves:** `PTE0004` / `AS0103` (missing permission set, **Standards
-§5.3**), `PTE0008` / `AS0062` (missing `ApplicationArea`), `AA0074` (label suffix), `AA0101`
-(API names not camelCase, **§2.7**), `AA0215` (file name, **§1.8**), and `AL0424` (ML syntax,
-**§1.7**). It doesn't replace symbol verification or App Code uniqueness across extensions
-(**§5.4**).
-
-**How to run it** (verified on AL Language extension 18.0.2732683; on a newer release, compile a
-table with no permission set and confirm `PTE0004` appears):
-- **GitHub Copilot Chat in VS Code:** the built-in `al_build`, which reads the settings above.
-- **Claude Code, Copilot CLI, or any other MCP host: not the AL MCP Server's
-  `al_build`/`al_compile`** — they don't apply analyzers by argument, launch flag, or settings.
-  Run `scripts/al-analyze.sh <project folder> <output .app path> [pte|appsource]` (Windows:
-  `scripts\al-analyze.cmd`, same arguments; defaults to `pte`). The plugin copies it into
-  `scripts/`; otherwise, or if it's missing, fetch it beside the launcher (ALL ALONG → AL MCP
-  Server, step 1).
-- **Read the warnings, not just the result.** The compiler and `al_build` succeed with warnings.
-  `al-analyze` exits `0` only with no errors and no warnings, `3` with warnings, `1` on failure.
-  Any warning fails Rule 5.
-
-**Zero warnings means zero.** No `#pragma warning disable` and no ruleset: every analyzer rule stays
-on, and a project that follows the Standards Guide compiles clean under them.
+- The mandatory compile runs **CodeCop**, **UICop**, and exactly one of **PerTenantExtensionCop**
+  (SaaS/OnPrem PTE) or **AppSourceCop** (AppSource) — never both.
+- `.vscode/settings.json`, and `AppSourceCop.json` for AppSource, are created at Step 3.
+- Outside Copilot Chat, run `scripts/al-analyze.*`: the AL MCP Server's own compile tools don't
+  apply analyzers.
+- **Read the warnings, not just the result** — `al-analyze` exits `3` on warnings, and any warning
+  fails Rule 5. No suppressions, and no ruleset.
 
 ## Symbols
 
-**The agent downloads symbols; the human never does** (Rule 6d). Stop at the first option that
-works:
-1. **Copilot Chat in VS Code:** the AL extension's `al_downloadsymbols` with
-   `globalSourcesOnly: true`. It also reloads VS Code's AL workspace.
-2. **Any other agent:** the AL MCP Server's `al_downloadsymbols` with `globalSourcesOnly: true`,
-   through the one-shot helper if the server isn't in this session yet.
-3. **From the sandbox** (`launch.json`, one browser sign-in by the human): when the project
-   depends on a non-AppSource app, when the global download fails, or for a localized project
-   outside Copilot Chat.
+**Full procedure: Ops § Symbols.** Read it at the end of Step 1.
 
-Global sources need no connection or sign-in (verified September 15, 2026, AL extension 18.0: a
-full BC 27 set in under 10 seconds). **The AL MCP Server's global download is W1 only.** It
-ignores `al.symbolsCountryRegion`, which VS Code's own download honors. For `Localization` ≠
-`W1`: in Copilot Chat, set `"al.symbolsCountryRegion"` (e.g. `"us"`) in `.vscode/settings.json`
-first. Elsewhere, start DESIGN on W1 and download from the sandbox before verifying any
-country-specific table or field.
-
-**Confirm symbols by using them** (`al_symbolsearch` for `Customer`, or a compile), never by
-unpacking a package's `SymbolReference.json`, which can look far emptier than what the compiler
-resolves. Download again after a dependency or version change, then keep the editor in sync.
+- **The agent downloads symbols; the human never does.** Global sources need no sign-in; a sandbox
+  download (one browser sign-in) covers non-AppSource dependencies and localized projects.
+- The AL MCP Server's global download is **W1 only**.
+- **Confirm symbols by using them**, never by unpacking `SymbolReference.json`. A sandbox download
+  carries Microsoft's own source and translation files: read them, never commit them.
 
 ## Keeping the Editor in Sync
 
-**Symptom:** the code compiles clean, but VS Code still marks objects red, often with an object ID
-"not within the allowed ranges" or a missing symbol, until the window reloads. The editor's AL
-language server is working from old information:
-- **`app.json` changed on disk** after the AL extension loaded it. The extension doesn't always
-  re-read it ([microsoft/vscode#147111](https://github.com/microsoft/vscode/issues/147111)). The
-  real case: **AL: Go!** created default ranges, then the agent wrote the project's ranges.
-- **Symbols downloaded outside VS Code.** The AL MCP Server reloads only its own workspace.
+**Full procedure: Ops § Editor Sync.** Read it at the end of Step 1 and after every clean compile.
 
-**Prevent:** write `app.json` once, complete, and download symbols at the end of Step 1, before
-any `.al` file exists. In Copilot Chat, download symbols with the AL extension's own tool.
-
-**Detect** after every `app.json` or symbol change and every clean compile: read the Problems
-panel with `al_getdiagnostics` (Copilot Chat) or the IDE `getDiagnostics` tool
-(`mcp__ide__getDiagnostics`, Claude Code in VS Code). AL errors the latest compile didn't report
-are stale. If you can't read the editor, tell the human once, at the first clean compile, what
-stale marks look like and the fix. At the end of Step 1 there are no `.al` files yet, so if
-`app.json` existed before you changed it, treat the editor as stale.
-
-**Fix:**
-1. **Copilot Chat:** run the AL extension's `al_downloadsymbols` once, then check again.
-2. **Otherwise, or if marks remain:** no agent tool can reload VS Code's window. At the end of
-   the reply, never mid-task, tell the human in one short message, in the working language: the
-   code compiles clean and VS Code is showing old errors; press Ctrl+Shift+P (Cmd+Shift+P on a
-   Mac) and run **Developer: Reload Window** (built into VS Code); files aren't touched, and if
-   the chat panel closes, reopen it and continue from its history.
-
-Never change code that compiles clean just to clear stale marks.
+- Red marks the latest compile didn't report mean the editor's view is stale, usually after
+  `app.json` changed on disk or symbols were downloaded outside VS Code.
+- **Detect** with the diagnostics tool; **fix** by re-downloading symbols in Copilot Chat, or by
+  asking the human, at the end of the reply, to run **Developer: Reload Window**.
+- **Never change code that compiles clean to clear stale marks.**
 
 ## Notifications
 
-**The human chooses at Step 1 how to be notified every time the agent finishes a turn, asks a
-question, or waits for an approval, and the choice persists.** The AI tool's own notifications and
-hooks do the work. The agent sets it up (Rule 6d); nothing is installed. In documents mode, say
-notifications aren't available and skip this.
+**Full procedure: Ops § Notifications.** Read it at Step 1, right after the working language.
 
-1. **Ask right after the working language** (Rule 6a), one multi-select question: *"Would you like
-   to be notified at the end of every turn and whenever a question or approval is waiting? Choose
-   any."* Offer only what works here:
-   - *Claude app* (a push to your phone) — Claude Code signed in through a claude.ai Pro, Max, Team,
-     or Enterprise account, not an API key, Bedrock, Google Cloud, Foundry, or a gateway, and with
-     none of `ANTHROPIC_BASE_URL`, `DISABLE_TELEMETRY`, `DO_NOT_TRACK`,
-     `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC`, or `DISABLE_GROWTHBOOK` set. On Team or
-     Enterprise, an Owner must have enabled Remote Control.
-   - *Sound* — always (on Linux it needs `paplay` or `canberra-gtk-play`; otherwise the terminal
-     bell, which Claude Code's VS Code extension can't ring).
-   - *Desktop notification* — GitHub Copilot Chat in VS Code or Copilot CLI (their own); Claude Code
-     on Windows or Linux, or in iTerm2, WezTerm, Ghostty, Warp, or Kitty when `CLAUDE_CODE_ENTRYPOINT`
-     is `cli` (not inside tmux). Never Claude Code's VS Code extension or VS Code's terminal on
-     macOS.
-   - *No notifications* — always; if picked with anything else, ask again.
-
-   **With *Claude app*, explain Remote Control first:** pushes need it connected, and while
-   connected the session transcript is stored on Anthropic's servers (not available under
-   requirements such as Zero Data Retention). Then ask: *Only when I turn it on* (`/remote-control`
-   before stepping away) / *Every Claude Code session on this machine* (until turned off with
-   **Enable Remote Control for all sessions**).
-2. **Record it in `.ocpf/notifications.json`** (per developer, always gitignored). At the start of
-   every session, read it: if it's missing, ask; if the current AI tool isn't in `aiTools`, apply the
-   recorded kinds for it and add it; if the human asks to change it, undo the dropped kinds, apply
-   the new ones, and rewrite the file.
-
-```json
-{
-  "notifyWhen": "every turn end, question, and approval",
-  "channels": ["claudeApp", "sound", "desktop"],
-  "remoteControl": "perSession",
-  "userSettingsWritten": [],
-  "aiTools": ["claude-code"],
-  "os": "macos",
-  "decidedOn": "2026-09-15"
-}
-```
-
-3. **Apply it, per AI tool:**
-   - **Claude app** (Claude Code): `"inputNeededNotifEnabled": true` and
-     `"agentPushNotifEnabled": true` in `.claude/settings.local.json`; with *Every session*, also
-     `"remoteControlAtStartup": true` in `~/.claude/settings.json` (honored only there). End every
-     turn that hands the ball back with a push naming what the human needs to do — this one depends
-     on the agent remembering, so suggest pairing it with *Sound*. The human installs the Claude app,
-     signs in, and allows its notifications.
-   - **Sound:** Claude Code — hooks in `.claude/settings.local.json` running `ocpf-notify` with
-     `sound`. Copilot Chat — VS Code user settings `"accessibility.signals.chatResponseReceived":
-     { "sound": "on" }` and `"accessibility.signals.chatUserActionRequired": { "sound": "on",
-     "announcement": "auto" }`. Copilot CLI — hooks in `~/.copilot/hooks/ocpf-notify.json`.
-   - **Desktop notification:** Claude Code — the same hooks with `desktop` added. Copilot Chat — VS
-     Code user settings `"chat.notifyWindowOnResponseReceived"` and
-     `"chat.notifyWindowOnConfirmation"`, each `"always"`. Copilot CLI — built in, nothing to set.
-   - **Files:** `.claude/settings.local.json` is per developer; merge and add it to `.gitignore`.
-     `~/.claude/settings.json`, `~/.copilot/hooks/`, and VS Code's user `settings.json` are outside
-     the project: say first that they apply to every project on this machine, then let the AI tool
-     ask; merge, keeping existing settings.
-   - **Script:** add `scripts/` to `.gitignore` now if needed, then copy `ocpf-notify.sh`
-     (macOS/Linux) or `ocpf-notify.ps1` (Windows, untested there) into it, from the plugin's
-     `notifications` skill or `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/notifications/scripts/<file>`. It takes `sound`, `desktop`, or both (`-Sound`,
-     `-Desktop` on Windows), and for Claude Code returns the terminal's own notification or bell.
-   - **Removing a kind:** remove its settings and hooks. Outside the project, touch only the settings
-     in the record's `userSettingsWritten`, where the agent lists `{ "key", "previous" }` for each one
-     it writes (asking first if the human had a different value): put back `previous`, or remove the
-     key when that's `null` — never write `false` or a default.
-4. **Test once** and ask (Rule 6a) whether each chosen kind arrived and whether clicking a
-   notification took the human to the session.
-
-Claude Code hooks (macOS/Linux, exec form; keep only the chosen kinds, one array element each):
-
-```json
-{
-  "hooks": {
-    "Stop": [ { "hooks": [ { "type": "command", "command": "sh", "args": ["${CLAUDE_PROJECT_DIR}/scripts/ocpf-notify.sh", "sound", "desktop", "Your turn: the agent finished"] } ] } ],
-    "PreToolUse": [ { "matcher": "AskUserQuestion", "hooks": [ { "type": "command", "command": "sh", "args": ["${CLAUDE_PROJECT_DIR}/scripts/ocpf-notify.sh", "sound", "desktop", "A question is waiting for your answer"] } ] } ],
-    "Notification": [ { "matcher": "permission_prompt", "hooks": [ { "type": "command", "command": "sh", "args": ["${CLAUDE_PROJECT_DIR}/scripts/ocpf-notify.sh", "sound", "desktop", "An approval is waiting for you"] } ] } ]
-  }
-}
-```
-
-On Windows, each hook runs PowerShell the same way, with only the chosen switches and each hook's
-own message:
-
-```json
-{ "type": "command", "command": "powershell.exe", "args": ["-NoProfile", "-ExecutionPolicy", "Bypass", "-File", "${CLAUDE_PROJECT_DIR}/scripts/ocpf-notify.ps1", "-Sound", "-Desktop", "-Message", "Your turn: the agent finished"] }
-```
-
-GitHub Copilot CLI sound hooks (start the CLI from the project root):
-
-```json
-{
-  "version": 1,
-  "hooks": {
-    "agentStop": [
-      { "type": "command", "timeoutSec": 15,
-        "bash": "grep -qs '\"sound\"' .ocpf/notifications.json && sh scripts/ocpf-notify.sh sound </dev/null >/dev/null; exit 0",
-        "powershell": "if ((Test-Path .ocpf/notifications.json) -and (Get-Content .ocpf/notifications.json -Raw) -match '\"sound\"') { & powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ocpf-notify.ps1 -Sound }" }
-    ],
-    "notification": [
-      { "type": "command", "timeoutSec": 15,
-        "bash": "grep -Eq '\"notification_type\" *: *\"(permission_prompt|elicitation_dialog)\"' && grep -qs '\"sound\"' .ocpf/notifications.json && sh scripts/ocpf-notify.sh sound </dev/null >/dev/null; exit 0",
-        "powershell": "$n = [Console]::In.ReadToEnd(); if ($n -match '\"notification_type\"\\s*:\\s*\"(permission_prompt|elicitation_dialog)\"' -and (Test-Path .ocpf/notifications.json) -and (Get-Content .ocpf/notifications.json -Raw) -match '\"sound\"') { & powershell -NoProfile -ExecutionPolicy Bypass -File scripts/ocpf-notify.ps1 -Sound }" }
-    ]
-  }
-}
-```
-
-Verified September 2026 in Claude Code 2.1.272: the `Stop` hook and a `PreToolUse` hook on
-`AskUserQuestion` both fired with these hooks. Documented but untested here: Claude Code's
-`terminalSequence` output, push settings, and Remote Control requirements; the VS Code settings;
-Copilot CLI notifications and hooks; Windows and Linux. Tools with neither notifications nor hooks
-(Claude Chat, Microsoft Copilot Cowork) can't notify; say so and record no channels.
+- **Ask once, as one multi-select question:** *Claude app*, *Sound*, *Desktop notification*, any
+  combination, or *No notifications* — offering only what works for this tool, OS, and sign-in.
+- **Record it in `.ocpf/notifications.json`** (per developer, always gitignored) and read it at the
+  start of every session; ask again when it's missing.
+- **Apply it** through each tool's own notifications and hooks — never a script-raised banner on
+  macOS — and test it once.
 
 ## Reference Sources — Microsoft Learn and AL Guidelines
 
-Consulted online, never fetched into the project, so there's nothing to bootstrap, gitignore, or
-refresh. If there's no web access, say so rather than answering from memory of what a reference
-says.
+**The list: Ops § Reference Sources** — Microsoft Learn's Base Application and System Application
+references, the translation-files and country/language pages, Microsoft's terminology collection and
+style guides, and AL Guidelines. Consulted online; nothing is fetched.
 
-| Reference | What it's for | Used at |
-|---|---|---|
-| **BC Base Application docs** — <https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application> | Standard Base App tables, fields, datatypes/sizes | Operating Rule 2 fallback |
-| **BC System Application docs** — <https://learn.microsoft.com/en-us/dynamics365/business-central/application/system-application/module/system-application> | System Application modules — check before building what the platform already provides | Operating Rule 2 fallback; Step 2 |
-| **Working with translation files** — <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-work-with-translation-files> | XLIFF translation in AL; why ML properties are banned | Standards §1.7, Part 8 |
-| **Country/Regional Availability and Supported Languages** — <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-countries-and-translations> | Which languages BC supports in each country, and who translates them — read live every time | Step 1; Standards §8.8 |
-| **Microsoft Terminology** — <https://learn.microsoft.com/en-us/globalization/reference/microsoft-terminology> and **Localization Style Guides** — <https://learn.microsoft.com/en-us/globalization/reference/microsoft-style-guides> | Terminology fallback and per-language style, when BC's own translations have no match | Standards §8.5, Appendix D |
-| **AL Guidelines** — <https://alguidelines.dev> (<https://github.com/microsoft/alguidelines>, MIT) | AL best practices, design patterns, agent-oriented *Vibe Coding Rules* | Step 2 (patterns); Step 6 (review) |
-
-**Precedence:** the downloaded symbol file beats Microsoft Learn on anything symbol-verifiable; the
-Standards Guide beats AL Guidelines on any AL rule. AL Guidelines' legacy *C/AL Coding
-Guidelines* pages are never followed (Standards §1.7).
-
-Every third-party resource the framework references, fetches, or recommends is credited, with its
-license, in `THIRD_PARTY_NOTICES.md` at the root of the framework repository.
+- **Precedence:** downloaded symbols beat Microsoft Learn on anything symbol-verifiable; the
+  Standards Guide beats AL Guidelines on any AL rule. Surface a conflict rather than picking a side
+  silently.
+- **No web access? Say so** rather than answering from memory.
 
 ## BCQuality Knowledge Snapshot
 
-BCQuality (`microsoft/BCQuality` on GitHub) is a curated knowledge base and skill library for BC
-AL code quality — markdown knowledge files plus skills defining how to search and apply them. It
-augments review judgment; it doesn't replace it.
+**Full procedure: Ops § Fetched Companions.** Read it at Step 3, when the snapshot is fetched, and
+at Step 6, when it's used.
 
-- Fetch a full, current snapshot **once per project**, at Step 3, alongside the rest of the
-  scaffold. Put it **outside** the AL project's own root — e.g. a sibling directory such as
-  `../<ProjectName>.bcquality/` — never anywhere under `app.json`'s tree: `alc` recursively
-  compiles every `.al` file it finds, and BCQuality's own knowledge base ships illustrative
-  `.good.al`/`.bad.al` fragments that aren't real compilable objects. A shallow clone
-  (`git clone --depth 1`), `.git` stripped but its `LICENSE` file kept (BCQuality is MIT-licensed,
-  and MIT requires the notice to stay with every copy), mirroring the repo's own layout. Write a small
-  `SNAPSHOT.json` alongside it recording the commit SHA and fetch timestamp. Tell the human you're
-  doing this — it's not a silent background check.
-- Refresh **only** when explicitly asked ("refresh BCQuality"). Overwrite the existing snapshot
-  and report plainly: "updated from `<old sha>` to `<new sha>`" or "already up to date."
-- **Using it:** read `skills/entry.md` from the snapshot with an explicit task context (goal,
-  inputs, technologies, BC version); it returns a dispatch record naming which action skill(s) to
-  run. Read `skills/read.md`/`skills/do.md` on demand. Invoke the dispatched skill(s) — for a full
-  review, typically `microsoft/skills/review/al-code-review.md`. Findings come back with an
-  outcome, a domain label, and structured references for knowledge-backed findings (an empty
-  `references: []` for the agent's own, capped at medium confidence). Integrate every finding the
-  same way as any other Step 6 finding — never applied blind. No network access is needed once the
-  snapshot exists.
-- It lives outside the project root, so there's nothing to gitignore (Repository Hygiene above).
+- A third-party BC AL code-quality knowledge base, fetched once at Step 3 and refreshed only on
+  request.
+- **It lives outside the project root** — `alc` would otherwise compile its illustrative snippets —
+  so there's nothing to gitignore.
+- At Step 6 it's an independent review pass whose findings are integrated like any other, never
+  applied blind.
 
 ## OCPF BC AL Patterns Library
 
-**OCPF** = **OnlyCopilotFans.** `ajansari/ocpfBCALPatterns` on GitHub is the human's own curated
-collection of reusable BC AL patterns, each extracted from a real bug found and fixed on a past
-project: symptom, verified root cause, the fix, a worked example, caveats — one self-contained
-Markdown file per pattern. Unlike BCQuality, this is the human's own accumulated cross-project
-material, not a third-party knowledge base.
+**Full procedure: Ops § Fetched Companions.** Read it at Step 3, when the library is fetched.
 
-- Fetch **once per project**, at Step 3, alongside the AL MCP Server and BCQuality bootstrap. If
-  the repo isn't reachable, say so plainly and continue — it's not a blocker.
-- Lives **inside** the project root, in `patterns/` — every file is Markdown with embedded AL, not
-  a real `.al` object, so there's no compile-breaking risk the way there was with BCQuality.
-- Shallow clone (`git clone --depth 1`), `.git` stripped, `LICENSE` kept. Write `SNAPSHOT.json` inside `patterns/`
-  recording source, ref, commit SHA, fetch timestamp.
-- **Merge behavior:** if `patterns/` doesn't exist, create it and copy the content in directly. If
-  `patterns/README.md` already exists locally, don't overwrite it — append the fetched README
-  under a fixed delimiter (`## Upstream README — ajansari/ocpfBCALPatterns @ <sha>`), so a later
-  refresh can find-and-replace that block instead of duplicating it. Add any pattern files not
-  already present; if a same-named file already exists locally with different content, ask the
-  human which to keep (Rule 6a) rather than silently overwriting.
-- Always gitignored — see Repository Hygiene above.
-- Refresh **only** when explicitly asked. Report new pattern files added, or "already up to date."
-- **Using it:** before diagnosing a bug from scratch at Step 5 or 7, check `patterns/` for an
-  already-documented match first — that's the entire point of the library. If a fix produced
-  during this project looks like it will recur on future projects, flag it to the human as a
-  candidate for a new pattern file — contributing back is the human's call, not the agent's.
+- The human's own cross-project BC AL patterns, fetched once into `patterns/`, always gitignored,
+  refreshed only on request, and merged rather than overwritten.
+- **Using it:** before diagnosing a bug from scratch at Step 5 or 7, check whether `patterns/`
+  already documents this class of problem.
+- A fix likely to recur on future projects is a candidate for a new pattern — flag it, don't add it
+  unilaterally.
 
 ## Translations & Terminology
 
-The rules are **Standards Part 8**; Lite applies them with the same gates as the full framework,
-just fewer documents. Skip everything here if Step 1 chose *US wording, no translation files*.
+**Full procedure: Ops § Translations** — the glossary, the cycle inside Step 5, review and approval,
+and the release gate. Read it at Step 1, at Step 5's first full build, and at Step 7's gate. Skip
+everything here if Step 1 chose *US wording, no translation files*.
 
-- **The glossary lives in `DesignDoc.md`** and is filled only by **Standards Appendix D** — never
-  from model memory. Update it whenever a new BC term appears in source text.
-- **The agent drafts, a named person approves.** Drafts are `needs-review-translation`. Only the
-  language's reviewer approves (`signed-off`) — directly, or by naming exactly which units the
-  agent should mark. Every approval is logged in `ChangeLog.md` by name.
-- **Bulk approval with a named scope is fine.** For a same-language file (`en-US` → `en-US`), the
-  agent may list unchanged units containing no glossary term for one approval decision.
-- **The release gate is a plain state scan.** Every unit in every language required at first
-  release is `signed-off` or `final` (**Standards §8.7**).
-- **Changed source text invalidates approval** (**§8.7**): the unit goes back through drafting and
-  review.
-- Microsoft's translation files are read, never committed. XLIFF Sync and NAB AL Tools are
-  credited in the framework's `THIRD_PARTY_NOTICES.md`.
+- **The glossary lives in `DesignDoc.md`** and is filled only by **Standards Appendix D**, never from
+  model memory.
+- **The agent drafts, a named person approves.** Every approval is logged in `ChangeLog.md` by name
+  (**Standards §8.7**).
+- **The release gate is a plain state scan:** every unit in every language required at first release
+  is `signed-off` or `final`.
+- **Changed source text invalidates approval** — the unit goes back through drafting and review.
 
 ## Permission Sets
 
@@ -1263,44 +881,18 @@ just fewer documents. Skip everything here if Step 1 chose *US wording, no trans
 
 ## OCPF Plugin (Optional)
 
-This framework is also distributed as an agent plugin,
-`ocpf-bc`, from the same repository. It works in Claude Code, the Claude apps, GitHub Copilot, and
-Microsoft Copilot Cowork. It's optional: copying this runbook in by hand still works exactly as
-before.
+**Full procedure: Ops § Plugin.** Read it at the start of a session in a plugin-installed project.
 
-**This section applies only when `.ocpf/framework.json` exists in the project root.** The plugin's
-`start` skill creates it. It records the edition, the runbook version, where the runbook copies
-were placed (`placedAs`), the source commit, the plugin version, a version the human chose to
-skip (`declinedUpdateVersion`), and the AL MCP Server outcome (`alMcp`). The `.ocpf/` folder
-follows the Step 1 framework-files answer, except `.ocpf/notifications.json`, which is always
-gitignored.
+**Applies only when `.ocpf/framework.json` exists** — the plugin's `start` skill creates it. Without
+that file, skip this section.
 
-**Framework update check, once per session.** At the start of each session, before resuming work:
-1. Read `runbookVersion` and `declinedUpdateVersion` from `.ocpf/framework.json`.
-2. Read the `**Version:**` line of
-   `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/liteVersion/LITE_BC_App_Build_Routine_Agent.md`
-   (download it; don't summarize it).
-3. Compare versions numerically, part by part.
-   - **Latest is newer and isn't the skipped version:** tell the human in a sentence or two and
-     offer **Update now / Not now / Skip this version** through the options mechanism. "Update
-     now" follows the plugin's `update-framework` skill: summarize the changelog entries in
-     between, back up each current copy to `.ocpf/previous/`, replace every copy in `placedAs`
-     and the project's `LITE_RunbookChangeLog.md`, update the marker, log it in `ChangeLog.md`,
-     and re-read the runbook.
-   - **Current:** say nothing.
-   - **GitHub unreachable:** mention it in one line and carry on.
-
-Never replace the project's runbook without an explicit yes.
-
-**What else the plugin changes:**
-- **Standards Guide:** a bundled fallback copy (ALL ALONG → OCPF AL Development Standards Guide).
-- **AL MCP Server:** the plugin's `al-mcp-setup` skill connects the AL tools with nothing to install
-  (ALL ALONG → AL MCP Server).
-- **Other skills:** `status` and `al-standards`.
-- **Sub-agents:** the plugin's `ocpf-reasoning` and `ocpf-light` sub-agents are for the full
-  framework's role split. Lite doesn't use them: one model still does everything.
-
----
+- **Once per session,** compare the project's runbook version against the latest published Lite
+  runbook and offer **Update now / Not now / Skip this version**. Never replace the runbook without
+  an explicit yes.
+- **What the plugin adds:** offline copies of the runbooks and both companions, one-step AL tool
+  setup, notification setup, and the `status`, `al-standards`, and `notifications` skills. (The
+  `ocpf-light` and `ocpf-reasoning` sub-agents belong to the full framework's role split, which Lite
+  doesn't use.)
 
 ## Step Map — Lite vs. Full Framework
 
