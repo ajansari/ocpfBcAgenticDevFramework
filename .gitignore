@@ -36,3 +36,5 @@ agentPlugin/dist/
 #Finder per-folder view-state file — local/cosmetic only, never useful to commit
 .DS_Store
 **/.DS_Store
+#Open items and known issues — local working log, never pushed to the remote
+issuesLog/
