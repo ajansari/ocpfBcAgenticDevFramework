@@ -16,6 +16,20 @@ framework.
 
 ---
 
+## v2.1.0.0 — September 15, 2026
+
+**The agent can run the API checks from the first build of the fix cycle, if the human wants it.**
+Derived from full framework v3.2.0.0. See `fullVersion/RunbookChangelog.md` v3.2.0.0.
+
+### Changed
+
+- **Step 5 asks once, at the first round**, whether the agent should publish and run the API
+  checklist before the human tests, with the browser sign-in named in the offer. The answer is
+  recorded in `ChangeLog.md` and honored for every later round; *No — I'll test by hand* isn't asked
+  again, and Step 7's human pass is authoritative either way.
+
+---
+
 ## v2.0.1.0 — September 15, 2026
 
 **Reference update only.** Derived from full framework v3.1.0.0 and pointing at Operations Guide

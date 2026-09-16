@@ -4,6 +4,14 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 2.2.0 — September 15, 2026
+
+**Bundles:** full runbook v3.2.0.0, Lite v2.1.0.0, Standards Guide v1.8.0.0, Operations Guide
+v1.1.0.0.
+
+- **Bundled runbooks:** the agent-run API pass is offered at the first build of the fix cycle, with
+  its sign-in cost stated and a standing option to decline.
+
 ## 2.1.0 — September 15, 2026
 
 **Bundles:** full runbook v3.1.0.0, Lite v2.0.1.0, Standards Guide v1.8.0.0, Operations Guide

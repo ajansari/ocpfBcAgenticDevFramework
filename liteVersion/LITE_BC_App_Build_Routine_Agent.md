@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 2.0.1.0 (Lite, derived from the full framework v3.1.0.0)
+**Version:** 2.1.0.0 (Lite, derived from the full framework v3.2.0.0)
 **Last Updated:** September 15, 2026
 
 > Version history for this edition lives in `LITE_RunbookChangeLog.md`, tracked independently of
@@ -507,8 +507,8 @@ compiles clean to clear them.
 
 **From here it's a cycle, not a single event:**
 1. Publish the current package to a BC sandbox tenant.
-2. Test it — manually, by the human, unless a live MCP connection lets the agent run the API test
-   checklist below itself.
+2. Test it — manually, by the human, unless the human took the agent-run API pass below, in which
+   case the agent publishes and runs the checklist first and reports what it found.
 3. For every error or problem, **first check `patterns/`** (ALL ALONG → OCPF BC AL Patterns
    Library) for a matching, already-documented pattern. If nothing matches, ask: is this a one-off
    or a pattern (search every generated file for the same class of issue)? Where did it come from
@@ -539,9 +539,19 @@ Appendix A**):
   invalid key; delete a record with dependencies; call with missing permissions — each should
   fail *gracefully with a clean, actionable error*.
 
-**Optional:** if a live MCP connection reaches the sandbox, offer to run the checklist above
-automatically; otherwise say so plainly and suggest Postman, Power Automate, or Copilot Studio as
-a manual alternative.
+**Ask once, at the first round: should the agent run the API checks before the human tests?**
+(Rule 6a; record the answer in `ChangeLog.md` and honor it for every later round.)
+- ***Yes — publish and run the checks each round (recommended).*** The agent publishes and works the
+  checklist above against the sandbox, so the human only tests builds that already answer. **It needs
+  one Microsoft browser sign-in per session** — the same one publishing and sandbox symbol downloads
+  use — and an authenticated route to the tenant's API (ALL ALONG → AL MCP Server, or another
+  authenticated MCP endpoint reaching the sandbox).
+- ***No — I'll publish and test by hand.*** Don't ask again for this project. Nothing is lost: Step
+  7's human pass is authoritative either way.
+
+**If the answer is yes but no authenticated route exists,** say so plainly, publish, and suggest
+Postman, Power Automate, or Copilot Studio instead. It's an early filter over the API pages only —
+never the BC client — and Step 7's human pass still decides.
 
 **Outputs:** All files compiling and packaging with **0 errors, 0 warnings**; at least one package
 published and manually tested on a sandbox; `ChangeLog.md` current; `DesignDoc.md` updated for

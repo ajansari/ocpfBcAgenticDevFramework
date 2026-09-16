@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v3.1.0.0**, the Standards Guide is at **v1.8.0.0**, the Operations Guide at **v1.1.0.0**, and Lite at **v2.0.1.0** — but
+**v3.2.0.0**, the Standards Guide is at **v1.8.0.0**, the Operations Guide at **v1.1.0.0**, and Lite at **v2.1.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 
 Entries are grouped by version, newest first, and describe the **cumulative** result of a
@@ -17,6 +17,37 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v3.2.0.0 — September 15, 2026
+
+**The agent can run the API checks from the first build of the fix cycle, if the human wants it —
+so testers only sit down to builds that already answer.** Ships with Lite **v2.1.0.0**. Plugin
+**v2.2.0**. Standards Guide and Operations Guide unchanged.
+
+### Changed
+
+- **Step 07 / Lite Step 5 asks once, at the first round**, whether the agent should publish and run
+  the green/red-team API checklist before the human tests, instead of offering it only "once things
+  are stable". The answer is recorded (`docs/ProjectMemory.md`; Lite: `ChangeLog.md`) and honored
+  for every later round.
+- **Declining is a real option and is asked for plainly:** *No — I'll publish and test by hand*
+  isn't asked again for that project, and the runbook says outright that nothing is lost, since
+  Step 12 / Lite Step 7's human pass is authoritative either way.
+- **The cost is stated in the offer, not discovered later:** it needs one Microsoft browser sign-in
+  per session — the same one publishing and sandbox symbol downloads already use — and an
+  authenticated route to the tenant's API. With no such route, the agent says so, publishes, and
+  suggests Postman, Power Automate, Power Apps, or Copilot Studio, rather than leaving it undone.
+- **Scope is stated too:** the pass covers the app's own API pages, never the BC client, the wizard,
+  the Role Center, or anything needing judgment about wording.
+
+### Not changed
+
+- **The second half of the review's H4** — moving the *Automated Test Scripts?* question from Step
+  11 to Step 03 — is not adopted. Tests written against a design that's still moving get rewritten,
+  and it commits a project to maintaining them before anyone knows whether it needs them. The
+  question stays at Step 11 (Ops § Automated Tests).
 
 ---
 

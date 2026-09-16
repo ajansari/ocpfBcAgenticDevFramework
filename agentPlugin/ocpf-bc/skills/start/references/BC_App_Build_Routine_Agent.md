@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 3.1.0.0
+**Version:** 3.2.0.0
 **Last Updated:** September 15, 2026
 
 > Version history for this framework lives in `RunbookChangelog.md`, tracked independently of any
@@ -561,7 +561,7 @@ clean to make stale red marks go away.
 
 **From here, Step 07 is a cycle, not a single event.** Packaging is not a milestone held back for later — it happens every time the extension changes during troubleshooting:
 1. Publish the current package to a BC sandbox tenant.
-2. Test it — manually, by the human, unless the optional agent-run API pass below is in play.
+2. Test it — manually, by the human, unless the human took the agent-run API pass below, in which case the agent publishes and runs the checklist first and reports what it found.
 3. For every error, warning, or reported problem, **first check `patterns/` (ALL ALONG → OCPF BC AL Patterns Library)** for a matching, already-documented pattern — a previously-solved bug class should be a fast recognition, not a fresh investigation. If nothing matches, ask the three questions (Operating Rule 4's systemic-signal discipline):
    - **One-off or pattern?** Search all generated files for the same class of issue before fixing one instance.
    - **Where did it come from?** Trace to the generation rule, the TDD template, or the source data.
@@ -577,15 +577,34 @@ stable — the first build the human confirms clean on the sandbox, again before
 again after any later fix that changes source text. Reviewers work in parallel; approval is required
 only at Step 12.
 
-**The API test checklist** — defined once, here, and used three times over the rest of the routine: optionally by the agent at the end of this step (below), as the source Step 11 writes `HumanUnitTestScript.md` from, and authoritatively by humans at Step 12 (Release to Users for Testing):
+**The API test checklist** — defined once, here, and used three times over the rest of the routine: optionally by the agent from this step's first round (below), as the source Step 11 writes `HumanUnitTestScript.md` from, and authoritatively by humans at Step 12 (Release to Users for Testing):
 - **Green-team (happy path):** `$metadata` returns the expected schema; read a collection; read a single record by `SystemId`; create a record on an editable endpoint; update a field; confirm a read-only endpoint rejects writes. Endpoint URL shapes are in Standards Appendix A.
 - **Red-team (boundary):** write to a read-only endpoint; send a non-existent field; send an invalid key; delete a record with dependencies; call with missing permissions — confirm each fails *gracefully with a clean, actionable error*.
 
-**Optional, once things are stable: agent-run API testing via a live MCP connection.** Offer the human an automated pass over the app's own API pages, using the checklist above, run directly by the agent against the published sandbox — but only if, and because, the human can supply a working connection (e.g., the AL MCP Server actually connected per ALL ALONG → AL MCP Server, or another authenticated MCP endpoint that reaches the sandbox's API). This is optional and conditional, never assumed to be available:
-- **If no working connection is available, say so plainly and suggest a manual alternative instead of leaving it undone** — testing the API by hand via **Postman**, or through a low-code caller like **Power Automate**, **Power Apps**, or **Copilot Studio**.
-- This is a cheap, early pass, not a substitute for the authoritative one: the same checklist runs again at Step 12, by a human, after Code Review and documentation have had their say — whether or not this optional agent-run pass ever happened.
+**Ask once, at the first round: should the agent run the API checks before the human tests?**
+(Rule 6a, and only once per project — record the answer in `docs/ProjectMemory.md` and honor it for
+every later round.) The offer must say what it costs up front:
+- ***Yes — publish and run the checks each round (recommended).*** The agent publishes the package
+  and works the green/red-team checklist above against the sandbox, so the human only ever sits down
+  to a build that already answers. **It needs one Microsoft browser sign-in per session** — the same
+  sign-in publishing and sandbox symbol downloads already use — and an authenticated route to the
+  tenant's API (the AL MCP Server connected per ALL ALONG → AL MCP Server, or another authenticated
+  MCP endpoint that reaches the sandbox).
+- ***No — I'll publish and test by hand.*** Don't ask again for this project. Say plainly that
+  nothing is lost: Step 12's human pass is the authoritative one either way, and the checklist above
+  is the same one a person runs.
 
-**Outputs:** All batches compiling and packaging with **0 errors, 0 warnings**; at least one package published and manually tested on a sandbox; ChangeLog current; TDD updated for every rule change; an agent-run API test result, if a live MCP connection was available and the human opted in; every target translation file synced, drafted, and passing technical checks, with the glossary current.
+**If the human says yes but no authenticated API route is available, say so plainly** rather than
+leaving it undone or pretending: publish, then suggest testing by hand via **Postman**, or a
+low-code caller like **Power Automate**, **Power Apps**, or **Copilot Studio**. Offer the agent-run
+pass again if a connection appears later.
+
+**What this pass is and isn't.** It's a cheap, early filter over the app's own API pages — it never
+touches the BC client, the wizard, the Role Center, or anything needing judgment about wording. The
+same checklist runs again at Step 12, by a human, after Code Review and documentation have had their
+say, and that remains the authoritative pass whether or not this one ever ran.
+
+**Outputs:** All batches compiling and packaging with **0 errors, 0 warnings**; at least one package published and manually tested on a sandbox; ChangeLog current; TDD updated for every rule change; an agent-run API test result for each round, if the human opted in at the first round and a connection was available; every target translation file synced, drafted, and passing technical checks, with the glossary current.
 
 **Exit gate:** Full extension compiles clean, with the analyzers and nothing suppressed (Ops § Analyzers); the human confirms sandbox testing is clean; no known systemic issue outstanding; ChangeLog and TDD reconciled (Operating Rule 5); no translation unit in any language required at first release is in `needs-translation` or `needs-adaptation`, and the technical translation checks are clean.
 
