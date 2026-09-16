@@ -93,7 +93,7 @@ September 14, 2026. The upstream project's current license always governs.*
   [Creative Commons Attribution 4.0 International (CC BY 4.0)](https://creativecommons.org/licenses/by/4.0/);
   code samples under MIT — per the public Business Central docs repository,
   <https://github.com/MicrosoftDocs/dynamics365smb-devitpro-pb>.
-- **Used for:** linked throughout both runbooks and the Standards Guide as fallback references.
+- **Used for:** linked throughout both runbooks, the Standards Guide, and the Operations Guide as fallback references.
 - **Quoted or adapted material:** `standardsGuide/ocpfALDevStandardsGuide.md` §1.7 quotes the
   AL0424 warning text and adapts Microsoft Learn's list of multilanguage (ML) properties excluded
   from `.xlf` files into a table. Attribution, a link to the source, the license, and a note that
@@ -102,7 +102,7 @@ September 14, 2026. The upstream project's current license always governs.*
   AppSource translation-file requirement, and the country/language support facts, with the same
   attribution block at the end of Part 8. Standards §1.8 adapts the file-naming notation and type
   map from *Best practices for AL code* and *CodeCop Warning AA0215*, and §2.7 summarizes *CodeCop
-  Warning AA0101*, each with the same attribution block. The runbooks' ALL ALONG → Analyzers
+  Warning AA0101*, each with the same attribution block. The Operations Guide's Ops § Analyzers
   summarizes the PerTenantExtensionCop and AppSourceCop pages.
   `translationAndMultiLanguage/MultilanguageSupportOverview.md` summarizes facts from these pages
   and carries its own attribution.

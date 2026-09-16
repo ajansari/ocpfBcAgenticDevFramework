@@ -129,9 +129,9 @@ flowchart TD
 
     subgraph PRE01["PRE-01 — State the Problem"]
         direction LR
-        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Ask working language; ask how<br/>to be notified (recorded in<br/>.ocpf/notifications.json);<br/>fetch Standards Guide into<br/>standardsGuide/ + gitignore it;<br/>ask who approves (one person<br/>or separate roles); capture raw<br/>requirements verbatim into<br/>requirements/;<br/>create ProjectProgress.md<br/>(project root); write problem<br/>statement, capture vocabulary,<br/>initial entity list, flag<br/>ambiguities"] --> Out1[/"Output:<br/>standardsGuide/ (gitignored),<br/>requirements/ (if any),<br/>ProjectProgress.md (root),<br/>ProblemStatement.md"/]
+        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Ask working language; ask how<br/>to be notified (recorded in<br/>.ocpf/notifications.json);<br/>fetch both companion guides<br/>(Standards + Ops) + gitignore;<br/>ask who approves (one person<br/>or separate roles); capture raw<br/>requirements verbatim into<br/>requirements/;<br/>create ProjectProgress.md<br/>(project root); write problem<br/>statement, capture vocabulary,<br/>initial entity list, flag<br/>ambiguities"] --> Out1[/"Output:<br/>standardsGuide/ (gitignored),<br/>requirements/ (if any),<br/>ProjectProgress.md (root),<br/>ProblemStatement.md"/]
     end
-    PRE01 --> Gate1{{"Exit gate:<br/>Standards Guide present<br/>and gitignored; notification<br/>choice recorded, applied,<br/>tested; Functional Consultant<br/>signs off (one approver:<br/>moves to PRE-02)"}}
+    PRE01 --> Gate1{{"Exit gate:<br/>Both companion guides<br/>present and gitignored; notification<br/>choice recorded, applied,<br/>tested; Functional Consultant<br/>signs off (one approver:<br/>moves to PRE-02)"}}
 
     Gate1 --> PRE02
     subgraph PRE02["PRE-02 — Structured Gap Analysis"]
@@ -378,7 +378,7 @@ flowchart LR
         Mem["Project Memory<br/>docs/ProjectMemory.md —<br/>anchor, not a narrative"]
         Prog["Project Progress Tracker<br/>ProjectProgress.md (project root) —<br/>one status table, created at PRE-01"]
         Pack["Packaging & Versioning<br/>never delete a package;<br/>propose bumps, don't apply silently"]
-        Std["OCPF AL Dev Standards Guide<br/>fetched at PRE-01 into standardsGuide/,<br/>gitignored — the rules cited as Standards §"]
+        Std["Companion guides<br/>Standards Guide (AL rules, Standards §)<br/>and Operations Guide (procedures, Ops §)<br/>fetched at PRE-01, gitignored"]
         Notif["Notifications<br/>on every turn end, question,<br/>and approval — Claude app, sound,<br/>and/or desktop, chosen at PRE-01,<br/>read every session"]
         MCP["AL MCP Server, Symbols &<br/>Editor Sync — agent sets up at<br/>§1.10, human only approves;<br/>check editor after clean compiles"]
         Ana["Analyzers<br/>CodeCop, UICop, and PerTenantExtensionCop<br/>or AppSourceCop on every<br/>mandatory compile"]
@@ -455,7 +455,7 @@ flowchart TD
 
 ---
 
-*Generated from `BC_App_Build_Routine_Agent.md` v2.15.0.0; all 8 diagrams re-rendered clean. Version
+*Generated from `BC_App_Build_Routine_Agent.md` v3.0.0.0; all 8 diagrams re-rendered clean. Version
 history is in `RunbookChangelog.md`. If the runbook changes in a way that affects the
 phase/step/role structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*

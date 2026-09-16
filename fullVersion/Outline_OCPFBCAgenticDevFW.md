@@ -59,6 +59,10 @@ documentation, and a human-run release test on top.*
 
 *Not a phase — runs underneath all four, every step, from PRE-01 to 12.*
 
+Each one keeps its non-negotiables in the runbook and points at the shared
+**Operations Guide** (`opsGuide/ocpfOperationsGuide.md`, cited as **Ops §**) for the procedure —
+fetched at PRE-01 alongside the Standards Guide.
+
 - Document
 - Track Changes — the ChangeLog
 - Retain Explanations
@@ -74,10 +78,11 @@ documentation, and a human-run release test on top.*
 - Keeping the Editor in Sync — stale red marks detected and refreshed
 - Notifications — Claude app, sound, and/or desktop notification, chosen at intake and remembered, whenever the agent finishes a turn, asks a question, or waits for an approval
 - OCPF AL Development Standards Guide — fetched at PRE-01, cited as **Standards §** throughout
+- OCPF Operations Guide — fetched at PRE-01, cited as **Ops §**: the procedures both editions share
 - Reference Sources — Microsoft Learn (BC Base App, BC System App, translation files, country/language availability) and AL Guidelines
 - BCQuality Knowledge Snapshot
 - OCPF BC AL Patterns Library
-- OCPF Plugin (optional) — update check, Standards Guide fallback, zero-install AL tool setup, sub-agents
+- OCPF Plugin (optional) — update check, offline copies of both companions, zero-install AL tool setup, notification setup, sub-agents
 
 ---
 

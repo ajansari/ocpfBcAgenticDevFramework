@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 1.7.0.0
+**Version:** 1.8.0.0
 **Last Updated:** September 15, 2026
 
 > **Audience:** Human developers and agentic (AI) developers building Business Central AL
@@ -12,8 +12,11 @@
 > API page design, field inclusion and exclusion, identifier naming, module and ID allocation,
 > gap analysis, anti-patterns, and translation and multilanguage rules.
 >
-> **Relationship to the runbook:** This guide is the companion to `BC_App_Build_Routine_Agent.md`,
-> the OnlyCopilotFans Agentic Dev Framework runbook. **The runbook drives the *sequence*** — what
+> **Relationship to the runbook:** This guide is one of two companions to
+> `BC_App_Build_Routine_Agent.md`, the OnlyCopilotFans Agentic Dev Framework runbook. The other is
+> the **OCPF Operations Guide** (`opsGuide/ocpfOperationsGuide.md`, cited as **Ops §**), which holds
+> the framework's *procedures* — asking, intake, project setup, tooling, packaging, hygiene, and the
+> translation workflow. This guide holds the AL *rules*. **The runbook drives the *sequence*** — what
 > happens when, who signs off, which gate opens the next step. **This guide holds the *rules*
 > that sequence applies.** The runbook cites it as **Standards §**. Where the two ever appear to
 > disagree about *process*, the runbook wins; where they appear to disagree about an *AL rule*,
@@ -48,7 +51,8 @@ rather than keeping a second, silently-diverging copy:
 | The Object Register | Runbook **ALL ALONG → Document** |
 | The language and translation intake questions (working language, countries, languages, source language, reviewers, document languages) | Runbook **PRE-01** and **Step 01** (Box 1 and §1.9), asked interactively |
 | The interactive API caption-locking classification | Runbook **Step 03** (the rules it applies are §8.6 below) |
-| When translations are synced, drafted, checked, and tested; the translation release gate | Runbook **Step 07**, **Step 12**, and **ALL ALONG → Translations & Terminology** |
+| When translations are synced, drafted, checked, and tested; the translation release gate | **Ops § Translations**, applied at the runbook's compile and release steps |
+| How the agent asks, sets the project up, runs the AL tools and analyzers, downloads symbols, packages, notifies, and keeps the repository clean | **Ops §** — the Operations Guide |
 
 ---
 

@@ -5,10 +5,10 @@ DEFINE → DESIGN → BUILD → PROVE) — independent of any single project bui
 is distributed as a standalone repository; a project built from an earlier copy won't otherwise
 know if or how the framework it's using has since changed. Check here for what changed and why.
 
-Since v2.4.0.0 this also tracks the two documents that ship alongside the runbook:
+Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v2.15.0.0**, the guide is at **v1.7.0.0** and Lite is at **v1.12.0.0** — but
+**v3.0.0.0**, the Standards Guide is at **v1.8.0.0**, the Operations Guide at **v1.0.0.0**, and Lite at **v2.0.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 
 Entries are grouped by version, newest first, and describe the **cumulative** result of a
@@ -17,6 +17,70 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v3.0.0.0 — September 15, 2026
+
+**The procedures both editions share now live in one fetched companion, the OCPF Operations Guide,
+cited as Ops § — so each runbook carries the sequence and its checks, not the procedures.** Full
+drops from 29,524 to about 17,200 words and Lite from 14,439 to about 9,700, with one copy to
+maintain instead of two. New **Operations Guide v1.0.0.0**. Standards Guide **v1.8.0.0**. Ships with
+Lite **v2.0.0.0**. Plugin **v2.0.0**.
+
+### Why
+
+An independent review found that the whole runbook is loaded every session and into every
+sub-agent, that much of it is used at one or two moments, and that the two editions duplicate most
+of their operational text — which had already drifted apart more than once. Moving the shared
+procedures out shrinks what's always loaded and leaves a single copy of each procedure.
+
+### Added
+
+- **`opsGuide/ocpfOperationsGuide.md` (v1.0.0.0)**, fetched into each project at PRE-01 / Lite Step
+  1 beside the Standards Guide, always gitignored, and cited as **Ops §**. Sixteen sections: Asking
+  and Approvals, Intake, Roles (Full only), Project Setup, AL Tools, Analyzers, Symbols, Editor
+  Sync, Notifications, Packaging, Repository Hygiene, Translations, Automated Tests (Full only),
+  Fetched Companions, Reference Sources, and Plugin. Written in Lite's shorter wording with Full's
+  complete content; the few edition differences are marked in place.
+
+### Changed
+
+- **Both runbooks keep the sequence and the checks.** Every step's Inputs, Actions, Outputs, and
+  Exit gate; the parameter tables; the pre-flight, API test, and Sanity Check checklists; the
+  document formats; and the hand-off notes all stay. Each ALL ALONG section keeps its
+  non-negotiables in a few lines and names the **Ops §** section with the procedure.
+- **Steps name what to read.** The step that needs a procedure says so in its Actions, and its exit
+  gate names the same section — so a moved procedure can't quietly go unread.
+- **PRE-01 / Lite Step 1 fetches both companions**, and `opsGuide/` joins the always-gitignored
+  list.
+- **Standards Guide v1.8.0.0:** its relationship note and *What is deliberately not here* table name
+  the Operations Guide as the home of the framework's procedures.
+- **Plugin v2.0.0:** `syncPlugin.sh` bundles the Operations Guide in the `start` skill's
+  `references/`; `start` places both companions and falls back to the bundled copies offline;
+  `update-framework` refreshes both to the versions the new runbook expects and compares their
+  major versions; the sub-agents and the github.com reviewer read **Ops §** alongside
+  **Standards §**.
+- **Outlines, schematics, README, and THIRD_PARTY_NOTICES** name the new companion; all 15 diagrams
+  re-rendered clean.
+
+### Verified
+
+- Every **Ops §** citation in both runbooks resolves to a section in the guide, every
+  **ALL ALONG → X** reference resolves to a section that still exists, and no markdown link in the
+  repository is broken.
+- Nothing was lost in the move: every identifier, file path, setting key, diagnostic code, and URL
+  present in the old runbooks is still present in the runbooks or the guide. Five details condensed
+  during drafting were restored (the symbol download's `enforceMinorVersion` note, BCQuality's layer
+  folders, frontmatter keys and outcome vocabulary, the patterns repository URL, the AL test library
+  names, and the runtime example).
+
+### Migration
+
+A project on an older runbook keeps working: the update check offers the new version, and
+`update-framework` fetches the Operations Guide alongside it. A project that updates by hand needs
+the `opsGuide/` fetch that PRE-01 now describes — the runbook says so at the top, and says to fetch
+the guide when it's missing.
 
 ---
 

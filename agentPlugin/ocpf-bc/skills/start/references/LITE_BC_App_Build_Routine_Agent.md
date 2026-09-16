@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 1.12.0.0 (Lite, derived from the full framework v2.15.0.0)
+**Version:** 2.0.0.0 (Lite, derived from the full framework v3.0.0.0)
 **Last Updated:** September 15, 2026
 
 > Version history for this edition lives in `LITE_RunbookChangeLog.md`, tracked independently of
@@ -17,7 +17,7 @@
 
 > **Companion documents, both fetched at Step 1 and shared unchanged with the full framework:**
 > - `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
->   (v1.7.0.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
+>   (v1.8.0.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
 > - `opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v1.0.0.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
@@ -738,7 +738,7 @@ bump. The non-negotiables:
 ## OCPF AL Development Standards Guide
 
 Two companions are fetched at Step 1 and kept for the life of the project: the **Standards Guide**
-(`standardsGuide/ocpfALDevStandardsGuide.md`, v1.7.0.0), cited as **Standards §**, and the
+(`standardsGuide/ocpfALDevStandardsGuide.md`, v1.8.0.0), cited as **Standards §**, and the
 **Operations Guide** (`opsGuide/ocpfOperationsGuide.md`, v1.0.0.0), cited as **Ops §** and shared
 unchanged with the full framework.
 
@@ -907,7 +907,7 @@ that file, skip this section.
 | Step 7 — Release for Testing | Step 12 |
 
 **Shared with the full framework, not reduced:** the OCPF AL Development Standards Guide. Both
-editions fetch the same v1.7.0.0 file and apply the same AL rules — Lite differs only in process.
+editions fetch the same v1.8.0.0 file and apply the same AL rules — Lite differs only in process.
 
 **Document count:** 4 maintained documents (`DesignDoc.md`, `ChangeLog.md`, `Docs.md`,
 `TestScript.md`), plus Step 1's two kickoff artifacts (`ProblemStatement.md`,

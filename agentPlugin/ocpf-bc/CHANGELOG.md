@@ -4,6 +4,21 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 2.0.0 — September 15, 2026
+
+**Bundles:** full runbook v3.0.0.0, Lite v2.0.0.0, Standards Guide v1.8.0.0, Operations Guide
+v1.0.0.0.
+
+- **New companion:** the Operations Guide is bundled in the `start` skill's `references/` and
+  fetched into each project alongside the Standards Guide. `start` places both and falls back to the
+  bundled copies when GitHub is unreachable.
+- **`update-framework`** refreshes both companions to the versions the new runbook expects, and
+  flags a major-version mismatch, since the runbook cites **Ops §** sections by name.
+- **Sub-agents and the github.com reviewer** read the Operations Guide alongside the Standards
+  Guide.
+- **Major version** because a project updated to these runbooks needs the new companion on disk:
+  the runbooks cite procedures that no longer live inside them.
+
 ## 1.7.0 — September 15, 2026
 
 **Bundles:** full runbook v2.15.0.0, Lite v1.12.0.0, Standards Guide v1.7.0.0.

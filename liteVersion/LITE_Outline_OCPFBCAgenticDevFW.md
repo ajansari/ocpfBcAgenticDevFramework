@@ -52,10 +52,15 @@ release test.*
 
 *Not a phase — runs underneath all four, every step, from Step 1 to 7.*
 
+Each one keeps its non-negotiables in the runbook and points at the shared
+**Operations Guide** (`opsGuide/ocpfOperationsGuide.md`, cited as **Ops §**) for the procedure —
+fetched at Step 1 alongside the Standards Guide.
+
 - `ChangeLog.md` — one log for deviations, root causes, and testing feedback (no separate
   Testing Feedback Log or Roadmap in Lite)
 - Packaging & Versioning
 - **OCPF AL Development Standards Guide** — fetched at Step 1, cited as **Standards §** throughout
+- **OCPF Operations Guide** — fetched at Step 1, cited as **Ops §**: the procedures both editions share
 - Repository Hygiene
 - AL MCP Server — needed from the end of Step 1; set up by the agent, the human only approves
 - Analyzers — CodeCop, UICop, and PerTenantExtensionCop *or* AppSourceCop, engaged on every mandatory compile
@@ -79,9 +84,11 @@ Plus two Step 1 setup artifacts, produced once at kickoff rather than maintained
 `ProblemStatement.md` and `ProjectParameters.md` (project root — the persisted intake sheet every
 later step reads from).
 
-Plus one fetched, gitignored reference: `standardsGuide/ocpfALDevStandardsGuide.md` — shared
-unchanged with the full framework. **Lite reduces process, not AL rules:** the same rules apply to
-a 5-file extension as to a 50-file one.
+Plus two fetched, gitignored companions, both shared unchanged with the full framework:
+`standardsGuide/ocpfALDevStandardsGuide.md` (the AL rules, **Standards §**) and
+`opsGuide/ocpfOperationsGuide.md` (the procedures, **Ops §**). **Lite reduces process, not AL
+rules:** the same rules apply to a 5-file extension as to a 50-file one, and both editions run the
+same procedures.
 
 ## When to Graduate to the Full Framework
 

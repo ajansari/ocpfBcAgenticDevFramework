@@ -16,6 +16,27 @@ framework.
 
 ---
 
+## v2.0.0.0 — September 15, 2026
+
+**The procedures Lite shares with the full framework now live in the fetched OCPF Operations Guide,
+cited as Ops §.** Lite drops from 14,439 to about 9,700 words and keeps its own sequence, checks,
+and document set. Derived from full framework v3.0.0.0; Standards Guide v1.8.0.0; Operations Guide
+v1.0.0.0. See `fullVersion/RunbookChangelog.md` v3.0.0.0 for the full reasoning.
+
+### Changed
+
+- **Step 1 fetches both companions** — `standardsGuide/` and `opsGuide/` — and both are always
+  gitignored.
+- **Each ALL ALONG section keeps its non-negotiables** and points at its **Ops §** section: AL
+  tools, analyzers, symbols, editor sync, notifications, packaging, repository hygiene,
+  translations, the fetched companions, and the plugin.
+- **Step 1's intake questions, the project setup, and Step 5's translation cycle** point at
+  Ops § Intake, Ops § Project Setup, and Ops § Translations. Lite's own boxes, gates, and four
+  maintained documents are unchanged.
+- **Steps name what to read**, in their Actions and again in their exit gates.
+
+---
+
 ## v1.12.0.0 — September 15, 2026
 
 **The human chooses at Step 1 how to be notified every time the agent finishes a turn, asks a

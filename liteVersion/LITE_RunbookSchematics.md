@@ -72,7 +72,7 @@ met).
 flowchart TD
     subgraph DEFINE["PHASE: DEFINE"]
         direction TB
-        S1["Step 1<br/>Define the Problem<br/>& Lock Parameters"] --> G_S1{{"Standards Guide present<br/>+ gitignored; notifications<br/>chosen and tested; no placeholder<br/>remains; ProjectParameters.md<br/>+ onboarding Qs answered;<br/>app.json + symbols ready;<br/>human confirms sheet"}}
+        S1["Step 1<br/>Define the Problem<br/>& Lock Parameters"] --> G_S1{{"Both companion guides<br/>present + gitignored; notifications<br/>chosen and tested; no placeholder<br/>remains; ProjectParameters.md<br/>+ onboarding Qs answered;<br/>app.json + symbols ready;<br/>human confirms sheet"}}
     end
 
     subgraph DESIGN["PHASE: DESIGN"]
@@ -119,9 +119,9 @@ flowchart TD
 
     subgraph S1["STEP 1 — Define the Problem & Lock Parameters"]
         direction LR
-        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Ask working language; ask how<br/>to be notified (recorded in<br/>.ocpf/notifications.json);<br/>fetch Standards Guide into<br/>standardsGuide/ + gitignore it;<br/>capture raw requirements<br/>verbatim; write problem<br/>statement + quick gap check<br/>(Standards Part 6); ask every<br/>intake question in grouped<br/>option boxes (up to 4 each),<br/>never inferred, then one confirm; persist<br/>ProjectParameters.md; then the<br/>agent writes app.json, connects<br/>AL tools, downloads symbols,<br/>checks the editor"] --> Out1[/"Output:<br/>standardsGuide/ (gitignored),<br/>requirements/ (if any),<br/>ProblemStatement.md,<br/>ProjectParameters.md,<br/>app.json, .alpackages/"/]
+        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Ask working language; ask how<br/>to be notified (recorded in<br/>.ocpf/notifications.json);<br/>fetch both companion guides<br/>(Standards + Ops) + gitignore;<br/>capture raw requirements<br/>verbatim; write problem<br/>statement + quick gap check<br/>(Standards Part 6); ask every<br/>intake question in grouped<br/>option boxes (up to 4 each),<br/>never inferred, then one confirm; persist<br/>ProjectParameters.md; then the<br/>agent writes app.json, connects<br/>AL tools, downloads symbols,<br/>checks the editor"] --> Out1[/"Output:<br/>standardsGuide/ (gitignored),<br/>requirements/ (if any),<br/>ProblemStatement.md,<br/>ProjectParameters.md,<br/>app.json, .alpackages/"/]
     end
-    S1 --> Gate1{{"Exit gate:<br/>Standards Guide present + gitignored,<br/>notification choice recorded,<br/>applied, and tested,<br/>no placeholder remains,<br/>onboarding questions answered,<br/>app.json matches sheet,<br/>symbols in .alpackages/,<br/>human confirms sheet"}}
+    S1 --> Gate1{{"Exit gate:<br/>Both companion guides present + gitignored,<br/>notification choice recorded,<br/>applied, and tested,<br/>no placeholder remains,<br/>onboarding questions answered,<br/>app.json matches sheet,<br/>symbols in .alpackages/,<br/>human confirms sheet"}}
 
     Gate1 --> Next(["to DESIGN, Step 2"])
 
@@ -288,7 +288,7 @@ flowchart LR
         direction TB
         Change["ChangeLog.md — the single log<br/>merges ChangeLog + Testing<br/>Feedback + Roadmap into one file"]
         Pack["Packaging & Versioning<br/>never delete a package;<br/>propose bumps, don't apply silently"]
-        Std["OCPF AL Dev Standards Guide<br/>fetched at Step 1, gitignored —<br/>the one fetch that isn't optional"]
+        Std["Companion guides<br/>Standards Guide (Standards §) and<br/>Operations Guide (Ops §) — fetched<br/>at Step 1, gitignored, not optional"]
         Hygiene["Repository Hygiene<br/>standardsGuide/, patterns/,<br/>.alpackages/ always gitignored;<br/>BCQuality outside the project;<br/>packages tracked"]
         Notif["Notifications<br/>on every turn end, question,<br/>and approval — Claude app, sound,<br/>and/or desktop, chosen at Step 1,<br/>read every session"]
         MCP["AL MCP Server, Symbols &<br/>Editor Sync — agent sets up at<br/>Step 1, human only approves;<br/>check editor after clean compiles"]
@@ -314,7 +314,7 @@ flowchart LR
 
 ---
 
-*Generated from `LITE_BC_App_Build_Routine_Agent.md` v1.12.0.0; all 7 diagrams re-rendered clean.
+*Generated from `LITE_BC_App_Build_Routine_Agent.md` v2.0.0.0; all 7 diagrams re-rendered clean.
 Version history is in `LITE_RunbookChangeLog.md`. If the Lite runbook changes in a way that
 affects the phase/step structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*

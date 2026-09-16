@@ -159,7 +159,7 @@ publisher and prefix once forced a full-project rename.
 | **2 — Naming** *(built from Box 1)* | 5. AL object prefix? | Two or three short lowercase prefixes built from the name and publisher. |
 | | 6. Which namespace? | `<Publisher>.<ExtensionShort>` built from Box 1 *(recommended)* / one alternative spelling / *No namespace* (only for a deliberate reason, such as a BC version predating namespaces). One answer records both **Use Namespace** and **Namespace**. |
 | | 7. Localization? | Up to three of the Box 1 countries as codes (e.g. `US`), then `W1`. |
-| | 8. Business Central version? | The current BC online major version *(recommended)* and the one before it, looked up on Microsoft Learn, never from memory. A sandbox the human already has is the natural choice. Don't ask for `runtime`: read it from Microsoft Learn's [Choose runtime version in AL](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-choosing-runtime) table. |
+| | 8. Business Central version? | The current BC online major version *(recommended)* and the one before it, looked up on Microsoft Learn, never from memory. A sandbox the human already has is the natural choice. Don't ask for `runtime`: read it from Microsoft Learn's [Choose runtime version in AL](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-choosing-runtime) table (for example runtime `17.0` ships with Business Central 28.0). |
 | **3 — Permission sets & IDs** *(built from Box 2)* | 9. Permission Set App Code? | Two or three uppercase codes built from the name that fit `13 − (prefix length)` characters. The question says the code must differ from every other extension using this prefix (**Standards §5.4**). |
 | | 10. Do other extensions already use this prefix? | *No, this is the first* / *Yes — I'll type their App Codes or permission set names*. If one matches answer 9, ask 9 again, alone. If the human isn't sure, recommend a more specific code. |
 | | 11. Object ID range? | Complete ranges, each with its size: any range the human's material names (e.g. *80300–80339 — 40 IDs*); *50100–50149 — 50 IDs*, described as "the AL template's default: only if no range has been assigned to you"; or type one as `start–end`. A typed range whose start is above its end is asked again. |
@@ -473,7 +473,9 @@ unresolved one under the runbook's zero-warnings rule.
    Copilot Chat.
 
 Global sources need no connection or sign-in — verified September 15, 2026 on AL extension 18.0: a
-full BC 27 set in under 10 seconds.
+full BC 27 set (System, Application, System Application, Business Foundation, Base Application) in
+under 10 seconds. The download takes the newest build of `app.json`'s major version (`27.0.0.0` →
+27.5) unless `enforceMinorVersion: true` is set.
 
 **The AL MCP Server's global download is W1 only.** It ignores `al.symbolsCountryRegion`, which VS
 Code's own download honors. When Localization isn't `W1`: in Copilot Chat, set
@@ -906,7 +908,7 @@ one-time manual script doesn't.
 
 - **AL Test Framework (native).** Business Central's own mechanism: a test codeunit
   (`Subtype = Test`) per feature area, with `[Test]`-attributed methods and the platform's test
-  libraries, exercising the app's actual business logic — tables, codeunits, pages — directly in AL,
+  libraries (`Library Assert`, `Library - Random`, and the rest), exercising the app's actual business logic — tables, codeunits, pages — directly in AL,
   not limited to what an API happens to expose. Run from the in-client **Test Tool** page during
   development and headlessly in CI (AL-Go for GitHub's test pipeline, or `BcContainerHelper`'s
   `Run-TestsInBcContainer`). Conventionally shipped as its own **test app**: a separate `app.json`
@@ -1002,21 +1004,26 @@ replace it, and the agent's own findings still count without a knowledge-file ci
 2. Read the meta-skill contracts (`skills/read.md`, `skills/do.md`; `skills/write.md` only when
    authoring knowledge) on demand, not upfront.
 3. Invoke each dispatched action skill from the snapshot's layers — for a full review, typically
-   `microsoft/skills/review/al-code-review.md`, which composes per-domain leaf skills.
+   `microsoft/skills/review/al-code-review.md`, which composes per-domain leaf skills (security,
+   performance, privacy, style) from the snapshot's layers (`microsoft/skills/`,
+   `community/skills/`, `custom/`).
 4. Each action skill runs Source → Relevance → Worklist → Action, filtering knowledge files by
-   frontmatter across every enabled layer, higher-precedence layers suppressing lower ones. A
+   frontmatter (`bc-version`, `domain`, `technologies`, `countries`, `application-area`) across
+   every enabled layer, higher-precedence layers suppressing lower ones. A
    prebuilt `knowledge-index.json` speeds discovery when present; without it, skills fall back to
    path-based discovery and review still works.
-5. Findings come back in `do.md`'s shape: an outcome, a `domain` label, structured `references` for
-   knowledge-backed findings, an empty `references: []` for the agent's own (capped at medium
-   confidence), and a `suppressed` list. Integrate them like any other Code Review finding — never
+5. Findings come back in `do.md`'s shape: an outcome (`completed` / `not-applicable` /
+   `no-knowledge` / `partial` / `failed`), a `domain` label, structured `references` for
+   knowledge-backed findings, an empty `references: []` for the agent's own (capped at `medium`
+   confidence), and a `suppressed` list of anything layer precedence overrode. Integrate them like any other Code Review finding — never
    applied blind.
 
 No network access is needed once the snapshot exists.
 
 ### OCPF BC AL Patterns library
 
-`ajansari/ocpfBCALPatterns` on GitHub is the framework author's own curated collection of reusable
+`ajansari/ocpfBCALPatterns` on GitHub (<https://github.com/ajansari/ocpfBCALPatterns>) is the
+framework author's own curated collection of reusable
 BC AL patterns, each extracted from a real bug found and fixed on a past project and then
 generalized: symptom, verified root cause, the fix, a worked example, and caveats, one self-contained
 Markdown file per pattern. Where BCQuality is a third-party platform-wide knowledge base, this is

@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 2.15.0.0
+**Version:** 3.0.0.0
 **Last Updated:** September 15, 2026
 
 > Version history for this framework lives in `RunbookChangelog.md`, tracked independently of any
@@ -15,7 +15,7 @@
 >
 > **Companion documents, both fetched at PRE-01 and kept for the life of the project:**
 > - `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
->   (v1.7.0.0): the AL *rules* this sequence applies (Parts 1–8, Appendices A–D), cited below as
+>   (v1.8.0.0): the AL *rules* this sequence applies (Parts 1–8, Appendices A–D), cited below as
 >   **Standards §**.
 > - `opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v1.0.0.0): the *procedures*
 >   this sequence uses — asking, intake, project setup, the AL tools, analyzers, symbols, editor
@@ -1017,7 +1017,7 @@ change.
 
 ## OCPF AL Development Standards Guide
 
-The companion rules document — `ocpfALDevStandardsGuide.md`, v1.7.0.0 — holds the AL rules this
+The companion rules document — `ocpfALDevStandardsGuide.md`, v1.8.0.0 — holds the AL rules this
 runbook cites as **Standards §**, from PRE-02 onward. Its sibling, the **Operations Guide**
 (`ocpfOperationsGuide.md`, v1.0.0.0), holds the procedures, cited as **Ops §**.
 
