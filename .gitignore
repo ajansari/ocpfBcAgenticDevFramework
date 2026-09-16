@@ -23,6 +23,8 @@ rad.json
 TestResults.xml   
 #Standalone HTML
 slidedecks/standaloneHTML/
+#OldSlidedecks
+slidedecks/oldSlidedecks/
 #Fonts folder
 slidedecks/fonts/
 #Multilanguage design working notes — local only, never pushed to the remote
