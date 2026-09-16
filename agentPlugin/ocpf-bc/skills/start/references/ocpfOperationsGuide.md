@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 1.1.0.0
+**Version:** 1.2.0.0
 **Last Updated:** September 15, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
@@ -162,7 +162,7 @@ publisher and prefix once forced a full-project rename.
 | | 8. Business Central version? | The current BC online major version *(recommended)* and the one before it, looked up on Microsoft Learn, never from memory. A sandbox the human already has is the natural choice. Don't ask for `runtime`: read it from Microsoft Learn's [Choose runtime version in AL](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-choosing-runtime) table (for example runtime `17.0` ships with Business Central 28.0). |
 | **3 — Permission sets & IDs** *(built from Box 2)* | 9. Permission Set App Code? | Two or three uppercase codes built from the name that fit `13 − (prefix length)` characters. The question says the code must differ from every other extension using this prefix (**Standards §5.4**). |
 | | 10. Do other extensions already use this prefix? | *No, this is the first* / *Yes — I'll type their App Codes or permission set names*. If one matches answer 9, ask 9 again, alone. If the human isn't sure, recommend a more specific code. |
-| | 11. Object ID range? | Complete ranges, each with its size: any range the human's material names (e.g. *80300–80339 — 40 IDs*); *50100–50149 — 50 IDs*, described as "the AL template's default: only if no range has been assigned to you"; or type one as `start–end`. A typed range whose start is above its end is asked again. |
+| | 11. Object ID range? | Complete ranges, each with its size: any range the human's material names (e.g. *80300–80339 — 40 IDs*); *50100–50149 — 50 IDs*, described as "the AL template's default: only if no range has been assigned to you"; or type one as `start–end`. A typed range whose start is above its end is asked again. **When Deployment Target is `AppSource`, the options change** — see *The AppSource questions* below. |
 | | 12. Another Object ID range? | *No* / *Yes*. Each *Yes* opens a box with questions 11 and 12 again. |
 | **4 — Onboarding** | 13–15. Assisted Setup Wizard? Role Center Activity Cues? Departments / "My Business Central" placement? | *No* / *Yes* each, with the runbook's one-line description of what each is. A follow-up box then asks the specifics of every *Yes*, offering choices drawn from the problem statement. |
 | | 16. Permission Sets required? *(only if the entity list has no new table)* | *No — the extension adds no tables* / *Yes*. Not asked once the extension owns a table: then it's `Yes` (**Standards §5.3**). |
@@ -177,6 +177,50 @@ with *I'll type it*, more than four candidates trimmed to the four most likely.
 
 **Lite differs only by what it doesn't have:** no question 17 (no role split), and its Box 5 carries
 the `.gitignore` question, the source language, and the per-country language questions together.
+
+### The AppSource questions
+
+**Asked only when the answer to question 3 is `AppSource`**, and asked during intake — not
+discovered at release, when a missing manifest property means the submission is rejected outright
+(**Standards Appendix E**). For `SaaS PTE` and `OnPrem PTE`, skip this whole section; none of it
+applies.
+
+**Question 11 changes.** An AppSource app's ID range is **registered to the publisher by
+Microsoft**, not chosen (**Standards §5.5**). Offer:
+- any range the human's material names, if it falls in 1,000,000–69,999,999 or
+  70,000,000–74,999,999;
+- *I'll type the range Microsoft assigned us* — validated against those two bands, and asked again
+  with the reason if it isn't in one;
+- *We don't have one yet* — accepted, recorded as a release blocker in the parameter sheet, and
+  said plainly in the question: the app can be built and tested, but can't be submitted until a
+  range is requested.
+
+**Never offer `50100–50149` here**, or any other part of 50,000–99,999: that's the customization
+range, and an app submitted from it fails validation.
+
+**Two extra boxes, after Box 3.** Every answer is written into `app.json` at project setup, and
+each one is mandatory for submission:
+
+| Box | Questions | Options to offer |
+|---|---|---|
+| **3a — Marketplace listing** | A1. Short description (`brief`)? | One line drawn from the problem statement, labelled a suggestion, plus *I'll type it*. It must match the offer listing in Partner Center. |
+| | A2. Long description (`description`)? | A paragraph drawn from the problem statement, labelled a suggestion, plus *I'll type it*. |
+| | A3. Product or support website (`url`)? | The publisher's domain if the human has given one, plus *I'll type it*. Say what it's for: it shows as **Website** on the **Extension Management** page. |
+| | A4. Logo file? | *I'll give you the path* / *I'll add it later* — if later, record it as a release blocker. The file is committed in the project and referenced by a relative path. |
+| **3b — Legal and support URLs** | A5. Privacy statement URL (`privacyStatement`)? | *I'll type it*, or the publisher's domain with a suggested path. |
+| | A6. License terms URL (`EULA`)? | Same. |
+| | A7. Help and troubleshooting URL (`help`)? | Same, plus *Same as the context-sensitive help URL*. |
+| | A8. Context-sensitive help URL (`contextSensitiveHelpUrl`)? | Same, plus *Same as the help URL*. If the app won't cover every BC locale, say so and record `/{0}/` in the URL with the locales in `supportedLocales`. |
+| | A9. Application Insights connection string? | *I'll paste it* / *Not yet*. Microsoft calls it recommended rather than mandatory, so *Not yet* is accepted — but say what it costs: Microsoft writes the detailed validation-failure telemetry there, so without it a rejected submission can't be diagnosed. |
+
+**One more thing to say out loud, once, in Box 3a:** for AppSource, `name`, `publisher`, and
+`version` must match the Partner Center offer exactly, so changing any of them later means changing
+the offer too.
+
+**Two answers elsewhere in the intake are already settled by `AppSource` and shouldn't be asked as
+if they were open:** the analyzer set becomes CodeCop + AppSourceCop + UICop (**Ops § Analyzers**),
+and translation files are mandatory regardless of language count (**Standards §8.10**) — so the
+`en-US`-only shortcut isn't offered. State both as consequences when the human picks `AppSource`.
 
 ### The language questions
 
@@ -308,6 +352,12 @@ own approval prompts.
    exists (for example the human ran **AL: Go!**), keep its `id` GUID and replace the rest. Don't
    change `idRanges`, `platform`, `application`, `runtime`, or `dependencies` again without
    re-running step 4.
+   - **Deployment Target `AppSource` adds mandatory properties:** `brief`, `description`, `url`,
+     `privacyStatement`, `EULA`, `help`, `contextSensitiveHelpUrl`, `logo`, `application`, and
+     `applicationInsightsConnectionString` where the human gave one — all from the intake's
+     AppSource boxes (**Ops § Intake**), written now rather than at release, because a missing one
+     is a rejected submission, not a warning (**Standards Appendix E**). Any the human deferred
+     stay recorded as release blockers.
 2. **Connect the AL tools** if this session doesn't have them (Ops § AL Tools).
 3. **Download symbols** (Ops § Symbols). Confirm `.alpackages/` holds the Base Application and
    System Application for the target version, and record where they came from as the sheet's Symbol
@@ -425,14 +475,15 @@ Deployment Target parameter:
   incompatible: *"Make sure to enable only one of these at a time."*
 - **AppSourceCop needs `AppSourceCop.json`** in the project root — at minimum
   `{ "mandatoryAffixes": ["<prefix>"] }` with the project's AL Object Prefix — or the compile fails
-  with `AS0054` before it evaluates a single file.
+  with `AS0054`, whatever the code looks like.
 - **Both files are created at the scaffold step** (Full Step 05 / Lite Step 3):
   `.vscode/settings.json` with `"al.enableCodeAnalysis": true` and `"al.codeAnalyzers"` set to the
   three analyzers above, plus `AppSourceCop.json` when the target is AppSource. The settings also
   give the human live analyzer feedback in the editor.
 
 **What the compile then proves:** `PTE0004` / `AS0103` (a table missing a matching permission set,
-**Standards §5.3**), `PTE0008` / `AS0062` (a page control or action missing `ApplicationArea`),
+**Standards §5.3**), `PTE0008` / `AS0062` (observed on a page field missing `ApplicationArea`; API pages don't carry the
+property, so this one lands on UI pages the project adds),
 `AA0074` (a `Label` missing its suffix, **§8.4**), `AA0101` (API names not camelCase, **§2.7**),
 `AA0215` (a file not named after its object, **§1.8**), and `AL0424` (deprecated multilanguage
 syntax, **§1.7**). It doesn't replace symbol verification (Operating Rule 2), permission set App
@@ -443,9 +494,19 @@ quality or the API caption-locking decisions.
 compiling a table with no permission set and confirming `PTE0004` appears:
 - **GitHub Copilot Chat in VS Code:** the built-in `al_build`, which reads the
   `.vscode/settings.json` analyzers when its `codeAnalyzers` argument is omitted.
-- **Claude Code, Copilot CLI, or any other MCP host: not the AL MCP Server's
-  `al_build`/`al_compile`.** They don't apply analyzers, whether passed as the `codeAnalyzers`
-  argument, the `--codeanalyzers` launch flag, or workspace settings. Run
+- **Claude Code, Copilot CLI, or any other MCP host: `scripts/al-analyze.*` is the mandatory
+  compile, not the AL MCP Server's own tools.** `al_build` never applies analyzers — whatever is
+  passed as `codeAnalyzers`, as the `--codeanalyzers` launch flag, or in workspace settings — and
+  reports `succeeded: true` while packaging code that has analyzer *errors*. `al_compile` does
+  apply them, but only when `enableCodeAnalysis: true` **and** a `codeAnalyzers` list of the
+  well-known tokens (`${CodeCop}`, `${PerTenantExtensionCop}`, `${UICop}`, `${AppSourceCop}`) are
+  both passed **at the top level of `options`** — not wrapped in a `parameters` key, which only
+  `al_symbolsearch` takes
+  ([AL MCP Server](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/al-agent-tools/al-mcp-server)),
+  and not as literal analyzer DLL paths, which return `AD0001` instead of rule results. **Get any
+  of that wrong and it returns a clean pass on failing code**, so never read an `al_compile` result
+  as a clean build unless the request had exactly that shape. It also produces no `.app`, so it's a
+  fast pre-check, never Operating Rule 4's compile-and-package. Run
   `scripts/al-analyze.sh <project folder> <output .app path> [pte|appsource]` instead (Windows:
   `scripts\al-analyze.cmd`, same arguments; the profile defaults to `pte`). The plugin's
   `al-mcp-setup` skill copies it into `scripts/`; otherwise fetch it beside the launcher
@@ -708,6 +769,12 @@ every code change after it. Version bumps stay separately gated.
 `app.json` at build time, never hardcoded or typed by hand. Example: `IP Tracking` at `1.0.0.0` →
 `IP_Tracking_1.0.0.0.app`. It goes in a fixed folder named **`outputAppPackage/`** in the project
 root — every project, that exact name, never `out/`, `output/`, or anything improvised.
+
+**The tools don't do this by themselves — name the output explicitly.** Left to its default,
+`al_build` writes `<publisher>_<name>_<version>.app`, keeping the spaces (verified September 15,
+2026: publisher `OCPFReview`, name `OCPF Analyzer Repro` → `OCPFReview_OCPF Analyzer Repro_1.0.0.0.app`).
+So pass the full path the framework wants — `outputPath` on `al_build`, the second argument to
+`scripts/al-analyze.*` — rather than accepting the default and renaming afterwards.
 **Say it twice:** once plainly at intake, before any package exists, and again with the exact path
 every time a build completes ("Package built: `outputAppPackage/IP_Tracking_1.0.0.0.app`"), never
 buried inside a longer status paragraph. Confirm `app.json` identity, runtime, and dependencies
@@ -760,6 +827,15 @@ action instead of silently complying. If the human insists, get an explicit over
 mismatch first. Inside the cycle, packaging with known open issues is the whole point: that's how
 they get tested.
 
+**The agent never publishes to a production environment.** Before every publish, read the target
+from `launch.json` or the explicit arguments and state it plainly: environment name and type. If it
+isn't a sandbox, stop and ask. The agent's own publish tool takes `environmentType`
+(`Sandbox` / `Production`), `schemaUpdateMode` (`Synchronize` / `ForceSync` / `Recreate`), and
+`forceUpgrade` — so it *can* force a destructive schema change on a production tenant. **Never pass
+`ForceSync`, `Recreate`, or `forceUpgrade: true` without a separate approval that names what can be
+lost**, and never at all against production. The production deploy at the release step is the
+human's, through Extension Management.
+
 **Flag Schema Sync Mode on every completed build, not only when asked.** Uploading a `.app` to a
 Business Central Online tenant through **Extension Management** offers **Add** (the default: warns
 and refuses an incompatible schema; no data loss) or **Force Sync** (overwrites the schema even when
@@ -768,8 +844,9 @@ and can lose data; Microsoft's guidance is to test a forced sync in a sandbox fi
 build actually changed and say which mode it needs: "This build only adds fields — upload with the
 default **Add** sync mode", or "This build removes `<field>` — you'll need **Force Sync**, and it
 may lose data in `<what>`." Never assume the human knows, and never let a schema-breaking change go
-out without the warning. (`launch.json`'s `schemaUpdateMode` — `Synchronize` / `Recreate` /
-`ForceSync` — is a different mechanism, for local F5 publishing only; don't conflate them.)
+out without the warning. (`schemaUpdateMode` — `Synchronize` / `Recreate` / `ForceSync` — is the same-named but separate
+setting used by `launch.json` for F5 publishing *and* by the agent's publish tool; it isn't the
+Extension Management choice, so don't conflate the two when explaining this to the human.)
 
 ---
 
@@ -936,6 +1013,49 @@ API-level automation.
 - **If any are created**, write a companion `AutomatedTestScripts.md` — a separate document from the
   human unit test script — naming which kinds were created, what they cover, how to run them, and
   how to keep them current as the app, not just its API, changes.
+
+### Running AL test codeunits: `al_run_tests`
+
+When AL Test Framework codeunits exist and the AL MCP Server is connected, **the agent runs them
+itself** — the human doesn't open the Test Tool page to find out whether the build is green.
+Verified against the live tool schema on AL Language extension 18.0.2732683 (September 15, 2026);
+re-verify on a newer release.
+
+**The call.** Arguments go at the **top level** — no `parameters` wrapper (Ops § Analyzers explains
+why that distinction bites). Only `codeunitId` is required:
+
+```
+al_run_tests  { "codeunitId": 60310,
+                "projectPath": "<project folder>",
+                "environmentName": "<sandbox name>",
+                "environmentType": "Sandbox",
+                "company": "<company>" }
+```
+
+- **`projectPath` is the least error-prone way to connect:** the tool reads the connection from the
+  project's `launch.json` rather than from arguments that can drift out of step with it.
+- **One codeunit per call.** `codeunitId` is a single integer, so the agent iterates the test
+  codeunits in the Object Register and aggregates the results itself. `testMethods` narrows a run
+  to named methods while fixing one failure — never for the run that reports the build green.
+- **Other arguments**, all optional: `company`, `tenant`, `authentication`
+  (`AAD` | `Windows` | `UserPassword`), `useInteractiveLogin` (default `true` — it opens a browser),
+  `noCache`, and for on-premises `serverUrl`, `serverInstance`, `port`. The tool also reads
+  `BC_SERVER_URL`, `BC_SERVER_INSTANCE`, `BC_SERVER_PORT`, `BC_SERVER_USERNAME`, and
+  `BC_SERVER_PASSWORD` from the environment.
+- **It returns a pass/fail summary with detail for failures** — read the failures, don't report the
+  summary line alone.
+
+**`environmentType` is never `Production`.** Tests write data. The same rule as publishing applies
+(Ops § Packaging): state the target environment before running, and if `launch.json` points at
+production, stop and ask rather than passing an override.
+
+**Where it fits.** The tests run after a clean analyzer compile and a successful publish, as part of
+the runbook's testing step — not instead of the human unit test script, which covers what a person
+must see in the UI. **A failing test codeunit fails the step**, exactly like a compiler error: it's
+fixed, not annotated.
+
+**When the server isn't connected**, or sign-in was skipped, say so plainly and leave the test run
+to the human with the codeunit IDs listed — never report untested code as tested.
 
 ---
 

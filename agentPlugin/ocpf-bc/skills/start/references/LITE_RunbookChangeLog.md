@@ -16,6 +16,46 @@ framework.
 
 ---
 
+## v2.2.0.0 — September 15, 2026
+
+Derived from full framework **v3.3.0.0**; Standards Guide **v1.9.0.0**; Operations Guide
+**v1.2.0.0**. Lite carries the same AL rules and the same corrections — it differs only in process.
+
+### Corrected
+
+- **The analyzer claim.** Lite said the AL MCP Server's compile tools "don't apply analyzers." In
+  fact `al_build` never does, while `al_compile` does — but only with `enableCodeAnalysis: true`
+  and a `codeAnalyzers` token list passed at the top level of `options`. Every other shape returns
+  a clean pass on failing code, which is the more dangerous failure. `scripts/al-analyze.*` remains
+  the mandatory compile (`al_compile` writes no `.app`). Full detail in **Ops § Analyzers**.
+
+### Added
+
+- **AppSource changes the intake.** The Deployment Target row now says so, and a new parameter row
+  carries the manifest set (`brief`, `description`, `url`, `logo`, `privacyStatement`, `EULA`,
+  `help`, `contextSensitiveHelpUrl`, and `applicationInsightsConnectionString` where given) — each
+  mandatory for submission, with anything deferred recorded as a release blocker. The questions
+  themselves are **Ops § Intake → *The AppSource questions***; the rules are **Standards
+  Appendix E**.
+- **The object ID range belongs to the deployment target** (**Standards §5.5**): PTE work uses
+  50,000–99,999; AppSource uses only a publisher-registered range, never the customization range.
+- **Upgrade and events are Design Doc content.** Part B now requires the upgrade plan — codeunits,
+  triggers, upgrade tags, and the two-version obsolete cycle (**Standards Part 9**) — and the event
+  inventory, published and subscribed (**Standards Part 10**). "No upgrade code needed" is written
+  down with its reason rather than left silent.
+- **Step 6 runs the AL tests.** If the project has test codeunits, the agent runs them with
+  `al_run_tests` against the sandbox, one codeunit per call (**Ops § Automated Tests**), never
+  against production. A failing test fails the step; an unconnected server is said plainly instead
+  of reported as a pass. Added to the step and its exit gate.
+
+### Changed
+
+- **The Step 5 schematic's test node** now says what it actually means: testing is by hand by
+  default, and agent-run only if round 1's offer was accepted *and* an HTTP-capable route exists —
+  the AL MCP Server is not one. Re-rendered.
+
+---
+
 ## v2.1.0.0 — September 15, 2026
 
 **The agent can run the API checks from the first build of the fix cycle, if the human wants it.**

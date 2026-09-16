@@ -2,15 +2,17 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 1.8.0.0
+**Version:** 1.9.0.0
 **Last Updated:** September 15, 2026
 
 > **Audience:** Human developers and agentic (AI) developers building Business Central AL
 > Per-Tenant Extensions (PTEs).
 >
-> **Purpose:** The detailed, project-agnostic *rules* for writing AL in a PTE — coding standards,
-> API page design, field inclusion and exclusion, identifier naming, module and ID allocation,
-> gap analysis, anti-patterns, and translation and multilanguage rules.
+> **Purpose:** The detailed, project-agnostic *rules* for writing AL — coding standards, API page
+> design, field inclusion and exclusion, identifier naming, module and ID allocation, gap analysis,
+> anti-patterns, translation and multilanguage rules, upgrade and data migration, and events and
+> extensibility. Appendix E adds the rules that apply only when the extension is destined for
+> AppSource rather than a single tenant.
 >
 > **Relationship to the runbook:** This guide is one of two companions to
 > `BC_App_Build_Routine_Agent.md`, the OnlyCopilotFans Agentic Dev Framework runbook. The other is
@@ -657,6 +659,33 @@ names lose that access when the new version is installed. Before shipping the re
 holds the old sets (the **Permission Set by User** page), reassign them right after the
 upgrade, and say so in the release's deployment notes.
 
+### 5.5 Object ID Ranges Belong to the Deployment Target
+
+**The range an extension may use is decided by where it will be installed, not by preference.**
+Microsoft's [Object ranges](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-object-ranges)
+(read September 15, 2026):
+
+| Range | Who it's for | Use it when Deployment Target is |
+|---|---|---|
+| 0–49,999 | Business Central base app. "mustn't be used in extensions or customizations." | never |
+| 50,000–99,999 | "customizations, and for test purposes" — per-tenant extensions built for one tenant | `SaaS PTE`, `OnPrem PTE` |
+| 100,000–999,999 | Microsoft's own country/regional localizations. "These objects can't be used by partners." | never |
+| 1,000,000–69,999,999 | *RSP Object Range*, tied to the Registered Solution Program. Microsoft: "We currently advise new publishers to **not** request an RSP object range." | `AppSource`, only if the publisher already holds one |
+| 70,000,000–74,999,999 | *App Object Range*. Microsoft: "We currently advise new publishers to request an app object range." | `AppSource` — the default for a new publisher |
+
+**An AppSource range is registered to the publisher, not invented.** The technical validation
+checklist: *"You're required to register an ID range for your publisher name and to use it in your
+extension."* So when Deployment Target is `AppSource`, the intake asks for the range the publisher
+was **assigned** and doesn't offer the AL template's `50100–50149` at all — an app in the
+customization range fails validation. If the human doesn't have a range yet, record that the app
+can't be submitted until one is requested (Microsoft's
+[Requesting an object range](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/readiness/get-started#requesting-an-object-range))
+and build in the assigned range once it arrives; re-numbering objects later is a rename of every
+object in the extension.
+
+**`50100–50149` is the AL template's default, not an allocation.** It's offered for PTE work only
+when no range has been assigned, and two extensions on the same tenant that both take it collide.
+
 ---
 
 ## Part 6 — Gap Analysis Checklist
@@ -1003,37 +1032,291 @@ Applies when the runbook's Deployment Target is `AppSource`.
 
 ---
 
+## Part 9 — Upgrade and Data Migration
+
+Applies from the extension's **second version onward**, and to the first version as soon as it has
+been installed anywhere real. Verified against Microsoft Learn,
+[Upgrading extensions](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-upgrading-extensions)
+(read September 15, 2026).
+
+### 9.1 When Upgrade Code Is Required
+
+**An upgrade is any install of a higher `version` than the one already there.** Microsoft: *"An
+upgrade is defined as enabling an extension that has a greater version number, as defined in the
+app.json file, than the current installed extension version."*
+
+Write upgrade code when the new version changes what existing data must look like:
+
+| Change | Upgrade code needed? |
+|---|---|
+| Added a table, page, report, codeunit | No — new objects arrive empty and work |
+| Added a field that existing records need a value in | **Yes** — nothing backfills it |
+| Renamed or replaced a field (obsoleted the old one) | **Yes** — copy the data across (§9.3) |
+| Changed the meaning of an existing field's values | **Yes** |
+| Changed an option/enum member's meaning or removed one | **Yes** |
+| Added a new table that must be linked to existing records | **Yes** |
+| Code-only change, no data implication | No |
+
+Microsoft: *"If there are no data changes between the extension versions, you don't need to write
+upgrade code. All data that isn't modified by upgrade code will automatically be available when the
+process completes."* **Deciding "no upgrade code" is a decision to record**, in the ChangeLog entry
+for the version — not a step to skip silently.
+
+### 9.2 The Upgrade Codeunit
+
+Upgrade logic goes in a codeunit with `Subtype = Upgrade`. Its triggers run in this order, and an
+error in any of them fails the whole upgrade:
+
+| Trigger | Purpose |
+|---|---|
+| `OnCheckPreconditionsPerCompany()` / `OnCheckPreconditionsPerDatabase()` | Verify the data is in a state the upgrade can handle. Fail loudly here rather than half-way through. |
+| `OnUpgradePerCompany()` / `OnUpgradePerDatabase()` | The actual data work. |
+| `OnValidateUpgradePerCompany()` / `OnValidateUpgradePerDatabase()` | Verify the result. |
+
+- **`PerCompany` runs once for every company** in the database, each in its own system session.
+  **`PerDatabase` runs once for the whole upgrade**, in a session with no company open — so never
+  touch company-scoped records from a `PerDatabase` trigger.
+- **One upgrade codeunit per concern, each independently runnable.** Microsoft: *"There's a set
+  order to the sequence of the upgrade triggers, but the execution order of the different codeunits
+  isn't guaranteed."*
+- **Name and number them like any other object** (§1.1, Part 4, §5.1), and register them in the
+  Object Register.
+
+### 9.3 Guard Every Upgrade with an Upgrade Tag
+
+**Upgrade code must not run twice.** Use the System Application's **Upgrade Tags** module —
+codeunit 9999 `"Upgrade Tag"` — rather than comparing version numbers, for anything beyond a
+first-install check. Microsoft's guidance table puts tags ahead of version comparison for large
+apps, apps that version more than once a year, and *"fixing a broken upgrade"*; version data is for
+*"when checking whether it's a first-time installation… comparing with 0.0.0.0"*.
+
+The pattern, in three parts — all three, every time:
+
+1. **Guard the upgrade code.**
+   ```AL
+   if UpgradeTagMgt.HasUpgradeTag(UpgradeTags.GetOCPFShoeSizeTag()) then
+       exit;
+   UpgradeShoeSize();
+   UpgradeTagMgt.SetUpgradeTag(UpgradeTags.GetOCPFShoeSizeTag());
+   ```
+2. **Register the tag for companies created later**, by subscribing to
+   `OnGetPerCompanyUpgradeTags` (or `OnGetPerDatabaseUpgradeTags`) on codeunit `"Upgrade Tag"` — a
+   new company has no legacy data, so its upgrade code must be skipped, not run.
+3. **Register the tag on first install**, from the install codeunit's `OnInstallAppPerCompany` /
+   `OnInstallAppPerDatabase` (`Subtype = Install`), so a fresh installation doesn't run upgrade
+   code meant for old data. `SetAllUpgradeTags()` covers every tag at once and is preferred over
+   setting them one by one.
+
+**Tag values live in methods, never as literals at the call site.** One "tag definitions" codeunit
+holds `GetXxxTag()` methods returning the value; the compiler then finds every use when a tag is
+retired. Use Microsoft's convention — `[Prefix]-[ID]-[Description]-[YYYYMMDD]`, e.g.
+`OCPF-1234-ShoeSizeUpgrade-20260915`. **Reuse the AL Object Prefix** from the parameter sheet so
+tags can't collide with another publisher's.
+
+**Two further rules Microsoft calls out, and this framework requires:**
+- **Safety-check the target before writing.** A tag can be missing or wrong; the upgrade must not
+  overwrite data that's already there. Verify the target field is blank (or error) before copying.
+- **Don't write when nothing changes.** `if new <> old then begin … Modify(); end;` — a blank
+  `Modify()` per record is a measurable upgrade slowdown on real data volumes.
+
+### 9.4 Deprecating a Field or Table — the Two-Version Cycle
+
+**Never delete a field or table that has shipped.** Deleting one destroys the tenant's data and is
+a breaking change AppSourceCop rejects. Retire it across two versions instead:
+
+| Version | What it does |
+|---|---|
+| **n** | Add the replacement field. Mark the old one `ObsoleteState = Pending`, with an `ObsoleteReason` naming the replacement and an `ObsoleteTag` carrying the version. Ship upgrade code that copies the data (§9.3). Keep writing to the new field only. |
+| **n+1** *(a later release, not the next build)* | `ObsoleteState = Removed`. The field stops being part of the schema; its data is gone. |
+
+Leave at least one full release between the two so every tenant has run the copying upgrade.
+`ObsoleteReason` is read by a human deciding what to do, so write the replacement's name in it, not
+"deprecated".
+
+### 9.5 Keep Side Effects Out of the Upgrade Session
+
+An upgrade that fails is rolled back — but only the database is. Web service calls, printing, and
+queued jobs aren't. Before doing anything with an outside effect, check the context:
+
+```AL
+if Session.GetExecutionContext() <> ExecutionContext::Normal then
+    exit;  // Install, Uninstall, or Upgrade — don't call out
+```
+
+This matters most in **event subscribers the extension already ships**: an upgrade that posts a
+document fires them, and a subscriber that calls an external service will do so during the upgrade.
+
+### 9.6 Upgrades Get Tested, Not Hoped For
+
+An upgrade path is testable and must be tested before release (runbook Step 11):
+1. Install the **previous** version on a clean sandbox, and create data in the fields that will
+   change — in **more than one company** where `PerCompany` code exists.
+2. Publish and install the new version.
+3. Check the migrated data, then **install it again** — the tag must make the second run a no-op.
+4. Check a **fresh install** of the new version too: first-install tag registration (§9.3 step 3)
+   is what keeps upgrade code from running on empty data.
+
+> *Sources and attribution:* Part 9's trigger table, upgrade-tag API and pattern, tag naming
+> convention, execution-context guidance, and the "no data changes / no upgrade code" and upgrade
+> definition statements are summarized, with short quotations, from Microsoft Learn —
+> [Upgrading extensions](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-upgrading-extensions)
+> and [Writing extension install code](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-extension-install-code)
+> — © Microsoft Corporation, licensed under
+> [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+---
+
+## Part 10 — Events and Extensibility
+
+Two separate concerns that use the same mechanism: **subscribing** to Microsoft's events (every
+extension does this) and **publishing** events of your own (what makes an extension extensible).
+Verified against Microsoft Learn,
+[Events in Business Central](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-events-in-al)
+(read September 15, 2026).
+
+### 10.1 Subscribe; Never Modify
+
+**An extension hooks into standard behavior through events, never by copying Microsoft's code.**
+Microsoft: *"A subscriber enables partners to hook into the core application functionality without
+having to do traditional code modifications."*
+
+- **Subscribers are `local procedure`s**, in a codeunit that exists for that purpose — not scattered
+  through business-logic codeunits. Name the codeunit for what it listens to
+  (`OCPF Sales Post Subscribers`).
+- **Write the full attribute**, and prefer the explicit forms:
+  `[EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnAfterPostSalesDoc', '', false, false)]`.
+  Reference the object by `Codeunit::"…"`, never by a bare ID.
+- **A subscriber does one thing and returns.** No UI (`Message`, `Confirm`, `Page.RunModal`) in a
+  subscriber on a posting routine — it will run in a web service or background session and throw.
+- **Never `Error()` in a subscriber to enforce your own rule** unless the extension genuinely owns
+  that rule; you're aborting someone else's transaction.
+- **A subscriber's cost is the publisher's cost.** Anything heavy belongs in a job queue entry, not
+  inline in a posting routine.
+- **Verify the event exists in the symbols before subscribing** (Operating Rule 2, Appendix B).
+  A misspelled event name compiles in some AL versions and simply never fires.
+
+### 10.2 Publishing Events from This Extension
+
+Publish an event where another extension will plausibly need to change or observe behavior: before
+and after the extension's own posting, validation, and defaulting; and wherever a customer-specific
+variation is foreseeable.
+
+| Attribute | Use it for |
+|---|---|
+| `[IntegrationEvent(IncludeSender, GlobalVarAccess)]` | **The default.** Extension points for other apps and PTEs to subscribe to. |
+| `[BusinessEvent(IncludeSender)]` | A business-level fact that is part of the published contract and won't change shape. **A business event can never be changed or removed** without breaking subscribers — so use it only for a genuine, stable business occurrence. |
+| `[InternalEvent(IncludeSender)]` | A hook for this extension's own code, or for apps listed in `internalsVisibleTo`. Not an extension point for third parties. |
+
+- **The publisher method is a signature and nothing else** — no body, no logic. Microsoft: *"An
+  event publisher method is composed of a signature only and doesn't execute any code."*
+- **Raise it explicitly**: business and integration events *"must be explicitly published and
+  raised"*. Publishing alone does nothing.
+- **Pass records by `var`** where a subscriber is expected to change them, and pass a `var Handled:
+  Boolean` where a subscriber may replace the behavior — then check `Handled` before running the
+  default.
+- **Pass what the subscriber needs, not the object graph.** Every parameter is part of the
+  signature forever.
+- **Name them `On[Before|After]<Verb><Noun>`**, matching Microsoft's own convention, and prefix the
+  publishing object per Part 4 — not the event name.
+- **Trigger events** (table and page operations) are *"published and raised implicitly by the system
+  at runtime"* — nothing to write, and they are the cheapest extension point for a table this
+  extension owns.
+
+### 10.3 A Published Event Signature Is a Promise
+
+Once a version ships, its event signatures are part of the contract:
+- **Never rename, remove, or change the parameters** of a published integration or business event.
+  For AppSource, AppSourceCop compares against the marketplace baseline and *"if any violations or
+  breaking changes are identified, the submission is rejected"*; for a PTE it silently breaks
+  whoever subscribed.
+- **To change one:** add the new event alongside, mark the old publisher `ObsoleteState = Pending`
+  with an `ObsoleteReason` naming the replacement, raise both for a release, then remove it — the
+  same two-version cycle as §9.4.
+- **Mark internal API surface deliberately.** Procedures other extensions shouldn't call get
+  `Access = Internal`; what's left public is what's being promised. Note that `internalsVisibleTo`
+  raises an AppSourceCop/PTECop warning in Business Central online, and Microsoft states
+  `Access = Internal` *"isn't designed as a security boundary."*
+
+### 10.4 Extensibility Is a Design Decision, Recorded
+
+The TDD (runbook Step 03) states, for each new module: **which events this extension publishes and
+why**, and **which Microsoft events it subscribes to**. Both go in the Object Register alongside
+the objects. Publishing an event later is easy; discovering at release that there's no hook where
+the customer needed one is not.
+
+> *Sources and attribution:* Part 10's event-type table, publisher/subscriber model, the
+> signature-only publisher rule, the explicit-raise rule, the trigger-event behavior, and the
+> `internalsVisibleTo` note are summarized, with short quotations, from Microsoft Learn —
+> [Events in Business Central](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-events-in-al),
+> [JSON files](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-json-files),
+> and [Technical validation checklist](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-checklist-submission)
+> — © Microsoft Corporation, licensed under
+> [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+---
+
 ## Appendix A — OData API Endpoint Patterns
 
 Substitute `<APIPublisher>`, `<APIGroup>`, and `<APIVersion>` with the values from the runbook's
-Step 01 §1.3 parameters.
+Step 01 parameters (§1.3), and `<EntitySetName>` with the page's own. Verified against Microsoft
+Learn, [API endpoint structure](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/webservices/api-endpoint-structure)
+(read September 15, 2026).
+
+**Base URL — one host for every tenant.** The tenant is a path segment, never a subdomain:
 
 ```
-Base URL: https://<tenant>.api.businesscentral.dynamics.com/v2.0/<tenantId>/<environmentName>/api/
-
-Per-group metadata:
-  .../api/<APIPublisher>/<APIGroup>/<APIVersion>/$metadata
-
-Entity collection:
-  .../api/<APIPublisher>/<APIGroup>/<APIVersion>/<EntitySetName>
-
-Single record by SystemId:
-  .../api/<APIPublisher>/<APIGroup>/<APIVersion>/<EntitySetName>(<SystemId>)
-
-Filtered query:
-  .../api/<APIPublisher>/<APIGroup>/<APIVersion>/<EntitySetName>?$filter=<fieldName> eq '<value>'
-
-Selected fields:
-  .../api/<APIPublisher>/<APIGroup>/<APIVersion>/<EntitySetName>?$select=<field1>,<field2>
+https://api.businesscentral.dynamics.com/v2.0/<EntraTenantId>/<EnvironmentName>/api
 ```
 
----
+The `<EntraTenantId>` segment is optional: `.../v2.0/<EnvironmentName>/api` also resolves.
+
+**Most endpoints are company-scoped.** Microsoft: *"To call most of the Business Central endpoints,
+you need to specify, which company you want to connect to."* Either form works:
+
+```
+{base}/<APIPublisher>/<APIGroup>/<APIVersion>/companies(<companyId>)/<EntitySetName>
+{base}/<APIPublisher>/<APIGroup>/<APIVersion>/<EntitySetName>?company=<companyId>
+```
+
+Get `<companyId>` from Microsoft's standard API: `GET {base}/v2.0/companies`.
+
+**The patterns this framework's tests and documentation use:**
+
+```
+Service document (every entity set in the group):
+  {base}/<APIPublisher>/<APIGroup>/<APIVersion>
+
+Metadata:
+  {base}/<APIPublisher>/<APIGroup>/<APIVersion>/$metadata
+
+Collection:
+  {base}/<APIPublisher>/<APIGroup>/<APIVersion>/companies(<companyId>)/<EntitySetName>
+
+Single record by SystemId (this framework's ODataKeyFields, §2.1):
+  {base}/<APIPublisher>/<APIGroup>/<APIVersion>/companies(<companyId>)/<EntitySetName>(<SystemId>)
+
+Filter and select:
+  .../<EntitySetName>?$filter=<fieldName> eq '<value>'
+  .../<EntitySetName>?$select=<field1>,<field2>
+```
+
+**On-premises** replaces the base with the server's own endpoint
+(`https://<server>:<port>/<instance>/api/...`); everything after `/api` is identical.
+
+> *Source:* Microsoft Learn, *API endpoint structure* (© Microsoft Corporation, CC BY 4.0). The
+> quoted sentence and the URL shapes are Microsoft's; the mapping onto this framework's parameters
+> is ours.
 
 ## Appendix B — BC Symbol File Verification Procedure
 
 Before finalizing any TDD, using the **Symbol Source** named in the runbook's Step 01 §1.4:
 
-1. Open the BC symbol file in VS Code using the AL Language extension.
+1. **Read the symbols directly — this is the agent's job, not a trip to the human's editor.** The
+   AL MCP Server's `al_symbolsearch` (its arguments go under a `parameters` key — it's the one tool
+   that takes that wrapper) and `al_symbolrelations` answer from the packages already in
+   `.alpackages/`. Without an MCP host, an `.app` is a short header followed by a standard zip, so
+   its symbol content can be read in place. Only if neither route is available does anyone open the
+   package in VS Code (**Ops § Symbols**).
 2. For each source table: confirm the table number matches (`table <ID> "<Name>"`).
 3. For each `using` directive: copy the exact namespace from the symbol file entry for that
    source table.
@@ -1118,6 +1401,68 @@ that names a standard BC concept. Record every result in the project's translati
    Terminology Collection and style guides (§8.5). Mark the glossary row **reviewer attention**.
 6. **Never commit or redistribute** the Microsoft files read in step 1 (§8.5). Read them where they
    are, or extract them outside the project's git-tracked tree.
+
+---
+
+## Appendix E — AppSource Manifest and Submission Requirements
+
+Applies only when the runbook's Deployment Target is `AppSource`. Everything here is from
+Microsoft's [JSON files](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-json-files)
+and [Technical validation checklist](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-checklist-submission),
+read September 15, 2026.
+
+### E.1 `app.json` properties Marketplace submission requires
+
+These are optional for a PTE and **mandatory for AppSource**. A missing one is not a warning: *"If
+any mandatory properties or required property values are missing, the submission is rejected."*
+The intake asks for each of them (**Ops § Intake**) and they're written at project setup, not
+retrofitted at release.
+
+| Property | Microsoft's description | What the intake asks for |
+|---|---|---|
+| `brief` | "Short description of the extension." | One line, matching the offer listing. |
+| `description` | "Longer description of the extension." | A paragraph, matching the offer listing. |
+| `privacyStatement` | "URL to the privacy statement for the extension." | A URL. |
+| `EULA` | "URL to the license terms for the extension." | A URL. Note the property is spelled in capitals. |
+| `help` | "URL to an online description of the extension focusing on the help and troubleshooting content." | A URL; may be the same as `contextSensitiveHelpUrl`. |
+| `contextSensitiveHelpUrl` | "The URL for the website that displays context-sensitive Help for the objects in the app." | A URL. If the app doesn't cover every BC locale, include `/{0}/` in it and list the locales in `supportedLocales`. |
+| `url` | "URL of the extension package… used in Business Central, on the **Extension Management** page, as **Website**." | A URL — the product or support page, not the help page. |
+| `logo` | "Relative path to the app package logo from the root of the package." | A file the human supplies; it is committed in the project and referenced by relative path. |
+| `application` | "Required for Marketplace submission" — it computes the minimum BC release the submission is validated against. | Already on the parameter sheet as the BC version. |
+| `applicationInsightsConnectionString` | "No, but **recommended** for Marketplace submission." | A connection string. It's also where Microsoft writes the detailed validation-failure telemetry, so an AppSource app without one is debugged blind. |
+
+`name`, `publisher`, and `version` are mandatory for every extension, and for AppSource they carry
+one extra rule: they **must match the offer description**, or the submission is rejected at step 4
+of validation. Changing any of them later means updating the offer in Partner Center too.
+
+### E.2 The rest of the checklist, as project rules
+
+- **Analyzer set:** `AppSourceCop` replaces `PerTenantExtensionCop` (they're mutually exclusive) —
+  **Ops § Analyzers**. Configure `AppSourceCop.json` with the publisher's registered affixes and
+  supported countries so `AS0011`/`AS0013` check what validation will check.
+- **Affixes and ID range are registered, not chosen:** *"You're required to register affixes for
+  your publisher name"* and *"to register an ID range for your publisher name"* (§5.5).
+- **Translation files are mandatory** (§8.10), and the `en-US`-only exception in §8.1 doesn't apply.
+- **`DataClassification` on every field** of every table and table extension, set to something other
+  than `ToBeClassified` (§1.4).
+- **Permission sets ship with the app** and must give a user full setup and usage without `SUPER`
+  (§5.3).
+- **Upgrade code is required:** *"Include the proper upgrade code allowing your app to successfully
+  upgrade from version to version"* (Part 9).
+- **`addfirst` / `addlast`** for placing actions and controls on Microsoft's pages, so a base-app
+  change doesn't break the app.
+- **No `OnBeforeCompanyOpen` / `OnAfterCompanyOpen`.**
+- **Never a runtime package**, and the `.app` must be digitally signed.
+- **`AppId` must be unique** — the same `AppId` can't be submitted as both a PTE and a Marketplace
+  app.
+- **Pages and codeunits exposed as web services must raise no UI**, which would throw in the caller.
+
+> *Sources and attribution:* Appendix E and §5.5 are summarized, with short quotations, from
+> Microsoft Learn — [JSON files](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-json-files),
+> [Technical validation checklist](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-checklist-submission),
+> and [Object ranges](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-object-ranges)
+> — © Microsoft Corporation, licensed under
+> [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); reorganized into the tables above.
 
 ---
 

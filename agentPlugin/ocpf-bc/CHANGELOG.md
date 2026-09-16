@@ -4,6 +4,20 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 2.3.0 — September 15, 2026
+
+**Bundles:** full runbook v3.3.0.0, Lite v2.2.0.0, Standards Guide v1.9.0.0, Operations Guide
+v1.2.0.0.
+
+- **`al-mcp-setup` corrected on analyzers.** `al_build` never applies them; `al_compile` does, but
+  only with `enableCodeAnalysis: true` and a `codeAnalyzers` token list at the top level of
+  `options` — anything else (a `parameters` wrapper, literal DLL paths) silently returns a clean
+  pass on failing code. `scripts/al-analyze.*` stays the mandatory compile, since `al_compile`
+  writes no `.app`. The `al-analyze.sh` header now records all of it.
+- **Bundled runbooks and guides:** AppSource intake and manifest requirements, Standards Parts 9
+  (upgrade and data migration) and 10 (events and extensibility), `al_run_tests` wired into the
+  testing step, and the Step 07 schematic redrawn to match the first-round API offer.
+
 ## 2.2.0 — September 15, 2026
 
 **Bundles:** full runbook v3.2.0.0, Lite v2.1.0.0, Standards Guide v1.8.0.0, Operations Guide

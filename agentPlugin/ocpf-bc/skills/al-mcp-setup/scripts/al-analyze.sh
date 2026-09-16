@@ -4,8 +4,16 @@
 # Compiles the project with Microsoft's bundled code analyzers actually engaged, using tools
 # already on this machine. Nothing is installed.
 #
-# Why not the AL MCP Server's al_build/al_compile: they don't apply analyzers (AL Language extension
-# 18.0.2732683; see the runbook's ALL ALONG → Analyzers). Re-verify against newer releases.
+# Why not the AL MCP Server's al_build/al_compile (AL Language extension 18.0.2732683; see the
+# runbook's ALL ALONG → Analyzers and Ops § Analyzers). Re-verify against newer releases.
+#   al_build   never applies analyzers, whatever is passed, and reports succeeded:true while
+#              packaging code that has analyzer errors.
+#   al_compile applies them only when enableCodeAnalysis:true AND a codeAnalyzers list of the
+#              ${CodeCop} / ${PerTenantExtensionCop} / ${UICop} / ${AppSourceCop} tokens are both
+#              passed at the top level of "options" — not under a "parameters" key (that wrapper is
+#              al_symbolsearch's alone) and not as literal DLL paths (those return AD0001). Every
+#              other shape returns a clean pass on failing code. It also writes no .app, so it can
+#              be a fast pre-check but never the compile-and-package.
 #
 # Usage: sh al-analyze.sh <project folder> <output .app path> [pte|appsource] [extra alc args...]
 #   sh scripts/al-analyze.sh . outputAppPackage/MyApp_1.0.0.0.app

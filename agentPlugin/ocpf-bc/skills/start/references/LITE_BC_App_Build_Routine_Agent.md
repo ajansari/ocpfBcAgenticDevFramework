@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 2.1.0.0 (Lite, derived from the full framework v3.2.0.0)
+**Version:** 2.2.0.0 (Lite, derived from the full framework v3.3.0.0)
 **Last Updated:** September 15, 2026
 
 > Version history for this edition lives in `LITE_RunbookChangeLog.md`, tracked independently of
@@ -17,9 +17,9 @@
 
 > **Companion documents, both fetched at Step 1 and shared unchanged with the full framework:**
 > - `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
->   (v1.8.0.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
+>   (v1.9.0.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
-> - `opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v1.1.0.0), cited as
+> - `opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v1.2.0.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
 >   analyzers, symbols, editor sync, notifications, packaging, repository hygiene, translations,
 >   fetched companions, and the plugin.
@@ -234,7 +234,8 @@ root (ALL ALONG → Packaging & Versioning). Mention it once, plainly, now.
 |---|---|---|
 | **Extension Name** | `<ExtensionName>` | No AL quotes. → `app.json "name"`. |
 | **Publisher** | `<Publisher>` | No AL quotes. → `app.json "publisher"`. |
-| **Deployment Target** | `<DeploymentTarget>` | One of: `AppSource`, `SaaS PTE`, `OnPrem PTE`. |
+| **Deployment Target** | `<DeploymentTarget>` | One of: `AppSource`, `SaaS PTE`, `OnPrem PTE`. **`AppSource` adds a block of mandatory `app.json` parameters and narrows the ID range** — read **Ops § Intake → *The AppSource questions*** before Box 3, and **Standards Appendix E**. |
+| **AppSource manifest set** *(only if Deployment Target = `AppSource`)* | — | `brief`, `description`, `url`, `logo`, `privacyStatement`, `EULA`, `help`, `contextSensitiveHelpUrl`, and `applicationInsightsConnectionString` where given. Each is **mandatory for submission** — a missing one is a rejected submission, not a warning. `name`, `publisher`, and `version` must match the Partner Center offer exactly. Anything deferred is recorded as a release blocker. |
 | **Use Namespace (y/n)** | `<UseNamespace>` | Default `Yes`. If `No`, no generated file gets a `namespace` line. |
 | **Namespace** | `<Publisher>.<ExtensionShort>` | N/A if Use Namespace = `No`. PascalCase, no spaces. |
 | **Localization** | `<Localization>` | E.g. `W1`, `NA`, `EU`, `US`. Drives field/table inclusion. |
@@ -242,7 +243,7 @@ root (ALL ALONG → Packaging & Versioning). Mention it once, plainly, now.
 | **APIPublisher / APIGroup Prefix / APIVersion** | — | Derived: the Publisher in camelCase (`'contoso'`), the prefix followed by a PascalCase group name (`'acmeCoreFinancial'`, no underscore), and `'v1.0'` — same values everywhere (**Standards §2.7**). |
 | **Permission Set App Code** | `<APPCODE>` | Uppercase letters or digits, no spaces, unique among every extension that uses this prefix, at most `13 − (prefix length)` characters (**Standards §5.4**). |
 | **Permission Set Names** | `<PREFIX> <APPCODE>, VIEW` / `<PREFIX> <APPCODE>, EDIT` | Derived: `<PREFIX>` is the AL Object Prefix in uppercase. Each ≤ 20 characters, e.g. `OCPF NAICS, VIEW`. |
-| **Object ID range(s)** | — | Primary + any Additional, from Box 3. |
+| **Object ID range(s)** | — | Primary + any Additional, from Box 3. **The range belongs to the Deployment Target** (**Standards §5.5**): PTE work uses 50,000–99,999; `AppSource` uses only a range Microsoft registered to this publisher (70,000,000–74,999,999 for a new publisher), never 50,000–99,999. |
 | **Permission Sets required?** | `Yes`/`No` | `No` only if the extension owns **zero new tables** (**Standards §5.3**); otherwise `Yes`, not asked. If `Yes`, reserve ≥ 2 IDs in the primary range. |
 | **AL Runtime / BC Application Minimum / Symbol Source** | — | BC version from Box 2; runtime from Microsoft Learn. Symbol Source is filled in by the agent after downloading: version, W1 or localized, and where from. |
 | **Onboarding extras** | `Yes`/`No` each | Assisted Setup Wizard? Role Center Activity Cues? Departments/"My Business Central" placement? Box 4; `No` to any is a final answer, not a placeholder — most small extensions answer `No` to all three, but ask anyway. |
@@ -351,6 +352,13 @@ be able to produce every object correctly from this document alone. Two halves, 
   the read-only set), with every table's `tabledata` grant enumerated per set — not just "sets
   exist" — named from `ProjectParameters.md`, each ≤ 20 characters with a caption ≤ 30
   (**Standards §5.3–§5.4**).
+- **Upgrade and data migration** — needed from the second version onward, and whenever this version
+  changes what existing data must look like: the upgrade codeunits, the trigger each uses, and the
+  upgrade tag guarding each one; the two-version obsolete cycle for any field being replaced
+  (**Standards Part 9**). **"No upgrade code needed" is written down with its reason**, not left
+  silent.
+- **Events** — which events this extension publishes (its extension points) and which Microsoft
+  events it subscribes to, each verified in the symbol file (**Standards Part 10**).
 - Special notes: singletons, header/line pairs, naming conflicts, deletion behavior for each
   entity (block-if-referenced / cascade / allow) — including any *other* table (standard BC
   included) that references this entity by `TableRelation`.
@@ -541,16 +549,18 @@ Appendix A**):
 
 **Ask once, at the first round: should the agent run the API checks before the human tests?**
 (Rule 6a; record the answer in `ChangeLog.md` and honor it for every later round.)
-- ***Yes — publish and run the checks each round (recommended).*** The agent publishes and works the
-  checklist above against the sandbox, so the human only tests builds that already answer. **It needs
-  one Microsoft browser sign-in per session** — the same one publishing and sandbox symbol downloads
-  use — and an authenticated route to the tenant's API (ALL ALONG → AL MCP Server, or another
-  authenticated MCP endpoint reaching the sandbox).
-- ***No — I'll publish and test by hand.*** Don't ask again for this project. Nothing is lost: Step
-  7's human pass is authoritative either way.
+- ***Yes — publish and run the checks each round.*** The agent publishes and works the checklist
+  above against the sandbox. **It needs two things**: one Microsoft browser sign-in per session, the
+  same one publishing and sandbox symbol downloads use; and **a tool in this session that can issue
+  OData requests against the sandbox with a bearer token**. **The AL MCP Server is not one** — it
+  builds, publishes, and reads symbols, and has no tool that calls a published endpoint.
+- ***No — I'll publish and test by hand (the realistic default).*** Don't ask again for this project.
+  Nothing is lost: Step 7's human pass is authoritative either way. **Recommend this one unless the
+  human says they have an API-capable connection.**
 
-**If the answer is yes but no authenticated route exists,** say so plainly, publish, and suggest
-Postman, Power Automate, or Copilot Studio instead. It's an early filter over the API pages only —
+**Check for the route first and say what you found.** With no HTTP-capable tool in this session,
+say so plainly, publish, and suggest Postman, Power Automate, or Copilot Studio instead. Endpoint
+URL shapes, including the company segment most endpoints need, are **Standards Appendix A**. It's an early filter over the API pages only —
 never the BC client — and Step 7's human pass still decides.
 
 **Outputs:** All files compiling and packaging with **0 errors, 0 warnings**; at least one package
@@ -630,6 +640,11 @@ human-run release test.
   documents walked once per required language, checking for untranslated text, truncation,
   regional terms, and formats. Each case names the glossary terms the tester should see, so a
   tester who reads English can run it without a translated copy.
+- **If the project has AL test codeunits, run them — don't leave it to the human.** The AL MCP
+  Server's `al_run_tests` runs them against the sandbox, one codeunit per call (**Ops § Automated
+  Tests**), never against production. A failing test fails this step like a compiler error. If the
+  server isn't connected, say so and list the codeunit IDs rather than reporting untested code as
+  tested.
 - **Translated documents aren't produced here.** Step 7 produces them once its functional test
   pass is green, so a fix found in testing doesn't make every translated copy stale too.
 
@@ -640,7 +655,8 @@ documents follow at Step 7. Step 1's `ProblemStatement.md` and
 
 **Exit gate:** Every gap classified and resolved or explicitly deferred (logged in
 `ChangeLog.md`); dead-code scan clean; no obsolete references; `Docs.md`'s diagram renders;
-`TestScript.md` is executable by a non-developer; translation checks clean.
+`TestScript.md` is executable by a non-developer; translation checks clean; any AL test codeunits
+have been run and pass, or it's recorded why they couldn't be.
 
 ## STEP 7 — Release for Testing
 
@@ -747,6 +763,10 @@ bump. The non-negotiables:
   **`outputAppPackage/`**, read from `app.json` at build time. Say the exact path every time a build
   completes.
 - **Built packages are tracked, never gitignored** — no blanket `*.app` entry.
+- **The agent never publishes to a production environment.** Before every publish, state the target
+  environment and type; if it isn't a sandbox, stop and ask. Never force a destructive schema change
+  (`ForceSync`, `Recreate`, `forceUpgrade`) without a separate approval naming what can be lost. The
+  production deploy at Step 7 is the human's, through Extension Management (Ops § Packaging).
 - **Never delete or overwrite a package from a different version.** Repeated builds at the same
   in-progress version legitimately overwrite that file; the protection is across versions.
 - **The package that passes Step 7 ships** — bump its Build segment or copy it to an immutable name,
@@ -758,8 +778,8 @@ bump. The non-negotiables:
 ## OCPF AL Development Standards Guide
 
 Two companions are fetched at Step 1 and kept for the life of the project: the **Standards Guide**
-(`standardsGuide/ocpfALDevStandardsGuide.md`, v1.8.0.0), cited as **Standards §**, and the
-**Operations Guide** (`opsGuide/ocpfOperationsGuide.md`, v1.1.0.0), cited as **Ops §** and shared
+(`standardsGuide/ocpfALDevStandardsGuide.md`, v1.9.0.0), cited as **Standards §**, and the
+**Operations Guide** (`opsGuide/ocpfOperationsGuide.md`, v1.2.0.0), cited as **Ops §** and shared
 unchanged with the full framework.
 
 **Full procedure: Ops § Fetched Companions** — fetching, refreshing, the plugin's offline copies,
@@ -810,8 +830,9 @@ for a remote first, since collaborators will see the files as deleted.
 - The mandatory compile runs **CodeCop**, **UICop**, and exactly one of **PerTenantExtensionCop**
   (SaaS/OnPrem PTE) or **AppSourceCop** (AppSource) — never both.
 - `.vscode/settings.json`, and `AppSourceCop.json` for AppSource, are created at Step 3.
-- Outside Copilot Chat, run `scripts/al-analyze.*`: the AL MCP Server's own compile tools don't
-  apply analyzers.
+- Outside Copilot Chat, run `scripts/al-analyze.*`. The AL MCP Server's `al_build` never applies
+  analyzers, and its `al_compile` only does so with one exact argument shape — anything else
+  returns a clean pass on failing code, and it produces no `.app` (**Ops § Analyzers**).
 - **Read the warnings, not just the result** — `al-analyze` exits `3` on warnings, and any warning
   fails Rule 5. No suppressions, and no ruleset.
 
@@ -931,7 +952,7 @@ that file, skip this section.
 | Step 7 — Release for Testing | Step 12 |
 
 **Shared with the full framework, not reduced:** the OCPF AL Development Standards Guide. Both
-editions fetch the same v1.8.0.0 file and apply the same AL rules — Lite differs only in process.
+editions fetch the same v1.9.0.0 file and apply the same AL rules — Lite differs only in process.
 
 **Document count:** 4 maintained documents (`DesignDoc.md`, `ChangeLog.md`, `Docs.md`,
 `TestScript.md`), plus Step 1's two kickoff artifacts (`ProblemStatement.md`,

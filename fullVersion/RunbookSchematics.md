@@ -240,20 +240,21 @@ flowchart TD
     subgraph S07["07 — Compile and Package,<br/>Troubleshoot, Iterate"]
         direction LR
         Compile["FIRST: compile the whole<br/>extension once with the analyzers,<br/>then package it — the one<br/>mandatory compile-and-package<br/>(Op. Rule 4)"] --> Deploy["Publish package<br/>to BC sandbox"]
-        Deploy --> Test["Test — manually by the<br/>human, or via the optional<br/>agent-run MCP API pass"]
+        Deploy --> Offer{"Round 1 only — offer an<br/>agent-run API pass. Needs an<br/>HTTP-capable route; the AL MCP<br/>Server is NOT one"}
+        Offer -- "No — publish and test<br/>by hand (recommended<br/>default)" --> Test["Human tests by hand:<br/>Postman, Power Automate,<br/>Power Apps, or Copilot Studio"]
+        Offer -- "Yes, but no route<br/>turns out to exist" --> NoRoute["Say so plainly, don't<br/>improvise a route —<br/>fall back to testing by hand"]
+        Offer -- "Yes, and a route exists" --> APITest["Agent runs the full green/<br/>red-team checklist against the<br/>sandbox API — this round<br/>and every round after"]
+        NoRoute --> Test
         Test --> Q{"Errors, warnings,<br/>or issues found?"}
+        APITest --> Q
         Q -- "Yes" --> Diag["Check patterns/ first, then<br/>reasoning role diagnoses:<br/>one-off or pattern? where<br/>from? what rule missed it?"]
         Diag --> Approve["Human approves the round's<br/>fixes together: apply all /<br/>selected / discuss (a TDD or<br/>design-rule change asked separately)"]
         Approve --> Fix["Main role fixes root cause,<br/>regenerates files, logs<br/>ChangeLog + updates TDD"]
         Fix --> Repackage["Compile AND package again<br/>(not just recompile)"]
         Repackage --> Deploy
         Q -- "No" --> Clean["0 errors / 0 warnings,<br/>sandbox testing clean —<br/>source text stable: draft and<br/>test each language (sync and<br/>checks ran on every build)"]
-        Clean --> APICheck{"Offer: live MCP<br/>connection available<br/>and human wants it?"}
-        APICheck -- "Yes (optional)" --> APITest["Agent runs full green/red-team<br/>checklist against the sandbox API"]
-        APICheck -- "No / declined" --> Manual["Suggest manual testing instead:<br/>Postman, Power Automate,<br/>Power Apps, or Copilot Studio"]
     end
-    APITest --> Gate3
-    Manual --> Gate3
+    Clean --> Gate3
 
     Gate3{{"Exit gate:<br/>Full extension compiles clean,<br/>human confirms sandbox testing<br/>clean, ChangeLog & TDD reconciled"}}
 
@@ -267,7 +268,7 @@ flowchart TD
     classDef endpoint fill:#f2f2f2,stroke:#888,stroke-width:1px;
     classDef decision fill:#fde2e2,stroke:#c0504d,stroke-width:1px;
     class In1,Out1 io;
-    class Act1,B1,Gen,Fix,Compile,Deploy,Test,Repackage,APITest,Manual,AskHuman act;
+    class Act1,B1,Gen,Fix,Compile,Deploy,Test,Repackage,APITest,NoRoute,AskHuman act;
     class PostGen light;
     class PreGen act;
     class Diag reasoning;

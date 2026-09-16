@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 3.2.0.0
+**Version:** 3.3.0.0
 **Last Updated:** September 15, 2026
 
 > Version history for this framework lives in `RunbookChangelog.md`, tracked independently of any
@@ -15,9 +15,9 @@
 >
 > **Companion documents, both fetched at PRE-01 and kept for the life of the project:**
 > - `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
->   (v1.8.0.0): the AL *rules* this sequence applies (Parts 1–8, Appendices A–D), cited below as
+>   (v1.9.0.0): the AL *rules* this sequence applies (Parts 1–10, Appendices A–E), cited below as
 >   **Standards §**.
-> - `opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v1.1.0.0): the *procedures*
+> - `opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v1.2.0.0): the *procedures*
 >   this sequence uses — asking, intake, project setup, the AL tools, analyzers, symbols, editor
 >   sync, notifications, packaging, repository hygiene, translations, fetched companions, and the
 >   plugin — cited below as **Ops §**. Both editions of the runbook share it unchanged.
@@ -220,6 +220,33 @@ up front, not discovered by surprise the first time a build finishes.
 - `SaaS PTE` — Business Central SaaS per-tenant extension.
 - `OnPrem PTE` — on-premises per-tenant extension.
 
+**`AppSource` changes the intake, and says so when it's chosen.** It adds two question boxes and a
+block of parameters (§1.1a), narrows the ID range to a publisher-registered one (§1.2), switches the
+analyzer set to AppSourceCop, and makes translation files mandatory. **Read Ops § Intake → *The
+AppSource questions* before Box 3**, and Standards Appendix E for why each is mandatory. For
+`SaaS PTE` and `OnPrem PTE`, none of §1.1a applies — leave it out of the sheet entirely.
+
+### 1.1a AppSource Manifest Parameters — only when Deployment Target = `AppSource`
+
+Each is **mandatory for submission**: a missing one is a rejected submission, not a warning
+(Standards Appendix E). All are written to `app.json` at §1.10, not at release.
+
+| Parameter | Placeholder | `app.json` property |
+|---|---|---|
+| **Short Description** | `<Brief>` | `brief` — one line; must match the Partner Center offer |
+| **Long Description** | `<Description>` | `description` — must match the offer |
+| **Product Website** | `<Url>` | `url` — shows as **Website** on **Extension Management** |
+| **Logo Path** | `<LogoPath>` | `logo` — relative to the package root; the file is committed |
+| **Privacy Statement URL** | `<PrivacyStatement>` | `privacyStatement` |
+| **License Terms URL** | `<EULA>` | `EULA` — capitalized exactly so |
+| **Help URL** | `<HelpUrl>` | `help` |
+| **Context-Sensitive Help URL** | `<ContextHelpUrl>` | `contextSensitiveHelpUrl` — with `/{0}/` and `supportedLocales` if not every BC locale is covered |
+| **App Insights Connection String** | `<AppInsights>` | `applicationInsightsConnectionString` — recommended, not mandatory; without it a rejected submission can't be diagnosed |
+
+**`name`, `publisher`, and `version` must match the Partner Center offer exactly**, or validation
+rejects the submission — so changing any of them later means changing the offer too. Any parameter
+the human defers is recorded here as a **release blocker**, not left blank.
+
 **Quoting reference — applies to every AL and config file in the project:**
 
 | Context | Quote style | Example |
@@ -252,6 +279,8 @@ Collected by Box 3's questions 11–12 — one row per range, in the order given
 | **Permission Sets required?** | `Yes` / `No` | `No` only when the extension introduces zero new tables of its own, e.g. a pure page or report extension (Standards §5.3). The moment the project owns a table, it's `Yes` — not asked (Box 4, question 16). If `Yes`, reserve ≥ 2 IDs inside the primary range. |
 
 > **Rule:** Never use object IDs outside the allocated ranges. Maintain the object register as a separate project artifact. If the project plans any new table, `Permission Sets required` must be `Yes` and they must be planned before code generation — do not accept `No` alongside a table in the entity list without flagging the contradiction back to the human.
+
+> **Rule — the range belongs to the Deployment Target** (Standards §5.5). `SaaS PTE` / `OnPrem PTE`: 50,000–99,999. `AppSource`: only a range Microsoft **registered to this publisher** — 70,000,000–74,999,999 for a new publisher, or 1,000,000–69,999,999 for one that already holds an RSP range. Never 50,000–99,999 for AppSource; an app submitted from the customization range fails validation. If no range has been assigned yet, record it as a release blocker and build in the assigned range once it arrives — renumbering later renames every object.
 
 **Worked example** (two ranges): Box 3 — the human types `90800–90899` and answers *Yes* to
 "another range?" → the next box — the human types `91500–91549` and answers *No*. The confirmation
@@ -454,6 +483,8 @@ human for sign-off, same as Step 02.
   6. Skip any question whose group is empty. **Record per object** in the per-object spec: group, locked `Yes`/`No`, and who decided — by name.
 
   Any API page or query added later (gap-fill, testing feedback) goes through steps 1–6 for the new objects only.
+- **Upgrade and data migration** — required from the second version onward, and whenever this version changes what existing data must look like: which upgrade codeunits exist, which trigger each uses (`PerCompany` vs `PerDatabase`), the upgrade tag guarding each one, and the two-version obsolete cycle for any field or table being replaced (Standards Part 9). **"No upgrade code needed" is a decision to write down**, with its reason — not a silence.
+- **Events published and subscribed** — which events this extension publishes and why (its extension points), and which Microsoft events it subscribes to, each verified in the symbol file (Standards Part 10). Both go in the Object Register with the objects.
 - **Special design notes** — singletons (`EntityName = EntitySetName`), header/line pairs as two top-level pages, high-volume tables, naming conflicts.
 - **Permission sets** — if Parameter 1.2 = `Yes`: a read-only set and a read/write set (including the read-only set), IDs from the allocated range, named from Parameter 1.3 (Standards §5.3–§5.4). **Each table's `tabledata` grant ships in the same batch that introduces the table** (Standards §5.3).
 
@@ -507,7 +538,7 @@ Goal: generate AL batch by batch, lint clean — including symbol verification �
 - Confirm the object build order: which objects are built in which batch, smallest/simplest module first (Operating Rule 3).
 - **Agree how to run the batches, once** (Rule 6a): **Run through all batches, stopping on any pre-flight failure or TDD deviation (recommended)** / **Ask me before each batch**. Record the answer in `ProjectMemory.md`. This one approval replaces a separate approval before every batch (Operating Rule 6); Step 06 follows it.
 - Within a batch, order objects so lookup/reference tables precede the entities that reference them.
-- Prepare the scaffold: confirm `app.json` still matches `docs/ProjectParameters.md` (written at §1.10: name, publisher, ID ranges, runtime, BC dependency, `"features": ["NoImplicitWith", "TranslationFile"]` — `TranslationFile` on every project, Standards §8.2), `launch.json`, folder structure per module, a `Translations/` folder, `.gitignore` populated per §1.8 and ALL ALONG → Repository Hygiene (including `*.g.xlf` and `.alpackages/`), and the analyzer files: `.vscode/settings.json` with the analyzers for Parameter 1.1 Deployment Target, plus `AppSourceCop.json` if it's AppSource (**read Ops § Analyzers now**). Confirm the compile script (`scripts/al-analyze.*`) is present unless this is GitHub Copilot Chat in VS Code, and copy or fetch it if not. If `app.json` has to change here, follow ALL ALONG → Keeping the Editor in Sync.
+- Prepare the scaffold: confirm `app.json` still matches `docs/ProjectParameters.md` (written at §1.10: name, publisher, ID ranges, runtime, BC dependency, `"features": ["NoImplicitWith", "TranslationFile"]` — `TranslationFile` on every project, Standards §8.2), `launch.json`, folder structure per module, a `Translations/` folder, `.gitignore` populated per §1.8 and ALL ALONG → Repository Hygiene (including `*.g.xlf` and `.alpackages/`), and the analyzer files: `.vscode/settings.json` with the analyzers for Parameter 1.1 Deployment Target, plus `AppSourceCop.json` if it's AppSource (**read Ops § Analyzers now**). **If Deployment Target = `AppSource`**, confirm `app.json` also carries every §1.1a property — a missing one is a rejected submission (Standards Appendix E). Confirm the compile script (`scripts/al-analyze.*`) is present unless this is GitHub Copilot Chat in VS Code, and copy or fetch it if not. If `app.json` has to change here, follow ALL ALONG → Keeping the Editor in Sync.
 - **Agree the translation tooling** (Rule 6a; skip if Parameter §1.9 chose *US wording, no translation files*). Recommend the **XLIFF Sync** PowerShell module (`XliffSync`) as the agent's headless sync and checks, with the **XLIFF Sync** VS Code extension for reviewers. Offer **NAB AL Tools** as the alternative for developers who already use it. Before installing PowerShell, the module, or any extension, look for an existing installation first and ask (Operating Rules 6, 6b). Record the choice in Parameter §1.9. Whatever the tooling, the release gate (ALL ALONG → Translations & Terminology) is the same state scan.
 - Bootstrap the BCQuality knowledge snapshot and the OnlyCopilotFans (OCPF) BC AL Patterns (**Ops § Fetched Companions**)
   library for this project if not already done (ALL ALONG) — both are one-time-per-project setup,
@@ -584,20 +615,25 @@ only at Step 12.
 **Ask once, at the first round: should the agent run the API checks before the human tests?**
 (Rule 6a, and only once per project — record the answer in `docs/ProjectMemory.md` and honor it for
 every later round.) The offer must say what it costs up front:
-- ***Yes — publish and run the checks each round (recommended).*** The agent publishes the package
-  and works the green/red-team checklist above against the sandbox, so the human only ever sits down
-  to a build that already answers. **It needs one Microsoft browser sign-in per session** — the same
-  sign-in publishing and sandbox symbol downloads already use — and an authenticated route to the
-  tenant's API (the AL MCP Server connected per ALL ALONG → AL MCP Server, or another authenticated
-  MCP endpoint that reaches the sandbox).
-- ***No — I'll publish and test by hand.*** Don't ask again for this project. Say plainly that
-  nothing is lost: Step 12's human pass is the authoritative one either way, and the checklist above
-  is the same one a person runs.
+- ***Yes — publish and run the checks each round.*** The agent publishes the package and works the
+  green/red-team checklist above against the sandbox, so the human only ever sits down to a build
+  that already answers. **It needs two things**: one Microsoft browser sign-in per session, the same
+  one publishing and sandbox symbol downloads already use; and **a tool in this session that can
+  issue OData requests against the sandbox with a bearer token** — an HTTP-capable MCP server or
+  equivalent. **The AL MCP Server is not one of these:** it builds, publishes, and reads symbols,
+  and has no tool that calls a published endpoint (16 tools, verified on AL extension 18.0.2732683);
+  its sign-in token is cached inside the tool and isn't reusable elsewhere.
+- ***No — I'll publish and test by hand (the realistic default).*** Don't ask again for this project.
+  Nothing is lost: Step 12's human pass is the authoritative one either way, and the checklist above
+  is the same one a person runs. **Recommend this one unless the human has said they have an
+  API-capable connection** — most projects don't.
 
-**If the human says yes but no authenticated API route is available, say so plainly** rather than
-leaving it undone or pretending: publish, then suggest testing by hand via **Postman**, or a
+**Check for the route before promising anything, and say what you found.** If there's no
+HTTP-capable tool in this session, say so plainly rather than leaving the checks undone or
+reporting a pass that never ran: publish, then suggest testing by hand via **Postman**, or a
 low-code caller like **Power Automate**, **Power Apps**, or **Copilot Studio**. Offer the agent-run
-pass again if a connection appears later.
+pass again if such a connection appears later. **Endpoint URL shapes are Standards Appendix A** —
+including the company segment most endpoints need.
 
 **What this pass is and isn't.** It's a cheap, early filter over the app's own API pages — it never
 touches the BC client, the wizard, the Role Center, or anything needing judgment about wording. The
@@ -705,7 +741,7 @@ every fix and normalizes whatever drift the findings call out.
 
 ## 11 — Document the Code
 
-**Inputs:** `PostDevTDD.md`, the built AL, any agent-run API test result from Step 07 (if a live MCP connection was available there — optional, may not exist).
+**Inputs:** `PostDevTDD.md`, the built AL, any agent-run API test result from Step 07 (only if the human opted in at its first round and a route was available — optional, may not exist).
 
 **Actions:**
 - **Generate the reference documentation from the code, not from memory.** Parse every API page: extract IDs, source tables, editability, filters, and every field's identifier / source name / description / R/W status. Produce a structured reference — one section per object, one row per field — plus: a **quick-start** guide (get the API working fast — auth, one request, one response; not the full install procedure, see `Deployment.md` below for that), authentication and URL patterns (Standards Appendix A), `$filter` / `$select` examples, create/update/delete examples, explicit limitations, common integration patterns, troubleshooting table.
@@ -718,6 +754,11 @@ every fix and normalizes whatever drift the findings call out.
   automated scripts carry an ongoing maintenance commitment a one-time manual script doesn't. If any
   are created, they go in `AutomatedTestScripts.md`, a separate document from
   `HumanUnitTestScript.md`.
+- **If AL test codeunits exist, run them — don't hand the human a Test Tool page.** The AL MCP
+  Server's `al_run_tests` executes them against the sandbox, one codeunit per call (**Ops §
+  Automated Tests** has the exact arguments). Never against a production environment. A failing
+  test fails this step, like a compiler error. If the server isn't connected, say so and list the
+  codeunit IDs rather than reporting untested code as tested.
 - Write the **user guide** as `UserGuide.md` — **Markdown, in the repo, always** (HTML with `@media print` rules only as an *additional* branded/print deliverable, never instead of the Markdown). This is a **separate document from `Documentation.md`** and must not be folded into it: `Documentation.md` is the integration/API reference written for a developer or BI consumer, whereas the user guide is written for the person clicking around in Business Central — what the feature is for, how to do each task in order, what each field means in business terms, and what to do when something is refused. If the only "user guide" produced is an API reference, this action has not been done.
 - Write one-page **deployment instructions** as `Deployment.md`, for an administrator: version requirements, install procedure, which permission sets map to which roles, verification steps, uninstall. If this release renames any permission set (for example, moving an older extension to Standards §5.4 names), list which users must be reassigned after the upgrade. Distinct from `Documentation.md`'s quick-start: this is the full admin install/upgrade/uninstall procedure, not a fast path to a first API call. If Parameter §1.9 has more than one language, include which Microsoft language apps (or partner language apps) an administrator must install for each language, and that the Allowed Languages list should include them.
 - **AppSource listing text** — only if §1.1 Deployment Target = `AppSource` (Standards §8.10). Draft, in English, the offer description's closing *Supported Countries/Regions* paragraph (the countries from Parameter §1.9) and *Supported Languages* paragraph (only languages whose translation files ship with every unit approved at Step 12). Write both into `Deployment.md`, and state plainly that the markets selected in Partner Center must match the countries paragraph. Every listed country needs its own test at Step 12.
@@ -726,7 +767,7 @@ every fix and normalizes whatever drift the findings call out.
 
 **Outputs:** `Documentation.md` (consumer/API reference, includes the Mermaid schema diagram), `HumanUnitTestScript.md`, **`UserGuide.md`** (end-user, Markdown), `Deployment.md`, and `AutomatedTestScripts.md` (only if the human opted in above). Four mandatory documents — check all four exist before claiming the step is complete; the fifth is conditional.
 
-**Exit gate:** Reference is generated from actual code and current; test script executable by a non-developer; the human has been asked about Automated Test Scripts (Ops § Automated Tests; answer recorded either way); app ready to hand to Step 12 for release testing.
+**Exit gate:** Reference is generated from actual code and current; test script executable by a non-developer; the human has been asked about Automated Test Scripts (Ops § Automated Tests; answer recorded either way); any AL test codeunits have been run and pass, or it's recorded why they couldn't be run; app ready to hand to Step 12 for release testing.
 
 ## 12 — Release to Users for Testing
 
@@ -780,7 +821,7 @@ every fix and normalizes whatever drift the findings call out.
 
 **Outputs:** `docs/ReleaseTestResults.md` — the Dev Manager's review (who, when, findings), every test case, its result, and a link to any ChangeLog issue it produced.
 
-**Exit gate:** The Dev Manager has reviewed `PostDevTDD.md`, the FRD baseline, and Step 11's documents (recorded in `ReleaseTestResults.md`); all green-team tests pass; all red-team tests fail gracefully; permission sets verified; every translated document §1.9 requires exists and has been reviewed; every language required at first release has passed its language pass and its state scan shows every unit `signed-off` or `final` (Ops § Translations). **If everything passes, the package that was actually tested is the one deployed to the Production company** — bump its Build segment (e.g. `0.0.5.0` → `0.0.5.1`) or copy it to an immutable filename first (ALL ALONG → Packaging & Versioning) so the shipped artifact stays permanently identifiable and is never itself overwritten by a later cycle build; this is marking the release candidate, not building a new one — no code is recompiled and no new testing is required to do it. **Before that deploy, restate the Schema Sync Mode assessment for this exact package** (ALL ALONG → Packaging & Versioning) — **Add** if this release is additive-only, **Force Sync** with an explicit data-loss warning if anything was removed, shrunk, retyped, or re-keyed since the last production release.
+**Exit gate:** The Dev Manager has reviewed `PostDevTDD.md`, the FRD baseline, and Step 11's documents (recorded in `ReleaseTestResults.md`); all green-team tests pass; all red-team tests fail gracefully; permission sets verified; every translated document §1.9 requires exists and has been reviewed; every language required at first release has passed its language pass and its state scan shows every unit `signed-off` or `final` (Ops § Translations). **If everything passes, the package that was actually tested is the one deployed to the production environment** — and that deploy is the human's, through Extension Management, never the agent's (Ops § Packaging) — bump its Build segment (e.g. `0.0.5.0` → `0.0.5.1`) or copy it to an immutable filename first (ALL ALONG → Packaging & Versioning) so the shipped artifact stays permanently identifiable and is never itself overwritten by a later cycle build; this is marking the release candidate, not building a new one — no code is recompiled and no new testing is required to do it. **Before that deploy, restate the Schema Sync Mode assessment for this exact package** (ALL ALONG → Packaging & Versioning) — **Add** if this release is additive-only, **Force Sync** with an explicit data-loss warning if anything was removed, shrunk, retyped, or re-keyed since the last production release.
 
 ---
 
@@ -825,7 +866,7 @@ mandatory there, in BUILD, not something that waits for PROVE — and continues 
 words, not yet triaged into decisions.
 This is distinct from both of the above: the ChangeLog records *decisions and reasoning*; the
 Step 12 test-run record (`ReleaseTestResults.md`) captures the human-run green-team/red-team
-pass/fail (with an earlier, optional agent-run pass at Step 07 if a live MCP connection was
+pass/fail (with an earlier, optional agent-run pass at Step 07 if the human opted in there and a route was
 available there). Neither preserves what the human actually said before it becomes a summary of
 what the human said.
 
@@ -865,6 +906,13 @@ agent that opens this repo.
   actually waiting on for a forward-looking decision. With a single contributor every row will
   say the same name — write it anyway, so the convention is already in place the day a second
   person joins.
+- **Keep a "Standing preferences" list** — the things this human has said once and shouldn't be
+  asked again: how they want to be notified, whose sign-off a given decision needs, a house naming
+  habit, a tool they don't want used. Each row records the preference, the date, and who gave it.
+  Without this, every preference expressed mid-project is lost at the next session boundary and
+  the human is asked a second time — which is how a framework that asks well starts to feel like
+  one that nags. A preference that contradicts a Project Parameter doesn't override it: raise the
+  conflict.
 - Update it at the close of every step or batch, the same moment the ChangeLog gets its entry, and whenever a document moves, a decision opens or closes, or a milestone lands.
 - If the executing agent *also* has its own persistent cross-session memory capability, that
   memory may point at `docs/ProjectMemory.md` (e.g. "always read this file first") but must not
@@ -943,6 +991,10 @@ translation files*, except Operating Rule 8 and Standards §1.7.
   build time. Say the folder once at intake, and the exact path every time a build completes.
 - **Built packages are git-tracked, never gitignored.** No `outputAppPackage/` or blanket `*.app`
   entry in `.gitignore`.
+- **The agent never publishes to a production environment.** Before every publish, state the target
+  environment and type; if it isn't a sandbox, stop and ask. Never force a destructive schema change
+  (`ForceSync`, `Recreate`, `forceUpgrade`) without a separate approval naming what can be lost. The
+  production deploy at Step 12 is the human's, through Extension Management (Ops § Packaging).
 - **Never delete or overwrite a package from a different version. NEVER.** No `rm`, no tidying, not
   even before a build. Repeated builds at the same in-progress version legitimately overwrite that
   version's file; the protection is across versions.
@@ -993,8 +1045,10 @@ and at Step 07's compile.
 - The mandatory compile runs with **CodeCop**, **UICop**, and exactly one of
   **PerTenantExtensionCop** (SaaS/OnPrem PTE) or **AppSourceCop** (AppSource) — never both.
 - `.vscode/settings.json` (and `AppSourceCop.json` for AppSource) is created at Step 05's scaffold.
-- Outside GitHub Copilot Chat, run `scripts/al-analyze.*`: the AL MCP Server's own
-  `al_build`/`al_compile` don't apply analyzers.
+- Outside GitHub Copilot Chat, run `scripts/al-analyze.*`. The AL MCP Server's `al_build` never
+  applies analyzers, and its `al_compile` only does so with one exact argument shape — anything
+  else returns a clean pass on failing code (**Ops § Analyzers**). Never treat an `al_compile`
+  result as the mandatory compile: it produces no `.app`.
 - **Read the warnings, not just the result.** The compiler succeeds with warnings; `al-analyze`
   exits `3` on them. Any warning fails Operating Rule 5.
 - **Zero warnings means zero:** no `#pragma warning disable`, and the framework ships no ruleset.
@@ -1039,9 +1093,9 @@ change.
 
 ## OCPF AL Development Standards Guide
 
-The companion rules document — `ocpfALDevStandardsGuide.md`, v1.8.0.0 — holds the AL rules this
+The companion rules document — `ocpfALDevStandardsGuide.md`, v1.9.0.0 — holds the AL rules this
 runbook cites as **Standards §**, from PRE-02 onward. Its sibling, the **Operations Guide**
-(`ocpfOperationsGuide.md`, v1.1.0.0), holds the procedures, cited as **Ops §**.
+(`ocpfOperationsGuide.md`, v1.2.0.0), holds the procedures, cited as **Ops §**.
 
 **Fetch both at PRE-01, before anything else needs them** — `standardsGuide/` and `opsGuide/` in
 this project's root, both always gitignored. **Full procedure: Ops § Fetched Companions**, which

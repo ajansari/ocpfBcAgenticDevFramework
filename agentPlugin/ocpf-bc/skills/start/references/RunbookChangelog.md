@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v3.2.0.0**, the Standards Guide is at **v1.8.0.0**, the Operations Guide at **v1.1.0.0**, and Lite at **v2.1.0.0** — but
+**v3.3.0.0**, the Standards Guide is at **v1.9.0.0**, the Operations Guide at **v1.2.0.0**, and Lite at **v2.2.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 
 Entries are grouped by version, newest first, and describe the **cumulative** result of a
@@ -17,6 +17,117 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v3.3.0.0 — September 15, 2026
+
+**AppSource is supported properly rather than named in passing, upgrade code and events stop being
+gaps, the agent runs the AL tests it writes, and the analyzer claim this framework has repeated
+since v2.11.0.0 is corrected.** Ships with Lite **v2.2.0.0**, Standards Guide **v1.9.0.0**,
+Operations Guide **v1.2.0.0**, plugin **v2.3.0**. From a full-framework review run on Opus against
+the whole framework, not just the changed files.
+
+### Corrected — the analyzer claim was wrong, and the truth is worse
+
+Since v2.11.0.0 this framework has stated that the AL MCP Server's `al_build` and `al_compile`
+"don't apply analyzers." Half of that is wrong, and the correction matters more than the original
+claim did. Verified twice on AL Language extension 18.0.2732683 (September 15, 2026), on the same
+server start, alternating the two calls to rule out ordering and caching:
+
+- **`al_compile` does apply analyzers** — with `enableCodeAnalysis: true` **and** a `codeAnalyzers`
+  list of the well-known tokens (`${CodeCop}`, `${PerTenantExtensionCop}`, `${UICop}`,
+  `${AppSourceCop}`), both passed **at the top level of `options`**. That call returned `AA0215`,
+  `PTE0004`, `AA0247`, and `PTE0026` on a fixture with a table and no permission set.
+- **The identical call wrapped in a `parameters` key returned `succeeded: true, diagnostics: []`.**
+  The wrapper belongs to `al_symbolsearch` alone; Microsoft's own page says so: *"The
+  `al_symbolsearch` tool requires its search parameters to be wrapped under a `parameters` key. All
+  other tools accept their parameters at the top level."* The earlier verification made exactly
+  this mistake and read the silent pass as proof the tool ignored analyzers.
+- **Every wrong shape fails silently as a clean pass** — the wrapper, a missing
+  `enableCodeAnalysis`, a `codeAnalyzers` list of literal DLL paths (which returns `AD0001`
+  instead of rule results). An agent gets a green light on code carrying an analyzer *error*.
+- **`al_build` genuinely never applies them**, whatever is passed, and reports `succeeded: true`
+  while writing a package from failing code — even though its schema advertises `enableCodeAnalysis`
+  and `codeAnalyzers`.
+
+`scripts/al-analyze.*` therefore keeps its place as the mandatory compile: `al_compile` writes no
+`.app`, so it can be a fast pre-check but never Operating Rule 4's compile-and-package. Corrected in
+**Ops § Analyzers**, both runbooks' Analyzers sections, the `al-mcp-setup` skill, and the
+`al-analyze.sh` header.
+
+### Added — AppSource as a supported deployment target
+
+Choosing `AppSource` at intake now changes the intake, rather than being recorded and forgotten
+until a submission is rejected.
+
+- **Standards §5.5 — Object ID ranges belong to the deployment target.** The full range table from
+  Microsoft's *Object ranges* page: 50,000–99,999 is the customization range and PTE work's home;
+  AppSource needs a range **registered to the publisher** — 70,000,000–74,999,999 (*"We currently
+  advise new publishers to request an app object range"*) or an existing RSP range in
+  1,000,000–69,999,999. The AL template's `50100–50149` is no longer offered when the target is
+  AppSource; an app submitted from it fails validation.
+- **Standards Appendix E — AppSource manifest and submission requirements.** The nine `app.json`
+  properties Microsoft marks *"No, but required for Marketplace submission"*, each with what the
+  intake asks for, plus the rest of the technical validation checklist restated as project rules
+  (AppSourceCop, registered affixes, mandatory translation files, `DataClassification`, upgrade
+  code, `addfirst`/`addlast`, no `OnBeforeCompanyOpen`, signing, unique `AppId`).
+- **Ops § Intake — *The AppSource questions*.** Two extra boxes (Marketplace listing; legal and
+  support URLs) asked only when Deployment Target is `AppSource`, and a replacement for question
+  11's options. Deferred answers are recorded as release blockers rather than left blank.
+- **Runbook §1.1a** carries the parameters; Step 05's scaffold check and Ops § Project Setup write
+  them into `app.json` at setup, not at release.
+
+### Added — the two AL gaps the review found
+
+- **Standards Part 9 — Upgrade and Data Migration.** When upgrade code is required (a table of
+  changes against it) and when it genuinely isn't; the upgrade codeunit and its six triggers, with
+  `PerCompany` vs `PerDatabase` scoping; the three-part upgrade-tag pattern — guard, register for
+  new companies, register on first install — with tag values behind methods and Microsoft's
+  `[Prefix]-[ID]-[Description]-[YYYYMMDD]` convention; the two-version `ObsoleteState` cycle that
+  replaces deleting a shipped field; keeping web-service and printing side effects out of the
+  upgrade session via `Session.GetExecutionContext()`; and a four-step procedure for actually
+  testing an upgrade path.
+- **Standards Part 10 — Events and Extensibility.** Subscribing (subscribers are `local`, in their
+  own codeunit, no UI, no `Error()` on someone else's transaction, verified against symbols before
+  use) and publishing (`IntegrationEvent` as the default, `BusinessEvent` only for a stable
+  business fact, `InternalEvent` for own use; signature-only publishers; explicit raising; `var`
+  and `Handled` parameters). A published event signature is a promise — changing one follows the
+  same two-version cycle as §9.4.
+- **Both are now TDD content:** Step 03 and Lite's Design Doc require the upgrade plan and the
+  event inventory, and *"no upgrade code needed"* is a decision written down with its reason.
+
+### Added — the agent runs the tests
+
+**Ops § Automated Tests** now documents `al_run_tests` against its live schema: flat top-level
+arguments, `codeunitId` the only required one, `projectPath` reading the connection from
+`launch.json`, one codeunit per call so the agent iterates the Object Register itself, and the full
+optional set (`company`, `tenant`, `authentication`, `useInteractiveLogin`, `noCache`, the
+on-premises trio, and the `BC_SERVER_*` environment variables). `environmentType` is never
+`Production`. A failing test codeunit fails the step like a compiler error; an unconnected server is
+said plainly rather than reported as a pass. Wired into Full Step 11 and Lite Step 6, including both
+exit gates.
+
+### Changed
+
+- **Step 07's schematic** now matches the v3.2.0.0 text: the API-pass offer is made once, at round
+  1, before testing, with three branches (accepted with a route, accepted without one, declined) —
+  instead of a decision hanging off the clean-compile node. Lite's equivalent node says the same in
+  one box. All 15 diagrams across both editions re-rendered.
+- **Package naming is stated against what the tools actually do:** left to its default `al_build`
+  writes `<publisher>_<name>_<version>.app`, keeping spaces, so the framework's name is passed
+  explicitly via `outputPath` rather than produced and renamed.
+- **Standards Appendix B step 1** no longer opens a symbol package in VS Code — the agent reads
+  symbols itself through `al_symbolsearch`/`al_symbolrelations`, or from the `.app`'s zip content,
+  with the editor as the last resort (zero-install, Rule 6d).
+- **`ProjectMemory.md` gains a "Standing preferences" list** — what this human has said once and
+  shouldn't be asked again, with the date and who gave it. Without it, a preference expressed
+  mid-project is lost at the next session boundary and gets asked a second time.
+- **Step 12's exit gate** says *production environment*, not *Production company*, and names the
+  production deploy as the human's, through Extension Management.
+- **Two claims narrowed to what was verified:** `AS0054` fails the compile (dropping an unverified
+  claim about *when* in the compile), and `PTE0008`/`AS0062` is described as observed on a page
+  field, noting it lands on UI pages rather than API pages.
 
 ---
 

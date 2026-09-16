@@ -193,7 +193,7 @@ flowchart TD
     subgraph S5["STEP 5 — Compile, Package, Test & Iterate"]
         direction LR
         Compile["FIRST: compile the whole<br/>extension once with the analyzers,<br/>then package it — the one<br/>mandatory compile-and-package<br/>(Op. Rule 4)"] --> Deploy["Publish package<br/>to BC sandbox"]
-        Deploy --> Test["Test — manually by the<br/>human, or via the optional<br/>agent-run MCP API pass"]
+        Deploy --> Test["Test — by hand (the default:<br/>Postman, Power Automate, Power<br/>Apps, Copilot Studio), or agent-run<br/>if round 1's offer was accepted<br/>AND an HTTP route exists —<br/>the AL MCP Server is not one"]
         Test --> Q{"Errors, warnings,<br/>or issues found?"}
         Q -- "Yes" --> Diag["Check patterns/ first, then:<br/>one-off or pattern? where<br/>from? what rule missed it?"]
         Diag --> Approve["Human approves the round's<br/>fixes together: apply all /<br/>selected / discuss"]
