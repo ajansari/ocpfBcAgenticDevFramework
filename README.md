@@ -13,19 +13,17 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 ## Table of Contents
 
 - [Background](#background)
-- [Inspiration](#inspiration)
-- [Contents](#contents)
 - [Setup: Agent Plugin (Recommended)](#setup-plugin)
 - [Staying Up to Date](#staying-up-to-date)
 - [Setup: Full Framework (Manual)](#setup-full)
 - [Setup: Lite Edition (Manual)](#lite-edition)
 - [Roadmap](#roadmap)
-- [Overview - Slidedeck](https://ajansari.github.io/ocpfBcAgenticDevFramework/)
-
+- [Repo Contents](#contents)
+- [Project Inspiration](#inspiration)
 
 <a id="background"></a>
 <details open>
-<summary><h2>Background</h2></summary>
+<summary><h1>Background</h1></summary>
 
 This Agentic Development Framework was created to help Business Central Functional Consultants use AI to build AL extensions and apps the **right** way — though professional AL developers will find it just as useful.
 
@@ -37,43 +35,9 @@ It comes in two editions: the **full framework** (14 steps) for substantial proj
 
 </details>
 
-<a id="inspiration"></a>
-<details open>
-<summary><h2>Inspiration</h2></summary>
-
-The spark for this project was Microsoft's **Business Central Agentic Engineering Process** vision, first unveiled at Directions North America in Orlando in April 2026.
-
-I've been teaching an AL development bootcamp at Community Summit NA since 2023. The bootcamp is typically geared toward developers, but for many years I've also led workshops and sessions on AL development aimed squarely at Functional Consultants. With the rise of vibe coding — and all the ill effects that come with taking that approach to business-critical code and apps — I wanted to create a framework that would let Functional Consultants and other non-developers use AI and agentic development tools to build AL extensions not just quickly, but the **right** way: the way a professional developer would build a BC app.
-
-What I wanted was for a Functional Consultant to be able to interface with an AI or agentic dev tool the same way they would interface with a human BC developer — and to expect the same quality of work and the same outputs, without incurring unnecessary technical debt along the way.
-
-With that in mind, I built my first proof of concept by May, centered on an AL Standards Guide I had written, and had a proper first version of the agentic development framework by early June. After extensive prototyping, internal use, testing, and iteration, I debuted it to an external audience at Days of Knowledge ANZ in Melbourne in August 2026, to very positive feedback.
-
-In the time since, my focus has turned to fine-tuning the framework and enhancing its user experience — making it more interactive, creating a Lite version for smaller projects, and integrating with popular tools like the AL MCP Server and BCQuality.
-
-At the heart of this project is a simple vision: that this framework should be **Simple Enough for a Functional Consultant, but Robust Enough for a Pro Developer**.
-
-</details>
-
-<a id="contents"></a>
-<details open>
-<summary><h2>Contents</h2></summary>
-
-| File | Purpose |
-|---|---|
-| `fullVersion/` | The **Full Framework** — the complete 14-step routine. See [Setup: Full Framework](#setup-full) below. |
-| `standardsGuide/ocpfALDevStandardsGuide.md` | The companion **OCPF AL Development Standards Guide** — the detailed AL rules the runbook cites as **Standards §** (coding standards, API page design, field inclusion, naming, ID allocation, gap analysis, anti-patterns, translation and multilanguage, upgrade and data migration, events and extensibility, and the AppSource manifest and submission requirements). You don't need to copy this one by hand: the runbook fetches it from this repository into every project at PRE-01, and gitignores it there. Shared by both editions. |
-| `opsGuide/ocpfOperationsGuide.md` | The companion **OCPF Operations Guide** — the procedures both editions share, cited as **Ops §** (how the agent asks and gets approval, intake, roles, project setup, the AL tools, analyzers, symbols, editor sync, notifications, packaging, repository hygiene, translations, automated tests, fetched companions, reference sources, and the plugin). Fetched into each project alongside the Standards Guide. |
-| `liteVersion/` | The **Lite Edition** — a 7-step version of the framework for small, fast-moving projects. See [Lite Edition](#lite-edition) below. |
-| `translationAndMultiLanguage/MultilanguageSupportOverview.md` | How the framework handles multilanguage — captions and XLIFF translation files, regional terminology (GST vs. VAT, CR/Adj Note vs. Credit Memo in Australia), agent-drafted translations with a human review gate, and language-aware UAT. Shared by both editions. |
-| `agentPlugin/` | The optional **agent plugin**, `ocpf-bc`, for Claude Code, GitHub Copilot, and other tools. See [Setup: Agent Plugin](#setup-plugin). This repository is also its plugin marketplace (`.claude-plugin/marketplace.json`). |
-| `THIRD_PARTY_NOTICES.md` | Credits and licenses for every third-party resource the framework references, fetches, or recommends — BCQuality, AL Guidelines, Microsoft Learn, and others. |
-
-</details>
-
 <a id="setup-plugin"></a>
 <details open>
-<summary><h2>Setup: Agent Plugin (Recommended)</h2></summary>
+<summary><h1>Setup: Agent Plugin (Recommended)</h1></summary>
 
 The framework is also an **agent plugin**, `ocpf-bc`. It's the easiest way in: install it once,
 then start any project with one command. The plugin:
@@ -222,7 +186,7 @@ In GitHub Copilot, the commands are the same.
 
 <a id="staying-up-to-date"></a>
 <details open>
-<summary><h2>Staying Up to Date</h2></summary>
+<summary><h1>Staying Up to Date</h1></summary>
 
 Two separate things get updated. The plugin handles each one differently.
 
@@ -262,7 +226,7 @@ you can run `/ocpf-bc:update-framework` in them anytime.
 
 <a id="setup-full"></a>
 <details open>
-<summary><h2>Setup: Full Framework (Manual)</h2></summary>
+<summary><h1>Setup: Full Framework (Manual)</h1></summary>
 
 | Full framework file | Purpose |
 |---|---|
@@ -295,7 +259,7 @@ Choose the setup that matches your development environment. Both paths use the s
 
 <a id="lite-edition"></a>
 <details open>
-<summary><h2>Setup: Lite Edition (Manual) — for small, fast-moving projects</h2></summary>
+<summary><h1>Setup: Lite Edition (Manual) — for small, fast-moving projects</h1></summary>
 
 Not every extension needs the full 14-step routine. **Lite Edition** covers the same ground in **7 steps** and **4 documents**, for projects that need to move fast without giving up the discipline that keeps AI-generated AL correct.
 
@@ -340,12 +304,46 @@ Same pattern as the full framework — only the source file changes.
 
 <a id="roadmap"></a>
 <details open>
-<summary><h2>Roadmap</h2></summary>
+<summary><h1>Roadmap</h1></summary>
 
 - ~~Add support for AL MCP~~ ✅ Completed
 - ~~Add support for BCQuality~~ ✅ Completed
 - ~~Add support for multi language translations~~ ✅ Completed — see [Multilanguage Support](translationAndMultiLanguage/MultilanguageSupportOverview.md)
 - ~~Distribute as an agent plugin for Claude and GitHub Copilot~~ ✅ Completed — see [Setup: Agent Plugin](#setup-plugin)
 - ~~List the plugin in Anthropic's community plugin directory~~ ✅ Completed — September 2026
+
+</details>
+
+<a id="contents"></a>
+<details open>
+<summary><h1>Repo Contents</h1></summary>
+
+| File | Purpose |
+|---|---|
+| `fullVersion/` | The **Full Framework** — the complete 14-step routine. See [Setup: Full Framework](#setup-full) below. |
+| `standardsGuide/ocpfALDevStandardsGuide.md` | The companion **OCPF AL Development Standards Guide** — the detailed AL rules the runbook cites as **Standards §** (coding standards, API page design, field inclusion, naming, ID allocation, gap analysis, anti-patterns, translation and multilanguage, upgrade and data migration, events and extensibility, and the AppSource manifest and submission requirements). You don't need to copy this one by hand: the runbook fetches it from this repository into every project at PRE-01, and gitignores it there. Shared by both editions. |
+| `opsGuide/ocpfOperationsGuide.md` | The companion **OCPF Operations Guide** — the procedures both editions share, cited as **Ops §** (how the agent asks and gets approval, intake, roles, project setup, the AL tools, analyzers, symbols, editor sync, notifications, packaging, repository hygiene, translations, automated tests, fetched companions, reference sources, and the plugin). Fetched into each project alongside the Standards Guide. |
+| `liteVersion/` | The **Lite Edition** — a 7-step version of the framework for small, fast-moving projects. See [Lite Edition](#lite-edition) below. |
+| `translationAndMultiLanguage/MultilanguageSupportOverview.md` | How the framework handles multilanguage — captions and XLIFF translation files, regional terminology (GST vs. VAT, CR/Adj Note vs. Credit Memo in Australia), agent-drafted translations with a human review gate, and language-aware UAT. Shared by both editions. |
+| `agentPlugin/` | The optional **agent plugin**, `ocpf-bc`, for Claude Code, GitHub Copilot, and other tools. See [Setup: Agent Plugin](#setup-plugin). This repository is also its plugin marketplace (`.claude-plugin/marketplace.json`). |
+| `THIRD_PARTY_NOTICES.md` | Credits and licenses for every third-party resource the framework references, fetches, or recommends — BCQuality, AL Guidelines, Microsoft Learn, and others. |
+
+</details>
+
+<a id="inspiration"></a>
+<details open>
+<summary><h1>Project Inspiration</h1></summary>
+
+The spark for this project was Microsoft's **Business Central Agentic Engineering Process** vision, first unveiled at Directions North America in Orlando in April 2026.
+
+I've been teaching an AL development bootcamp at Community Summit NA since 2023. The bootcamp is typically geared toward developers, but for many years I've also led workshops and sessions on AL development aimed squarely at Functional Consultants. With the rise of vibe coding — and all the ill effects that come with taking that approach to business-critical code and apps — I wanted to create a framework that would let Functional Consultants and other non-developers use AI and agentic development tools to build AL extensions not just quickly, but the **right** way: the way a professional developer would build a BC app.
+
+What I wanted was for a Functional Consultant to be able to interface with an AI or agentic dev tool the same way they would interface with a human BC developer — and to expect the same quality of work and the same outputs, without incurring unnecessary technical debt along the way.
+
+With that in mind, I built my first proof of concept by May, centered on an AL Standards Guide I had written, and had a proper first version of the agentic development framework by early June. After extensive prototyping, internal use, testing, and iteration, I debuted it to an external audience at Days of Knowledge ANZ in Melbourne in August 2026, to very positive feedback.
+
+In the time since, my focus has turned to fine-tuning the framework and enhancing its user experience — making it more interactive, creating a Lite version for smaller projects, and integrating with popular tools like the AL MCP Server and BCQuality.
+
+At the heart of this project is a simple vision: that this framework should be **Simple Enough for a Functional Consultant, but Robust Enough for a Pro Developer**.
 
 </details>
