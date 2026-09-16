@@ -846,7 +846,7 @@ agent that opens this repo.
   actually waiting on for a forward-looking decision. With a single contributor every row will
   say the same name — write it anyway, so the convention is already in place the day a second
   person joins.
-- Update it at the close of every step or batch — the same moment the ChangeLog gets its entry — whenever a document moves, a decision opens or closes, or a milestone lands.
+- Update it at the close of every step or batch, the same moment the ChangeLog gets its entry, and whenever a document moves, a decision opens or closes, or a milestone lands.
 - If the executing agent *also* has its own persistent cross-session memory capability, that
   memory may point at `docs/ProjectMemory.md` (e.g. "always read this file first") but must not
   duplicate its content. A fact that lives only in an agent's private memory and nowhere in
