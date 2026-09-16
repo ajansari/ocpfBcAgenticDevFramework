@@ -272,7 +272,7 @@ Choose the setup that matches your development environment. Both paths use the s
 **Getting started prompt:**
 > This AL project will follow the Agentic Development Framework outlined in `BC_App_Build_Routine_Agent.md` (may also be referred to as `CLAUDE.md` or `.github/copilot-instructions.md`). Please review this file and let's get started.
 
-> 💡 **Don't copy the Standards Guide by hand.** PRE-01 — the very first step of the routine — fetches it from this repository into a `standardsGuide/` folder in your project and adds that folder to `.gitignore`, so it stays out of your project's remote.
+> 💡 **Don't copy the companion guides by hand.** PRE-01 — the very first step of the routine — fetches it from this repository into a `standardsGuide/` folder in your project and adds that folder to `.gitignore`, so it stays out of your project's remote.
 
 > ⚠️ **One edition per project.** A project follows either the full framework or Lite — not both at once. If this project is only ~5–10 AL files with one person and one AI model on it, [Lite](#lite-edition) covers the same ground in 7 steps and 4 documents.
 
@@ -317,7 +317,7 @@ Same pattern as the full framework — only the source file changes.
 **Getting started prompt (Lite):**
 > This AL project (10 files or fewer) will follow the Lite Agentic Development Framework outlined in `LITE_BC_App_Build_Routine_Agent.md` (may also be referred to as `CLAUDE.md` or `.github/copilot-instructions.md`). Please review this file and let's get started.
 
-> 💡 **Don't copy the Standards Guide by hand.** Step 1 — the very first step of the Lite routine — fetches it from this repository into a `standardsGuide/` folder in your project and adds that folder to `.gitignore`, so it stays out of your project's remote.
+> 💡 **Don't copy the companion guides by hand.** Step 1 — the very first step of the Lite routine — fetches it from this repository into a `standardsGuide/` folder in your project and adds that folder to `.gitignore`, so it stays out of your project's remote.
 
 > ⚠️ **One edition per project.** A project follows either the full framework or Lite — not both at once. If a Lite project outgrows Lite mid-flight, swap in the full runbook in place of the Lite one; your `DesignDoc.md` and `ChangeLog.md` carry straight over.
 

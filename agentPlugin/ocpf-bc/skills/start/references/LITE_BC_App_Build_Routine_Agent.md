@@ -29,6 +29,15 @@
 > runbook states each rule in short form where you need it and cites the guides for the full
 > version.
 >
+> **When to use Lite:** a Business Central AL Per-Tenant Extension with **10 or fewer AL files** —
+> typically a handful of API pages over standard tables, maybe one or two new tables, a single
+> developer or functional consultant driving it, one AI model doing the work. **Graduate to the full
+> framework** the moment any of these stops being true: the object count grows past ~10, the project
+> needs multiple sign-off roles (Dev Manager, Technical Lead, Functional Consultant as separate
+> people), you want to split work across more than one AI model, or the extension is heading to
+> AppSource, which tends to demand the fuller documentation trail. Nothing is lost by switching
+> later — Lite's Design Doc and ChangeLog map directly onto the full framework's TDD and ChangeLog.
+>
 > **How the agent uses it:** work the phases in order (DEFINE → DESIGN → BUILD → PROVE). Don't
 > start a step until its predecessor's exit gate is met. The *Project Parameters* block in Step 1
 > is the single source of truth for every name, ID, version, and quoting decision — never hardcode
@@ -170,9 +179,6 @@ design work.
   through the options mechanism, with English listed first and free text for any other language.
   It's asked alone, so every later box can be in the language chosen. Continue in the language
   chosen.
-- **Ask how to be notified right after that** (Ops § Notifications — read it now): Claude app, sound,
-  desktop notification, any combination, or none. Record it in `.ocpf/notifications.json` and
-  apply it, so every later question reaches the human even when they've stepped away.
 - **Fetch both companion guides first, before anything else needs them.** Get
   `standardsGuide/ocpfALDevStandardsGuide.md` into `standardsGuide/` and
   `opsGuide/ocpfOperationsGuide.md` into `opsGuide/`, from
@@ -180,6 +186,9 @@ design work.
   `.gitignore`** — see ALL ALONG → OCPF AL Development Standards Guide. The gap check below leans on
   Standards Part 6, and this step's notification and intake procedures are Ops §, so neither can
   wait for Step 3 the way the other fetched libraries do. Tell the human you're doing it.
+- **Ask how to be notified right after that** (Ops § Notifications — read it now): Claude app, sound,
+  desktop notification, any combination, or none. Record it in `.ocpf/notifications.json` and
+  apply it, so every later question reaches the human even when they've stepped away.
 - **Capture any raw requirements input verbatim, before interpreting it.** If the human pastes raw
   requirements in chat, or uploads a file, save it untouched in a `requirements/` folder (a
   descriptive filename, or the file's own name for an upload) before doing anything else with it.
@@ -239,7 +248,7 @@ root (ALL ALONG → Packaging & Versioning). Mention it once, plainly, now.
 | **Onboarding extras** | `Yes`/`No` each | Assisted Setup Wizard? Role Center Activity Cues? Departments/"My Business Central" placement? Box 4; `No` to any is a final answer, not a placeholder — most small extensions answer `No` to all three, but ask anyway. |
 | **Framework files in `.gitignore`?** | `Yes` (default) | Box 5, asked as: *"`.gitignore` lists files Git leaves out of commits and pushes — they stay on disk and work normally. Should this framework's own files be left out of this project's repository?"* Covers this runbook (under whatever name it was given: `CLAUDE.md`, `.github/copilot-instructions.md`, or `LITE_BC_App_Build_Routine_Agent.md`), `LITE_RunbookChangeLog.md`, `LITE_RunbookSchematics.md`, and the plugin's `.ocpf/` folder, if present. **Never the project's own `ChangeLog.md`**, which is always committed. |
 | **Working language** | — | From the first question of this step. |
-| **Target languages** | table | Box 5's question 19, for the countries from Box 1 — never asked again (rules: **Standards §8.8**). Classify each chosen language as Microsoft-translated, partner-translated (ask which partner app, in the next box — it's the terminology source), or not supported by BC (every right-to-left language included). Don't offer an unsupported language; if typed, offer the country's English instead, and only record it if the human insists. Then, unless source wording is *US wording, no translation files*, per language, two questions: *Required at first release* / *Can follow later*; and who reviews it — names the human mentioned, or *I'll type it*; a named fluent person, never the agent. Flag any mismatch with **Localization**. |
+| **Target languages** | table | Box 5, for the countries from Box 1 — Lite groups the setup and language questions together (Ops § Intake) — never asked again (rules: **Standards §8.8**). Classify each chosen language as Microsoft-translated, partner-translated (ask which partner app, in the next box — it's the terminology source), or not supported by BC (every right-to-left language included). Don't offer an unsupported language; if typed, offer the country's English instead, and only record it if the human insists. Then, unless source wording is *US wording, no translation files*, per language, two questions: *Required at first release* / *Can follow later*; and who reviews it — names the human mentioned, or *I'll type it*; a named fluent person, never the agent. Flag any mismatch with **Localization**. |
 | **Source language** | `en-US` (default) | Offer `en-US` first, labelled recommended, with the one-line reasons in **Standards §8.1**. If the human chooses another, state the consequences before recording it. |
 | **Source wording** | `W1` | Microsoft's W1 English wording in source, with one translation file per target language (`en-US` included). Only when `en-US` is the **sole** target **and Deployment Target isn't `AppSource`** (AppSource requires translation files — **Standards §8.10**), also offer *US wording in source, no translation files* — simpler now, but another market later means changing source strings. |
 | **Documents in other languages** | per document | Only with a target language other than the source. Two questions: translate `Docs.md`'s user-guide section into each required language (*Yes (recommended)* / *No*); and does `TestScript.md` need a translated copy (*No — testers run the language pass from the English script, which names the terms they should see (recommended when testers read English)* / *Yes*)? `DesignDoc.md` and `ChangeLog.md` stay English. Translated documents are produced at Step 7, once the functional test pass is green. |
@@ -274,13 +283,13 @@ the human's (Rule 6d). **Full procedure: Ops § Project Setup.**
    Symbols).
 4. **Keep the editor in sync** (ALL ALONG → Keeping the Editor in Sync).
 
-**Outputs:** `standardsGuide/` (fetched, gitignored), `requirements/` (if any raw input was
+**Outputs:** `standardsGuide/` and `opsGuide/` (both fetched, gitignored), `requirements/` (if any raw input was
 captured), `ProblemStatement.md` (purpose, scope, out-of-scope, entity list, open questions),
 `ProjectParameters.md` (project root — the completed Project Parameters block, all placeholders
 replaced), `.gitignore` populated per the table above, `app.json`, and `.alpackages/`.
 
 **Exit gate:** Every question was asked through the options mechanism. `app.json` matches the
-sheet, and the target version's symbols are in `.alpackages/`. Both companion guides are present, in `standardsGuide/` and
+sheet, and the target version's symbols are in `.alpackages/` (Ops § Project Setup). Both companion guides are present, in `standardsGuide/` and
 `opsGuide/`, and gitignored. The notification choice is recorded in
 `.ocpf/notifications.json`, applied, and tested. `ProjectParameters.md` exists in the project root with no placeholder remaining. Deployment Target
 is one allowed value. Namespace is consistent or correctly N/A. If
@@ -409,7 +418,7 @@ fix in a loop until clean.
 - Prepare the scaffold: confirm `app.json` (written at the end of Step 1) still matches
   `ProjectParameters.md` — name, publisher, ID ranges, runtime, BC dependency,
   `"features": ["NoImplicitWith", "TranslationFile"]` (**Standards §8.2**) — then `launch.json`,
-  folder structure, a `Translations/` folder, `.gitignore` per Step 1 (plus `*.g.xlf` and
+  folder structure, a `Translations/` folder, `.gitignore` per Step 1 and Ops § Repository Hygiene (plus `*.g.xlf` and
   `.alpackages/`), and the analyzer files: `.vscode/settings.json` with the analyzers for the
   Deployment Target, plus `AppSourceCop.json` for AppSource (ALL ALONG → Analyzers). Outside GitHub
   Copilot Chat, confirm `scripts/al-analyze.*` is present, and copy or fetch it if not. If
@@ -488,8 +497,8 @@ Step 5's mandatory compile-and-package.
 **Actions:** First, **compile the whole extension once, with the analyzers this framework
 requires, then package it** (ALL ALONG → Analyzers; check for an already-provisioned runtime
 before installing anything — Rule 6b). This is Rule 4's mandatory compile-and-package. Package
-naming, location (`outputAppPackage/`), and the never-delete rule (ALL ALONG → Packaging &
-Versioning) apply from this very first package on.
+naming, location (`outputAppPackage/`), and the never-delete rule apply from this very first package
+on (**read Ops § Packaging now**).
 
 **After every compile with 0 errors, check what the human's editor shows** (ALL ALONG → Keeping
 the Editor in Sync). Red marks the compiler didn't report, like an object ID outside the allowed
@@ -656,7 +665,7 @@ documents follow at Step 7. Step 1's `ProblemStatement.md` and
   header. Each is reviewed by that language's reviewer before the language pass that uses it.
 - **Language passes:** for each language required at first release, a tester fluent in it runs
   the language pass, with the right Microsoft or partner language app installed in the sandbox.
-- **Translation approval — the release gate** (skip if *US wording, no translation files*):
+- **Translation approval — the release gate** (Ops § Translations; skip if *US wording, no translation files*):
   - Each language's named reviewer approves its translations — directly in their tooling, or by
     telling the agent exactly which units they approve. The agent sets `signed-off` only on those
     units.
@@ -677,7 +686,8 @@ documents follow at Step 7. Step 1's `ProblemStatement.md` and
 
 **Exit gate:** All green-team tests pass; all red-team tests fail gracefully; permission sets
 verified; every translated document Step 1 asked for exists and has been reviewed; every required
-language has passed its language pass and its state scan shows every unit `signed-off` or `final`.
+language has passed its language pass and its state scan shows every unit `signed-off` or `final`
+(Ops § Translations).
 **If everything passes, the package that was actually tested is the one deployed to Production** —
 bump its Build segment (e.g. `0.0.5.0` → `0.0.5.1`) or copy it to an immutable
 filename first, so the shipped artifact stays permanently identifiable. This is marking the
@@ -765,6 +775,10 @@ artifacts, the AL source, `Translations/*.xlf`, and every package in `outputAppP
 **Gitignored by default, with Step 1's question:** this runbook, `LITE_RunbookChangeLog.md`,
 `LITE_RunbookSchematics.md`, and the plugin's `.ocpf/` folder — except `.ocpf/notifications.json`.
 **Never the project's own `ChangeLog.md`**, one of Lite's four maintained documents.
+
+**If a project built on an earlier Lite version has `ChangeLog.md` in `.gitignore`,** remove that
+entry and commit the file — earlier wording said "this runbook and `ChangeLog.md`" when it meant the
+framework's changelog. Check for a remote first: collaborators will see the file as newly added.
 
 **If any of this is already tracked,** add the entry, then untrack with `git rm --cached` — checking
 for a remote first, since collaborators will see the files as deleted.

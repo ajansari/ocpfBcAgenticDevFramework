@@ -50,8 +50,9 @@ procedures out shrinks what's always loaded and leaves a single copy of each pro
   Exit gate; the parameter tables; the pre-flight, API test, and Sanity Check checklists; the
   document formats; and the hand-off notes all stay. Each ALL ALONG section keeps its
   non-negotiables in a few lines and names the **Ops §** section with the procedure.
-- **Steps name what to read.** The step that needs a procedure says so in its Actions, and its exit
-  gate names the same section — so a moved procedure can't quietly go unread.
+- **Steps name what to read.** The step that needs a procedure says so in its Actions, and the gates
+  that turn on one repeat it — Step 01 (Intake), Step 05 and Step 07 (Analyzers), Step 11 (Automated
+  Tests), and Step 12 (Translations) — so a moved procedure can't quietly go unread.
 - **PRE-01 / Lite Step 1 fetches both companions**, and `opsGuide/` joins the always-gitignored
   list.
 - **Standards Guide v1.8.0.0:** its relationship note and *What is deliberately not here* table name
@@ -70,7 +71,7 @@ procedures out shrinks what's always loaded and leaves a single copy of each pro
   **ALL ALONG → X** reference resolves to a section that still exists, and no markdown link in the
   repository is broken.
 - Nothing was lost in the move: every identifier, file path, setting key, diagnostic code, and URL
-  present in the old runbooks is still present in the runbooks or the guide. Five details condensed
+  present in the old runbooks is still present in the runbooks or the guide. Six details condensed
   during drafting were restored (the symbol download's `enforceMinorVersion` note, BCQuality's layer
   folders, frontmatter keys and outcome vocabulary, the patterns repository URL, the AL test library
   names, and the runtime example).

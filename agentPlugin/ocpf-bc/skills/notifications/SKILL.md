@@ -8,16 +8,18 @@ description: Turn on notifications for a Business Central project following the 
 The runbook turns notifications on at its first step (full framework: PRE-01; Lite: Step 1). Use
 this skill to do the same on a project that started earlier, or to repair it.
 
-**Follow the project runbook's ALL ALONG → Notifications section.** It has the exact settings for
-each AI tool, and it's the version this project follows. If the runbook predates that section,
-fetch the latest runbook's section from
-`https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/fullVersion/BC_App_Build_Routine_Agent.md`
-and follow it; the settings are the same for both editions.
+**Follow `Ops § Notifications` in the project's Operations Guide** (`opsGuide/ocpfOperationsGuide.md`)
+— it has the exact settings, hooks, and record format, and it's the version this project follows. If
+the project has no `opsGuide/` yet (a project started before the guide existed, or a runbook older
+than Full v3.0.0.0 / Lite v2.0.0.0), use this plugin's bundled copy in the `start` skill's
+`references/ocpfOperationsGuide.md`, or fetch
+`https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/opsGuide/ocpfOperationsGuide.md`.
+The procedure is the same for both editions.
 
 In short:
 1. **Ask one multi-select question** through the options mechanism: *"Would you like to be notified
    at the end of every turn and whenever a question or approval is waiting? Choose any."* Offer only
-   what can work, per the runbook's table:
+   what can work, per `Ops § Notifications`, step 1:
    - *Claude app* — Claude Code signed in through a claude.ai subscription, with Remote Control
      available (no API key, Bedrock, Google Cloud, Foundry, gateway, or the environment variables
      the runbook lists).
@@ -30,7 +32,7 @@ In short:
    while it's connected) and ask: only when the human turns it on, or every session on this machine.
 3. **Record the answer in `.ocpf/notifications.json`** — per developer, always gitignored. The
    runbook reads it at the start of every session.
-4. **Apply it** per the runbook's table: Claude Code push settings and sound/desktop hooks in
+4. **Apply it** per `Ops § Notifications`, step 3: Claude Code push settings and sound/desktop hooks in
    `.claude/settings.local.json` (plus `remoteControlAtStartup` in `~/.claude/settings.json` for
    every-session Remote Control); VS Code user settings for Copilot Chat's own sounds and
    notifications; user-level `~/.copilot/hooks/` for Copilot CLI sound. Before writing a user-level

@@ -114,14 +114,6 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
   listed first and a free-text choice for any other language. Continue the rest of the engagement
   in the language chosen. Record it in `ProjectMemory.md` immediately; Step 01 §1.9 carries it
   into `docs/ProjectParameters.md`.
-- **Ask how to be notified, right after the working language** (Ops § Notifications — read it now): Claude app, sound, desktop notification, any combination, or none. Record the answer in `.ocpf/notifications.json` and apply it now, so every question from here on — the approvers question included — reaches the human even when they've stepped away.
-- **Ask who approves, next** (Rule 6a), because it decides how many sign-offs follow — starting
-  with this step's own. *Who signs off on the design documents?* **One person for every role**
-  (the Functional Consultant, Technical Lead, and Dev Manager sign-offs are all the same
-  reader) / **Separate people for different roles**. Record it in `ProjectMemory.md`; Step 01 §1.1
-  carries it into `docs/ProjectParameters.md` as **Approvers**. With one approver, sign-offs that
-  are serial waits on the same reader are combined: PRE-01's with PRE-02's, and Step 03's with Step
-  04's. The FRD sign-off (Step 02) stays separate, since the TDD is written from it.
 - **Fetch both companion guides into the project, before anything else needs them** — the
   Standards Guide into `standardsGuide/` and the Operations Guide into `opsGuide/`, from
   `https://github.com/ajansari/ocpfBcAgenticDevFramework/`, and add both folders to this project's
@@ -130,6 +122,14 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
   be on disk from the first step. Say so plainly rather than fetching silently. **Full procedure,
   including the plugin's offline copies and what to do when GitHub is unreachable: ALL ALONG → OCPF
   AL Development Standards Guide.**
+- **Ask how to be notified, right after the working language** (Ops § Notifications — read it now): Claude app, sound, desktop notification, any combination, or none. Record the answer in `.ocpf/notifications.json` and apply it now, so every question from here on — the approvers question included — reaches the human even when they've stepped away.
+- **Ask who approves, next** (Rule 6a), because it decides how many sign-offs follow — starting
+  with this step's own. *Who signs off on the design documents?* **One person for every role**
+  (the Functional Consultant, Technical Lead, and Dev Manager sign-offs are all the same
+  reader) / **Separate people for different roles**. Record it in `ProjectMemory.md`; Step 01 §1.1
+  carries it into `docs/ProjectParameters.md` as **Approvers**. With one approver, sign-offs that
+  are serial waits on the same reader are combined: PRE-01's with PRE-02's, and Step 03's with Step
+  04's. The FRD sign-off (Step 02) stays separate, since the TDD is written from it.
 - **Capture any raw requirements input verbatim, before any interpretation happens**. If the human has pasted raw requirements text in chat, or uploaded a file, this is
   the frozen, ground-truth source the rest of DEFINE works from — preserve it untouched, the same
   role a project's own `requirements/<name>.md` already plays once DEFINE is done with it:
@@ -156,7 +156,7 @@ Goal: turn a business need into a validated, complete scope and a filled-in para
 - Produce an initial entity/object list from stakeholder domain knowledge.
 - As the agent: identify duplicates, ambiguous terms, and outdated/legacy terminology in the initial list; ask clarifying questions about scope and consumer use cases. Do not resolve ambiguities silently.
 
-**Outputs:** `standardsGuide/` (fetched, gitignored), `requirements/` (seeded, if any raw input was provided), `ProjectProgress.md` (seeded, project root), `ProblemStatement.md` — purpose, scope, out-of-scope, target consumers, initial entity list, open questions.
+**Outputs:** `standardsGuide/` and `opsGuide/` (both fetched, gitignored), `requirements/` (seeded, if any raw input was provided), `ProjectProgress.md` (seeded, project root), `ProblemStatement.md` — purpose, scope, out-of-scope, target consumers, initial entity list, open questions.
 
 **Exit gate:** Both companion guides are present, in `standardsGuide/` and `opsGuide/`, and gitignored. The notification choice is recorded in `.ocpf/notifications.json`, applied, and tested (ALL ALONG → Notifications). Functional Consultant signs off on the problem statement and initial entity list (Stage↔Step Map, Stage 1) — or, when **Approvers** is one person, this sign-off moves to the end of PRE-02 and is given together with that step's, on the problem statement and expanded list at once.
 
@@ -392,7 +392,7 @@ answer from memory or a copy.
 
 **Outputs:** `docs/ProjectParameters.md` — the completed Project Parameters block (above, all placeholders replaced), persisted as its own tracked document so every later step, and every role under §1.7, reads it from disk rather than depending on conversation history; an empty **Object Register** artifact seeded with the allocated ID ranges; the project's `.gitignore` populated per this section and per ALL ALONG → Repository Hygiene; **`docs/TranslationGlossary.md`**, created with the regional terms PRE-02 listed (ALL ALONG → Translations & Terminology) — unless the project chose *US wording, no translation files*; `app.json` and `.alpackages/` per §1.10.
 
-**Exit gate:** Every question in this step was asked through the options mechanism (Ops § Intake). `app.json` matches the sheet, and symbols for the target version are in `.alpackages/` (§1.10). No placeholder remains. **Approvers** is recorded (asked at PRE-01). Deployment Target is one allowed value. Namespace matches between 1.1 and 1.3, or both are correctly N/A if Use Namespace = `No`. Localization is set. If Permission Sets required = `Yes`, ≥ 2 IDs are reserved in the primary range. §1.6's three questions are each answered `Yes`/`No` with specifics recorded for any `Yes`. §1.7 is answered or explicitly skipped — if configured, every one of the three roles has both a model and a thinking effort (or `N/A`) recorded, not model alone. §1.8 is answered (or defaults to `Yes`) and `.gitignore` reflects it. §1.9: every target language is classified against Microsoft's live page and — unless source wording is *US wording, no translation files* — has a required-at-release answer and a named reviewer; source language and wording are recorded; any mismatch with `Localization` is resolved. Human confirms the sheet.
+**Exit gate:** Every question in this step was asked through the options mechanism (Ops § Intake). `app.json` matches the sheet, and symbols for the target version are in `.alpackages/` (§1.10, Ops § Project Setup). No placeholder remains. **Approvers** is recorded (asked at PRE-01). Deployment Target is one allowed value. Namespace matches between 1.1 and 1.3, or both are correctly N/A if Use Namespace = `No`. Localization is set. If Permission Sets required = `Yes`, ≥ 2 IDs are reserved in the primary range. §1.6's three questions are each answered `Yes`/`No` with specifics recorded for any `Yes`. §1.7 is answered or explicitly skipped — if configured, every one of the three roles has both a model and a thinking effort (or `N/A`) recorded, not model alone. §1.8 is answered (or defaults to `Yes`) and `.gitignore` reflects it. §1.9: every target language is classified against Microsoft's live page and — unless source wording is *US wording, no translation files* — has a required-at-release answer and a named reviewer; source language and wording are recorded; any mismatch with `Localization` is resolved. Human confirms the sheet.
 
 ---
 
@@ -551,7 +551,7 @@ main role's.
 
 **Inputs:** Every batch from Step 06 (lint-clean, not yet compiled); the symbol-verified lint findings accumulated across BUILD; `TDD.md`; ChangeLog.
 
-**Actions:** First, **compile the whole extension once, with the analyzers this framework requires, then package it** (Operating Rule 4; Ops § Analyzers — check for an already-provisioned runtime before installing anything, Operating Rule 6b). This is Operating Rule 4's mandatory compile-and-package. Package naming, location (`outputAppPackage/`), the never-delete rule, and Schema Sync Mode/Force Sync guidance all apply from this very first package onward (ALL ALONG → Packaging & Versioning) — there is no "not a real package yet" grace period.
+**Actions:** First, **compile the whole extension once, with the analyzers this framework requires, then package it** (Operating Rule 4; Ops § Analyzers — check for an already-provisioned runtime before installing anything, Operating Rule 6b). This is Operating Rule 4's mandatory compile-and-package. Package naming, location (`outputAppPackage/`), the never-delete rule, and Schema Sync Mode/Force Sync guidance all apply from this very first package onward (**read Ops § Packaging now**) — there is no "not a real package yet" grace period.
 
 **After every compile with 0 errors, check what the human's editor shows** (ALL ALONG → Keeping
 the Editor in Sync). If VS Code still marks AL errors the compiler
@@ -705,7 +705,7 @@ every fix and normalizes whatever drift the findings call out.
 
 **Outputs:** `Documentation.md` (consumer/API reference, includes the Mermaid schema diagram), `HumanUnitTestScript.md`, **`UserGuide.md`** (end-user, Markdown), `Deployment.md`, and `AutomatedTestScripts.md` (only if the human opted in above). Four mandatory documents — check all four exist before claiming the step is complete; the fifth is conditional.
 
-**Exit gate:** Reference is generated from actual code and current; test script executable by a non-developer; the human has been asked about Automated Test Scripts (answer recorded either way); app ready to hand to Step 12 for release testing.
+**Exit gate:** Reference is generated from actual code and current; test script executable by a non-developer; the human has been asked about Automated Test Scripts (Ops § Automated Tests; answer recorded either way); app ready to hand to Step 12 for release testing.
 
 ## 12 — Release to Users for Testing
 

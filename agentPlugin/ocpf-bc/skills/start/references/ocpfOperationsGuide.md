@@ -212,9 +212,10 @@ reached, say so and ask the human rather than guessing.
    the agent (**§8.7**). A partner-translated language's app question joins the same box. Skipped
    entirely for *US wording, no translation files*.
 4. **Documents**, only when there's a target language other than the source:
-   - *Which user-facing documents are translated into each required language?* (multi-select): the
-     user guide *(recommended)*, the deployment instructions *(recommended)*, or none. Engineering
-     documents stay in English only.
+   - *Which user-facing documents are translated into each required language?* (multi-select).
+     **Full:** the user guide *(recommended)*, the deployment instructions *(recommended)*, or none.
+     **Lite:** `Docs.md`'s user-guide section *(recommended)* or none — Lite has no separate
+     deployment document. Engineering documents stay in English only.
    - *Do testers need a translated test script?* *No — they run the language pass from the English
      script, which names the terms each language should show (recommended when testers read
      English)* / *Yes, one per required language*.
@@ -510,7 +511,7 @@ VS Code's AL language server is working from old information:
 `.al` file exists.
 
 **Detect** after every `app.json` or symbol change and after every clean compile: read the Problems
-panel with `al_getdiagnostics` (Copilot Chat) or the IDE diagnostics tool
+panel with `al_getdiagnostics` (Copilot Chat, severity `error`) or the IDE diagnostics tool
 (`mcp__ide__getDiagnostics`, Claude Code in VS Code). AL errors the latest compile didn't report are
 stale. If you can't read the editor, tell the human once, at the first clean compile, what stale
 marks look like and how to clear them. At the end of intake there are no `.al` files yet, so if
@@ -781,9 +782,9 @@ project's own git remote, even though they sit in the working directory like any
 - **`.claude/settings.local.json`** and **`.ocpf/notifications.json`** — each developer's own Claude
   Code settings and notification choice (Ops § Notifications). Added to `.gitignore` when the
   choice is made, even when the framework's own files are tracked.
-- **`standardsGuide/`** — the fetched Standards Guide lives inside the project root, so it needs its
-  own entry. Added when the guide is fetched. It's the framework author's cross-project methodology,
-  refetchable at will, not part of what the client is paying for.
+- **`standardsGuide/` and `opsGuide/`** — the two fetched companions live inside the project root,
+  so each needs its own entry. Added when they're fetched. They're the framework author's
+  cross-project methodology, refetchable at will, not part of what the client is paying for.
 - **The BCQuality snapshot** — kept outside the project root entirely (Ops § Fetched Companions
   explains why `alc` forces that), so it isn't even a candidate for tracking.
 - **`patterns/`** — the fetched patterns library, inside the root but always excluded, for the same
@@ -820,8 +821,8 @@ How the routine applies **Standards Part 8**. Skip everything here for a project
 chose *US wording, no translation files*, except the runbook's working-language rule and
 **Standards §1.7**.
 
-**The glossary — `docs/TranslationGlossary.md`** (Lite: inside `DesignDoc.md`). Created at intake,
-current at every step after. One row per standard BC concept the extension names: the concept, the
+**The glossary — `docs/TranslationGlossary.md`**, created at intake and current at every step after.
+**Lite:** it lives inside `DesignDoc.md` and is created at the design step, not at intake. One row per standard BC concept the extension names: the concept, the
 W1 source term, one column per target language, where each term came from (Microsoft file and
 version, partner app, or style guide), and its status (`verified` / `reviewer attention`).
 - Every row is filled by **Standards Appendix D**, never from model memory.
@@ -988,7 +989,8 @@ replace it, and the agent's own findings still count without a knowledge-file ci
   compile produced 470+ errors, none of them in its own files. BCQuality's own documented
   integration pattern also uses two separate directories.
 - **Nothing to gitignore:** it isn't inside the tracked tree at all, which is a stronger guarantee
-  than an ignore rule.
+  than an ignore rule. There's also no reason for a client's repository to carry an 806-file
+  third-party knowledge snapshot.
 - **Don't install it as a plugin**, and don't share one long-lived copy across unrelated projects —
   that's how it goes stale for all of them at once.
 - **Refresh only on request.** The repository is under active development, which is exactly why
@@ -1022,8 +1024,9 @@ No network access is needed once the snapshot exists.
 
 ### OCPF BC AL Patterns library
 
-`ajansari/ocpfBCALPatterns` on GitHub (<https://github.com/ajansari/ocpfBCALPatterns>) is the
-framework author's own curated collection of reusable
+`ajansari/ocpfBCALPatterns` on GitHub (<https://github.com/ajansari/ocpfBCALPatterns>, public —
+confirmed reachable September 13, 2026 via `git ls-remote`, not assumed) is the framework author's
+own curated collection of reusable
 BC AL patterns, each extracted from a real bug found and fixed on a past project and then
 generalized: symptom, verified root cause, the fix, a worked example, and caveats, one self-contained
 Markdown file per pattern. Where BCQuality is a third-party platform-wide knowledge base, this is

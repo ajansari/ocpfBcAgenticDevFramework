@@ -45,7 +45,7 @@ const m = JSON.parse(fs.readFileSync(file, 'utf8'));
 m.name = { short: 'OCPF BC Agentic Dev', full: 'OCPF BC Agentic Development Framework' };
 m.description = {
   short: 'Guided routine for building Business Central AL extensions',
-  full: 'The OnlyCopilotFans Business Central Agentic Development Framework. In Copilot Cowork it guides the DEFINE and DESIGN phases (problem statement, gap analysis, parameters, functional and technical design) with the latest Full or Lite runbook, and applies the OCPF AL Development Standards Guide. Building, compiling, and testing the extension continue in Visual Studio Code.'
+  full: 'The OnlyCopilotFans Business Central Agentic Development Framework. In Copilot Cowork it guides the DEFINE and DESIGN phases (problem statement, gap analysis, parameters, functional and technical design) with the latest Full or Lite runbook, and applies the OCPF AL Development Standards Guide and the shared Operations Guide. Building, compiling, and testing the extension continue in Visual Studio Code.'
 };
 m.agentSkills = (m.agentSkills || []).filter(s => !s.folder.endsWith('/al-mcp-setup') && !s.folder.endsWith('/notifications'));
 fs.writeFileSync(file, JSON.stringify(m, null, 4) + '\n');

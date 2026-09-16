@@ -33,7 +33,8 @@ v1.0.0.0. See `fullVersion/RunbookChangelog.md` v3.0.0.0 for the full reasoning.
 - **Step 1's intake questions, the project setup, and Step 5's translation cycle** point at
   Ops § Intake, Ops § Project Setup, and Ops § Translations. Lite's own boxes, gates, and four
   maintained documents are unchanged.
-- **Steps name what to read**, in their Actions and again in their exit gates.
+- **Steps name what to read**, in their Actions, and the gates that turn on one repeat it (Steps 3
+  and 5 for Analyzers, Step 7 for Translations).
 
 ---
 

@@ -194,8 +194,12 @@ aren't possible. There's no AL compiler, VS Code project, or Git. Say so plainly
 part that is:
 
 1. **Choose the edition** (Step 3).
-2. **Get the runbook text:** fetch it (Step 5) if the environment can reach GitHub, otherwise use
-   the bundled copy in `references/` and name its version.
+2. **Get the runbook text and both companions:** fetch them (Step 5) if the environment can reach
+   GitHub, otherwise use the bundled copies and name their versions — the runbook and the
+   **Operations Guide** in this skill's `references/`, the **Standards Guide** in the `al-standards`
+   skill's `references/`. DEFINE and DESIGN need them: the intake questions, the roles question, and
+   the asking rules are **Ops §** sections, and the AL rules are **Standards §**. Say that nothing
+   can be written to disk here, so the guides are read, not installed.
 3. **Work DEFINE and DESIGN with the human, following the runbook's rules:**
    - **Full:** PRE-01 through Step 04: problem statement, gap analysis, project parameters, FRD,
      TDD, Sanity Check.
