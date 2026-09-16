@@ -30,7 +30,9 @@ Repository: `https://github.com/ajansari/ocpfBcAgenticDevFramework` (default bra
    - Full: `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/fullVersion/BC_App_Build_Routine_Agent.md`
    - Lite: `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/liteVersion/LITE_BC_App_Build_Routine_Agent.md`
 
-   Use a terminal download (`curl -fsSL`) where available, and read its `**Version:**` line.
+   To check the version alone, fetch only the first kilobyte — `curl -fsSL -r 0-1023 <url>` — which
+   contains the `**Version:**` line. Download the whole file only when the human says "Update now".
+   If a host ignores the range, read the line and discard the rest.
 2. **If GitHub is unreachable,** compare against the bundled copy in the `start` skill's
    `references/` folder instead, if your environment exposes it, and say that's what you compared
    against.

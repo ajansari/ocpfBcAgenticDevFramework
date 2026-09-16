@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v3.0.0.0**, the Standards Guide is at **v1.8.0.0**, the Operations Guide at **v1.0.0.0**, and Lite at **v2.0.0.0** — but
+**v3.1.0.0**, the Standards Guide is at **v1.8.0.0**, the Operations Guide at **v1.1.0.0**, and Lite at **v2.0.1.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 
 Entries are grouped by version, newest first, and describe the **cumulative** result of a
@@ -17,6 +17,33 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v3.1.0.0 — September 15, 2026
+
+**The last five items from the independent review: one owner per fact, one edit per document, and a
+cheaper update check.** Operations Guide **v1.1.0.0**. Ships with Lite **v2.0.1.0** (its Ops Guide
+reference only). Plugin **v2.1.0**.
+
+### Changed
+
+- **Step 08 records; Step 10 applies.** The Gap-Fit Test writes every classification into
+  `GapAnalysis.md` and edits no design document. Step 10 applies the *Spec stale* ones once, when it
+  writes `PostDevTDD.md` and re-baselines the FRD — the same edit was previously made in both steps.
+- **API caption locking is re-verified once, at Step 09.** Step 08's duplicate check is gone; the
+  plan check at Step 04 and the per-batch pre-flight at Step 05/06 are unchanged.
+- **`ProjectProgress.md` is the only record of the current step.** `ProjectMemory.md` points at it
+  instead of carrying a second copy, so there's no two-file sync at every step boundary. It keeps
+  document locations, open decisions, and milestone pointers.
+- **Testing feedback links one way.** Each ChangeLog Issue or `Roadmap.md` item names the
+  `TestingFeedback.md` entry it came from; the verbatim capture is unchanged, and the reverse
+  back-link is dropped — a search finds it.
+- **The once-per-session update check fetches the first kilobyte** (`curl -fsSL -r 0-1023`) to read
+  the `**Version:**` line, instead of downloading a runbook of tens of thousands of words, and
+  raises an update at a step boundary rather than mid-step. The full download still happens on
+  "Update now". Verified September 15, 2026: GitHub's raw host honors the range and returns 1,024
+  bytes, which contains the version line. Same change in the plugin's `update-framework` skill.
 
 ---
 

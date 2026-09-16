@@ -4,6 +4,14 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 2.1.0 — September 15, 2026
+
+**Bundles:** full runbook v3.1.0.0, Lite v2.0.1.0, Standards Guide v1.8.0.0, Operations Guide
+v1.1.0.0.
+
+- **`update-framework`** checks a version by fetching the first kilobyte of the published runbook
+  rather than the whole file, and downloads it in full only after "Update now".
+
 ## 2.0.0 — September 15, 2026
 
 **Bundles:** full runbook v3.0.0.0, Lite v2.0.0.0, Standards Guide v1.8.0.0, Operations Guide

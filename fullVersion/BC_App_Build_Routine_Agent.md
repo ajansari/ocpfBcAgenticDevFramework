@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 3.0.0.0
+**Version:** 3.1.0.0
 **Last Updated:** September 15, 2026
 
 > Version history for this framework lives in `RunbookChangelog.md`, tracked independently of any
@@ -17,7 +17,7 @@
 > - `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.8.0.0): the AL *rules* this sequence applies (Parts 1–8, Appendices A–D), cited below as
 >   **Standards §**.
-> - `opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v1.0.0.0): the *procedures*
+> - `opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v1.1.0.0): the *procedures*
 >   this sequence uses — asking, intake, project setup, the AL tools, analyzers, symbols, editor
 >   sync, notifications, packaging, repository hygiene, translations, fetched companions, and the
 >   plugin — cited below as **Ops §**. Both editions of the runbook share it unchanged.
@@ -598,8 +598,8 @@ Goal: prove the built code matches intent, is clean, is fully documented, and ha
 ## 08 — Gap-Fit Test, Fidelity Validation
 
 **Role:** if §1.7 role assignment is configured, this three-way comparison is done by the
-**reasoning role**; the main role applies the resulting classification (Intentional / Oversight /
-Spec stale) to the actual documents.
+**reasoning role**; the main role records the resulting classification (Intentional / Oversight /
+Spec stale) in `GapAnalysis.md`.
 
 **Inputs:** `FRD.md`, `TDD.md`, the built AL, ChangeLog.
 
@@ -609,9 +609,9 @@ Spec stale) to the actual documents.
 - Rule in the FRD the TDD did not implement — TDD gap.
 - Rule implemented differently from the TDD — is there a ChangeLog entry?
 - Implementation decision that contradicts the FRD — FRD update needed.
-- **Languages** — a language the FRD requires at first release without a complete, synced translation file; a translation file for a language no longer in scope; an API page or query whose caption locking doesn't match its recorded decision.
+- **Languages** — a language the FRD requires at first release without a complete, synced translation file, or a translation file for a language no longer in scope. (API caption locking is re-verified once, at Step 09 — don't repeat it here.)
 
-Classify every gap as **Intentional** (document the reasoning), **Oversight** (fix now or schedule), or **Spec stale** (code is right, update the FRD/TDD).
+Classify every gap as **Intentional** (record the reasoning), **Oversight** (fix now or schedule), or **Spec stale** (the code is right, so the FRD/TDD needs updating). **Record every classification in `GapAnalysis.md` and edit no design document here** — Step 10 rewrites the TDD as `PostDevTDD.md` and re-baselines the FRD once, from this file, so the same edit isn't made twice.
 
 **If a gap is classified Oversight and needs a code fix, apply the same Step 07 cycle before closing this step** — present every Oversight fix from this step for one approval, the way Step 07 presents a test round's diagnoses, then fix the root cause, compile and package again, redeploy to the sandbox, retest. A documentation-only correction (Spec stale, or Intentional-with-a-doc-update) does not require a new package; a code change does, every time, no matter how small — packaging is still the default rhythm here, not something reserved for a later step (Operating Rule 4).
 
@@ -661,6 +661,8 @@ every fix and normalizes whatever drift the findings call out.
 **Inputs:** `TDD.md`, `FRD.md`, ChangeLog, `GapAnalysis.md`, `CodeReview.md`.
 
 **Actions:**
+- **Apply every *Spec stale* classification `GapAnalysis.md` recorded at Step 08** — this is where
+  those document edits happen, once, rather than twice.
 - Produce a new **as-built TDD version** (`PostDevTDD.md`) reflecting the architecture as actually implemented: final system identity, final object inventory with all properties, every naming convention and abbreviation as applied, all special cases and exceptions, and a deviation summary that references the ChangeLog.
 - Produce a new **FRD baseline** for future development: fold in every implementation decision that diverged from the original FRD — even where the implementation is better — so the next planning session starts from truth, not a stale spec.
 - Bring **`docs/TranslationGlossary.md`** and Parameter §1.9 up to date with what was actually built: every term in use, every language actually shipped, and the final API caption-locking decisions (recorded in `PostDevTDD.md`).
@@ -812,9 +814,9 @@ what the human said.
   tester's findings/requests **verbatim**, before they are triaged.
 - Triage each item explicitly: implement now (its own ChangeLog Issue), schedule for later
   (`Roadmap.md`), or reject (record why, in the same log).
-- Cross-reference in both directions: the `TestingFeedback.md` entry links to the ChangeLog
-  Issue(s) or Roadmap item(s) it produced, so the raw ask and the eventual decision both remain
-  traceable independently.
+- **Link it one way:** each ChangeLog Issue or `Roadmap.md` item names the `TestingFeedback.md`
+  entry it came from. The raw ask stays traceable to its decision without writing the same finding
+  three times with back-links in both directions; a search finds the reverse.
 - **Role (§1.7):** diagnosing *why* a reported bug happens is a **reasoning-role** task, same as
   Step 07 — including Step 07's own first move: **check `patterns/` (ALL ALONG → OCPF BC AL
   Patterns Library) for an already-documented match before diagnosing from scratch.** The **main
@@ -833,8 +835,10 @@ other document here — **not** an agent's own external/cross-session memory fea
 tied to one machine's file path and invisible to git, to a teammate, and to any other tool or
 agent that opens this repo.
 
-- **Keep it short — an anchor, not a narrative.** Current phase/step, where each live document
-  lives, any decision awaiting sign-off, and a one-line pointer per past milestone. The full
+- **Keep it short — an anchor, not a narrative.** Where each live document lives, any decision
+  awaiting sign-off, and a one-line pointer per past milestone. **It doesn't carry the current
+  step:** `ProjectProgress.md` owns that, and this file points at it, so there's no second copy to
+  keep in sync. The full
   story of *why* a decision was made belongs in `ChangeLog.md`; `ProjectMemory.md` just says
   *where to look*. If it starts reading like a second ChangeLog, trim it.
 - **Every row in "Open decisions" names who it's awaiting** — `(awaiting: <name>)`. This is not
@@ -875,9 +879,8 @@ This is **not** a narrative document and must not become one — that is exactly
   `In Progress`. A project that already has `ProjectMemory.md` but no `ProjectProgress.md` (e.g.
   one that adopts this framework version mid-project) gets one backfilled from the ChangeLog the
   next time any step closes.
-- **Update it at the exact same moments `ProjectMemory.md`'s "Current position" is updated** — a
-  step starting, a step's exit gate being met — never on a separate schedule. The two files must
-  never disagree about which step is current.
+- **This file is the only record of which step is current.** Update it when a step starts and when
+  its exit gate is met. `ProjectMemory.md` points here rather than repeating it.
 - Leave a step's row blank until it actually starts; don't pre-fill future steps as blank
   placeholders with any other text, and don't mark a step `Completed` before its own exit gate is
   actually met (that step's own **Exit gate** line in this runbook is the test, not "the agent

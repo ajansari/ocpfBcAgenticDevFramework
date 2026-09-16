@@ -16,6 +16,15 @@ framework.
 
 ---
 
+## v2.0.1.0 — September 15, 2026
+
+**Reference update only.** Derived from full framework v3.1.0.0 and pointing at Operations Guide
+v1.1.0.0, whose update check now fetches only the first kilobyte to read a version line and raises
+updates at a step boundary. Lite's own steps, gates, and documents are unchanged. See
+`fullVersion/RunbookChangelog.md` v3.1.0.0.
+
+---
+
 ## v2.0.0.0 — September 15, 2026
 
 **The procedures Lite shares with the full framework now live in the fetched OCPF Operations Guide,

@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 1.0.0.0
+**Version:** 1.1.0.0
 **Last Updated:** September 15, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
@@ -1101,12 +1101,18 @@ section entirely. The `.ocpf/` folder follows the intake answer about framework 
 
 **Framework update check, once per session,** before resuming work:
 1. Read `runbookVersion` and `declinedUpdateVersion` from `.ocpf/framework.json`.
-2. Read the `**Version:**` line of the latest published runbook — download it, don't summarize it:
+2. Read the `**Version:**` line of the latest published runbook. **Fetch only the first kilobyte** —
+   the version line is inside it, and the whole runbook is tens of thousands of words:
+   `curl -fsSL -r 0-1023 <url>` (verified September 15, 2026: GitHub's raw host honors the range and
+   returns 1,024 bytes). If a host ignores the range and sends the whole file, read the line and
+   discard the rest — never summarize it.
    - Full: `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/fullVersion/BC_App_Build_Routine_Agent.md`
    - Lite: `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/liteVersion/LITE_BC_App_Build_Routine_Agent.md`
 3. Compare numerically, part by part.
    - **Newer, and not the skipped version:** say so in a sentence or two and offer **Update now /
-     Not now / Skip this version**. "Update now" follows the plugin's `update-framework` skill:
+     Not now / Skip this version**. **Raise it at a step boundary, not mid-step** — an update that
+     lands between two Actions of one step is the one most likely to change the rules under work
+     already half-done. "Update now" follows the plugin's `update-framework` skill:
      summarize the changelog entries in between, flagging any that touch a completed step; back up
      each current copy to `.ocpf/previous/`; replace every copy in `placedAs`, the project's runbook
      changelog, and the fetched companions the new version expects; update the marker; record it in

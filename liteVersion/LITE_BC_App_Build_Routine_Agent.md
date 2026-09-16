@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 2.0.0.0 (Lite, derived from the full framework v3.0.0.0)
+**Version:** 2.0.1.0 (Lite, derived from the full framework v3.1.0.0)
 **Last Updated:** September 15, 2026
 
 > Version history for this edition lives in `LITE_RunbookChangeLog.md`, tracked independently of
@@ -19,7 +19,7 @@
 > - `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.8.0.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
-> - `opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v1.0.0.0), cited as
+> - `opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v1.1.0.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
 >   analyzers, symbols, editor sync, notifications, packaging, repository hygiene, translations,
 >   fetched companions, and the plugin.

@@ -455,7 +455,7 @@ flowchart TD
 
 ---
 
-*Generated from `BC_App_Build_Routine_Agent.md` v3.0.0.0; all 8 diagrams re-rendered clean. Version
+*Generated from `BC_App_Build_Routine_Agent.md` v3.1.0.0; all 8 diagrams re-rendered clean. Version
 history is in `RunbookChangelog.md`. If the runbook changes in a way that affects the
 phase/step/role structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*
