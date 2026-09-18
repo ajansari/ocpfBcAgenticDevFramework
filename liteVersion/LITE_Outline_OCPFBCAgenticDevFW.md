@@ -15,7 +15,7 @@ work.*
 
 | Step | Merges (full framework) |
 |---|---|
-| **1** — Define the Problem & Lock Parameters | PRE-01, PRE-02, Step 01 |
+| **1** — Define the Problem & Lock Parameters (asks the working language, notifications, and the one Main model and its thinking effort; creates `docs/`) | PRE-01, PRE-02, Step 01 |
 
 ## II. DESIGN
 
@@ -61,7 +61,7 @@ fetched at Step 1 alongside the Standards Guide.
 - Packaging & Versioning
 - **OCPF AL Development Standards Guide** — fetched at Step 1, cited as **Standards §** throughout
 - **OCPF Operations Guide** — fetched at Step 1, cited as **Ops §**: the procedures both editions share
-- Repository Hygiene
+- Repository Hygiene — framework files gitignored by exact name (`LITE_RunbookChangeLog.md` included), verified with `git check-ignore`
 - AL MCP Server — needed from the end of Step 1; set up by the agent, the human only approves
 - Analyzers — CodeCop, UICop, and PerTenantExtensionCop *or* AppSourceCop, engaged on every mandatory compile
 - Symbols — downloaded by the agent, never the human
@@ -78,11 +78,13 @@ fetched at Step 1 alongside the Standards Guide.
 
 ## Document Set
 
-Four tracked files, start to finish: `DesignDoc.md`, `ChangeLog.md`, `Docs.md`, `TestScript.md`.
+Four tracked files, start to finish, all in `docs/`: `docs/DesignDoc.md`, `docs/ChangeLog.md`,
+`docs/Docs.md`, `docs/TestScript.md`.
 
 Plus two Step 1 setup artifacts, produced once at kickoff rather than maintained throughout:
-`ProblemStatement.md` and `ProjectParameters.md` (project root — the persisted intake sheet every
-later step reads from).
+`docs/ProblemStatement.md` and `docs/ProjectParameters.md` (the persisted intake sheet every later
+step reads from — including the Main model and thinking effort). Only `requirements/`, `app.json`,
+the AL source, `Translations/`, and `outputAppPackage/` stay in the project root.
 
 Plus two fetched, gitignored companions, both shared unchanged with the full framework:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the AL rules, **Standards §**) and

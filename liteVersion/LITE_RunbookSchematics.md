@@ -28,7 +28,9 @@ simply fails to draw wherever it's viewed — that check is what catches it befo
 its three optional roles (Main / Light / Reasoning) performs them. Lite has no such split —
 Operating Rule set states it plainly: "one model does everything" — so there is no role-color
 legend, and no diagram in this file corresponding to the full framework's §4.2 (Model & Effort
-Assignment). Every action box below is performed by whichever single model is running the routine.
+Assignment). Every action box below is performed by whichever single model is running the routine;
+since Lite v2.3.0.0, Step 1 asks which model that is, and at what thinking effort, right after
+notifications, and records it in `docs/ProjectParameters.md`.
 
 ---
 
@@ -72,7 +74,7 @@ met).
 flowchart TD
     subgraph DEFINE["PHASE: DEFINE"]
         direction TB
-        S1["Step 1<br/>Define the Problem<br/>& Lock Parameters"] --> G_S1{{"Both companion guides<br/>present + gitignored; notifications<br/>chosen and tested; no placeholder<br/>remains; ProjectParameters.md<br/>+ onboarding Qs answered;<br/>app.json + symbols ready;<br/>human confirms sheet"}}
+        S1["Step 1<br/>Define the Problem<br/>& Lock Parameters"] --> G_S1{{"Both companion guides<br/>present + gitignored; notifications<br/>chosen and tested; no placeholder<br/>remains; docs/ProjectParameters.md<br/>+ onboarding Qs answered;<br/>app.json + symbols ready;<br/>human confirms sheet"}}
     end
 
     subgraph DESIGN["PHASE: DESIGN"]
@@ -119,7 +121,7 @@ flowchart TD
 
     subgraph S1["STEP 1 — Define the Problem & Lock Parameters"]
         direction LR
-        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Ask working language; fetch both<br/>companion guides (Standards + Ops)<br/>+ gitignore; ask how to be notified<br/>(recorded in .ocpf/notifications.json);<br/>capture raw requirements<br/>verbatim; write problem<br/>statement + quick gap check<br/>(Standards Part 6); ask every<br/>intake question in grouped<br/>option boxes (up to 4 each),<br/>never inferred, then one confirm; persist<br/>ProjectParameters.md; then the<br/>agent writes app.json, connects<br/>AL tools, downloads symbols,<br/>checks the editor"] --> Out1[/"Output:<br/>standardsGuide/ + opsGuide/<br/>(gitignored),<br/>requirements/ (if any),<br/>ProblemStatement.md,<br/>ProjectParameters.md,<br/>app.json, .alpackages/"/]
+        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Ask working language; fetch both<br/>companion guides (Standards + Ops)<br/>+ gitignore; ask how to be notified<br/>(recorded in .ocpf/notifications.json);<br/>ask the Main model and its<br/>thinking effort; create docs/;<br/>capture raw requirements<br/>verbatim; write problem<br/>statement + quick gap check<br/>(Standards Part 6); ask every<br/>intake question in grouped<br/>option boxes (up to 4 each),<br/>never inferred, then one confirm; persist<br/>ProjectParameters.md; then the<br/>agent writes app.json, connects<br/>AL tools, downloads symbols,<br/>checks the editor"] --> Out1[/"Output:<br/>standardsGuide/ + opsGuide/<br/>(gitignored),<br/>requirements/ (if any),<br/>docs/ProblemStatement.md,<br/>docs/ProjectParameters.md,<br/>app.json, .alpackages/"/]
     end
     S1 --> Gate1{{"Exit gate:<br/>Both companion guides present + gitignored,<br/>notification choice recorded,<br/>applied, and tested,<br/>no placeholder remains,<br/>onboarding questions answered,<br/>app.json matches sheet,<br/>symbols in .alpackages/,<br/>human confirms sheet"}}
 
@@ -314,7 +316,7 @@ flowchart LR
 
 ---
 
-*Generated from `LITE_BC_App_Build_Routine_Agent.md` v2.1.0.0; all 7 diagrams re-rendered clean.
+*Generated from `LITE_BC_App_Build_Routine_Agent.md` v2.3.0.0; all 7 diagrams re-rendered clean with `@mermaid-js/mermaid-cli` 11.17.0 on September 18, 2026.
 Version history is in `LITE_RunbookChangeLog.md`. If the Lite runbook changes in a way that
 affects the phase/step structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*

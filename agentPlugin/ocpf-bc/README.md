@@ -35,8 +35,9 @@ The `start` skill:
 | `al-standards` skill | The OCPF AL Development Standards Guide, for writing and reviewing AL. The shared **Operations Guide** — the framework's procedures, cited as Ops § — is bundled with the `start` skill and fetched into each project. |
 | `al-mcp-setup` skill | Connects Microsoft's AL tools with nothing to install. In GitHub Copilot Chat, the AL Language extension's tools are built in. In Claude Code and Copilot CLI, it registers the extension's bundled AL MCP Server (compile, build, symbols, diagnostics, publish, tests) for the project, via a launcher that follows AL extension updates. |
 | `notifications` skill | Asks how you'd like to be notified whenever the agent finishes a turn, asks a question, or waits for an approval — Claude app, sound, desktop notification, or none — remembers the answer, and applies it through each AI tool's own notifications and hooks. The runbook sets this up at its first step; the skill adds it to older projects. |
-| `ocpf-reasoning` sub-agent | The full framework's Reasoning role: FRD/TDD drafting, Sanity Check, diagnosis, Gap-Fit, Code Review. |
-| `ocpf-light` sub-agent | The full framework's Light role: post-generation pre-flight checks and symbol verification. |
+| `roles` skill | Asks which models do the work — Full: Main, Light, and Reasoning, each with a thinking effort; Lite: one — and makes it take effect by writing project-local copies of the two sub-agents with the chosen model and effort, then verifying every delegation. The runbook runs it at its first step. |
+| `ocpf-reasoning` sub-agent | The full framework's Reasoning role: FRD/TDD drafting, Sanity Check, diagnosis, Gap-Fit, Code Review. Carries no model of its own; the `roles` skill writes the project's copy with the chosen model. |
+| `ocpf-light` sub-agent | The full framework's Light role: post-generation pre-flight checks and symbol verification. Same: the project's copy carries the model. |
 
 ## License
 

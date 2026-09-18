@@ -8,7 +8,7 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 *by AJ Ansari*
 
-*Last Updated: Wednesday, September 16, 2026*
+*Last Updated: Friday, September 18, 2026*
 
 > ## 🌐 [Official Website](https://ajansari.github.io/ocpfBcAgenticDevFramework/)
 >
@@ -166,7 +166,7 @@ commands are identical.
 | **1** | **Full or Lite.** It asks about the project — object count, people and sign-off roles, whether it's heading to AppSource — and recommends an edition with its reasoning. | Confirm or override. You can switch later without losing work. |
 | **2** | **Where the runbook goes.** It places the latest runbook as `CLAUDE.md`, `.github/copilot-instructions.md`, or both for mixed teams. | Nothing, unless a file already exists — then it asks. **It never overwrites.** |
 | **3** | **AL tools, nothing to install.** It connects Microsoft's AL tools using the AL Language extension you already have. | In Copilot Chat, nothing — they're built in. In Claude Code, approve the connection once. |
-| **4** | **The routine begins.** | Tell it your working language. |
+| **4** | **The routine begins.** | Tell it your working language, how you want to be notified, and which models do the work — Full asks for a Main, Light, and Reasoning model with a thinking effort each (recommended Sonnet / Haiku / Opus, High); Lite asks for one. The Full framework then runs its Reasoning and Light sub-agents on exactly the models you chose, and every document lands in `docs/`. |
 
 **Other commands, for later:**
 
@@ -176,6 +176,7 @@ commands are identical.
 | `/ocpf-bc:update-framework` | Checks for a newer runbook |
 | `/ocpf-bc:al-mcp-setup` | Connects the AL tools, if you skipped it at start |
 | `/ocpf-bc:notifications` | Turns on "your turn" notifications in an older project |
+| `/ocpf-bc:roles` | Asks which models do the work (Full: Main, Light, Reasoning, each with a thinking effort; Lite: one) and makes the answer take effect — the runbook runs it at its first step; run it by hand to change or repair the assignment |
 
 </details>
 
@@ -266,7 +267,7 @@ Not every extension needs the full 14-step routine. **Lite Edition** covers the 
 
 **Use the full framework when** any of those stops being true — the object count grows past ~10, multiple sign-off roles are involved, you want to split work across more than one AI model (Main / Light / Reasoning), or the extension is heading to AppSource, which tends to demand the fuller documentation trail.
 
-**What Lite trims — and what it doesn't.** Lite reduces *process*, never the AL rules: it merges the FRD, TDD and Sanity Check into a single `DesignDoc.md`, folds the Testing Feedback Log and Roadmap into `ChangeLog.md`, and drops the multi-model role split. Both editions fetch and apply the **same** OCPF AL Development Standards Guide — the same rules apply to a 5-file extension as to a 50-file one. Nothing is lost by switching later: `DesignDoc.md` maps directly onto the full framework's TDD, and `ChangeLog.md` carries straight over.
+**What Lite trims — and what it doesn't.** Lite reduces *process*, never the AL rules: it merges the FRD, TDD and Sanity Check into a single `docs/DesignDoc.md`, folds the Testing Feedback Log and Roadmap into `docs/ChangeLog.md`, and drops the multi-model role split (it still asks which one model, at what thinking effort, does the work). Both editions fetch and apply the **same** OCPF AL Development Standards Guide — the same rules apply to a 5-file extension as to a 50-file one. Nothing is lost by switching later: `DesignDoc.md` maps directly onto the full framework's TDD, and `ChangeLog.md` carries straight over.
 
 | Lite file | Purpose |
 |---|---|

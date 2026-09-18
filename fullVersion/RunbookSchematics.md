@@ -129,7 +129,7 @@ flowchart TD
 
     subgraph PRE01["PRE-01 — State the Problem"]
         direction LR
-        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Ask working language; fetch both<br/>companion guides (Standards + Ops)<br/>+ gitignore; ask how to be notified<br/>(recorded in .ocpf/notifications.json);<br/>ask who approves (one person<br/>or separate roles); capture raw<br/>requirements verbatim into<br/>requirements/;<br/>create ProjectProgress.md<br/>(project root); write problem<br/>statement, capture vocabulary,<br/>initial entity list, flag<br/>ambiguities"] --> Out1[/"Output:<br/>standardsGuide/ + opsGuide/<br/>(gitignored),<br/>requirements/ (if any),<br/>ProjectProgress.md (root),<br/>ProblemStatement.md"/]
+        In1[/"Inputs:<br/>Stakeholder notes"/] --> Act1["Actions:<br/>Ask working language; fetch both<br/>companion guides (Standards + Ops)<br/>+ gitignore; ask how to be notified<br/>(recorded in .ocpf/notifications.json);<br/>ask the six model and effort<br/>questions (Main / Light / Reasoning)<br/>and write the project-local<br/>sub-agent definitions; ask who<br/>approves (one person or separate<br/>roles); capture raw requirements<br/>verbatim into requirements/;<br/>create docs/ and ProjectProgress.md<br/>(project root); write problem<br/>statement, capture vocabulary,<br/>initial entity list, flag<br/>ambiguities"] --> Out1[/"Output:<br/>standardsGuide/ + opsGuide/<br/>(gitignored),<br/>requirements/ (if any),<br/>ProjectProgress.md (root),<br/>docs/ProblemStatement.md,<br/>model assignment recorded<br/>and materialized"/]
     end
     PRE01 --> Gate1{{"Exit gate:<br/>Both companion guides<br/>present and gitignored; notification<br/>choice recorded, applied,<br/>tested; Functional Consultant<br/>signs off (one approver:<br/>moves to PRE-02)"}}
 
@@ -358,7 +358,7 @@ flowchart TD
 ## 4. Cross-Cutting Schematics
 
 These two aren't tied to a single phase — ALL ALONG runs underneath every phase, and the
-Model & Effort Assignment (§1.7) role split, if configured, applies wherever a **Role:** note
+Model & Effort Assignment (§1.7) role split applies wherever a **Role:** note
 appears in the runbook.
 
 ### 4.1 ALL ALONG — Continuous Discipline
@@ -404,18 +404,22 @@ flowchart LR
 
 ### 4.2 Model & Effort Assignment (§1.7)
 
-Each role's box now carries both halves of what this section is named for — model **and**
-thinking effort — not model alone. Model and effort are asked as **two separate questions per
-role**, never merged into one prompt. **High is the recommended default for all three roles**,
-presented as the first-listed option through the interactive mechanism; the example below shows
-Main and Reasoning accepting that default and Light being explicitly overridden to Medium for
-cost — a real override, not a rule that Light must always be lowered.
+Since v3.4.0.0 the assignment is asked at **PRE-01**, right after notifications — six questions
+(model and thinking effort for each of Main, Light, and Reasoning; two boxes in Claude Code, one
+page where the harness allows six) — and is **always** filled in: the "No" branch below now only
+means a harness that cannot run sub-agents at all. Each role's box carries both halves — model
+**and** thinking effort. **High is the recommended default for all three roles**, presented first;
+the example below shows Main and Reasoning accepting that default and Light explicitly overridden to
+Medium — a real override, not a rule that Light must always be lowered. **Enforcement** (Operating
+Rule 10, Ops § Roles): the answer is materialized as project-local sub-agent definitions carrying
+`model:` and `effort:`, every delegation passes the model where the harness allows it, and every
+sub-agent report opens with the model it actually ran on — a mismatch stops the step.
 
 ```mermaid
 flowchart TD
-    Config{"§1.7 configured?"}
-    Config -- "No (default)" --> OneModel["Everything runs through<br/>one model, as if §1.7<br/>didn't exist"]
-    Config -- "Yes" --> ThreeRoles["Fixed three-role division —<br/>fixed regardless of which<br/>physical models are assigned"]
+    Config{"Harness can run<br/>sub-agents?"}
+    Config -- "No (Claude Chat, Cowork,<br/>github.com agent)" --> OneModel["Everything runs through<br/>the session model; Light and<br/>Reasoning recorded as N/A"]
+    Config -- "Yes (asked at PRE-01:<br/>6 questions, always answered)" --> ThreeRoles["Fixed three-role division —<br/>fixed regardless of which<br/>physical models are assigned;<br/>materialized as project-local<br/>sub-agent definitions, model<br/>passed on every delegation,<br/>verified from each report"]
 
     ThreeRoles --> Main
     ThreeRoles --> Light
@@ -456,7 +460,7 @@ flowchart TD
 
 ---
 
-*Generated from `BC_App_Build_Routine_Agent.md` v3.2.0.0; all 8 diagrams re-rendered clean. Version
+*Generated from `BC_App_Build_Routine_Agent.md` v3.4.0.0; all 8 diagrams re-rendered clean with `@mermaid-js/mermaid-cli` 11.17.0 on September 18, 2026. Version
 history is in `RunbookChangelog.md`. If the runbook changes in a way that affects the
 phase/step/role structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*

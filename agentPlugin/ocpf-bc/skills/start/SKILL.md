@@ -146,7 +146,9 @@ are only a fallback.
    This marker is what turns on the runbook's plugin-only behavior (ALL ALONG → OCPF Plugin): the
    once-per-session update check, the Standards Guide fallback, and the one-step AL tool setup.
 4. **Don't touch `.gitignore` here.** The runbook asks the human about framework files at intake
-   (full §1.8, Lite Step 1) and applies the answer to the runbook, its changelog, and `.ocpf/`.
+   (full §1.8, Lite Step 1) and applies the answer to the runbook, its changelog, its schematics,
+   the project-local sub-agent definitions, and `.ocpf/` — by exact filename, verified with
+   `git check-ignore` (Ops § Repository Hygiene has the block).
 
 ## Step 7: Connect the AL tools
 
@@ -180,7 +182,14 @@ notification kind at the runbook's first step counts as asking, for the settings
 2. **Follow it from the first step:** PRE-01 for Full, Step 1 for Lite. This is exactly what the
    manual "Getting started prompt" does. The runbook's first question is the human's working
    language. Right after it, the runbook asks how the human wants to be notified when it's their
-   turn (ALL ALONG → Notifications), using this plugin's `notifications` skill scripts.
+   turn (ALL ALONG → Notifications), using this plugin's `notifications` skill scripts — and then
+   which models do the work: Full asks six questions (Main, Light, and Reasoning model, each with
+   a thinking effort), Lite asks two (Main model and effort). Use this plugin's `roles` skill for
+   that step: it asks, and in Full writes project-local copies of this plugin's `ocpf-light` and
+   `ocpf-reasoning` agents carrying the chosen model and effort, which the runbook delegates to —
+   the bundled ones carry no model (Ops § Roles → *Enforcement*). It works the same in Claude Code
+   (VS Code or CLI) and GitHub Copilot (VS Code or CLI). Every document the routine produces goes
+   in `docs/`; the runbook says which few files stay in the root.
 3. **Note the two companion guides.** The runbook fetches both at that first step: the **Standards
    Guide** into `standardsGuide/` and the **Operations Guide** into `opsGuide/`. If GitHub is
    unreachable, use the copies bundled with this plugin — the Standards Guide in the `al-standards`

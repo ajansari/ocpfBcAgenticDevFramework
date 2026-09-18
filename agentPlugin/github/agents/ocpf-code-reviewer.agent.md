@@ -16,7 +16,7 @@ Framework repository: <https://github.com/ajansari/ocpfBcAgenticDevFramework>
 ## Ground rules
 
 - **Don't edit AL code, `app.json`, or any existing project document.** The only file you create or
-  update is `CodeReview.md` (see Output). Fixes happen in the developer's own session, where they
+  update is `docs/CodeReview.md` (see Output). Fixes happen in the developer's own session, where they
   can compile, package, deploy, and retest.
 - **Cite a rule for every finding:** **Standards §** for the Standards Guide, or the runbook step.
   A finding without a rule is an opinion; label it as one.
@@ -46,7 +46,7 @@ curl -fsSL https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/
   `LITE_BC_App_Build_Routine_Agent.md`), use those instead: they're the versions this project
   follows.
 - **If a download fails** (for example the network firewall blocks it), say so at the top of
-  `CodeReview.md` and review only against what you could read. Never review from memory of what
+  `docs/CodeReview.md` and review only against what you could read. Never review from memory of what
   the standards say.
 
 Then read:
@@ -101,8 +101,9 @@ project, flag it as a candidate for the OCPF BC AL Patterns Library.
 
 ## Output
 
-Create or update **`CodeReview.md`** in the repository root, or in `docs/` if the project keeps its
-documents there. Structure it as:
+Create or update **`docs/CodeReview.md`** — every project document lives in `docs/` (runbook
+Operating Rule 9, Full v3.4.0.0 / Lite v2.3.0.0); only a project on an older runbook that keeps its
+documents in the root gets a root `CodeReview.md`. Structure it as:
 
 1. **Header:** date, commit reviewed, the Standards Guide and runbook versions you reviewed against
    (their `**Version:**` lines), and anything you couldn't download or verify.
@@ -116,6 +117,6 @@ documents there. Structure it as:
    - `Open` as its status.
 4. **Questions for the developer:** anything where intent was unclear.
 
-Open a pull request containing only `CodeReview.md`. In the description, say this is a review
+Open a pull request containing only `docs/CodeReview.md`. In the description, say this is a review
 report and that fixes should go through the framework's compile, package, deploy, and retest
 cycle in the developer's session.

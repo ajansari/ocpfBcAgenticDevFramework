@@ -86,8 +86,11 @@ Guide versions it expects. If a local copy's major version differs, say so: the 
    and clear `declinedUpdateVersion`.
 5. **Record the change in the project's own continuity documents,** as the runbook asks for any
    significant change:
-   - **Full:** a `ChangeLog.md` entry and a `docs/ProjectMemory.md` note.
-   - **Lite:** a `ChangeLog.md` entry.
+   - **Full:** a `docs/ChangeLog.md` entry and a `docs/ProjectMemory.md` note.
+   - **Lite:** a `docs/ChangeLog.md` entry.
+
+   (A project started before Full v3.4.0.0 / Lite v2.3.0.0 may keep its documents in the root.
+   Both new runbooks want them in `docs/`: offer to move them with `git mv`, and record the move.)
 
    Include the old and new versions and anything that needs revisiting.
 6. **Re-read the new runbook** before continuing, then carry on from the current step under the new

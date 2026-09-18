@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 2.2.0.0 (Lite, derived from the full framework v3.3.0.0)
-**Last Updated:** September 15, 2026
+**Version:** 2.3.0.0 (Lite, derived from the full framework v3.4.0.0)
+**Last Updated:** September 18, 2026
 
 > Version history for this edition lives in `LITE_RunbookChangeLog.md`, tracked independently of
 > the full framework's own `fullVersion/RunbookChangelog.md` (though a change to one often has to
@@ -19,7 +19,7 @@
 > - `standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.9.0.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
-> - `opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v1.2.0.0), cited as
+> - `opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v1.3.0.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
 >   analyzers, symbols, editor sync, notifications, packaging, repository hygiene, translations,
 >   fetched companions, and the plugin.
@@ -42,14 +42,25 @@
 > start a step until its predecessor's exit gate is met. The *Project Parameters* block in Step 1
 > is the single source of truth for every name, ID, version, and quoting decision — never hardcode
 > any of those values in AL; always derive them from that block. It is persisted as
-> `ProjectParameters.md` in the project root, not just discussed — every later step reads it from
+> `docs/ProjectParameters.md`, not just discussed — every later step reads it from
 > that file. At the start of every session, read `.ocpf/notifications.json` and keep notifying the
 > human the way it says; if it's missing, ask how they want to be notified (ALL ALONG →
 > Notifications).
 >
-> **One model does everything.** Lite drops the full framework's optional Main/Light/Reasoning
-> role split. There's no delegation mechanism to configure — the executing agent plans, generates,
-> reviews, and documents, in that order, within each step.
+> **One model does everything.** Lite drops the full framework's Main/Light/Reasoning role split.
+> There's no delegation to configure — the executing agent plans, generates, reviews, and documents,
+> in that order, within each step. Step 1 still asks which model and thinking effort that one
+> agent runs on, and confirms the session matches (Ops § Roles).
+>
+> **Every project document lives in `docs/`.** `docs/ProblemStatement.md`, `docs/ProjectParameters.md`,
+> `docs/DesignDoc.md`, `docs/ChangeLog.md`, `docs/Docs.md`, `docs/TestScript.md`, and every translated
+> copy — created at Step 1, before the first document is written. Of the routine's own outputs, only
+> `requirements/`, `app.json`, the AL source, `Translations/`, and `outputAppPackage/` stay in the
+> project root. Every step names
+> its documents with the `docs/` prefix; a bare name still means the `docs/` path. At every exit
+> gate, list the root: a document sitting there is moved with `git mv` and the move noted in
+> `docs/ChangeLog.md`. On a real project the design documents landed in the root because the steps
+> named files without their folder.
 >
 > **Prime directive:** an ambiguous input produces ambiguous code. If a step's inputs are
 > incomplete or contradictory, stop and ask the human — do not invent rules to fill the gap.
@@ -110,13 +121,13 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
    - **generating code** — once, for the batch plan at Step 3, which covers both batches when there
      are two, unless the human chose to be asked before the second;
    - **applying root-cause fixes** — all the diagnoses from one test round or review, presented
-     together for one decision (Step 5), with any fix that changes a design rule in `DesignDoc.md`
+     together for one decision (Step 5), with any fix that changes a design rule in `docs/DesignDoc.md`
      asked separately;
    - **finalizing the Design Doc;**
    - **installing any tool or runtime.**
 
    An approved run-through still stops by itself on any pre-flight failure or deviation from
-   `DesignDoc.md`, and the human can say "stop" at any time.
+   `docs/DesignDoc.md`, and the human can say "stop" at any time.
    6a. **Ask decisions in a selectable options box, not in prose.** When the agent needs the human
        to *decide* something — pick a design option, approve a version bump, resolve an ambiguity —
        present it through the interactive multiple-choice mechanism the agent's harness provides
@@ -155,13 +166,13 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
        Server** — the AL Language extension has no such command — and never route AL tooling through
        a third-party VS Code extension.
 7. **Log every deviation immediately.** Any departure from the Design Doc — human or agent — goes
-   in `ChangeLog.md` before the next batch starts.
+   in `docs/ChangeLog.md` before the next batch starts.
 8. **Work in the human's chosen working language.** The first question of Step 1 asks which
    language the human wants to work in. Every later question, options box, and explanation is in
    that language. **Always in English, regardless:** this runbook, the Standards Guide, AL code
-   and names, commit messages, `DesignDoc.md`, and `ChangeLog.md`. **Kept verbatim in their
+   and names, commit messages, `docs/DesignDoc.md`, and `docs/ChangeLog.md`. **Kept verbatim in their
    original language:** raw requirements and tester feedback. When the human names a BC concept in
-   their own language, map it through the glossary in `DesignDoc.md` rather than guessing.
+   their own language, map it through the glossary in `docs/DesignDoc.md` rather than guessing.
 
 ---
 
@@ -189,6 +200,18 @@ design work.
 - **Ask how to be notified, right after the working language** (Ops § Notifications — read it now): Claude app, sound,
   desktop notification, any combination, or none. Record it in `.ocpf/notifications.json` and
   apply it, so every later question reaches the human even when they've stepped away.
+- **Ask which model does the work, right after notifications** (Rule 6a; **Ops § Roles — read
+  it now**). Two questions in one box, recommended answer first and free-text entry for anything
+  else: **Main model** (*Sonnet — recommended*) and **Main thinking effort** (*High — recommended* /
+  *Medium* / *Low*). Say which model this session is running on before asking: in Lite the one
+  model *is* this session, and only the human can change it (`/model` and `/effort` in Claude Code;
+  the model picker in Copilot). If they choose something other than what's running, ask them to
+  switch now and confirm before continuing — never record a model that isn't the one doing the
+  work. The answer goes in the Project Parameters below. Asked here, not in the intake boxes, so
+  it's settled before the first document is drafted. In a plugin project the plugin's `roles` skill
+  (`/ocpf-bc:roles`) asks and records it.
+- **Create the `docs/` folder now** — every document from here on is written there (see the
+  header note; only `requirements/` and the build outputs stay in the root).
 - **Capture any raw requirements input verbatim, before interpreting it.** If the human pastes raw
   requirements in chat, or uploads a file, save it untouched in a `requirements/` folder (a
   descriptive filename, or the file's own name for an upload) before doing anything else with it.
@@ -209,8 +232,7 @@ design work.
   table costs far more to add after BUILD than before it.
 - Identify duplicates, ambiguous terms, and outdated terminology; ask clarifying questions about
   scope and consumer use cases. Do not resolve ambiguities silently.
-- **Populate the Project Parameters block below, and persist it as `ProjectParameters.md` in the
-  project root.** Complete every field; replace every placeholder. These values override all
+- **Populate the Project Parameters block below, and persist it as `docs/ProjectParameters.md`.** Complete every field; replace every placeholder. These values override all
   defaults for the rest of the routine, and every later step reads them from that file rather than
   from conversation history.
 
@@ -219,8 +241,9 @@ offer for each question, and the language questions — is Ops § Intake. Read i
 box.** In short: every question goes through the options mechanism, grouped into as few boxes as the
 questions allow (identity, naming, permission sets and IDs, onboarding, setup and languages, then
 the translation questions); countries are asked once; a suggestion is a candidate the human picks,
-never an answer recorded for them; and the whole sheet is confirmed once at the end. Lite skips the
-full framework's model-split question.
+never an answer recorded for them; and the whole sheet is confirmed once at the end. Lite asks only
+the Main model and effort — already asked above, right after notifications — not the full
+framework's Light and Reasoning questions.
 
 **The Permission Set App Code question exists because** permission sets named from the prefix alone
 (`OCPF - READ`) collided across every extension with that prefix (**Standards §5.4**).
@@ -247,12 +270,13 @@ root (ALL ALONG → Packaging & Versioning). Mention it once, plainly, now.
 | **Permission Sets required?** | `Yes`/`No` | `No` only if the extension owns **zero new tables** (**Standards §5.3**); otherwise `Yes`, not asked. If `Yes`, reserve ≥ 2 IDs in the primary range. |
 | **AL Runtime / BC Application Minimum / Symbol Source** | — | BC version from Box 2; runtime from Microsoft Learn. Symbol Source is filled in by the agent after downloading: version, W1 or localized, and where from. |
 | **Onboarding extras** | `Yes`/`No` each | Assisted Setup Wizard? Role Center Activity Cues? Departments/"My Business Central" placement? Box 4; `No` to any is a final answer, not a placeholder — most small extensions answer `No` to all three, but ask anyway. |
-| **Framework files in `.gitignore`?** | `Yes` (default) | Box 5, asked as: *"`.gitignore` lists files Git leaves out of commits and pushes — they stay on disk and work normally. Should this framework's own files be left out of this project's repository?"* Covers this runbook (under whatever name it was given: `CLAUDE.md`, `.github/copilot-instructions.md`, or `LITE_BC_App_Build_Routine_Agent.md`), `LITE_RunbookChangeLog.md`, `LITE_RunbookSchematics.md`, and the plugin's `.ocpf/` folder, if present. **Never the project's own `ChangeLog.md`**, which is always committed. |
+| **Framework files in `.gitignore`?** | `Yes` (default) | Box 5, asked as: *"`.gitignore` lists files Git leaves out of commits and pushes — they stay on disk and work normally. Should this framework's own files be left out of this project's repository?"* With `Yes`, these exact entries go into `.gitignore` — by name, every one, not "the framework files" in the agent's head: the runbook under whatever name it was given (`CLAUDE.md`, `.github/copilot-instructions.md`, `.github/instructions/ocpf-framework.instructions.md`, `LITE_BC_App_Build_Routine_Agent.md` — only the ones that exist), `LITE_[Rr]unbook[Cc]hange[Ll]og.md` (both spellings the changelog has shipped under; a case-sensitive entry misses one on Linux and in CI), `LITE_RunbookSchematics.md`, and `.ocpf/` (with `.ocpf/notifications.json` always ignored). **Then prove it:** `git check-ignore -v <file>` on each file that exists, and `git status --porcelain` on the root; a framework file still showing means the entry is wrong. On a real project the changelog was left out and shipped to the client's remote. **Never the project's own `docs/ChangeLog.md`**, which is always committed. The full block is Ops § Repository Hygiene. |
 | **Working language** | — | From the first question of this step. |
+| **Main model & thinking effort** | `<MainModel>` / `<MainEffort>` | Asked right after notifications (Ops § Roles): the model this one agent runs on (recommended Sonnet) and its thinking effort (High recommended / Medium / Low). Recorded as the human named them, plus the harness's own identifier (e.g. `sonnet`). Must match what the session is actually running — the human switches the session, not the agent. Lite has no Light or Reasoning rows. |
 | **Target languages** | table | Box 5, for the countries from Box 1 — Lite groups the setup and language questions together (Ops § Intake) — never asked again (rules: **Standards §8.8**). Classify each chosen language as Microsoft-translated, partner-translated (ask which partner app, in the next box — it's the terminology source), or not supported by BC (every right-to-left language included). Don't offer an unsupported language; if typed, offer the country's English instead, and only record it if the human insists. Then, unless source wording is *US wording, no translation files*, per language, two questions: *Required at first release* / *Can follow later*; and who reviews it — names the human mentioned, or *I'll type it*; a named fluent person, never the agent. Flag any mismatch with **Localization**. |
 | **Source language** | `en-US` (default) | Offer `en-US` first, labelled recommended, with the one-line reasons in **Standards §8.1**. If the human chooses another, state the consequences before recording it. |
 | **Source wording** | `W1` | Microsoft's W1 English wording in source, with one translation file per target language (`en-US` included). Only when `en-US` is the **sole** target **and Deployment Target isn't `AppSource`** (AppSource requires translation files — **Standards §8.10**), also offer *US wording in source, no translation files* — simpler now, but another market later means changing source strings. |
-| **Documents in other languages** | per document | Only with a target language other than the source. Two questions: translate `Docs.md`'s user-guide section into each required language (*Yes (recommended)* / *No*); and does `TestScript.md` need a translated copy (*No — testers run the language pass from the English script, which names the terms they should see (recommended when testers read English)* / *Yes*)? `DesignDoc.md` and `ChangeLog.md` stay English. Translated documents are produced at Step 7, once the functional test pass is green. |
+| **Documents in other languages** | per document | Only with a target language other than the source. Two questions: translate `docs/Docs.md`'s user-guide section into each required language (*Yes (recommended)* / *No*); and does `docs/TestScript.md` need a translated copy (*No — testers run the language pass from the English script, which names the terms they should see (recommended when testers read English)* / *Yes*)? `docs/DesignDoc.md` and `docs/ChangeLog.md` stay English. Translated documents are produced at Step 7, once the functional test pass is green. |
 | **Customer-language documents / translatable data** | `Yes`/`No` each | Two questions: do invoices or emails follow the customer's language? Does the extension store user-entered text needing per-language versions? (**Standards §8.9**) |
 
 **Quoting reference** (applies everywhere): `app.json`/`launch.json` use standard JSON strings;
@@ -285,14 +309,16 @@ the human's (Rule 6d). **Full procedure: Ops § Project Setup.**
 4. **Keep the editor in sync** (ALL ALONG → Keeping the Editor in Sync).
 
 **Outputs:** `standardsGuide/` and `opsGuide/` (both fetched, gitignored), `requirements/` (if any raw input was
-captured), `ProblemStatement.md` (purpose, scope, out-of-scope, entity list, open questions),
-`ProjectParameters.md` (project root — the completed Project Parameters block, all placeholders
-replaced), `.gitignore` populated per the table above, `app.json`, and `.alpackages/`.
+captured), `docs/ProblemStatement.md` (purpose, scope, out-of-scope, entity list, open questions),
+`docs/ProjectParameters.md` (the completed Project Parameters block, all placeholders
+replaced, the Main model and effort included), `docs/` itself (created before the first document),
+`.gitignore` populated per the table above and verified with `git check-ignore`, `app.json`, and
+`.alpackages/`.
 
 **Exit gate:** Every question was asked through the options mechanism. `app.json` matches the
 sheet, and the target version's symbols are in `.alpackages/` (Ops § Project Setup). Both companion guides are present, in `standardsGuide/` and
 `opsGuide/`, and gitignored. The notification choice is recorded in
-`.ocpf/notifications.json`, applied, and tested. `ProjectParameters.md` exists in the project root with no placeholder remaining. Deployment Target
+`.ocpf/notifications.json`, applied, and tested. `docs/ProjectParameters.md` exists, in `docs/`, with no placeholder remaining, and the Main model and effort recorded there match what this session is running on. Every `.gitignore` entry from the framework-files row is present and `git check-ignore` confirms each existing framework file — `LITE_RunbookChangeLog.md` included — is ignored. Nothing from the `docs/` list is in the project root. Deployment Target
 is one allowed value. Namespace is consistent or correctly N/A. If
 Permission Sets required = `Yes`, ≥ 2 IDs are reserved. Onboarding questions are each answered.
 Every target language is classified against Microsoft's live page and, unless source wording is
@@ -307,9 +333,9 @@ Goal: one self-sufficient Design Doc, sanity-checked, before any code.
 
 ## STEP 2 — Write the Design Doc & Self-Check
 
-**Inputs:** `ProblemStatement.md`, `ProjectParameters.md`, BC symbol file.
+**Inputs:** `docs/ProblemStatement.md`, `docs/ProjectParameters.md`, BC symbol file.
 
-**Actions:** Write **one** document — `DesignDoc.md` — that does the job the full framework splits
+**Actions:** Write **one** document — `docs/DesignDoc.md` — that does the job the full framework splits
 across an FRD and a TDD. It must be self-sufficient: someone who's never seen the project should
 be able to produce every object correctly from this document alone. Two halves, one file:
 
@@ -350,7 +376,7 @@ be able to produce every object correctly from this document alone. Two halves, 
   rather than inventing a pattern.
 - Permission sets, if required (see Step 1): a read-only set and a read/write set (which includes
   the read-only set), with every table's `tabledata` grant enumerated per set — not just "sets
-  exist" — named from `ProjectParameters.md`, each ≤ 20 characters with a caption ≤ 30
+  exist" — named from `docs/ProjectParameters.md`, each ≤ 20 characters with a caption ≤ 30
   (**Standards §5.3–§5.4**).
 - **Upgrade and data migration** — needed from the second version onward, and whenever this version
   changes what existing data must look like: the upgrade codeunits, the trigger each uses, and the
@@ -365,7 +391,7 @@ be able to produce every object correctly from this document alone. Two halves, 
 - **Translatable text** (**Standards §8.3**): every message a `Label` with an AA0074 suffix and a
   `Comment` for each placeholder; which labels are `Locked`; translation file names
   (`Translations/<ExtensionName>.<culture>.xlf`).
-- **Translation glossary** — a table in `DesignDoc.md` (skip if the project chose *US wording, no
+- **Translation glossary** — a table in `docs/DesignDoc.md` (skip if the project chose *US wording, no
   translation files*): BC concept · W1 source term · one column per target language · where each
   term came from · status (`verified` / `reviewer attention`). Fill every row with **Standards
   Appendix D** — Microsoft's own translations first — never from model memory.
@@ -400,7 +426,7 @@ in Lite, but don't skip the checklist just because there's no one else to hand i
       or marked for reviewer attention.
 - [ ] Every API page and query has a recorded group and caption-locking decision.
 
-**Outputs:** `DesignDoc.md`; an **Object Register** table (inside `DesignDoc.md` is fine at this
+**Outputs:** `docs/DesignDoc.md`; an **Object Register** table (inside `docs/DesignDoc.md` is fine at this
 scale — every planned object with its ID, source table, and R/W status).
 
 **Exit gate:** Human sign-off. Self-check passes with 0 blocking issues. No rule requires
@@ -415,16 +441,16 @@ fix in a loop until clean.
 
 ## STEP 3 — Plan & Scaffold
 
-**Inputs:** `DesignDoc.md`, Object Register.
+**Inputs:** `docs/DesignDoc.md`, Object Register.
 
 **Actions:**
 - Confirm the batch plan from Operating Rule 3 (one batch, or two on a natural split) and object
   order within it (lookups before the things that reference them). **This is the one approval to
   generate code** (Rule 6). With two batches, ask once (Rule 6a): **Run through both batches,
   stopping on any pre-flight failure or Design Doc deviation (recommended)** / **Ask me before
-  the second batch**. Record the answer in `ChangeLog.md`.
+  the second batch**. Record the answer in `docs/ChangeLog.md`.
 - Prepare the scaffold: confirm `app.json` (written at the end of Step 1) still matches
-  `ProjectParameters.md` — name, publisher, ID ranges, runtime, BC dependency,
+  `docs/ProjectParameters.md` — name, publisher, ID ranges, runtime, BC dependency,
   `"features": ["NoImplicitWith", "TranslationFile"]` (**Standards §8.2**) — then `launch.json`,
   folder structure, a `Translations/` folder, `.gitignore` per Step 1 and Ops § Repository Hygiene (plus `*.g.xlf` and
   `.alpackages/`), and the analyzer files: `.vscode/settings.json` with the analyzers for the
@@ -464,12 +490,12 @@ scaffold structurally complete, analyzer settings and (for AppSource) `AppSource
 
 ## STEP 4 — Generate the Code
 
-**Inputs:** `DesignDoc.md`, `ProjectParameters.md`, symbol file, batch plan, pre-flight checklist.
+**Inputs:** `docs/DesignDoc.md`, `docs/ProjectParameters.md`, symbol file, batch plan, pre-flight checklist.
 
 **Actions — per object, in order:**
 1. **Approval came at Step 3** — don't ask again per object. With two batches, pause before the
    second only if the human chose that. Stop and ask on any pre-flight failure the Design Doc
-   can't resolve, or any deviation from `DesignDoc.md`.
+   can't resolve, or any deviation from `docs/DesignDoc.md`.
 2. Extract source-table and field data for this object from the symbol file.
 3. Run the pre-generation pre-flight pass; fix the Design Doc before generating if anything fails.
 4. Generate the AL file **from the standard template in Standards §1.3**, substituting only Step 1
@@ -491,7 +517,7 @@ scaffold structurally complete, analyzer settings and (for AppSource) `AppSource
   generated (**Standards §5.3**; vacuously satisfied if the extension owns no tables).
 
 **Outputs:** Every AL file, lint-clean including symbol verification; ChangeLog entries for any
-deviation from `DesignDoc.md`. The extension is **not** compiled yet.
+deviation from `docs/DesignDoc.md`. The extension is **not** compiled yet.
 
 **Exit gate:** Every planned object generated and pre-flight-clean; permission-set coverage
 verified. A clean compile is not required to close this gate — Step 4 hands off directly into
@@ -500,7 +526,7 @@ Step 5's mandatory compile-and-package.
 ## STEP 5 — Compile, Package, Test & Iterate
 
 **Inputs:** Every generated file (lint-clean, not yet compiled); accumulated lint findings;
-`DesignDoc.md`; `ChangeLog.md`.
+`docs/DesignDoc.md`; `docs/ChangeLog.md`.
 
 **Actions:** First, **compile the whole extension once, with the analyzers this framework
 requires, then package it** (ALL ALONG → Analyzers; check for an already-provisioned runtime
@@ -525,9 +551,9 @@ compiles clean to clear them.
    round has a diagnosis, present them all in one message — each listed separately with its root
    cause and proposed fix — and ask once (Rule 6a): **Apply all** / **Apply selected** / **Discuss
    first**. Nothing is applied before that answer. A diagnosis that would change a design rule in
-   `DesignDoc.md` gets its own separate box. Then fix each approved **root cause**, regenerate the
-   affected files, and log the issue + resolution in `ChangeLog.md` before moving on. Update
-   `DesignDoc.md` whenever a rule changes.
+   `docs/DesignDoc.md` gets its own separate box. Then fix each approved **root cause**, regenerate the
+   affected files, and log the issue + resolution in `docs/ChangeLog.md` before moving on. Update
+   `docs/DesignDoc.md` whenever a rule changes.
 5. **Compile and package again**, redeploy, retest. Repeat until 0 errors / 0 warnings and the
    human confirms sandbox testing is clean.
 
@@ -548,7 +574,7 @@ Appendix A**):
   fail *gracefully with a clean, actionable error*.
 
 **Ask once, at the first round: should the agent run the API checks before the human tests?**
-(Rule 6a; record the answer in `ChangeLog.md` and honor it for every later round.)
+(Rule 6a; record the answer in `docs/ChangeLog.md` and honor it for every later round.)
 - ***Yes — publish and run the checks each round.*** The agent publishes and works the checklist
   above against the sandbox. **It needs two things**: one Microsoft browser sign-in per session, the
   same one publishing and sandbox symbol downloads use; and **a tool in this session that can issue
@@ -564,7 +590,7 @@ URL shapes, including the company segment most endpoints need, are **Standards A
 never the BC client — and Step 7's human pass still decides.
 
 **Outputs:** All files compiling and packaging with **0 errors, 0 warnings**; at least one package
-published and manually tested on a sandbox; `ChangeLog.md` current; `DesignDoc.md` updated for
+published and manually tested on a sandbox; `docs/ChangeLog.md` current; `docs/DesignDoc.md` updated for
 every rule change.
 
 **Exit gate:** Full extension compiles clean, with the analyzers and nothing suppressed (Ops § Analyzers); human confirms sandbox testing is clean; no known
@@ -580,14 +606,14 @@ human-run release test.
 
 ## STEP 6 — Review, Gap-Check & Finalize Docs
 
-**Inputs:** The built extension, `DesignDoc.md`, `ChangeLog.md`.
+**Inputs:** The built extension, `docs/DesignDoc.md`, `docs/ChangeLog.md`.
 
 **Actions:**
-- **Gap-check** — compare `DesignDoc.md` against the as-built code. For each divergence: object
+- **Gap-check** — compare `docs/DesignDoc.md` against the as-built code. For each divergence: object
   planned but not built (intentional or oversight?), object built but not planned (scope creep or
   gap-fill?), a rule implemented differently (is there a ChangeLog entry?). Classify each as
   **Intentional**, **Oversight** (fix now via the Step 5 cycle), or **Spec stale** (code's right —
-  update `DesignDoc.md`).
+  update `docs/DesignDoc.md`).
 - **Code review** — one pass across every object: consistent structure/naming/formatting
   throughout (small projects still drift between the first file written and the last); no dead
   code (**Standards §1.5**); no reference to anything with `ObsoleteState = Pending`/`Removed`,
@@ -613,14 +639,14 @@ human-run release test.
   an additional, independent pass, and fold its findings in the same way as your own — never
   applied blind. If the fetch didn't happen or the snapshot is missing, say so rather than
   silently skipping this pass.
-- **Update `DesignDoc.md` in place** to reflect the as-built reality — final object inventory, any
+- **Update `docs/DesignDoc.md` in place** to reflect the as-built reality — final object inventory, any
   naming or exception that emerged during BUILD, a short deviation summary pointing at the
-  relevant `ChangeLog.md` entries. There's no separate as-built document in Lite; one file, kept
+  relevant `docs/ChangeLog.md` entries. There's no separate as-built document in Lite; one file, kept
   current, is the point.
 - Present this step's fixes together for one approval, as in Step 5. Any fix this step produces
   follows the Step 5 cycle (recompile, repackage, redeploy, retest) before this step closes; a
   comment/formatting-only fix doesn't need a fresh package.
-- **Write `Docs.md`** — one combined reference covering everything the full framework splits
+- **Write `docs/Docs.md`** — one combined reference covering everything the full framework splits
   across four documents:
   - *API/dev reference*, generated from the actual code, not memory: one section per object, one
     row per field (identifier, source name, description, R/W status); a quick-start (auth, one
@@ -634,7 +660,7 @@ human-run release test.
     something is refused — written for the person clicking around in BC, not a developer.
   - A short **deployment** section: version requirements, install procedure, which permission sets
     map to which roles, uninstall, and which users to reassign if a release renames a permission set.
-- **Write `TestScript.md`** — the green-team/red-team checklist from Step 5, made concrete against
+- **Write `docs/TestScript.md`** — the green-team/red-team checklist from Step 5, made concrete against
   this extension's actual endpoints, for a human tester to run end to end at Step 7. With more
   than one required language, add a **language pass**: key pages, messages, and customer-facing
   documents walked once per required language, checking for untranslated text, truncation,
@@ -648,14 +674,14 @@ human-run release test.
 - **Translated documents aren't produced here.** Step 7 produces them once its functional test
   pass is green, so a fix found in testing doesn't make every translated copy stale too.
 
-**Outputs:** `DesignDoc.md` (updated in place, glossary included), `Docs.md`, and `TestScript.md`.
-Together with `ChangeLog.md` from Step 1 onward, that's Lite's four maintained documents; translated
-documents follow at Step 7. Step 1's `ProblemStatement.md` and
-`ProjectParameters.md` are also tracked, but written once at kickoff rather than kept current.
+**Outputs:** `docs/DesignDoc.md` (updated in place, glossary included), `docs/Docs.md`, and `docs/TestScript.md`.
+Together with `docs/ChangeLog.md` from Step 1 onward, that's Lite's four maintained documents; translated
+documents follow at Step 7. Step 1's `docs/ProblemStatement.md` and
+`docs/ProjectParameters.md` are also tracked, but written once at kickoff rather than kept current.
 
 **Exit gate:** Every gap classified and resolved or explicitly deferred (logged in
-`ChangeLog.md`); dead-code scan clean; no obsolete references; `Docs.md`'s diagram renders;
-`TestScript.md` is executable by a non-developer; translation checks clean; any AL test codeunits
+`docs/ChangeLog.md`); dead-code scan clean; no obsolete references; `docs/Docs.md`'s diagram renders;
+`docs/TestScript.md` is executable by a non-developer; translation checks clean; any AL test codeunits
 have been run and pass, or it's recorded why they couldn't be.
 
 ## STEP 7 — Release for Testing
@@ -669,7 +695,7 @@ have been run and pass, or it's recorded why they couldn't be.
 > **"Perfect, I understand!"** and **"I have some questions."** The message itself must: (a)
 > congratulate the human on reaching this point; (b) state plainly that this is the logical end of
 > the Lite framework's own work — Step 7 runs by human hands from here; (c) say concretely what
-> they need to do next (run `TestScript.md` end to end, record every finding in `ChangeLog.md`);
+> they need to do next (run `docs/TestScript.md` end to end, record every finding in `docs/ChangeLog.md`);
 > and (d) say how to bring the agent back in — when testing surfaces something to fix, when the
 > functional pass is green and translated documents are due (if Step 1 asked for any), or once
 > everything passes and it's time to mark the release candidate.
@@ -677,7 +703,7 @@ have been run and pass, or it's recorded why they couldn't be.
 > Everything below this note is what happens *after* that hand-off — the human's test run, and
 > the agent's part in recording and fixing what it turns up.
 
-**Inputs:** The most recently built package; `TestScript.md`; `Docs.md`.
+**Inputs:** The most recently built package; `docs/TestScript.md`; `docs/Docs.md`.
 
 **Actions:**
 - Confirm the latest package is published to a BC sandbox tenant — republish if anything changed.
@@ -686,12 +712,12 @@ have been run and pass, or it's recorded why they couldn't be.
   install this one, verify the migrated data, install it again to confirm the upgrade tag makes the
   second run a no-op, and check that a fresh install doesn't run upgrade code at all. A failed
   upgrade path fails this step — by the time anyone notices, the tenant's data is already wrong.
-- Real users/testers — not the agent, not a simulated pass — run `TestScript.md` end to end: every
+- Real users/testers — not the agent, not a simulated pass — run `docs/TestScript.md` end to end: every
   green-team and red-team case, by hand.
 - Verify permission sets as part of the same pass: read-only grants read everywhere; read/write
   includes it plus write on editable pages.
 - **Translated documents, once the functional pass is green** (if Step 1 asked for them): the
-  agent produces `Docs.<culture>.md` (user-guide section) and, if chosen, `TestScript.<culture>.md`.
+  agent produces `docs/Docs.<culture>.md` (user-guide section) and, if chosen, `docs/TestScript.<culture>.md`.
   It uses the glossary for every BC term and names the English source version in each file's
   header. Each is reviewed by that language's reviewer before the language pass that uses it.
 - **Language passes:** for each language required at first release, a tester fluent in it runs
@@ -700,20 +726,20 @@ have been run and pass, or it's recorded why they couldn't be.
   - Each language's named reviewer approves its translations — directly in their tooling, or by
     telling the agent exactly which units they approve. The agent sets `signed-off` only on those
     units.
-  - Log each approval in `ChangeLog.md`: reviewer by name, language, count, and date.
+  - Log each approval in `docs/ChangeLog.md`: reviewer by name, language, count, and date.
   - Then **scan every target file** for a language required at first release: every unit must be
     `signed-off` or `final` (**Standards §8.7**).
   - A fix that changes source text sends affected units back through Step 5 and review.
-- Record every finding directly in `ChangeLog.md` — verbatim first, then triaged: **implement now**
+- Record every finding directly in `docs/ChangeLog.md` — verbatim first, then triaged: **implement now**
   (its own entry, fixed via the Step 5 cycle), **defer** (its own entry, marked deferred, with
   reasoning — Lite doesn't keep a separate `Roadmap.md`), or **reject** (record why).
 - **If a fix here changes any object, field, or behavior, treat Step 6's outputs as stale, not
-  already covered** — re-run the affected parts of the review and regenerate `Docs.md`'s reference
+  already covered** — re-run the affected parts of the review and regenerate `docs/Docs.md`'s reference
   and diagram from the now-changed code, plus any translated document already produced from what
   changed. Say explicitly which parts a given fix actually requires re-running.
 - Repeat until every green-team test passes and every red-team test fails gracefully.
 
-**Outputs:** `ChangeLog.md` updated with every test finding and its resolution.
+**Outputs:** `docs/ChangeLog.md` updated with every test finding and its resolution.
 
 **Exit gate:** All green-team tests pass; all red-team tests fail gracefully; the upgrade path
 passes, or this is the first release (**Standards §9.6**); permission sets
@@ -740,7 +766,7 @@ procedure.** Read the named **Ops §** section at the step that needs it.
 ## ChangeLog.md — the single running log
 
 Lite merges what the full framework splits across a ChangeLog, a Testing Feedback Log, and a
-Roadmap into **one file**. Every deviation from `DesignDoc.md`, every diagnosed root cause, and
+Roadmap into **one file**. Every deviation from `docs/DesignDoc.md`, every diagnosed root cause, and
 every piece of testing feedback goes here, before the next batch or the next test round begins.
 Entry format:
 
@@ -758,7 +784,7 @@ their actual name — never a generic "the human" or "the user." The moment a se
 joins the project, a role-noun stops answering the only question that phrase exists to answer.
 
 Commit each batch to version control separately, before the next begins, with a message that
-references its `ChangeLog.md` entries.
+references its `docs/ChangeLog.md` entries.
 
 ## Packaging & Versioning
 
@@ -785,7 +811,7 @@ bump. The non-negotiables:
 
 Two companions are fetched at Step 1 and kept for the life of the project: the **Standards Guide**
 (`standardsGuide/ocpfALDevStandardsGuide.md`, v1.9.0.0), cited as **Standards §**, and the
-**Operations Guide** (`opsGuide/ocpfOperationsGuide.md`, v1.2.0.0), cited as **Ops §** and shared
+**Operations Guide** (`opsGuide/ocpfOperationsGuide.md`, v1.3.0.0), cited as **Ops §** and shared
 unchanged with the full framework.
 
 **Full procedure: Ops § Fetched Companions** — fetching, refreshing, the plugin's offline copies,
@@ -805,15 +831,23 @@ and what to do when GitHub is unreachable.
 `.ocpf/notifications.json`, `standardsGuide/`, `opsGuide/`, `patterns/`, `scripts/`, `.alpackages/`,
 `*.g.xlf`, and Microsoft's translation files. BCQuality lives outside the project root entirely.
 
-**Always tracked:** `DesignDoc.md`, `ChangeLog.md`, `Docs.md`, `TestScript.md`, the Step 1 kickoff
+**Always tracked:** `docs/DesignDoc.md`, `docs/ChangeLog.md`, `docs/Docs.md`, `docs/TestScript.md`, the Step 1 kickoff
 artifacts, the AL source, `Translations/*.xlf`, and every package in `outputAppPackage/`.
 
-**Gitignored by default, with Step 1's question:** this runbook, `LITE_RunbookChangeLog.md`,
-`LITE_RunbookSchematics.md`, and the plugin's `.ocpf/` folder — except `.ocpf/notifications.json`.
-**Never the project's own `ChangeLog.md`**, one of Lite's four maintained documents.
+**Gitignored by default, with Step 1's question — by exact filename, every one:** this runbook
+under whatever name it was placed (`CLAUDE.md`, `.github/copilot-instructions.md`,
+`.github/instructions/ocpf-framework.instructions.md`, `LITE_BC_App_Build_Routine_Agent.md`), its
+changelog in either spelling (`LITE_[Rr]unbook[Cc]hange[Ll]og.md`), `LITE_RunbookSchematics.md`, and
+the plugin's `.ocpf/` folder — except `.ocpf/notifications.json`, always ignored. Step 1's table has
+the list; Ops § Repository Hygiene has the block to paste. **Verify with `git check-ignore -v`** on
+each file that exists — that command, not a re-read of `.gitignore`, is what proves an entry works.
+**Never the project's own `docs/ChangeLog.md`**, one of Lite's four maintained documents.
 
-**If a project built on an earlier Lite version has `ChangeLog.md` in `.gitignore`,** remove that
-entry and commit the file — earlier wording said "this runbook and `ChangeLog.md`" when it meant the
+**`docs/` is where every document lives** — see the header note. At every exit gate, list the root:
+a document sitting there is moved with `git mv`, and the move is noted in `docs/ChangeLog.md`.
+
+**If a project built on an earlier Lite version has `docs/ChangeLog.md` in `.gitignore`,** remove that
+entry and commit the file — earlier wording said "this runbook and `docs/ChangeLog.md`" when it meant the
 framework's changelog. Check for a remote first: collaborators will see the file as newly added.
 
 **If any of this is already tracked,** add the entry, then untrack with `git rm --cached` — checking
@@ -914,9 +948,9 @@ at Step 6, when it's used.
 and the release gate. Read it at Step 1, at Step 5's first full build, and at Step 7's gate. Skip
 everything here if Step 1 chose *US wording, no translation files*.
 
-- **The glossary lives in `DesignDoc.md`** and is filled only by **Standards Appendix D**, never from
+- **The glossary lives in `docs/DesignDoc.md`** and is filled only by **Standards Appendix D**, never from
   model memory.
-- **The agent drafts, a named person approves.** Every approval is logged in `ChangeLog.md` by name
+- **The agent drafts, a named person approves.** Every approval is logged in `docs/ChangeLog.md` by name
   (**Standards §8.7**).
 - **The release gate is a plain state scan:** every unit in every language required at first release
   is `signed-off` or `final`.
@@ -942,9 +976,9 @@ that file, skip this section.
   runbook and offer **Update now / Not now / Skip this version**. Never replace the runbook without
   an explicit yes.
 - **What the plugin adds:** offline copies of the runbooks and both companions, one-step AL tool
-  setup, notification setup, and the `status`, `al-standards`, and `notifications` skills. (The
-  `ocpf-light` and `ocpf-reasoning` sub-agents belong to the full framework's role split, which Lite
-  doesn't use.)
+  setup, notification setup, and the `status`, `al-standards`, `notifications`, and `roles` skills
+  (`roles` asks Lite's two model questions). (The `ocpf-light` and `ocpf-reasoning` sub-agents
+  belong to the full framework's role split, which Lite doesn't use.)
 
 ## Step Map — Lite vs. Full Framework
 
@@ -961,14 +995,14 @@ that file, skip this section.
 **Shared with the full framework, not reduced:** the OCPF AL Development Standards Guide. Both
 editions fetch the same v1.9.0.0 file and apply the same AL rules — Lite differs only in process.
 
-**Document count:** 4 maintained documents (`DesignDoc.md`, `ChangeLog.md`, `Docs.md`,
-`TestScript.md`), plus Step 1's two kickoff artifacts (`ProblemStatement.md`,
-`ProjectParameters.md`), versus the full framework's 20 (`ProblemStatement`, `ProjectParameters`, `FRD`, `TDD`,
+**Document count:** 4 maintained documents (`docs/DesignDoc.md`, `docs/ChangeLog.md`, `docs/Docs.md`,
+`docs/TestScript.md`), plus Step 1's two kickoff artifacts (`docs/ProblemStatement.md`,
+`docs/ProjectParameters.md`), versus the full framework's 20 (`ProblemStatement`, `ProjectParameters`, `FRD`, `TDD`,
 `SanityCheck`, `ChangeLog`, `ProjectMemory`, `ProjectProgress`, `GapAnalysis`, `CodeReview`,
 `PostDevTDD`, `Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`,
 `AutomatedTestScripts`, `ReleaseTestResults`, `TestingFeedback`, `Roadmap`,
-`TranslationGlossary`). Lite keeps its translation glossary inside `DesignDoc.md`; translated copies
-of `Docs.md` and `TestScript.md` don't count as separate documents.
+`TranslationGlossary`). Lite keeps its translation glossary inside `docs/DesignDoc.md`; translated copies
+of `docs/Docs.md` and `docs/TestScript.md` don't count as separate documents.
 
 ---
 

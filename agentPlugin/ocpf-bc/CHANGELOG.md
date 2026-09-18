@@ -4,6 +4,39 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 2.4.0 — September 18, 2026
+
+**Bundles:** full runbook v3.4.0.0, Lite v2.3.0.0, Standards Guide v1.9.0.0, Operations Guide
+v1.3.0.0.
+
+- **`ocpf-reasoning` and `ocpf-light` now prove which model they ran on.** Each opens every report
+  with a `Model:` line and stops on its own if it can read the project's §1.7 and is running on a
+  different model. They still carry no `model:` of their own — the same file is read by Claude Code
+  (which wants `opus`) and Copilot (which wants a picker name) — so the runbook now has the project
+  write local copies with the chosen model and effort at PRE-01 and delegate to those, passing the
+  model on every Claude Code call as well (runbook Operating Rule 10; Ops § Roles → *Enforcement*).
+  On a real project every delegated task had silently inherited the session's model.
+- **New `roles` skill** (`/ocpf-bc:roles`): asks the model and effort questions at the runbook's
+  first step (six in Full, two in Lite) through each harness's own mechanism — two
+  `AskUserQuestion` boxes in Claude Code, one `askQuestions` carousel in Copilot Chat, one at a
+  time in Copilot CLI — writes the project-local `ocpf-reasoning` and `ocpf-light` copies with the
+  chosen model and effort (`.claude/agents/*.md` with `model:` + `effort:`; `.github/agents/*.agent.md`
+  with `model:`, read by Copilot in VS Code and the CLI — `model:` is documented for the IDEs only,
+  so in the CLI the `Model:` first-line check is the guarantee), records the assignment, and handles the
+  one first-session catch in Claude Code (a new `.claude/agents/` folder loads at the next start, so
+  until then the bundled agents are used with the model passed per call). Also repairs a project
+  whose roles ran on the wrong model. Left out of the Cowork package, which has no sub-agents.
+- **`start`** tells the human the model questions come right after notifications (six in Full, two
+  in Lite), points at the `roles` skill, and says that every document goes in `docs/` and that the
+  `.gitignore` answer is applied by exact filename and checked.
+- **`status`** reads `docs/ChangeLog.md` and `docs/ProjectParameters.md` in both editions, reports
+  the recorded model per role, and says if the project-local sub-agent definitions are missing —
+  meaning delegated steps would run on the session's model.
+- **`update-framework`** records its ChangeLog entry at `docs/ChangeLog.md` and offers to move an
+  older project's documents into `docs/`.
+- **Bundled runbooks and guides:** the front-loaded model questions, the `docs/` rule, and the
+  exact-name `.gitignore` block with `git check-ignore` verification.
+
 ## 2.3.0 — September 15, 2026
 
 **Bundles:** full runbook v3.3.0.0, Lite v2.2.0.0, Standards Guide v1.9.0.0, Operations Guide

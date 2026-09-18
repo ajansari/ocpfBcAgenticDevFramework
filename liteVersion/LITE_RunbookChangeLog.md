@@ -16,6 +16,50 @@ framework.
 
 ---
 
+## v2.3.0.0 — September 18, 2026
+
+Derived from full framework **v3.4.0.0**; Standards Guide **v1.9.0.0** (unchanged); Operations
+Guide **v1.3.0.0**. Three fixes from one real run of the full framework, applied to Lite so they
+can't recur here either.
+
+### Added
+
+- **Step 1 asks which model does the work, right after notifications.** Two questions in one box:
+  the Main model (*Sonnet* recommended, free entry) and its thinking effort (*High* recommended /
+  Medium / Low). The agent states the model the session is running on first — in Lite the one model
+  *is* the session, and only the human can change it (`/model` and `/effort` in Claude Code, the
+  model picker in Copilot) — and a different choice means the human switches and confirms before
+  anything continues. Recorded in a new **Main model & thinking effort** parameter row, with the
+  harness's own identifier. Lite has no Light or Reasoning roles, so none of the full framework's
+  enforcement machinery applies; the one check is that the recorded model matches the session.
+  The asking, and why it's the first step rather than the parameter sheet, is **Ops § Roles**.
+
+### Changed
+
+- **Every project document lives in `docs/`.** `docs/ProblemStatement.md`,
+  `docs/ProjectParameters.md`, `docs/DesignDoc.md`, `docs/ChangeLog.md`, `docs/Docs.md`,
+  `docs/TestScript.md`, and every translated copy. Previously the runbook named every file bare and
+  said `ProjectParameters.md` went in the project root; on a real full-framework run that pattern
+  put the design documents in the root. The folder is created at Step 1, every step now writes the
+  full path, the root exceptions are listed once (`requirements/`, `app.json`, the AL source,
+  `Translations/`, `outputAppPackage/`), and each exit gate checks the root — a document found
+  there is moved with `git mv` and the move noted in `docs/ChangeLog.md`. A project on an earlier
+  Lite version keeps its layout until it updates; the plugin's `update-framework` skill offers the
+  move.
+- **The framework-files `.gitignore` answer is applied by exact filename and verified.** The
+  parameter row now lists every entry: the runbook under each name it may have, the changelog in
+  both spellings as one pattern (`LITE_[Rr]unbook[Cc]hange[Ll]og.md`), `LITE_RunbookSchematics.md`,
+  and `.ocpf/`, then `git check-ignore -v` on each existing file and `git status --porcelain` on
+  the root before the step closes. The full block is **Ops § Repository Hygiene**. On the real run
+  the changelog was left out and reached the client's remote.
+
+### Schematics
+
+- The Step 1 diagram in `LITE_RunbookSchematics.md` shows the Main model question and `docs/`;
+  all 7 diagrams re-rendered clean with `@mermaid-js/mermaid-cli` 11.17.0.
+
+---
+
 ## v2.2.0.0 — September 15, 2026
 
 Derived from full framework **v3.3.0.0**; Standards Guide **v1.9.0.0**; Operations Guide

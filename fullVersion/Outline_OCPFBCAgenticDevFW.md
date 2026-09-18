@@ -12,7 +12,7 @@ any design work.*
 
 | Step | Role |
 |---|---|
-| **PRE-01** — State the Problem | Main Agent |
+| **PRE-01** — State the Problem | Main Agent — asks the working language, notifications, the six model-and-effort questions (Main / Light / Reasoning), and who approves; creates `docs/` |
 | **PRE-02** — Structured Gap Analysis | Main Agent |
 | **01** — Populate the Intake Sheet *(Project Parameters)* | Main Agent |
 
@@ -63,7 +63,7 @@ Each one keeps its non-negotiables in the runbook and points at the shared
 **Operations Guide** (`opsGuide/ocpfOperationsGuide.md`, cited as **Ops §**) for the procedure —
 fetched at PRE-01 alongside the Standards Guide.
 
-- Document
+- Document — every project document in `docs/`; only `ProjectProgress.md` at the root
 - Track Changes — the ChangeLog
 - Retain Explanations
 - Testing Feedback Log
@@ -71,7 +71,7 @@ fetched at PRE-01 alongside the Standards Guide.
 - Project Progress Tracker — `ProjectProgress.md`, one status row per step, in the project root
 - Translations & Terminology — translation glossary, named reviewers, release gate on approved translations
 - Packaging & Versioning
-- Repository Hygiene
+- Repository Hygiene — framework files gitignored by exact name (changelog included) and verified with `git check-ignore`
 - AL MCP Server — set up by the agent at Step 01 §1.10; the human only approves
 - Analyzers — CodeCop, UICop, and PerTenantExtensionCop *or* AppSourceCop, engaged on every mandatory compile
 - Symbols — downloaded by the agent, never the human

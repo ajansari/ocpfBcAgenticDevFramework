@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 1.2.0.0
-**Last Updated:** September 15, 2026
+**Version:** 1.3.0.0
+**Last Updated:** September 18, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
 > `fullVersion/BC_App_Build_Routine_Agent.md` and `liteVersion/LITE_BC_App_Build_Routine_Agent.md`.
@@ -32,7 +32,7 @@
 | The pre-flight checklist, the API test checklist, the Sanity Check checklist | The runbook |
 | Document formats: ChangeLog, Project Memory, Progress Tracker, Testing Feedback Log | The runbook |
 | AL coding rules, API page design, naming, field inclusion, permission sets, translations rules | **Standards §** |
-| Which model does what (Full's role split) | Ops § Roles, below — it's procedure, but Full only |
+| Which model does what — the Main model (both editions) and the Light/Reasoning split (Full) | Ops § Roles, below |
 
 ---
 
@@ -40,7 +40,7 @@
 
 1. [Asking and Approvals](#ops--asking-and-approvals)
 2. [Intake](#ops--intake)
-3. [Roles](#ops--roles-full-only) *(Full only)*
+3. [Roles](#ops--roles-full-only) *(the Main model in both editions; Light and Reasoning are Full only)*
 4. [Project Setup](#ops--project-setup)
 5. [AL Tools](#ops--al-tools)
 6. [Analyzers](#ops--analyzers)
@@ -69,7 +69,9 @@ through the harness's selectable-options mechanism, with the recommended option 
 reason on each. Never an open-ended question or a numbered list in chat.
 
 - **Claude Code — `AskUserQuestion`:** up to four questions per box, 2–4 options each, a free-text
-  *Other* added automatically, and multi-select where several answers apply.
+  *Other* added automatically, and multi-select where several answers apply. The four-question cap
+  is a hard limit of the tool: a set that needs more (the six model-and-effort questions, Ops §
+  Roles) is split into consecutive boxes, never trimmed.
 - **GitHub Copilot Chat in VS Code — the `askQuestions` tool:** several questions in one carousel,
   each single-select, multi-select, or free text.
 - **GitHub Copilot CLI — the `ask_user` tool:** a choice question there takes no typed answer, so
@@ -166,7 +168,7 @@ publisher and prefix once forced a full-project rename.
 | | 12. Another Object ID range? | *No* / *Yes*. Each *Yes* opens a box with questions 11 and 12 again. |
 | **4 — Onboarding** | 13–15. Assisted Setup Wizard? Role Center Activity Cues? Departments / "My Business Central" placement? | *No* / *Yes* each, with the runbook's one-line description of what each is. A follow-up box then asks the specifics of every *Yes*, offering choices drawn from the problem statement. |
 | | 16. Permission Sets required? *(only if the entity list has no new table)* | *No — the extension adds no tables* / *Yes*. Not asked once the extension owns a table: then it's `Yes` (**Standards §5.3**). |
-| **5 — Working setup** | 17. Split work across models? **Full only** | *One model for everything (recommended)* / *Recommended split* / *Customize each role* (Ops § Roles). |
+| **5 — Working setup** | 17. *(Moved.)* Which models do the work — and at what thinking effort — is asked at the routine's first step, right after notifications, not here (Ops § Roles). Box 5 only confirms the recorded answer is on the sheet. | — |
 | | 18. Leave the framework's own files out of the project's repository? | *Yes (recommended)* — the framework is distributed from its own repository, and its methodology isn't part of what the client receives / *No, track them* — a teammate cloning the project sees exactly how it was built. Explain `.gitignore` in the question itself: *"`.gitignore` lists files Git leaves out of commits and pushes — they stay on disk and work normally."* |
 | | 19. Which language is the AL source text written in? | *`en-US` (recommended)*, with **Standards §8.1**'s reason in one sentence, or another language typed in. |
 | **6 onward — Languages** | The per-country, per-language, and document questions below. | As below. |
@@ -175,8 +177,9 @@ publisher and prefix once forced a full-project rename.
 **Option counts** are in Ops § Asking and Approvals: 2–4 per question, a single suggestion paired
 with *I'll type it*, more than four candidates trimmed to the four most likely.
 
-**Lite differs only by what it doesn't have:** no question 17 (no role split), and its Box 5 carries
-the `.gitignore` question, the source language, and the per-country language questions together.
+**Lite differs only by what it doesn't have:** no Light or Reasoning roles (its Step 1 asks the Main
+model and effort only, Ops § Roles), and its Box 5 carries the `.gitignore` question, the source
+language, and the per-country language questions together.
 
 ### The AppSource questions
 
@@ -258,7 +261,7 @@ reached, say so and ask the human rather than guessing.
 4. **Documents**, only when there's a target language other than the source:
    - *Which user-facing documents are translated into each required language?* (multi-select).
      **Full:** the user guide *(recommended)*, the deployment instructions *(recommended)*, or none.
-     **Lite:** `Docs.md`'s user-guide section *(recommended)* or none — Lite has no separate
+     **Lite:** `docs/Docs.md`'s user-guide section *(recommended)* or none — Lite has no separate
      deployment document. Engineering documents stay in English only.
    - *Do testers need a translated test script?* *No — they run the language pass from the English
      script, which names the terms each language should show (recommended when testers read
@@ -278,28 +281,75 @@ once the object inventory does.
 
 ## Ops § Roles (Full only)
 
-The Full edition can split work across three roles, each potentially a different model. It's
-optional: with no answer, everything runs through one model, as if this section didn't exist. The
-Lite edition has no role split at all.
+*(The heading keeps its name for anchor stability. Since Ops v1.3.0.0 the first part — asking
+which model the Main role runs on — applies to Lite too; everything about the Light and Reasoning
+roles remains Full only.)*
+
+The Full edition splits work across three roles, each potentially a different model. Lite has one
+role, Main, and asks only that one's model and effort. **The assignment is never optional and never
+"everything on one model, as if the roles didn't exist":** every role gets a model and a thinking
+effort, recorded and enforced. Choosing the same model for all three is a valid answer — the Light
+and Reasoning roles still run as sub-agents, because fresh eyes are the point, not just a different
+model.
 
 The executing agent can't switch its own model mid-session, but it can delegate a self-contained
 task to a sub-agent running a different model, get a result back, and act on it. That's the whole
-mechanism, and it isn't tied to one harness.
+mechanism, and it isn't tied to one harness. **What can go wrong is the delegation inheriting the
+session's model by default** — which is exactly what happened on a real project, and why the
+*Enforcement* part below exists.
 
-**Asking, once at intake**, as one question with three options:
-- ***One model for everything (recommended)*** — no role assignment.
-- ***Recommended split*** — name the models this harness actually offers: a capable general model
-  for Main, a fast lower-cost model for Light, the strongest reasoning model for Reasoning, High
-  thinking effort for all three. Record exactly what was named.
-- ***Customize each role*** — then ask each role's **model** and **thinking effort** as two separate
-  questions, never merged: one box with the three model questions, then one box with the effort
-  question for each role whose chosen model has an effort setting. A role whose model has no such
-  setting isn't asked; record `N/A` rather than leaving it blank.
+### Asking — at the routine's first step, right after notifications
 
-If the harness can't run sub-agents at all — Claude Chat, Microsoft Copilot Cowork, the github.com
-cloud agent — don't ask: say everything runs through one model and record `No`.
+Asked in the runbook's first step (Full PRE-01, Lite Step 1), **before any document is drafted**, so
+the answer exists before the first delegated task — not at the parameter sheet, where it used to sit
+behind a preset question and arrived after the sub-agent definitions had already been used with no
+model set.
 
-**What each role is for:**
+**Full — six questions, on one page where the harness allows it:**
+
+| # | Question | Options to offer (free-text entry always available) |
+|---|---|---|
+| 1 | Main model? | *Sonnet (recommended)* / *Opus* / *Haiku* — or, in a harness with other models, the names its picker uses |
+| 2 | Main thinking effort? | *High (recommended)* / *Medium* / *Low* |
+| 3 | Light model? | *Haiku (recommended)* / *Sonnet* / *Opus* |
+| 4 | Light thinking effort? | *High (recommended)* / *Medium* / *Low* |
+| 5 | Reasoning model? | *Opus (recommended)* / *Sonnet* / *Haiku* |
+| 6 | Reasoning thinking effort? | *High (recommended)* / *Medium* / *Low* |
+
+- **Claude Code:** `AskUserQuestion` takes at most four questions per box, so this is two boxes, back
+  to back — questions 1–4 (Main and Light), then 5–6 (Reasoning). Don't spread them further.
+- **GitHub Copilot Chat in VS Code:** `askQuestions` carries all six in one carousel. Offer the
+  Claude models by the names the model picker shows (for example *Claude Sonnet 5*), since that's the
+  string a `.agent.md` file's `model:` needs.
+- **GitHub Copilot CLI:** `ask_user`, one question at a time in the same order, with *I'll type it*
+  on each.
+- **A harness that can't run sub-agents at all** (Claude Chat, Microsoft Copilot Cowork, the
+  github.com cloud agent): ask questions 1–2 only, say that the Light and Reasoning roles can't run
+  here, and record `N/A — no sub-agents in this harness` for them.
+
+**Lite — two questions, one box:** the Main model (*Sonnet (recommended)* / *Opus* / *Haiku*) and its
+thinking effort (*High (recommended)* / *Medium* / *Low*).
+
+**Say what's running before asking.** The Main model *is* the session's model. State it — and the
+session's effort, where the harness shows it — in the question's own text, and offer the current
+value as the recommended one when it matches the framework's recommendation. Only the human can
+change either: `/model <sonnet|opus|haiku>` and `/effort <low|medium|high>` in Claude Code (which also accepts `xhigh` and `max`; the framework offers three — the
+agent has no tool that does this); the model picker in Copilot Chat. If the human picks a Main model
+or effort other than what's running, ask them to switch now, then confirm the session shows the new
+model before continuing. **Never record a Main model that isn't the one doing the work.**
+
+**High is the recommended default thinking effort for every role, whichever model holds it.** This
+is a quality-first framework: the zero-errors-zero-warnings rule already demands care, and every
+role's job benefits from more thinking, not less. Offer High first, with that reasoning. Medium or
+Low is a legitimate, explicit override — most plausibly for the Light role, whose checklist matching
+gains least from extra effort — not a mistake to argue the human out of.
+
+**Record everything, in one place:** the model as the human named it, the harness identifier it maps
+to (the Claude Code alias `sonnet` / `opus` / `haiku`, or the Copilot picker name), and the effort —
+in `docs/ProjectMemory.md` at once, then Full §1.7 / Lite's parameter row when the sheet is written.
+
+### What each role is for
+
 1. **Main role** — the bulk of the work: all code generation, all actual code edits (including
    applying what the other roles report), and end-to-end ownership of the continuity documents:
    ChangeLog, Object Register, project memory, and the Testing Feedback Log. A capable
@@ -312,30 +362,89 @@ cloud agent — don't ask: say everything runs through one model and record `No`
    diagnosing whether a testing-feedback report is real. Reports findings, drafts, or diagnoses;
    never edits code or the continuity documents.
 
-**High is the recommended default thinking effort for all three roles, whichever model holds them.**
-This is a quality-first framework: the zero-errors-zero-warnings rule already demands care, and
-every role's job benefits from more thinking, not less. Offer High first, with that reasoning. A
-human may still choose Medium — most plausibly for the Light role, whose checklist matching gains
-least from extra effort — and that's a legitimate, explicit override, not a mistake to argue them
-out of. What matters is that the default offered is High; a lower setting is opted into, never
-assumed.
-
 **The division of labor is fixed, whichever models are assigned.** The light and reasoning roles
 investigate, draft, or diagnose; the main role is the only one that edits code and the only one that
 owns the continuity documents. That keeps one consistent author across the codebase and keeps
 root-cause tracing in one thread instead of fragmenting across cold hand-offs. A role holder's
 output is always relayed back and integrated by the main role, never applied blind.
 
-**Delegating in practice:** hand the role holder the specific inputs its task needs — the relevant
-documents, the code or finding in question, the standing checklist — plus a pointer to the runbook
-itself, since every rule applies to whichever role is acting. Set that role's configured thinking
-effort when the mechanism allows it.
+### Enforcement — making the recorded model the one that actually runs (Full)
+
+A sub-agent runs on whatever its definition and the delegating call say. **If neither says
+anything, it inherits the main session's model** — in Claude Code that is the documented resolution
+order (per-call `model` parameter → the definition's `model:` frontmatter → the
+`CLAUDE_CODE_SUBAGENT_MODEL` environment variable → the main conversation's model), and Copilot's
+custom agents likewise fall back to the model picker's selection. The plugin's bundled
+`ocpf-light` and `ocpf-reasoning` definitions deliberately carry **no `model:`**, because the same
+file is read by Claude Code (which wants an alias like `opus`) and by Copilot (which wants a picker
+name like `Claude Opus 5`) and the human's choice isn't known until intake. So the project has to
+supply it. Four steps, all the agent's, none optional:
+
+1. **Materialize the assignment as project-local sub-agent definitions, immediately after the
+   answer** — at PRE-01, before PRE-02 starts. Take the bundled definitions as the template: fetch
+   `agentPlugin/ocpf-bc/agents/ocpf-light.agent.md` and `ocpf-reasoning.agent.md` from
+   `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/`, or copy them from
+   the installed plugin's `agents/` folder when GitHub is unreachable. Write, for every harness the
+   project uses (the same choice the runbook placement was made for):
+   - **Claude Code:** `.claude/agents/ocpf-light.md` and `.claude/agents/ocpf-reasoning.md`, with the
+     bundled body unchanged and two frontmatter lines added — `model: <alias>` (`haiku`, `sonnet`,
+     `opus`, or a full model ID) and `effort: <low|medium|high>` (Claude Code's own effort field on a sub-agent definition, which also
+     accepts `xhigh` and `max`;
+     a sub-agent definition; there is **no per-call effort override**, so the frontmatter is the only
+     place a role's effort can be set). Keep `name:` as `ocpf-light` / `ocpf-reasoning` and keep the
+     `disallowedTools:` line.
+   - **GitHub Copilot:** `.github/agents/ocpf-light.agent.md` and `.github/agents/ocpf-reasoning.agent.md`,
+     with `model: '<picker name>'` added (a string, or an array of picker names in preference
+     order). Copilot has no effort field on an agent definition; say so, and record the effort as
+     `session` for those roles.
+
+   These files are framework files: they follow the §1.8 / Step 1 `.gitignore` answer (Ops §
+   Repository Hygiene lists the entries). Tell the human they were written, and where.
+2. **Delegate to the project-local definition, and pass the model anyway.** In Claude Code — the
+   VS Code extension and the CLI behave the same — call the Agent tool with `subagent_type` set to
+   the project-local `ocpf-reasoning` or `ocpf-light` (a project agent outranks a plugin agent of
+   the same name) **and** `model` set to the recorded alias on **every single call** — belt and
+   braces, because the per-call parameter wins over everything and costs nothing. In Copilot Chat
+   and Copilot CLI, invoke the project-local agent by name (both read `.github/agents/`). In VS
+   Code its `model:` line does the rest — Copilot has no per-call override, so the file is the
+   mechanism. **In Copilot CLI, `model:` is not documented** (GitHub lists it for VS Code and the
+   JetBrains, Eclipse, and Xcode IDEs only), so the sub-agent may run on the CLI's session model:
+   say so to the human, and rely on step 3's `Model:` check to show what actually ran.
+   Hand the role holder the inputs its task needs plus a pointer to the runbook, as before.
+
+   **The first session is the exception, in Claude Code.** It watches `.claude/agents/` for
+   changes, but only a folder that existed when the session started; the session that *creates*
+   the folder may not see the new definitions until the next start (nor does it watch folders added
+   with `--add-dir`, or anything in a `--disable-slash-commands` session). So after writing them, check
+   whether the Agent tool offers `ocpf-reasoning`; if not, for the rest of that session delegate to
+   the plugin's `ocpf-bc:ocpf-reasoning` / `ocpf-bc:ocpf-light` **with the recorded alias in the
+   `model` parameter on every call** — the model is still right — tell the human that those roles'
+   effort will be the session's until the next session, and record it in `docs/ChangeLog.md`. Step
+   3 catches any call that forgets.
+3. **Verify from the report, every time.** Every sub-agent report opens with one line —
+   `Model: <the model this sub-agent is running on>` — which the bundled definitions require. Before
+   using anything from the report, the main role compares that line with the §1.7 row for the
+   role. **A mismatch stops the step:** say so to the human in plain words ("the Reasoning role ran
+   on Sonnet; §1.7 says Opus"), fix the definition or the call, and redo the task on the right model.
+   Never accept the output and note the discrepancy later — the discrepancy *is* the defect.
+4. **Record what actually ran.** The ChangeLog entry that closes a delegated step names the model
+   from the report's first line, so the project's record shows what happened rather than what was
+   intended. A project that finds, after the fact, that its roles never ran on the recorded models
+   records that in the ChangeLog too — as a defect with a root cause, not a footnote.
+
+**Why four steps and not one:** on a real project the human chose Sonnet / Haiku / Opus at intake
+and the sheet said so, but the sub-agent definitions carried no model, no delegation passed one, and
+nothing checked. Every Reasoning-role task — the FRD, the TDD, the Sanity Check — ran on Sonnet, and
+it came to light only because the human asked. Any one of the steps above would have caught it.
 
 **With the OCPF plugin**, the Light and Reasoning roles ship as ready-made sub-agents, `ocpf-light`
 and `ocpf-reasoning` (in Claude Code, `ocpf-bc:ocpf-light` and `ocpf-bc:ocpf-reasoning`). They carry
-this division of labor already and are denied file-editing tools. Pass the configured model and
-effort where the harness allows a per-delegation override; where it doesn't, tell the human which
-model the sub-agent will actually run on.
+this division of labor already, are denied file-editing tools, and open every report with the
+`Model:` line — but **they are templates**, used through the project-local copies above, and
+delegated to directly only in the first-session fallback, always with the model passed per call.
+The plugin's **`roles` skill** (`/ocpf-bc:roles`) does the asking, the writing, the recording,
+and the first-session check in one go, in Claude Code and Copilot alike; the runbook invokes it at
+its first step in a plugin project, and it repairs a project whose roles ran on the wrong model.
 
 ---
 
@@ -365,6 +474,10 @@ own approval prompts.
 4. **Keep the editor in sync** (Ops § Editor Sync). If VS Code's AL extension loaded this project
    before the agent changed `app.json`, it still shows the old ID ranges and missing symbols as red
    errors. Refresh now, while no `.al` file exists yet.
+5. **Check the layout and the ignore list before design begins.** `docs/` exists and holds every
+   document written so far (nothing from the runbook's document list in the root); `.gitignore`
+   carries the full block from Ops § Repository Hygiene; and `git check-ignore -v` names each
+   framework file that exists. A miss here is cheap now and a client-facing mistake later.
 
 ---
 
@@ -881,11 +994,58 @@ project's own git remote, even though they sit in the working directory like any
   where they are, inside the ignored `.alpackages/`, or extract them outside the tracked tree.
 
 **Gitignored by default, with an intake question:** the runbook itself, its changelog, its
-schematics, and the plugin's `.ocpf/` folder — except `.ocpf/notifications.json`, which is always
-ignored. The runbook's intake asks this one; both answers are legitimate.
+schematics, the project-local sub-agent definitions (Ops § Roles → *Enforcement*), and the plugin's
+`.ocpf/` folder — except `.ocpf/notifications.json`, which is always ignored. The runbook's intake
+asks this one; both answers are legitimate.
 
-**Always tracked:** the project's own documents, its AL source, `Translations/*.xlf`, and every
-package in `outputAppPackage/` (Ops § Packaging).
+**The block to write, by name.** "The framework files" is not an entry; each file is. With the
+intake answer *Yes*, the project's `.gitignore` carries this block (drop only the runbook filenames
+that don't exist in this project; keep both changelog patterns — they cover the two spellings the
+file has shipped under, and a case-sensitive entry misses one on Linux and in CI):
+
+```
+# OCPF BC Agentic Development Framework — always ignored (Ops § Repository Hygiene)
+.claude/settings.local.json
+.ocpf/notifications.json
+standardsGuide/
+opsGuide/
+patterns/
+scripts/
+.alpackages/
+*.g.xlf
+
+# OCPF BC Agentic Development Framework — framework files (intake answer: not tracked)
+CLAUDE.md
+.github/copilot-instructions.md
+.github/instructions/ocpf-framework.instructions.md
+BC_App_Build_Routine_Agent.md
+LITE_BC_App_Build_Routine_Agent.md
+[Rr]unbook[Cc]hange[Ll]og.md
+LITE_[Rr]unbook[Cc]hange[Ll]og.md
+RunbookSchematics.md
+LITE_RunbookSchematics.md
+.claude/agents/ocpf-light.md
+.claude/agents/ocpf-reasoning.md
+.github/agents/ocpf-light.agent.md
+.github/agents/ocpf-reasoning.agent.md
+.ocpf/
+```
+
+With the answer *No*, only the first group is written, plus `.ocpf/notifications.json` (already in
+it). **Never** `outputAppPackage/`, `*.app`, `docs/`, `requirements/`, `Translations/*.xlf`, or the
+project's own `docs/ChangeLog.md`.
+
+**Prove it, don't assume it.** After writing the file, run `git check-ignore -v <path>` for each
+framework file that exists on disk and `git status --porcelain` in the root: a framework file that
+`check-ignore` doesn't name, or that `status` lists as untracked or modified, means an entry is
+missing or misspelled — fix it before moving on. A `.gitignore` that was "written per the runbook"
+but never checked is how the changelog reached a client's remote on a real project.
+
+**Always tracked:** the project's own documents — all of them under `docs/` (the runbook's rule:
+Full Operating Rule 9, Lite's header note), with `ProjectProgress.md` the one document at the root —
+its AL source, `Translations/*.xlf`, and every package in `outputAppPackage/` (Ops § Packaging).
+
+**Never** ignore the project's own `docs/ChangeLog.md` — see the block above.
 
 **If any of this is already tracked** when the policy is adopted: add the entries to `.gitignore`,
 then untrack with `git rm --cached` (not `git rm` — the files stay on disk), since an ignore rule
@@ -902,7 +1062,7 @@ chose *US wording, no translation files*, except the runbook's working-language 
 **Standards §1.7**.
 
 **The glossary — `docs/TranslationGlossary.md`**, created at intake and current at every step after.
-**Lite:** it lives inside `DesignDoc.md` and is created at the design step, not at intake. One row per standard BC concept the extension names: the concept, the
+**Lite:** it lives inside `docs/DesignDoc.md` and is created at the design step, not at intake. One row per standard BC concept the extension names: the concept, the
 W1 source term, one column per target language, where each term came from (Microsoft file and
 version, partner app, or style guide), and its status (`verified` / `reviewer attention`).
 - Every row is filled by **Standards Appendix D**, never from model memory.
@@ -944,7 +1104,7 @@ caption change sends back to `needs-adaptation`.
    (and **Region** for formats) and walks the changed pages, messages, and reports, looking for
    untranslated text (usually a hard-coded string), truncation, and wrong regional terms.
 
-**Full only — roles.** If the role split is configured, terminology verification is the light role's
+**Full only — roles.** Terminology verification is the light role's (Operating Rule 10)
 (a lookup against ground truth, like symbol verification) and drafting is the main role's, since the
 files are deliverables. Approving is never an AI role's.
 
@@ -1265,13 +1425,18 @@ started with until the human chooses otherwise.
 - **Notifications:** the `notifications` skill sets them up, or adds them to an older project
   (Ops § Notifications).
 - **Sub-agents:** `ocpf-reasoning` and `ocpf-light` carry the Full edition's Reasoning and Light
-  roles (Ops § Roles).
-- **Other skills:** `status` reports where the project stands; `al-standards` answers ad hoc AL
+  roles (Ops § Roles). They carry no model of their own: the project's copies, written at the first
+  step with the recorded model and effort, are the ones delegated to (Ops § Roles → *Enforcement*).
+- **Models:** the `roles` skill asks the model and effort questions at the first step (six in Full,
+  two in Lite), writes those project-local copies, records the assignment, and repairs a project
+  whose roles ran on the wrong model.
+- **Other skills:** `status` reports where the project stands (including the model per role and
+  whether the project-local definitions exist); `al-standards` answers ad hoc AL
   questions from the Standards Guide.
 
 **Optional github.com reviewer.** The repository also ships a GitHub Copilot custom agent,
 `agentPlugin/github/agents/ocpf-code-reviewer.agent.md`. It reviews the extension against the Code
-Review step and the Standards Guide, writes `CodeReview.md`, and never edits AL.
+Review step and the Standards Guide, writes `docs/CodeReview.md`, and never edits AL.
 - **Offer it once**, at Code Review, if the project is hosted on GitHub and the team uses Copilot.
 - **If the human wants it:** copy the file into the project's `.github/agents/`. That file **must be
   tracked** in git, or github.com can't see it.

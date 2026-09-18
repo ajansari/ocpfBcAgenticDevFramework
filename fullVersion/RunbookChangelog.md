@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v3.3.0.0**, the Standards Guide is at **v1.9.0.0**, the Operations Guide at **v1.2.0.0**, and Lite at **v2.2.0.0** — but
+**v3.4.0.0**, the Standards Guide is at **v1.9.0.0**, the Operations Guide at **v1.3.0.0**, and Lite at **v2.3.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 
 Entries are grouped by version, newest first, and describe the **cumulative** result of a
@@ -17,6 +17,106 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v3.4.0.0 — September 18, 2026
+
+**Three failures from one real run, each closed with a mechanism rather than a reminder: the
+model assignment is now asked first and actually enforced, every project document has an explicit
+`docs/` path, and the framework's own files are gitignored by exact name and verified.** Ships with
+Lite **v2.3.0.0**, Standards Guide **v1.9.0.0** (unchanged), Operations Guide **v1.3.0.0**, plugin
+**v2.4.0**.
+
+### Corrected — the role split never ran on the models the human chose
+
+On a project where the human picked Sonnet / Haiku / Opus at intake and
+`docs/ProjectParameters.md` §1.7 said so, every Reasoning-role task — the FRD, the TDD, the Sanity
+Check — and every Light-role pre-flight pass ran on Sonnet. The plugin's `ocpf-reasoning` and
+`ocpf-light` definitions carried no `model:`, no delegation passed one, and nothing checked, so
+each sub-agent fell back to the main session's model. The intake sheet recorded a decision that
+never took effect. Fixed in four places, each of which alone would have caught it:
+
+- **New Operating Rule 10 — delegate on the recorded model, and prove it.** The assignment is
+  materialized at PRE-01 as project-local sub-agent definitions (`.claude/agents/ocpf-*.md` with
+  `model:` and `effort:`; `.github/agents/ocpf-*.agent.md` with `model:`), every delegation names
+  the project-local agent and — in Claude Code — passes the recorded alias in the Agent tool's
+  `model` parameter on every call, every sub-agent report opens with `Model: <what it ran on>`, and
+  the main role compares that line with §1.7 before using the report. A mismatch stops the step.
+  The ChangeLog entry for a delegated step names the model that actually ran.
+- **Ops § Roles → *Enforcement*** carries the per-harness mechanics, verified against the current
+  Claude Code and VS Code documentation (Copilot CLI's `model:` support is not documented and is
+  said so): Claude Code resolves a sub-agent's model as per-call
+  parameter → definition frontmatter → `CLAUDE_CODE_SUBAGENT_MODEL` → the session's model, and has
+  **no per-call effort override** (only the definition's `effort:` field); Copilot's `.agent.md`
+  takes a picker name in `model:` and has no effort field. The bundled agents stay model-less on
+  purpose — the same file is read by both harnesses, which want different identifiers — and the
+  project's copies supply it.
+- **The bundled `ocpf-reasoning` and `ocpf-light` definitions** now require the `Model:` first
+  line and stop on their own if they can read §1.7 and are running on a different model.
+- **A new plugin skill, `roles`** (`/ocpf-bc:roles`), does the whole step in a plugin project —
+  asks the six (Lite: two) questions per harness, writes the project-local definitions from the
+  bundled templates, records the assignment, and repairs a project whose roles ran on the wrong
+  model. It behaves the same in Claude Code's VS Code extension and CLI and in GitHub Copilot's VS
+  Code chat and CLI (both Copilot surfaces read `.github/agents/`; `model:` on an agent file is
+  documented for the IDEs only, so in Copilot CLI the `Model:` first-line check is what proves the
+  model, and the human is told those roles may run on the CLI's session model). One harness-specific catch is
+  documented and handled: Claude Code watches `.claude/agents/` only when the folder existed at
+  session start, so in the session that creates it the plugin's own agents are used with the model
+  passed per call, and the project-local ones take over from the next session.
+- **Every *Role:* note** (Steps 02–04, 06–09, the Testing Feedback Log) drops "if §1.7 role
+  assignment is configured": the roles are always assigned and always delegated.
+
+### Changed — the model questions moved to PRE-01 and are asked directly
+
+§1.7 is no longer an optional section behind a *One model / Recommended split / Customize* preset
+at intake question 17. **PRE-01 asks six questions, right after notifications and before any
+document is drafted:** Main model (*Sonnet* recommended), Main thinking effort (*High* / Medium /
+Low), Light model (*Haiku*), Light effort, Reasoning model (*Opus*), Reasoning effort — free entry
+on each. One page where the harness allows six questions (Copilot Chat's `askQuestions`); two boxes
+back to back in Claude Code, whose `AskUserQuestion` takes four questions per box (Ops § Asking now
+names that cap). The agent states the model the session is running on before asking, because the
+Main model *is* the session and only the human can switch it (`/model`, `/effort`); a different
+choice means the human switches and confirms before anything continues. §1.7's table now records,
+per role, the model as named, the harness identifier passed on delegation, the effort, and the
+file it's materialized in. Choosing the same model everywhere is valid; the sub-agents still run.
+
+### Corrected — documents were written to the project root
+
+On the same project the problem statement, FRD, TDD, Sanity Check, and gap analysis all landed in
+the root: the steps named the files (`FRD.md`) without their folder, and only four documents
+anywhere in the runbook carried the `docs/` prefix. **New Operating Rule 9:** every project
+document lives in `docs/`, the folder is created at PRE-01, every Inputs/Outputs line now writes
+the full `docs/…` path (the Object Register is `docs/ObjectRegister.md`), the root exceptions are
+listed once (`ProjectProgress.md`, `requirements/`, `app.json`, the AL source, `Translations/`,
+`outputAppPackage/`), and every exit gate checks the root — a document found there is moved with
+`git mv` and the move logged. The plugin's `status` and `update-framework` skills read the new
+paths and say so when an older project still keeps them in the root; the github.com
+`ocpf-code-reviewer` agent writes `docs/CodeReview.md`.
+
+### Corrected — `RunbookChangeLog.md` was not in `.gitignore`
+
+§1.8 said "this runbook, its changelog, and its schematics" and left the filenames to the agent;
+the changelog was missed and reached the client's remote. §1.8 and Ops § Repository Hygiene now
+carry the exact block to write — every runbook filename the project may use, both spellings of the
+changelog as one pattern (`[Rr]unbook[Cc]hange[Ll]og.md`, since a case-sensitive entry misses one of
+them on Linux and in CI), the schematics, the project-local sub-agent definitions, and `.ocpf/` —
+and require `git check-ignore -v` on each existing file plus `git status --porcelain` on the root
+before the step closes. Ops § Project Setup gains a fifth step that re-checks the layout and the
+ignore list before design begins.
+
+### Lite
+
+Lite **v2.3.0.0** takes the `docs/` rule and the exact-name `.gitignore` rule unchanged, and asks
+two questions at Step 1 — the Main model and its thinking effort — recorded in
+`docs/ProjectParameters.md`; it has no Light or Reasoning roles to enforce. Its changelog has the
+detail.
+
+### Schematics
+
+The PRE-01 and §4.2 diagrams in `RunbookSchematics.md` were updated for the front-loaded model
+questions, the materialized sub-agent definitions, and `docs/`; all 8 diagrams (and Lite's 7)
+were re-rendered clean with `@mermaid-js/mermaid-cli` 11.17.0.
 
 ---
 
