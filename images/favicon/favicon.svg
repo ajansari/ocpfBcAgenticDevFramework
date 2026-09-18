@@ -1,0 +1,29 @@
+<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 1584 1584">
+  <rect x="149" y="149" width="1286" height="1286" rx="282" fill="#E9EBED" transform="rotate(45 792 792)"/>
+  <g fill="#0E7F87">
+    <rect x="742" y="310" width="97" height="970"/>
+    <rect x="305" y="747" width="486" height="97"/>
+    <circle cx="790" cy="310" r="200"/>
+    <circle cx="305" cy="796" r="200"/>
+    <circle cx="791" cy="1280" r="200"/>
+  </g>
+  <g fill="#E9EBED">
+    <circle cx="790" cy="310" r="102"/>
+    <circle cx="305" cy="796" r="102"/>
+    <circle cx="791" cy="1280" r="102"/>
+  </g>
+  <g fill="#16B1BE">
+    <circle cx="790" cy="310" r="73"/>
+    <circle cx="305" cy="796" r="73"/>
+    <circle cx="791" cy="1280" r="73"/>
+    <circle cx="791" cy="795" r="244"/>
+  </g>
+  <circle cx="791" cy="795" r="162" fill="#E9EBED"/>
+  <g fill="#FBAF45">
+    <rect x="791" y="747" width="486" height="97"/>
+    <circle cx="791" cy="795" r="94"/>
+    <circle cx="1277" cy="795" r="195"/>
+  </g>
+  <circle cx="1277" cy="795" r="107" fill="#E9EBED"/>
+  <circle cx="1277" cy="795" r="75" fill="#000"/>
+</svg>
