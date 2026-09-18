@@ -128,7 +128,7 @@ commit `.github/copilot/settings.json`:
 |---|---|
 | **Autonomous work** | The cloud agent works on its own toward a pull request. Use it for well-defined tasks against an approved design ("implement batch B3 per the TDD"), not the whole step-by-step routine with its approval gates. |
 | **Network access** | Add `learn.microsoft.com` to the repository's Copilot **Internet access** allowlist. It isn't on the default list. |
-| **Code review** | Optional **OCPF Code Reviewer** agent — copy [`agentPlugin/github/agents/ocpf-code-reviewer.agent.md`](agentPlugin/github/agents/ocpf-code-reviewer.agent.md) into your project's `.github/agents/` folder. It reviews your extension against the Standards Guide and writes `CodeReview.md`. |
+| **Code review** | Optional **OCPF Code Reviewer** agent — copy [`agentPlugin/github/agents/ocpf-code-reviewer.agent.md`](agentPlugin/github/agents/ocpf-code-reviewer.agent.md) into your project's `.github/agents/` folder. It reviews your extension against the Standards Guide and writes `docs/CodeReview.md`. |
 
 **Claude apps (Chat and Cowork — web, desktop, mobile)** — *not yet fully vetted.* In Claude:
 **Customize** → **Plugins** → **+** → **Add marketplace** → **Add from a repository**, enter
@@ -331,6 +331,10 @@ Same pattern as the full framework — only the source file changes.
 <summary><h1>Project Inspiration</h1></summary>
 
 The spark for this project was Microsoft's **Business Central Agentic Engineering Process** vision, first unveiled at Directions North America in Orlando in April 2026.
+
+<img src="inspiration/BCAgenticEngineeringProcess-Vision.png" alt="Microsoft's Business Central Agentic Engineering Process vision, presented at BC TechDays 2026" width="75%">
+
+*Microsoft's Business Central Agentic Engineering Process vision, as presented at BC TechDays 2026.*
 
 I've been teaching an AL development bootcamp at Community Summit NA since 2023. The bootcamp is typically geared toward developers, but for many years I've also led workshops and sessions on AL development aimed squarely at Functional Consultants. With the rise of vibe coding — and all the ill effects that come with taking that approach to business-critical code and apps — I wanted to create a framework that would let Functional Consultants and other non-developers use AI and agentic development tools to build AL extensions not just quickly, but the **right** way: the way a professional developer would build a BC app.
 
