@@ -1,0 +1,50 @@
+### AL ###
+#Template for AL projects for Dynamics 365 Business Central
+#launch.json folder
+.vscode/
+#Cache folder
+.alcache/
+#Symbols folder
+.alpackages/
+#Snapshots folder
+.snapshots/
+#Testing Output folder
+.output/
+#Extension App-file
+*.app
+#Rapid Application Development File
+rad.json
+#Translation Base-file
+*.g.xlf
+#License-files
+*.bclicense
+*.flf
+#Test results file
+TestResults.xml   
+#Standalone HTML
+slidedecks/standaloneHTML/
+#OldSlidedecks
+slidedecks/oldSlidedecks/
+#Fonts folder
+slidedecks/fonts/
+#Multilanguage design working notes — local only, never pushed to the remote
+translationDesign/
+#Plugin design working notes — local only, never pushed to the remote
+pluginDesign/
+#Built plugin packages (Copilot Cowork .zip) — attach to a GitHub release instead of committing
+agentPlugin/dist/
+
+### macOS ###
+#Finder per-folder view-state file — local/cosmetic only, never useful to commit
+.DS_Store
+**/.DS_Store
+#Open items and known issues — local working log, never pushed to the remote
+issuesLog/
+#Private working notes for AJ — local only, never pushed to the remote
+forAJsEyesOnly/
+#Drop-in replacements drafted for other repositories (e.g. ocpfBCALPatterns) — local only, never pushed
+untracked/
+#PoC journey design working notes — local only, never pushed to the remote
+PotentialPoCJourney/
+#Standards Guide split (standalone repo) decision note and cutover plan — local only, never pushed
+ProjectStandardsGuideSplit/

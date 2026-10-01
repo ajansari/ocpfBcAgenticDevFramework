@@ -1,0 +1,23 @@
+{
+  "name": "ocpf-bc",
+  "description": "The OnlyCopilotFans Business Central Agentic Development Framework: a guided DEFINE, DESIGN, BUILD, PROVE routine for building AL extensions the right way, per-tenant or for AppSource. Picks Full or Lite, sets up the latest runbook, connects Microsoft's AL tools with nothing to install, adds reasoning, light, and generator sub-agents (batches generated in parallel), writes every project document from a template, estimates human and AI effort, and measures token usage and cost at every step boundary.",
+  "version": "5.0.0",
+  "author": {
+    "name": "OnlyCopilotFans",
+    "email": "aj@onlycopilotfans.com",
+    "url": "https://github.com/ajansari"
+  },
+  "homepage": "https://github.com/ajansari/ocpfBcAgenticDevFramework",
+  "repository": "https://github.com/ajansari/ocpfBcAgenticDevFramework",
+  "license": "PolyForm-Shield-1.0.0",
+  "keywords": [
+    "business-central",
+    "dynamics-365",
+    "al",
+    "erp",
+    "agentic-development",
+    "bcquality"
+  ],
+  "agents": "agents/",
+  "skills": "skills/"
+}

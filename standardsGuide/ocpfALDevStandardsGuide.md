@@ -1,0 +1,1777 @@
+# OCPF AL Development Standards Guide
+
+## OnlyCopilotFans Agentic Dev Framework for BC Consultants
+
+**Version:** 1.11.0.0
+**Last Updated:** October 1, 2026
+
+> **Audience:** Human developers and agentic (AI) developers building Business Central AL
+> extensions — **Per-Tenant Extensions (PTEs) and AppSource apps alike**. Every Part applies to
+> both; where a rule depends on the deployment target, the text says so (§5.5 object ranges, §8.10
+> translations, Part 9 obsoleting, Part 10 events, and Appendix E's manifest and submission
+> requirements apply when the target is AppSource).
+>
+> **Purpose:** The detailed, project-agnostic *rules* for writing AL — coding standards, API page
+> design, field inclusion and exclusion, identifier naming, module and ID allocation, gap analysis,
+> anti-patterns, translation and multilanguage rules, upgrade and data migration, events and
+> extensibility, and the client page rules for parent–child pages and number series. Appendix E
+> adds the manifest and submission rules that apply only when the extension is destined for
+> AppSource rather than a single tenant.
+>
+> **Relationship to the runbook:** This guide is one of two companions to
+> `BC_App_Build_Routine_Agent.md`, the OnlyCopilotFans Agentic Dev Framework runbook. The other is
+> the **OCPF Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, cited as **Ops §**), which holds
+> the framework's *procedures* — asking, intake, project setup, tooling, packaging, hygiene, and the
+> translation workflow. This guide holds the AL *rules*. **The runbook drives the *sequence*** — what
+> happens when, who signs off, which gate opens the next step. **This guide holds the *rules*
+> that sequence applies.** The runbook cites it as **Standards §**. Where the two ever appear to
+> disagree about *process*, the runbook wins; where they appear to disagree about an *AL rule*,
+> this guide wins — but neither should happen, because neither document restates the other's
+> content. The runbook names an AL rule in one line where a checklist applies it and cites
+> **Standards §**; the rule's rationale, limits, tool behavior, and reference links live only here.
+> The runbook's process lives only there (see *What is deliberately not here* below).
+>
+> **Authoritative-source rule:** Every name, ID, version, prefix, namespace, and quoting decision
+> comes from the **Project Parameters** block that the runbook fills in interactively at **Step
+> 01** — that filled-in block, in the project's own repository, is the single source of truth.
+> Never hardcode a publisher, prefix, namespace, version, or object ID anywhere in AL code, and
+> never restate a Step 01 parameter in this guide: this guide deliberately carries no copy of the
+> intake sheet, so the two can never drift apart or contradict each other.
+
+### What is deliberately *not* here
+
+Each of the following lives in exactly one place — the runbook — and this guide points there
+rather than keeping a second, silently-diverging copy:
+
+| Topic | Where it actually lives |
+|---|---|
+| The intake sheet / project parameters (extension identity, ID ranges, naming & API parameters, platform & runtime, feature flags, onboarding, model roles, `.gitignore` policy), and how its questions are grouped and asked | Runbook **Step 01** and **Operating Rule 6a**, asked interactively |
+| Required project documents, and the phase/stage lifecycle | Runbook **ALL ALONG → Document**, and its DEFINE → DESIGN → BUILD → PROVE phase structure |
+| What makes a TDD self-sufficient | Runbook **Step 03** |
+| The sanity-check checklist | Runbook **Step 04** |
+| The pre-flight validation checklist (pre- and post-generation) | Runbook **Step 05** — the canonical list |
+| Batching, compile cadence, and the zero-errors/zero-warnings gate | Runbook **Operating Rules 3, 4, 5** |
+| Treating a compiler error as a systemic signal | Runbook **Operating Rule 4** |
+| Verifying against symbol files rather than model memory | Runbook **Operating Rule 2** (procedure in Appendix B below) |
+| The ChangeLog entry format | Runbook **ALL ALONG → Track Changes** |
+| The Object Register | Runbook **ALL ALONG → Document** |
+| The language and translation intake questions (working language, countries, languages, source language, reviewers, document languages) | Runbook **PRE-01** and **Step 01** (Box 1 and §1.9), asked interactively |
+| The interactive API caption-locking classification | Runbook **Step 03** (the rules it applies are §8.6 below) |
+| When translations are synced, drafted, checked, and tested; the translation release gate | **Ops § Translations**, applied at the runbook's compile and release steps |
+| How the agent asks, sets the project up, runs the AL tools and analyzers, downloads symbols, packages, notifies, and keeps the repository clean | **Ops §** — the Operations Guide |
+
+---
+
+## Part 1 — AL Coding Standards
+
+### 1.1 File Header — Required on Every AL File
+
+```al
+namespace <Publisher>.<ExtensionShort>;
+
+using <Microsoft.Or.System.Namespace>;
+```
+
+- One `namespace` declaration per file, always first — the value comes from the runbook's Step 01
+  parameters. **If Step 01's `Use Namespace` parameter is `No`, omit the `namespace` line
+  entirely** from every generated file; nothing else in this guide changes.
+- One `using` directive per file; source it directly from the BC symbol file for that object's
+  source table — never from documentation or memory.
+- Exception: `System.Automation` for approval/workflow objects (not `Microsoft.*`).
+- Never use sub-namespaces within a single extension. The namespace is flat; API groups provide
+  the logical separation.
+
+### 1.2 `Rec.` Qualification — `NoImplicitWith`
+
+`NoImplicitWith` is enforced on every project built with this framework. It is a fixed framework
+decision, not a per-project choice (runbook §1.5), and is declared in `app.json`:
+
+```json
+"features": ["NoImplicitWith"]
+```
+
+Every field source reference must therefore be prefixed with `Rec.`:
+
+```al
+// Correct
+field(myField; Rec."My Field") { ... }
+
+// Wrong — fails with NoImplicitWith
+field(myField; "My Field") { ... }
+```
+
+### 1.3 AL API Page Template
+
+Substitute every bracketed value using the runbook's Step 01 parameters. Do not add properties,
+triggers, or code blocks unless specifically required.
+
+```al
+namespace <Publisher>.<ExtensionShort>;
+
+using <Microsoft.Module.Feature>;
+
+page <ObjectID> "<EntitySetName>"
+{
+    PageType = API;
+    Caption = '<Complete sentence describing what this entity represents.>';
+    APIPublisher = '<apiPublisher>';       // camelCase (§2.7)
+    APIGroup = '<prefix><GroupName>';      // camelCase, no underscore (§2.7)
+    APIVersion = '<version>';
+    EntityName = '<entityNameSingular>';
+    EntitySetName = '<entitySetNamePlural>';
+    EntityCaption = '<Human-readable singular name>';     // Translatable API objects only (§8.6)
+    EntitySetCaption = '<Human-readable plural name>';    // Translatable API objects only (§8.6)
+    SourceTable = <SourceTableName>;
+    ODataKeyFields = SystemId;
+    DelayedInsert = true;   // Editable pages only. Use "Editable = false;" for read-only pages.
+
+    layout
+    {
+        area(content)
+        {
+            repeater(Group)
+            {
+                field(systemId; Rec.SystemId)
+                {
+                    Caption = 'System ID';
+                    ToolTip = 'Unique system-assigned identifier for this record. Used as the OData key.';
+                    ApplicationArea = All;
+                }
+                field(<camelCaseIdentifier>; Rec."<Source Field Name>")
+                {
+                    Caption = '<Human-readable label>';
+                    ToolTip = '<Specifies the ... sentence.>';
+                    ApplicationArea = All;
+                }
+                // ... remaining fields
+            }
+        }
+    }
+}
+```
+
+> Omit the `namespace` line if Step 01's `Use Namespace` parameter is `No` (§1.1).
+>
+> **Caption locking (§8.6):** the template shows a *translatable* API page, the default for
+> business and admin objects. For an object recorded as *locked* (internal plumbing), omit
+> `EntityCaption` / `EntitySetCaption` and add `Locked = true` to the page `Caption` and every
+> field `Caption`. `ToolTip`s stay translatable either way.
+
+### 1.4 Mandatory Field Properties
+
+Every field on every page must have all three. No exceptions.
+
+| Property | Requirement | Notes |
+|---|---|---|
+| `Caption` | Required | Source from BC field metadata, or the field name in title case. Never `CaptionML` (§1.7). |
+| `ToolTip` | Required | Source from BC field metadata, or `'Specifies the <FieldName>.'` Never `ToolTipML` (§1.7). |
+| `ApplicationArea` | `All` | Always. Omitting it breaks visibility in both client and API contexts. |
+
+### 1.5 No Dead Code
+
+- No empty triggers (`OnInsert`, `OnModify`, etc. must not appear unless they contain logic)
+- No commented-out fields
+- No duplicate field exposures
+- No placeholder `// TODO` comments in committed code
+
+### 1.6 Indentation Standard
+
+Use 4-space indentation per AL level. Fields inside `repeater(Group)` are 4 levels deep
+(16 spaces):
+
+```al
+    layout                    // 4 spaces
+    {
+        area(content)         // 8 spaces
+        {
+            repeater(Group)   // 12 spaces
+            {
+                field(...)    // 16 spaces
+                {
+                    Caption   // 20 spaces
+```
+
+**Do not mix tabs and spaces.** Normalize every file to spaces before committing.
+
+### 1.7 Translatable Text — Label Syntax Only, Never Multilanguage (ML) Properties
+
+Every piece of user-facing text — captions, tooltips, option captions, instructional text, and
+every message, error, confirmation, and notification string — is written **once, in the
+project's default language**, using the single-language property or a `Label`. Translations
+never live in AL code; they live in XLIFF (`.xlf`) translation files.
+
+```al
+// Correct — single-language label syntax; picked up in the generated .xlf file
+Caption = 'Credit Memo No.';
+ToolTip = 'Specifies the number of the credit memo.';
+OptionCaption = 'Open,Released,Closed';
+
+var
+    PostedMsg: Label 'Document %1 was posted.', Comment = '%1 = Document No.';
+
+// Wrong — multilanguage (ML) syntax; deprecated, and never reaches the .xlf file
+CaptionML = ENU = 'Credit Memo No.', ENA = 'CR/Adj Note No.';
+ToolTipML = ENU = 'Specifies the number of the credit memo.';
+
+var
+    PostedMsg: TextConst ENU = 'Document %1 was posted.';
+```
+
+**Never use any of these**, in new code or in a modification to existing code:
+
+| Deprecated | Use instead |
+|---|---|
+| `CaptionML` | `Caption` |
+| `ToolTipML` | `ToolTip` |
+| `OptionCaptionML` | `OptionCaption` |
+| `InstructionalTextML` | `InstructionalText` |
+| `PromotedActionCategoriesML` | `PromotedActionCategories` |
+| `RequestFilterHeadingML` | `RequestFilterHeading` |
+| `AboutTitleML` | `AboutTitle` |
+| `AboutTextML` | `AboutText` |
+| `TextConst` (data type) | `Label` (data type) |
+
+**Why this is unconditional:**
+
+- **The ML syntax is deprecated.** Compiler warning **AL0424** — *"The multilanguage syntax is
+  being deprecated. Please update to the new syntax."* It may still compile today; that is not a
+  reason to write it.
+- **ML properties and `TextConst` are not included in the generated `.xlf` file** — Microsoft
+  Learn, [*Working with translation files*](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-work-with-translation-files). A string written that way is invisible to every
+  translation workflow, so the app silently shows untranslated (or wrong-regional) text to
+  exactly the users it was meant to serve.
+- **AppSource requires XLIFF translation files.** An extension carrying ML syntax is not on the
+  path to AppSource.
+- **The compiler catches it, but only because this framework always enables `TranslationFile`.**
+  AL0424 fires only when `app.json`'s `features` includes `TranslationFile` — every project built
+  with this framework has it (§8.2), so a clean, zero-warnings compile already proves the codebase
+  is free of ML syntax. On a project *without* that flag, `CaptionML` compiles with no warning at
+  all. Code review therefore still searches for ML syntax added since the last 0/0 compile, and
+  on any project without the flag.
+
+**Label attributes.** Use `Comment` to tell the translator what every placeholder (`%1`, `%2`, …)
+stands for — required whenever a string has a placeholder. Use `Locked = true` for strings that
+must never be translated (telemetry event IDs, API-facing technical values, fixed codes). Use
+`MaxLength` when the string lands somewhere with a length limit.
+
+**Found in existing code** (human-written, inherited, or pasted in): it is a Code Review finding,
+not a style note. Refactor to the single-language property or `Label`, keeping the
+default-language text as the value; move any other-language text out of AL and into that
+language's `.xlf` file rather than discarding it.
+
+**Conflicting older guidance.** AL Guidelines (<https://alguidelines.dev>) still hosts legacy
+*C/AL Coding Guidelines* pages — *"CaptionML on System Pages"* and *"Using OptionCaptionML"* —
+that recommend ML properties. They predate AL and XLIFF; this section supersedes them. AL
+Guidelines' current *Vibe Coding Rules* agree with this section (labels for every message,
+`Comment` for placeholders, `Locked = true` for technical text).
+
+> *Sources and attribution:* the AL0424 message text and the list of ML properties excluded from
+> `.xlf` files are quoted or adapted from Microsoft Learn — [Compiler Warning
+> AL0424](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/diagnostics/diagnostic-al424)
+> and [Working with translation
+> files](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-work-with-translation-files)
+> — © Microsoft Corporation, licensed under
+> [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); reorganized into the table above. The
+> AL0424 message text follows the compiler's wording as reported in
+> [microsoft/AL issue #5789](https://github.com/microsoft/AL/issues/5789).
+
+
+### 1.8 File Naming
+
+Name every AL file after its object: the object name using only `A–Z`, `a–z`, and `0–9` (drop
+spaces and every other character), a dot, the object type, and `.al`. Microsoft's CodeCop enforces
+this as warning **AA0215**, so a wrongly named file fails the zero-warnings gate.
+
+| Object type | File name type | Example object → file name |
+|---|---|---|
+| Table / Table Extension | `Table` / `TableExt` | `table 50100 "ACME Sales Target"` → `ACMESalesTarget.Table.al` |
+| Page / Page Extension | `Page` / `PageExt` | `page 50101 "acmeCustomers"` → `acmeCustomers.Page.al` |
+| Codeunit | `Codeunit` | `codeunit 50102 "ACME Target Mgt."` → `ACMETargetMgt.Codeunit.al` |
+| Report / Query / XMLport | `Report` / `Query` / `Xmlport` | `query 50103 "acmeTargets"` → `acmeTargets.Query.al` |
+| Enum / Enum Extension | `Enum` / `EnumExt` | `enum 50104 "ACME Target Status"` → `ACMETargetStatus.Enum.al` |
+| Interface | `Interface` | `interface "ACME Target Provider"` → `ACMETargetProvider.Interface.al` |
+| Permission Set / Permission Set Extension | `PermissionSet` / `PermissionSetExt` | `permissionset 50105 "ACME TARGETS, VIEW"` → `ACMETARGETSVIEW.PermissionSet.al` |
+| Profile / Control Add-in / Request Page | `Profile` / `ControlAddin` / `RequestPage` | — |
+
+Folders are free: group files under `src/` by feature or object type as the project grows.
+
+> *Source:* [Best practices for AL code → File naming](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-bestpracticesforalcode#file-naming)
+> and [CodeCop Warning AA0215](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/analyzers/codecop-aa0215)
+> (Microsoft Learn, © Microsoft Corporation, CC BY 4.0); the type names follow Microsoft's type map.
+
+---
+
+## Part 2 — API Page Design Rules
+
+> Entity-naming parameters (`APIPublisher`, `APIGroup`, `APIVersion`, `EntityName`,
+> `EntitySetName`, and the object prefix they derive from) come from the runbook's Step 01
+> parameters — never hardcoded in AL files.
+
+### 2.1 OData Key
+
+```al
+ODataKeyFields = SystemId;
+```
+
+- **Always use `SystemId`** — a system-generated GUID present on every BC table since v15
+  (2019 Wave 2).
+- Never use business keys (document number, customer number, etc.) as the OData key. Business
+  keys change; `SystemId` never does.
+- Business key fields are still exposed as regular fields, for `$filter` use.
+
+### 2.2 Editable vs. Read-Only Pages
+
+**Rule:** Set based on data mutability, not developer preference.
+
+| Data Category | Setting | Implementation |
+|---|---|---|
+| Master data (Customers, Vendors, Items, Bank Accounts) | Editable | `DelayedInsert = true` |
+| Setup / config (Posting Groups, VAT Setup, Currencies, Dimensions, Payment Terms) | Editable | `DelayedInsert = true` |
+| Open documents (Sales/Purchase Orders, Invoices, Quotes, Credit Memos, Blanket Orders) | Editable | `DelayedInsert = true` |
+| Journal lines (General Journal Lines) | Editable | `DelayedInsert = true` |
+| Posted ledger entries (GL Entry, Cust/Vend Ledger, Value Entries) | Read-only | `Editable = false` |
+| Posted documents (Posted Invoices, Shipments, Receipts, Return docs) | Read-only | `Editable = false` |
+| Audit / system tables (GL Register, Approval Entry, Workflow Instances) | Read-only | `Editable = false` |
+| Registers and sub-ledgers | Read-only | `Editable = false` |
+
+`DelayedInsert = true` is mandatory on all editable API pages — without it, OData inserts fail
+silently. Do not set `DelayedInsert` on read-only pages; it is irrelevant and misleading.
+
+### 2.3 Document-Type Filtered Pages (`SourceTableView`)
+
+When a single BC table stores multiple document types (Sales Header, Purchase Header), create one
+API page per type and apply a `SourceTableView` filter:
+
+```al
+// Single-word enum values — NO quotes inside const()
+SourceTableView = where("Document Type" = const(Quote));
+SourceTableView = where("Document Type" = const(Order));
+SourceTableView = where("Document Type" = const(Invoice));
+
+// Multi-word enum values — double-quotes required inside const()
+SourceTableView = where("Document Type" = const("Credit Memo"));
+SourceTableView = where("Document Type" = const("Blanket Order"));
+SourceTableView = where("Document Type" = const("Return Order"));
+```
+
+**Rule:** Quote only when the enum value contains spaces. Never quote single-word values — that
+causes a parser error.
+
+### 2.4 Header and Line Pages
+
+When an entity has both a header and lines (e.g., Sales Order + Sales Order Lines):
+
+- Create two separate top-level API pages.
+- Do not nest lines as a sub-page on the header.
+- OData consumers join on the document number field using `$filter`.
+- Example (prefix `acme`): Header `EntityName = 'acmeSalesOrder'` / `EntitySetName =
+  'acmeSalesOrders'`; Lines `EntityName = 'acmeSalesOrderLine'` / `EntitySetName =
+  'acmeSalesOrderLines'`.
+
+### 2.5 Page Caption
+
+Write the page `Caption` as a complete sentence describing the entity. It flows into OData
+`$metadata` as the entity description and must be useful to a developer or AI agent discovering
+the schema:
+
+```al
+// Good
+Caption = 'Represents posted general ledger entries, the permanent audit trail of all financial transactions.';
+
+// Bad
+Caption = 'GL Entries';
+```
+
+### 2.6 Field ToolTips as Self-Describing Schema
+
+ToolTips flow into OData `$metadata` as property-level descriptions. Write them for API
+consumers, not just UI users:
+
+```al
+// Good
+ToolTip = 'Specifies the G/L account number to which the entry is posted.';
+
+// Acceptable fallback (no BC source tooltip exists)
+ToolTip = 'Specifies the G/L Account No.';
+
+// Bad — no information value
+ToolTip = 'G/L Account No.';
+```
+
+
+### 2.7 API Naming — camelCase
+
+`APIPublisher`, `APIGroup`, `EntityName`, and `EntitySetName` are camelCase: letters and digits
+only, first letter lowercase, each later word capitalized, no underscores or spaces. They form the
+endpoint URL, and Microsoft's CodeCop enforces the casing as warning **AA0101**.
+
+| Property | Pattern | Example (publisher `Contoso`, prefix `acme`) |
+|---|---|---|
+| `APIPublisher` | The publisher in camelCase | `'contoso'`; `Only Copilot Fans` → `'onlyCopilotFans'` |
+| `APIGroup` | Prefix + group name in PascalCase | `'acmeCoreFinancial'` |
+| `EntityName` | Prefix + singular name in PascalCase | `'acmeGeneralLedgerEntry'` |
+| `EntitySetName` | Prefix + plural name in PascalCase | `'acmeGeneralLedgerEntries'` |
+
+**Changing an existing extension's values changes its endpoint URLs** and breaks every consumer
+calling them. Apply this to new API pages; for a published extension, change it only as a
+planned, versioned API change.
+
+> *Source:* [CodeCop Warning AA0101](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/analyzers/codecop-aa0101)
+> (Microsoft Learn, © Microsoft Corporation, CC BY 4.0).
+
+---
+
+## Part 3 — Field Inclusion & Exclusion Rules
+
+> All inclusion and exclusion is governed by the **Localization** parameter set at runbook Step 01
+> §1.1. Concrete ID ranges below are worked examples for `Localization = W1`; for any other
+> target, apply the same logic against that localization's applicable ranges and verify each
+> field in the symbol file.
+
+### 3.1 Fields to Include
+
+- Standard BC fields allowed by the Localization parameter.
+  - For `W1`: field IDs **1–9,999** and **99,000,000+**.
+  - For a specific localization (e.g., `NA`, `EU`): the W1 range **plus** the fields applicable to
+    that localization.
+- Fields with `ObsoleteState = Active` only
+- `Media` and `MediaSet` fields (the BC API framework streams these as OData URLs)
+- FlowFields with safe read operations (e.g., calculated balances)
+- All applicable fields, regardless of whether they appear on any UI card or list page
+
+### 3.2 Fields to Exclude — Mandatory
+
+| Category | Exclusion Rule | Rationale |
+|---|---|---|
+| Localization-specific fields | Per the Localization parameter. For `W1`: exclude all field IDs **10,000–89,999**. For a specific localization: exclude fields outside that localization's applicable range. Verify each field's classification in the symbol file. | Prevents exposing irrelevant/region-specific data and protects deployment portability. |
+| Obsolete pending | `ObsoleteState = Pending` — **all**, unconditionally | Platform has flagged it for removal; do not expose it in new builds. |
+| Obsolete removed | `ObsoleteState = Removed` | Already removed from the platform. |
+| BLOB fields | Type = `Blob` | Binary data; no OData serialization value. |
+| FlowFilter fields | Class = `FlowFilter` | Cannot be serialized via OData. |
+| Localization-specific tables | Verify each table against the Localization parameter; exclude tables that do not apply to the target (e.g., for `W1`: US Sales Tax, GST/HST, country-specific ledger tables). | Same principle as field-level localization, at table level. |
+
+> **Obsolete Pending — Strict Rule:** Exclude all `ObsoleteState = Pending` fields regardless of
+> `ObsoleteRemovalVersion` or `ObsoleteTag`. Do not evaluate timelines. A newly built extension
+> must not expose fields scheduled for removal.
+
+### 3.3 Code Functions to Exclude Because of Obsolescence
+
+When referencing BC base-app codeunits, procedures, or events in extension logic:
+
+- Exclude all calls to procedures where `ObsoleteState = Pending` or `Removed`.
+- Do not subscribe to events marked obsolete.
+- Exclude any helper/wrapper that depends on fields or symbols already obsolete in the target BC
+  version.
+- Check `ObsoleteReason` in the symbol file for the recommended replacement.
+- Verify all codeunit and procedure references against the current symbol file — do not rely on
+  documentation or AI knowledge. Preserve an obsolete construct only if the project parameters
+  explicitly allow an exception.
+
+### 3.4 Field Verification
+
+**Always verify against BC symbol files.** Human-written TDDs contain mistakes; the two most
+common:
+
+- **Wrong table numbers** — verify every table ID against the symbol file before writing the TDD.
+- **Wrong `using` directive namespaces** — source every `using` line from the symbol file, not
+  from documentation or memory.
+
+The step-by-step verification procedure is in **Appendix B**.
+
+---
+
+## Part 4 — Identifier Naming Rules
+
+### 4.1 Field Identifiers — camelCase
+
+Convert BC field names to camelCase. Apply in order:
+
+| Rule | Example (Before → After) |
+|---|---|
+| Strip spaces; first word lowercase, subsequent words capitalized | `"G/L Account No."` → `gLAccountNo` |
+| Remove dots, slashes, hyphens (treat as word separators) | `"Credit Memo No."` → `creditMemoNo` |
+| Remove parentheses and quotation marks | `"Customer (No.)"` → `customerNo` |
+| Replace `%` with a `Pct` suffix | `"Payment Discount %"` → `paymentDiscountPct` |
+| Remove `$` | `"Amount ($)"` → `amount` |
+| Apply BC standard abbreviations (§4.2) when the identifier exceeds 30 characters | `generalBusinessPostingGroup` (28) — OK; `generalBusinessPostingGroupCode` (30) — borderline, verify |
+| Reserved AL keywords: suffix with type (§4.3) | `area` → `areaCode` |
+
+**Hard limit: 30 characters.** AL will not compile identifiers longer than 30 characters.
+Validate every identifier before committing.
+
+### 4.2 BC Standard Abbreviations
+
+Use these when an identifier approaches or exceeds 30 characters. Stay consistent with BC's own
+conventions.
+
+| Full Word | Abbreviation |
+|---|---|
+| General | Gen |
+| Business | Bus |
+| Product | Prod |
+| Vendor | Vend |
+| Customer | Cust |
+| Credit Memo | CrMemo |
+| Purchase | Purch |
+| Detailed | Dtld |
+| Ledger | Ledg |
+| Entry / Entries | Entry / Entries (do not abbreviate unless necessary) |
+| Posting | Posting (do not abbreviate unless necessary) |
+| Application | Appl |
+| Transaction | Trans |
+| Description | Desc |
+| Amount | Amt |
+| Number | No |
+| Quantity | Qty |
+
+### 4.3 Reserved AL Keyword Conflicts
+
+When a camelCase identifier matches an AL or layout keyword, suffix it with the field's data type
+name or a clarifying noun. Never use the bare keyword.
+
+| Conflicting Name | Use Instead | Type Suffix |
+|---|---|---|
+| `area` | `areaCode` | Code |
+| `group` | `groupCode` | Code |
+| `value` | `fieldValue` | (context-dependent) |
+| `key` | `keyValue` | Value |
+| `label` | `labelText` | Text |
+| `trigger` | *(rename entirely)* | — |
+| `type` | `typeOption` | Option |
+| `name` | `nameText` *(only if a collision exists)* | Text |
+
+### 4.4 `EntitySetName` and `EntityName` Character Limits
+
+- Both must be ≤ 30 characters **including** the prefix.
+- Apply the abbreviations in §4.2 to the name portion, not to the prefix.
+- Pre-validate every name before adding it to the TDD.
+
+| Full Name (chars) | Shortened (chars) |
+|---|---|
+| `<prefix>GeneralBusinessPostingGroups` (33 w/ a 4-char prefix) | `<prefix>GenBusPostingGroups` (24) |
+| `<prefix>GeneralProductPostingGroups` (32) | `<prefix>GenProdPostingGroups` (25) |
+| `<prefix>DetailedVendorLedgerEntries` (32) | `<prefix>DtldVendorLedgEntries` (25) |
+| `<prefix>PostedPurchaseCreditMemoLines` (34) | `<prefix>PostedPurchCrMemoLines` (26) |
+
+---
+
+## Part 5 — Module & ID Allocation Strategy
+
+### 5.1 Group Objects into Logical Modules Before Allocation
+
+Before assigning any object IDs:
+
+1. List all planned objects.
+2. Group them into functional modules (e.g., CoreFinancial, MasterData, Sales, Purchasing).
+3. Assign contiguous ID blocks to each module.
+4. Reserve growth buffers (minimum 20% of each block unallocated).
+5. Reserve a tail block at the end of the overall range for cross-module additions.
+
+**Never scatter IDs randomly.** Grouped, sequential IDs keep the Object Register readable and
+growth predictable.
+
+### 5.2 Growth Buffer Planning
+
+| Range size | Minimum buffer |
+|---|---|
+| Up to 50 objects | 10 IDs reserved |
+| 50–150 objects | 25–30% buffer |
+| 150+ objects | 20–25% buffer + tail block |
+
+For each module block, leave at least 5–6 IDs unallocated at the end for additions within that
+module. These reserved IDs are also what later gap-fill work draws on, so they are not decorative
+— spending them early leaves nothing for the fixes that follow.
+
+### 5.3 Permission Sets Are Deliverables, Not Afterthoughts
+
+If Permission Sets are enabled (runbook Step 01 §1.2), every AL PTE that exposes API pages or
+data must deliver:
+
+- A **read-only** permission set granting `X` (Execute/Read) on all pages.
+- A **read/write** permission set that includes the read-only set, plus write permissions on all
+  editable pages.
+
+Both must be assigned IDs from the allocated range before development begins, and named per
+§5.4.
+
+**Every table the extension owns needs a `tabledata` grant in both sets.** `PTE0004`
+("Table definitions must have a matching permission set") is a PerTenantExtensionCop rule, and
+`AS0103` is its AppSourceCop equivalent, so a missing grant is caught at the mandatory compile
+when that compile has the analyzer engaged (runbook Operating Rule 4, ALL ALONG → Analyzers). Ship
+each table's grant in the same batch that introduces the table rather than waiting for the compile
+to catch a gap late.
+
+**Deployment note:** Extension permission sets grant access to extension objects only. Consumers
+also need the underlying BC base-table permissions:
+
+- Read-only consumers: assign `<PREFIX> <APPCODE>, VIEW` + `D365 READ`.
+- Read/write consumers: assign `<PREFIX> <APPCODE>, EDIT` + `D365 BUS FULL ACCESS` (or
+  equivalent).
+
+### 5.4 Permission Set Names Must Be Unique Across Every Extension You Build
+
+**The rule.** An extension's permission sets are named with the AL Object Prefix *and* the
+extension's own **Permission Set App Code** (runbook Step 01 §1.3):
+
+| Set | Name | Example (prefix `ocpf`, App Code `NAICS`) | Caption |
+|---|---|---|---|
+| Read-only | `<PREFIX> <APPCODE>, VIEW` | `permissionset 60488 "OCPF NAICS, VIEW"` | `'<Extension Name> - View'` |
+| Read/write | `<PREFIX> <APPCODE>, EDIT` | `permissionset 60489 "OCPF NAICS, EDIT"` | `'<Extension Name> - Edit'` |
+
+`<PREFIX>` is the AL Object Prefix in uppercase. Any further set follows the same pattern with
+another short role word (`SETUP`, `ADMIN`), within the same length limit; a five-letter role word
+leaves one character less for the App Code. A non-assignable
+building-block set uses the same `<PREFIX> <APPCODE>` start.
+
+**Why a prefix alone isn't enough.** Every extension built with the same prefix produced the same
+names (`OCPF - READ`), so they collided with each other. The fixes were made by hand, one
+extension at a time, each with a different pattern, and the next extension hit it again. Verified
+(AL Language extension 18.0 and BC 27 System symbols, September 15, 2026):
+- **A permission set's identity in the tenant is its Role ID:** the object name in uppercase,
+  `Code[20]`, with **no namespace**. `Access Control`, `Aggregate Permission Set`, and
+  `Tenant Permission Set` all store it next to the App ID. Two extensions that both ship
+  `OCPF - READ` put two rows with the same Role ID in front of every admin screen, assignment
+  import, and tool that picks a permission set by Role ID.
+- **The compiler doesn't catch it when the extensions use namespaces.** App B depending on app
+  A, both declaring `"OCPF - READ"`, compiled cleanly in different namespaces. Without
+  namespaces it failed with `AL0197` (duplicate object name). Namespaces are the framework
+  default, so this never surfaces before deployment.
+- **Microsoft uses the same shape for its own sets.** Business Central 28's Base Application
+  names its assignable sets `D365 <AREA>, VIEW` / `, EDIT` / `, SETUP` (`D365 CUSTOMER, EDIT`).
+  For several apps from one publisher, Microsoft's affix guidance adds an app-level affix after
+  the company affix (`fab-rentals-…`) —
+  [Prefix and suffix for naming in extensions](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-prefix-suffix).
+
+**Length limits.**
+- **Name: 20 characters or fewer** for an assignable set (`Assignable = true`), 30 for a
+  non-assignable one. Longer fails with `AL0305`
+  ([Permission set object](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-permissionset-object)).
+  So the App Code can be at most `20 − 7 − (length of the prefix)` characters: 9 with a
+  four-character prefix like `ocpf`.
+- **Caption: 30 characters or fewer.** The platform's permission set **Name** field is
+  `Text[30]`. A longer caption compiles, and Microsoft ships a few, but 79 of Base Application's 85
+  assignable captions stay within 30. Shorten the extension name in the caption when needed.
+
+**The App Code** is 2 or more uppercase letters or digits, no spaces, taken from the extension
+name (`NAICS Classification` → `NAICS`). It must differ from the App Code of **every other
+extension that uses the same prefix**, whoever built it, including extensions built before this
+rule existed (compare their permission set names).
+
+**Renaming the sets of an extension that's already installed** changes their Role IDs.
+`Access Control` records each user's assignment by Role ID and App ID, so users assigned to the old
+names lose that access when the new version is installed. Before shipping the rename, list who
+holds the old sets (the **Permission Set by User** page), reassign them right after the
+upgrade, and say so in the release's deployment notes.
+
+### 5.5 Object ID Ranges Belong to the Deployment Target
+
+**The range an extension may use is decided by where it will be installed, not by preference.**
+Microsoft's [Object ranges](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-object-ranges)
+(read September 15, 2026):
+
+| Range | Who it's for | Use it when Deployment Target is |
+|---|---|---|
+| 0–49,999 | Business Central base app. "mustn't be used in extensions or customizations." | never |
+| 50,000–99,999 | "customizations, and for test purposes" — per-tenant extensions built for one tenant | `SaaS PTE`, `OnPrem PTE` |
+| 100,000–999,999 | Microsoft's own country/regional localizations. "These objects can't be used by partners." | never |
+| 1,000,000–69,999,999 | *RSP Object Range*, tied to the Registered Solution Program. Microsoft: "We currently advise new publishers to **not** request an RSP object range." | `AppSource`, only if the publisher already holds one |
+| 70,000,000–74,999,999 | *App Object Range*. Microsoft: "We currently advise new publishers to request an app object range." | `AppSource` — the default for a new publisher |
+
+**An AppSource range is registered to the publisher, not invented.** The technical validation
+checklist: *"You're required to register an ID range for your publisher name and to use it in your
+extension."* So when Deployment Target is `AppSource`, the intake asks for the range the publisher
+was **assigned** and doesn't offer the AL template's `50100–50149` at all — an app in the
+customization range fails validation. If the human doesn't have a range yet, record that the app
+can't be submitted until one is requested (Microsoft's
+[Requesting an object range](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/readiness/get-started#requesting-an-object-range))
+and build in the assigned range once it arrives; re-numbering objects later is a rename of every
+object in the extension.
+
+**`50100–50149` is the AL template's default, not an allocation.** It's offered for PTE work only
+when no range has been assigned, and two extensions on the same tenant that both take it collide.
+
+---
+
+## Part 6 — Gap Analysis Checklist
+
+Run this during the runbook's **PRE-02 (Structured Gap Analysis)** to catch missing entities
+before the FRD is finalized.
+
+### 6.1 Analytical Detail Tables
+
+For every transactional entity, ask: *Is there a sub-ledger or detail table?*
+
+| Entity | Ask About |
+|---|---|
+| Customer Ledger Entries | Detailed Customer Ledger Entries |
+| Vendor Ledger Entries | Detailed Vendor Ledger Entries |
+| Item Ledger Entries | Value Entries, Item Application Entries |
+| General Ledger | GL Registers (audit trail) |
+| Bank Account | Bank Account Ledger Entries |
+| Resource | Resource Ledger Entries |
+
+### 6.2 Posted / Archived Versions
+
+For every open document, ask: *What is the posted equivalent?*
+
+| Open | Posted |
+|---|---|
+| Sales Invoice | Posted Sales Invoice + Lines |
+| Sales Credit Memo | Posted Sales Credit Memo + Lines |
+| Sales Order | Posted Sales Shipment + Lines |
+| Purchase Invoice | Posted Purchase Invoice + Lines |
+| Purchase Credit Memo | Posted Purchase Credit Memo + Lines |
+| Purchase Order | Posted Purchase Receipt + Lines |
+
+### 6.3 Reference / Lookup Tables
+
+Check that every lookup table referenced by an included entity is itself included:
+
+- Payment Terms, Payment Methods
+- Currencies, Countries/Regions
+- Units of Measure, Item Units of Measure
+- Locations, Warehouses
+- Shipment Methods, Shipping Agents
+- Item Categories, Product Groups
+- Salesperson / Purchaser codes
+
+### 6.4 Secondary Document Types
+
+When including one document type, verify all related types:
+
+- Sales Orders → also Sales Quotes, Blanket Orders, Return Orders
+- Purchase Orders → also Purchase Quotes, Blanket Orders, Return Orders
+
+### 6.5 Modern vs. Legacy Tables
+
+| Legacy (Do Not Use) | Modern (Use This) |
+|---|---|
+| Sales Price (Table 7002) | Price List Header + Lines (Tables 7000, 7001) |
+| Purchase Price (Table 7012) | Price List Header + Lines (Tables 7000, 7001) |
+| Sales Line Discount (Table 7004) | Price List Lines |
+| Job (Table 167 — UI only) | Still Table 167; use entity name `<prefix>Project` |
+| Job Posting Group (Table 96) | Project Posting Group (Table 208 in BC v27+) |
+
+### 6.6 Tax Framework Tables
+
+Verify whether any tax tables apply to the target Localization before including or excluding
+them. Do not assume.
+
+---
+
+## Part 7 — Anti-Patterns Reference
+
+| Anti-Pattern | Problem | Correct Pattern |
+|---|---|---|
+| Using `Editable = false` on editable pages | Prevents OData write operations | `DelayedInsert = true` on all editable pages |
+| Omitting `DelayedInsert` on editable pages | OData inserts fail silently | Always set `DelayedInsert = true` |
+| Setting both `Editable = false` AND `DelayedInsert` | Contradictory; misleading | Set exactly one (§2.2) |
+| Quoting single-word enum values in `const()` | Parser error | Quote only multi-word values (§2.3) |
+| Not quoting multi-word enum values in `const()` | Parser error | Always quote values containing spaces (§2.3) |
+| Using `%` in field identifiers | Invalid AL identifier character | Replace with a `Pct` suffix (§4.1) |
+| Using reserved keywords as identifiers (`area`, `group`, etc.) | Compiler error | Suffix with a type noun (§4.3) |
+| Identifier > 30 characters | Compiler error | Apply BC abbreviations (§4.2) |
+| Permission sets named from the prefix alone (`OCPF - READ`) | Every extension with that prefix ships the same Role ID; with namespaces the compiler doesn't notice | `<PREFIX> <APPCODE>, VIEW` / `, EDIT`, with an App Code unique across the prefix's extensions, name ≤ 20 characters (§5.4) |
+| Using estimated / guessed table numbers | Silent wrong-table references | Verify every table ID against symbol files (Appendix B) |
+| Including `ObsoleteState = Pending` fields with future removal dates | Exposes deprecated fields | Exclude all pending-obsolete fields unconditionally (§3.2) |
+| Including fields outside the allowed Localization range | Exposes irrelevant data; breaks portability | Apply the field rules in Part 3 per the Localization parameter |
+| Missing `ApplicationArea = All` | Fields hidden in API context | Required on every field (§1.4) |
+| Missing `ODataKeyFields = SystemId` | OData key not defined | Required on every API page (§2.1) |
+| Sub-namespaces within a single extension | Unnecessary complexity | One flat namespace per extension (§1.1) |
+| Fixing an individual file's error without fixing the root cause | The error recurs in the next batch | Fix the template/rule, then every file it touched |
+| A TDD that depends on context not in the document | Agents and new developers must guess | The TDD must be fully self-sufficient (runbook Step 03) |
+| Using legacy price tables (Tables 7002, 7012) | Deprecated since BC 2020 Wave 2 | Use Price List Header + Lines (Tables 7000, 7001) (§6.5) |
+| `EntityName` ≠ `EntitySetName` for singleton tables | OData metadata inconsistency | Singleton: set `EntityName = EntitySetName` |
+| Generic ToolTips with no information value | Poor `$metadata` schema quality | Write descriptive, field-specific ToolTips (§2.6) |
+| Hardcoding publisher, prefix, namespace, or version in AL code | Values diverge from the project parameters | Always derive from the runbook's Step 01 block — never hardcode |
+| Reaching for a `FlowField` when "auto-populated but editable" is what's wanted | A `FlowField` is always read-only and always live-recalculated; a user can never override it | Use a real stored field seeded by `OnValidate`/`OnInsert` that never overwrites a value the user already entered |
+| Using `CaptionML`, `ToolTipML`, `OptionCaptionML`, or any other multilanguage (ML) property, or the `TextConst` data type — whoever wrote it | Deprecated (AL0424); never included in the `.xlf` file, so the text can't be translated; blocks AppSource; compiles with **no warning** unless `TranslationFile` is enabled | Single-language `Caption` / `ToolTip` / `OptionCaption` / `Label` in the default language; translations go in `.xlf` files (§1.7) |
+| Hard-coded text in `Error`, `Message`, `Confirm`, `StrMenu`, notifications, or `ErrorInfo` | String literals aren't labels, so they never reach the `.xlf` file and can't be translated | A `Label` with an AA0074 suffix (§8.3) |
+| A label with a placeholder (`%1`, `#1`) and no `Comment` | Translators must guess what the placeholder holds and can reorder or drop it | `Comment = '%1 = <meaning>'` on every placeholder label (§8.3) |
+| An `OptionCaption` translation with a different member count than the option | Option values shift or disappear in that language | Same number of comma-separated members in every language (§8.4) |
+| Editing the generated `.g.xlf` by hand | Overwritten by the next build | Edit only the per-language target files (§8.2) |
+| Choosing a BC term in a translation from model memory | Wording that doesn't match what BC users see everywhere else in that market | Use Microsoft's own translation for the term (§8.5, Appendix D) |
+| Shipping units in `needs-translation`, `needs-adaptation`, `needs-review-translation`, or `translated` state | Untranslated or unapproved text reaches users; `translated` can be written by tools, so it doesn't prove human approval | Release only when every unit in every required language is `signed-off` or `final` (§8.7) |
+| Locking business or admin API captions — or leaving internal plumbing translatable — without a recorded decision | Business users see untranslated names in low-code tools, or translators spend effort on text no person reads | Classify every API page and query, and record the locking decision per object (§8.6) |
+| Testing translations with Incremental Build or RAD publishing | Microsoft documents that both ignore translations, so the test proves nothing | A full build before any language test (§8.2) |
+| Writing regional wording (`Tax`, `State`, `GST`) into the source text for a standard BC concept | A second market becomes a source-code change; alignment with Microsoft's translations breaks | Microsoft's W1 wording in source; regional wording in each language's `.xlf` (§8.1) |
+| A child list or list part whose `OnNewRecord` reads the parent link with a bare `GetFilter`, or from one filter group only | `SubPageLink` filters are in group 4, `RunPageLink` filters in group 0; the same page is opened both ways, so one read is blank in one entry point; the row is inserted with a blank link and *"the view is filtered, and the entry is outside the filter"* appears | Read groups 4 then 0, only when blank, restoring the group; link field as a hidden control; `TestField` on the link in the table's `OnInsert`; `DelayedInsert = true` (§11.1) |
+| Establishing a child page's parent with `SetRange` in `OnOpenPage`, or with `RunPageView`'s `where()` | The platform never pre-fills a new row from a hand-set or `Exec`-group filter; every new child is an orphan | `SubPageLink` on parts, `RunPageLink` on actions (§11.1) |
+| `Rec.Init()` in `OnNewRecord`, or in a "new record" helper the page calls, after the link was set | `Init()` clears every non-key field, the parent link included | Seed defaults field by field; never `Init()` a record the platform has already pre-filled (§11.1) |
+| A number-series field bound to a page variable, or a setup-table field without `TableRelation = "No. Series"` | No lookup; the user cannot choose a series, or the choice never reaches the setup record | `Code[20]` + `TableRelation = "No. Series"` on the setup table; the wizard bound to a temporary copy of that table (§11.2) |
+| Numbering with codeunit 396 `NoSeriesManagement` | Obsolete; removed from the Base Application (absent from the Base Application 27.5 symbols) | Codeunit `"No. Series"` from `Microsoft.Foundation.NoSeries` — `GetNextNo`, `AreRelated`, `LookupRelatedNoSeries` (§11.2) |
+
+---
+
+## Part 8 — Translation & Multilanguage Rules
+
+> **Scope.** Applies to every project with at least one target language recorded at runbook Step
+> 01 §1.9. §1.7 (no ML syntax) applies to every project, whether or not it's translated. *When*
+> each rule is applied — intake, the build cycle, review, release — is the runbook's concern.
+
+### 8.1 Source Language and Source Wording
+
+- **Source language is `en-US` by default and by recommendation.** The runbook lets the developer
+  choose otherwise; if they do, record the choice and its consequences (below).
+  - The generated `.g.xlf` declares `source-language="en-US"`.
+  - Microsoft's own apps use `en-US` as their source language, and aligning with Microsoft's
+    translations (§8.5) matches on source text.
+  - A user whose language has no translation file sees the source text.
+- **Source wording is Microsoft's W1 (international) English** for every standard BC concept —
+  the words Microsoft's own source strings use. For example: `VAT`, not `Tax` or `GST`; `County`,
+  not `State`; `Credit Memo`, not `CR/Adj Note`.
+- **Regional wording lives in translation files, never in source.** Microsoft does the same even
+  for English markets:
+
+  | Microsoft file | Strings differing from source | Examples |
+  |---|---|---|
+  | US Base Application v27.5, `en-US` | 5,468 of 145,199 | `Set up VAT` → `Set up Tax`; `County` → `State` |
+  | English (Australia) language app v28.5, `en-AU` | 9,273 of 132,917 | `VAT` → `GST` (3,071 strings, while 178 keep `VAT`); `Sales Credit Memo` → `Sales CR/Adj Note` |
+  | English (United Kingdom) language app v28.5, `en-GB` | 4,838 of 128,333 | `VAT` and `Credit Memo` kept; `Customize` → `Customise`, `licenses` → `licences` |
+
+  Adaptations are per string, not search-and-replace — which is why §8.5 requires Microsoft's
+  translation for each term.
+- **Single-market exception — US English only.** When the *only* target language is `en-US` **and
+  the Deployment Target isn't AppSource** (AppSource requires translation files — §8.10), the
+  developer may choose to write US wording directly in source and ship no translation file. This is
+  the simpler path, and the runbook offers it — but W1 wording plus an `en-US.xlf` stays
+  recommended, because adding any other market later then requires no source changes.
+
+**If a non-`en-US` source language is chosen:** an `en-US.xlf` is required whenever English users
+exist, alignment with Microsoft's translations by source text isn't available, and any user without
+a translation file sees non-English text.
+
+### 8.2 Translation Files
+
+- **`app.json`:** `"features"` includes `"TranslationFile"` on every project. It also switches on
+  AL0424 (§1.7).
+- **Folder and naming:** all translation files live in `Translations/` in the project root. One
+  file per target language, named `<ExtensionName>.<culture>.xlf` — for example,
+  `Acme APIs.de-DE.xlf`. **`en-US` gets its own file too**, whenever it's a target language and
+  source wording is W1 (§8.1).
+- **Never edit `<ExtensionName>.g.xlf`.** The compiler regenerates it on every build. Only the
+  per-language target files are edited, and they're kept in sync with `.g.xlf` by tooling.
+- **`.g.xlf` is a build output; target files are deliverables.** Target `.xlf` files are
+  git-tracked. `*.g.xlf` is gitignored — it's regenerated from source on every build, and tracking
+  it only adds noise to every diff.
+- **Full builds only for language testing.** Microsoft documents that when Incremental Build is
+  enabled, or when publishing with RAD, translations are ignored.
+- **Culture codes, not Windows language IDs.** Files and parameters use `xx-YY` culture codes
+  (`en-AU`, `fr-CA`). The three-letter IDs (ENA, FRC) may be shown to people for recognition only.
+
+### 8.3 Labels, Placeholders, and Locked Text
+
+- **Every piece of user-facing text is a `Label` or a single-language text property** (§1.7). That
+  includes every `Error`, `Message`, `Confirm`, `StrMenu`, notification, and `ErrorInfo` message —
+  never a string literal.
+- **Label names end in a CodeCop AA0074 suffix:**
+
+  | Suffix | Use |
+  |---|---|
+  | `Msg` | Message |
+  | `Err` | Error |
+  | `Qst` | `Confirm` or `StrMenu` |
+  | `Lbl` | Label, caption |
+  | `Txt` | Text |
+  | `Tok` | Token — short technical values such as `GET` or `HTTPS`, always `Locked = true` |
+
+- **Every label with a placeholder carries a `Comment`** naming each placeholder:
+  `Comment = '%1 = Customer No., %2 = Document No.'`.
+- **`Locked = true`** for text that must never be translated: tokens, telemetry messages and event
+  IDs, fixed technical values, and captions recorded as locked under §8.6.
+- **`MaxLength`** on any label whose translation lands somewhere length-limited.
+
+### 8.4 Option and Enum Captions
+
+- An `OptionCaption` translation has **exactly the same number of comma-separated members** as the
+  option it describes, in the same order.
+- Enum value captions are translated per value; never concatenate captions to build text.
+
+### 8.5 Terminology — Microsoft's Translations Are the Authority
+
+When a string names a standard BC concept, its translation in each language uses **the term
+Microsoft's own BC translation for that language uses** — not a term chosen from model memory,
+general dictionaries, or another product's conventions. The procedure is **Appendix D**.
+
+**Sources, in order of authority:**
+
+1. **Microsoft's BC translation files for that language and market.** Where they are:
+   - **The localized Base Application** carries its own market's language — for example, "Base
+     Application (AU)" contains `Base Application.en-AU.xlf`, and the US Base Application contains
+     `Base Application.en-US.xlf`. Symbols downloaded from an environment of that localization
+     include it.
+   - **The System Application and Business Foundation packages** carry every Microsoft-translated
+     language (26 languages in the System Application).
+   - **Microsoft's language apps** — one per Microsoft-translated language, named
+     `English language (Australia)`, `German language (Germany)`, and so on — each contain
+     `Base Application.<culture>.xlf`. They're in Microsoft's public Business Central artifacts
+     (the `Extensions` folder of a country artifact), which BcContainerHelper's `Get-BCArtifactUrl`
+     locates.
+2. **The customer's partner localization or language app**, for a language whose application
+   translation Microsoft doesn't provide (§8.8).
+3. **Microsoft Terminology Collection** —
+   <https://learn.microsoft.com/en-us/globalization/reference/microsoft-terminology>
+4. **Microsoft Localization Style Guides**, for tone, formality, punctuation, and formats —
+   <https://learn.microsoft.com/en-us/globalization/reference/microsoft-style-guides>
+
+Every term chosen for a standard BC concept is recorded in the project's translation glossary, with
+the source it came from. Terms from sources 3–4 are marked for reviewer attention.
+
+**Microsoft's translation files are Microsoft's proprietary content.** Read them as a reference.
+Never commit them to a repository, copy them wholesale into an extension's translation files, or
+redistribute them.
+
+### 8.6 API Pages and API Queries — Translatable or Locked Captions
+
+Every `PageType = API` page and `QueryType = API` query is classified into exactly one group, and
+its caption-locking decision is recorded per object:
+
+| Group | Definition | Recommended | Microsoft precedent |
+|---|---|---|---|
+| **Business** | Exposes business data people work with: master data, documents, ledger entries, business setup, business reporting queries | **Translatable** | API v2.0 business pages and queries: 0 of 1,526 captions locked. Base Application Power Automate and Dataverse pages: 0 of 98. |
+| **Technical — admin** | Platform or infrastructure a person manages or configures through the API: the extension's own users, permissions, job scheduling, feature switches | **Translatable** | API v2.0 `automation` pages (users, permission sets, extension deployment, scheduled jobs): 1 of 157 captions locked. |
+| **Technical — internal plumbing** | Infrastructure no person configures: logs, sync or integration state, webhooks, telemetry, diagnostics | **Locked** | Base Application runtime pages (webhook logs, API routes, webhook supported resources): 21 of 21 locked. |
+
+- **Translatable objects** set `EntityCaption` and `EntitySetCaption` — the names Power Automate
+  and similar tools show people — as Microsoft's API v2.0 pages and queries do. Captions follow
+  §2.5 and §4.
+- **Locked objects** set `Locked = true` on the page or query `Caption` and every field `Caption`,
+  and omit `EntityCaption` / `EntitySetCaption`.
+- **`ToolTip`s stay translatable in both cases.** Microsoft's locked-caption pages leave tooltips
+  translatable.
+- The developer may override a recommendation per group. Every classification and decision is
+  recorded, with the name of the person who made it.
+
+*Precedent counts: Microsoft API v2.0 source (`microsoft/ALAppExtensions`, `Apps/W1/APIV2`, MIT
+License, © Microsoft Corporation) and the Business Central 27.5 US Base Application, counted
+September 14, 2026.*
+
+### 8.7 Translation States and Approval
+
+Every translation unit in a target file carries an XLIFF 1.2 `state`. The framework uses these
+states, and only these:
+
+| State | Meaning | Written by |
+|---|---|---|
+| `needs-translation` | No translation yet | Translation tooling, on sync |
+| `needs-adaptation` | A technical check failed, or the source text changed since translation | Translation tooling, on test or sync |
+| `translated` | Text present but **not approved** — for example, copied or imported by a tool | Translation tooling |
+| `needs-review-translation` | Drafted by the agent; awaiting human review | The agent |
+| `signed-off` | **Approved by the named reviewer for that language** | The reviewer, or the agent only on that reviewer's explicit, recorded instruction |
+| `final` | Approved and frozen | The reviewer |
+
+- **Only `signed-off` and `final` count as approved.** Tools write `translated` themselves (XLIFF
+  Sync does when importing or copying from source), so `translated` never proves a person reviewed
+  the text. XLIFF Sync's own checks also report `needs-review-translation` units as neither missing
+  nor needing work, so no tool's check stands in for a scan of the states themselves.
+- **The agent never approves its own drafts.**
+- **A changed source text invalidates approval.** XLIFF Sync moves such units to
+  `needs-adaptation` on sync; the unit must be reviewed and approved again.
+
+### 8.8 Language Support by Market
+
+What can be offered in a country follows Microsoft's *Country/Regional Availability and Supported
+Languages* page
+(<https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-countries-and-translations>),
+read live — never from memory, and never from a copy kept in a project or in this guide:
+
+| Case | Definition | Rule |
+|---|---|---|
+| **Microsoft-translated** | Microsoft provides the application translation for the language | Supported. Terminology source 1 (§8.5). |
+| **Partner-translated** | Microsoft translates the platform, but the application translation comes from a partner | Supported. Terminology source 2 — the customer's partner app — or sources 3–4 when unavailable, with reviewer attention required. |
+| **Not supported by BC** | The language isn't in Microsoft's supported-languages table | Not offered by default. If a developer requires it, record it as outside platform support. |
+
+- **Right-to-left languages aren't supported by Business Central's interface.** Microsoft's page
+  lists Israel as "no RTL; English only", and no right-to-left language appears in its
+  supported-languages table. Whether right-to-left *data* stores and prints correctly must be
+  tested in a sandbox before it's promised.
+- **Where no regional English exists, English means `en-US`.**
+
+### 8.9 Beyond Captions
+
+- **Customer-facing documents** follow the customer's language, or the company's default document
+  language, when the project records that requirement — not the language of the user who posts
+  them.
+- **Report layouts:** only report labels are translated. Never type user-facing text directly into
+  a Word or RDLC layout.
+- **Translatable business data** (user-entered text that needs per-language versions) follows BC's
+  translation-table pattern, as Item Translations does — see AL Guidelines, *Multilanguage
+  Application Data*.
+- **Text expansion:** captions and messages must tolerate translations roughly 30% longer than
+  English, especially in cues, action captions, and narrow columns.
+- **Teaching tips** (`AboutTitle`, `AboutText`) are translatable captions like any other.
+
+### 8.10 AppSource
+
+Applies when the runbook's Deployment Target is `AppSource`.
+
+- **Translation files are mandatory.** Microsoft's technical validation checklist: "The extension
+  submitted must use translation files." The §8.1 US-only no-translation-files exception doesn't
+  apply.
+- **No specific language is mandatory per market** for a standard AppSource app. Microsoft's
+  marketing validation guidance says the app "can be in any language; if not in English, a document
+  with English translation is required." The exception is Microsoft's Validated Localization app
+  program, which requires translation into local languages — of the localization app, its
+  documentation, and the base app where the language isn't already supported.
+- **Declare exactly what ships.** The offer description ends with *Supported Countries/Regions* and
+  *Supported Languages* paragraphs, written in English:
+  - list only languages whose translation files ship with every unit approved (§8.7);
+  - the Partner Center markets must match the countries paragraph.
+- **Test in every listed country.** Microsoft: "each country's base code is slightly different."
+
+> *Sources and attribution:* the CodeCop AA0074 suffix list, the Incremental Build / RAD behavior,
+> the AppSource technical and marketing language requirements, the Validated Localization app
+> translation requirements, and the country and language support facts are summarized and briefly
+> quoted from Microsoft Learn —
+> [CodeCop Warning AA0074](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/analyzers/codecop-aa0074),
+> [Working with translation files](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-work-with-translation-files),
+> [Technical validation checklist](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-checklist-submission),
+> [Language, Branding, and Images](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/readiness/readiness-checklist-a-languange-branding),
+> [Offer Description](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/readiness/readiness-checklist-c-offer-description),
+> [Development of validated localization apps](https://learn.microsoft.com/en-us/dynamics365/business-central/about-validated-localization-apps),
+> and [Country/Regional Availability and Supported Languages](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/compliance/apptest-countries-and-translations)
+> — © Microsoft Corporation, licensed under
+> [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); reorganized into the tables above.
+> String counts and examples in §8.1 come from reading Microsoft's own translation files — the US
+> Base Application symbol package (v27.5) and the English (Australia) and English (United Kingdom)
+> language apps in Microsoft's public Business Central artifact for Australia (sandbox
+> 28.5.54151.54677) — on September 14, 2026. Those files are Microsoft proprietary content; only
+> aggregate counts and short examples are cited. XLIFF state behavior of XLIFF Sync is from its
+> source code (`rvanbekkum/ps-xliff-sync`, MIT License, © Rob van Bekkum).
+
+---
+
+## Part 9 — Upgrade and Data Migration
+
+Applies from the extension's **second version onward**, and to the first version as soon as it has
+been installed anywhere real. Verified against Microsoft Learn,
+[Upgrading extensions](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-upgrading-extensions)
+(read September 15, 2026).
+
+### 9.1 When Upgrade Code Is Required
+
+**An upgrade is any install of a higher `version` than the one already there.** Microsoft: *"An
+upgrade is defined as enabling an extension that has a greater version number, as defined in the
+app.json file, than the current installed extension version."*
+
+Write upgrade code when the new version changes what existing data must look like:
+
+| Change | Upgrade code needed? |
+|---|---|
+| Added a table, page, report, codeunit | No — new objects arrive empty and work |
+| Added a field that existing records need a value in | **Yes** — nothing backfills it |
+| Renamed or replaced a field (obsoleted the old one) | **Yes** — copy the data across (§9.3) |
+| Changed the meaning of an existing field's values | **Yes** |
+| Changed an option/enum member's meaning or removed one | **Yes** |
+| Added a new table that must be linked to existing records | **Yes** |
+| Code-only change, no data implication | No |
+
+Microsoft: *"If there are no data changes between the extension versions, you don't need to write
+upgrade code. All data that isn't modified by upgrade code will automatically be available when the
+process completes."* **Deciding "no upgrade code" is a decision to record**, in the ChangeLog entry
+for the version — not a step to skip silently.
+
+### 9.2 The Upgrade Codeunit
+
+Upgrade logic goes in a codeunit with `Subtype = Upgrade`. Its triggers run in this order, and an
+error in any of them fails the whole upgrade:
+
+| Trigger | Purpose |
+|---|---|
+| `OnCheckPreconditionsPerCompany()` / `OnCheckPreconditionsPerDatabase()` | Verify the data is in a state the upgrade can handle. Fail loudly here rather than half-way through. |
+| `OnUpgradePerCompany()` / `OnUpgradePerDatabase()` | The actual data work. |
+| `OnValidateUpgradePerCompany()` / `OnValidateUpgradePerDatabase()` | Verify the result. |
+
+- **`PerCompany` runs once for every company** in the database, each in its own system session.
+  **`PerDatabase` runs once for the whole upgrade**, in a session with no company open — so never
+  touch company-scoped records from a `PerDatabase` trigger.
+- **One upgrade codeunit per concern, each independently runnable.** Microsoft: *"There's a set
+  order to the sequence of the upgrade triggers, but the execution order of the different codeunits
+  isn't guaranteed."*
+- **Name and number them like any other object** (§1.1, Part 4, §5.1), and register them in the
+  Object Register.
+
+### 9.3 Guard Every Upgrade with an Upgrade Tag
+
+**Upgrade code must not run twice.** Use the System Application's **Upgrade Tags** module —
+codeunit 9999 `"Upgrade Tag"` — rather than comparing version numbers, for anything beyond a
+first-install check. Microsoft's guidance table puts tags ahead of version comparison for large
+apps, apps that version more than once a year, and *"fixing a broken upgrade"*; version data is for
+*"when checking whether it's a first-time installation… comparing with 0.0.0.0"*.
+
+The pattern, in three parts — all three, every time:
+
+1. **Guard the upgrade code.**
+   ```AL
+   if UpgradeTagMgt.HasUpgradeTag(UpgradeTags.GetOCPFShoeSizeTag()) then
+       exit;
+   UpgradeShoeSize();
+   UpgradeTagMgt.SetUpgradeTag(UpgradeTags.GetOCPFShoeSizeTag());
+   ```
+2. **Register the tag for companies created later**, by subscribing to
+   `OnGetPerCompanyUpgradeTags` (or `OnGetPerDatabaseUpgradeTags`) on codeunit `"Upgrade Tag"` — a
+   new company has no legacy data, so its upgrade code must be skipped, not run.
+3. **Register the tag on first install**, from the install codeunit's `OnInstallAppPerCompany` /
+   `OnInstallAppPerDatabase` (`Subtype = Install`), so a fresh installation doesn't run upgrade
+   code meant for old data. `SetAllUpgradeTags()` covers every tag at once and is preferred over
+   setting them one by one.
+
+**Tag values live in methods, never as literals at the call site.** One "tag definitions" codeunit
+holds `GetXxxTag()` methods returning the value; the compiler then finds every use when a tag is
+retired. Use Microsoft's convention — `[Prefix]-[ID]-[Description]-[YYYYMMDD]`, e.g.
+`OCPF-1234-ShoeSizeUpgrade-20260915`. **Reuse the AL Object Prefix** from the parameter sheet so
+tags can't collide with another publisher's.
+
+**Two further rules Microsoft calls out, and this framework requires:**
+- **Safety-check the target before writing.** A tag can be missing or wrong; the upgrade must not
+  overwrite data that's already there. Verify the target field is blank (or error) before copying.
+- **Don't write when nothing changes.** `if new <> old then begin … Modify(); end;` — a blank
+  `Modify()` per record is a measurable upgrade slowdown on real data volumes.
+
+### 9.4 Deprecating a Field or Table — the Two-Version Cycle
+
+**Never delete a field or table that has shipped.** *Obsoleting* and *deleting* are different acts
+with different consequences, and conflating them is how data gets lost: obsoleting is the supported
+retirement path and keeps the data, while physically removing the field from the source drops the
+column and is a breaking change AppSourceCop rejects. Retire it across two versions instead:
+
+| Version | What it does |
+|---|---|
+| **n** | Add the replacement field. Mark the old one `ObsoleteState = Pending`, with an `ObsoleteReason` naming the replacement and an `ObsoleteTag` carrying the version. Ship upgrade code that copies the data (§9.3). Keep writing to the new field only. |
+| **n+1** *(a later release, not the next build)* | `ObsoleteState = Removed`. AL then refuses new references to it — `Pending` is a warning, `Removed` an error — but **the field and its data stay in the database.** Microsoft, on AppSourceCop AS0016: *"Tables and fields marked as [Obsolete Removed] are and not deleted from the database. This is why they are also validated by this rule."* So keep `DataClassification` set on it; AS0016 still checks it. |
+
+**A `Removed` field is retired, not erased.** Nothing here drops a column, so a release that only
+obsoletes fields is additive as far as Schema Sync Mode is concerned (**Ops § Packaging**) — it's
+deleting the field from the source that would force a destructive sync.
+
+Leave at least one full release between the two so every tenant has run the copying upgrade.
+`ObsoleteReason` is read by a human deciding what to do, so write the replacement's name in it, not
+"deprecated".
+
+### 9.5 Keep Side Effects Out of the Upgrade Session
+
+An upgrade that fails is rolled back — but only the database is. Web service calls, printing, and
+queued jobs aren't. Before doing anything with an outside effect, check the context:
+
+```AL
+if Session.GetExecutionContext() <> ExecutionContext::Normal then
+    exit;  // Install, Uninstall, or Upgrade — don't call out
+```
+
+This matters most in **event subscribers the extension already ships**: an upgrade that posts a
+document fires them, and a subscriber that calls an external service will do so during the upgrade.
+
+### 9.6 Upgrades Get Tested, Not Hoped For
+
+An upgrade path is testable and must be tested before release — **runbook Step 12 / Lite Step 7**, before the human runs anything else:
+1. Install the **previous** version on a clean sandbox, and create data in the fields that will
+   change — in **more than one company** where `PerCompany` code exists.
+2. Publish and install the new version.
+3. Check the migrated data, then **install it again** — the tag must make the second run a no-op.
+4. Check a **fresh install** of the new version too: first-install tag registration (§9.3 step 3)
+   is what keeps upgrade code from running on empty data.
+
+> *Sources and attribution:* Part 9's trigger table, upgrade-tag API and pattern, tag naming
+> convention, execution-context guidance, and the "no data changes / no upgrade code" and upgrade
+> definition statements are summarized, with short quotations, from Microsoft Learn —
+> [Upgrading extensions](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-upgrading-extensions),
+> [Writing extension install code](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-extension-install-code),
+> and [AppSourceCop Error AS0016](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/analyzers/appsourcecop-as0016)
+> — © Microsoft Corporation, licensed under
+> [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+---
+
+## Part 10 — Events and Extensibility
+
+Two separate concerns that use the same mechanism: **subscribing** to Microsoft's events (every
+extension does this) and **publishing** events of your own (what makes an extension extensible).
+Verified against Microsoft Learn,
+[Events in Business Central](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-events-in-al)
+(read September 15, 2026).
+
+### 10.1 Subscribe; Never Modify
+
+**An extension hooks into standard behavior through events, never by copying Microsoft's code.**
+Microsoft: *"A subscriber enables partners to hook into the core application functionality without
+having to do traditional code modifications."*
+
+- **Subscribers are `local procedure`s**, in a codeunit that exists for that purpose — not scattered
+  through business-logic codeunits. Name the codeunit for what it listens to
+  (`OCPF Sales Post Subscribers`).
+- **Write the full attribute**, and prefer the explicit forms:
+  `[EventSubscriber(ObjectType::Codeunit, Codeunit::"Sales-Post", 'OnAfterPostSalesDoc', '', false, false)]`.
+  Reference the object by `Codeunit::"…"`, never by a bare ID.
+- **A subscriber does one thing and returns.** No UI (`Message`, `Confirm`, `Page.RunModal`) in a
+  subscriber on a posting routine — it will run in a web service or background session and throw.
+- **Never `Error()` in a subscriber to enforce your own rule** unless the extension genuinely owns
+  that rule; you're aborting someone else's transaction.
+- **A subscriber's cost is the publisher's cost.** Anything heavy belongs in a job queue entry, not
+  inline in a posting routine.
+- **Verify the publisher in the symbols before subscribing** (Operating Rule 2, Appendix B) — the
+  event method, its object, and its parameter list. The compiler catches a bad event *name*; what
+  it doesn't catch is a wrong **`ElementName`** — the fourth argument, which Microsoft says *"only
+  requires a value for database trigger events, that is, when the ObjectType is set to table and
+  the EventName argument is a validate trigger event, such as `OnAfterValidateEvent`."* Name the
+  wrong field there and the subscriber silently never runs — Microsoft's own AL repository carries
+  this as a reported defect ([microsoft/AL#5377](https://github.com/microsoft/AL/issues/5377)),
+  and Learn documents only when the argument is *required*, not what a wrong value does — so read
+  the field's exact name from the symbol file rather than relying on the compiler to catch it:
+  `[EventSubscriber(ObjectType::Table, Database::"Purchase Line", 'OnAfterValidateEvent', 'Location Code', false, false)]`.
+- **For a table trigger event the object is `Database::"…"`, never `Table::"…"`.** Microsoft calls
+  this one out explicitly: *"For a table event, specify `ObjectId` by name with
+  `Database::<ObjectName>`, not `Table::<ObjectName>`."*
+
+### 10.2 Publishing Events from This Extension
+
+Publish an event where another extension will plausibly need to change or observe behavior: before
+and after the extension's own posting, validation, and defaulting; and wherever a customer-specific
+variation is foreseeable.
+
+| Attribute | Use it for |
+|---|---|
+| `[IntegrationEvent(IncludeSender, GlobalVarAccess)]` | **The default** — `[IntegrationEvent(false, false)]` unless a subscriber genuinely needs the sender. Microsoft: *"Avoid `GlobalVarAccess`. Use event parameters instead, or mark page or table variables as `protected`."* Extension points for other apps and PTEs to subscribe to. |
+| `[BusinessEvent(IncludeSender)]` | A business-level fact that is part of the published contract and won't change shape. **A business event can never be changed or removed** without breaking subscribers — so use it only for a genuine, stable business occurrence. |
+| `[InternalEvent(IncludeSender)]` | A hook for this extension's own code, or for apps listed in `internalsVisibleTo`. Not an extension point for third parties. |
+
+- **The publisher method is a signature and nothing else** — no body, no logic. Microsoft: *"An
+  event publisher method is composed of a signature only and doesn't execute any code."*
+- **Raise it explicitly**: business and integration events *"must be explicitly published and
+  raised"*. Publishing alone does nothing.
+- **Pass records by `var`** where a subscriber is expected to change them, and pass a `var Handled:
+  Boolean` where a subscriber may replace the behavior — then check `Handled` before running the
+  default.
+- **Pass what the subscriber needs, not the object graph.** Every parameter is part of the
+  signature forever.
+- **Name them `On[Before|After]<Verb><Noun>`**, matching Microsoft's own convention, and prefix the
+  publishing object per Part 4 — not the event name.
+- **Trigger events** (table and page operations) are *"published and raised implicitly by the system
+  at runtime"* — nothing to write, and they are the cheapest extension point for a table this
+  extension owns.
+
+### 10.3 A Published Event Signature Is a Promise
+
+Once a version ships, its event signatures are part of the contract:
+- **Never rename, remove, or change the parameters** of a published integration or business event.
+  For AppSource, AppSourceCop compares against the marketplace baseline and *"if any violations or
+  breaking changes are identified, the submission is rejected"*; for a PTE it silently breaks
+  whoever subscribed.
+- **To change one:** add the new event alongside, mark the old publisher `ObsoleteState = Pending`
+  with an `ObsoleteReason` naming the replacement, raise both for a release, then remove it — the
+  same two-version cycle as §9.4.
+- **Mark internal API surface deliberately.** Procedures other extensions shouldn't call get
+  `Access = Internal`; what's left public is what's being promised. Note that `internalsVisibleTo`
+  raises an AppSourceCop/PTECop warning in Business Central online, and Microsoft states
+  `Access = Internal` *"isn't designed as a security boundary."*
+
+### 10.4 Extensibility Is a Design Decision, Recorded
+
+The TDD (runbook Step 03) states, for each new module: **which events this extension publishes and
+why**, and **which Microsoft events it subscribes to**. Both go in the Object Register alongside
+the objects. Publishing an event later is easy; discovering at release that there's no hook where
+the customer needed one is not.
+
+> *Sources and attribution:* Part 10's event-type table, publisher/subscriber model, the
+> signature-only publisher rule, the explicit-raise rule, the trigger-event behavior, and the
+> `internalsVisibleTo` note are summarized, with short quotations, from Microsoft Learn —
+> [Events in Business Central](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-events-in-al),
+> [EventSubscriber attribute](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/attributes/devenv-eventsubscriber-attribute),
+> [IntegrationEvent attribute](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/attributes/devenv-integrationevent-attribute),
+> [JSON files](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-json-files),
+> and [Technical validation checklist](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-checklist-submission)
+> — © Microsoft Corporation, licensed under
+> [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+---
+
+## Part 11 — Client Page Rules: Parent–Child Pages and Number Series
+
+> **Scope.** Every page a person uses in the BC client — cards, lists, list parts, setup pages,
+> assisted setup wizards — as opposed to the API pages Parts 1–2 govern. Two defects recurred on
+> project after project built with this framework, in both editions and with both agents, before
+> these rules existed: a child record created from its parent's page that lands *outside the
+> filter* and vanishes, and a number-series field with no lookup. Both compile clean, both pass a
+> template check, and both are found only by a person clicking in the sandbox. Each rule below
+> is therefore paired with the sandbox check that proves it (§11.3), which the runbook runs at
+> every compile-and-package round and writes into the human test script.
+
+### 11.1 A Child Record Created in Its Parent's Context Must Carry the Parent's Key
+
+**The defect.** A list or list part shows the children of one parent — the lines of one document,
+the contacts of one customer, the registrations of one event. The user adds a row, fills it in,
+leaves it, and the client shows *"The view is filtered, and the entry is outside the filter. Some
+actions may not work."* The row disappears. It **was** inserted — with the linking field blank —
+and is now visible only in an unfiltered list of the child table, where it accumulates as an
+orphan and corrupts every FlowField rollup on the parent.
+
+**The mechanism.** A page in a parent's context is filtered on the link field, and the platform
+keeps that filter in a **filter group** that depends on *how the page was opened*. Microsoft
+Learn's `Record.FilterGroup` reference documents the groups, and the property pages settle the one
+it leaves out:
+
+| How the child page is opened | Where the link filter lives | Source |
+|---|---|---|
+| `part(...)` with `SubPageLink`; report `dataitem` with `DataItemLink` | Group **4** ("Link") | `Record.FilterGroup` table, row 4 |
+| Action with `RunPageLink` | Group **0** ("Std") — the property page states these filters "are visible in the UI and can be modified by end-users", which is the group-0 definition | `RunPageLink Property`; `Record.FilterGroup` row 0 |
+| `RunPageView`, `SubPageView` | Group **3** ("Exec") | `Record.FilterGroup` row 3 |
+| `SourceTableView`, `SetTableView` | Group **2** ("Form") | `Record.FilterGroup` row 2 |
+
+`Rec.GetFilter(...)` reads only the group the record is currently on, which defaults to **0**. So a
+subform bound by `SubPageLink` reading group 0 finds nothing, and a list opened by `RunPageLink`
+reading group 4 finds nothing. **The same child page is routinely opened both ways** — as a part on
+the card *and* from an action on the list — so code that reads one group is right in one entry
+point and silently wrong in the other. That is exactly how the same child list failed on two
+builds of one project: one read group 0 only, the other read group 4 only.
+
+**The rule — six parts, all required for every child table with a parent-link field.** "Child
+table" means any table with a field that identifies a parent record (`"Document No."`,
+`"Customer No."`, `"Parent No."`), whether or not that field is in the primary key.
+
+1. **Link by property, never by hand.** A part uses `SubPageLink = "<Link Field>" = field("<Parent
+   Key>")`. An action uses `RunPageLink = "<Link Field>" = field("<Parent Key>")` (and
+   `RunPageView = sorting("<Link Field>")`, which Microsoft requires for performance). Never
+   establish the parent in `OnOpenPage` with `SetRange`, and never through `RunPageView`'s
+   `where()`, which takes only `const()` and `filter()` — never `field()` — so it can never carry a
+   parent's identity.
+2. **The link field is a control on the child page**, `Visible = false` if the parent context makes
+   it redundant — never omitted. A field the page knows about is a field the platform can fill in.
+3. **`OnNewRecord` reads the link from filter groups 4 and 0, in that order, only when the field is
+   still blank, and restores the previous group on every path.** This is the fallback for the
+   platform's own pre-fill, which is what usually works and is what the two failing builds were
+   trusting. Use this exact shape — it is the corrected form of the patterns-library entry
+   `Pattern-SubPageLink-FilterGroup4.md`, which covers group 4 only:
+
+   ```al
+       trigger OnNewRecord(BelowxRec: Boolean)
+       begin
+           if Rec."Parent No." = '' then
+               Rec.Validate("Parent No.", GetParentNoFromLink());
+           // Seed other defaults here. Never call Rec.Init() in this trigger:
+           // Init() clears every non-key field, including the link just set.
+       end;
+
+       local procedure GetParentNoFromLink(): Code[20]
+       var
+           ParentNo: Code[20];
+       begin
+           if TryGetSingleValueFilter(4, ParentNo) then // SubPageLink, DataItemLink
+               exit(ParentNo);
+           if TryGetSingleValueFilter(0, ParentNo) then // RunPageLink, end-user filters
+               exit(ParentNo);
+           exit('');
+       end;
+
+       local procedure TryGetSingleValueFilter(FilterGroupNo: Integer; var ParentNo: Code[20]) Found: Boolean
+       var
+           PrevFilterGroup: Integer;
+       begin
+           PrevFilterGroup := Rec.FilterGroup();
+           Rec.FilterGroup(FilterGroupNo);
+           // Nested ifs on purpose: the second test must not run when there is no filter,
+           // because GetRangeMin errors on a field with no filter.
+           if Rec.GetFilter("Parent No.") <> '' then
+               if Rec.GetRangeMin("Parent No.") = Rec.GetRangeMax("Parent No.") then begin
+                   ParentNo := Rec.GetRangeMin("Parent No.");
+                   Found := true;
+               end;
+           Rec.FilterGroup(PrevFilterGroup);
+       end;
+   ```
+
+   The `Record.FilterGroup` page's warning is about **replacing** the platform's filter by writing
+   while parked on a reserved group; this helper only reads, and restores the group at once, which
+   is why the previous group is
+   restored before anything else runs. `GetRangeMin` errors only when the field has no filter at
+   all (Microsoft Learn's one documented error condition), which is why the `GetFilter <> ''`
+   guard comes first; a hand-written range such as `A..B` does *not* error — it returns `A` — which
+   is why the `GetRangeMin = GetRangeMax` test is required to reject anything that is not a single
+   parent identity. A `field()` link always produces a single value.
+4. **The table's `OnInsert` starts with `Rec.TestField("<Link Field>")`.** `NotBlank = true` guards
+   typed entry only; it does nothing for a value assigned in code or left blank by the platform. The
+   `TestField` turns a silent orphan into an error naming the field, on every insert path — page,
+   API, migration, test codeunit — and it stays after the page is fixed, because it is a table
+   invariant: a child of this table is never valid without a parent.
+5. **`DelayedInsert = true` on every child list and list part.** The row is then written when the
+   user leaves it, with every field present, instead of on the first keystroke with the rest still
+   blank — the reason a failing build shows a numbered row that has none of its other fields yet. This is the
+   setting on every Microsoft document subform.
+6. **Nothing clears the field after it is set.** No `Rec.Init()` in `OnNewRecord`, `OnInsert`, or a
+   "new record" helper the page calls (see the patterns library's
+   `Pattern-Init-Does-Not-Clear-Primary-Key.md` for what `Init()` does and does not reset), and no
+   `OnValidate` on another field that resets the link.
+
+**Recorded where.** The TDD's per-object spec names, for every child table, its link field, every
+page that shows it in a parent's context, and the opening mechanism of each (runbook Step 03 /
+Lite Step 2). Code Review checks all six parts against every such page (runbook Step 09 / Lite
+Step 6).
+
+### 11.2 A Number-Series Field Gets Its Lookup from `TableRelation`, and Numbering Follows Business Foundation
+
+**The defect.** The setup card or assisted setup wizard has a field for the number series that
+numbers the extension's records, and clicking it opens nothing, or opens the wrong page, or the
+picked value never reaches the setup record. The extension then cannot number its first record.
+
+**The rule.**
+
+1. **The setup table field is `Code[20]` with `TableRelation = "No. Series"`.** Table 308 `"No.
+   Series"` (namespace `Microsoft.Foundation.NoSeries`) declares `LookupPageId = "No. Series"`, so
+   this one property gives the field its dropdown, its lookup page, and its validation. Nothing
+   else is written for the lookup: no `OnLookup`, no `Page.RunModal`, no `Lookup` or `Editable`
+   property.
+
+   ```al
+   field(2; "<Entity> Nos."; Code[20])
+   {
+       Caption = '<Entity> Nos.';
+       ToolTip = 'Specifies the number series that assigns numbers to new <entities>.';
+       TableRelation = "No. Series";
+   }
+   ```
+2. **The wizard binds to the setup table, temporarily.** `SourceTable = "<Prefix> Setup"` with
+   `SourceTableTemporary = true`, and the control is `field("<Entity> Nos."; Rec."<Entity>
+   Nos.")`, so the table's `TableRelation` carries over; the Finish action copies the temporary
+   record into the real setup record with `Validate`. **A page variable has no `TableRelation`** —
+   a control bound to one has no lookup unless the *control* declares `TableRelation = "No.
+   Series"`; that is the only acceptable variable-bound form, and only when the setup table
+   genuinely cannot be the wizard's source.
+3. **Offering to create a series is a separate, variable-bound step.** Business Foundation exposes
+   no public procedure that creates a series — codeunit 299 `"No. Series - Setup"` exposes only
+   `CalculateOpen`, `IncrementNoText`, and `UpdateNoSeriesLine`, none of which creates a series
+   (verified in the 27.5 symbol file, Appendix B) — so
+   the wizard inserts the two tables itself, from page variables for the new code and starting
+   number (a `TableRelation` field would reject a code that does not exist yet), guarded against a
+   code that already exists, and then assigns the new code to the setup field:
+
+   ```al
+   procedure CreateNoSeries(SeriesCode: Code[20]; SeriesDescription: Text[100]; StartingNo: Code[20])
+   var
+       NoSeries: Record "No. Series";
+       NoSeriesLine: Record "No. Series Line";
+   begin
+       if NoSeries.Get(SeriesCode) then
+           exit;
+       NoSeries.Init();
+       NoSeries.Code := SeriesCode;
+       NoSeries.Description := SeriesDescription;
+       NoSeries."Default Nos." := true;
+       NoSeries.Insert(true);
+
+       NoSeriesLine.Init();
+       NoSeriesLine."Series Code" := SeriesCode;
+       NoSeriesLine."Line No." := 10000;
+       NoSeriesLine.Validate("Starting No.", StartingNo);
+       NoSeriesLine."Increment-by No." := 1;
+       NoSeriesLine.Open := true;
+       NoSeriesLine.Insert(true);
+   end;
+   ```
+4. **The numbered table follows Microsoft's own shape** — a `"No. Series"` field, an `OnInsert`
+   that numbers only a blank `"No."`, and an `AssistEdit` for the card — using codeunit 310 `"No.
+   Series"` from `Microsoft.Foundation.NoSeries` (its public surface — `GetNextNo`, `PeekNextNo`,
+   `AreRelated`, `LookupRelatedNoSeries`, `TestManual` — verified in the 27.5 symbol file). Never
+   codeunit 396 `NoSeriesManagement`, which is obsolete.
+
+   ```al
+   using Microsoft.Foundation.NoSeries;
+
+   field(1; "No."; Code[20])
+   {
+       Caption = 'No.';
+       trigger OnValidate()
+       begin
+           if Rec."No." <> xRec."No." then begin
+               Setup.Get();
+               NoSeries.TestManual(Setup."<Entity> Nos.");
+               Rec."No. Series" := '';
+           end;
+       end;
+   }
+   field(20; "No. Series"; Code[20])
+   {
+       Caption = 'No. Series';
+       Editable = false;
+       TableRelation = "No. Series";
+   }
+
+   trigger OnInsert()
+   begin
+       if Rec."No." = '' then begin
+           Setup.Get();
+           Setup.TestField("<Entity> Nos.");
+           Rec."No. Series" := Setup."<Entity> Nos.";
+           if NoSeries.AreRelated(Setup."<Entity> Nos.", xRec."No. Series") then
+               Rec."No. Series" := xRec."No. Series";
+           Rec."No." := NoSeries.GetNextNo(Rec."No. Series");
+       end;
+   end;
+
+   procedure AssistEdit(OldRec: Record "<Prefix> <Entity>"): Boolean
+   begin
+       Setup.Get();
+       Setup.TestField("<Entity> Nos.");
+       if NoSeries.LookupRelatedNoSeries(Setup."<Entity> Nos.", OldRec."No. Series", Rec."No. Series") then begin
+           Rec."No." := NoSeries.GetNextNo(Rec."No. Series");
+           exit(true);
+       end;
+   end;
+
+   var
+       Setup: Record "<Prefix> Setup";
+       NoSeries: Codeunit "No. Series";   // the codeunit here; item 3's NoSeries was the record
+   ```
+
+   On the card, the `"No."` control gets `trigger OnAssistEdit() begin if Rec.AssistEdit(xRec) then
+   CurrPage.Update(); end;`. Inserting several records from one record variable (a wizard's
+   sample data) needs `Clear()` or a fresh variable between inserts — `Init()` leaves the primary
+   key alone, so the second insert reuses the first number (patterns library,
+   `Pattern-Init-Does-Not-Clear-Primary-Key.md`).
+
+**Recorded where.** The TDD's per-object spec names, for every numbered table, the setup field that
+holds its series and every page on which that field appears (runbook Step 03 / Lite Step 2).
+
+### 11.3 The Sandbox Checks That Prove Both Rules
+
+These run at every compile-and-package round (runbook Step 07 / Lite Step 5) and are written into
+the human test script (runbook Step 11 / Lite Step 6) as test cases. **Either message below is a
+defect to diagnose, never a warning to dismiss.**
+
+| Check | Steps | Pass means |
+|---|---|---|
+| **Child from every parent entry point** (§11.1) | For every page that shows a child table in a parent's context — each part *and* each action, separately — open it from the parent, add a row, fill the required fields, leave the row. Then open the unfiltered child list. | The row stays visible in the filtered page; the link field (unhide it or use *Personalize*) shows the parent's key; no *"The view is filtered, and the entry is outside the filter"* banner; the unfiltered list has no row with a blank link field. |
+| **Number series field** (§11.2) | Open the assisted setup wizard and the setup card. Click the number-series field. Pick a series (create one first through the wizard, if it offers to). Finish. Create the first two records of the numbered table from the client. | The field opens the *No. Series* dropdown with *Select from full list*; the picked code is on the setup card after Finish; the first record gets the series' starting number and the second gets the next one. |
+
+> *Sources and attribution:* the filter-group table and the "you replace the filter" warning are
+> quoted and summarized from Microsoft Learn —
+> [Record.FilterGroup Method](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/methods-auto/record/record-filtergroup-method),
+> [RunPageLink Property](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/properties/devenv-runpagelink-property),
+> [RunPageView Property](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/properties/devenv-runpageview-property),
+> [SubPageLink Property](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/properties/devenv-subpagelink-property)
+> — © Microsoft Corporation, licensed under
+> [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/), all fetched September 21, 2026.
+> Object IDs, namespaces, fields, and procedure signatures for `"No. Series"`, `"No. Series
+> Line"`, and codeunits 299 and 310 were read from the Business Foundation 27.5.46862.46929 symbol
+> file (Appendix B), not from memory. Both rules come from defects found on real projects built
+> with this framework in September 2026, in both editions and with both agents.
+
+---
+
+## Appendix A — OData API Endpoint Patterns
+
+Substitute `<APIPublisher>`, `<APIGroup>`, and `<APIVersion>` with the values from the runbook's
+Step 01 parameters (§1.3), and `<EntitySetName>` with the page's own. Verified against Microsoft
+Learn, [API endpoint structure](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/webservices/api-endpoint-structure)
+(read September 15, 2026).
+
+**Base URL — one host for every tenant.** The tenant is a path segment, never a subdomain:
+
+```
+https://api.businesscentral.dynamics.com/v2.0/<EntraTenantId>/<EnvironmentName>/api
+```
+
+The `<EntraTenantId>` segment is optional: `.../v2.0/<EnvironmentName>/api` also resolves.
+
+**Most endpoints are company-scoped.** Microsoft: *"To call most of the Business Central endpoints,
+you need to specify, which company you want to connect to."* Either form works:
+
+```
+{base}/<APIPublisher>/<APIGroup>/<APIVersion>/companies(<companyId>)/<EntitySetName>
+{base}/<APIPublisher>/<APIGroup>/<APIVersion>/<EntitySetName>?company=<companyId>
+```
+
+Get `<companyId>` from Microsoft's standard API: `GET {base}/v2.0/companies`.
+
+**The patterns this framework's tests and documentation use:**
+
+```
+Service document (every entity set in the group):
+  {base}/<APIPublisher>/<APIGroup>/<APIVersion>
+
+Metadata:
+  {base}/<APIPublisher>/<APIGroup>/<APIVersion>/$metadata
+
+Collection:
+  {base}/<APIPublisher>/<APIGroup>/<APIVersion>/companies(<companyId>)/<EntitySetName>
+
+Single record by SystemId (this framework's ODataKeyFields, §2.1):
+  {base}/<APIPublisher>/<APIGroup>/<APIVersion>/companies(<companyId>)/<EntitySetName>(<SystemId>)
+
+Filter and select:
+  .../<EntitySetName>?$filter=<fieldName> eq '<value>'
+  .../<EntitySetName>?$select=<field1>,<field2>
+```
+
+**On-premises** replaces the base with the server's own endpoint
+(`https://<server>:<port>/<instance>/api/...`); everything after `/api` is identical.
+
+> *Source:* Microsoft Learn, *API endpoint structure* (© Microsoft Corporation, CC BY 4.0). The
+> quoted sentence and the URL shapes are Microsoft's; the mapping onto this framework's parameters
+> is ours.
+
+## Appendix B — BC Symbol File Verification Procedure
+
+The downloaded symbols are the source of truth and the **only** routine lookup. Consult Microsoft
+Learn's Base Application or System Application reference **only** when (a) symbols could not be
+downloaded, (b) the object, field, method, or event is not in the downloaded symbols, or (c) the
+task needs a code pattern, a snippet, or an event's signature to subscribe to it. Never as a
+second check on something the symbols already answered, and never "to be safe". Every Learn
+lookup costs time and tokens; say why it was needed when one happens.
+
+Before finalizing any TDD, using the **Symbol Source** named in the runbook's Step 01 §1.4:
+
+1. **Read the symbols directly — this is the agent's job, not a trip to the human's editor.** The
+   AL MCP Server's `al_symbolsearch` (its arguments go under a `parameters` key — it's the one tool
+   that takes that wrapper) and `al_symbolrelations` answer from the packages already in
+   `.alpackages/`. Without an MCP host, an `.app` is a short header followed by a standard zip, so
+   its symbol content can be read in place. Only if neither route is available does anyone open the
+   package in VS Code (**Ops § Symbols**).
+2. For each source table: confirm the table number matches (`table <ID> "<Name>"`).
+3. For each `using` directive: copy the exact namespace from the symbol file entry for that
+   source table.
+4. For each field: confirm `ObsoleteState`, field ID, and data type.
+5. For localization compliance: confirm every included field complies with the Localization
+   parameter, per the rules in Part 3.
+
+**Do not rely on BC documentation websites, agent knowledge, or memory for table numbers or
+namespaces.** Symbol files are authoritative.
+
+**Where to look in the three cases above, and only then:** the entire BC BaseApp for the current
+Business Central Online version is documented at
+<https://learn.microsoft.com/en-us/dynamics365/business-central/application/base-application/module/base-application>
+— every standard table, field, and field datatype/size — and the System Application (its
+foundation modules: Language, Translation, Email, Telemetry, and the rest) at
+<https://learn.microsoft.com/en-us/dynamics365/business-central/application/system-application/module/system-application>.
+Not to corroborate what the symbols already answered: the downloaded symbol file for the target
+version still wins if the two ever disagree, and the lookup's reason is stated when it happens.
+
+---
+
+## Appendix C — Recommended VS Code Extensions and Tools
+
+| Tool | Purpose |
+|---|---|
+| AL Language (Microsoft) | AL IntelliSense, compiler, symbol files |
+| AL Object ID Ninja | Manages object ID ranges across team members |
+| AZ AL Dev Tools | Linting, unused variable detection, code quality — the rule set the runbook's Step 06 post-generation pass reads against |
+| XLIFF Sync (VS Code extension, Rob van Bekkum) | Translation reviewer's tool — sync target files, jump to missing or needs-work units, technical translation checks |
+| XLIFF Sync PowerShell module (`XliffSync`, Rob van Bekkum) | The agent's headless translation sync and checks (`Sync-XliffTranslations`, `Test-XliffTranslations`, `Test-BcAppXliffTranslations`) |
+| NAB AL Tools (Johannes Wikman) | Alternative translation-management extension, for developers who already use it |
+| Git | Version control |
+
+---
+
+## Appendix D — Terminology Verification Procedure
+
+The translation equivalent of Appendix B. Run it for every target language, for every source string
+that names a standard BC concept. Record every result in the project's translation glossary.
+
+1. **Locate Microsoft's translation files for the language**, in this order.
+   - **Search first with the AL MCP Server's `al_searchtranslations`** — it searches the XLIFF
+     inside every package in `.alpackages/`, no unzipping. Pass the arguments inside a `parameters`
+     object: `query` (the source term), `locale` (e.g. `fr-CA`), and optionally `objectName`,
+     `kinds`, and `limit`. Each result gives the package (`appName`), the `sourceText`, and
+     Microsoft's `translatedText`. A result whose `translatedText` is empty means that package
+     doesn't carry the language: continue down the list below for that term. Symbols from
+     Microsoft's public symbol feed carry no translation files, so this only finds anything when
+     the symbols were downloaded from a sandbox. Checked on BC 28.4 sandbox symbols: the System
+     Application answered in all 26 of its languages, including `fr-CA`; the US Base Application
+     answered in `en-US` only.
+   - **Otherwise, open the files directly.** An `.app` file is a short header followed by a
+     standard zip archive; list its `Translations/` folder.
+
+   The sources, in order:
+   1. **The project's localized Base Application symbols** (`.alpackages/`) — they carry that
+      localization's own language(s), e.g. `Base Application.en-AU.xlf` in "Base Application (AU)".
+   2. **The System Application and Business Foundation symbols** — for System Application and
+      Business Foundation strings, in every Microsoft-translated language.
+   3. **Microsoft's language app for the language**, when step 1 doesn't carry it — for example,
+      `fr-CA` for an extension built on a US localization. It's the
+      `Microsoft_<Language> language (<Country>)` app in the `Extensions` folder of Microsoft's
+      public Business Central artifact for a matching BC version. Locate the artifact with
+      BcContainerHelper's `Get-BCArtifactUrl` (or its public artifact index), and fetch only that
+      one app — a few megabytes — rather than the whole artifact. **Tell the human before
+      downloading**, and follow Operating Rule 6b if any tooling would need installing.
+   4. For a **partner-translated** language (§8.8), the customer's partner language or localization
+      app.
+
+   - **Record which package and version each file came from.** Prefer the same major BC version the
+     project targets.
+   - **If no Microsoft file for the language can be obtained, stop and say so.** Ask the human for
+     an environment or package that has it. Never proceed from memory of what Microsoft's term is.
+2. **Find Microsoft's matching unit** — by exact source text first, then by the object and field
+   or property the string refers to (the `Xliff Generator` note).
+3. **Use Microsoft's target text for the term.** Keep the rest of the sentence natural in the
+   target language; the rule governs the BC term, not word-for-word copying.
+4. **Record** the source term, the target term, the Microsoft file and version, and the date in the
+   glossary.
+5. **No Microsoft match:** use the customer's partner localization app (§8.8), then the Microsoft
+   Terminology Collection and style guides (§8.5). Mark the glossary row **reviewer attention**.
+6. **Never commit or redistribute** the Microsoft files read in step 1 (§8.5). Read them where they
+   are, or extract them outside the project's git-tracked tree.
+
+---
+
+## Appendix E — AppSource Manifest and Submission Requirements
+
+Applies only when the runbook's Deployment Target is `AppSource`. Everything here is from
+Microsoft's [JSON files](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-json-files)
+and [Technical validation checklist](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-checklist-submission),
+read September 15, 2026.
+
+### E.1 `app.json` properties Marketplace submission requires
+
+These are optional for a PTE and **mandatory for AppSource**. A missing one is not a warning: *"If
+any mandatory properties or required property values are missing, the submission is rejected."*
+The intake asks for each of them (**Ops § Intake**) and they're written at project setup, not
+retrofitted at release.
+
+| Property | Microsoft's description | What the intake asks for |
+|---|---|---|
+| `brief` | "Short description of the extension." | One line, matching the offer listing. |
+| `description` | "Longer description of the extension." | A paragraph, matching the offer listing. |
+| `privacyStatement` | "URL to the privacy statement for the extension." | A URL. |
+| `EULA` | "URL to the license terms for the extension." | A URL. Note the property is spelled in capitals. |
+| `help` | "URL to an online description of the extension focusing on the help and troubleshooting content." | A URL; may be the same as `contextSensitiveHelpUrl`. |
+| `contextSensitiveHelpUrl` | "The URL for the website that displays context-sensitive Help for the objects in the app." | A URL. If the app doesn't cover every BC locale, include `/{0}/` in it and list the locales in `supportedLocales`. |
+| `url` | "URL of the extension package… used in Business Central, on the **Extension Management** page, as **Website**." | A URL — the product or support page, not the help page. |
+| `logo` | "Relative path to the app package logo from the root of the package." | A file the human supplies; it is committed in the project and referenced by relative path. |
+| `application` | "Required for Marketplace submission" — it computes the minimum BC release the submission is validated against. | Already on the parameter sheet as the BC version. |
+| `applicationInsightsConnectionString` | "No, but **recommended** for Marketplace submission." | A connection string. It's also where Microsoft writes the detailed validation-failure telemetry, so an AppSource app without one is debugged blind. |
+
+`name`, `publisher`, and `version` are mandatory for every extension, and for AppSource they carry
+one extra rule: they **must match the offer description**, or the submission is rejected at step 4
+of validation. Changing any of them later means updating the offer in Partner Center too.
+
+### E.2 The rest of the checklist, as project rules
+
+- **Analyzer set:** `AppSourceCop` replaces `PerTenantExtensionCop` (they're mutually exclusive) —
+  **Ops § Analyzers**. Configure `AppSourceCop.json` with the publisher's registered affixes and
+  supported countries so `AS0011`/`AS0013` check what validation will check.
+- **Affixes and ID range are registered, not chosen:** *"You're required to register affixes for
+  your publisher name"* and *"to register an ID range for your publisher name"* (§5.5).
+- **Translation files are mandatory** (§8.10), and the `en-US`-only exception in §8.1 doesn't apply.
+- **`DataClassification` on every field** of every table and table extension, set to something other
+  than `ToBeClassified` (§1.4).
+- **Permission sets ship with the app** and must give a user full setup and usage without `SUPER`
+  (§5.3).
+- **Upgrade code is required:** *"Include the proper upgrade code allowing your app to successfully
+  upgrade from version to version"* (Part 9).
+- **`addfirst` / `addlast`** for placing actions and controls on Microsoft's pages, so a base-app
+  change doesn't break the app.
+- **No `OnBeforeCompanyOpen` / `OnAfterCompanyOpen`.**
+- **Never a runtime package**, and the `.app` must be digitally signed.
+- **`AppId` must be unique** — the same `AppId` can't be submitted as both a PTE and a Marketplace
+  app.
+- **Pages and codeunits exposed as web services must raise no UI**, which would throw in the caller.
+
+> *Sources and attribution:* Appendix E and §5.5 are summarized, with short quotations, from
+> Microsoft Learn — [JSON files](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-json-files),
+> [Technical validation checklist](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-checklist-submission),
+> and [Object ranges](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-object-ranges)
+> — © Microsoft Corporation, licensed under
+> [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/); reorganized into the tables above.
+
+---
+
+*This document was created by AJ Ansari, Microsoft MVP, from OnlyCopilotFans. Update this document
+when new patterns are discovered or rules are revised. Its version history is tracked in
+`fullVersion/RunbookChangelog.md` alongside the runbook it accompanies.*
