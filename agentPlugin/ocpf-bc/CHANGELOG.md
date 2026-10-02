@@ -4,6 +4,24 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.1.0 — October 1, 2026
+
+**Bundles:** full runbook v5.1.0.0 (core + 14 step files), Lite v5.1.0.0 (core + 7 step files),
+Standards Guide v1.11.0.0 (unchanged), Operations Guide v5.1.0.0; templates unchanged. No layout
+change: `update-framework` replaces the runbook, step files, and Operations Guide, no migration.
+
+- **Every step closes through `AskUserQuestion`** (or the harness's equivalent). A real run on
+  5.0.0 closed Steps 1–7 with a prose prompt because Rule 6c applied the check-in only from Step
+  08 (Lite: Step 5) and Rule 6a excluded "finishing a step" from the box. Rule 6c, Rule 6a, Ops §
+  Asking and Approvals, and every step file now require **Proceed into Step <next> now
+  (recommended)** / **Stop here** as the last thing in every step's closing message, with the
+  final hand-off keeping its own two-option box. Nothing in the skills changes; the `usage`
+  skill's "before the Rule 6c check-in" ordering now applies to every step.
+- **Resume re-asks the box.** New runbook Rule 6e (both editions) and Ops § *Interrupted and
+  resumed*: after Escape, a stop, or a closed session, "continue" re-asks whatever is still
+  unanswered through `AskUserQuestion`, from the project's files, and keeps the step-close box
+  at every later step. The `status` skill now reports an unanswered box under *Waiting on you*.
+
 ## 5.0.0 — September 27, 2026
 
 **Bundles:** full runbook v5.0.0.0 (core + 14 step files), Lite v5.0.0.0 (core + 7 step files),

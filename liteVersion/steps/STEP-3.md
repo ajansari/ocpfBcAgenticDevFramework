@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 3 — Plan & Scaffold
 
-**Runbook version:** 5.0.0.0 · Lite edition · Phase: BUILD
+**Runbook version:** 5.1.0.0 · Lite edition · Phase: BUILD
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -71,3 +71,5 @@
 generation mode recorded);
 scaffold structurally complete, analyzer settings and (for AppSource) `AppSourceCop.json` in place per Ops § Analyzers
 (not compiled — Operating Rule 4); pre-flight checklist ready. This step's usage rows, one per model, are written before this message (Operating Rule 9).
+
+**Step close (Rule 6c) — mandatory, never a prose prompt:** once the exit gate is met and the usage rows are pasted, end the closing message with the options box: **Proceed into Step 4 now (recommended)** / **Stop here** (say what there is to review and how to resume). Nothing of Step 4 starts until the human answers.

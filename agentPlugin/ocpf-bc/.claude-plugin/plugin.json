@@ -1,7 +1,7 @@
 {
   "name": "ocpf-bc",
   "displayName": "OCPF BC Agentic Development Framework",
-  "version": "5.0.0",
+  "version": "5.1.0",
   "description": "The OnlyCopilotFans Business Central Agentic Development Framework: a guided DEFINE, DESIGN, BUILD, PROVE routine for building AL extensions the right way, per-tenant or for AppSource. Picks Full or Lite, sets up the latest runbook, connects Microsoft's AL tools with nothing to install, adds reasoning, light, and generator sub-agents (batches generated in parallel), writes every project document from a template, estimates human and AI effort, and measures token usage and cost at every step boundary.",
   "author": {
     "name": "OnlyCopilotFans",

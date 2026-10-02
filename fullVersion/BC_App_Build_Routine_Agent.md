@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.0.0.0
+**Version:** 5.1.0.0
 **Last Updated:** October 1, 2026
 
 > Version history for this framework lives in `ocpfFramework/RunbookChangelog.md`, tracked
@@ -18,7 +18,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.11.0.0): the AL *rules* this sequence applies (Parts 1–11, Appendices A–E), cited below as
 >   **Standards §**.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.0.0.0): the *procedures*
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.1.0.0): the *procedures*
 >   this sequence uses — asking, intake, project setup, the AL tools, tooling checks, analyzers,
 >   symbols, editor sync, notifications, packaging, repository hygiene, translations, fetched
 >   companions, documents, usage and cost, and the plugin — cited below as **Ops §**. Both editions
@@ -68,7 +68,7 @@
 
    An approved batch plan, in any batch mode, still stops by itself on any pre-flight failure or deviation from the TDD, and the human can say "stop" at any time. Why batched: approving each batch and each fix separately cost a typical run dozens of one-at-a-time waits without adding protection — every item is still listed and individually selectable before anything is applied.
 6a. **Ask decisions in a selectable options box, not in prose.** When the agent needs the human to *decide something* — pick between design options, approve a version bump, choose a name, resolve an ambiguity — present it through the interactive multiple-choice mechanism the agent's harness provides (e.g., in Claude Code, the `AskUserQuestion` tool — substitute whatever the actual harness offers), with the recommended option first and a short reason on each. A decision buried in a paragraph of chat is easy to miss: it reads like the agent finished and is idling, so the project silently stalls waiting on an answer nobody realised was owed.
-    **Use it only for decisions.** Do *not* wrap ordinary progress in it — finishing a step and waiting to be told to start the next one, reporting a clean compile, or handing back a result is normal conversation, not a decision point. Over-using the box makes it noise, which defeats the purpose.
+    **Use it for decisions — and every step close is one.** Finishing a step and asking whether to start the next one is a decision (proceed / stop), and it always goes through the box: Rule 6c says exactly how, for every step of every phase, PRE-01 through Step 12. What does *not* go in the box is progress *inside* a step — a clean compile mid-round, a batch's pre-flight result, a draft handed back part-way — that is ordinary conversation, and wrapping it makes the box noise.
     **Every intake question counts as a decision, including the ones only the human can answer.**
     Names, publisher, prefix, namespace, localization, object ID ranges, and versions all go
     through the options mechanism. None is asked as an open-ended question or a numbered list in
@@ -92,24 +92,30 @@
     npx-cached mermaid-cli is never on `PATH`, so `which mmdc` is the wrong test. Installing
     anything is itself a human-in-the-loop decision, whatever a fallback elsewhere lists as
     available.
-6c. **From Step 08 onward, check in only after a step that hands the human something to act on.**
-    When a PROVE step's own work is finished — its outputs written, its exit gate met, and the
-    normal end-of-step summary given — decide which kind of step just closed:
-    - **It produced a new package, or a document or findings the human must review or decide on**
-      (typically Steps 08 and 09 when they changed code or left findings open): close with a second
-      message that puts the choice through the interactive mechanism (Rule 6a) — proceed directly
-      into the next step now, or stop here so the human has room to review, run, or publish what was
-      produced. State how to resume when ready (e.g., "say 'continue' or name the step to run next").
-    - **It produced nothing the human needs to act on yet** (Step 10's as-built documents, which are
-      reviewed at the Step 11 → Step 12 hand-off; Step 08 or 09 when nothing changed): say so in one
-      line — e.g., "Step 10 done; starting Step 11 — say stop to pause" — and continue.
+6c. **Every step closes through the options box — PRE-01 through Step 12, every phase, no exceptions.**
+    When a step's own work is finished — its outputs written, its exit gate met, its usage rows
+    recorded and pasted (Rule 11), and the end-of-step summary given — the **last thing in the
+    closing message is a question through the interactive mechanism (Rule 6a)**, never a line of
+    prose that waits for "continue". It asks one thing, with these two named options plus the
+    mechanism's own free-text entry: **Proceed into Step <next> now (recommended)** / **Stop here**.
+    Where the step produced something the human may want to look at first — a package to run, a
+    document or findings to review — the *Stop here* option says what that is, and the message says
+    how to resume ("say 'continue' or name the step"). At a phase boundary (Step 01 → 02 closes
+    DEFINE, 04 → 05 closes DESIGN, 07 → 08 closes BUILD) the same box names the phase that closes
+    and the one that opens. **Nothing of the next step starts until the human answers the box.**
+    Each step file repeats this under its exit gate, with the next step named.
 
-    This is a deliberate, narrow exception to Rule 6a's own "don't wrap ordinary progress in a
-    decision box" guidance, used only where "keep going or pause" is a genuine decision. Steps
-    01–07 are unaffected — Operating Rule 6's own approval gates already pace BUILD. **The Step
-    11 → Step 12 boundary is a special case of this rule, not an addition to it** — see Step 12's
-    own note on the hand-off moment, which replaces this generic check-in for that one specific
-    transition.
+    Why this is a rule and not a preference: through v5.0.0.0 this rule applied "from Step 08
+    onward" and said Steps 01–07 were "unaffected". A v5.0.0.0 run closed every DEFINE, DESIGN,
+    and BUILD step with a plain prompt, the project sat waiting on an answer nobody realised was
+    owed, and the agent explained that the box "was only needed from Step 8". Rule 6a's own
+    reasoning — a decision in prose reads like the agent finished and is idling — holds at every
+    step, so the box is mandatory at every one.
+
+    **One boundary has its own box instead of this one:** the Step 11 → Step 12 hand-off, where
+    Step 12's note *replaces* this check-in with the two-option hand-off message ("Perfect, I
+    understand!" / "I have some questions."), followed by the one reminder message that note
+    prescribes, which asks nothing. Send that box, not both.
 6d. **Zero-install first — never turn setup into the human's job.** Before proposing any install,
     or any manual setup for the human (editing `PATH`, a shell profile, or an environment variable),
     work through the ladder in **Ops § Asking and Approvals** and stop at the first option that
@@ -124,6 +130,38 @@
     set up the AL MCP Server** — the AL Language extension has no such command — and never route AL
     tooling through a third-party VS Code extension. The test: would a functional consultant with
     only VS Code and the AL extension have to do anything by hand? If yes, look again.
+6e. **An interruption changes nothing about how questions are asked.** The human can dismiss a box
+    (Escape in Claude Code), stop the agent mid-step, close the session, or come back days later.
+    When they say "continue", "resume", "go on", name a step, or run the `status` skill and then
+    ask to proceed, the agent first works out what is still unanswered, then asks for it the only
+    way it ever asks — through the options box (Rule 6a) — and carries on under exactly the same
+    rules, including the Rule 6c box at the end of the step and of every step after it:
+    - **A dismissed or unanswered box is re-asked, not inferred.** An interrupted intake set
+      (PRE-01, Step 01) resumes at the first question without a recorded answer, in the same box
+      form, with the questions already answered skipped — never re-asked from the top, never
+      defaulted silently. A dismissed Rule 6c box at a step boundary is sent again, as it was,
+      before anything of the next step starts. A dismissed approval (Rule 6) is asked again before
+      the thing it gates is done.
+    - **What counts as answered is what is recorded:** `docs/1-define/ProjectParameters.md` and
+      `app.json` for intake, the project's sign-offs and `docs/0-project/ProjectMemory.md` for
+      decisions, `ProjectProgress.md` and `ocpfFramework/state/usage.json` for which step is open.
+      Anything the human typed in chat instead of the box is recorded there first, then treated
+      as answered. If the agent's memory of an answer isn't in a file, it isn't an answer.
+    - **Resuming mid-step** never skips the step's close: finish the step's actions, meet its exit
+      gate, record usage (Rule 11), then the Rule 6c box (mid-step, the framework update offer is
+      held until the gate — Ops § Plugin). Resuming *at* a boundary — the human
+      stopped right after a step closed — **always starts with that boundary's Rule 6c box, sent
+      again**: nothing records whether the box was answered or dismissed, re-asking a *Stop here*
+      is harmless, and inferring a *Proceed* is exactly what this rule forbids. The once-per-session
+      framework update offer (Ops § Plugin) comes first, as its own box, and only then the re-asked
+      Rule 6c box — reversed from a live boundary, because the box has not been answered yet and an
+      update may change the next step's rules.
+    - **"Continue" is not a blanket approval.** It reopens the routine; it answers no pending
+      box. The one message that may both resume and answer is a choice typed in the mechanism's
+      free-text entry.
+    Why: an interruption is the moment the agent is most tempted to "just carry on" from memory
+    — and the moment the project is most likely to be running on an assumption the human never
+    made. Both editions follow this rule identically.
 7. **Log every deviation immediately.** Any departure from FRD or TDD goes in the ChangeLog before the next batch starts (see *All Along*).
 8. **Work in the human's chosen working language.** The very first question of the routine (PRE-01) asks which language the human wants to work in. From then on, every question, options box (Rule 6a), explanation, and status message is in that language. **Always in English, regardless:** this runbook and the Standards Guide, AL code, object and identifier names, commit messages, and the engineering documents (`FRD`, `TDD`, `SanityCheck`, `PostDevTDD`, `ChangeLog`, `GapAnalysis`, `CodeReview`, `ProjectMemory`) — so no second-language copy can drift from them. **Kept verbatim in their original language:** raw requirements (`requirements/`) and tester feedback (`docs/0-project/TestingFeedback.md`). When the human names a BC concept in their own language, map it to the standard object through the translation glossary (ALL ALONG → Translations & Terminology) rather than guessing.
 9. **Every project document lives in `docs/`, in its phase subfolder — write the path, not just
@@ -185,7 +223,7 @@
     procedure is **Ops § Usage & Cost → 5. The step boundary ritual**; the non-negotiables:
     - **Step start:** append `{ "step", "startedAt" }` to `ocpfFramework/state/usage.json` and set
       the step's `ProjectProgress.md` row to `In Progress` — same moment, same message.
-    - **Step close, before the exit-gate message or the Rule 6c check-in:** set `completedAt`, run
+    - **Step close, before the closing message (summary, then the pasted rows, then the Rule 6c box as its last thing):** set `completedAt`, run
       the measurement (plugin: `/ocpf-bc:usage --step <id>`; without the plugin, the Ops procedure),
       and write the step's rows into the usage table — **one row per model that ran in the step**,
       the Main model and every sub-agent model, never one row for the step with a single model.
@@ -802,7 +840,7 @@ change.
 
 The companion rules document — `ocpfALDevStandardsGuide.md`, v1.11.0.0 — holds the AL rules this
 runbook cites as **Standards §**, from PRE-02 onward. Its sibling, the **Operations Guide**
-(`ocpfOperationsGuide.md`, v5.0.0.0), holds the procedures, cited as **Ops §**.
+(`ocpfOperationsGuide.md`, v5.1.0.0), holds the procedures, cited as **Ops §**.
 
 **Fetch both at PRE-01, before anything else needs them** — `ocpfFramework/standardsGuide/` and `ocpfFramework/opsGuide/` in
 this project's root, both always gitignored — **and, in the same fetch, this runbook's step files

@@ -17,7 +17,7 @@ names: `PRE-01`, `PRE-02`, `01` … `12`, `STEP-1` … `STEP-7`.
 
 - **Step start:** append `{ "step", "startedAt" }` to `ocpfFramework/state/usage.json` and set the
   step's `ProjectProgress.md` row to `In Progress` — same moment, same message.
-- **Step close, before the exit-gate message or the Rule 6c check-in:** set `completedAt`, run the
+- **Step close, before the closing message (summary, then the pasted rows, then the Rule 6c box as its last thing):** set `completedAt`, run the
   measurement (Step 3 below), and write the step's rows into the usage table. **One row per model
   that ran in the step** — the Main model and every sub-agent model — never one row for the step
   with a single model. **Paste those rows into the closing message** so the human sees them without

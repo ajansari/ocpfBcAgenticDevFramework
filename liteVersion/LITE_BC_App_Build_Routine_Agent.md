@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 5.0.0.0 (Lite, derived from the full framework v5.0.0.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
+**Version:** 5.1.0.0 (Lite, derived from the full framework v5.1.0.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
 **Last Updated:** October 1, 2026
 
 > Version history for this edition lives in `ocpfFramework/LITE_RunbookChangeLog.md`, tracked
@@ -21,7 +21,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.11.0.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.0.0.0), cited as
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.1.0.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
 >   tooling checks, analyzers, symbols, editor sync, notifications, packaging, repository hygiene,
 >   translations, fetched companions, documents, usage and cost, and the plugin.
@@ -161,9 +161,10 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
    6a. **Ask decisions in a selectable options box, not in prose.** When the agent needs the human
        to *decide* something — pick a design option, approve a version bump, resolve an ambiguity —
        present it through the interactive multiple-choice mechanism the agent's harness provides
-       (e.g., Claude Code's `AskUserQuestion`), recommended option first with a short reason. Don't
-       wrap ordinary progress (finishing a step, reporting a clean compile) in this — that's just
-       noise. **Every intake question counts as a decision**, including values only the human
+       (e.g., Claude Code's `AskUserQuestion`), recommended option first with a short reason. **Every
+       step close is a decision too** (proceed / stop) and always goes through it — Rule 6c says
+       how, for Steps 1–7. What stays out is progress *inside* a step (a clean compile mid-round,
+       a batch's pre-flight result) — that's just noise. **Every intake question counts as a decision**, including values only the human
        knows: names, publisher, prefix, namespace, localization, ID ranges, versions. Ask them
        through the options mechanism, never as open-ended questions or a numbered list in chat;
        the mechanism's free-text entry (Claude Code: *Other*) carries a typed answer. Step 1 says
@@ -177,16 +178,23 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
        decision regardless of what a fallback elsewhere in this runbook lists as available. The
        checks and per-OS install offers for Node, mermaid-cli, and PowerShell 7 are **Ops §
        Tooling Checks** — never `which mmdc`.
-   6c. **From Step 5 onward, check in only after a step that hands the human something to act
-       on.** Step 5 always does (a tested package): once its exit gate is met, put the choice
-       through the selectable-options mechanism (Rule 6a) — proceed directly into Step 6, or stop
-       here so the human has room to review, run, or publish the package. State how to resume. A
-       step that produces nothing the human must act on yet gets one line instead (e.g., "done;
-       starting Step 6 — say stop to pause"). Steps 1–4 are unaffected — Rule 6's own approval
-       gates pace them.
-       **The Step 6 → Step 7 boundary is a special case of this rule, not an addition to it** —
-       see Step 7's own hand-off note, which replaces this generic check-in for that one
-       transition. Don't do both.
+   6c. **Every step closes through the options box — Steps 1 through 7, every phase, no
+       exceptions.** When a step's own work is finished — outputs written, exit gate met, usage
+       rows recorded and pasted (Rule 9), summary given — the **last thing in the closing message
+       is a question through the selectable-options mechanism (Rule 6a)**, never a prose prompt
+       that waits for "continue": **Proceed into Step <next> now (recommended)** / **Stop here**,
+       plus the mechanism's free-text entry. Where the step produced something the human may want
+       to look at first (Step 5's tested package, Step 2's Design Doc, Step 6's findings), the
+       *Stop here* option says what that is, and the message says how to resume. At a phase
+       boundary (Step 1 → 2 closes DEFINE, 2 → 3 closes DESIGN, 5 → 6 closes BUILD) the box names
+       the phase that closes and the one that opens. **Nothing of the next step starts until the
+       human answers the box.** Each step file repeats this under its exit gate.
+       Why: through v5.0.0.0 this rule applied "from Step 5 onward" and said Steps 1–4 were
+       "unaffected"; a v5.0.0.0 run closed the early steps with a plain prompt and stalled on an
+       answer nobody realised was owed. A decision in prose reads like idling at every step.
+       **The Step 6 → Step 7 boundary has its own box instead of this one** — see Step 7's hand-off
+       note, which replaces this generic check-in for that one transition (its one closing
+       reminder message, which asks nothing, is part of that note). Don't do both.
    6d. **Zero-install first — never turn setup into the human's job.** Before proposing any
        install, or any manual setup (editing `PATH`, a shell profile, or an environment variable),
        work through the ladder in **Ops § Asking and Approvals**: what the editor already provides,
@@ -199,6 +207,32 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
        Central environment. **Never send the human to the Command Palette to set up the AL MCP
        Server** — the AL Language extension has no such command — and never route AL tooling through
        a third-party VS Code extension.
+   6e. **An interruption changes nothing about how questions are asked.** The human can dismiss a
+       box (Escape in Claude Code), stop the agent mid-step, close the session, or come back later.
+       On "continue", "resume", a named step, or `status` followed by "go on", the agent first
+       works out what is still unanswered, then asks for it through the options box (Rule 6a) —
+       never in prose, never inferred — and carries on under the same rules, including the Rule 6c
+       box at the end of the step and of every step after it.
+       - **A dismissed or unanswered box is re-asked, not inferred.** An interrupted Step 1 intake
+         resumes at the first question without a recorded answer, questions already answered
+         skipped, never re-asked from the top and never defaulted silently. A dismissed Rule 6c box
+         at a boundary is sent again before anything of the next step starts; a dismissed approval
+         (Rule 6) is asked again before the thing it gates is done.
+       - **Answered means recorded:** `docs/1-define/ProjectParameters.md` and `app.json` for intake,
+         sign-offs, `docs/0-project/ChangeLog.md`, and the recorded answers in
+         `docs/2-design/DesignDoc.md` for decisions, `ProjectProgress.md` and
+         `ocpfFramework/state/usage.json` for which step is open. An answer typed in chat instead
+         of the box is recorded first, then counts. Not in a file, not an answer.
+       - **Resuming mid-step** never skips the step's close: finish the actions, meet the exit
+         gate, record usage (Rule 9), then the Rule 6c box (mid-step, the framework update offer
+         is held until the gate — Ops § Plugin). Resuming at a boundary **always starts
+         with that boundary's Rule 6c box, sent again** — nothing records whether it was answered
+         or dismissed, and inferring a *Proceed* is what this rule forbids. The once-per-session
+         framework update offer (Ops § Plugin) comes first, as its own box, then the re-asked box
+         — reversed from a live boundary, because the box has not been answered yet.
+       - **"Continue" is not a blanket approval** — it reopens the routine and answers no pending
+         box; only a choice typed in the mechanism's free-text entry can do both.
+       This rule is identical in the Full edition.
 7. **Log every deviation immediately.** Any departure from the Design Doc — human or agent — goes
    in `docs/0-project/ChangeLog.md` before the next batch starts.
 8. **Work in the human's chosen working language.** The first question of Step 1 asks which
@@ -210,7 +244,8 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
 9. **Record usage at every step boundary — the ritual is Ops § Usage & Cost → 5.** At a step's
    start, append `{ "step", "startedAt" }` to `ocpfFramework/state/usage.json` and set the step's
    `ProjectProgress.md` row to `In Progress` — same moment, same message. At its close, before the
-   exit-gate message or the Rule 6c check-in: set `completedAt`, run the measurement (plugin:
+   closing message (summary, then the pasted rows, then the Rule 6c box as its last thing): set
+   `completedAt`, run the measurement (plugin:
    `/ocpf-bc:usage --step <id>`; without the plugin, the Ops procedure), and write the step's rows
    into the usage table — **one row per model that ran in the step** (the Main model, and every
    sub-agent model), never one row for the step with a single model. Paste those rows into the
@@ -547,7 +582,7 @@ first package and before Step 6's release-candidate question. The non-negotiable
 
 Two companions are fetched at Step 1 and kept for the life of the project: the **Standards Guide**
 (`ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md`, v1.11.0.0), cited as **Standards §**, and the
-**Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v5.0.0.0), cited as **Ops §** and shared
+**Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v5.1.0.0), cited as **Ops §** and shared
 unchanged with the full framework.
 
 **Full procedure: Ops § Fetched Companions** — fetching, refreshing, the plugin's offline copies,

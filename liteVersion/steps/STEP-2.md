@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 2 — Write the Design Doc & Self-Check
 
-**Runbook version:** 5.0.0.0 · Lite edition · Phase: DESIGN
+**Runbook version:** 5.1.0.0 · Lite edition · Phase: DESIGN
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -151,3 +151,5 @@ scale — every planned object with its ID, source table, and R/W status); `docs
 knowledge outside the document. `docs/2-design/HumanEffortEstimate.md` exists, covers every object, names
 its baselines source, and states its assumptions. `docs/2-design/AiEffortEstimate.md` exists, covers every step
 from Step 3 on, states its margin and the 30-minute approval assumption. This step's usage rows, one per model, are written before this message (Operating Rule 9).
+
+**Step close (Rule 6c) — mandatory, never a prose prompt:** once the exit gate is met and the usage rows are pasted, end the closing message with the options box: **Proceed into Step 3 now — closes DESIGN, opens BUILD (recommended)** / **Stop here** (say what there is to review and how to resume). Nothing of Step 3 starts until the human answers.

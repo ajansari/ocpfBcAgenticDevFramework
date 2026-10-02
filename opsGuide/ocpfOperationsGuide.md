@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.0.0.0 (from this release the Full and Lite runbooks, this guide, and the plugin share one version number; the previous version of this guide was 2.0.1.0)
+**Version:** 5.1.0.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number; the previous version of this guide was 2.0.1.0)
 **Last Updated:** October 1, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
@@ -93,8 +93,39 @@ reason on each. Never an open-ended question or a numbered list in chat.
 **Option counts:** 2–4 options per question. With a single suggestion, pair it with *I'll type it*;
 with more than four candidates, offer the four most likely and say the rest can be typed.
 
-**Don't wrap ordinary progress in it.** Finishing a step, reporting a clean compile, or handing back
-a result is conversation, not a decision. Over-using the box makes it noise.
+**Every step close goes through it; progress inside a step does not.** The end of every step and
+every phase — Full PRE-01 through Step 12, Lite Steps 1 through 7 — closes with one box, **Proceed
+into Step <next> now (recommended)** / **Stop here** (runbook Rule 6c), sent after the usage rows
+are pasted and before anything of the next step starts. The one exception is the final hand-off
+(Full Step 11 → 12, Lite 6 → 7), which has its own two-option box in the step file. A clean
+compile mid-round, a batch's pre-flight result, or a draft handed back part-way through a step is
+conversation, not a decision — wrapping those makes the box noise. (Through v5.0.0.0 the rule
+applied only to the PROVE steps; a real run on v5.0.0.0 closed Steps 1–7 with a prose prompt and
+stalled, which is why the box is now mandatory at every step.)
+
+### Interrupted and resumed — the box comes back (runbook Rule 6e)
+
+Escape in Claude Code dismisses an `AskUserQuestion` box with no answer recorded; Copilot's
+`askQuestions` and `ask_user` can be cancelled the same way; a session can be closed on any of
+them. None of that changes how the agent asks. On "continue", "resume", a named step, or the
+`status` skill followed by "go on":
+
+1. **Find what is still unanswered, from files, not memory:** intake answers in
+   `docs/1-define/ProjectParameters.md` and `app.json`; decisions in sign-offs and
+   `docs/0-project/ProjectMemory.md` (Full) or the ChangeLog and `docs/2-design/DesignDoc.md`
+   (Lite); the open step in `ProjectProgress.md` and
+   `ocpfFramework/state/usage.json` (a step with `startedAt` and no `completedAt` is mid-step; a
+   step with `completedAt` whose next step has no `startedAt` is at a boundary).
+2. **Re-ask every unanswered question through the mechanism above**, in the same box form, the
+   already-answered ones skipped. An interrupted intake resumes at its first unanswered question. A
+   resume at a boundary **always** starts with that boundary's Rule 6c box, sent again — nothing
+   records whether it was answered or dismissed, so it is never inferred. A dismissed approval is
+   asked again before the gated action. The once-per-session framework update check (Ops § Plugin)
+   runs first, as its own box; the re-asked box follows it.
+3. **Carry on under the same rules** — the Rule 6c box at the end of this step and every later
+   one, the usage ritual, the approval gates. "Continue" reopens the routine; it answers nothing.
+
+Both editions apply this identically (Full Rule 6e, Lite Rule 6e).
 
 ### GitHub Copilot session settings
 
@@ -2144,7 +2175,7 @@ the end of the project, not "when there's time". Both editions, the same words (
 - **Step start:** append `{ "step": "<id>", "startedAt": "<now>" }` to
   `ocpfFramework/state/usage.json` and set the step's `ProjectProgress.md` row to `In Progress`.
   Same moment, same message.
-- **Step close — before the exit-gate message or the Rule 6c check-in:** set `completedAt`; run the
+- **Step close — before the closing message (summary, then the pasted rows, then the Rule 6c box as its last thing):** set `completedAt`; run the
   measurement — with the plugin `/ocpf-bc:usage --step <id>`, without it parts 1–3 above by hand —
   and write the step's rows into the usage table, **one row per model that ran in the step**. Then
   **paste those rows into the closing message**, so the human sees them without opening the file.
@@ -2242,7 +2273,13 @@ which are always gitignored (Ops § Repository Hygiene). A project whose marker 
    - Lite: `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/liteVersion/LITE_BC_App_Build_Routine_Agent.md`
 3. Compare numerically, part by part.
    - **Newer, and not the skipped version:** say so in a sentence or two and offer **Update now /
-     Not now / Skip this version**. **Raise it at a step boundary, not mid-step** — an update that
+     Not now / Skip this version**. **Raise it at a step boundary, not mid-step** — as its own box,
+     sent after the boundary's Rule 6c box is answered *Proceed* and before the next step's
+     `startedAt`; on a session that resumes **at a boundary**, this offer comes first, then the
+     re-asked Rule 6c box (reversed from a live boundary, because on resume the Rule 6c box has not
+     yet been answered and an update may change the next step's rules); on a mid-step resume the
+     version is still read at session start, but the offer is held until the gate (next sentence)
+     and any re-asked box comes first (runbook Rule 6e) — an update that
      lands between two Actions of one step is the one most likely to change the rules under work
      already half-done. When a session resumes mid-step, hold the offer until that step's exit gate
      is met rather than dropping it. "Update now" follows the plugin's `update-framework` skill:

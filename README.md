@@ -54,6 +54,20 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 1, 2026 — Full v5.1.0.0 · Lite v5.1.0.0 · Operations Guide v5.1.0.0 · Plugin v5.1.0
+
+**Every step now closes through the options box.** A real run on v5.0.0.0 closed Steps 1–7 with a
+plain prompt and stalled: Rule 6c applied the check-in only "from Step 08 onward" (Lite: Step 5),
+and Rule 6a and the Operations Guide both told the agent not to wrap "finishing a step" in the
+box. All three now say the opposite, and every step file repeats it under its exit gate: the end
+of every step and every phase — Full PRE-01 through Step 12, Lite 1 through 7 — ends with
+**Proceed into the next step now (recommended)** / **Stop here** through `AskUserQuestion` (or
+the harness's equivalent), and nothing of the next step starts until the human answers. The
+final hand-off keeps its own two-option box. **A new Rule 6e** (both editions) makes resuming after
+Escape, a stop, or a closed session re-ask whatever is still unanswered through the box, from the
+project's files, and keep the step-close box from there on. No layout change, no migration;
+`update-framework` replaces the files. Standards Guide unchanged at v1.11.0.0.
+
 ## September 27, 2026 — Full v5.0.0.0 · Lite v5.0.0.0 · Operations Guide v5.0.0.0 · Standards Guide v1.11.0.0 · Plugin v5.0.0
 
 A major release for both editions, driven by what real projects on v4 showed. The project layout

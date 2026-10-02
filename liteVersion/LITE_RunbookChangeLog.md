@@ -16,6 +16,33 @@ framework.
 
 ---
 
+## v5.1.0.0 — October 1, 2026
+
+Derived from full framework **v5.1.0.0**; Operations Guide **v5.1.0.0**; plugin **5.1.0**;
+Standards Guide unchanged at v1.11.0.0. No layout change, no migration.
+
+- **Every step closes through the options box — Steps 1 through 7.** On v5.0.0.0, Rule 6c
+  applied the check-in "from Step 5 onward" and said Steps 1–4 were "unaffected", and Rule 6a
+  told the agent not to wrap "finishing a step" in the box; a real run (on the Full edition, whose
+  Lite rule is the same shape) closed the early steps with a plain prompt and stalled. Rule 6c now
+  requires the box at the end of every step and every phase boundary, as the last thing in the
+  closing message after the usage rows: **Proceed into Step <next> now (recommended)** / **Stop
+  here**, with what to review and how to resume. Nothing of the next step starts until the human
+  answers. Rule 6a says a step close *is* a decision; only progress inside a step stays out of the
+  box. The Step 6 → Step 7 hand-off box still replaces the generic one at that boundary.
+- **Every step file** (`STEP-1.md` through `STEP-7.md`) carries a **Step close (Rule 6c)**
+  paragraph under its exit gate naming the next step and the two options; `STEP-6.md` points at
+  Step 7's hand-off box; `STEP-7.md` closes the project with *Close the project — released* /
+  *Something needs fixing*.
+- **Ops § Asking and Approvals** says the same under *The mechanism, per harness*.
+- **New Rule 6e — an interruption changes nothing about how questions are asked.** Same text and
+  numbering as the Full edition: after Escape on a box, a stop, or a closed session, "continue"
+  makes the agent find what is unanswered from the project's files, re-ask it through the options
+  box (Step 1 intake resumes at its first unanswered question; a dismissed Rule 6c box is sent
+  again), and carry on with the Rule 6c box at every later step. "Continue" answers no box.
+  Procedure in **Ops § Asking and Approvals → Interrupted and resumed**.
+
+
 ## v5.0.0.0 — September 27, 2026
 
 Derived from full framework **v5.0.0.0**; Standards Guide **v1.11.0.0** (Appendix B only);

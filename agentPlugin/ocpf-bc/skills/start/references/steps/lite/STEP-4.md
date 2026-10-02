@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 4 — Generate the Code
 
-**Runbook version:** 5.0.0.0 · Lite edition · Phase: BUILD
+**Runbook version:** 5.1.0.0 · Lite edition · Phase: BUILD
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -81,3 +81,5 @@ deviation from `docs/2-design/DesignDoc.md` (a generator's reported deviations i
 generator's report integrated and its model line checked; permission-set coverage
 verified. A clean compile is not required to close this gate — Step 4 hands off directly into
 Step 5's mandatory compile-and-package. This step's usage rows, one per model, are written before this message (Operating Rule 9).
+
+**Step close (Rule 6c) — mandatory, never a prose prompt:** once the exit gate is met and the usage rows are pasted, end the closing message with the options box: **Proceed into Step 5 now (recommended)** / **Stop here** (say what there is to review and how to resume). Nothing of Step 5 starts until the human answers.

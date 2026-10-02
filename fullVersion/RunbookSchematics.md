@@ -478,7 +478,7 @@ flowchart TD
 
 ---
 
-*Generated from `BC_App_Build_Routine_Agent.md` v5.0.0.0 (v4.0.0.0 moved the step text into `steps/` and added the usage table and effort estimate; v5.0.0.0 added the batch-mode choice and generator lane in BUILD, the scorecard, the fifth Step 11 document and release-candidate question, the new project paths, and the Usage and Tooling Checks disciplines — the step order and gates are otherwise as drawn); all 8 diagrams re-rendered clean with `@mermaid-js/mermaid-cli` 12.0.0 on September 27, 2026. Version
+*Generated from `BC_App_Build_Routine_Agent.md` v5.1.0.0 (v5.1.0.0 made the Rule 6c options-box check-in mandatory at every step close, PRE-01 through Step 12, not only PROVE; v4.0.0.0 moved the step text into `steps/` and added the usage table and effort estimate; v5.0.0.0 added the batch-mode choice and generator lane in BUILD, the scorecard, the fifth Step 11 document and release-candidate question, the new project paths, and the Usage and Tooling Checks disciplines — the step order and gates are otherwise as drawn); all 8 diagrams re-rendered clean with `@mermaid-js/mermaid-cli` 12.0.0 on September 27, 2026. Version
 history is in `RunbookChangelog.md` (a project's copy: `ocpfFramework/RunbookChangelog.md`). If the runbook changes in a way that affects the
 phase/step/role structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*

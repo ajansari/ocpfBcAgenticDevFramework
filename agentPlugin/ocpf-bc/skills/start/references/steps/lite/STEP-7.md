@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 7 — Release for Testing
 
-**Runbook version:** 5.0.0.0 · Lite edition · Phase: PROVE
+**Runbook version:** 5.1.0.0 · Lite edition · Phase: PROVE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -97,3 +97,5 @@ is additive-only, **Force Sync** with an explicit data-loss warning if anything 
 shrunk, retyped, or re-keyed since the last package installed in that tenant. Then set the Step 7
 row of `ProjectProgress.md` to `Completed`, refresh the usage table, and export the calibration
 file (the hand-off note above).
+
+**Step close (Rule 6c) — mandatory, never a prose prompt:** when the human reports the test outcome, end the closing message with the options box: **Close the project — released (recommended)** / **Something needs fixing** (names what, and re-enters the Step 5 cycle). The routine does not end on an open prompt.

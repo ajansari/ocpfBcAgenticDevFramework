@@ -25,7 +25,7 @@ The `start` skill:
 3. connects **Microsoft's AL tools**, with nothing to install, using the AL Language extension you already have,
 4. begins the routine.
 
-**Project layout (plugin 5.0.0, Full 5.0.0.0 / Lite 5.0.0.0):** everything the framework fetches
+**Project layout (since plugin 5.0.0, Full 5.0.0.0 / Lite 5.0.0.0; current 5.1.0 / 5.1.0.0):** everything the framework fetches
 or keeps lives under one folder, `ocpfFramework/` (step files, templates, guides, patterns,
 scripts, the marker, and per-developer `state/`); project documents go in `docs/` by phase
 (`0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/`); `ProjectProgress.md` stays in the

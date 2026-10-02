@@ -323,7 +323,7 @@ flowchart LR
 
 ---
 
-*Generated from `LITE_BC_App_Build_Routine_Agent.md` v5.0.0.0 (September 27, 2026: `ProjectProgress.md`, the `ocpfFramework/` and `docs/` layouts, the parallel-batch branch in Step 4, the Revision increment and fixed build message in Step 5, the scorecard, Acknowledgements, and release-candidate question in Step 6, and Step 7's "ships as it is" gate); all 7 diagrams re-rendered clean with `@mermaid-js/mermaid-cli` 12.0.0 on September 27, 2026.
+*Generated from `LITE_BC_App_Build_Routine_Agent.md` v5.1.0.0 (October 1, 2026: the Rule 6c options-box check-in is mandatory at every step close, Steps 1–7, not only Step 5 onward; September 27, 2026: `ProjectProgress.md`, the `ocpfFramework/` and `docs/` layouts, the parallel-batch branch in Step 4, the Revision increment and fixed build message in Step 5, the scorecard, Acknowledgements, and release-candidate question in Step 6, and Step 7's "ships as it is" gate); all 7 diagrams re-rendered clean with `@mermaid-js/mermaid-cli` 12.0.0 on September 27, 2026.
 Version history is in `LITE_RunbookChangeLog.md`. If the Lite runbook changes in a way that
 affects the phase/step structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*

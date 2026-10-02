@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.0.0.0**, the Standards Guide is at **v1.11.0.0**, the Operations Guide at **v5.0.0.0**, and Lite at **v5.0.0.0** — but
+**v5.1.0.0**, the Standards Guide is at **v1.11.0.0**, the Operations Guide at **v5.1.0.0**, and Lite at **v5.1.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -23,6 +23,51 @@ change-worthy. (This is a different convention from a project's own ChangeLog, w
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
 
 ---
+
+## v5.1.0.0 — October 1, 2026
+
+**Every step closes through the options box — not only PROVE.** Lite **v5.1.0.0**, Operations
+Guide **v5.1.0.0**, plugin **5.1.0**; Standards Guide unchanged at v1.11.0.0. No layout change
+and no migration: `update-framework` replaces the runbook, step files, and Operations Guide.
+
+- **What went wrong on v5.0.0.0.** A real project run closed Steps 1 through 7 with a plain prose
+  prompt — "ready to start Step N, say continue" — and waited. Asked why it hadn't used
+  `AskUserQuestion`, the agent said the box "was only needed from Step 8". It was quoting the
+  framework accurately: Rule 6c opened with *"From Step 08 onward, check in only after a step
+  that hands the human something to act on"* and ended *"Steps 01–07 are unaffected"*; Rule 6a's
+  "use it only for decisions" paragraph listed *"finishing a step and waiting to be told to
+  start the next one"* as something **not** to put in the box; and Ops § Asking and Approvals
+  repeated that. Three places told the agent to do exactly what it did.
+- **Rule 6c rewritten.** Every step — PRE-01 through Step 12, every phase boundary — closes with
+  the options box as the last thing in the closing message, after the usage rows are pasted:
+  **Proceed into Step <next> now (recommended)** / **Stop here**, plus the mechanism's free-text
+  entry. Where the step produced something to review first, *Stop here* says what and the message
+  says how to resume. At a phase boundary the box names the phase closing and the one opening.
+  Nothing of the next step starts until the human answers. The real-run failure is recorded in
+  the rule as its "why". The Step 11 → Step 12 hand-off box still *replaces* this one at that
+  boundary (unchanged from v3.9.0.0).
+- **Rule 6a's scope corrected.** "Use it only for decisions" now says a step close *is* a
+  decision and points at Rule 6c; what stays out of the box is progress *inside* a step (a clean
+  compile mid-round, a batch's pre-flight result, a draft handed back part-way).
+- **Ops § Asking and Approvals** says the same under *The mechanism, per harness*, with the
+  v5.0.0.0 failure named.
+- **Every step file** (`PRE-01.md` through `12.md`) carries a **Step close (Rule 6c)** paragraph
+  directly under its exit gate, naming the next step and the two options — so the instruction is
+  in the file the agent reads before the step, not only in the core rule it may have scrolled
+  past. `11.md` points at Step 12's hand-off box; `12.md` closes the project with
+  *Close the project — released* / *Something needs fixing*.
+- **Schematics** footers note the change; the diagrams carry no step-close node (only the
+  hand-off node, still correct), so the rule text governs.
+- **New Rule 6e — an interruption changes nothing about how questions are asked.** Escape on a
+  box, a stop mid-step, or a closed session leaves a question unanswered; on "continue" / "resume"
+  / a named step the agent works out what is still unanswered **from the project's files** (intake
+  in `ProjectParameters.md` and `app.json`, decisions in sign-offs and `ProjectMemory.md`, the
+  open step in `ProjectProgress.md` and `usage.json`), re-asks it through the options box (an
+  intake resumes at its first unanswered question; a dismissed Rule 6c box is sent again before
+  the next step starts), and carries on with the Rule 6c box at every later step. "Continue" is
+  not an answer to any pending box. Procedure in **Ops § Asking and Approvals → Interrupted and
+  resumed**; the plugin's `status` skill reports an unanswered box as "waiting on you".
+
 
 ## v5.0.0.0 — September 27, 2026
 

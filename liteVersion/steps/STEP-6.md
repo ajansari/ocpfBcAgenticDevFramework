@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 6 — Review, Gap-Check & Finalize Docs
 
-**Runbook version:** 5.0.0.0 · Lite edition · Phase: PROVE
+**Runbook version:** 5.1.0.0 · Lite edition · Phase: PROVE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -125,3 +125,5 @@ documents follow at Step 7. Also: the code-review scorecard in this step's Chang
 have been run and pass, or it's recorded why they couldn't be; the eight-dimension scorecard is in
 the ChangeLog entry; `docs/0-project/Acknowledgements.md` exists with one row per resource used;
 the release-candidate question is answered and, on yes, `1.0.0.0` is built. This step's usage rows, one per model, are written before this message (Operating Rule 9).
+
+**Step close (Rule 6c) — mandatory, never a prose prompt:** once the exit gate is met and the usage rows are pasted, this boundary closes with **Step 7's hand-off box** (the note at the top of `STEP-7.md`: "Perfect, I understand!" / "I have some questions."), which replaces the generic Proceed / Stop box here. Send that box, not both, and nothing of Step 7 starts until the human answers it.

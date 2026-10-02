@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 1 — Define the Problem & Lock Parameters
 
-**Runbook version:** 5.0.0.0 · Lite edition · Phase: DEFINE
+**Runbook version:** 5.1.0.0 · Lite edition · Phase: DEFINE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -182,3 +182,5 @@ Permission Sets required = `Yes`, ≥ 2 IDs are reserved. Onboarding questions a
 Every target language is classified against Microsoft's live page and, unless source wording is
 *US wording, no translation files*, has a required-at-release answer and a named reviewer; source
 language and wording are recorded. Human confirms the sheet.
+
+**Step close (Rule 6c) — mandatory, never a prose prompt:** once the exit gate is met and the usage rows are pasted, end the closing message with the options box: **Proceed into Step 2 now — closes DEFINE, opens DESIGN (recommended)** / **Stop here** (say what there is to review and how to resume). Nothing of Step 2 starts until the human answers.

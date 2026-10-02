@@ -1,6 +1,6 @@
 # BC App Build Routine — PRE-02 — Structured Gap Analysis
 
-**Runbook version:** 5.0.0.0 · Full edition · Phase: DEFINE
+**Runbook version:** 5.1.0.0 · Full edition · Phase: DEFINE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -26,3 +26,5 @@
 **Outputs:** Expanded, de-duplicated entity list with each entity tagged (analytical / master / setup / document / posted / lookup), R/W intent noted, and global-vs-localized noted. Gap log: what was added and why.
 
 **Exit gate:** Technical Lead reviews the expanded list; all gaps are closed or explicitly deferred with reasoning (Stage↔Step Map, Stage 2). When **Approvers** is one person, this is one sign-off covering `docs/1-define/ProblemStatement.md` and the expanded list together (PRE-01's deferred sign-off included). This step's usage rows, one per model, are written before this message (Operating Rule 11).
+
+**Step close (Rule 6c) — mandatory, never a prose prompt:** once the exit gate is met and the usage rows are pasted, end the closing message with the options box: **Proceed into Step 01 now (recommended)** / **Stop here** (say what there is to review and how to resume). Nothing of Step 01 starts until the human answers.

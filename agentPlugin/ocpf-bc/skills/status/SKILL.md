@@ -68,4 +68,10 @@ Keep it to a compact block:
 - **Copilot session settings** (only when Copilot is in use): the request limit and approval mode
   from `ocpfFramework/state/copilot.json`, or "not set".
 
-Then stop. Don't start the next step unless the human asks.
+- **Unanswered box:** when the open step's record shows a question or a step-close that was never
+  answered (an intake field blank in `docs/1-define/ProjectParameters.md`, a step with `completedAt`
+  whose successor never started), say so: the next thing on resume is that box again (runbook
+  Rule 6e).
+
+Then stop. Don't start the next step unless the human asks. When they do, the first message
+re-asks whatever is still unanswered through the options box, then proceeds under Rules 6a and 6c.
