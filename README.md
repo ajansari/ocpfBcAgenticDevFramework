@@ -88,7 +88,11 @@ reference to this framework's step numbers and operating rules; its rule numberi
 by contract, so **Standards §** citations keep resolving. Standards changes are logged there from
 1.12.0.0 on; this changelog records only where the pin points.
 
-**A live dashboard for every project.** From the first minutes of PRE-01 (Lite Step 1), the
+**A live dashboard for every project.**
+
+![The OCPF project dashboard — the Build Map page, rendered from a real project](images/ocpfDashboard.png)
+
+From the first minutes of PRE-01 (Lite Step 1), the
 framework renders `ocpfFramework/state/dashboard.html` — the *Build Map* page — opens it once in
 your default browser, explains it once, and then keeps it fresh for free: hooks re-render it after
 every turn in Claude Code and the Copilot CLI (every step boundary in Copilot Chat, which has no
