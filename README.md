@@ -54,6 +54,78 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 10, 2026 — Full v5.2.0.0 · Lite v5.2.0.0 · Operations Guide v5.2.0.0 · Plugin v5.2.0
+
+**Copilot credits are read from the session journal — nobody types a number any more.** Since
+VS Code 1.139 (September 22, 2026) Copilot Chat's agent mode runs on the Copilot SDK, the same
+engine as the Copilot CLI, and the chat sessions moved out of VS Code's workspace storage into
+`~/.copilot/session-state/`. The usage script was still reading the old location, found nothing,
+and fell back to asking you to read *Session Cost* from the popover at every step close. It now
+reads the SDK journal: the project folder from `session.start`, the cumulative credits from
+`session.usage_checkpoint` and `session.shutdown`, every model request with its timestamp. The
+figure is exact when a chat ends and split by request share while it runs, and the table says
+which. Copilot CLI projects are measured the same way, from the same journal. `--reconcile` prints
+the account's month-to-date credits from GitHub's billing API as a cross-check. The Copilot table
+is one row per step with every model named; the per-model split stays in the JSON and calibration
+output. Both script ports, the `usage` skill, Ops § Usage & Cost, both runbook cores, and the
+`ProjectProgress.md` template changed; nothing else moved, no migration.
+
+**Enums, never Options — and every enum's `Extensible` is a question, not a default.** The
+Standards Guide (v1.12.0.0, new §1.9) now rules out the `Option` data type in new code and makes
+each enum's `Extensible` a recorded decision: it defaults to `false` on an enum, so a design that
+never asks has silently closed the list. Full Step 03 and Lite Step 2 ask you, per enum, through
+the options box; the TDD and Design Doc record the answer and the reason; the generated enum
+carries the property explicitly either way.
+
+**The Standards Guide is now its own repository.** The *OCPF AL Development Standards Guide* has
+moved to [ajansari/ocpfBCALStandards](https://github.com/ajansari/ocpfBCALStandards), MIT, with its
+own README, CONTRIBUTING, CHANGELOG, and release tags, so the Business Central AL community can
+use it under any build process. This framework is one consumer: it pins a release tag (`v1.12.0.0`,
+named in `standardsGuide/README.md`), fetches the guide at that tag into each project's
+`ocpfFramework/standardsGuide/` — same path, same filename as before, so no project file moves —
+and bundles the same release in the plugin for offline use. The guide's own text lost every
+reference to this framework's step numbers and operating rules; its rule numbering is append-only
+by contract, so **Standards §** citations keep resolving. Standards changes are logged there from
+1.12.0.0 on; this changelog records only where the pin points.
+
+**A live dashboard for every project.** From the first minutes of PRE-01 (Lite Step 1), the
+framework renders `ocpfFramework/state/dashboard.html` — the *Build Map* page — opens it once in
+your default browser, explains it once, and then keeps it fresh for free: hooks re-render it after
+every turn in Claude Code and the Copilot CLI (every step boundary in Copilot Chat, which has no
+hooks), with no model call. It shows your app's name and icon, which phase and step the build is
+on, tokens or AI credits and cost so far, how the elapsed time splits between the agent's work and
+yours, which models are working, the current step's exit gate, and — when the agent is waiting on
+you — the open question and where to answer it. `ProjectProgress.md` stays the written record; the
+page is a view of it. **To reopen it after closing the tab:** right-click
+`ocpfFramework/state/dashboard.html` in VS Code's Explorer → **Open Externally** (or *Reveal in
+Finder / File Explorer* and double-click), or ask the agent to "open the dashboard". One theme
+ships, *OnlyBCFans*, dark with a Day / Night switch; the page's footer carries a selector for the
+themes to come. To make the app's name and icon available that early, **the three identity
+questions — extension name, publisher, app icon — now come first**, right after the notification
+question, and `app.json` is written the moment they are answered; the rest of `app.json` (ID
+ranges, BC version, features) is still written when the intake sheet is confirmed.
+
+**Business Central Copilot features get a verified blueprint.** When a project builds a feature in
+Business Central's own Copilot UI — a registered capability, a `PromptDialog`, a *Suggest with
+Copilot* action, Azure OpenAI through System.AI — both runbooks now fetch and follow the
+[OnlyBCFans BC Copilot Blueprint](https://github.com/ajansari/obcfBCCopilotBlueprint): a design
+distilled from a shipped per-tenant extension, with compilable templates, a symbol-verified API
+reference for BC 27.5, and a table of 31 false assumptions agents keep making ("a PTE can't do
+Copilot", "it needs an Azure subscription", "`RegisterCapability` takes three parameters"). The
+intake asks *Business Central Copilot feature? Yes / No*; a Yes names the host pages and billing
+path, triggers the fetch at the scaffold step, and threads the Blueprint's procedure through the
+FRD, TDD, generation, compile fixes, and review. A new rule in both runbooks: never claim a BC
+Copilot thing is impossible without reading the false-assumptions table and citing the row.
+
+**API pages take BCQuality's shape.** The guide's "set exactly one of `DelayedInsert` /
+`Editable = false`" rule is gone; it contradicted BCQuality on every review and left read-only
+pages without a real write guard. Every API page now declares `DelayedInsert = true`, and a
+read-only page adds `Editable = false` with `InsertAllowed`, `ModifyAllowed`, and `DeleteAllowed`
+all false, Microsoft's documented way to refuse POST, PATCH, and DELETE. Details in
+[fullVersion/RunbookChangelog.md](fullVersion/RunbookChangelog.md),
+[liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
+[agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
+
 ## October 1, 2026 — Full v5.1.0.0 · Lite v5.1.0.0 · Operations Guide v5.1.0.0 · Plugin v5.1.0
 
 **Every step now closes through the options box.** A real run on v5.0.0.0 closed Steps 1–7 with a
@@ -178,11 +250,10 @@ Full's Main / Light / Reasoning roles; Lite recommends Sonnet Medium or Gemini 3
   the object isn't in them, or a pattern or event signature is needed — never as a second check
   — and every lookup says why it happened.
 - **GitHub Copilot usage measured in AI credits** *(added September 29)*. Copilot has billed in AI
-  credits since June 1, 2026, and VS Code records them per turn and per model in its chat session
-  files. The usage script now reads those, so a Copilot project gets a credits table in
-  `ProjectProgress.md` — AI credits and cost per step and model, sub-agents included, its total
-  equal to the chat's *Session Cost* — instead of a row of *n/a*. Steps are separated by
-  checkpoints taken at each step close. See *Token and cost tracking* under the previous release.
+  credits since June 1, 2026. The usage script reads them from Copilot's own records, so a Copilot
+  project gets a credits table in `ProjectProgress.md` — AI credits and cost per step, sub-agents
+  included — instead of a row of *n/a*. (v5.2.0.0 moved the source to the Copilot SDK's session
+  journal; see the October 10 entry.) See *Token and cost tracking* under the previous release.
 - **One version number** *(October 1)*. The Full runbook, Lite, the Operations Guide, and the plugin
   all ship as **5.0.0.0 / 5.0.0** and move together from here; the Standards Guide keeps its own
   line. The What's New headings before this one show the old, separate numbering.
@@ -249,17 +320,17 @@ the Reasoning and Light sub-agents counted. Prices come from Anthropic's pricing
 Ollama's for its cloud models (local Ollama models cost nothing), stored with the source and the
 date read.
 
-**With GitHub Copilot in VS Code, the unit is the AI credit, and the table is a different
-table.** Since June 1, 2026 every Copilot plan bills in AI credits: each model call's tokens are
-priced at that model's published rate and converted to credits, at a published value per credit.
-VS Code records the credits for every turn and every sub-agent call, per model, in the chat
-session files it keeps on disk, and the framework reads those files directly, so the table shows
-**AI credits and cost per step and per model**, and its total is the *Session Cost* you see in the
-chat's Session Info popover. It has no token columns, because Copilot Chat records no token totals
-by type, and no token figure is ever estimated for a Copilot step. Those session files are VS
-Code's own storage, not a documented interface; if a VS Code release changes them, the agent asks
-you for the one number in the popover and records that instead. Timestamps, elapsed time, and the
-human-hours comparison work the same in both tools.
+**With GitHub Copilot — VS Code's chat or the Copilot CLI — the unit is the AI credit, and the
+table is a different table.** Since June 1, 2026 every Copilot plan bills in AI credits: each
+model call's tokens are priced at that model's published rate and converted to credits, at a
+published value per credit. The Copilot SDK, which runs VS Code's agent mode and the CLI, journals
+every session on disk with its project folder and its cumulative credits, sub-agents included, and
+the framework reads that journal directly, so the table shows **AI credits and cost per step**,
+every model that answered named, and its total is what the chat's Session Info popover shows once
+the session has ended. It has no token columns, because Copilot records no token totals by type,
+and no token figure is ever estimated for a Copilot step. You are never asked to read a number
+from the screen. Timestamps, elapsed time, and the human-hours comparison work the same in both
+tools.
 
 *An earlier version of this section said Copilot exposed premium requests only. That was true
 until GitHub's billing change; the framework follows the new unit from Full v5.0.0.0 / Lite
@@ -542,7 +613,7 @@ you can run `/ocpf-bc:update-framework` in them anytime.
 | File | Purpose |
 |---|---|
 | `fullVersion/` | The **Full Framework** — the complete 14-step routine. See [Full Framework, by hand](GettingStartedAlternatives.md#setup-full). |
-| `standardsGuide/ocpfALDevStandardsGuide.md` | The companion **OCPF AL Development Standards Guide** — the detailed AL rules the runbook cites as **Standards §** (coding standards, API page design, field inclusion, naming, ID allocation, gap analysis, anti-patterns, translation and multilanguage, upgrade and data migration, events and extensibility, and the AppSource manifest and submission requirements). You don't need to copy this one by hand: the runbook fetches it from this repository into every project's `ocpfFramework/standardsGuide/` at PRE-01, and gitignores it there. Shared by both editions. |
+| `standardsGuide/README.md` | The **prelude** to the companion **OCPF AL Development Standards Guide** — the guide itself now lives standalone at [ajansari/ocpfBCALStandards](https://github.com/ajansari/ocpfBCALStandards) (MIT) and is fetched at the release tag this file pins (`v1.12.0.0`) into each project's `ocpfFramework/standardsGuide/`. The prelude holds the framework's own framing: purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the map of what is deliberately not in the guide. |
 | `opsGuide/ocpfOperationsGuide.md` | The companion **OCPF Operations Guide** — the procedures both editions share, cited as **Ops §** (how the agent asks and gets approval, intake, roles, project setup, the AL tools, analyzers, symbols, editor sync, notifications, packaging, repository hygiene, translations, automated tests, fetched companions, reference sources, and the plugin). Fetched into each project's `ocpfFramework/opsGuide/` alongside the Standards Guide. |
 | `liteVersion/` | The **Lite Edition** — a 7-step version of the framework for small, fast-moving projects. See [Lite Edition, by hand](GettingStartedAlternatives.md#lite-edition). |
 | `documentTemplates/` | One template per document the framework produces (FRD, TDD, Sanity Check, Human Effort Estimate and its baselines, AI Effort Estimate, Build Plan, ChangeLog, Gap Analysis, Code Review, Documentation, User Guide, test scripts, Deployment, Release Test Results, Acknowledgements, Project Progress with its usage table for both editions, and Lite's Design Doc, Docs, and Test Script). Fetched into each project's `ocpfFramework/documentTemplates/` with the step files; shared by both editions. |

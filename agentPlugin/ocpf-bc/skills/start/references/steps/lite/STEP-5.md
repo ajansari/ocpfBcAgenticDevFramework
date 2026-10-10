@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 5 — Compile, Package, Test & Iterate
 
-**Runbook version:** 5.1.0.0 · Lite edition · Phase: BUILD
+**Runbook version:** 5.2.0.0 · Lite edition · Phase: BUILD
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -59,6 +59,7 @@ compiles clean to clear them.
    a series field with no dropdown are defects to diagnose (**§11.1**, **§11.2**), never warnings
    to click past — ask the human to report them explicitly.
 3. For every error or problem, **first check `ocpfFramework/patterns/`** (ALL ALONG → OCPF BC AL Patterns
+   - **A System.AI or Copilot error** (an obsolete `RegisterCapability` overload, a GPT-4o getter, "Copilot capability has not been set", AL0223 on the dialog): check the Blueprint's `references/08-api-reference-bc27.md` and `references/09-false-assumptions.md` before memory (ALL ALONG → *Business Central Copilot Features*).
    Library) for a matching, already-documented pattern. If nothing matches, ask: is this a one-off
    or a pattern (search every generated file for the same class of issue)? Where did it come from
    — the generation rule, the Design Doc, or the source data? What rule should have caught it?
@@ -111,6 +112,6 @@ version included); `docs/2-design/DesignDoc.md` updated for every rule change.
 
 **Exit gate:** Full extension compiles clean, with the analyzers and nothing suppressed (Ops § Analyzers); human confirms sandbox testing is clean; no known
 systemic issue outstanding; no unit in a language required at first release is
-`needs-translation` or `needs-adaptation`, and translation checks are clean. This step's usage rows, one per model, are written before this message (Operating Rule 9).
+`needs-translation` or `needs-adaptation`, and translation checks are clean. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
 
 **Step close (Rule 6c) — mandatory, never a prose prompt:** once the exit gate is met and the usage rows are pasted, end the closing message with the options box: **Proceed into Step 6 now — closes BUILD, opens PROVE (recommended)** / **Stop here** (say what there is to review and how to resume). Nothing of Step 6 starts until the human answers.

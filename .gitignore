@@ -48,3 +48,5 @@ untracked/
 PotentialPoCJourney/
 #Standards Guide split (standalone repo) decision note and cutover plan — local only, never pushed
 ProjectStandardsGuideSplit/
+#Build Map dashboard concept (live HTML progress map) working notes and concept images — local only, never pushed
+BuildMapDashboard/

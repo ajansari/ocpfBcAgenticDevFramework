@@ -27,7 +27,7 @@
 |---|---|
 | Source table (name / verified number) | |
 | PageType / APIGroup / EntityName / EntitySetName / ODataKeyFields | |
-| DelayedInsert = true **or** Editable = false | |
+| `DelayedInsert = true` on every API page; read-only adds `Editable = false` + the three `*Allowed = false` (Standards §2.2) | |
 | SourceTableView | |
 | `using` (from the symbol file) | |
 | Deletion behaviour | |
@@ -47,8 +47,8 @@
 | BC concept | W1 term | <language> | Source | Status |
 |---|---|---|---|---|
 ## B11. Object Register
-| ID | Type | Name | Source table | R / RW |
-|---|---|---|---|---|
+| ID | Type | Name | Source table | R / RW | Enum: Extensible (true / false — why) |
+|---|---|---|---|---|---|
 
 ## Self-check
 - [ ] Every Step 1 entity maps to at least one object, or is explicitly deferred.
@@ -58,4 +58,5 @@
 - [ ] All names ≤ 30 characters; R / RW matches mutability.
 - [ ] Permission sets enumerated and named with this extension's App Code.
 - [ ] Every deletion behaviour decided; every API object has a caption-locking decision.
+- [ ] No new `Option`; every enum has its `Extensible = true` / `false` decided with the human, recorded here with the reason, and written explicitly in the object (Standards §1.9).
 - [ ] Every target language has a reviewer; every regional term is in the glossary.

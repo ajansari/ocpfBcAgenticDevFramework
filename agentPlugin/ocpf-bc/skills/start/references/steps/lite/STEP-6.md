@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 6 — Review, Gap-Check & Finalize Docs
 
-**Runbook version:** 5.1.0.0 · Lite edition · Phase: PROVE
+**Runbook version:** 5.2.0.0 · Lite edition · Phase: PROVE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -26,9 +26,9 @@
   with the App Code (**§5.4**). `Rec.`-prefix everywhere and every table's `tabledata` coverage are
   already proven by the last 0/0 compile — confirm it ran with the analyzers this framework
   requires (ALL ALONG → Analyzers) and nothing is suppressed, rather than re-deriving either check
-  by hand. Correct `DelayedInsert`/`Editable` per data mutability (**§2.2**) still needs a human
+  by hand. `DelayedInsert = true` on every API page and the read-only guards where the data is immutable (**§2.2**) still needs a human
   read; a compiler can't judge it. **Then run the full
-  Anti-Patterns table — Standards Part 7 — against the codebase.** Then check every child list or
+  Anti-Patterns table — Standards Part 7 — against the codebase.** When the project has a Business Central Copilot feature, also walk the OnlyBCFans BC Copilot Blueprint's `SKILL.md` §3 done checklist and §2 rules against the built objects (ALL ALONG → *Business Central Copilot Features*); a missed item is a finding. Then check every child list or
   list part against all six parts of **§11.1** and every number-series field and numbered table
   against **§11.2** — read each `OnNewRecord`, each child table's `OnInsert`, and each wizard's
   field bindings, not just the page properties. The Part 7 table is one table and it reads in
@@ -124,6 +124,6 @@ documents follow at Step 7. Also: the code-review scorecard in this step's Chang
 `docs/4-prove/TestScript.md` is executable by a non-developer; translation checks clean; any AL test codeunits
 have been run and pass, or it's recorded why they couldn't be; the eight-dimension scorecard is in
 the ChangeLog entry; `docs/0-project/Acknowledgements.md` exists with one row per resource used;
-the release-candidate question is answered and, on yes, `1.0.0.0` is built. This step's usage rows, one per model, are written before this message (Operating Rule 9).
+the release-candidate question is answered and, on yes, `1.0.0.0` is built. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
 
 **Step close (Rule 6c) — mandatory, never a prose prompt:** once the exit gate is met and the usage rows are pasted, this boundary closes with **Step 7's hand-off box** (the note at the top of `STEP-7.md`: "Perfect, I understand!" / "I have some questions."), which replaces the generic Proceed / Stop box here. Send that box, not both, and nothing of Step 7 starts until the human answers it.

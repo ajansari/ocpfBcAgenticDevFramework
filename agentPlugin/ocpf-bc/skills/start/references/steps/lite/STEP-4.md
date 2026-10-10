@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 4 — Generate the Code
 
-**Runbook version:** 5.1.0.0 · Lite edition · Phase: BUILD
+**Runbook version:** 5.2.0.0 · Lite edition · Phase: BUILD
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -20,7 +20,9 @@ file names fixed), pre-flight checklist, the generation mode chosen at Step 3.
   effort (Lite's only sub-agent; the plugin bundles it). Each brief carries: Action 4 below,
   verbatim; the batch's Design Doc sections; `docs/1-define/ProjectParameters.md`; Standards
   §1.1–§1.8 and §2 (plus Part 11 and the matching `ocpfFramework/patterns/` files when the batch
-  has a child list, setup page, or wizard); and the symbol source. A generator writes its batch's
+  has a child list, setup page, or wizard; plus, for a Copilot-feature batch, the Blueprint's
+  `templates/` file per object and its `SKILL.md` §2 rules — ALL ALONG → *Business Central Copilot
+  Features*); and the symbol source. A generator writes its batch's
   AL files under `src/` and nothing else — never `docs/0-project/ChangeLog.md`, the Object
   Register, the Design Doc, or another batch's files — and reports deviations and open questions.
   Its report opens with the model it ran on; compare that against `docs/1-define/ProjectParameters.md`
@@ -50,8 +52,8 @@ with the cost stated.
 3. Run the pre-generation pre-flight pass; fix the Design Doc before generating if anything fails.
 4. Generate the AL file **from the standard template in Standards §1.3**, substituting only Step 1
    parameter values: one `namespace` (omitted entirely if `Use Namespace` = `No`), one `using`
-   (from the symbol file), `ODataKeyFields = SystemId`, exactly one of `DelayedInsert = true` /
-   `Editable = false`, `Caption` + `ToolTip` + `ApplicationArea = All` on every field. No dead
+   (from the symbol file), `ODataKeyFields = SystemId`, `DelayedInsert = true` on every API page plus
+   the three `*Allowed = false` and `Editable = false` on a read-only one (§2.2), `Caption` + `ToolTip` + `ApplicationArea = All` on every field. No dead
    code, no empty triggers, no commented-out fields, no `// TODO` (**Standards §1.1–§1.5**).
    Write `Caption` and `ToolTip` as self-describing schema for API consumers, not UI filler — they
    flow into OData `$metadata` and are what a developer or AI agent reads when discovering the
@@ -80,6 +82,6 @@ deviation from `docs/2-design/DesignDoc.md` (a generator's reported deviations i
 **Exit gate:** Every planned object generated and pre-flight-clean; in parallel mode, every
 generator's report integrated and its model line checked; permission-set coverage
 verified. A clean compile is not required to close this gate — Step 4 hands off directly into
-Step 5's mandatory compile-and-package. This step's usage rows, one per model, are written before this message (Operating Rule 9).
+Step 5's mandatory compile-and-package. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
 
 **Step close (Rule 6c) — mandatory, never a prose prompt:** once the exit gate is met and the usage rows are pasted, end the closing message with the options box: **Proceed into Step 5 now (recommended)** / **Stop here** (say what there is to review and how to resume). Nothing of Step 5 starts until the human answers.

@@ -5,15 +5,18 @@ description: The OnlyCopilotFans (OCPF) AL Development Standards Guide for Micro
 
 # OCPF AL Development Standards Guide
 
-The full guide is in [`references/ocpfALDevStandardsGuide.md`](references/ocpfALDevStandardsGuide.md).
-It's the same file the framework repository publishes at `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md`,
-bundled with this plugin. Its version is on its own `**Version:**` line.
+The full guide is in [`references/ocpfALDevStandardsGuide.md`](references/ocpfALDevStandardsGuide.md),
+bundled with this plugin from the guide's own repository,
+<https://github.com/ajansari/ocpfBCALStandards>, at the release tag the framework pins (`v1.12.0.0`
+for runbook v5.2.0.0; the pin is named in the framework's `standardsGuide/README.md`). Its version is
+on its own `**Version:**` line.
 
 ## When a project follows the OCPF runbook
 
-The runbook fetches the latest guide from GitHub into the project's `ocpfFramework/standardsGuide/` folder at
-its first step (Full PRE-01, Lite Step 1). That fetched copy is the one to use. Use this bundled
-copy only as the runbook's fallback when GitHub isn't reachable. In that case:
+The runbook fetches the guide at the pinned tag from `ajansari/ocpfBCALStandards` into the
+project's `ocpfFramework/standardsGuide/` folder at its first step (Full PRE-01, Lite Step 1), with
+the framework's prelude `README.md` beside it. That fetched copy is the one to use. Use this
+bundled copy only as the runbook's fallback when GitHub isn't reachable. In that case:
 
 1. Copy `references/ocpfALDevStandardsGuide.md` into `ocpfFramework/standardsGuide/` in the project root.
 2. Write `ocpfFramework/standardsGuide/SNAPSHOT.json` with `"source": "ocpf-bc plugin bundle"`, the plugin

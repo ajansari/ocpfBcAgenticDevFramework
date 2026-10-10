@@ -38,17 +38,18 @@ One block per object. Every source table **number** verified in the symbol file.
 | PageType / APIPublisher / APIGroup / APIVersion | <…> |
 | EntityName / EntitySetName (≤ 30, camelCase) | <…> |
 | ODataKeyFields | SystemId |
-| DelayedInsert = true **or** Editable = false (exactly one, Standards §2.2) | <…> |
+| `DelayedInsert = true` (every API page); read-only pages add `Editable = false; InsertAllowed = false; ModifyAllowed = false; DeleteAllowed = false;` (Standards §2.2) | <editable / read-only, with the five lines> |
 | SourceTableView (const() quoting, Standards §2.3) | <…> |
 | `using` namespaces (from the symbol file) | <…> |
 | Deletion behaviour (block-if-referenced / cascade / allow) — incl. referencing fields on other tables | <…> |
 | Caption-locking group and decision (Standards §8.6), decided by | <…> |
 | Parent link — child tables only (Standards §11.1): link field; every page showing this table in a parent's context and its opening (`SubPageLink` part / `RunPageLink` action); hidden link control, two-group `OnNewRecord` read, `TestField` in `OnInsert`, `DelayedInsert = true` | <… or N/A — no parent-link field> |
 | Number series — numbered tables only (Standards §11.2): setup field (`TableRelation = "No. Series"`); pages it appears on and their binding; `"No. Series"` field, `OnInsert`, `AssistEdit` on codeunit `"No. Series"` | <… or N/A — not numbered> |
+| Enums — every enum this object declares or introduces (Standards §1.9): name, values with ordinals (0 = blank), **`Extensible = true` / `false`**, decided by whom, and why | <… or N/A — no enum> |
 
 #### Fields
-| Source field | Identifier (camelCase, ≤ 30) | Conversion decision (Standards §4.1–§4.3) | Included / excluded — reason (Standards Part 3) | FlowField or stored (Standards Part 7) |
-|---|---|---|---|---|
+| Source field | Identifier (camelCase, ≤ 30) | Conversion decision (Standards §4.1–§4.3) | Included / excluded — reason (Standards Part 3) | FlowField or stored (Standards Part 7) | Data type — `enum <name>` for any fixed value set, never `Option` (Standards §1.9) |
+|---|---|---|---|---|---|
 
 ## 5. Standard object template
 The exact AL pattern every generated object follows (Standards §1.3), shown once.
@@ -94,5 +95,6 @@ Also maintained standalone as `docs/1-define/ObjectRegister.md`.
 - [ ] Every ID is inside an allocated range with its buffer intact.
 - [ ] Every source table number and `using` namespace comes from the symbol file.
 - [ ] Every field decision (include / exclude / rename / FlowField) is written, not defaulted.
+- [ ] No new `Option` anywhere; every enum has its `Extensible` answer and reason recorded, and the value is written explicitly in the object (Standards §1.9).
 - [ ] Every deletion behaviour and every caption-locking decision names who decided.
 - [ ] No rule in this document needs knowledge that lives outside it.

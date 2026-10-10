@@ -16,6 +16,51 @@ framework.
 
 ---
 
+## v5.2.0.0 — October 10, 2026
+
+Derived from full framework **v5.2.0.0**; Operations Guide **v5.2.0.0**; Standards Guide
+**v1.12.0.0**; plugin **5.2.0**. No layout change, no migration.
+
+- **Copilot AI credits read from the session journal.** On a Copilot project the v5.1.0.0 usage
+  script found no chat session files and asked the human to read *Session Cost* from the Session
+  Info popover at every step close. Since VS Code 1.139 Copilot Chat's agent mode runs on the
+  Copilot SDK, which journals every session at `~/.copilot/session-state/<id>/events.jsonl` — the
+  project folder, the cumulative credits (`totalNanoAiu`, 1e9 to the credit), every model request
+  with its timestamp. The script now reads that journal, VS Code's chat and the Copilot CLI alike,
+  takes each session's last journaled figure, and splits it across the step windows by request
+  share between the journaled points (a checkpoint is written when the chat ends, not per turn);
+  the table says which rows are exact and which are shares, and a still-open session is *as of*
+  its last checkpoint. The Copilot table is **one row per step**, every model named; Rule 9 and
+  the *Usage & Cost Tracking* passage say the human is never asked for a figure, and that asking
+  while a journal exists is a bug. `--reconcile` prints the account's month-to-date credits from
+  GitHub's billing API as a cross-check. Full changelog: *v5.2.0.0*.
+- **A live dashboard from Step 1, and the identity questions first.** Step 1 asks extension name,
+  publisher, and app icon right after the notification question, writes `app.json` at once (a
+  first write; project setup completes it, keeping those values), then creates
+  `ocpfFramework/state/dashboard.html`, opens it, installs the refresh hooks, and asks the one
+  explanation question (**I understand** / *Other*). New ALL ALONG → *Dashboard*; Ops § Dashboard
+  has the procedure; the plugin's `dashboard` skill does it. Zero-token refresh by hooks in Claude
+  Code and the Copilot CLI, at every step close in Copilot Chat. Full changelog: *v5.2.0.0*.
+- **Business Central Copilot features follow the OnlyBCFans BC Copilot Blueprint.** New ALL
+  ALONG section *Business Central Copilot Features*; Step 1 asks *Business Central Copilot
+  feature* `Yes`/`No` (host pages, billing path); Step 2 specifies the feature's objects from the
+  Blueprint's procedure, references, and templates; Step 3 fetches it at the pinned tag into a
+  sibling folder outside the root; Step 4's generator brief carries the template per object and
+  the Blueprint's rules. Never claim a BC Copilot thing is impossible for a PTE without citing the
+  Blueprint's false-assumptions table. Full changelog: *v5.2.0.0*.
+- **The Standards Guide is standalone** at `ajansari/ocpfBCALStandards`, pinned at `v1.12.0.0`;
+  Lite projects fetch it at that tag into the unchanged `ocpfFramework/standardsGuide/` path with
+  the framework's prelude beside it. Nothing in Lite's steps changes for it. Full changelog:
+  *v5.2.0.0*.
+- **Enums, never Options; `Extensible` asked per enum.** Step 2's design bullets and the Design
+  Doc template (object register column, self-check) now require every fixed value set to be an
+  `enum`, and the human to answer *Extensible = true (recommended)* / *false* for each one, with
+  the reason recorded and the property written explicitly (Standards §1.9, new in v1.12.0.0).
+- **API pages: `DelayedInsert = true` on every one; read-only adds the three write guards.**
+  Steps 2, 4, and 6 drop "exactly one of `DelayedInsert` / `Editable = false`" for Standards
+  §2.2's new shape, aligned with BCQuality: every API page `DelayedInsert = true`; a read-only page
+  also `Editable = false` with `InsertAllowed`, `ModifyAllowed`, `DeleteAllowed` all `false`.
+
 ## v5.1.0.0 — October 1, 2026
 
 Derived from full framework **v5.1.0.0**; Operations Guide **v5.1.0.0**; plugin **5.1.0**;

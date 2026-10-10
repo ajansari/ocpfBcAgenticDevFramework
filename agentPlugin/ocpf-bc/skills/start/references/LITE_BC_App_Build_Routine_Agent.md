@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 5.1.0.0 (Lite, derived from the full framework v5.1.0.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
-**Last Updated:** October 1, 2026
+**Version:** 5.2.0.0 (Lite, derived from the full framework v5.2.0.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
+**Last Updated:** October 10, 2026
 
 > Version history for this edition lives in `ocpfFramework/LITE_RunbookChangeLog.md`, tracked
 > independently of the full framework's own `fullVersion/RunbookChangelog.md` (though a change to
@@ -19,9 +19,9 @@
 
 > **Companion documents, both fetched at Step 1 and shared unchanged with the full framework:**
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
->   (v1.11.0.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
+>   (v1.12.0.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.1.0.0), cited as
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.2.0.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
 >   tooling checks, analyzers, symbols, editor sync, notifications, packaging, repository hygiene,
 >   translations, fetched companions, documents, usage and cost, and the plugin.
@@ -252,10 +252,11 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
    closing message so the human sees them without opening the file. **The exit gate is not met
    until the rows exist**; the next step does not start on a missing row, and the `status` skill
    reports one as a blocker. **Never hand-write a row, in either tool** — the script reads Claude
-   Code's transcripts, or GitHub Copilot Chat's session files, and already aggregates per (step,
-   model); a hand-written row is how a real project got one model for everything. **In Copilot
-   the step close is also the checkpoint** that separates this step's AI credits from the next
-   one's — a step closed without the measurement can't be separated later (Ops § Usage & Cost →
+   Code's transcripts, or the Copilot session journals (`~/.copilot/session-state`, VS Code's chat
+   and the CLI alike), and already aggregates per step — one row per model in Claude Code, one row
+   per step in Copilot; a hand-written row is how a real project got one model for everything.
+   **In Copilot the human is never asked to read a figure from the screen**: the journal holds the
+   credits, exact when a chat ends and split by request share while it runs (Ops § Usage & Cost →
    2).
 
 ---
@@ -278,14 +279,14 @@ requirements verbatim, write the problem statement and entity list with a quick 
 fill every parameter — the app icon included — through the options mechanism (Ops § Intake) and
 set up the AL project yourself (Ops § Project Setup), AL source under `src/`.
 
-**Outputs:** `ocpfFramework/` with its six-line `README.md`; `ocpfFramework/standardsGuide/`, `ocpfFramework/opsGuide/`, `ocpfFramework/runbookSteps/`, and `ocpfFramework/documentTemplates/` (all fetched, gitignored); `ocpfFramework/state/usage.json` (Step 1's start timestamp) and `ProjectProgress.md` (seeded, project root, Lite step table only, Step 1 `In Progress`); `ocpfFramework/state/copilot.json` and the Copilot keys in `.vscode/settings.json` (when Copilot is in use); `requirements/` (if any raw input was
+**Outputs:** `ocpfFramework/` with its six-line `README.md`; `ocpfFramework/standardsGuide/`, `ocpfFramework/opsGuide/`, `ocpfFramework/runbookSteps/`, and `ocpfFramework/documentTemplates/` (all fetched, gitignored); `app.json` (first write: name, publisher, logo, version, id) and `src/` early in the step, complete at project setup; `ocpfFramework/state/dashboard.html` rendered, opened, explained, with its hooks and `ocpfFramework/state/dashboard.json`; `ocpfFramework/state/usage.json` (Step 1's start timestamp) and `ProjectProgress.md` (seeded, project root, Lite step table only, Step 1 `In Progress`); `ocpfFramework/state/copilot.json` and the Copilot keys in `.vscode/settings.json` (when Copilot is in use); `requirements/` (if any raw input was
 captured); `docs/` with `0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` (created before the first document); `docs/1-define/ProblemStatement.md` (purpose, scope, out-of-scope, entity list, open questions);
 `docs/1-define/ProjectParameters.md` (the completed Project Parameters block, all placeholders
 replaced, the Main model and effort, version, and app icon answer included);
 `.gitignore` populated per the table above and verified with `git check-ignore`; `app.json`; `src/`
 (with `src/logo/AppLogo.png` when an icon was given); and `.alpackages/`.
 
-**Exit gate:** Every question was asked through the options mechanism. `app.json` matches the
+**Exit gate:** Every question was asked through the options mechanism; the extension name, publisher, and app icon were asked first, after notifications, and `app.json` was written then and rewritten complete at project setup; the dashboard was rendered from it, opened, its hooks installed, and the explanation question answered (ALL ALONG → Dashboard). `app.json` matches the
 sheet (version `0.0.0.1` for a new app, the installed version for an existing one; `logo` set when an icon was given), `src/` exists, and the target version's symbols are in `.alpackages/` (Ops § Project Setup). Both companion guides are present, in `ocpfFramework/standardsGuide/` and
 `ocpfFramework/opsGuide/`, and gitignored. The notification choice is recorded in
 `ocpfFramework/state/notifications.json`, applied, and tested. `docs/1-define/ProjectParameters.md` exists, in `docs/`, with no placeholder remaining, and the Main model and effort recorded there match what this session is running on. Every `.gitignore` entry from the framework-files row is present and `git check-ignore` confirms each existing framework file — `ocpfFramework/LITE_RunbookChangeLog.md` included — is ignored. Nothing from the `docs/` list is in the project root; `ProjectProgress.md` is, with only the Lite step table and the Step 1 row `In Progress`. Deployment Target
@@ -318,7 +319,7 @@ scale — every planned object with its ID, source table, and R/W status); `docs
 **Exit gate:** Human sign-off. Self-check passes with 0 blocking issues. No rule requires
 knowledge outside the document. `docs/2-design/HumanEffortEstimate.md` exists, covers every object, names
 its baselines source, and states its assumptions. `docs/2-design/AiEffortEstimate.md` exists, covers every step
-from Step 3 on, states its margin and the 30-minute approval assumption. This step's usage rows, one per model, are written before this message (Operating Rule 9).
+from Step 3 on, states its margin and the 30-minute approval assumption. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
 
 ---
 
@@ -342,7 +343,7 @@ ask before each), and get one approval for it.
 **Exit gate:** Batch plan approved with every ID and file name fixed (and, with two batches, the
 generation mode recorded);
 scaffold structurally complete, analyzer settings and (for AppSource) `AppSourceCop.json` in place per Ops § Analyzers
-(not compiled — Operating Rule 4); pre-flight checklist ready. This step's usage rows, one per model, are written before this message (Operating Rule 9).
+(not compiled — Operating Rule 4); pre-flight checklist ready. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
 
 ## STEP 4 — Generate the Code
 
@@ -359,7 +360,7 @@ deviation from `docs/2-design/DesignDoc.md` (a generator's reported deviations i
 **Exit gate:** Every planned object generated and pre-flight-clean; in parallel mode, every
 generator's report integrated and its model line checked; permission-set coverage
 verified. A clean compile is not required to close this gate — Step 4 hands off directly into
-Step 5's mandatory compile-and-package. This step's usage rows, one per model, are written before this message (Operating Rule 9).
+Step 5's mandatory compile-and-package. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
 
 ## STEP 5 — Compile, Package, Test & Iterate
 
@@ -377,7 +378,7 @@ version included); `docs/2-design/DesignDoc.md` updated for every rule change.
 
 **Exit gate:** Full extension compiles clean, with the analyzers and nothing suppressed (Ops § Analyzers); human confirms sandbox testing is clean; no known
 systemic issue outstanding; no unit in a language required at first release is
-`needs-translation` or `needs-adaptation`, and translation checks are clean. This step's usage rows, one per model, are written before this message (Operating Rule 9).
+`needs-translation` or `needs-adaptation`, and translation checks are clean. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
 
 ---
 
@@ -408,7 +409,7 @@ documents follow at Step 7. Also: the code-review scorecard in this step's Chang
 `docs/4-prove/TestScript.md` is executable by a non-developer; translation checks clean; any AL test codeunits
 have been run and pass, or it's recorded why they couldn't be; the eight-dimension scorecard is in
 the ChangeLog entry; `docs/0-project/Acknowledgements.md` exists with one row per resource used;
-the release-candidate question is answered and, on yes, `1.0.0.0` is built. This step's usage rows, one per model, are written before this message (Operating Rule 9).
+the release-candidate question is answered and, on yes, `1.0.0.0` is built. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
 
 ## STEP 7 — Release for Testing
 
@@ -516,12 +517,12 @@ second table of `ProjectProgress.md`. In a plugin project the `usage` skill
   same moment `ProjectProgress.md` changes; nothing can be attributed to a step without them.
 - **Measured, never estimated.** Claude Code's per-request usage — input, output, cache-write, and
   cache-read tokens per model, sub-agents included — is read from its session transcripts on disk.
-  **GitHub Copilot bills in AI credits**, and VS Code records them per turn and per model,
-  sub-agents included, in the chat session files it keeps on disk: the usage table reads those,
-  and is a **different table** — AI credits and cost per model, no token columns, because Copilot
-  Chat records no token totals by type. If the session files can't be read, the human reads
-  *Session Cost* in the Session Info popover and the script records that one number. Never invent
-  a token figure, never convert credits to tokens, and never hand-write a row.
+  **GitHub Copilot bills in AI credits**, and the Copilot SDK journals every session's cumulative
+  credits on disk — VS Code's chat and the CLI alike, sub-agents included: the usage table reads
+  those journals, and is a **different table** — AI credits and cost per step, every model named,
+  no token columns, because Copilot records no token totals by type. The human never reads a
+  figure from the screen for it. Never invent a token figure, never convert credits to tokens, and
+  never hand-write a row.
 - **Cost uses published prices, fetched, dated, and cited** — stored in `ocpfFramework/state/pricing.json` with the
   source URL and the date read; never hardcoded.
 - **Write the rows at every step close, one row per model that ran in the step** — model, input,
@@ -581,7 +582,7 @@ first package and before Step 6's release-candidate question. The non-negotiable
 ## OCPF AL Development Standards Guide
 
 Two companions are fetched at Step 1 and kept for the life of the project: the **Standards Guide**
-(`ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md`, v1.11.0.0), cited as **Standards §**, and the
+(`ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md`, v1.12.0.0), cited as **Standards §**, and the
 **Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v5.1.0.0), cited as **Ops §** and shared
 unchanged with the full framework.
 
@@ -677,6 +678,24 @@ for a remote first, since collaborators will see the files as deleted.
   asking the human, at the end of the reply, to run **Developer: Reload Window**.
 - **Never change code that compiles clean to clear stale marks.**
 
+## Dashboard — the Build Map Page
+
+- **Every project has a live HTML dashboard at `ocpfFramework/state/dashboard.html`**, created at
+  Step 1 the moment `app.json` exists (the three identity questions come first for that reason),
+  opened once in the default browser, explained once through the options mechanism (**I
+  understand** / *Other*), and kept fresh by hooks at zero token cost — every turn in Claude Code
+  and the Copilot CLI, every step boundary in Copilot Chat. **Full procedure: Ops § Dashboard**; in
+  a plugin project the `dashboard` skill (`/ocpf-bc:dashboard`) does it.
+- It shows the app's name and icon, phase and step, tokens or AI credits and cost, the agent / you
+  / waiting time split, who is working, the current step's exit gate, and the open question with
+  where to answer it. It is a view over `ProjectProgress.md`, `usage.json`, `app.json`, the step
+  files, and the transcripts — **the agent never writes the HTML and never types a figure into
+  it**; `ProjectProgress.md` remains the record.
+- The page never takes an answer. When it says *Waiting on you*, the answer goes where the box is:
+  Visual Studio Code, the terminal, or the mobile device via Claude Code Remote Control.
+- If the human closes it: right-click the file in VS Code's Explorer → **Open Externally** (or
+  *Reveal in Finder / File Explorer* and double-click), or "open the dashboard".
+
 ## Notifications
 
 **Full procedure: Ops § Notifications.** Read it at Step 1, right after the working language.
@@ -729,6 +748,24 @@ at Step 6, when it's used.
   before diagnosing from scratch.
 - A fix likely to recur on future projects is a candidate for a new pattern — flag it, don't add it
   unilaterally.
+
+## Business Central Copilot Features — the OnlyBCFans BC Copilot Blueprint
+
+- **When the extension includes a Business Central Copilot feature** (a `Copilot Capability`, a
+  `PromptDialog` page, a *Suggest with Copilot* action, Azure OpenAI through System.AI —
+  Microsoft-billed or Partner-billed), **the OnlyBCFans BC Copilot Blueprint is the design and
+  build reference** (<https://github.com/ajansari/obcfBCCopilotBlueprint>), fetched at the pinned
+  tag into a sibling folder outside the project root as Ops § Fetched Companions → *OnlyBCFans BC
+  Copilot Blueprint* describes. Its `SKILL.md` procedure is the build order for the feature's
+  objects: cited and specified object by object in the Design Doc (Step 2), generated from its
+  `templates/` (Step 4), checked against its API reference when the compiler disagrees with memory
+  (Step 5), reviewed against its done checklist (Step 6).
+- **Never claim a BC Copilot thing is impossible, unsupported for a PTE, or dependent on an Azure
+  subscription without reading the Blueprint's `references/09-false-assumptions.md` and citing
+  the row.** A Microsoft-billed Copilot feature in a PTE needs no Azure subscription, endpoint, or key.
+- **Step 1 asks** *Business Central Copilot feature* `Yes`/`No`; a `Yes` names the host page(s),
+  billing path(s), and what the AI suggests, and triggers the fetch at Step 3. Where the Blueprint
+  and the Standards Guide seem to disagree, the Standards Guide wins.
 
 ## Translations & Terminology
 
@@ -794,7 +831,7 @@ done silently.
 | Step 7 — Release for Testing | Step 12 |
 
 **Shared with the full framework, not reduced:** the OCPF AL Development Standards Guide. Both
-editions fetch the same v1.11.0.0 file and apply the same AL rules — Lite differs only in process.
+editions fetch the same v1.12.0.0 file and apply the same AL rules — Lite differs only in process.
 
 **Document count:** 4 maintained documents (`docs/2-design/DesignDoc.md`, `docs/0-project/ChangeLog.md`, `docs/4-prove/Docs.md`,
 `docs/4-prove/TestScript.md`), plus `ProjectProgress.md` (project root, both tables), Step 1's two

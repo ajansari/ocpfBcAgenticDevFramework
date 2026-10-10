@@ -92,14 +92,23 @@ Guide versions it expects. If a local copy's major version differs, say so: the 
    gets the folders created and gitignored (`ocpfFramework/runbookSteps/`,
    `ocpfFramework/documentTemplates/`, always ignored). Check each step file's
    `**Runbook version:**` line equals the new runbook's version. Refresh
-   `ocpfFramework/patterns/` and `ocpfFramework/scripts/` the same way.
-3b. **Refresh both companion guides to the versions the new runbook expects** — its header names
-   them. Overwrite `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` and
-   `ocpfFramework/opsGuide/ocpfOperationsGuide.md` from
-   `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/standardsGuide/ocpfALDevStandardsGuide.md`
-   and `.../main/opsGuide/ocpfOperationsGuide.md`, updating each folder's `SNAPSHOT.json`. A runbook
-   and a companion from different majors don't go together: the runbook cites **Ops §** sections by
-   name.
+   `ocpfFramework/patterns/` and `ocpfFramework/scripts/` the same way. That includes the dashboard
+   renderer, its PowerShell twin, and its `dashboard.html` template (from the plugin's `dashboard`
+   skill); then render the page once so it reflects the new version. A project that began before
+   v5.2.0.0 has no dashboard yet: create it with the `dashboard` skill (hooks, one render, the
+   explanation question) as part of this update.
+3b. **Refresh both companion guides to the versions the new runbook expects.** The Operations
+   Guide comes from the framework repository:
+   `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/opsGuide/ocpfOperationsGuide.md`
+   → `ocpfFramework/opsGuide/ocpfOperationsGuide.md`. **The Standards Guide comes from its own
+   repository at the tag the new framework pins** — read the pin from the framework's
+   `standardsGuide/README.md` (fetch that prelude into `ocpfFramework/standardsGuide/README.md` too):
+   `https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfALDevStandardsGuide.md`
+   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v5.2.0.0 the pin is
+   `v1.12.0.0`). Update each folder's `SNAPSHOT.json` (`repo`, `ref`, `sha`, `fetchedAt`). A project that
+   began before v5.2.0.0 needs **no file move**: the on-disk path and filename are unchanged; the
+   refresh only changes the source recorded in `SNAPSHOT.json`. A runbook and a companion from
+   different majors don't go together: the runbook cites **Ops §** and **Standards §** by number.
 3c. **Sub-agent definitions:** if the project has no `ocpf-generator` definition
    (`.claude/agents/ocpf-generator.md` / `.github/agents/ocpf-generator.agent.md`), run the
    `roles` skill's Step 3 for it with the Main model and effort already recorded — both editions.

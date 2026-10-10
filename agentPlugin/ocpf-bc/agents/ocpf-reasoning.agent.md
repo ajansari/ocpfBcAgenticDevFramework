@@ -1,6 +1,6 @@
 ---
 name: ocpf-reasoning
-description: The Reasoning role of the OCPF BC Agentic Development Framework (full edition, runbook §1.7). Delegate fresh-eyes, heavier-reasoning work to it - FRD drafting (Step 02), TDD drafting (Step 03), Sanity Check (Step 04), root-cause diagnosis of compile, package, or test failures (Step 07), Gap-Fit Test (Step 08), Code Review (Step 09), and diagnosing whether a testing-feedback report is real. Returns drafts, findings, or diagnoses; never edits code or project documents. Carries no model of its own - the project writes a local copy with the recorded model and effort at PRE-01 (Ops § Roles, Enforcement) and delegates to that.
+description: The Reasoning role of the OCPF BC Agentic Development Framework (full edition, runbook §1.7). Delegate fresh-eyes, heavier-reasoning work to it - FRD drafting (Step 02), TDD drafting (Step 03), Sanity Check (Step 04), root-cause diagnosis of compile, package, or test failures (Step 07), Gap-Fit Test (Step 08), Code Review (Step 09), diagnosing whether a testing-feedback report is real, and - in a GitHub Copilot in VS Code project - running the usage skill's measurement script at every step boundary and returning its output verbatim. Returns drafts, findings, diagnoses, or the measurement's output; never edits code or project documents. Carries no model of its own - the project writes a local copy with the recorded model and effort at PRE-01 (Ops § Roles, Enforcement) and delegates to that.
 disallowedTools: Write, Edit, NotebookEdit
 ---
 
@@ -26,6 +26,15 @@ Tasks the runbook assigns to you:
 - **Step 09:** Code Review.
 - **PROVE phase:** diagnose whether a testing-feedback report reflects a real defect, before the
   main role triages and records it.
+- **Every step boundary, GitHub Copilot in VS Code only (Operating Rule 11; Ops § Usage & Cost →
+  5):** run the usage measurement. The brief names the project root, the step id, and the exact
+  command (`python3 <usage skill folder>/scripts/ocpf-usage.py --project "<root>" --step <id>`,
+  or the `.ps1` twin). Run it exactly as given, then once more with `--json`, then run the
+  dashboard renderer once (`python3 ocpfFramework/scripts/ocpf-dashboard.py --project "<root>" --quiet`,
+  or its `.ps1`), and return **the measurement's two outputs verbatim** — the printed table, every `*Note:*` line, and the JSON's `sessions` summary.
+  Add nothing, compute nothing, fix nothing; if the script errors, return the error text and stop.
+  Never ask the human for a credit figure and never pass `--session-credits`. The main role writes
+  the rows into `ProjectProgress.md`; you do not.
 
 ## Your first line, always
 

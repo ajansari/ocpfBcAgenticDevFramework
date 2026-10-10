@@ -1,9 +1,9 @@
 # OCPF AL Development Standards Guide
 
-## OnlyCopilotFans Agentic Dev Framework for BC Consultants
+## OnlyCopilotFans — Business Central AL Development Standards
 
-**Version:** 1.11.0.0
-**Last Updated:** October 1, 2026
+**Version:** 1.12.0.0
+**Last Updated:** October 10, 2026
 
 > **Audience:** Human developers and agentic (AI) developers building Business Central AL
 > extensions — **Per-Tenant Extensions (PTEs) and AppSource apps alike**. Every Part applies to
@@ -18,47 +18,25 @@
 > adds the manifest and submission rules that apply only when the extension is destined for
 > AppSource rather than a single tenant.
 >
-> **Relationship to the runbook:** This guide is one of two companions to
-> `BC_App_Build_Routine_Agent.md`, the OnlyCopilotFans Agentic Dev Framework runbook. The other is
-> the **OCPF Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, cited as **Ops §**), which holds
-> the framework's *procedures* — asking, intake, project setup, tooling, packaging, hygiene, and the
-> translation workflow. This guide holds the AL *rules*. **The runbook drives the *sequence*** — what
-> happens when, who signs off, which gate opens the next step. **This guide holds the *rules*
-> that sequence applies.** The runbook cites it as **Standards §**. Where the two ever appear to
-> disagree about *process*, the runbook wins; where they appear to disagree about an *AL rule*,
-> this guide wins — but neither should happen, because neither document restates the other's
-> content. The runbook names an AL rule in one line where a checklist applies it and cites
-> **Standards §**; the rule's rationale, limits, tool behavior, and reference links live only here.
-> The runbook's process lives only there (see *What is deliberately not here* below).
->
 > **Authoritative-source rule:** Every name, ID, version, prefix, namespace, and quoting decision
-> comes from the **Project Parameters** block that the runbook fills in interactively at **Step
-> 01** — that filled-in block, in the project's own repository, is the single source of truth.
-> Never hardcode a publisher, prefix, namespace, version, or object ID anywhere in AL code, and
-> never restate a Step 01 parameter in this guide: this guide deliberately carries no copy of the
-> intake sheet, so the two can never drift apart or contradict each other.
+> comes from **your project's parameter sheet** — the one record, kept in the project's own
+> repository, of its publisher, prefix, namespace, object-ID ranges, Business Central version,
+> localization, deployment target (per-tenant extension or AppSource), and feature choices. That
+> sheet is the single source of truth. Never hardcode a publisher, prefix, namespace, version, or
+> object ID anywhere in AL code, and never restate a parameter in this guide: the guide carries no
+> project values, so it can never drift from the sheet or contradict it. Where a rule below depends
+> on such a value, it names the parameter and leaves the value to your project.
 
-### What is deliberately *not* here
+### Scope
 
-Each of the following lives in exactly one place — the runbook — and this guide points there
-rather than keeping a second, silently-diverging copy:
-
-| Topic | Where it actually lives |
-|---|---|
-| The intake sheet / project parameters (extension identity, ID ranges, naming & API parameters, platform & runtime, feature flags, onboarding, model roles, `.gitignore` policy), and how its questions are grouped and asked | Runbook **Step 01** and **Operating Rule 6a**, asked interactively |
-| Required project documents, and the phase/stage lifecycle | Runbook **ALL ALONG → Document**, and its DEFINE → DESIGN → BUILD → PROVE phase structure |
-| What makes a TDD self-sufficient | Runbook **Step 03** |
-| The sanity-check checklist | Runbook **Step 04** |
-| The pre-flight validation checklist (pre- and post-generation) | Runbook **Step 05** — the canonical list |
-| Batching, compile cadence, and the zero-errors/zero-warnings gate | Runbook **Operating Rules 3, 4, 5** |
-| Treating a compiler error as a systemic signal | Runbook **Operating Rule 4** |
-| Verifying against symbol files rather than model memory | Runbook **Operating Rule 2** (procedure in Appendix B below) |
-| The ChangeLog entry format | Runbook **ALL ALONG → Track Changes** |
-| The Object Register | Runbook **ALL ALONG → Document** |
-| The language and translation intake questions (working language, countries, languages, source language, reviewers, document languages) | Runbook **PRE-01** and **Step 01** (Box 1 and §1.9), asked interactively |
-| The interactive API caption-locking classification | Runbook **Step 03** (the rules it applies are §8.6 below) |
-| When translations are synced, drafted, checked, and tested; the translation release gate | **Ops § Translations**, applied at the runbook's compile and release steps |
-| How the agent asks, sets the project up, runs the AL tools and analyzers, downloads symbols, packages, notifies, and keeps the repository clean | **Ops §** — the Operations Guide |
+This guide holds **AL rules** and nothing else: what to write, what never to write, how to verify
+a platform claim, and what "done" looks like for each rule. It deliberately holds no **process** —
+no intake questionnaire, no phase or gate structure, no batching or compile cadence, no review
+calendar, no change-log format. Those belong to whatever build process the reader uses, human or
+agentic; one such process is the [OnlyCopilotFans BC Agentic Dev Framework](https://github.com/ajansari/ocpfBcAgenticDevFramework),
+which fetches this guide at a pinned release tag and cites its rules by number as **Standards §**.
+Rules are numbered append-only (see `CONTRIBUTING.md`), so a citation written against one release
+still resolves in the next.
 
 ---
 
@@ -72,8 +50,8 @@ namespace <Publisher>.<ExtensionShort>;
 using <Microsoft.Or.System.Namespace>;
 ```
 
-- One `namespace` declaration per file, always first — the value comes from the runbook's Step 01
-  parameters. **If Step 01's `Use Namespace` parameter is `No`, omit the `namespace` line
+- One `namespace` declaration per file, always first — the value comes from your project's parameter
+  sheet. **If the project records `Use Namespace` as `No`, omit the `namespace` line
   entirely** from every generated file; nothing else in this guide changes.
 - One `using` directive per file; source it directly from the BC symbol file for that object's
   source table — never from documentation or memory.
@@ -83,8 +61,8 @@ using <Microsoft.Or.System.Namespace>;
 
 ### 1.2 `Rec.` Qualification — `NoImplicitWith`
 
-`NoImplicitWith` is enforced on every project built with this framework. It is a fixed framework
-decision, not a per-project choice (runbook §1.5), and is declared in `app.json`:
+`NoImplicitWith` is enforced on every project that follows this guide. It is a fixed decision,
+not a per-project choice, and is declared in `app.json`:
 
 ```json
 "features": ["NoImplicitWith"]
@@ -102,7 +80,7 @@ field(myField; "My Field") { ... }
 
 ### 1.3 AL API Page Template
 
-Substitute every bracketed value using the runbook's Step 01 parameters. Do not add properties,
+Substitute every bracketed value using your project's parameter sheet. Do not add properties,
 triggers, or code blocks unless specifically required.
 
 ```al
@@ -123,7 +101,12 @@ page <ObjectID> "<EntitySetName>"
     EntitySetCaption = '<Human-readable plural name>';    // Translatable API objects only (§8.6)
     SourceTable = <SourceTableName>;
     ODataKeyFields = SystemId;
-    DelayedInsert = true;   // Editable pages only. Use "Editable = false;" for read-only pages.
+    DelayedInsert = true;   // Every API page. A read-only page adds the three guards below.
+    // Read-only pages only (§2.2):
+    // Editable = false;
+    // InsertAllowed = false;
+    // ModifyAllowed = false;
+    // DeleteAllowed = false;
 
     layout
     {
@@ -150,7 +133,7 @@ page <ObjectID> "<EntitySetName>"
 }
 ```
 
-> Omit the `namespace` line if Step 01's `Use Namespace` parameter is `No` (§1.1).
+> Omit the `namespace` line if the project's `Use Namespace` parameter is `No` (§1.1).
 >
 > **Caption locking (§8.6):** the template shows a *translatable* API page, the default for
 > business and admin objects. For an object recorded as *locked* (internal plumbing), omit
@@ -242,9 +225,9 @@ var
   exactly the users it was meant to serve.
 - **AppSource requires XLIFF translation files.** An extension carrying ML syntax is not on the
   path to AppSource.
-- **The compiler catches it, but only because this framework always enables `TranslationFile`.**
+- **The compiler catches it, but only when `TranslationFile` is enabled in `app.json`.**
   AL0424 fires only when `app.json`'s `features` includes `TranslationFile` — every project built
-  with this framework has it (§8.2), so a clean, zero-warnings compile already proves the codebase
+  that follows this guide has it (§8.2), so a clean, zero-warnings compile already proves the codebase
   is free of ML syntax. On a project *without* that flag, `CaptionML` compiles with no warning at
   all. Code review therefore still searches for ML syntax added since the last 0/0 compile, and
   on any project without the flag.
@@ -301,11 +284,76 @@ Folders are free: group files under `src/` by feature or object type as the proj
 
 ---
 
+### 1.9 Enums, Never Options — and Every Enum's `Extensible` Is a Recorded Decision
+
+**Rule:** a new field, variable, parameter, or return value with a fixed set of named values is an
+**`enum`**. The `Option` data type is not used in new code. Not in a table field, not in a
+`tableextension`, not as a page variable, not as a parameter.
+
+Why: an `Option` is a closed list baked into the object that declares it. No other extension —
+not a customer's, not a partner's, not this extension's own next version without a schema change
+— can add a value to it. An `enum` is its own object, can carry a `Caption` per value and an
+implementing `interface`, and can be opened to `enumextension` objects. Microsoft introduced enums
+as the replacement for options in AL, keeps option conversion only "to be backwards compatible
+… for now", and tells API authors directly to "make sure to use Enums instead of Options", because
+an option is published in OData metadata as a plain string while an enum gets its own typed
+member list. Option is not formally deprecated as of October 2026; it is a legacy construct that
+every signal from Microsoft points away from, and a field declared as one today is the field a
+future upgrade has to migrate (AppSourceCop AS0070 and AS0071 govern that migration: the enum must
+keep the option's member names and ordinals).
+
+**The `Extensible` property is decided, per enum, in the design — never left to the default.**
+On an enum `Extensible` defaults to **`false`** (on tables, pages, and reports it defaults to
+`true`), so an enum that says nothing cannot be extended by anyone. The design asks the project
+owner, for every enum this extension declares:
+
+| Answer | When | Consequence |
+|---|---|---|
+| `Extensible = true` | The value set is a business classification another app or a later version may legitimately grow (statuses, types, categories, methods, reasons) — **the default recommendation** | Any extension can add values; every `case` over the enum needs an `else` branch, and code must never assume the list is complete |
+| `Extensible = false` | The value set is a closed, code-driven contract: every value has a code path that must exist (a state machine, a protocol version, an interface selector where an unknown value cannot be handled) | Nobody can add a value without this extension changing; say why in the TDD |
+
+Record the answer and the reason in the TDD's per-object spec and the Object Register, and write the
+property **explicitly in the enum** either way — `Extensible = true;` or `Extensible = false;` — so
+the decision is visible in the code, not inferred from an omission.
+
+Rules that follow:
+
+- **Value `0` is the blank value** (`value(0; " ") { Caption = ' '; }`) on any enum used as a table
+  field, so a new record has an honest "not set" state instead of silently meaning the first real
+  value.
+- **Ordinals are permanent.** Never renumber, reuse, or delete a value once shipped; obsolete a
+  value with `ObsoleteState` and keep its ordinal (Part 9). An `enumextension` uses ordinals from
+  this extension's own object ID range, never small numbers that a later base-app value could take.
+- **Captions carry no comma** (AppSourceCop AS0087 — a comma splits the caption in the UI).
+- **An API page never exposes an enum by ordinal.** Under OData schema 2.0 (Microsoft's API v2.0,
+  the default for custom APIs since BC 24) the contract is the member **name**; under schema 1.0 it
+  is the en-US **caption**. A renamed value is a breaking change in every case (AS0082); a wording
+  change goes in `Caption`, a new value is appended with a higher ordinal (BCQuality,
+  *api-enum-values-are-a-contract-by-name-not-ordinal*).
+- **Every `case` over an extensible enum has an `else`** that fails loudly or handles the unknown
+  value deliberately.
+- **An existing `Option` field inherited from older code** is left as is unless the project
+  schedules its migration (Part 9, AS0070/AS0071); it is never copied as the pattern for a new field.
+
+> *Sources and attribution:* the `Extensible` default per object type, the enum declaration and
+> `enumextension` syntax, the conversion note, and the API-page guidance are summarized, with short
+> quotations, from Microsoft Learn —
+> [Extensible property](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/properties/devenv-extensible-property),
+> [Extensible enums](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-extensible-enums),
+> [Developing a custom API](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-develop-custom-api),
+> [AppSourceCop AS0070](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/analyzers/appsourcecop-as0070),
+> [AS0071](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/analyzers/appsourcecop-as0071), and
+> [AS0087](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/analyzers/appsourcecop-as0087)
+> — © Microsoft Corporation, licensed under
+> [CC BY 4.0](https://creativecommons.org/licenses/by/4.0/).
+
+---
+
 ## Part 2 — API Page Design Rules
 
 > Entity-naming parameters (`APIPublisher`, `APIGroup`, `APIVersion`, `EntityName`,
-> `EntitySetName`, and the object prefix they derive from) come from the runbook's Step 01
-> parameters — never hardcoded in AL files.
+> `EntitySetName`, and the object prefix they derive from) come from your project's
+> parameter sheet — never hardcoded in AL files.
 
 ### 2.1 OData Key
 
@@ -321,7 +369,27 @@ ODataKeyFields = SystemId;
 
 ### 2.2 Editable vs. Read-Only Pages
 
-**Rule:** Set based on data mutability, not developer preference.
+**Rule:** set based on data mutability, not developer preference — and encode it explicitly, because
+an API page's default is **writable**.
+
+- **Every `PageType = API` page declares `DelayedInsert = true`.** No exception for read-only
+  pages. On an editable page it is what makes OData inserts work: the record is written once, with
+  every field present, instead of on the first property with the rest blank, so validation
+  triggers see a complete record and deep inserts succeed. On a read-only page it is inert — and
+  one invariant for every API page is simpler to generate, review, and lint than a conditional
+  one. This is the shape BCQuality's style rule (*api-page-delayedinsert-true*) and every page in
+  Microsoft's custom-API walkthrough use.
+- **A read-only page adds the three CRUD guards and `Editable = false`:** `InsertAllowed = false;
+  ModifyAllowed = false; DeleteAllowed = false; Editable = false;`. The three `*Allowed` properties
+  are Microsoft's documented way to disallow create, update, and delete through an API page;
+  `Editable = false` on its own is a UI property and was never the documented write guard. An API
+  "intended" as read-only that sets none of them accepts POST, PATCH, and DELETE (BCQuality,
+  *disable-write-operations-on-read-only-api-pages*).
+- **A write-enabled page follows least privilege** (BCQuality, *api-page-least-privilege-write-access*):
+  only the fields the consumer needs, `Editable = false` on the rest, and `InsertAllowed` /
+  `DeleteAllowed` false unless the consumer genuinely creates or deletes through that page. A
+  consumer-supplied key named in `ODataKeyFields` is never `Editable = false` on a page that allows
+  inserts (*api-page-key-fields-must-be-editable-on-insert*); `SystemId` is the exception.
 
 | Data Category | Setting | Implementation |
 |---|---|---|
@@ -329,13 +397,15 @@ ODataKeyFields = SystemId;
 | Setup / config (Posting Groups, VAT Setup, Currencies, Dimensions, Payment Terms) | Editable | `DelayedInsert = true` |
 | Open documents (Sales/Purchase Orders, Invoices, Quotes, Credit Memos, Blanket Orders) | Editable | `DelayedInsert = true` |
 | Journal lines (General Journal Lines) | Editable | `DelayedInsert = true` |
-| Posted ledger entries (GL Entry, Cust/Vend Ledger, Value Entries) | Read-only | `Editable = false` |
-| Posted documents (Posted Invoices, Shipments, Receipts, Return docs) | Read-only | `Editable = false` |
-| Audit / system tables (GL Register, Approval Entry, Workflow Instances) | Read-only | `Editable = false` |
-| Registers and sub-ledgers | Read-only | `Editable = false` |
+| Posted ledger entries (GL Entry, Cust/Vend Ledger, Value Entries) | Read-only | `DelayedInsert = true; Editable = false; InsertAllowed = false; ModifyAllowed = false; DeleteAllowed = false;` |
+| Posted documents (Posted Invoices, Shipments, Receipts, Return docs) | Read-only | same five |
+| Audit / system tables (GL Register, Approval Entry, Workflow Instances) | Read-only | same five |
+| Registers and sub-ledgers | Read-only | same five |
 
-`DelayedInsert = true` is mandatory on all editable API pages — without it, OData inserts fail
-silently. Do not set `DelayedInsert` on read-only pages; it is irrelevant and misleading.
+> *Until v1.12.0.0 this section said "set exactly one" of `DelayedInsert` / `Editable = false` and
+> called setting both contradictory. That was a tidiness opinion, it contradicted BCQuality on
+> every review, and it left read-only pages without the documented write guards. Pages generated
+> under the old rule keep working; add the three guards when the page is next touched.*
 
 ### 2.3 Document-Type Filtered Pages (`SourceTableView`)
 
@@ -423,7 +493,7 @@ planned, versioned API change.
 
 ## Part 3 — Field Inclusion & Exclusion Rules
 
-> All inclusion and exclusion is governed by the **Localization** parameter set at runbook Step 01
+> All inclusion and exclusion is governed by the project's **Localization** parameter — the market the extension targets, recorded on its parameter sheet —
 > §1.1. Concrete ID ranges below are worked examples for `Localization = W1`; for any other
 > target, apply the same logic against that localization's applicable ranges and verify each
 > field in the symbol file.
@@ -584,7 +654,7 @@ module. These reserved IDs are also what later gap-fill work draws on, so they a
 
 ### 5.3 Permission Sets Are Deliverables, Not Afterthoughts
 
-If Permission Sets are enabled (runbook Step 01 §1.2), every AL PTE that exposes API pages or
+If Permission Sets are enabled (a parameter-sheet decision), every AL PTE that exposes API pages or
 data must deliver:
 
 - A **read-only** permission set granting `X` (Execute/Read) on all pages.
@@ -597,7 +667,7 @@ Both must be assigned IDs from the allocated range before development begins, an
 **Every table the extension owns needs a `tabledata` grant in both sets.** `PTE0004`
 ("Table definitions must have a matching permission set") is a PerTenantExtensionCop rule, and
 `AS0103` is its AppSourceCop equivalent, so a missing grant is caught at the mandatory compile
-when that compile has the analyzer engaged (runbook Operating Rule 4, ALL ALONG → Analyzers). Ship
+when that compile has the analyzer engaged (a zero-warnings compile with the analyzers engaged). Ship
 each table's grant in the same batch that introduces the table rather than waiting for the compile
 to catch a gap late.
 
@@ -611,7 +681,7 @@ also need the underlying BC base-table permissions:
 ### 5.4 Permission Set Names Must Be Unique Across Every Extension You Build
 
 **The rule.** An extension's permission sets are named with the AL Object Prefix *and* the
-extension's own **Permission Set App Code** (runbook Step 01 §1.3):
+extension's own **Permission Set App Code** (recorded on the parameter sheet):
 
 | Set | Name | Example (prefix `ocpf`, App Code `NAICS`) | Caption |
 |---|---|---|---|
@@ -694,7 +764,7 @@ when no range has been assigned, and two extensions on the same tenant that both
 
 ## Part 6 — Gap Analysis Checklist
 
-Run this during the runbook's **PRE-02 (Structured Gap Analysis)** to catch missing entities
+Run this during requirements analysis, before design, to catch missing entities
 before the FRD is finalized.
 
 ### 6.1 Analytical Detail Tables
@@ -763,14 +833,18 @@ them. Do not assume.
 
 | Anti-Pattern | Problem | Correct Pattern |
 |---|---|---|
-| Using `Editable = false` on editable pages | Prevents OData write operations | `DelayedInsert = true` on all editable pages |
-| Omitting `DelayedInsert` on editable pages | OData inserts fail silently | Always set `DelayedInsert = true` |
-| Setting both `Editable = false` AND `DelayedInsert` | Contradictory; misleading | Set exactly one (§2.2) |
+| Using `Editable = false` on an editable API page | Prevents OData write operations | Leave the page editable; restrict individual fields instead (§2.2) |
+| Omitting `DelayedInsert` on any API page | OData inserts fail or validate a half-built record | `DelayedInsert = true` on every `PageType = API` page (§2.2) |
+| A read-only API page with only `Editable = false` | POST, PATCH, and DELETE still succeed — the write guard was never set | `InsertAllowed = false; ModifyAllowed = false; DeleteAllowed = false;` plus `Editable = false` (§2.2) |
+| `Editable = false` on a consumer-supplied `ODataKeyFields` field of an insertable page | The key leaves the write schema; POST fails with a bare BadRequest | Keep consumer-supplied keys editable; `SystemId` is the exception (§2.2) |
 | Quoting single-word enum values in `const()` | Parser error | Quote only multi-word values (§2.3) |
 | Not quoting multi-word enum values in `const()` | Parser error | Always quote values containing spaces (§2.3) |
 | Using `%` in field identifiers | Invalid AL identifier character | Replace with a `Pct` suffix (§4.1) |
 | Using reserved keywords as identifiers (`area`, `group`, etc.) | Compiler error | Suffix with a type noun (§4.3) |
 | Identifier > 30 characters | Compiler error | Apply BC abbreviations (§4.2) |
+| A new field, variable, or parameter declared as `Option` | Closed list no extension can grow; published as a plain string in OData; the field a future upgrade has to migrate under AS0070/AS0071 | An `enum` object, with its `Extensible` decided and written (§1.9) |
+| An enum declared without an explicit `Extensible` line | Defaults to `false`; the decision is invisible and usually unmade | `Extensible = true;` or `Extensible = false;` written in the enum, decided in the TDD (§1.9) |
+| A `case` over an extensible enum with no `else` | A value added by another extension falls through silently | `else` branch that errors or handles the unknown value (§1.9) |
 | Permission sets named from the prefix alone (`OCPF - READ`) | Every extension with that prefix ships the same Role ID; with namespaces the compiler doesn't notice | `<PREFIX> <APPCODE>, VIEW` / `, EDIT`, with an App Code unique across the prefix's extensions, name ≤ 20 characters (§5.4) |
 | Using estimated / guessed table numbers | Silent wrong-table references | Verify every table ID against symbol files (Appendix B) |
 | Including `ObsoleteState = Pending` fields with future removal dates | Exposes deprecated fields | Exclude all pending-obsolete fields unconditionally (§3.2) |
@@ -779,11 +853,11 @@ them. Do not assume.
 | Missing `ODataKeyFields = SystemId` | OData key not defined | Required on every API page (§2.1) |
 | Sub-namespaces within a single extension | Unnecessary complexity | One flat namespace per extension (§1.1) |
 | Fixing an individual file's error without fixing the root cause | The error recurs in the next batch | Fix the template/rule, then every file it touched |
-| A TDD that depends on context not in the document | Agents and new developers must guess | The TDD must be fully self-sufficient (runbook Step 03) |
+| A TDD that depends on context not in the document | Agents and new developers must guess | The TDD must be fully self-sufficient |
 | Using legacy price tables (Tables 7002, 7012) | Deprecated since BC 2020 Wave 2 | Use Price List Header + Lines (Tables 7000, 7001) (§6.5) |
 | `EntityName` ≠ `EntitySetName` for singleton tables | OData metadata inconsistency | Singleton: set `EntityName = EntitySetName` |
 | Generic ToolTips with no information value | Poor `$metadata` schema quality | Write descriptive, field-specific ToolTips (§2.6) |
-| Hardcoding publisher, prefix, namespace, or version in AL code | Values diverge from the project parameters | Always derive from the runbook's Step 01 block — never hardcode |
+| Hardcoding publisher, prefix, namespace, or version in AL code | Values diverge from the project parameters | Always derive from the project's parameter sheet — never hardcode |
 | Reaching for a `FlowField` when "auto-populated but editable" is what's wanted | A `FlowField` is always read-only and always live-recalculated; a user can never override it | Use a real stored field seeded by `OnValidate`/`OnInsert` that never overwrites a value the user already entered |
 | Using `CaptionML`, `ToolTipML`, `OptionCaptionML`, or any other multilanguage (ML) property, or the `TextConst` data type — whoever wrote it | Deprecated (AL0424); never included in the `.xlf` file, so the text can't be translated; blocks AppSource; compiles with **no warning** unless `TranslationFile` is enabled | Single-language `Caption` / `ToolTip` / `OptionCaption` / `Label` in the default language; translations go in `.xlf` files (§1.7) |
 | Hard-coded text in `Error`, `Message`, `Confirm`, `StrMenu`, notifications, or `ErrorInfo` | String literals aren't labels, so they never reach the `.xlf` file and can't be translated | A `Label` with an AA0074 suffix (§8.3) |
@@ -805,13 +879,13 @@ them. Do not assume.
 
 ## Part 8 — Translation & Multilanguage Rules
 
-> **Scope.** Applies to every project with at least one target language recorded at runbook Step
-> 01 §1.9. §1.7 (no ML syntax) applies to every project, whether or not it's translated. *When*
-> each rule is applied — intake, the build cycle, review, release — is the runbook's concern.
+> **Scope.** Applies to every project with at least one target language recorded on the project's
+> parameter sheet §1.9. §1.7 (no ML syntax) applies to every project, whether or not it's translated. *When*
+> each rule is applied — intake, the build cycle, review, release — belongs to your build process, not to this guide.
 
 ### 8.1 Source Language and Source Wording
 
-- **Source language is `en-US` by default and by recommendation.** The runbook lets the developer
+- **Source language is `en-US` by default and by recommendation.** A project may let the developer
   choose otherwise; if they do, record the choice and its consequences (below).
   - The generated `.g.xlf` declares `source-language="en-US"`.
   - Microsoft's own apps use `en-US` as their source language, and aligning with Microsoft's
@@ -834,7 +908,7 @@ them. Do not assume.
 - **Single-market exception — US English only.** When the *only* target language is `en-US` **and
   the Deployment Target isn't AppSource** (AppSource requires translation files — §8.10), the
   developer may choose to write US wording directly in source and ship no translation file. This is
-  the simpler path, and the runbook offers it — but W1 wording plus an `en-US.xlf` stays
+  the simpler path, and a project may choose it — but W1 wording plus an `en-US.xlf` stays
   recommended, because adding any other market later then requires no source changes.
 
 **If a non-`en-US` source language is chosen:** an `en-US.xlf` is required whenever English users
@@ -1003,7 +1077,7 @@ read live — never from memory, and never from a copy kept in a project or in t
 
 ### 8.10 AppSource
 
-Applies when the runbook's Deployment Target is `AppSource`.
+Applies when the project's **Deployment Target** — the parameter-sheet choice between a per-tenant extension and AppSource — is `AppSource`.
 
 - **Translation files are mandatory.** Microsoft's technical validation checklist: "The extension
   submitted must use translation files." The §8.1 US-only no-translation-files exception doesn't
@@ -1122,7 +1196,7 @@ retired. Use Microsoft's convention — `[Prefix]-[ID]-[Description]-[YYYYMMDD]`
 `OCPF-1234-ShoeSizeUpgrade-20260915`. **Reuse the AL Object Prefix** from the parameter sheet so
 tags can't collide with another publisher's.
 
-**Two further rules Microsoft calls out, and this framework requires:**
+**Two further rules Microsoft calls out, and this guide requires:**
 - **Safety-check the target before writing.** A tag can be missing or wrong; the upgrade must not
   overwrite data that's already there. Verify the target field is blank (or error) before copying.
 - **Don't write when nothing changes.** `if new <> old then begin … Modify(); end;` — a blank
@@ -1141,7 +1215,7 @@ column and is a breaking change AppSourceCop rejects. Retire it across two versi
 | **n+1** *(a later release, not the next build)* | `ObsoleteState = Removed`. AL then refuses new references to it — `Pending` is a warning, `Removed` an error — but **the field and its data stay in the database.** Microsoft, on AppSourceCop AS0016: *"Tables and fields marked as [Obsolete Removed] are and not deleted from the database. This is why they are also validated by this rule."* So keep `DataClassification` set on it; AS0016 still checks it. |
 
 **A `Removed` field is retired, not erased.** Nothing here drops a column, so a release that only
-obsoletes fields is additive as far as Schema Sync Mode is concerned (**Ops § Packaging**) — it's
+obsoletes fields is additive as far as Schema Sync Mode is concerned — it's
 deleting the field from the source that would force a destructive sync.
 
 Leave at least one full release between the two so every tenant has run the copying upgrade.
@@ -1163,7 +1237,7 @@ document fires them, and a subscriber that calls an external service will do so 
 
 ### 9.6 Upgrades Get Tested, Not Hoped For
 
-An upgrade path is testable and must be tested before release — **runbook Step 12 / Lite Step 7**, before the human runs anything else:
+An upgrade path is testable and must be tested before release — before release, before the human runs anything else:
 1. Install the **previous** version on a clean sandbox, and create data in the fields that will
    change — in **more than one company** where `PerCompany` code exists.
 2. Publish and install the new version.
@@ -1208,7 +1282,7 @@ having to do traditional code modifications."*
   that rule; you're aborting someone else's transaction.
 - **A subscriber's cost is the publisher's cost.** Anything heavy belongs in a job queue entry, not
   inline in a posting routine.
-- **Verify the publisher in the symbols before subscribing** (Operating Rule 2, Appendix B) — the
+- **Verify the publisher in the symbols before subscribing** (Appendix B) — the
   event method, its object, and its parameter list. The compiler catches a bad event *name*; what
   it doesn't catch is a wrong **`ElementName`** — the fourth argument, which Microsoft says *"only
   requires a value for database trigger events, that is, when the ObjectType is set to table and
@@ -1266,7 +1340,7 @@ Once a version ships, its event signatures are part of the contract:
 
 ### 10.4 Extensibility Is a Design Decision, Recorded
 
-The TDD (runbook Step 03) states, for each new module: **which events this extension publishes and
+The technical design document states, for each new module: **which events this extension publishes and
 why**, and **which Microsoft events it subscribes to**. Both go in the Object Register alongside
 the objects. Publishing an event later is easy; discovering at release that there's no hook where
 the customer needed one is not.
@@ -1288,11 +1362,11 @@ the customer needed one is not.
 
 > **Scope.** Every page a person uses in the BC client — cards, lists, list parts, setup pages,
 > assisted setup wizards — as opposed to the API pages Parts 1–2 govern. Two defects recurred on
-> project after project built with this framework, in both editions and with both agents, before
+> project after project, with more than one AI agent, before
 > these rules existed: a child record created from its parent's page that lands *outside the
 > filter* and vanishes, and a number-series field with no lookup. Both compile clean, both pass a
 > template check, and both are found only by a person clicking in the sandbox. Each rule below
-> is therefore paired with the sandbox check that proves it (§11.3), which the runbook runs at
+> is therefore paired with the sandbox check that proves it (§11.3), which runs at
 > every compile-and-package round and writes into the human test script.
 
 ### 11.1 A Child Record Created in Its Parent's Context Must Carry the Parent's Key
@@ -1401,9 +1475,7 @@ table" means any table with a field that identifies a parent record (`"Document 
    `OnValidate` on another field that resets the link.
 
 **Recorded where.** The TDD's per-object spec names, for every child table, its link field, every
-page that shows it in a parent's context, and the opening mechanism of each (runbook Step 03 /
-Lite Step 2). Code Review checks all six parts against every such page (runbook Step 09 / Lite
-Step 6).
+page that shows it in a parent's context, and the opening mechanism of each. Code Review checks all six parts against every such page.
 
 ### 11.2 A Number-Series Field Gets Its Lookup from `TableRelation`, and Numbering Follows Business Foundation
 
@@ -1527,12 +1599,12 @@ picked value never reaches the setup record. The extension then cannot number it
    `Pattern-Init-Does-Not-Clear-Primary-Key.md`).
 
 **Recorded where.** The TDD's per-object spec names, for every numbered table, the setup field that
-holds its series and every page on which that field appears (runbook Step 03 / Lite Step 2).
+holds its series and every page on which that field appears.
 
 ### 11.3 The Sandbox Checks That Prove Both Rules
 
-These run at every compile-and-package round (runbook Step 07 / Lite Step 5) and are written into
-the human test script (runbook Step 11 / Lite Step 6) as test cases. **Either message below is a
+These run at every compile-and-package round and are written into
+the human test script as test cases. **Either message below is a
 defect to diagnose, never a warning to dismiss.**
 
 | Check | Steps | Pass means |
@@ -1551,14 +1623,14 @@ defect to diagnose, never a warning to dismiss.**
 > Object IDs, namespaces, fields, and procedure signatures for `"No. Series"`, `"No. Series
 > Line"`, and codeunits 299 and 310 were read from the Business Foundation 27.5.46862.46929 symbol
 > file (Appendix B), not from memory. Both rules come from defects found on real projects built
-> with this framework in September 2026, in both editions and with both agents.
+> in September 2026, with more than one AI agent.
 
 ---
 
 ## Appendix A — OData API Endpoint Patterns
 
-Substitute `<APIPublisher>`, `<APIGroup>`, and `<APIVersion>` with the values from the runbook's
-Step 01 parameters (§1.3), and `<EntitySetName>` with the page's own. Verified against Microsoft
+Substitute `<APIPublisher>`, `<APIGroup>`, and `<APIVersion>` with the values from your project's
+parameter sheet (§1.3), and `<EntitySetName>` with the page's own. Verified against Microsoft
 Learn, [API endpoint structure](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/webservices/api-endpoint-structure)
 (read September 15, 2026).
 
@@ -1580,7 +1652,7 @@ you need to specify, which company you want to connect to."* Either form works:
 
 Get `<companyId>` from Microsoft's standard API: `GET {base}/v2.0/companies`.
 
-**The patterns this framework's tests and documentation use:**
+**The URL patterns tests and documentation use:**
 
 ```
 Service document (every entity set in the group):
@@ -1592,7 +1664,7 @@ Metadata:
 Collection:
   {base}/<APIPublisher>/<APIGroup>/<APIVersion>/companies(<companyId>)/<EntitySetName>
 
-Single record by SystemId (this framework's ODataKeyFields, §2.1):
+Single record by SystemId (the `ODataKeyFields` rule, §2.1):
   {base}/<APIPublisher>/<APIGroup>/<APIVersion>/companies(<companyId>)/<EntitySetName>(<SystemId>)
 
 Filter and select:
@@ -1604,7 +1676,7 @@ Filter and select:
 (`https://<server>:<port>/<instance>/api/...`); everything after `/api` is identical.
 
 > *Source:* Microsoft Learn, *API endpoint structure* (© Microsoft Corporation, CC BY 4.0). The
-> quoted sentence and the URL shapes are Microsoft's; the mapping onto this framework's parameters
+> quoted sentence and the URL shapes are Microsoft's; the mapping onto your project's parameters
 > is ours.
 
 ## Appendix B — BC Symbol File Verification Procedure
@@ -1616,14 +1688,14 @@ task needs a code pattern, a snippet, or an event's signature to subscribe to it
 second check on something the symbols already answered, and never "to be safe". Every Learn
 lookup costs time and tokens; say why it was needed when one happens.
 
-Before finalizing any TDD, using the **Symbol Source** named in the runbook's Step 01 §1.4:
+Before finalizing any TDD, using the **Symbol Source** your project records — the Business Central version and localization whose symbol packages you download:
 
 1. **Read the symbols directly — this is the agent's job, not a trip to the human's editor.** The
    AL MCP Server's `al_symbolsearch` (its arguments go under a `parameters` key — it's the one tool
    that takes that wrapper) and `al_symbolrelations` answer from the packages already in
    `.alpackages/`. Without an MCP host, an `.app` is a short header followed by a standard zip, so
    its symbol content can be read in place. Only if neither route is available does anyone open the
-   package in VS Code (**Ops § Symbols**).
+   package in VS Code.
 2. For each source table: confirm the table number matches (`table <ID> "<Name>"`).
 3. For each `using` directive: copy the exact namespace from the symbol file entry for that
    source table.
@@ -1651,7 +1723,7 @@ version still wins if the two ever disagree, and the lookup's reason is stated w
 |---|---|
 | AL Language (Microsoft) | AL IntelliSense, compiler, symbol files |
 | AL Object ID Ninja | Manages object ID ranges across team members |
-| AZ AL Dev Tools | Linting, unused variable detection, code quality — the rule set the runbook's Step 06 post-generation pass reads against |
+| AZ AL Dev Tools | Linting, unused variable detection, code quality — the rule set a post-generation lint pass reads against |
 | XLIFF Sync (VS Code extension, Rob van Bekkum) | Translation reviewer's tool — sync target files, jump to missing or needs-work units, technical translation checks |
 | XLIFF Sync PowerShell module (`XliffSync`, Rob van Bekkum) | The agent's headless translation sync and checks (`Sync-XliffTranslations`, `Test-XliffTranslations`, `Test-BcAppXliffTranslations`) |
 | NAB AL Tools (Johannes Wikman) | Alternative translation-management extension, for developers who already use it |
@@ -1689,7 +1761,7 @@ that names a standard BC concept. Record every result in the project's translati
       public Business Central artifact for a matching BC version. Locate the artifact with
       BcContainerHelper's `Get-BCArtifactUrl` (or its public artifact index), and fetch only that
       one app — a few megabytes — rather than the whole artifact. **Tell the human before
-      downloading**, and follow Operating Rule 6b if any tooling would need installing.
+      downloading**; ask before installing any tooling.
    4. For a **partner-translated** language (§8.8), the customer's partner language or localization
       app.
 
@@ -1712,7 +1784,7 @@ that names a standard BC concept. Record every result in the project's translati
 
 ## Appendix E — AppSource Manifest and Submission Requirements
 
-Applies only when the runbook's Deployment Target is `AppSource`. Everything here is from
+Applies only when the project's Deployment Target is `AppSource`. Everything here is from
 Microsoft's [JSON files](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-json-files)
 and [Technical validation checklist](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-checklist-submission),
 read September 15, 2026.
@@ -1721,7 +1793,7 @@ read September 15, 2026.
 
 These are optional for a PTE and **mandatory for AppSource**. A missing one is not a warning: *"If
 any mandatory properties or required property values are missing, the submission is rejected."*
-The intake asks for each of them (**Ops § Intake**) and they're written at project setup, not
+They are decided at intake and written at project setup, not
 retrofitted at release.
 
 | Property | Microsoft's description | What the intake asks for |
@@ -1744,7 +1816,7 @@ of validation. Changing any of them later means updating the offer in Partner Ce
 ### E.2 The rest of the checklist, as project rules
 
 - **Analyzer set:** `AppSourceCop` replaces `PerTenantExtensionCop` (they're mutually exclusive) —
-  **Ops § Analyzers**. Configure `AppSourceCop.json` with the publisher's registered affixes and
+  Enable AppSourceCop in every compile. Configure `AppSourceCop.json` with the publisher's registered affixes and
   supported countries so `AS0011`/`AS0013` check what validation will check.
 - **Affixes and ID range are registered, not chosen:** *"You're required to register affixes for
   your publisher name"* and *"to register an ID range for your publisher name"* (§5.5).
@@ -1773,5 +1845,7 @@ of validation. Changing any of them later means updating the offer in Partner Ce
 ---
 
 *This document was created by AJ Ansari, Microsoft MVP, from OnlyCopilotFans. Update this document
-when new patterns are discovered or rules are revised. Its version history is tracked in
-`fullVersion/RunbookChangelog.md` alongside the runbook it accompanies.*
+when new patterns are discovered or rules are revised. Its version history is `CHANGELOG.md` in this
+repository from 1.12.0.0 on; earlier history, through 1.11.0.0, is in the OnlyCopilotFans BC Agentic
+Dev Framework's `fullVersion/RunbookChangelog.md`, where the guide was maintained before it became
+standalone.*

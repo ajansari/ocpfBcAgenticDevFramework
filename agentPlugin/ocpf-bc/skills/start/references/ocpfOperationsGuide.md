@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.1.0.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number; the previous version of this guide was 2.0.1.0)
-**Last Updated:** October 1, 2026
+**Version:** 5.2.0.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number; the previous version of this guide was 2.0.1.0)
+**Last Updated:** October 10, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
 > `fullVersion/BC_App_Build_Routine_Agent.md` and `liteVersion/LITE_BC_App_Build_Routine_Agent.md`.
@@ -13,7 +13,9 @@
 > unchanged; where an edition differs, the difference is marked **Full:** or **Lite:** in place.
 >
 > The runbooks cite it as **Ops §**. The third document, the **OCPF AL Development Standards Guide**
-> (`ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md`), holds the AL rules, cited as **Standards §**. Since
+> (`ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md`, published standalone at
+> <https://github.com/ajansari/ocpfBCALStandards> and fetched at a pinned tag — Ops § Fetched
+> Companions), holds the AL rules, cited as **Standards §**. Since
 > runbook v4.0.0.0 / Lite v3.0.0.0 the runbook's step text lives in per-step files (`ocpfFramework/runbookSteps/`)
 > and every document has a template (`ocpfFramework/documentTemplates/`), both fetched with this guide (Ops §
 > Fetched Companions). Since runbook v5.0.0.0 / Lite v5.0.0.0 (this guide's v5.0.0.0) **everything the
@@ -62,6 +64,7 @@
 15. [Fetched Companions](#ops--fetched-companions)
 16. [Documents](#ops--documents)
 17. [Usage & Cost](#ops--usage--cost)
+18. [Dashboard](#ops--dashboard)
 18. [Reference Sources](#ops--reference-sources)
 19. [Plugin](#ops--plugin)
 
@@ -286,13 +289,29 @@ reaches the parameter sheet until the human selects or types it. Build suggestio
 the human said or confirmed — never from an email domain or a guess at house style. An inferred
 publisher and prefix once forced a full-project rename.
 
+**Box 0 — Identity first, at the routine's first step.** Since v5.2.0.0 the three questions that
+name the app are asked at **PRE-01 / Lite Step 1, right after the notification question and before
+the model questions** — not in the intake sheet's Box 1 — and `app.json` is written the moment they
+are answered (a first write: `name`, `publisher`, `logo`, `version` `0.0.0.1`, `id`, platform
+defaults; Ops § Project Setup step 1 rewrites it complete after the sheet is confirmed, keeping
+those values). Why: the dashboard (Ops § Dashboard) is created right after and shows the app's name
+and icon from `app.json`. One box, three questions: **Extension name?** (up to three suggestions
+from the human's own wording, each labelled a suggestion, plus *I'll type it*); **Publisher?** (only
+a name the human has already written or uploaded, quoted with its source; else *I'll type it* —
+never inferred from an email domain or house style; an inferred publisher once forced a
+full-project rename); **App icon?** (*Yes — I'll provide an image* / *No icon* / *Later*; on *Yes*,
+the path as free text with the guidance under *The app icon* below, and the agent places and
+resizes it). The sheet's Box 1 and Box 1a then **record** these three answers and do not ask them
+again. Everything else `app.json` needs — ID ranges, BC version, features, the AppSource block —
+stays where it is below, because it depends on answers the business questions produce first.
+
 | Box | Questions | Options to offer (free-text entry always available) |
 |---|---|---|
-| **1 — Identity** | 1. Extension Name? | Up to three names built from the problem statement's own wording, each labelled a suggestion. |
-| | 2. Publisher? | Only names the human has already written or uploaded, quoted verbatim, each with where it came from. If there are none: *I'll type it* / *Decide after the other questions* — then ask it again, alone, before Box 2. |
+| **1 — Identity** | 1. Extension Name? | *Recorded from Box 0* — not asked again. |
+| | 2. Publisher? | *Recorded from Box 0* — not asked again. |
 | | 3. Deployment Target? | *SaaS PTE* / *OnPrem PTE* / *AppSource*, the best fit for the problem statement first. |
 | | 4. Which countries will users work in? *(multi-select)* | The countries the problem statement names that BC is available in. **Countries are asked only here** — Localization and the language questions reuse the answer. |
-| **1a — App** *(after Box 1: the options depend on the Deployment Target)* | 4a. App icon? *(both editions)* | *Yes — I'll provide an image* / *No icon* / *Later*. For `AppSource`, *No icon* isn't offered and *Later* is recorded as a release blocker — the old AppSource logo question (A4) is this one. On *Yes*, the next box asks for the path as free text with this guidance, verbatim: *"PNG, square, 300 × 300 px is ideal — Microsoft accepts 216 to 350 px for the marketplace listing. Larger is fine; I'll resize it, keeping the proportions, never stretching."* What happens next is under *The app icon* below. |
+| **1a — App** *(after Box 1: the options depend on the Deployment Target)* | 4a. App icon? *(both editions)* | *Recorded from Box 0* — asked here only if Box 0 recorded *Later* and the target is now `AppSource` (then it is a release blocker to resolve). Formerly: *Yes — I'll provide an image* / *No icon* / *Later*. For `AppSource`, *No icon* isn't offered and *Later* is recorded as a release blocker — the old AppSource logo question (A4) is this one. On *Yes*, the next box asks for the path as free text with this guidance, verbatim: *"PNG, square, 300 × 300 px is ideal — Microsoft accepts 216 to 350 px for the marketplace listing. Larger is fine; I'll resize it, keeping the proportions, never stretching."* What happens next is under *The app icon* below. |
 | | 4b. New app or existing app? | *New app — the version starts at `0.0.0.1` (recommended)* / *Existing app — I'll type the version installed in the target environment*. An existing app's version is confirmed on its **Extension Management** page and the project continues from it (Ops § Packaging → *Version numbers*). |
 | **2 — Naming** *(built from Box 1)* | 5. AL object prefix? | Two or three short lowercase prefixes built from the name and publisher. |
 | | 6. Which namespace? | `<Publisher>.<ExtensionShort>` built from Box 1 *(recommended)* / one alternative spelling / *No namespace* (only for a deliberate reason, such as a BC version predating namespaces). One answer records both **Use Namespace** and **Namespace**. |
@@ -561,9 +580,10 @@ in `docs/0-project/ProjectMemory.md` at once, then Full §1.7 / Lite's parameter
    pass in full, including **symbol verification**, which is deliberately not the reasoning role's —
    it's a lookup against ground truth, not a judgment call. Reports findings; never edits code.
 3. **Reasoning role** — heavier-reasoning, fresh-eyes work: the Sanity Check, Gap-Fit Test, Code
-   Review, FRD and TDD authorship, root-cause diagnosis during the compile-and-package cycle, and
-   diagnosing whether a testing-feedback report is real. Reports findings, drafts, or diagnoses;
-   never edits code or the continuity documents.
+   Review, FRD and TDD authorship, root-cause diagnosis during the compile-and-package cycle,
+   diagnosing whether a testing-feedback report is real, and — in a GitHub Copilot in VS Code
+   project — the usage measurement at every step boundary (*Usage & Cost → 5*). Reports findings,
+   drafts, diagnoses, or the measurement's output; never edits code or the continuity documents.
 4. **Generator sub-agent** (both editions) — the main role's hands for one batch: it writes the
    AL files of exactly one batch, under `src/`, from a brief it reads and nothing else; it never
    edits the ChangeLog, the Object Register, the TDD, or another batch's files; it reports the
@@ -795,8 +815,10 @@ Framework repository: https://github.com/ajansari/ocpfBcAgenticDevFramework
 
 Then, in order:
 
-1. **Write `app.json` once, complete, from the confirmed sheet:** name, publisher, version, every ID
-   range, `platform`, `application`, `runtime`, and the `features` the scaffold step lists —
+1. **Write `app.json` complete, from the confirmed sheet** — the second and last write; the first
+   happened at PRE-01 / Lite Step 1 with the identity answers (Ops § Intake → *Box 0*), so **keep
+   `id`, `name`, `publisher`, and `logo` exactly as that write left them** and fill in the rest:
+   version, every ID range, `platform`, `application`, `runtime`, and the `features` the scaffold step lists —
    including `"NoImplicitWith"` and `"TranslationFile"` (**Standards §8.2**). **`version` is
    `0.0.0.1` for a new app**, or the installed version the human gave at intake question 4b for an
    existing one (Ops § Packaging → *Version numbers*). If `app.json` already exists (for example the
@@ -1101,7 +1123,7 @@ VS Code's AL language server is working from old information:
 - **Symbols downloaded outside VS Code.** The AL MCP Server reloads only its own workspace; VS
   Code's language server is a separate process and isn't told.
 
-**Prevent:** write `app.json` once, complete, and download symbols at the end of intake, before any
+**Prevent:** complete `app.json` once at the end of intake (its identity values were written at PRE-01 / Step 1) and download symbols then, before any
 `.al` file exists.
 
 **Detect** after every `app.json` or symbol change and after every clean compile: read the Problems
@@ -1293,6 +1315,107 @@ notify: say so and record `"channels": []`.
 
 ---
 
+## Ops § Dashboard
+
+**Every project gets a live HTML dashboard — `ocpfFramework/state/dashboard.html`, the *Build Map*
+page — from the first minutes of the routine on.** It shows the app's name and icon, which phase
+and step the project is on, tokens (Copilot: AI credits) and cost so far, elapsed time split
+between the agent's work and the human's, which models are working, the current step's exit gate,
+and — when a question is open — the question and where to answer it. It is a **view**, not a
+record: `ProjectProgress.md` stays the written tracker, and the page is rendered from files the
+framework already keeps. In a plugin project the `dashboard` skill (`/ocpf-bc:dashboard`) does
+everything below; without the plugin, the scripts are fetched byte for byte from
+`https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/dashboard/`.
+
+### 1. When it first appears
+
+**The moment `app.json` exists at PRE-01 / Lite Step 1** — right after the three identity
+questions (Ops § Intake → *Box 0*) are answered and written, before the model questions. That is
+the first moment the page has a name and an icon to show; earlier it would be an empty shell. The
+runbook renders it, **opens it once in the default browser** (`--open`: `open` on macOS, `start` on
+Windows, `xdg-open` on Linux — nothing installed, nothing else ever opens it unasked), installs the
+refresh hooks, and then **asks the one explanation question through the options mechanism**
+(Rule 6a) before anything else — **I understand** / *Other* (free text) — with this text, in the
+working language:
+
+> **Your project now has a live dashboard.** I just opened it in your browser. It shows this
+> extension's name and icon, which phase and step we're on, tokens *(Copilot: AI credits)* and cost
+> so far, how the elapsed time splits between my work and yours, which models are working, the
+> current step's exit gate, and — when I'm waiting on you — the open question and where to answer
+> it. It exists so you can see where the build stands at a glance without asking me, which also
+> costs nothing: the page re-renders itself from files the framework already keeps, by hooks, with
+> no model call. `ProjectProgress.md` remains the written record.
+>
+> **The file:** `ocpfFramework/state/dashboard.html` in this project (gitignored — it is your view,
+> not a deliverable). It reloads itself every 30 seconds while open.
+>
+> **If you close the tab or window:** in VS Code's Explorer, right-click the file → **Open
+> Externally** *(when that entry isn't offered: **Reveal in Finder** / **Reveal in File Explorer**
+> and double-click the file)*, or ask me to "open the dashboard" and I will.
+>
+> *(Copilot Chat in VS Code only:)* Copilot Chat has no hooks, so this page refreshes at every step
+> boundary rather than every turn; the header says *Refreshed* and when.
+
+Record the answer in `docs/0-project/ProjectMemory.md`; act on a free-text answer before continuing.
+
+### 2. What renders it, and from what
+
+`ocpfFramework/scripts/ocpf-dashboard.py` (PowerShell twin `ocpf-dashboard.ps1`; both print the
+same page) and its template `dashboard.html`, copied from the plugin's `dashboard` skill into
+`ocpfFramework/scripts/` (gitignored) at first creation and refreshed with the framework
+(`update-framework`). The renderer reads, and only reads:
+
+| Source | What the page takes from it |
+|---|---|
+| `app.json` | name, publisher, version, BC version, `logo` (embedded as a data URI, so the page is one file) |
+| `ocpfFramework/framework.json` | edition, runbook version, AL MCP state |
+| `ocpfFramework/state/usage.json` | the AI tool and every step's start / close window |
+| `ProjectProgress.md` | each step's status (the step table is the source of truth for *done / in progress*) |
+| `ocpfFramework/runbookSteps/<step>.md` | each step's phase and title; the current step's **Exit gate** text |
+| the usage script's `--json` (Ops § Usage & Cost) | tokens or credits, cost, turns, decisions per step and model |
+| `ocpfFramework/state/pricing.json` | price source and date; the credit price |
+| the sub-agent definitions (`.claude/agents/`, `.github/agents/`) | each role's model and effort |
+| Claude Code transcripts | who is working now, running sub-agents, and the **agent / you / waiting** time split (Ops § Usage & Cost → *Agent time and human time*) |
+| `ocpfFramework/state/waiting.json` | the open question and its options, written by the hooks |
+| `ocpfFramework/state/dashboard-events.jsonl` | the recent-events strip |
+| `docs/2-design/AiEffortEstimate.md` | the current step's estimate, for the *step vs estimate* bar |
+
+**The agent never writes the HTML, never edits the template, and never types a number into the
+page.** A figure the renderer cannot find is shown as *n/a* or *No estimate yet* with the reason.
+
+### 3. Keeping it fresh — hooks, zero tokens
+
+| AI tool | Refresh | How |
+|---|---|---|
+| **Claude Code** | every turn, every sub-agent return, every question opened and answered | `Stop`, `SubagentStop`, `PreToolUse` and `PostToolUse` (matcher `AskUserQuestion`) hooks in `.claude/settings.local.json`, merged beside the notification hooks, each running the renderer with `--quiet --live` (the PreToolUse hook adds `--waiting-json` from stdin, the PostToolUse hook `--clear-waiting`) |
+| **GitHub Copilot CLI** | the same moments | the same four hooks in `.github/hooks/ocpf-dashboard.json` (project level, gitignored) with the CLI's event names and `ask_user` as the tool |
+| **GitHub Copilot Chat in VS Code** | every step boundary | no hooks exist; the usage ritual's step close (Ops § Usage & Cost → 5) ends by running the renderer, and the Reasoning role's measurement brief (Full) includes it. The header reads *Refreshed · time · at step close*. Offer a refresh whenever the human asks where things stand. |
+
+On Windows the hooks run the PowerShell twin under **`pwsh` (PowerShell 7)**, never Windows
+PowerShell 5.1, which cannot parse it; where `pwsh` is absent and Python 3 is present, run the
+`.py` instead (Ops § Tooling Checks records both). A hook run costs no tokens: the script reads files and writes one file. `--quiet` makes every
+failure silent with exit 0 — a dashboard that cannot render must never interrupt the agent. The
+page reloads itself every 30 seconds while open, so a hook's render appears without a keypress.
+`ocpfFramework/state/dashboard.json` records `hooks`, `theme`, and `tool`; the `status` skill
+reports a project whose hooks are missing.
+
+### 4. Themes
+
+One theme ships in v5.2.0.0 — *OnlyBCFans*, the brand page, dark by default with a Day / Night
+switch in its header. The footer carries a theme selector for the themes to come; each future theme
+is another template beside `dashboard.html`, chosen by `theme` in `dashboard.json`. The data the
+renderer embeds is the same for every theme.
+
+### 5. On request, and repair
+
+"Open the dashboard" → render, then open; say the path. "Refresh it" → render. "Where is it?" →
+the path and the right-click route. A page that stopped refreshing: check the hooks still name the
+scripts and `ocpfFramework/scripts/` still holds them, then run the renderer by hand and read its
+notes. The page uses no network and no local script file: it is self-contained, so a blank page
+means the file was not re-rendered, not that a browser blocked it.
+
+---
+
 ## Ops § Packaging
 
 Packaging starts at the runbook's mandatory compile (Full Step 07 / Lite Step 5) and recurs with
@@ -1469,9 +1592,10 @@ project's own git remote, even though they sit in the working directory like any
 - **`ocpfFramework/patterns/`** — the fetched patterns library, for the same reason as the
   Standards Guide.
 - **`ocpfFramework/scripts/`** — the framework's own plumbing: launchers, the one-shot helper, the
-  analyzer compile script, the notification script.
-- **The BCQuality snapshot** — kept outside the project root entirely (Ops § Fetched Companions
-  explains why `alc` forces that), so it isn't even a candidate for tracking.
+  analyzer compile script, the notification script, the dashboard renderer and its template.
+- **The BCQuality snapshot and the OnlyBCFans BC Copilot Blueprint** — kept outside the project
+  root entirely (Ops § Fetched Companions explains why `alc` forces that: both ship `.al` files
+  that are not this project's objects), so neither is even a candidate for tracking.
 - **`*.g.xlf`** — regenerated on every build (**Standards §8.2**). The per-language target files in
   `Translations/` **are** deliverables and always tracked.
 - **`.alpackages/`** — downloaded dependency symbols, refetched in seconds (Ops § Symbols), so
@@ -1729,41 +1853,63 @@ to the human with the codeunit IDs listed — never report untested code as test
 
 ## Ops § Fetched Companions
 
-Three bodies of knowledge are fetched into (or beside) each project, so the agent reads them from
-disk rather than from memory: this framework's **Standards Guide**, the **BCQuality** snapshot, and
-the **OCPF BC AL Patterns** library. **This Operations Guide is fetched the same way** — the runbook
-says when. All four are refetchable at will, so none is ever committed (Ops § Repository Hygiene),
+Four bodies of knowledge are fetched into (or beside) each project, so the agent reads them from
+disk rather than from memory: the **Standards Guide**, the **BCQuality** snapshot, the **OCPF BC AL
+Patterns** library, and — when the project builds a Business Central Copilot feature — the
+**OnlyBCFans BC Copilot Blueprint**. **This Operations Guide is fetched the same way** — the runbook
+says when. All five are refetchable at will, so none is ever committed (Ops § Repository Hygiene),
 and each carries a small `SNAPSHOT.json` recording the source repo, ref, commit SHA, and fetch
 timestamp, so a later refresh has something to diff against and report. **Tell the human before
 fetching; none of these is a silent background download.**
 
-### The Standards Guide and this guide
+### The Standards Guide
 
-Fetched at the routine's first step, before anything else needs them, from
-`https://github.com/ajansari/ocpfBcAgenticDevFramework/`: the repository's
-`standardsGuide/ocpfALDevStandardsGuide.md` into the project's `ocpfFramework/standardsGuide/`, and
-`opsGuide/ocpfOperationsGuide.md` into `ocpfFramework/opsGuide/` (repository paths in the raw URL,
-`ocpfFramework/…` on disk). Both live **inside** the project root — they're single Markdown files
-with no `.al` objects, so nothing forces them outside — and both are always gitignored, not a
-per-project choice. The runbook's changelog (`RunbookChangelog.md` / `LITE_RunbookChangeLog.md`)
-and, when placed, its schematics go in `ocpfFramework/` beside them, never in the project root.
+Fetched at the routine's first step, before anything else needs it, from **its own repository**,
+`https://github.com/ajansari/ocpfBCALStandards/` — the guide has been published standalone since
+Full v5.2.0.0 / Lite v5.2.0.0 so the AL community can use it without this framework — **at the
+release tag the framework pins**, never from `main`:
 
-- **Neither is optional.** The runbook cites **Standards §** and **Ops §** from its first steps on,
-  so a missing copy is a real gap, not a degraded-but-workable state. If the repository isn't
-  reachable, say so plainly and ask the human for a copy rather than working from memory.
-  **Exception with the OCPF plugin:** it bundles copies. Use them, record
-  `"source": "ocpf-bc plugin bundle"` and the bundled version in `SNAPSHOT.json`, say plainly which
-  version was used, and offer a refresh once the network is back.
-- **Refresh only when the human asks** ("refresh the standards guide", "get the latest ops guide").
-  Re-run the fetch, overwrite, and report: "updated from `<old sha>` to `<new sha>`", or "already up
-  to date."
-- **Version skew is named, not papered over.** Each guide carries its own version, tracked in
-  `ocpfFramework/RunbookChangelog.md` alongside the runbook. If a fetched guide's version doesn't match what the
-  runbook expects, say so rather than silently reconciling a citation that doesn't resolve.
+```
+https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfALDevStandardsGuide.md
+  → ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md   (+ SNAPSHOT.json)
+```
 
-### The step files and the document templates
+The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
+purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
+"what is deliberately not in the guide" map), which is fetched beside the guide into the same
+folder as `README.md`. For runbook **v5.2.0.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
+The on-disk path and filename are unchanged from the days the guide lived in this repository, so
+no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
+`"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
 
-Fetched in the same call as the two guides, from the same repository, and gitignored the same way:
+- **Pin a tag, not `main`.** The guide has its own release cadence. A newer tag may add rules the
+  runbook does not yet cite; the runbook moves its pin in a framework release, never on its own.
+  The standalone repository commits to append-only numbering, so **Standards §** citations keep
+  resolving across its releases.
+- **Not optional.** The runbook cites **Standards §** from its first steps on. If the repository
+  isn't reachable, say so plainly and ask the human for a copy rather than working from memory.
+  **Exception with the OCPF plugin:** it bundles the pinned release in the `al-standards` skill.
+  Use it, record `"source": "ocpf-bc plugin bundle"` and the bundled version in `SNAPSHOT.json`,
+  say plainly which version was used, and offer a refresh once the network is back.
+- **Refresh only when the human asks** ("refresh the standards guide"). Re-fetch the pinned tag,
+  overwrite, and report: "updated from `<old sha>` to `<new sha>`", or "already up to date." A
+  request to move to a *newer* tag than the pin is a framework update, not a refresh — say so.
+- **Version skew is named, not papered over.** If the fetched guide's `**Version:**` line doesn't
+  match the pin, say so rather than silently reconciling a citation that doesn't resolve.
+
+### This guide, the step files, and the document templates
+
+Fetched in the same call, from the framework repository
+`https://github.com/ajansari/ocpfBcAgenticDevFramework/`: `opsGuide/ocpfOperationsGuide.md` into
+`ocpfFramework/opsGuide/`, `standardsGuide/README.md` into `ocpfFramework/standardsGuide/`
+(repository paths in the raw URL, `ocpfFramework/…` on disk). Everything lives **inside** the
+project root — single Markdown files with no `.al` objects, so nothing forces them outside — and
+is always gitignored, not a per-project choice. The runbook's changelog (`RunbookChangelog.md` /
+`LITE_RunbookChangeLog.md`) and, when placed, its schematics go in `ocpfFramework/` beside them,
+never in the project root. This guide is not optional either, and its version is tracked in
+`ocpfFramework/RunbookChangelog.md` with the runbook; a mismatch is skew, named the same way.
+
+The step files and the document templates come from the same repository, in the same call, gitignored the same way:
 
 | From the repository | Into the project | What it is |
 |---|---|---|
@@ -1882,6 +2028,55 @@ this class of problem — turning a previously solved bug into fast recognition 
 investigation. If a fix here looks like it will recur on future projects, flag it
 to the human as a candidate for a new pattern; contributing back is their call, not the agent's.
 
+### OnlyBCFans BC Copilot Blueprint — when the project builds a Business Central Copilot feature
+
+`ajansari/obcfBCCopilotBlueprint` on GitHub (<https://github.com/ajansari/obcfBCCopilotBlueprint>,
+MIT, the framework author's own) is a **verified, end-to-end reference design for a Business
+Central Copilot feature in AL** — the signature Copilot UI: a `Copilot Capability` enum extension
+and its 4-parameter registration, a `PromptDialog` page with its system actions, the host page's
+`Prompting` action, the System.AI codeunits for both the **Microsoft-billed** path (Microsoft-managed
+Azure OpenAI, no Azure subscription, no key) and the **Partner-billed** path (the customer's own
+Azure OpenAI endpoint), setup, wizard, telemetry, install and upgrade, a symbol-verified API
+reference for BC 27.5, nine compilable AL templates, and a table of **31 false assumptions** agents
+keep making about BC Copilot. It exists because the framework and most AI coding tools get this
+feature wrong or declare it impossible — "a PTE cannot register a Copilot capability", "Copilot
+needs an Azure subscription", "`RegisterCapability` takes three parameters", "the dialog closes
+with `LookupOK`" — and a shipped per-tenant extension proved every one of those wrong.
+
+- **When:** fetched the moment the project is known to include a Copilot feature — normally at the
+  scaffold step (Full Step 05 / Lite Step 3) when the intake sheet's **Business Central Copilot
+  feature** answer is *Yes*; otherwise the moment a Copilot feature is asked for later. A project
+  with no Copilot feature never fetches it.
+- **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
+  `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
+  `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.2.0.0; the Blueprint pins
+  its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
+  `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
+  tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
+  (gitignored with the other framework files) so the skill triggers on *Copilot*, *PromptDialog*,
+  *Azure OpenAI*, and on an agent about to say something is not possible; in Copilot the rule in
+  the runbook (ALL ALONG → *Business Central Copilot Features*) is the trigger.
+- **Using it:** the Blueprint's `SKILL.md` is the entry point and its **15-step procedure is the
+  build order for the feature's objects**, inside this framework's own steps: the FRD (Full Step 02
+  / Lite Step 2) names the capability, the host page, the billing path(s), and what the AI
+  suggests, citing the Blueprint; the TDD (Full Step 03 / Lite Step 2) specifies every object from
+  `references/01-architecture.md` and the templates, billing path from `03` or `04`, the dialog
+  from `05`, the engine from `06`, setup/wizard/telemetry/upgrade from `07`; generation (Full Step
+  06 / Lite Step 4) starts from `templates/`, renamed and renumbered to the project's prefix and
+  ranges, never from a blank file; compile fixes (Full Step 07 / Lite Step 5) check
+  `references/08-api-reference-bc27.md` before memory; Code Review (Full Step 09 / Lite Step 6)
+  walks `SKILL.md` section 3's done checklist and section 2's non-negotiable rules as a review
+  dimension. **Before any statement that a BC Copilot thing is impossible, unsupported for PTEs,
+  or needs an Azure subscription, read `references/09-false-assumptions.md` and cite the row** —
+  or drop the claim.
+- **Where the Blueprint and the Standards Guide seem to disagree, the Standards Guide wins** and
+  the Blueprint has a bug (its own README says so); report it to the human as a candidate fix.
+  Where the Blueprint's BC version differs from the project's target, say so: its claims are
+  pinned to BC 27.5, and `references/08` documents how to re-extract the API from newer symbols.
+- **Refresh only on request**, and report what changed. Moving to a newer Blueprint tag is a
+  framework decision, recorded in the framework changelog like the Standards pin.
+
 ---
 
 ## Ops § Documents
@@ -1998,8 +2193,9 @@ ritual*). Per developer, always gitignored.
 usage table's first column, the `usage` skill's `--step` argument, and this file all use that
 spelling. A step reopened later gets a second entry with the same `step`; windows are summed. **An
 open window ends where the next window starts**, so a step left without `completedAt` never absorbs
-the steps after it. A Copilot project's file also holds `copilot.sessionDirs` and
-`copilot.checkpoints` — written by the usage script, never by hand (*2. Measuring*). Without these timestamps nothing can be attributed
+the steps after it. A Copilot project's file also holds `copilot.journalDirs` (and, for a
+project that began on the pre-SDK chat, `copilot.sessionDirs` and `copilot.checkpoints`) — written
+by the usage script, never by hand (*2. Measuring*). Without these timestamps nothing can be attributed
 to a step, so a missing file is fixed the moment it's noticed: create it, and mark earlier steps
 `n/a — no timestamps` in the table rather than back-filling guesses.
 
@@ -2030,56 +2226,59 @@ that file is the source — not `/cost`, not memory:
   covered by the 5-minute / 1-hour split are priced at the 5-minute rate. Nothing measured is ever
   priced at zero silently.
 
-**GitHub Copilot Chat in VS Code** bills in **AI credits** — GitHub's usage-based billing, on
-every plan since June 1, 2026, which replaced premium requests. Each model call's input, cached,
-and output tokens are priced at that model's published rate and converted to credits; VS Code
-records the result for every turn, per model, sub-agents included, and **that record is the
-source** — the agent reads it, the human doesn't have to:
+**GitHub Copilot — VS Code's Copilot Chat and the Copilot CLI** bill in **AI credits** — GitHub's
+usage-based billing, on every plan since June 1, 2026, which replaced premium requests. Each model
+call's input, cached, and output tokens are priced at that model's published rate and converted to
+credits. Since VS Code 1.139 (September 2026) Copilot Chat's agent mode runs on the **Copilot SDK**,
+the same engine as the CLI, and **the SDK journals every session on disk; that journal is the
+source** — the agent reads it, the human reads nothing:
 
-- **Where:** `<VS Code user data>/User/workspaceStorage/<hash>/chatSessions/<session id>.jsonl`.
-  The user data folder is `~/Library/Application Support/Code` (macOS), `%APPDATA%\Code`
-  (Windows), `~/.config/Code` (Linux) — `Code - Insiders` and `VSCodium` likewise. The `<hash>`
-  folder is the one whose `workspace.json` names the project folder; the script finds it and
-  records it in `usage.json` as `copilot.sessionDirs`.
-- **What:** each file is an operation log that rebuilds the session. Every turn (`requests[n]`)
-  carries `timestamp`, `modelId`, and `copilotCredits` — **the turn's running total, the
-  sub-agents' credits folded in**. Every sub-agent call is a `runSubagent` tool invocation whose
-  `toolSpecificData` carries its own `modelId` and `credits`. So the Main model's share of a turn
-  is the turn's credits minus its sub-agent calls', and the sum over the turns is the **Session
-  Cost** the human sees in the *Session Info* popover (the context-window control in the chat
-  input). Where a turn carries `sessionCopilotCredits` — the backend's own session total, which
-  also covers work billed between turns, such as a compaction — the excess over the turns' sum is
-  reported as its own row, *between turns*.
-- **No token totals by type.** A turn's `promptTokens` and `completionTokens` describe its *last*
-  model call — the context-window meter — not what the turn consumed, and the cached share isn't
-  recorded per turn at all. **The Copilot table therefore has no token columns**, and a token
-  figure is never derived from credits or typed from the meter.
-- **Checkpoints, not turn start times.** A Copilot turn routinely runs across several steps, and
-  its credits are one running number. So steps are separated by **checkpoints**: at every step
-  close the script stores the cumulative totals per model in `usage.json`
-  (`copilot.checkpoints`), and a step's row is the difference between its checkpoint and the one
-  before. That is one more reason the measurement runs at the boundary and not later: a
-  checkpoint can't be taken after the fact. Work with no checkpoint — a project that started
-  before this rule — is attributed by each turn's start time, and the table says so.
-- **Also counted, per step:** turns, decisions asked (`vscode_askQuestions` tool calls), and
-  sub-agent invocations (`runSubagent`).
-- **The storage format is VS Code's own, not a documented interface** — a request for a supported
-  one (microsoft/vscode#338007) was closed as not planned in September 2026 — so it can change
-  with a VS Code release. **When the script can't read it, the human reads one number:** ask them
-  to open the Session Info popover and read *Session Cost*, record it with
-  `--session-credits <n>` (it becomes the step's checkpoint), and the row says *read from the
-  popover by the human — no model breakdown*. That is the only Copilot row a human supplies.
-- **A cross-check, not a source:** github.com → *Settings → Billing and licensing* → *AI usage*
-  shows credits per model for the billing cycle, across everything the account did — it can't be
-  attributed to a project or a step. Use it to sanity-check a project's total, never to fill a row.
-- **Tokens by type, only if the human wants them:** Copilot Chat can export OpenTelemetry spans
-  to a local file (`github.copilot.chat.otel.enabled`, `exporterType: "file"`, `outfile`; off by
-  default), with input, output, cache-read, and cache-creation tokens per model call — and no
-  credits. The framework doesn't turn it on and the usage table doesn't need it.
-
-**GitHub Copilot CLI** bills in the same AI credits and keeps its own store
-(`~/.copilot/session-store.db`). The usage script doesn't read it; record the session's credits
-as the human reads them, with `--tool copilot-chat --session-credits <n>`, and say so in the row.
+- **Where:** `~/.copilot/session-state/<session id>/events.jsonl` (macOS and Linux;
+  `%USERPROFILE%\.copilot\session-state\` on Windows) — one folder per session, whether it ran in
+  VS Code's chat or in the CLI. The journal's `session.start` event carries `context.cwd`, the
+  project folder, and that is how the script finds a project's sessions; a session journaled on
+  another machine (a remote, WSL, or dev-container window keeps it there) is named with
+  `--journal <its session-state folder>`. The script records the folder in `usage.json` as
+  `copilot.journalDirs`.
+- **What:** `session.usage_checkpoint` and `session.shutdown` carry `totalNanoAiu`, the session's
+  **cumulative cost in nano-AI-units — 1,000,000,000 to the AI credit** (the SDK's
+  `NANO_AIU_PER_AIU`; checked against the Session Info popover on a real project: the popover said
+  1,055 credits at a step close, the journal 1,143 ninety seconds and a few requests later).
+  `session.shutdown` also carries `modelMetrics`, the same figure per model. Every model request is
+  an `assistant.message` event with its model and timestamp; every question to the human is an
+  `ask_user` tool call; every sub-agent is a `subagent.started` event. Sub-agents are folded into
+  the session's figure.
+- **What the journal does not hold:** per-call usage. The SDK's `assistant.usage` event is streamed
+  live and never written to disk (GitHub's streaming-events reference marks it ephemeral), and a
+  **checkpoint is written when the chat ends, not per turn**. So inside a session the cumulative
+  figure is exact only at those points. Between two known points the script **splits the
+  difference across the step windows by each window's share of model requests**, and the table's
+  footnote says so. The project total is the sum of the sessions' last known figures: exact once a
+  session has ended, *as of* its last checkpoint while it is open — the next measurement picks up
+  the rest.
+- **No token totals by type.** `session.shutdown` reports tokens per model for the whole session
+  only, and the context meter is not consumption. **The Copilot table has no token columns**, and
+  a token figure is never derived from credits.
+- **One row per step**, its *Model(s)* cell naming every model that answered in it, *Notes* saying
+  *n request(s), session journal*. A per-model split of a step would be a second estimate on top of
+  the first; the session's exact per-model figures are in the `--json` output and the calibration
+  export for whoever wants them.
+- **Also counted, per step:** turns (the human's prompts plus every `ask_user` the human
+  answered), decisions asked (`ask_user` calls), and sub-agent invocations (`subagent.started`).
+- **The pre-SDK chat** (VS Code before 1.139) kept per-turn credits in
+  `<VS Code user data>/User/workspaceStorage/<hash>/chatSessions/<session id>.jsonl`; the script
+  still reads those files when present, with the checkpoint arithmetic they need, so a project
+  that spans both formats loses nothing. The format is VS Code's own (microsoft/vscode#338007,
+  closed as not planned, September 2026); the SDK journal is documented by GitHub.
+- **Nobody reads a number from the screen.** `--session-credits <n>` still exists for the one case
+  where no journal and no chat file exists on any reachable machine; the row then says *read from
+  the popover by the human*. A run that asks the human for the popover figure while a journal
+  exists is a bug — name the journal folder instead.
+- **A cross-check, not a source:** `--reconcile` asks GitHub's billing API (`gh api
+  /users/<login>/settings/billing/ai_credit/usage`, classic token with the `user` scope: `gh auth
+  refresh -s user`) for the account's month-to-date AI credits and prints them under the table.
+  It covers everything the account did that month, so it bounds a project's total; it never fills a
+  row. The same figure is on github.com → *Settings → Billing and licensing → AI usage*.
 
 **Ollama** through Claude Code or another harness: local models report token counts through the
 harness the same way and cost `$0`; Ollama's cloud models are priced per million tokens on
@@ -2151,18 +2350,21 @@ Everything but the consumption columns is the same in both, and means the same. 
 changes tools midway keeps **both** tables, each with the steps worked in that tool, and a line
 between them saying when the tool changed.
 
-- **One row per model that ran in the step** — the Main model's row and one for every sub-agent
-  model — never one row for the step with a single model in it; then a **Total** row, and a footnote
-  naming the pricing source and the date read. *Elapsed*, *Turns*, and *Decisions* belong to the
+- **Claude Code: one row per model that ran in the step** — the Main model's row and one for every
+  sub-agent model — never one row for the step with a single model in it. **Copilot: one row per
+  step**, every model named in it (*2. Measuring*). Then a **Total** row, and a footnote naming the
+  pricing source and the date read. *Elapsed*, *Turns*, and *Decisions* belong to the
   step, so they appear on the Main model's row and `—` on the sub-agent rows.
 - The *Senior AL dev est.* column is filled from `docs/2-design/HumanEffortEstimate.md` once it
   exists (Full Step 03 / Lite Step 2) — the estimate's per-task hours summed to the step they belong
   to.
-- In the Copilot table *Notes* says what the row is — *main, n turn(s)*, *sub-agent, n call(s)*,
-  *billed between turns*, or *read from the popover by the human — no model breakdown* — and the
-  footnote names the credit's price, its source, the date read, and the session files read. The
-  table's **Total is the sessions' Session Cost**: if the two differ, say why. Both editions use
-  the same columns; Lite's sub-agent column counts the generator and the skills' delegations.
+- In the Copilot table a step is **one row**, *Model(s)* naming every model that answered in it
+  and *Notes* saying *n request(s), session journal* (a pre-SDK chat's rows keep *main, n turn(s)*
+  / *sub-agent, n call(s)*); the footnote names the credit's price, its source, the date read, and
+  the journals read, with how many sessions have ended and how many are still open. The table's
+  **Total is the sum of the sessions' journaled figures** and, once every session has ended,
+  equals what the Session Info popovers showed. Both editions use the same columns; Lite's
+  sub-agent column counts the generator and the skills' delegations.
 - A step with no timestamps, or worked in a tool that exposes nothing, says why. **Never a blank,
   never a guess.**
 
@@ -2177,19 +2379,41 @@ the end of the project, not "when there's time". Both editions, the same words (
   Same moment, same message.
 - **Step close — before the closing message (summary, then the pasted rows, then the Rule 6c box as its last thing):** set `completedAt`; run the
   measurement — with the plugin `/ocpf-bc:usage --step <id>`, without it parts 1–3 above by hand —
-  and write the step's rows into the usage table, **one row per model that ran in the step**. Then
-  **paste those rows into the closing message**, so the human sees them without opening the file.
+  and write the step's rows into the usage table — **one row per model that ran in the step** in
+  Claude Code, **one row per step** in Copilot. Then **paste those rows into the closing message**,
+  so the human sees them without opening the file.
 - **The exit gate is not met until the rows exist.** A step whose rows are missing is not closed;
   the next step does not start on a missing row, and the `status` skill reports a missing row for a
   closed step as a blocker.
 - **Never hand-write a row, in either tool.** The script reads the transcripts (Claude Code) or
-  the chat session files (Copilot) and already aggregates per (step, model), sub-agents included.
-  A hand-written row is exactly how a real project ended up with one model credited for
-  everything, when three had run. The one figure a human ever supplies is a Copilot *Session
-  Cost* read from the popover when the session files can't be read — and it goes in through
-  `--session-credits`, not into the table by hand.
-- **Copilot: the step close is also the checkpoint.** A step closed without the measurement has no
-  checkpoint, and its credits land in the next step's row. There is no recovering that later.
+  the Copilot session journals and already aggregates per step, sub-agents included. A hand-written
+  row is exactly how a real project ended up with one model credited for everything, when three
+  had run. **The human is never asked to read a figure from the screen**: a Copilot run that asks
+  for the popover's Session Cost while a journal exists is a bug, not a procedure.
+- **Copilot in VS Code (Full): the Reasoning role runs the measurement.** The main role delegates
+  it to the project-local `ocpf-reasoning` sub-agent, Rule 10 in force (the §1.7 model, in the
+  background, the report's first line verified). The brief carries five things and nothing else:
+  the project root; the step id; the exact command — `python3 <usage skill folder>/scripts/ocpf-usage.py --project "<root>" --step <id>` (PowerShell: the `.ps1` twin) — and the
+  instruction to run it twice, once as printed and once with `--json`, then run the dashboard
+  renderer once (`python3 ocpfFramework/scripts/ocpf-dashboard.py --project "<root>" --quiet`),
+  and **return the measurement's outputs verbatim: the table, every `*Note:*` line, and the JSON's
+  `sessions` summary**, adding nothing and fixing nothing. The main role writes the returned rows into the table and pastes them; a
+  report without the table, or with a row the script did not print, is rejected and the delegation
+  rerun. The Reasoning role never asks the human for a figure either. Why a delegation for a
+  script: on a real Copilot project the Main model skipped the script and asked the human for the
+  popover figure at every step close; the measurement is a procedure with no judgment in it,
+  which the Reasoning role follows exactly, for a handful of requests' worth of credits. Claude
+  Code projects, the Copilot CLI, and Lite (no Reasoning role) keep the main role running it.
+- **Copilot Chat in VS Code: the step close also refreshes the dashboard.** Copilot Chat has no
+  hooks, so the page is rendered at the step close (Ops § Dashboard → 3): in Full the Reasoning
+  role's brief ends with the render command, so the page is refreshed when the measurement returns;
+  in Lite the main role runs it after writing the rows
+  (`python3 ocpfFramework/scripts/ocpf-dashboard.py --project "<root>" --quiet`, or the `.ps1`). In
+  Claude Code and the Copilot CLI the hooks already do this.
+- **Copilot: the figure refines when the chat ends.** The journal's cumulative credits are exact at
+  a checkpoint, which the SDK writes when the chat ends; a step closed mid-chat gets its share by
+  request count, and the next measurement after the chat ends settles it. Say *as of* in the
+  closing message when a session is still open.
 
 Why a ritual and not a reminder: on a real project the table was "to be filled in later", and later
 the windows were gone. Recording at the boundary costs one command; reconstructing costs the data.

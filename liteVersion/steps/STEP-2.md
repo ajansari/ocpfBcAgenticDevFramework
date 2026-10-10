@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 2 — Write the Design Doc & Self-Check
 
-**Runbook version:** 5.1.0.0 · Lite edition · Phase: DESIGN
+**Runbook version:** 5.2.0.0 · Lite edition · Phase: DESIGN
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -39,8 +39,16 @@ be able to produce every object correctly from this document alone. Two halves, 
   spending it all — those are what gap-fill work at Step 6 draws on (**Standards §5.2**; Lite
   skips the full framework's module sub-blocks, but not the buffer).
 - **Per-object spec** — for every object: ID, type, source table name *and* verified source table
-  number, `PageType`, `APIGroup`, `EntityName`, `EntitySetName`, `ODataKeyFields = SystemId`, and
-  exactly one of `DelayedInsert = true` / `Editable = false`.
+  number, `PageType`, `APIGroup`, `EntityName`, `EntitySetName`, `ODataKeyFields = SystemId`,
+  `DelayedInsert = true` on every API page, and — on a read-only page — `Editable = false` with
+  `InsertAllowed`, `ModifyAllowed`, `DeleteAllowed` all `false` (**Standards §2.2**).
+- **Enums, never Options — `Extensible` decided with the human, per enum** (**Standards §1.9**).
+  Every fixed value set is an `enum` object; no new `Option`. For every enum this extension
+  declares, ask through the options mechanism: **Extensible = true (recommended) — another app or
+  a later version may add values** / **Extensible = false — a closed, code-driven set**, with the
+  one-line reason. The property defaults to `false` on an enum, so an unasked question is a silent
+  decision; record answer and reason in the Design Doc's object register and write the property
+  explicitly in the object.
 - **Per-field spec** — source name and camelCase identifier for every field (conversion rules:
   **Standards §4.1**); which fields are excluded and why (**Standards Part 3**, driven by the
   Localization parameter, and **§3.2** for obsolete fields); abbreviations applied (**§4.2**); reserved-keyword resolutions (**§4.3** — `area` →
@@ -62,6 +70,7 @@ be able to produce every object correctly from this document alone. Two halves, 
   `TableRelation = "No. Series"`), every page it appears on and how it is bound (wizard bound to a
   temporary copy of the setup table), the table's `"No. Series"` field, `OnInsert`, and
   `AssistEdit`, all on codeunit `"No. Series"` from Business Foundation.
+- **Business Central Copilot feature, if Step 1 recorded one** (ALL ALONG → *Business Central Copilot Features*): the capability, each host page and its suggestion, the billing path(s), and every object the OnlyBCFans BC Copilot Blueprint's `SKILL.md` §1 procedure names, each from its `references/` document and `templates/` file, renamed and renumbered to this project's prefix and ranges; the Blueprint tag used. Never write that a Copilot element is impossible for a PTE.
 - Design patterns the Standards Guide doesn't cover (error handling, facades, and similar):
   consult AL Guidelines (ALL ALONG → Reference Sources) and cite the guideline used,
   rather than inventing a pattern.
@@ -150,6 +159,6 @@ scale — every planned object with its ID, source table, and R/W status); `docs
 **Exit gate:** Human sign-off. Self-check passes with 0 blocking issues. No rule requires
 knowledge outside the document. `docs/2-design/HumanEffortEstimate.md` exists, covers every object, names
 its baselines source, and states its assumptions. `docs/2-design/AiEffortEstimate.md` exists, covers every step
-from Step 3 on, states its margin and the 30-minute approval assumption. This step's usage rows, one per model, are written before this message (Operating Rule 9).
+from Step 3 on, states its margin and the 30-minute approval assumption. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
 
 **Step close (Rule 6c) — mandatory, never a prose prompt:** once the exit gate is met and the usage rows are pasted, end the closing message with the options box: **Proceed into Step 3 now — closes DESIGN, opens BUILD (recommended)** / **Stop here** (say what there is to review and how to resume). Nothing of Step 3 starts until the human answers.

@@ -4,6 +4,62 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.2.0 — October 10, 2026
+
+**Bundles:** full runbook v5.2.0.0 (core + 14 step files), Lite v5.2.0.0 (core + 7 step files),
+Standards Guide v1.12.0.0 (new §1.9 *Enums, Never Options*; §2.2 API pages aligned with BCQuality —
+`DelayedInsert = true` on every API page, read-only pages add the three `*Allowed = false` guards;
+Part 7 rows), Operations Guide v5.2.0.0; `ProjectProgress.md`, `TDD.md`, and `DesignDoc.md` templates updated. No layout change: `update-framework` replaces the runbook, step files, and Operations
+Guide, no migration.
+
+- **`usage` skill: Copilot credits from the Copilot SDK session journal.** Both script ports
+  (`ocpf-usage.py`, `ocpf-usage.ps1`) read `~/.copilot/session-state/<id>/events.jsonl`
+  (`%USERPROFILE%\.copilot\session-state` on Windows): the project folder from `session.start`,
+  the cumulative credits from `session.usage_checkpoint` and `session.shutdown` (`totalNanoAiu` ÷
+  1e9), model requests from `assistant.message`, turns from `user.message` plus answered
+  `ask_user` calls, decisions from `ask_user`, sub-agents from `subagent.started`. Per-step split
+  by request share between journaled points; one row per step with every model named; open
+  sessions reported *as of* their last checkpoint. The reader exists because VS Code 1.139 moved
+  agent-mode sessions there, and the v5.1.0 reader, which only knew
+  `workspaceStorage/<hash>/chatSessions/`, fell back to asking the human for the popover figure
+  on every step of a real project.
+- **New options:** `--journal <dir>` / `-Journal` (a session-state folder on another machine),
+  `--reconcile` / `-Reconcile` (month-to-date AI credits from GitHub's billing API via `gh api`,
+  needs `gh auth refresh -s user` once; printed as a cross-check, never a row), `--tool
+  copilot-cli` accepted — the CLI is measured from the same journal, the script no longer refuses
+  it. `--sessions` and `--session-credits` remain for pre-SDK chat files and the no-journal last
+  resort; popover checkpoints stored by 5.1.0 are superseded by the journal and ignored with a
+  note. `--json` adds `journalDirs`, `sessions` (id, client, start, last known figure, closed,
+  requests, models), and `githubMonthToDate`. `usage.json` gains `copilot.journalDirs`.
+- **SKILL.md** rewritten for the journal: never ask the human for a number; re-run without
+  `--step` at the next boundary so a mid-chat row settles; `--journal` before `--session-credits`;
+  and, in a GitHub Copilot in VS Code project on the Full edition, the main role delegates the
+  script run to the `ocpf-reasoning` sub-agent and writes what it returns.
+- **New `dashboard` skill** (`/ocpf-bc:dashboard`): `scripts/ocpf-dashboard.py` and
+  `scripts/ocpf-dashboard.ps1` render `templates/dashboard.html` into
+  `ocpfFramework/state/dashboard.html` from the project's own state (the usage script's JSON
+  included); `--open` opens it once; `--live`, `--waiting-json`, `--clear-waiting`, `--event` are
+  the hook entry points; `--quiet` never fails the agent's turn. Both ports verified to embed
+  identical data on a real Full project and a real Copilot project. The skill installs the Claude
+  Code / Copilot CLI hooks, runs the one-time explanation question, and documents the right-click →
+  **Open Externally** route. The `usage` skill's step close renders the page in Copilot Chat; the
+  `ocpf-reasoning` brief includes the render; `status` reports a missing dashboard;
+  `update-framework` refreshes the scripts and creates the page on older projects; `start` notes
+  that PRE-01 / Step 1 owns the moment.
+- **`start` skill** notes the OnlyBCFans BC Copilot Blueprint as a conditional fetched companion
+  (not bundled; fetched only for projects with a Business Central Copilot feature, outside the
+  project root). The runbooks and Ops carry the rule.
+- **Standards Guide bundled from its own repository.** `syncPlugin.sh` now fetches
+  `ajansari/ocpfBCALStandards` at the pinned tag **`v1.12.0.0`** into `skills/al-standards/references/`
+  (falling back to the sibling checkout with a warning when the tag is unreachable) and warns if
+  the bundled version and the pin disagree. The `al-standards`, `start`, and `update-framework`
+  skills and the GitHub code-reviewer agent name the new source; a project's on-disk path is
+  unchanged.
+- **`agents/ocpf-reasoning.agent.md`** lists that delegation among the role's tasks, with the
+  output contract (table, notes, and `--json` sessions summary, verbatim).
+- Verified on the project that failed: the journal's 1,143 credits against the 1,055 the human had
+  read from the popover ninety seconds earlier; both ports print identical tables.
+
 ## 5.1.0 — October 1, 2026
 
 **Bundles:** full runbook v5.1.0.0 (core + 14 step files), Lite v5.1.0.0 (core + 7 step files),

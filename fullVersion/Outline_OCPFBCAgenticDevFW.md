@@ -74,7 +74,7 @@ procedure — fetched at PRE-01 alongside the Standards Guide.
 - Testing Feedback Log
 - Project Memory
 - Project Progress Tracker — `ProjectProgress.md`, one status row per step, in the project root, plus the usage table — both editions
-- Usage & Cost Tracking — Operating Rule 11's step boundary ritual: rows at every step start and close, one per model, never hand-written (Claude Code: tokens by type from its transcripts; GitHub Copilot: AI credits from its chat session files — two different tables), priced from published rates, next to the human and AI effort estimates; calibration export at project close
+- Usage & Cost Tracking — Operating Rule 11's step boundary ritual: rows at every step start and close — one per model in Claude Code, one per step in Copilot, read from the Copilot session journal — never hand-written (Claude Code: tokens by type from its transcripts; GitHub Copilot: AI credits from its chat session files — two different tables), priced from published rates, next to the human and AI effort estimates; calibration export at project close
 - Translations & Terminology — translation glossary, named reviewers, release gate on approved translations
 - Packaging & Versioning — new apps start at `0.0.0.1`; the Revision goes up before every build, never two builds at one version, never a package overwritten; the fixed "Package built:" block after each; the release candidate `1.0.0.0` asked at Step 11; the package that passes ships as it is
 - Repository Hygiene — `ocpfFramework/state/` and the fetched folders always gitignored, the rest of `ocpfFramework/` and the sub-agent definitions per intake §1.8, verified with `git check-ignore`

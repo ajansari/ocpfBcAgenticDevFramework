@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 3 — Plan & Scaffold
 
-**Runbook version:** 5.1.0.0 · Lite edition · Phase: BUILD
+**Runbook version:** 5.2.0.0 · Lite edition · Phase: BUILD
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -38,6 +38,11 @@
   check it and, if missing, offer the per-OS install exactly as **Ops § Tooling Checks** says
   (Rule 6b), and record the outcome in `ocpfFramework/framework.json` → `"tooling"`. Look for
   existing installations first, and ask before installing anything.
+- **If Step 1 recorded a Business Central Copilot feature, fetch the OnlyBCFans BC Copilot
+  Blueprint now** (Ops § Fetched Companions): shallow clone at the pinned tag into a sibling folder
+  outside the project root (its `templates/` are real `.al` objects), `LICENSE` kept,
+  `SNAPSHOT.json` written; in Claude Code also copy it to `.claude/skills/obcf-bc-copilot-blueprint/`.
+  Plan the feature's batch from its `SKILL.md` §1 procedure.
 - Bootstrap the BCQuality knowledge snapshot and the OCPF BC AL Patterns library (both ALL
   ALONG) — one-time-per-project setup, cheapest done now alongside the rest of the scaffold. (The
   Standards Guide, the AL tools, and symbols are **not** in this group: Step 1 already set them
@@ -70,6 +75,6 @@
 **Exit gate:** Batch plan approved with every ID and file name fixed (and, with two batches, the
 generation mode recorded);
 scaffold structurally complete, analyzer settings and (for AppSource) `AppSourceCop.json` in place per Ops § Analyzers
-(not compiled — Operating Rule 4); pre-flight checklist ready. This step's usage rows, one per model, are written before this message (Operating Rule 9).
+(not compiled — Operating Rule 4); pre-flight checklist ready. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
 
 **Step close (Rule 6c) — mandatory, never a prose prompt:** once the exit gate is met and the usage rows are pasted, end the closing message with the options box: **Proceed into Step 4 now (recommended)** / **Stop here** (say what there is to review and how to resume). Nothing of Step 4 starts until the human answers.

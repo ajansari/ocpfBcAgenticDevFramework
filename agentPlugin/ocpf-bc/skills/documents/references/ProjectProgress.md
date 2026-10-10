@@ -52,20 +52,20 @@ From Claude Code's session transcripts.
 *Prices: <source URL>, read <date>. Human estimate: `docs/2-design/HumanEffortEstimate.md`; AI estimate: `docs/2-design/AiEffortEstimate.md`.*
 
 ### GitHub Copilot — AI credits
-From the chat session files GitHub Copilot Chat keeps in VS Code's workspace storage, sub-agents included. Copilot Chat records no token totals by type, so this table has none; the **Total** is the sessions' *Session Cost* (the Session Info popover).
+From the Copilot session journals (`~/.copilot/session-state`, VS Code's chat and the CLI alike), sub-agents included — one row per step, every model that answered named. Copilot records no token totals by type, so this table has none; the **Total** is the sum of the sessions' journaled credits, equal to the Session Info popovers once every session has ended.
 | Step | Model(s) | AI credits | Cost (USD) | Elapsed | Turns | Decisions | Sub-agent calls | Senior AL dev est. (h) | Notes |
 |---|---|---|---|---|---|---|---|---|---|
-| <PRE-01 or STEP-1> | <model> | | | | | | | | <main, n turn(s) / sub-agent, n call(s)> |
+| <PRE-01 or STEP-1> | <model(s)> | | | | | | | | <n request(s), session journal> |
 | **Total** | | | | | | | | | |
 
-*1 AI credit = $<value>: <source URL>, read <date>. Source: <n> chat session file(s) in <folder> / the Session Info popover, read by the human. Human estimate: `docs/2-design/HumanEffortEstimate.md`; AI estimate: `docs/2-design/AiEffortEstimate.md`.*
+*1 AI credit = $<value>: <source URL>, read <date>. Source: <n> Copilot session journal(s) in <folder> (<n> ended, <n> open). Human estimate: `docs/2-design/HumanEffortEstimate.md`; AI estimate: `docs/2-design/AiEffortEstimate.md`.*
 
 ## Before calling a refresh done
 - [ ] The step table's `In Progress` row matches the open window in `ocpfFramework/state/usage.json`.
 - [ ] Every step with a start timestamp has a usage row; a step that couldn't be measured says why.
-- [ ] One row per model that ran in the step, never one row per step; no row was hand-written.
+- [ ] Claude Code: one row per model that ran in the step, never one row per step. Copilot: one row per step, every model named. No row was hand-written.
 - [ ] Only the table for the project's AI tool is here (both, if the tool changed midway).
-- [ ] Copilot: the step's checkpoint is in `ocpfFramework/state/usage.json`, and the Total equals the Session Cost — or the difference is explained.
+- [ ] Copilot: the journal folder is in `ocpfFramework/state/usage.json`, no human was asked for a figure, and a still-open session is noted *as of* its last checkpoint.
 - [ ] The step's rows were pasted into the closing message.
 - [ ] The Total row and the pricing footnote are current.
 

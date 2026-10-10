@@ -1,14 +1,18 @@
 # OCPF BC Agentic Development Framework — usage and cost per step, PowerShell port.
 # Two sources, chosen by "aiTool" in usage.json (or -Tool): claude-code reads tokens by type from Claude Code's
-# transcripts; copilot-chat reads AI credits per model from the chat session files GitHub Copilot Chat in VS Code
-# keeps in the workspace storage folder, sub-agents included. Copilot Chat records no token totals by type, so the
-# Copilot table has credit columns, not token columns. Steps are separated by checkpoints stored in usage.json
-# (a turn can run across several steps); see ocpf-usage.py's header.
+# transcripts; copilot-chat / copilot-cli read AI credits from the Copilot session journals the Copilot SDK keeps at
+# ~/.copilot/session-state/<id>/events.jsonl (%USERPROFILE%\.copilot\session-state on Windows) — the same journal
+# whether the session ran in VS Code's Copilot Chat agent mode or in the Copilot CLI. session.start names the project
+# folder (context.cwd); session.usage_checkpoint and session.shutdown carry totalNanoAiu, the cumulative cost in
+# nano-AI-units, 1e9 to the credit. A checkpoint is written when the chat ends, not per turn, so between two known
+# points the difference is split across the step windows by each window's share of model requests; the table says so.
+# Legacy VS Code chat session files (workspaceStorage/<hash>/chatSessions, pre-SDK) are still read when present.
+# Copilot records no token totals by type, so the Copilot table has credit columns, not token columns.
 # Mirrors ocpf-usage.py (the Python script is the reference implementation); exercised on PowerShell 7 on macOS,
 # untested on Windows. Internal variables avoid the parameter names: PowerShell variable names are case-insensitive.
 #   pwsh ocpf-usage.ps1 -Project C:\path\to\project [-Json] [-Step 03] [-Usage <path>] [-Pricing <path>] [-Transcripts <dir>]
 #   pwsh ocpf-usage.ps1 -Project C:\path\to\project -Calibrate
-#   pwsh ocpf-usage.ps1 -Project C:\path\to\project -Step 03 [-Tool copilot-chat] [-Sessions <chatSessions dir>] [-SessionCredits 3714.7]
+#   pwsh ocpf-usage.ps1 -Project C:\path\to\project -Step 03 [-Tool copilot-chat] [-Journal <session-state dir>] [-Reconcile]
 # Defaults: ocpfFramework\state\usage.json and ocpfFramework\state\pricing.json under the project.
 # -Calibrate (project close, Full Step 12 / Lite Step 7) writes ~\.ocpf\calibration\<project>-<date>.json —
 # per step and per model tokens by type, elapsed, turns, decisions, sub-agent calls, and the object counts
@@ -18,7 +22,8 @@ param(
   [string]$Project = ".",
   [string]$Usage, [string]$Pricing, [string]$Transcripts,
   [switch]$Json, [string]$Step, [switch]$Calibrate,
-  [ValidateSet("claude-code", "copilot-chat")][string]$Tool, [string]$Sessions, [Nullable[double]]$SessionCredits
+  [ValidateSet("claude-code", "copilot-chat", "copilot-cli")][string]$Tool, [string]$Journal, [string]$Sessions,
+  [Nullable[double]]$SessionCredits, [switch]$Reconcile
 )
 $ErrorActionPreference = "Stop"
 $inv = [cultureinfo]::InvariantCulture
@@ -32,8 +37,7 @@ $usageDoc   = Load-Json $usagePath @{}
 $pricingDoc = Load-Json ($(if ($Pricing) { $Pricing } else { Join-Path $stateDir "pricing.json" })) @{}
 $rates = if ($pricingDoc.perMillionTokens) { $pricingDoc.perMillionTokens } else { @{} }
 $aiTool = if ($Tool) { $Tool } elseif ($usageDoc.aiTool) { $usageDoc.aiTool } else { "claude-code" }
-if ($aiTool -eq "copilot-cli") { Write-Error "Copilot CLI isn't measured by this script — read the session's credits in the CLI and pass them with -Tool copilot-chat -SessionCredits <n>"; exit 1 }
-$isCopilot = $aiTool -eq "copilot-chat"
+$isCopilot = $aiTool -in @("copilot-chat", "copilot-cli")
 $notes = @()
 $wins = @(); foreach ($s in ($usageDoc.steps ?? @())) { $a = Parse-Ts $s.startedAt; if ($a -and $s.step) { $wins += ,@($s.step, $a, (Parse-Ts $s.completedAt)) } }
 $wins = @($wins | Sort-Object { $_[1] })
@@ -105,6 +109,77 @@ function Session-DirsFor($root) {
     } } }
   $dirs
 }
+
+# ───────────────────────────── Copilot SDK session journals (VS Code agent mode and the CLI) ─────────────────────────────
+$NanoAiuPerCredit = 1000000000.0   # github/copilot-sdk NANO_AIU_PER_AIU; AIU = AI credit (verified on a real project)
+function Journal-Dirs { $c = @((Join-Path $HOME ".copilot/session-state")); if ($env:USERPROFILE) { $c += (Join-Path $env:USERPROFILE ".copilot/session-state") }; @($c | Select-Object -Unique | Where-Object { Test-Path $_ }) }
+function Under-Path($path, $root) { if (-not $path) { return $false }; try { $a = [System.IO.Path]::GetFullPath($path).TrimEnd('\', '/'); $b = [System.IO.Path]::GetFullPath($root).TrimEnd('\', '/') } catch { return $false }; ($a -ieq $b) -or $a.StartsWith($b + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase) -or $a.StartsWith($b + '/', [System.StringComparison]::OrdinalIgnoreCase) }
+function Read-Journal($path) {
+  $sess = @{ id = (Split-Path -Leaf (Split-Path $path)); path = $path; cwd = $null; client = $null; start = $null; last = $null; points = @(); requests = @(); turns = 0; decisions = 0; subAgentCalls = 0; closed = $false; modelMetrics = $null }
+  try {
+    foreach ($line in [System.IO.File]::ReadLines($path)) {
+      try { $o = $line | ConvertFrom-Json -AsHashtable } catch { continue }
+      if ($o -isnot [System.Collections.IDictionary]) { continue }
+      $t = $o.type; $d = if ($o.data -is [System.Collections.IDictionary]) { $o.data } else { @{} }; $ts = Parse-Ts $o.timestamp
+      if ($null -eq $ts) { continue }
+      $sess.last = $ts
+      switch ($t) {
+        "session.start" { $sess.start = $ts; if ($d.context -is [System.Collections.IDictionary]) { $sess.cwd = $d.context.cwd } }
+        "session.context_changed" { if (-not $sess.cwd -and $d.cwd) { $sess.cwd = $d.cwd } }
+        "assistant.message" { $sess.requests += @{ ts = $ts; model = ($d.model ?? "unknown") } }
+        "user.message" { $sess.turns++ }
+        "tool.execution_start" { if ($d.toolName -eq "ask_user") { $sess.decisions++; $sess.turns++ } }
+        "subagent.started" { $sess.subAgentCalls++ }
+        { $_ -in @("session.usage_checkpoint", "session.shutdown") } {
+          if ($d.totalNanoAiu -is [ValueType]) { $sess.points += @{ ts = $ts; val = ([double]$d.totalNanoAiu / $NanoAiuPerCredit); kind = $t } }
+          if ($t -eq "session.shutdown") { $sess.closed = $true; $sess.modelMetrics = $d.modelMetrics }
+        }
+      }
+    }
+  } catch { return $null }
+  $wy = Join-Path (Split-Path $path) "workspace.yaml"
+  if (Test-Path $wy) { foreach ($ln in [System.IO.File]::ReadLines($wy)) { if (-not $sess.cwd -and $ln.StartsWith("cwd:")) { $sess.cwd = $ln.Substring(4).Trim() }; if ($ln.StartsWith("client_name:")) { $sess.client = $ln.Substring(12).Trim() } } }
+  $sess.points = @($sess.points | Sort-Object { $_.ts })
+  $sess
+}
+function Journal-SessionsFor($root, $dirs) {
+  $found = @()
+  foreach ($d in $dirs) { foreach ($f in (Get-ChildItem -Path $d -Directory -ErrorAction SilentlyContinue | Sort-Object Name)) {
+    $p = Join-Path $f.FullName "events.jsonl"; if (-not (Test-Path $p)) { continue }
+    $sess = Read-Journal $p; if ($sess -and (Under-Path $sess.cwd $root)) { $found += ,$sess } } }
+  $found
+}
+function Attribute-Session($sess) {
+  # Split a session's credits over the step windows: exact at every journaled point, by request share between them.
+  $per = @{}
+  foreach ($r in $sess.requests) { $k = Step-For $r.ts; if (-not $per.ContainsKey($k)) { $per[$k] = @{ credits = 0.0; requests = 0; models = @{} } }; $per[$k].requests++ }
+  $known = 0.0; $prevTs = $sess.start; if ($null -eq $prevTs -and $sess.requests.Count) { $prevTs = $sess.requests[0].ts }; $prevVal = 0.0; $estimated = $false; $firstSeg = $true
+  foreach ($pt in $sess.points) {
+    $ts = $pt.ts; $val = $pt.val; $delta = [math]::Max(0.0, $val - $prevVal)
+    $seg = @($sess.requests | Where-Object { ($null -eq $prevTs -or ($(if ($firstSeg) { $_.ts -ge $prevTs } else { $_.ts -gt $prevTs }))) -and $_.ts -le $ts })
+    if ($delta -gt 0) {
+      if ($seg.Count) {
+        $share = $delta / $seg.Count; $stepsIn = @{}
+        foreach ($r in $seg) { $k = Step-For $r.ts; $stepsIn[$k] = $true; if (-not $per.ContainsKey($k)) { $per[$k] = @{ credits = 0.0; requests = 0; models = @{} } }; $per[$k].credits += $share; $per[$k].models[$r.model] = ($per[$k].models[$r.model] ?? 0.0) + $share }
+        if ($stepsIn.Count -gt 1) { $estimated = $true }
+      } else { $k = Step-For $ts; if (-not $per.ContainsKey($k)) { $per[$k] = @{ credits = 0.0; requests = 0; models = @{} } }; $per[$k].credits += $delta; $per[$k].models["unknown"] = ($per[$k].models["unknown"] ?? 0.0) + $delta }
+    }
+    $known = $val; $prevTs = $ts; $prevVal = $val; $firstSeg = $false
+  }
+  $unj = @($sess.requests | Where-Object { $null -ne $prevTs -and $_.ts -gt $prevTs }).Count
+  @{ per = $per; known = $known; estimated = $estimated; unjournaled = $unj }
+}
+function Reconcile-GitHub {
+  try {
+    $login = (& gh api user --jq .login 2>$null); if ($LASTEXITCODE -ne 0 -or -not $login) { return @{ error = "gh is not signed in (gh auth login)" } }
+    $now = [datetime]::UtcNow
+    $raw = (& gh api "/users/$login/settings/billing/ai_credit/usage?year=$($now.Year)&month=$($now.Month)" 2>&1)
+    if ($LASTEXITCODE -ne 0) { $msg = ("$raw" -split "`n" | Where-Object { $_ } | Select-Object -Last 1); if ($msg -match "scope|404") { $msg += " — run: gh auth refresh -h github.com -s user" }; return @{ error = $msg } }
+    $data = "$raw" | ConvertFrom-Json -AsHashtable; $credits = 0.0; $items = @($data.usageItems ?? @())
+    foreach ($i in $items) { if ("$($i.unitType)" -match "credit" -or "$($i.sku)" -match "credit") { $credits += [double]($i.netQuantity ?? $i.grossQuantity ?? $i.quantity ?? 0) } }
+    @{ login = $login; year = $now.Year; month = $now.Month; credits = [math]::Round($credits, 1); items = $items.Count }
+  } catch { @{ error = "$_" } }
+}
 function New-Snap { @{ byModel = @{}; turns = 0; decisions = 0; subAgentCalls = 0 } }
 function Snapshot($turnList, $overhead = 0.0) {
   $s = New-Snap
@@ -139,11 +214,13 @@ if ($isCopilot) {
   $cpManual = $null -ne $SessionCredits
   $cand = if ($Sessions) { @($Sessions) } elseif ($cpState.sessionDirs) { @($cpState.sessionDirs) } else { @(Session-DirsFor $root) }
   $cpDirs = @($cand | Where-Object { $_ } | ForEach-Object { $_ -replace '^~', $HOME } | Where-Object { Test-Path $_ })
-  foreach ($d in $cpDirs) { $cpFiles += @(Get-ChildItem -Path $d -File | Where-Object { $_.Name -like "*.json*" } | Sort-Object Name) }
+  $cpFiles = @(); foreach ($d in $cpDirs) { $cpFiles += @(Get-ChildItem -Path $d -File | Where-Object { $_.Name -like "*.json*" } | Sort-Object Name) }
+  $jDirs = @($(if ($Journal) { @($Journal -replace '^~', $HOME) } else { Journal-Dirs }) | Where-Object { Test-Path $_ })
+  $jSessions = @(); if (-not $cpManual) { $jSessions = @(Journal-SessionsFor $root $jDirs) }
   $turnList = @(); $overhead = 0.0
   if ($cpManual) { $current = New-Snap; $current.byModel["$AllModels|all"] = @{ credits = [math]::Round([double]$SessionCredits, 4); calls = 0 }; $current.source = "popover" }
   else {
-    if (-not $cpFiles) { Write-Error ("no Copilot Chat session files found for this project folder" + $(if ($cpDirs) { " in $($cpDirs -join ', ')" } else { " in VS Code's workspace storage" }) + " — pass -Sessions <chatSessions folder>, or read Session Cost in the Session Info popover (the context window control in the chat input) and pass it with -SessionCredits <n>"); exit 1 }
+    if (-not $cpFiles -and -not $jSessions) { Write-Error ("no Copilot session journal names this project folder" + $(if ($jDirs) { " in $($jDirs -join ', ')" } else { " (no ~/.copilot/session-state on this machine)" }) + $(if ($cpDirs) { ", and no legacy chat session files in $($cpDirs -join ', ')" } else { "" }) + " — a session journaled on another machine needs -Journal <its session-state folder>; only if the journal truly does not exist, read Session Cost in the Session Info popover and pass -SessionCredits <n>"); exit 1 }
     $unread = 0
     foreach ($f in $cpFiles) {
       $state = $null; try { $state = Replay-Session $f.FullName } catch { }
@@ -167,10 +244,18 @@ if ($isCopilot) {
       if ($reported -gt $total + 0.05) { $overhead += $reported - $total }
     }
     if ($unread) { $notes += "$unread session file(s) could not be read and were skipped" }
-    $current = Snapshot $turnList $overhead; $current.source = "sessions"
-    $cpState["sessionDirs"] = $cpDirs
+    if ($jSessions.Count -and $turnList.Count) {
+      $spans = @(foreach ($x in $jSessions) { if ($x.last) { ,@(($x.start ?? $x.last), $x.last) } })
+      $kept = @($turnList | Where-Object { $t = $_; -not ($t.ts -and (@($spans | Where-Object { $_[0] -le $t.ts -and $t.ts -le $_[1] }).Count)) })
+      if ($kept.Count -ne $turnList.Count) { $notes += "$($turnList.Count - $kept.Count) legacy chat-session turn(s) overlap a journaled session and were not counted twice"; $turnList = $kept; if (-not $turnList.Count) { $overhead = 0.0 } }
+    }
+    $current = Snapshot $turnList $overhead; $current.source = $(if ($jSessions.Count) { "journal" } else { "sessions" })
+    if ($cpDirs) { $cpState["sessionDirs"] = $cpDirs }
+    if ($jSessions.Count -and (@($cpState.journalDirs) -join '|') -ne ($jDirs -join '|')) { $cpState["journalDirs"] = $jDirs; $usageDoc | ConvertTo-Json -Depth 12 | Set-Content -Path $usagePath -Encoding utf8 }
   }
-  if ($Step -and -not $Calibrate) {
+  $legacy = $cpManual -or ($turnList.Count -gt 0)
+  if ($jSessions.Count -and $cps.Count -and -not $legacy) { $notes += "$($cps.Count) earlier checkpoint(s) in usage.json were taken from the popover before the journal reader existed — superseded by the journal and ignored"; $cps = [System.Collections.ArrayList]::new() }
+  if ($Step -and -not $Calibrate -and $legacy) {
     $win = @($wins | Where-Object { $_[0] -eq $Step })
     if (-not $win) { Write-Error "step $Step has no startedAt in ocpfFramework/state/usage.json — write the window first"; exit 1 }
     $cp = [ordered]@{ step = $Step; at = [datetime]::UtcNow.ToString("yyyy-MM-ddTHH:mm:ssZ"); source = $current.source; byModel = $current.byModel; turns = $current.turns; decisions = $current.decisions; subAgentCalls = $current.subAgentCalls }
@@ -188,7 +273,8 @@ if ($isCopilot) {
     $g.turns += $d.turns; $g.decisions += $d.decisions; $g.subAgentCalls += $d.subAgentCalls
   }
   function Turn-Step($t) { if ($null -eq $t.ts) { "Unattributed" } else { Step-For $t.ts } }
-  if ($cps.Count -eq 0) {
+  if (-not $legacy) { }
+  elseif ($cps.Count -eq 0) {
     $notes += "no checkpoints yet — attributed by each turn's start time; a turn that ran across steps counts in the step it started in"
     foreach ($sid in ((@($wins | ForEach-Object { $_[0] }) + "Unattributed") | Select-Object -Unique)) { Credit-Step $sid (Snapshot @($turnList | Where-Object { (Turn-Step $_) -eq $sid })) }
     Credit-Step "between turns" (Snapshot @() $overhead)
@@ -222,6 +308,33 @@ if ($isCopilot) {
         turns=$d.turns; decisions=$d.decisions; subAgentCalls=$d.subAgentCalls; webRequests=0 }
     }
   }
+  # ---- Copilot SDK journals: exact session totals, split by request share between known points ----
+  $jRows = [ordered]@{}; $jTotal = 0.0; $openSessions = 0; $estAny = $false; $unj = 0
+  foreach ($sess in $jSessions) {
+    $att = Attribute-Session $sess; $jTotal += $att.known; if ($att.estimated) { $estAny = $true }; $unj += $att.unjournaled
+    if (-not $sess.closed) { $openSessions++ }
+    foreach ($sid in $att.per.Keys) { $v = $att.per[$sid]; if ($v.credits -le 0.00005 -and $v.requests -eq 0) { continue }
+      if (-not $jRows.Contains($sid)) { $jRows[$sid] = @{ credits = 0.0; requests = 0; models = @{}; turns = 0; decisions = 0; subAgentCalls = 0 } }
+      $g = $jRows[$sid]; $g.credits += $v.credits; $g.requests += $v.requests; foreach ($m in $v.models.Keys) { $g.models[$m] = ($g.models[$m] ?? 0.0) + $v.models[$m] } }
+    if ($sess.requests.Count) { $k = Step-For $sess.requests[0].ts; if ($jRows.Contains($k)) { $jRows[$k].turns += $sess.turns; $jRows[$k].decisions += $sess.decisions; $jRows[$k].subAgentCalls += $sess.subAgentCalls } }
+  }
+  if ($jSessions.Count) {
+    $notes += "Turns in a Copilot row = the human's prompts plus every question the agent asked and the human answered (ask_user)"
+    if ($estAny) { $notes += "inside a session the SDK journals the cumulative credits only when the chat ends; between those points the figure is split across steps by each step's share of model requests" }
+    if ($openSessions) { $notes += "$openSessions session(s) still open — their credits are as of the last journaled checkpoint; the step rows will grow when the chat ends and the measurement runs again" }
+    if ($unj) { $notes += "$unj model request(s) ran after the last journaled checkpoint and are not yet counted anywhere" }
+  }
+  foreach ($sid in $jRows.Keys) {
+    if ($Step -and $sid -ne $Step) { continue }
+    $g = $jRows[$sid]; $el = Elapsed-For $sid
+    $models = (@($g.models.Keys | Where-Object { $g.models[$_] -gt 0.00005 } | Sort-Object) -join ", "); if (-not $models) { $models = "unknown" }
+    $out += [pscustomobject]@{ step=$sid; model=$models; role="session"; aiCredits=[math]::Round($g.credits, 2); calls=$g.requests
+      input=$null; output=$null; cacheWrite=$null; cacheRead=$null; requests=$g.requests
+      costUsd=$(if ($null -ne $usdPerCredit) { [math]::Round($g.credits * $usdPerCredit, 4) } else { $null }); elapsedSeconds=$(if ($null -ne $el) { [int][math]::Round($el) } else { $null })
+      turns=$g.turns; decisions=$g.decisions; subAgentCalls=$g.subAgentCalls; webRequests=0 }
+  }
+  $stepOrder = @($wins | ForEach-Object { $_[0] }) + "Unattributed"
+  $out = @($out | Sort-Object { $i = $stepOrder.IndexOf(($_.step -replace ' \(open\)$', '')); if ($i -lt 0) { 999 } else { $i } })
   if ($Step -and -not $out) { $notes += "no credits were recorded inside step $Step — check its window in ocpfFramework/state/usage.json, and that the chat session wasn't deleted" }
   if ($null -eq $usdPerCredit) { $notes += 'pricing.json has no "aiCredit" entry — fetch https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing and write { "aiCredit": { "usd": <value>, "source": <url> } }' }
 }
@@ -345,7 +458,10 @@ if ($Calibrate) {
 function HM($sec) { if ($null -eq $sec) { "n/a — no timestamps" } else { "{0}h {1:00}m" -f [int][math]::Floor($sec/3600), [int][math]::Floor(([int]$sec % 3600)/60) } }
 if ($isCopilot) {
   $src = if ($pricingDoc.aiCredit -and $pricingDoc.aiCredit.source) { $pricingDoc.aiCredit.source } else { "none fetched" }
-  if ($Json) { [ordered]@{ aiTool="copilot-chat"; sessionDirs=$cpDirs; files=$cpFiles.Count; usdPerAiCredit=$usdPerCredit; pricingSource=$src; pricingFetchedAt=$pricingDoc.fetchedAt; sessionTotalCredits=[math]::Round((Snap-Total $current), 1); rows=$out; notes=$notes } | ConvertTo-Json -Depth 5; exit 0 }
+  $recon = $null
+  if ($Reconcile) { $recon = Reconcile-GitHub; if ($recon.error) { $notes += "GitHub billing cross-check unavailable: $($recon.error)"; $recon = $null } }
+  $sessSummary = @(foreach ($x in $jSessions) { [ordered]@{ id=$x.id; client=$x.client; start=$x.start; lastKnownAt=$(if ($x.points.Count) { $x.points[-1].ts }); credits=$(if ($x.points.Count) { [math]::Round($x.points[-1].val, 2) } else { 0.0 }); closed=$x.closed; requests=$x.requests.Count; models=@($x.requests | ForEach-Object { $_.model } | Sort-Object -Unique) } })
+  if ($Json) { [ordered]@{ aiTool="copilot-chat"; journalDirs=$jDirs; sessions=$sessSummary; sessionDirs=$cpDirs; files=$cpFiles.Count; usdPerAiCredit=$usdPerCredit; pricingSource=$src; pricingFetchedAt=$pricingDoc.fetchedAt; sessionTotalCredits=[math]::Round((Snap-Total $current) + $jTotal, 1); githubMonthToDate=$recon; rows=$out; notes=$notes } | ConvertTo-Json -Depth 6; exit 0 }
   "| Step | Model(s) | AI credits | Cost (USD) | Elapsed | Turns | Decisions | Sub-agent calls | Senior AL dev est. (h) | Notes |"
   "|---|---|---|---|---|---|---|---|---|---|"
   $tc = 0.0; $tcost = 0.0; $unpriced = $false; $shown = @{}
@@ -354,13 +470,18 @@ if ($isCopilot) {
     $tc += $r.aiCredits
     $first = -not $shown.ContainsKey($r.step); $shown[$r.step] = $true
     $el = if ($first) { HM $r.elapsedSeconds } else { "〃" }; $tu = if ($first) { $r.turns } else { "〃" }; $de = if ($first) { $r.decisions } else { "〃" }; $sa = if ($first) { $r.subAgentCalls } else { "〃" }
-    $note = switch ($r.role) { "main" { "main, $($r.calls) turn(s)" } "sub-agent" { "sub-agent, $($r.calls) call(s)" } "session" { "billed between turns" } "all" { "read from the popover by the human — no model breakdown" } default { $r.role } }
+    $note = switch ($r.role) { "main" { "main, $($r.calls) turn(s)" } "sub-agent" { "sub-agent, $($r.calls) call(s)" } "session" { "$($r.calls) request(s), session journal" } "all" { "read from the popover by the human — no model breakdown" } default { $r.role } }
     "| $($r.step) | $($r.model) | $(([double]$r.aiCredits).ToString('N1', $inv)) | $c | $el | $tu | $de | $sa |  | $note |"
   }
   "| **Total** |  | $($tc.ToString('N1', $inv)) | $($tcost.ToString('F2', $inv))$(if ($unpriced) { ' + unpriced' }) |  |  |  |  |  |  |"
-  $where = if ($cpManual) { "the Session Info popover, read by the human" } else { "$($cpFiles.Count) chat session file(s) in $($cpDirs -join ', ')" }
+  $parts = @()
+  if ($jSessions.Count) { $parts += "$($jSessions.Count) Copilot session journal(s) in $($jDirs -join ', ') ($(@($jSessions | Where-Object { $_.closed }).Count) ended, $openSessions open)" }
+  if ($cpFiles.Count) { $parts += "$($cpFiles.Count) legacy chat session file(s) in $($cpDirs -join ', ')" }
+  if ($cpManual) { $parts += "the Session Info popover, read by the human" }
+  $where = $(if ($parts) { $parts -join "; " } else { "none" })
   $rate = if ($null -ne $usdPerCredit) { '$' + $usdPerCredit.ToString('0.####', $inv) } else { "price unknown" }
-  ""; "*AI credits as GitHub Copilot Chat recorded them, sub-agents included; Copilot Chat records no token totals by type. 1 AI credit = ${rate}: $src, read $($pricingDoc.fetchedAt ?? 'n/a'). Source: $where.*"
+  ""; "*AI credits as the Copilot SDK journaled them, sub-agents included; Copilot records no token totals by type. 1 AI credit = ${rate}: $src, read $($pricingDoc.fetchedAt ?? 'n/a'). Source: $where.*"
+  if ($recon) { "*GitHub billing, month to date for $($recon.login) ($($recon.year)-$($recon.month.ToString('00'))): $($recon.credits.ToString('N1', $inv)) AI credits across everything the account did — a cross-check, not a project figure.*" }
   foreach ($n_ in $notes) { "*Note: $n_*" }
   exit 0
 }

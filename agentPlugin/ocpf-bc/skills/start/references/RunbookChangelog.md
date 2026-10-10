@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.1.0.0**, the Standards Guide is at **v1.11.0.0**, the Operations Guide at **v5.1.0.0**, and Lite at **v5.1.0.0** — but
+**v5.2.0.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.2.0.0**, and Lite at **v5.2.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -23,6 +23,130 @@ change-worthy. (This is a different convention from a project's own ChangeLog, w
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
 
 ---
+
+## v5.2.0.0 — October 10, 2026
+
+**Copilot AI credits read from the session journal; the human never types a figure. Enums, never
+Options, with every enum's `Extensible` a recorded decision.** Lite **v5.2.0.0**, Operations Guide
+**v5.2.0.0**, Standards Guide **v1.12.0.0**, plugin **5.2.0**. No layout change and no migration:
+`update-framework` replaces the runbook, step files, Operations Guide, and Standards Guide.
+
+- **What went wrong.** On a Copilot project run on v5.1.0.0 the usage script found no chat session
+  files and, at every step close, asked the human to open the Session Info popover, read *Session
+  Cost*, and pass it with `--session-credits`. The row then said *read from the popover by the
+  human — no model breakdown*. The cause: since VS Code 1.139 (September 22, 2026) Copilot Chat's
+  agent mode runs on the **Copilot SDK**, the same engine as the Copilot CLI, and its sessions are
+  journaled at `~/.copilot/session-state/<id>/events.jsonl` — not in VS Code's
+  `workspaceStorage/<hash>/chatSessions/`, the only place the v5.0.0.0 reader looked. A session
+  that ran on the older chat (the September 29 proof project) still had the old files; every
+  session since did not.
+- **The journal is the source** (Ops § Usage & Cost → 2, rewritten). `session.start` carries the
+  project folder; `session.usage_checkpoint` and `session.shutdown` carry `totalNanoAiu`, the
+  cumulative cost in nano-AI-units, 1e9 to the credit (the SDK's `NANO_AIU_PER_AIU`; checked
+  against the popover on the failing project: 1,055 credits read at the step close, 1,143 in the
+  journal ninety seconds and a few requests later); every model request is an `assistant.message`
+  with model and timestamp. Both script ports find a project's sessions by folder, take each
+  session's last journaled figure, and split it across the step windows by request share between
+  the journaled points — the SDK writes a checkpoint when the chat ends, not per turn, and
+  per-call usage (`assistant.usage`) is streamed but never journaled, per GitHub's streaming-events
+  reference. The table says which rows are exact and which are shares; a still-open session is
+  reported *as of* its last checkpoint and settles at the next measurement.
+- **One row per step in the Copilot table**, every model that answered named in *Model(s)*,
+  *Notes* saying *n request(s), session journal*. Rule 11, Ops § Usage & Cost → 4 and 5, the
+  `usage` skill, and the `ProjectProgress.md` template say so; Claude Code keeps one row per model.
+  The session's exact per-model figures stay in the script's `--json` output and the calibration
+  export.
+- **Copilot CLI projects are measured the same way**, from the same journal (`aiTool:
+  copilot-cli`); the script no longer refuses them.
+- **`--reconcile`** prints the account's month-to-date AI credits from GitHub's billing API
+  (`gh api /users/<login>/settings/billing/ai_credit/usage`, classic token with the `user` scope)
+  under the table, as a bound on the project's total; it never fills a row.
+- **Pre-SDK chat files are still read** when present (per-turn `copilotCredits`, with the
+  checkpoints they need), so a project that spans both formats loses nothing; popover checkpoints
+  stored before this version are superseded by the journal and ignored, with a note.
+- **`--session-credits` survives as the last resort** for a project whose journal exists on no
+  reachable machine, and only then; a run that asks for the popover figure while a journal exists
+  is named as a bug in Rule 11, Lite Rule 9, Ops § Usage & Cost → 5, and the skill.
+- **In GitHub Copilot in VS Code, the Reasoning role runs the measurement** (Rule 10's task list,
+  Rule 11, Ops § Roles → *What each role is for*, Ops § Usage & Cost → 5, the `ocpf-reasoning`
+  agent definition, the `usage` skill). At every step close the main role delegates the script run
+  to the project-local `ocpf-reasoning` sub-agent with a four-line brief and receives the table,
+  the notes, and the JSON session summary verbatim; the main role writes and pastes the rows. The
+  Main model on the failing project had skipped the script; a procedure with no judgment in it is
+  what the Reasoning role follows exactly. Claude Code, the Copilot CLI, and Lite are unchanged.
+- Both runbook cores' *Usage & Cost Tracking* passages, the README, the user guide, and the plugin
+  README describe the new source; `usage.json` gains `copilot.journalDirs`.
+- **A live dashboard, from PRE-01 on.** New **Ops § Dashboard**, new ALL ALONG → *Dashboard* in
+  both cores, and a new `dashboard` skill in the plugin. `ocpfFramework/state/dashboard.html` is
+  rendered by a bundled script (Python, with a PowerShell twin that prints the same page) from
+  `app.json`, `framework.json`, `usage.json`, `ProjectProgress.md`, the step files, `pricing.json`,
+  the sub-agent definitions, the usage script's JSON, and — in Claude Code — the transcripts; the
+  agent never writes the HTML. It appears **the moment `app.json` exists at PRE-01**, is opened
+  once in the default browser, and the human is told about it once through the options box (**I
+  understand** / *Other*): what it is, why, how to read it, where the file is, and how to reopen it
+  (right-click → **Open Externally**). Hooks keep it fresh at zero token cost — `Stop`,
+  `SubagentStop`, and the `AskUserQuestion` pre/post hooks in Claude Code (the open question and
+  its options appear on the page, with where to answer); the same moments in the Copilot CLI; the
+  step-boundary ritual in Copilot Chat, which has no hooks. One theme ships, *OnlyBCFans* (dark,
+  Day / Night switch), with a footer selector reserved for more. `ProjectProgress.md` remains the
+  record. `update-framework` creates the page on a project that predates it.
+- **Identity questions frontloaded.** PRE-01 asks **extension name, publisher, and app icon** in
+  one box right after the notification question and before the model questions (Ops § Intake →
+  *Box 0*), and writes `app.json` at once — a first write with `name`, `publisher`, `logo`,
+  `version` `0.0.0.1`, `id`, and the platform defaults — so the dashboard created next shows the
+  human's own app. Step 01's §1.1 rows and Ops § Intake's Box 1 / 1a now *record* those three
+  answers instead of asking them; Ops § Project Setup's step 1 is the complete, second write, which
+  keeps the four identity values. Object ID ranges, the BC version, features, and the AppSource
+  block stay where they were, because they depend on answers the business questions produce first.
+- **Business Central Copilot features follow the OnlyBCFans BC Copilot Blueprint.** New ALL
+  ALONG section *Business Central Copilot Features* (both editions) and Ops § Fetched Companions →
+  *OnlyBCFans BC Copilot Blueprint* (<https://github.com/ajansari/obcfBCCopilotBlueprint>, MIT,
+  pinned at `v1.0.0.0`, fetched only when the project has such a feature, into a sibling folder
+  outside the root because its templates are real `.al` objects; in Claude Code also installed as
+  a project skill). Step 01 §1.6 gains **Business Central Copilot feature** `Yes`/`No` with host
+  pages and billing path; Step 02 cites the Blueprint in the FRD; Step 03 specifies every object
+  of its 15-step procedure from its references and templates; Step 05 fetches it; Step 06 starts
+  a Copilot batch from its templates with its non-negotiable rules in the brief; Step 07 checks
+  its API reference before memory on System.AI errors; Step 09 walks its done checklist as a
+  review pass. **Rule:** never claim a BC Copilot thing is impossible, unsupported for a PTE, or
+  dependent on an Azure subscription without reading `references/09-false-assumptions.md` and
+  citing the row — the framework and most AI tools had made exactly those claims. Where the
+  Blueprint and the Standards Guide disagree, the Standards Guide wins.
+- **The Standards Guide is now standalone — `ajansari/ocpfBCALStandards`, pinned at `v1.12.0.0`.**
+  `standardsGuide/ocpfALDevStandardsGuide.md` is deleted from this repository; in its place
+  `standardsGuide/README.md` is the *prelude* (purpose, relationship to the runbook, the
+  authoritative-source rule in Step 01 terms, the "not in the guide" map, and the pinned tag).
+  Projects fetch the guide at the pinned tag from the standalone repository into the **same on-disk
+  path and filename** as before, with the prelude beside it; no project file moves, and
+  `update-framework` only rewrites `SNAPSHOT.json`'s source. Ops § Fetched Companions splits the
+  old "Standards Guide and this guide" subsection in two and adds the pin-a-tag rule; the `start`,
+  `update-framework`, and `al-standards` skills, the GitHub code-reviewer agent, the README, the
+  user guide, and `THIRD_PARTY_NOTICES.md` point at the new source; `syncPlugin.sh` bundles the
+  pinned tag into the plugin instead of copying a local file. The standalone guide's text lost
+  every reference to this runbook's step numbers, operating rules, and Ops §; its numbering is
+  append-only by contract, so **Standards §** citations keep resolving. **Standards history through
+  1.11.0.0 stays in this file; from 1.12.0.0 on it is logged in the standalone repository**, and
+  this file records only pin moves. The two 1.12.0.0 rule changes below shipped with the split.
+- **Standards Guide v1.12.0.0 — §1.9 *Enums, Never Options*.** A real project showed the guide
+  said nothing about the choice. New code declares every fixed value set as an `enum`, never an
+  `Option` (Microsoft keeps option conversion only "to be backwards compatible … for now" and tells
+  API authors to use enums; AS0070/AS0071 govern the eventual migration). **`Extensible` is decided
+  per enum, with the human, and written explicitly** — it defaults to `false` on an enum, so an
+  unasked question is a silent decision. Full Step 03 and Lite Step 2 ask it through the options
+  mechanism (*Extensible = true (recommended)* / *Extensible = false*, with the reason); the TDD
+  per-object spec, the TDD fields table, the Design Doc object register, and both self-checks
+  record it; Part 7 gains three anti-pattern rows (a new `Option`, an enum without an explicit
+  `Extensible`, a `case` over an extensible enum without `else`). Value 0 is the blank value;
+  ordinals are permanent; captions carry no comma (AS0087); API pages expose enums by name.
+- **Standards Guide v1.12.0.0 — §2.2 adopts BCQuality's shape for API pages.** A real review
+  found the guide's "set exactly one of `DelayedInsert` / `Editable = false`" rule contradicting
+  BCQuality's style rule on every API page. Now: `DelayedInsert = true` on **every** `PageType =
+  API` page; a read-only page adds `Editable = false` and the documented write guards
+  `InsertAllowed`, `ModifyAllowed`, `DeleteAllowed` all `false` — `Editable = false` alone never
+  blocked POST or DELETE. Least-privilege write pages and the consumer-supplied-key rule are
+  stated from BCQuality's three web-services articles. The §1.3 template, the Part 7 rows, the TDD
+  and Design Doc per-object rows, Full Steps 03 and 09, and Lite Steps 2, 4, and 6 follow. Pages
+  built under the old rule keep working; the guards are added when a page is next touched.
 
 ## v5.1.0.0 — October 1, 2026
 

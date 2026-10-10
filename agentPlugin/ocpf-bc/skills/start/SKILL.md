@@ -142,10 +142,14 @@ Nothing else in the root.
    runbook is a short core plus one file per step. The runbook fetches them itself at its first
    step, with the guides, all under `ocpfFramework/` (Ops § Fetched Companions has the file lists:
    `fullVersion/steps/` or `liteVersion/steps/` into `ocpfFramework/runbookSteps/`, the repository's
-   `documentTemplates/` into `ocpfFramework/documentTemplates/`, the Standards Guide into
-   `ocpfFramework/standardsGuide/`, the Operations Guide into `ocpfFramework/opsGuide/`, the patterns
+   `documentTemplates/` into `ocpfFramework/documentTemplates/`, the Standards Guide — from its own
+   repository `ajansari/ocpfBCALStandards` at the tag named in the framework's
+   `standardsGuide/README.md`, fetched beside it — into `ocpfFramework/standardsGuide/`, the
+   Operations Guide into `ocpfFramework/opsGuide/`, the patterns
    library into `ocpfFramework/patterns/`; this plugin's scripts into `ocpfFramework/scripts/`; all
-   gitignored). If GitHub is unreachable then, the bundled copies are in this skill's
+   gitignored). The OnlyBCFans BC Copilot Blueprint (`ajansari/obcfBCCopilotBlueprint`) is fetched
+   later, only when the intake records a Business Central Copilot feature, into a sibling folder
+   outside the project root (Ops § Fetched Companions); it is not bundled here. If GitHub is unreachable then, the bundled copies are in this skill's
    `references/steps/full/` and `references/steps/lite/`, and in the `documents` skill's `references/`.
 2b. **`ocpfFramework/README.md`:** write these six lines, exactly, so anyone opening the folder
    knows what it is:
@@ -246,9 +250,14 @@ notification kind at the runbook's first step counts as asking, for the settings
    questions — the agent-mode request limit (150 / 100 / default) and tool approvals (ask each
    time / allow the framework's commands / allow everything) — and writes `.vscode/settings.json`
    (Ops § Asking and Approvals → *GitHub Copilot session settings*).
+2c. **Note the dashboard.** PRE-01 / Lite Step 1 creates `ocpfFramework/state/dashboard.html` the
+   moment `app.json` exists (right after the identity questions), opens it, installs its hooks, and
+   asks the one explanation question — the `dashboard` skill does it (`/ocpf-bc:dashboard`). Don't
+   create it here; the runbook's step owns the moment.
 3. **Note the two companion guides.** The runbook fetches both at that first step: the **Standards
-   Guide** into `ocpfFramework/standardsGuide/` and the **Operations Guide** into `ocpfFramework/opsGuide/`
-   (each with a `SNAPSHOT.json`). If GitHub is
+   Guide** — standalone at `ajansari/ocpfBCALStandards`, at the pinned tag — into
+   `ocpfFramework/standardsGuide/` with the framework's prelude `README.md` beside it, and the
+   **Operations Guide** into `ocpfFramework/opsGuide/` (each with a `SNAPSHOT.json`). If GitHub is
    unreachable, use the copies bundled with this plugin — the Standards Guide in the `al-standards`
    skill's `references/`, the Operations Guide in this skill's `references/` — and say which
    versions were used, as the runbook's ALL ALONG → OCPF AL Development Standards Guide describes.

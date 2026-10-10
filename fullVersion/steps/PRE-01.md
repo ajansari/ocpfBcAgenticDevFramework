@@ -1,6 +1,6 @@
 # BC App Build Routine — PRE-01 — State the Problem
 
-**Runbook version:** 5.1.0.0 · Full edition · Phase: DEFINE
+**Runbook version:** 5.2.0.0 · Full edition · Phase: DEFINE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -40,7 +40,32 @@
   copies and what to do when GitHub is unreachable: ALL ALONG → OCPF AL Development Standards
   Guide.**
 - **Ask how to be notified, right after the working language** (Ops § Notifications — read it now): Claude app, sound, desktop notification, any combination, or none. Record the answer in `ocpfFramework/state/notifications.json` and apply it now, so every question from here on — the approvers question included — reaches the human even when they've stepped away.
-- **Ask which models do the work, right after notifications — before any document is drafted**
+- **Ask the three identity questions next — extension name, publisher, app icon — and write
+  `app.json` at once** (Rule 6a; **Ops § Intake → *Box 0 — Identity first***). One box, three
+  questions, in this order, before the model questions: **1. Extension name?** (up to three
+  suggestions built from the human's own wording, each labelled a suggestion, plus *I'll type it*);
+  **2. Publisher?** (only a name the human has already written, quoted with its source, else *I'll
+  type it* — never inferred from an email domain); **3. App icon?** (*Yes — I'll provide an image* /
+  *No icon* / *Later*; on *Yes*, ask for the path as free text with Ops § Intake's guidance and place
+  it at `src/logo/AppLogo.png`, resized as Ops § Intake → *The app icon* says). Then **create
+  `src/` and write `app.json` now** with `name`, `publisher`, `logo` when given, `version`
+  `0.0.0.1`, a new `id` GUID (or keep an existing file's), and the platform defaults from Ops §
+  Project Setup — **this is a first write, not the complete one**: object ID ranges, the BC version,
+  features, and the AppSource block need answers that Step 01 collects later, and §1.10 rewrites
+  `app.json` complete, keeping `id`, `name`, `publisher`, and `logo`. Record the three answers in
+  `docs/0-project/ProjectMemory.md`; Step 01 §1.1 carries them into the sheet and does not ask
+  them again. Why first: the dashboard created in the next bullet shows the app's name and icon from
+  `app.json`, and the sooner the human sees their own app on it, the sooner it earns its place.
+- **Create the live dashboard the moment `app.json` exists, open it, and explain it once**
+  (ALL ALONG → Dashboard; **Ops § Dashboard — read it now**; plugin: `/ocpf-bc:dashboard`). Copy
+  the renderer and its template into `ocpfFramework/scripts/`, render `ocpfFramework/state/dashboard.html`,
+  open it in the default browser (`--open`), install the refresh hooks for this AI tool (Claude
+  Code and Copilot CLI: every turn; Copilot Chat: every step boundary), then ask the one
+  explanation question through the options mechanism — **I understand** / *Other* — with the text
+  Ops § Dashboard fixes: what the page is, why it exists, how to read it, the file's name and place,
+  and that a closed tab reopens with a right-click on the file → **Open Externally** (or *Reveal in
+  Finder / File Explorer* and a double-click). Record the answer in `docs/0-project/ProjectMemory.md`.
+- **Ask which models do the work, right after the dashboard — before any document is drafted**
   (Rule 6a; **Ops § Roles — read it now**). **Say this first, once, before the questions:** *"A
   High thinking effort makes every task slower: the model thinks longer before each answer, and a
   step can take noticeably more time. The framework recommends High only where judgment matters
@@ -79,7 +104,7 @@
   `ocpfFramework/state/usage.json` with PRE-01's `startedAt` (Operating Rule 11; ALL ALONG → Usage
   & Cost Tracking; Ops § Usage & Cost → 5). If the AI tool is Claude Code, note the transcript
   folder the usage skill will read. At this step's close the same rule applies for the first time:
-  set `completedAt`, measure, and write PRE-01's rows — one per model — before the exit-gate
+  set `completedAt`, measure, and write PRE-01's rows — one per model in Claude Code, one per step in Copilot — before the exit-gate
   message.
 - **Ask who approves, next** (Rule 6a), because it decides how many sign-offs follow — starting
   with this step's own. *Who signs off on the design documents?* **One person for every role**
@@ -120,8 +145,8 @@
 - Produce an initial entity/object list from stakeholder domain knowledge.
 - As the agent: identify duplicates, ambiguous terms, and outdated/legacy terminology in the initial list; ask clarifying questions about scope and consumer use cases. Do not resolve ambiguities silently.
 
-**Outputs:** `ocpfFramework/` with its six-line `README.md`, `standardsGuide/`, `opsGuide/`, `runbookSteps/`, `documentTemplates/`, and `RunbookChangelog.md` (all fetched, the folder gitignored per Ops § Repository Hygiene), `ocpfFramework/state/usage.json` (PRE-01's `startedAt`, and its rows at the close), `ocpfFramework/state/copilot.json` and the Copilot keys in `.vscode/settings.json` (when Copilot is in use), `requirements/` (seeded, if any raw input was provided), `ProjectProgress.md` (seeded from its template, Full step table, project root), `docs/` with `0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` (created), the model and effort assignment recorded in `docs/0-project/ProjectMemory.md` and materialized as three project-local sub-agent definitions — light, reasoning, generator (Ops § Roles), `docs/1-define/ProblemStatement.md` — purpose, scope, out-of-scope, target consumers, initial entity list, open questions.
+**Outputs:** `ocpfFramework/` with its six-line `README.md`, `standardsGuide/`, `opsGuide/`, `runbookSteps/`, `documentTemplates/`, and `RunbookChangelog.md` (all fetched, the folder gitignored per Ops § Repository Hygiene), `app.json` (first write: name, publisher, logo, version `0.0.0.1`, id) and `src/` with `src/logo/AppLogo.png` when an icon was given, `ocpfFramework/state/dashboard.html` (rendered, opened, explained — hooks installed, `ocpfFramework/state/dashboard.json`), `ocpfFramework/state/usage.json` (PRE-01's `startedAt`, and its rows at the close), `ocpfFramework/state/copilot.json` and the Copilot keys in `.vscode/settings.json` (when Copilot is in use), `requirements/` (seeded, if any raw input was provided), `ProjectProgress.md` (seeded from its template, Full step table, project root), `docs/` with `0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` (created), the model and effort assignment recorded in `docs/0-project/ProjectMemory.md` and materialized as three project-local sub-agent definitions — light, reasoning, generator (Ops § Roles), `docs/1-define/ProblemStatement.md` — purpose, scope, out-of-scope, target consumers, initial entity list, open questions.
 
-**Exit gate:** Both companion guides are present, in `ocpfFramework/standardsGuide/` and `ocpfFramework/opsGuide/`, the step files in `ocpfFramework/runbookSteps/`, the templates in `ocpfFramework/documentTemplates/`, the changelog at `ocpfFramework/RunbookChangelog.md`, the `README.md` written, all gitignored. The Copilot session settings are written and recorded when Copilot is in use. `ocpfFramework/state/usage.json` holds PRE-01's `startedAt` and, at the close, its `completedAt`, and PRE-01's usage rows — one per model — are in `ProjectProgress.md` and pasted into the closing message (Operating Rule 11). The notification choice is recorded in `ocpfFramework/state/notifications.json`, applied, and tested (ALL ALONG → Notifications). The effort warning was said before the model questions, all six model and effort answers are recorded, the Main model and effort match what this session is actually running on, and the Light, Reasoning, and Generator sub-agent definitions exist in the project with the chosen model and effort set (Operating Rule 10). `docs/1-define/ProblemStatement.md` is in `docs/1-define/`, not the root or a flat `docs/` (Operating Rule 9). Functional Consultant signs off on the problem statement and initial entity list (Stage↔Step Map, Stage 1) — or, when **Approvers** is one person, this sign-off moves to the end of PRE-02 and is given together with that step's, on the problem statement and expanded list at once.
+**Exit gate:** `app.json` exists with the human's extension name and publisher (and `logo` when an icon was given — the file at `src/logo/AppLogo.png`), asked in this step's first box after notifications; the dashboard `ocpfFramework/state/dashboard.html` was rendered from it, opened in the browser, its hooks installed for this AI tool, and the one explanation question answered (ALL ALONG → Dashboard). Both companion guides are present, in `ocpfFramework/standardsGuide/` and `ocpfFramework/opsGuide/`, the step files in `ocpfFramework/runbookSteps/`, the templates in `ocpfFramework/documentTemplates/`, the changelog at `ocpfFramework/RunbookChangelog.md`, the `README.md` written, all gitignored. The Copilot session settings are written and recorded when Copilot is in use. `ocpfFramework/state/usage.json` holds PRE-01's `startedAt` and, at the close, its `completedAt`, and PRE-01's usage rows — one per model in Claude Code, one per step in Copilot — are in `ProjectProgress.md` and pasted into the closing message (Operating Rule 11). The notification choice is recorded in `ocpfFramework/state/notifications.json`, applied, and tested (ALL ALONG → Notifications). The effort warning was said before the model questions, all six model and effort answers are recorded, the Main model and effort match what this session is actually running on, and the Light, Reasoning, and Generator sub-agent definitions exist in the project with the chosen model and effort set (Operating Rule 10). `docs/1-define/ProblemStatement.md` is in `docs/1-define/`, not the root or a flat `docs/` (Operating Rule 9). Functional Consultant signs off on the problem statement and initial entity list (Stage↔Step Map, Stage 1) — or, when **Approvers** is one person, this sign-off moves to the end of PRE-02 and is given together with that step's, on the problem statement and expanded list at once.
 
 **Step close (Rule 6c) — mandatory, never a prose prompt:** once the exit gate is met and the usage rows are pasted, end the closing message with the options box: **Proceed into PRE-02 now (recommended)** / **Stop here** (say what there is to review and how to resume). Nothing of PRE-02 starts until the human answers.

@@ -1,6 +1,6 @@
 ---
 name: usage
-description: Measure and record what an OCPF BC Agentic Development Framework project has consumed, in the unit its AI tool bills in - in Claude Code, input, output, cache-write, and cache-read tokens per step and per model from its session transcripts; in GitHub Copilot in VS Code, AI credits per step and per model from Copilot Chat's session files - sub-agents included in both, with elapsed time, turns, decisions asked, and cost at published prices fetched from the publisher - and refresh the usage table in ProjectProgress.md (both editions; one table per tool). Runs at every step boundary as /ocpf-bc:usage --step <id>; at project close, /ocpf-bc:usage --calibrate exports the measurements for the next project's AI Effort Estimate. Use when a step starts or closes, when the user asks "what has this cost", "how many tokens", "token usage by step", "how many credits", "Copilot credits by step", "update the usage table", or runs /ocpf-bc:usage.
+description: Measure and record what an OCPF BC Agentic Development Framework project has consumed, in the unit its AI tool bills in - in Claude Code, input, output, cache-write, and cache-read tokens per step and per model from its session transcripts; in GitHub Copilot (VS Code's chat or the CLI), AI credits per step from the Copilot SDK's session journals - sub-agents included in both, with elapsed time, turns, decisions asked, and cost at published prices fetched from the publisher - and refresh the usage table in ProjectProgress.md (both editions; one table per tool). Runs at every step boundary as /ocpf-bc:usage --step <id>; at project close, /ocpf-bc:usage --calibrate exports the measurements for the next project's AI Effort Estimate. Use when a step starts or closes, when the user asks "what has this cost", "how many tokens", "token usage by step", "how many credits", "Copilot credits by step", "update the usage table", or runs /ocpf-bc:usage.
 ---
 
 # OCPF usage and cost
@@ -24,14 +24,31 @@ names: `PRE-01`, `PRE-02`, `01` … `12`, `STEP-1` … `STEP-7`.
   opening the file.
 - **The exit gate is not met until the rows exist.** The next step does not start on a missing row;
   the `status` skill reports a missing row as a blocker.
-- **Never hand-write a row, in either tool.** The script reads Claude Code's transcripts or
-  Copilot Chat's session files and already aggregates per (step, model); a hand-written row is how
-  a real project got one model for everything.
-- **In Copilot, the step close is also the checkpoint.** `--step <id>` stores the cumulative
-  credits per model in `usage.json`; the step's row is the difference from the checkpoint before.
-  A step closed without it can't be separated from the next one later.
+- **Copilot Chat in VS Code: the step close refreshes the dashboard**, since Copilot Chat has no
+  hooks (Ops § Dashboard → 3). In Full the Reasoning role's measurement brief ends with the render
+  command (below), so nothing more is needed; in Lite run
+  `python3 ocpfFramework/scripts/ocpf-dashboard.py --project "<root>" --quiet` (or the `.ps1`) after
+  the rows. Claude Code and the Copilot CLI refresh by hook.
+- **Never hand-write a row, in either tool.** The script reads Claude Code's transcripts or the
+  Copilot session journals and already aggregates per step (one row per model in Claude Code, one
+  row per step in Copilot); a hand-written row is how a real project got one model for everything.
+- **In Copilot, never ask the human for a number.** The journal holds the credits. A run that asks
+  the human to read *Session Cost* from the Session Info popover while a journal exists is a bug
+  in the run, not a step of the procedure.
 
 Without `--step`, refresh the whole table (every step). Same wording in Full and Lite.
+
+**Who runs the measurement.** The main role — except in a **GitHub Copilot in VS Code project on
+the Full edition**, where the main role delegates Step 3 to the project-local `ocpf-reasoning`
+sub-agent (Operating Rule 10 in force: the §1.7 model, in the background, the report's first line
+verified against §1.7). The brief is four lines: the project root, the step id, the exact script
+command, and *run it as printed and once more with `--json`, then run the dashboard renderer once;
+return the table, every note, and the JSON `sessions` summary verbatim*. The main role then does Step 4 with what came back; a
+report without the table, or with a row the script did not print, is rejected and rerun. Why: on
+a real Copilot project the Main model skipped the script and asked the human for the popover
+figure at every step; the measurement is a procedure with no judgment in it, which the Reasoning
+role follows exactly, for a handful of requests' worth of credits. Claude Code, the Copilot CLI,
+and Lite keep the main role running the script itself.
 
 ## Step 1: Timestamps — `ocpfFramework/state/usage.json`
 
@@ -39,7 +56,8 @@ Without `--step`, refresh the whole table (every step). Same wording in Full and
   tool this session is running in, which decides the source and the table), `transcriptDir`
   (Claude Code: `~/.claude/projects/<key>` where `<key>` is the project's absolute path with every
   `/` replaced by `-`; Copilot: `null`), and an empty `steps` list. In a Copilot project the script
-  adds `copilot.sessionDirs` and `copilot.checkpoints` itself; never edit those by hand. Earlier steps get `n/a — no timestamps` in the table; never back-fill a guess.
+  adds `copilot.journalDirs` itself (and, on a pre-SDK chat, `copilot.sessionDirs` and
+  `copilot.checkpoints`); never edit those by hand. Earlier steps get `n/a — no timestamps` in the table; never back-fill a guess.
 - **A step is starting or closing?** Append `{ "step", "startedAt" }` or set `completedAt`, ISO 8601
   UTC, the same moment the `ProjectProgress.md` row changes (both editions).
 - Per developer, always gitignored (Ops § Repository Hygiene; the whole `ocpfFramework/state/`
@@ -79,37 +97,42 @@ If `--step` returns no rows, the window's timestamps are wrong — fix them, don
 the script into the project's `ocpfFramework/scripts/` only if the human wants to run it without
 the plugin; `ocpfFramework/scripts/` is gitignored.
 
-**GitHub Copilot Chat in VS Code** — the same script, a different source and a different table
-(Ops § Usage & Cost → 2). Copilot bills in **AI credits**; VS Code records them per turn and per
-model, sub-agents included, in the chat session files under its workspace storage. The script
-finds the project's `chatSessions` folder, rebuilds each session, splits every turn's credits
-between the Main model and its sub-agent calls, stores the step's checkpoint, prices the credits
-from `pricing.json`'s `aiCredit`, and prints the **credits table** — ten columns, no token columns:
+**GitHub Copilot — VS Code's chat and the Copilot CLI** — the same script, a different source and
+a different table (Ops § Usage & Cost → 2). Copilot bills in **AI credits**, and the Copilot SDK —
+the engine under VS Code's agent mode since VS Code 1.139 and under the CLI — journals every
+session at `~/.copilot/session-state/<id>/events.jsonl` (`%USERPROFILE%\.copilot\session-state`
+on Windows): the project folder in `session.start`, the cumulative credits (`totalNanoAiu`,
+1e9 to the credit) in `session.usage_checkpoint` and `session.shutdown`, every model request with
+its timestamp. The script finds the project's sessions by folder, takes each session's last
+journaled figure, splits it across the step windows by request share between the journaled
+points, prices the credits from `pricing.json`'s `aiCredit`, and prints the **credits table** —
+ten columns, no token columns, **one row per step** with every model named:
 
 ```
 python3 <this skill's folder>/scripts/ocpf-usage.py --project "<project root>" --step <id>
 pwsh   <this skill's folder>/scripts/ocpf-usage.ps1 -Project "<project root>" -Step <id>
 ```
 
-- `--tool copilot-chat` overrides `usage.json`'s `aiTool`; `--sessions <dir>` names the
-  `chatSessions` folder when the script can't find it (a remote, WSL, or dev-container window
-  keeps it on the machine VS Code runs on).
-- **The Total must equal the Session Cost** in the chat's Session Info popover (the
-  context-window control in the chat input) — summed over the project's sessions. If the human
-  reports a different figure, say so and look for a deleted session or a second VS Code window.
-- **If the script can't read the session files** — a VS Code release changed its storage, or the
-  files aren't on this machine — ask the human to open the Session Info popover and read
-  *Session Cost*, then record that one number:
-  `--step <id> --session-credits <n>` (PowerShell: `-SessionCredits <n>`). The row says *read from
-  the popover by the human — no model breakdown*. Tell the human the model breakdown is lost for
-  that step and why.
-- **Never put tokens in a Copilot row.** The per-turn token counts in the session files are the
-  context-window meter, not consumption; credits are never converted to tokens.
-- **No checkpoints yet** (a project that started before this version): the script attributes by
-  each turn's start time and says so in a note. Keep the note in the table's footnote.
-
-**GitHub Copilot CLI** — the script doesn't read the CLI's store. Record the credits the human
-reads in the CLI with `--tool copilot-chat --step <id> --session-credits <n>`, and say so.
+- `--tool copilot-chat` or `--tool copilot-cli` overrides `usage.json`'s `aiTool` (the source is
+  the same journal); `--journal <dir>` names the session-state folder when it is on another machine
+  (a remote, WSL, or dev-container window keeps it there).
+- **A checkpoint is written when the chat ends, not per turn.** So a step closed mid-chat gets its
+  share by request count, and the figure settles at the next measurement after the chat ends. Say
+  *as of the last checkpoint* in the closing message when the script notes an open session, and
+  **re-run the measurement without `--step` at the next boundary** so earlier rows refresh.
+- **The Total is the sum of the sessions' journaled figures**, equal to what the Session Info
+  popovers showed once every session has ended. `--reconcile` adds the account's month-to-date AI
+  credits from GitHub's billing API as a cross-check (needs `gh auth refresh -s user` once); it
+  bounds the total, it never fills a row.
+- **If the script finds no journal** for this folder, the session ran elsewhere: find its
+  session-state folder and pass `--journal`. Only when no journal exists anywhere — never because
+  reading one is inconvenient — does `--session-credits <n>` record a popover figure, and the row
+  says so.
+- **Never put tokens in a Copilot row.** The journal's token counts are per session, not per step,
+  and the context meter is not consumption; credits are never converted to tokens.
+- **A project that began on the pre-SDK chat** (VS Code before 1.139) also has
+  `workspaceStorage/<hash>/chatSessions/*.jsonl` files with per-turn credits; the script reads
+  those too, with the checkpoints they need, and the table carries both.
 
 ## Step 4: Write the table
 
@@ -127,8 +150,8 @@ reads in the CLI with `--tool copilot-chat --step <id> --session-credits <n>`, a
   as an *Unattributed* row, never dropped.
 - Say in one line what changed since the last refresh, and what couldn't be measured and why.
 - Work the template's *Before calling a refresh done* checklist: `In Progress` row matches the open
-  window, every started step has rows, one row per model, rows pasted into the closing message,
-  Total and footnote current.
+  window, every started step has rows, one row per model (Claude Code) or per step (Copilot), rows
+  pasted into the closing message, Total and footnote current.
 
 Then stop. Don't start the next step unless the human asks.
 
@@ -143,5 +166,5 @@ plus the measured output-token throughput. It prints the path; put that path in 
 message and the ChangeLog entry. The next project's AI Effort Estimate (`documents` skill, Full
 Step 03 / Lite Step 2) reads every file in that folder and derives its per-object and per-step
 averages from them; three or more files move the estimate's margin from ±30 % to ±10 %. A
-Copilot project's file carries AI credits per step and per model (`aiCredits`, `role`) with the
-token fields `null`; say so. `--calibrate` exports the whole project and refuses `--step`.
+Copilot project's file carries AI credits per step (`aiCredits`, `role`) with the token fields
+`null`; say so. `--calibrate` exports the whole project and refuses `--step`.

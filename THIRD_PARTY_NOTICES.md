@@ -42,6 +42,24 @@ September 14, 2026 (Node.js and PowerShell 7 on September 27, 2026). The upstrea
 - **Used for:** the reusable AL bug-pattern library, fetched into each project's `ocpfFramework/patterns/`
   folder. The snapshot keeps its `LICENSE` file.
 
+### OnlyBCFans BC Copilot Blueprint
+- **Source:** <https://github.com/ajansari/obcfBCCopilotBlueprint>
+- **License:** MIT — AJ Ansari (same author as this framework)
+- **Used for:** the verified reference design, templates, API reference, and false-assumptions
+  table the runbooks follow when a project builds a Business Central Copilot feature. Fetched at a
+  pinned tag (`v1.0.0.0` for runbook v5.2.0.0), only on projects with such a feature, into a sibling
+  folder outside the project root; the snapshot keeps its `LICENSE` file. Nothing from it is
+  copied into this repository or the plugin.
+
+### OCPF AL Development Standards Guide
+- **Source:** <https://github.com/ajansari/ocpfBCALStandards>
+- **License:** MIT — AJ Ansari (same author as this framework)
+- **Used for:** the AL rules the runbooks cite as **Standards §**. Standalone since Full/Lite
+  v5.2.0.0 (it was part of this repository through its version 1.11.0.0); fetched at the pinned
+  release tag (`v1.12.0.0`, named in `standardsGuide/README.md`) into each project's
+  `ocpfFramework/standardsGuide/`, and bundled at that tag in the `ocpf-bc` plugin's `al-standards`
+  skill as the offline copy.
+
 ---
 
 ## Consulted as references (linked, not copied)
@@ -106,7 +124,7 @@ September 14, 2026 (Node.js and PowerShell 7 on September 27, 2026). The upstrea
   code samples under MIT — per the public Business Central docs repository,
   <https://github.com/MicrosoftDocs/dynamics365smb-devitpro-pb>.
 - **Used for:** linked throughout both runbooks, the Standards Guide, and the Operations Guide as fallback references.
-- **Quoted or adapted material:** `standardsGuide/ocpfALDevStandardsGuide.md` §1.7 quotes the
+- **Quoted or adapted material:** the Standards Guide's §1.7 (now in `ajansari/ocpfBCALStandards`) quotes the
   AL0424 warning text and adapts Microsoft Learn's list of multilanguage (ML) properties excluded
   from `.xlf` files into a table. Attribution, a link to the source, the license, and a note that
   the list was reorganized sit directly below that section, as CC BY 4.0 requires. Standards Part

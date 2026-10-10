@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 1 — Define the Problem & Lock Parameters
 
-**Runbook version:** 5.1.0.0 · Lite edition · Phase: DEFINE
+**Runbook version:** 5.2.0.0 · Lite edition · Phase: DEFINE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -34,7 +34,25 @@
 - **Ask how to be notified, right after the working language** (Ops § Notifications — read it now): Claude app, sound,
   desktop notification, any combination, or none. Record it in `ocpfFramework/state/notifications.json` and
   apply it, so every later question reaches the human even when they've stepped away.
-- **Ask which model does the work, right after notifications** (Rule 6a; **Ops § Roles — read
+- **Ask the three identity questions next — extension name, publisher, app icon — and write
+  `app.json` at once** (Rule 6a; **Ops § Intake → *Box 0 — Identity first***): one box, three
+  questions — **Extension name?** (suggestions from the human's own wording + *I'll type it*),
+  **Publisher?** (only a name they already wrote, with its source, else *I'll type it*; never
+  inferred), **App icon?** (*Yes — I'll provide an image* / *No icon* / *Later*; on *Yes*, the path
+  as free text, placed at `src/logo/AppLogo.png` and resized per Ops § Intake → *The app icon*).
+  Then create `src/` and write `app.json` now — `name`, `publisher`, `logo` when given, `version`
+  `0.0.0.1`, a new or kept `id`, the platform defaults — as a **first write**; the complete write,
+  with ID ranges, BC version, and features, is the project-setup step below once the sheet is
+  confirmed, and it keeps these four values. The Project Parameters block records them; its Box 1
+  does not ask them again. Why first: the dashboard in the next bullet shows the app's name and icon.
+- **Create the live dashboard the moment `app.json` exists, open it, and explain it once**
+  (ALL ALONG → Dashboard; **Ops § Dashboard — read it now**; plugin: `/ocpf-bc:dashboard`): copy the
+  renderer and template into `ocpfFramework/scripts/`, render `ocpfFramework/state/dashboard.html`,
+  open it (`--open`), install the refresh hooks for this AI tool (Claude Code and Copilot CLI:
+  every turn; Copilot Chat: every step boundary), then ask the one explanation question — **I
+  understand** / *Other* — with Ops § Dashboard's text (what, why, how, the file and where it is,
+  and reopening with right-click → **Open Externally** or *Reveal* + double-click).
+- **Ask which model does the work, right after the dashboard** (Rule 6a; **Ops § Roles — read
   it now**). Say once, before the questions: *"A High thinking effort makes every task slower: the
   model thinks longer before each answer, and a step can take noticeably more time. The framework
   recommends High only where judgment matters most."* Two questions in one box, the recommended
@@ -62,7 +80,7 @@
   Tracker).
 - **Start the usage clock:** append Step 1's `startedAt` to `ocpfFramework/state/usage.json` the
   moment `ProjectProgress.md` is created (Operating Rule 9; Ops § Usage & Cost). At this step's
-  close the same rule writes Step 1's usage rows, one per model, into the second table.
+  close the same rule writes Step 1's usage rows — one per model in Claude Code, one per step in Copilot — into the second table.
 - **Capture any raw requirements input verbatim, before interpreting it.** If the human pastes raw
   requirements in chat, or uploads a file, save it untouched in a `requirements/` folder (a
   descriptive filename, or the file's own name for an upload) before doing anything else with it.
@@ -93,7 +111,7 @@ box.** In short: every question goes through the options mechanism, grouped into
 questions allow (identity, naming, permission sets and IDs, onboarding, setup and languages, then
 the translation questions); countries are asked once; a suggestion is a candidate the human picks,
 never an answer recorded for them; and the whole sheet is confirmed once at the end. Box 1a carries
-question **4a. App icon?** (the *App icon* row below). Lite asks only the Main model and effort —
+question **4a. App icon?** only when it was not already answered in this step's identity box (it normally was — the *App icon* row below records it). Lite asks only the Main model and effort —
 already asked above, right after notifications — not the full framework's Light and Reasoning
 questions.
 
@@ -125,6 +143,7 @@ Packaging & Versioning). Mention it once, plainly, now.
 | **AL Runtime / BC Application Minimum / Symbol Source** | — | BC version from Box 2; runtime from Microsoft Learn. Symbol Source is filled in by the agent after downloading: version, W1 or localized, and where from. |
 | **Onboarding extras** | `Yes`/`No` each | Assisted Setup Wizard? Role Center Activity Cues? Departments/"My Business Central" placement? Box 4; `No` to any is a final answer, not a placeholder — most small extensions answer `No` to all three, but ask anyway. |
 | **App icon** | `Yes — I'll provide an image` / `No icon` / `Later` | Box 1a, question 4a (Ops § Intake). *Later* is a release blocker for AppSource — the old AppSource icon question is folded in here. On *Yes*, ask for the path as free text with the guidance *"PNG, square, 300 × 300 px is ideal — Microsoft accepts 216 to 350 px for the marketplace listing. Larger is fine; I'll resize it, keeping the proportions, never stretching."* The agent copies it to `src/logo/AppLogo.png`, resizing when larger with what the machine has — macOS `sips -Z 300 <in> --out src/logo/AppLogo.png`; Windows a PowerShell `System.Drawing` snippet (Ops § Intake gives it); Linux `convert <in> -resize 300x300 src/logo/AppLogo.png` if ImageMagick is present, else Python Pillow, else ask the human to resize. A non-square image gets its longer side resized to 300 and is padded to square with transparency, never cropped silently — say what was done. `app.json` gets `"logo": "src/logo/AppLogo.png"`; the file is committed. |
+| **Business Central Copilot feature** | `Yes` / `No` | A feature in Business Central's own Copilot UI (a `Copilot Capability`, a `PromptDialog` page, a *Suggest with Copilot* action, Azure OpenAI through System.AI). **`Yes` is valid for a PTE**; Microsoft-billed needs no Azure subscription. If `Yes`: the host page(s), what the AI suggests, and the billing path — *Microsoft-billed* (default) / *Partner-billed* / *both*. Triggers the OnlyBCFans BC Copilot Blueprint fetch at Step 3 (ALL ALONG → *Business Central Copilot Features*). |
 | **Framework files in `.gitignore`?** | `Yes` (default) | Box 5, asked as: *"`.gitignore` lists files Git leaves out of commits and pushes — they stay on disk and work normally. Should this framework's own files be left out of this project's repository?"* With `Yes`, the second block of Ops § Repository Hygiene goes into `.gitignore` — by name, every one, not "the framework files" in the agent's head: `ocpfFramework/` as a whole (it holds `LITE_RunbookChangeLog.md`, `LITE_RunbookSchematics.md`, `framework.json`, and the runbook itself when `CLAUDE.md` already existed), the runbook under whatever name it was given (`CLAUDE.md`, `.github/copilot-instructions.md`, `.github/instructions/ocpf-framework.instructions.md` — only the ones that exist), and the project-local sub-agent definitions (`.claude/agents/ocpf-light.md`, `ocpf-reasoning.md`, `ocpf-generator.md`; `.github/agents/ocpf-light.agent.md`, `ocpf-reasoning.agent.md`, `ocpf-generator.agent.md`). The first block — `.claude/settings.local.json`, `ocpfFramework/state/`, `ocpfFramework/standardsGuide/`, `opsGuide/`, `runbookSteps/`, `documentTemplates/`, `patterns/`, `scripts/`, `.alpackages/`, `*.g.xlf` — is written whatever the answer. **Then prove it:** `git check-ignore -v <file>` on each file that exists, and `git status --porcelain` on the root; a framework file still showing means the entry is wrong. On a real project the changelog was left out and shipped to the client's remote. **Never `docs/`, `requirements/`, `src/`, `ProjectProgress.md`, `outputAppPackage/`, `*.app`, or `Translations/*.xlf`** — `docs/0-project/ChangeLog.md` is always committed. The full block is Ops § Repository Hygiene. |
 | **Working language** | — | From the first question of this step. |
 | **Main model & thinking effort** | `<MainModel>` / `<MainEffort>` | Asked right after notifications (Ops § Roles): the model this one agent runs on and its thinking effort — recommended **Sonnet, Medium** in Claude Code, **Gemini 3.8 Flash, Medium** in GitHub Copilot; High only where judgment matters most. Recorded as the human named them, plus the harness's own identifier (e.g. `sonnet`). Must match what the session is actually running — the human switches the session, not the agent. The generator sub-agent Step 4 may use inherits this pair. Lite has no Light or Reasoning rows. |
@@ -157,7 +176,7 @@ EntitySetName`. Use modern BC names, not legacy ones (e.g. table "Job" → `Enti
 
 **Once the human confirms the sheet, set up the AL project before DESIGN** — the agent's job, never
 the human's (Rule 6d). **Full procedure: Ops § Project Setup.**
-1. **Write `app.json` once, complete,** from the sheet, keeping an existing `id` GUID — `version`
+1. **Write `app.json` complete** — the second write; the first happened earlier in this step with the identity answers — from the sheet, keeping `id`, `name`, `publisher`, and `logo` exactly as that write left them — `version`
    from the Version row, `"logo": "src/logo/AppLogo.png"` when an icon was given.
 2. **Create `src/`** — every AL file goes there (subfolders per module are fine), never in the
    project root; the app icon, if any, at `src/logo/AppLogo.png`.
@@ -166,14 +185,14 @@ the human's (Rule 6d). **Full procedure: Ops § Project Setup.**
    Symbols).
 5. **Keep the editor in sync** (ALL ALONG → Keeping the Editor in Sync).
 
-**Outputs:** `ocpfFramework/` with its six-line `README.md`; `ocpfFramework/standardsGuide/`, `ocpfFramework/opsGuide/`, `ocpfFramework/runbookSteps/`, and `ocpfFramework/documentTemplates/` (all fetched, gitignored); `ocpfFramework/state/usage.json` (Step 1's start timestamp) and `ProjectProgress.md` (seeded, project root, Lite step table only, Step 1 `In Progress`); `ocpfFramework/state/copilot.json` and the Copilot keys in `.vscode/settings.json` (when Copilot is in use); `requirements/` (if any raw input was
+**Outputs:** `ocpfFramework/` with its six-line `README.md`; `ocpfFramework/standardsGuide/`, `ocpfFramework/opsGuide/`, `ocpfFramework/runbookSteps/`, and `ocpfFramework/documentTemplates/` (all fetched, gitignored); `app.json` (first write: name, publisher, logo, version, id) and `src/` early in the step, complete at project setup; `ocpfFramework/state/dashboard.html` rendered, opened, explained, with its hooks and `ocpfFramework/state/dashboard.json`; `ocpfFramework/state/usage.json` (Step 1's start timestamp) and `ProjectProgress.md` (seeded, project root, Lite step table only, Step 1 `In Progress`); `ocpfFramework/state/copilot.json` and the Copilot keys in `.vscode/settings.json` (when Copilot is in use); `requirements/` (if any raw input was
 captured); `docs/` with `0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` (created before the first document); `docs/1-define/ProblemStatement.md` (purpose, scope, out-of-scope, entity list, open questions);
 `docs/1-define/ProjectParameters.md` (the completed Project Parameters block, all placeholders
 replaced, the Main model and effort, version, and app icon answer included);
 `.gitignore` populated per the table above and verified with `git check-ignore`; `app.json`; `src/`
 (with `src/logo/AppLogo.png` when an icon was given); and `.alpackages/`.
 
-**Exit gate:** Every question was asked through the options mechanism. `app.json` matches the
+**Exit gate:** Every question was asked through the options mechanism; the extension name, publisher, and app icon were asked first, after notifications, and `app.json` was written then and rewritten complete at project setup; the dashboard was rendered from it, opened, its hooks installed, and the explanation question answered (ALL ALONG → Dashboard). `app.json` matches the
 sheet (version `0.0.0.1` for a new app, the installed version for an existing one; `logo` set when an icon was given), `src/` exists, and the target version's symbols are in `.alpackages/` (Ops § Project Setup). Both companion guides are present, in `ocpfFramework/standardsGuide/` and
 `ocpfFramework/opsGuide/`, and gitignored. The notification choice is recorded in
 `ocpfFramework/state/notifications.json`, applied, and tested. `docs/1-define/ProjectParameters.md` exists, in `docs/`, with no placeholder remaining, and the Main model and effort recorded there match what this session is running on. Every `.gitignore` entry from the framework-files row is present and `git check-ignore` confirms each existing framework file — `ocpfFramework/LITE_RunbookChangeLog.md` included — is ignored. Nothing from the `docs/` list is in the project root; `ProjectProgress.md` is, with only the Lite step table and the Step 1 row `In Progress`. Deployment Target
