@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.3.1.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number; the previous version of this guide was 2.0.1.0)
+**Version:** 5.3.2.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number; the previous version of this guide was 2.0.1.0)
 **Last Updated:** October 10, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
@@ -1400,8 +1400,8 @@ page.** A figure the renderer cannot find is shown as *n/a* or *No estimate yet*
 
 | AI tool | Refresh | How |
 |---|---|---|
-| **Claude Code** | every turn, every sub-agent return, every question opened and answered | `Stop`, `SubagentStop`, `PreToolUse` and `PostToolUse` (matcher `AskUserQuestion`) hooks in `.claude/settings.local.json`, merged beside the notification hooks, each running the renderer with `--quiet --live` (the PreToolUse hook adds `--waiting-json` from stdin, the PostToolUse hook `--clear-waiting`) |
-| **GitHub Copilot CLI** | the same moments | the same four hooks in `.github/hooks/ocpf-dashboard.json` (project level, gitignored) with the CLI's event names and `ask_user` as the tool |
+| **Claude Code** | every turn, every sub-agent return, every question opened and answered, and at least every 45 seconds inside a long turn | `Stop`, `SubagentStop`, `PreToolUse` and `PostToolUse` (matcher `AskUserQuestion`) hooks in `.claude/settings.local.json`, merged beside the notification hooks, each running the renderer with `--quiet --live` (the PreToolUse hook adds `--waiting-json` from stdin, the PostToolUse hook `--clear-waiting`); plus one `PostToolUse` hook with no matcher — every tool call, the sub-agents' included — running the renderer with `--quiet --live --throttle 45`, which returns at once when the page is younger than 45 seconds |
+| **GitHub Copilot CLI** | the same moments | the same five hooks in `.github/hooks/ocpf-dashboard.json` (project level, gitignored) with the CLI's event names and `ask_user` as the tool; the unmatched `postToolUse` hook carries `--throttle 45` |
 | **GitHub Copilot Chat in VS Code** | every step boundary | no hooks exist; the usage ritual's step close (Ops § Usage & Cost → 5) ends by running the renderer, and the Reasoning role's measurement brief (Full) includes it. The header reads *Refreshed · time · at step close*. Offer a refresh whenever the human asks where things stand. |
 
 On Windows the hooks run the PowerShell twin under **`pwsh` (PowerShell 7)**, never Windows
@@ -1409,6 +1409,12 @@ PowerShell 5.1, which cannot parse it; where `pwsh` is absent and Python 3 is pr
 `.py` instead (Ops § Tooling Checks records both). A hook run costs no tokens: the script reads files and writes one file. `--quiet` makes every
 failure silent with exit 0 — a dashboard that cannot render must never interrupt the agent. The
 page reloads itself every 30 seconds while open, so a hook's render appears without a keypress.
+**Why the every-tool hook:** `Stop` fires only when the turn ends. On a real v5.2.0.0 project Main
+delegated the FRD to the Reasoning sub-agent and the page sat frozen for the whole turn — still
+showing the previous step as current and the sub-agent idle — because nothing had fired since the
+turn began; reloading the page only reloads the same file. With the throttled hook every tool call
+(Main's and the sub-agents') is a chance to re-render, at most once per 45 seconds, and a render
+costs well under a second of file reading and no tokens.
 `ocpfFramework/state/dashboard.json` records `hooks`, `theme`, and `tool`; the `status` skill
 reports a project whose hooks are missing.
 
@@ -1896,7 +1902,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v5.3.1.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
+folder as `README.md`. For runbook **v5.3.2.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2069,7 +2075,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.3.1.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.3.2.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
@@ -2231,9 +2237,7 @@ that file is the source — not `/cost`, not memory:
 - **What:** every line whose `type` is `assistant` carries `timestamp`, `message.model`, and
   `message.usage` with `input_tokens`, `output_tokens`, `cache_creation_input_tokens`,
   `cache_read_input_tokens`, and `cache_creation.ephemeral_5m_input_tokens` /
-  `ephemeral_1h_input_tokens` (which cache-write rate applies). Sub-agent work is in the same
-  folder, marked `isSidechain: true` with an `agentId`, and **counts** — the Reasoning role's FRD
-  draft is the step's biggest line item.
+  `ephemeral_1h_input_tokens` (which cache-write rate applies). Sub-agent work (the `Agent` tool) is **not** in the session's own file: each session `<id>.jsonl` has a sibling folder `<id>/subagents/agent-*.jsonl`, one file per sub-agent, whose lines carry `isSidechain: true`, the sub-agent's `message.model`, and the same `message.usage` and `requestId` fields. Read both — a reader that globs only the top-level files reports the Reasoning and Light roles as never having run and leaves their tokens out of every total, which is what v5.2.0.0 did on a real project.
 - **Dedupe by `requestId`.** One API response produces several `assistant` lines (text, then each
   tool call), all carrying the same `requestId` and the same usage; count each `requestId` once. A
   line with no `requestId` is skipped and counted in a note, never counted by another key.

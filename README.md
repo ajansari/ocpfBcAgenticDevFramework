@@ -54,6 +54,16 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 10, 2026 — Full v5.3.2.0 · Lite v5.3.2.0 · Operations Guide v5.3.2.0 · Plugin v5.3.2
+
+**Sub-agents are counted and the dashboard stays live inside a turn.** Claude Code writes each
+sub-agent's transcript to its own file under the session, and neither the usage script nor the
+dashboard read those files: the Reasoning role's tokens were missing from every total and the
+role showed idle while Opus drafted the FRD. Both now read them. A new throttled hook on every
+tool call re-renders the page at most every 45 seconds, so a long turn no longer leaves it frozen
+at the turn's start. Run `/ocpf-bc:update-framework`: it merges the hook and refreshes the usage
+table so closed steps gain their sub-agent rows.
+
 ## October 10, 2026 — Full v5.3.1.0 · Lite v5.3.1.0 · Operations Guide v5.3.1.0 · Plugin v5.3.1
 
 **Dashboard fix.** The *Waiting on you* card let a long option label run out of the card and

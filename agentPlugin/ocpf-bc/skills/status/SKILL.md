@@ -23,7 +23,10 @@ conversation memory.
    and its hooks are installed (`hooks`); report a project without a dashboard, or one whose hooks
    are missing, as something to repair with the `dashboard` skill, and give the path
    `ProjectDashboard.html` and the right-click → **Open Externally** route. A project that still
-   has `ocpfFramework/state/dashboard.html` (v5.2.0.0) needs the `update-framework` skill.
+   has `ocpfFramework/state/dashboard.html` (v5.2.0.0) needs the `update-framework` skill; so does
+   one whose hooks lack the unmatched `PostToolUse` entry (the page freezes for a whole turn) or
+   whose usage rows name no sub-agent model (scripts before v5.3.2.0 never read
+   `<session>/subagents/`).
 3. **`ocpfFramework/framework.json`**, if present: edition, runbook version, `layout`, `alMcp`, and
    `tooling` (mermaid and pwsh, recorded by Ops § Tooling Checks). Also
    **`ocpfFramework/state/notifications.json`**, if present: the notification kinds this developer chose.

@@ -342,7 +342,8 @@ if ($isCopilot) {
 if (-not $isCopilot) {
 $key = ($root -replace '[\\/:]', '-')
 $tdir = if ($Transcripts) { $Transcripts } elseif ($usageDoc.transcriptDir) { $usageDoc.transcriptDir -replace '^~', $HOME } else { Join-Path $HOME ".claude/projects/$key" }
-$files = Get-ChildItem -Path $tdir -Filter *.jsonl -ErrorAction SilentlyContinue | Sort-Object Name
+# a session is <id>.jsonl; its sub-agents (Agent tool) are journaled beside it in <id>/subagents/agent-*.jsonl
+$files = @(@(Get-ChildItem -Path $tdir -Filter *.jsonl -ErrorAction SilentlyContinue) + @(Get-ChildItem -Path $tdir -Directory -ErrorAction SilentlyContinue | ForEach-Object { Join-Path $_.FullName "subagents" } | Where-Object { Test-Path $_ } | ForEach-Object { Get-ChildItem -Path $_ -Filter *.jsonl -ErrorAction SilentlyContinue }) | Sort-Object FullName)
 if (-not $files) { Write-Error "no transcripts in $tdir — set transcriptDir in ocpfFramework/state/usage.json (ls ~/.claude/projects/)"; exit 1 }
 $seen = @{}; $rows = @(); $turns = @{}; $decisions = @{}; $agents = @{}; $web = @{}; $noRid = 0
 foreach ($f in $files) {

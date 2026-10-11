@@ -24,7 +24,7 @@ Nothing here is estimated by the model: the page shows what is on disk and says 
     python3 ocpf-dashboard.py --project <root> --clear-waiting                                  # hook: it was answered
     python3 ocpf-dashboard.py --project <root> --event "who" "text"                             # append a feed event
 """
-import argparse, base64, glob, json, os, re, subprocess, sys
+import argparse, time, base64, glob, json, os, re, subprocess, sys
 from datetime import datetime, timezone, timedelta
 
 STATE = os.path.join("ocpfFramework", "state")
@@ -145,7 +145,8 @@ def transcript_dir(root, usage):
 def claude_live(root, usage, wins, steps_idx):
     """Agent / you / waiting seconds per step, and the live state of Main and the sub-agents."""
     tdir = transcript_dir(root, usage)
-    files = sorted(glob.glob(os.path.join(tdir, "*.jsonl")), key=os.path.getmtime)
+    # a session is <id>.jsonl; its sub-agents (Agent tool) are journaled beside it in <id>/subagents/agent-*.jsonl
+    files = sorted(glob.glob(os.path.join(tdir, "*.jsonl")) + glob.glob(os.path.join(tdir, "*", "subagents", "*.jsonl")), key=os.path.getmtime)
     if not files: return None
     ev = []  # (ts, kind, extra)
     side = {}  # agentId -> {"last": ts, "model":..., "first": ts}
@@ -202,6 +203,7 @@ def claude_live(root, usage, wins, steps_idx):
     subs = []
     for aid, s in side.items():
         running = (now_utc() - s["last"]).total_seconds() < 120
+        if running and main_state == "idle": main_state = "working"  # Main is waiting on its sub-agent, not idle
         subs.append({"agentId": aid, "model": s["model"], "running": running, "seconds": (s["last"] - s["first"]).total_seconds(), "last": s["last"]})
     subs.sort(key=lambda s: s["last"], reverse=True)
     return {"perStep": per, "main": {"state": main_state, "model": last_model, "text": last_txt, "lastAt": last[0].isoformat()}, "subs": subs}
@@ -397,12 +399,19 @@ def main():
     ap.add_argument("--waiting-json", help="hook input of an AskUserQuestion / ask_user call: record the open question and render")
     ap.add_argument("--clear-waiting", action="store_true", help="hook: the question was answered")
     ap.add_argument("--event", nargs=2, metavar=("WHO", "TEXT"), help="append a feed event and render")
+    ap.add_argument("--throttle", type=int, default=0, metavar="SECONDS", help="hook on every tool call: skip the render when the page is younger than this (unless a question, answer, or event is being recorded)")
     a = ap.parse_args()
     root = os.path.abspath(a.project)
     if not os.path.isdir(os.path.join(root, "ocpfFramework")):
         if a.quiet: return
         sys.exit(f"error: {root} has no ocpfFramework/ folder — not an OCPF project")
     os.makedirs(os.path.join(root, STATE), exist_ok=True)
+    if a.throttle and not (a.waiting_json or a.clear_waiting or a.event or a.open):
+        out_ = os.path.join(root, "ProjectDashboard.html")
+        try:
+            if os.path.isfile(out_) and (time.time() - os.path.getmtime(out_)) < a.throttle: return
+            if os.path.isfile(out_ + ".tmp") and (time.time() - os.path.getmtime(out_ + ".tmp")) < 120: return  # a render is in progress
+        except OSError: pass
     if a.waiting_json:
         if a.waiting_json == "-":
             try: a.waiting_json = sys.stdin.read()

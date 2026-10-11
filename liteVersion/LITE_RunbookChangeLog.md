@@ -16,6 +16,22 @@ framework.
 
 ---
 
+## v5.3.2.0 — October 10, 2026
+
+Derived from full framework **v5.3.2.0**; Operations Guide **v5.3.2.0**; Standards Guide
+**v1.12.0.0** (unchanged); plugin **5.3.2**. Scripts and one hook; `update-framework` migrates.
+
+- **Sub-agent usage counted; dashboard live inside a turn.** The usage script and the dashboard
+  renderer read only the session's own transcript, never `<session>/subagents/agent-*.jsonl` where
+  Claude Code journals each `Agent` call — so the Reasoning and Light roles' tokens were missing
+  from every row and they never showed as running. Fixed in all four scripts. A new unmatched
+  `PostToolUse` hook (`--throttle 45`) re-renders the page at most every 45 seconds inside a long
+  turn; before it the page froze from the turn's start until `Stop`. `update-framework` merges the
+  hook and re-runs the usage table so closed steps gain their sub-agent rows. Full changelog:
+  *v5.3.2.0*.
+
+---
+
 ## v5.3.1.0 — October 10, 2026
 
 Derived from full framework **v5.3.1.0**; Operations Guide **v5.3.1.0**; Standards Guide

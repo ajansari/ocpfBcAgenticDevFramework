@@ -11,7 +11,7 @@
 #   pwsh ocpf-dashboard.ps1 -Project <root> -Event who,text                 # append a feed event
 param(
   [string]$Project = ".", [switch]$Open, [switch]$Quiet, [int]$Refresh = 30, [string]$Toast, [switch]$Live,
-  [string]$WaitingJson, [switch]$ClearWaiting, [string[]]$Event
+  [string]$WaitingJson, [switch]$ClearWaiting, [string[]]$Event, [int]$Throttle = 0
 )
 $ErrorActionPreference = "Stop"
 try {
@@ -19,6 +19,7 @@ $root = (Resolve-Path $Project).Path
 $stateDir = Join-Path $root "ocpfFramework/state"
 if (-not (Test-Path (Join-Path $root "ocpfFramework"))) { if ($Quiet) { exit 0 }; Write-Error "$root has no ocpfFramework/ folder — not an OCPF project"; exit 1 }
 New-Item -ItemType Directory -Force -Path $stateDir | Out-Null
+if ($Throttle -gt 0 -and -not ($WaitingJson -or $ClearWaiting -or $Event -or $Open)) { $pg = Join-Path $root "ProjectDashboard.html"; if ((Test-Path $pg) -and (((Get-Date) - (Get-Item $pg).LastWriteTime).TotalSeconds -lt $Throttle)) { exit 0 }; if ((Test-Path "$pg.tmp") -and (((Get-Date) - (Get-Item "$pg.tmp").LastWriteTime).TotalSeconds -lt 120)) { exit 0 } }
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 function Load-Json($p, $d) { if (Test-Path $p) { try { Get-Content $p -Raw | ConvertFrom-Json -AsHashtable } catch { $d } } else { $d } }
 function Read-Text($p) { if (Test-Path $p) { Get-Content $p -Raw } else { "" } }
@@ -91,7 +92,8 @@ function Sum($arr, $k) { $t = 0.0; foreach ($r in $arr) { $t += [double]($r[$k] 
 $liveState = $null
 if (-not $copilot -and $wins.Count) {
   $tdir = if ($usage.transcriptDir) { $usage.transcriptDir -replace '^~', $HOME } else { Join-Path $HOME ".claude/projects/$(($root -replace '[\\/:]', '-'))" }
-  $files = @(Get-ChildItem -Path $tdir -Filter *.jsonl -ErrorAction SilentlyContinue | Sort-Object LastWriteTime)
+  # a session is <id>.jsonl; its sub-agents (Agent tool) are journaled beside it in <id>/subagents/agent-*.jsonl
+  $files = @(@(Get-ChildItem -Path $tdir -Filter *.jsonl -ErrorAction SilentlyContinue) + @(Get-ChildItem -Path $tdir -Directory -ErrorAction SilentlyContinue | ForEach-Object { Join-Path $_.FullName "subagents" } | Where-Object { Test-Path $_ } | ForEach-Object { Get-ChildItem -Path $_ -Filter *.jsonl -ErrorAction SilentlyContinue }) | Sort-Object LastWriteTime)
   if ($files.Count) {
     $ev = [System.Collections.Generic.List[object]]::new(); $side = @{}
     foreach ($f in $files) { foreach ($line in [IO.File]::ReadLines($f.FullName)) { try { $o = $line | ConvertFrom-Json -AsHashtable } catch { continue }
@@ -111,6 +113,7 @@ if (-not $copilot -and $wins.Count) {
       $mainState = if ($last.k -ne "prompt" -and $age -lt 180) { "working" } else { "idle" }
       $lastModel = $null; $lastTxt = ""; for ($i = $ev.Count - 1; $i -ge 0; $i--) { if ($ev[$i].x -and $ev[$i].x.model -and -not $lastModel) { $lastModel = $ev[$i].x.model }; if ($ev[$i].x -and $ev[$i].x.txt -and -not $lastTxt) { $lastTxt = $ev[$i].x.txt }; if ($lastModel -and $lastTxt) { break } }
       $subsRaw = @(foreach ($aid in $side.Keys) { $s = $side[$aid]; @{ agentId = $aid; model = $s.model; running = (((NowUtc) - $s.last).TotalSeconds -lt 120); seconds = ($s.last - $s.first).TotalSeconds; last = $s.last } })
+      if ($mainState -eq "idle" -and @($subsRaw | Where-Object { $_.running }).Count -gt 0) { $mainState = "working" }  # Main is waiting on its sub-agent, not idle
       $subs = @($subsRaw | Sort-Object { $_.last } -Descending)
       $liveState = @{ perStep = $per; main = @{ state = $mainState; model = $lastModel; text = $lastTxt }; subs = $subs } } }
 }

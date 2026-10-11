@@ -100,8 +100,17 @@ Guide versions it expects. If a local copy's major version differs, say so: the 
    `ocpfFramework/state/dashboard.html`, which is gitignored:** since v5.3.0.0 the renderer writes
    `ProjectDashboard.html` to the project root, tracked. After the first render with the new
    scripts, delete `ocpfFramework/state/dashboard.html`, run `git check-ignore -v
-   ProjectDashboard.html` (must print nothing), and `git add ProjectDashboard.html`. The hooks need
-   no change. Tell the human the page moved and now persists with the project.
+   ProjectDashboard.html` (must print nothing), and `git add ProjectDashboard.html`. Tell the human
+   the page moved and now persists with the project. **A project whose hooks predate v5.3.2.0:**
+   merge the unmatched `PostToolUse` hook (`--quiet --live --throttle 45`; Copilot CLI: the
+   unmatched `postToolUse` with `-Throttle 45` / `--throttle 45`) from the `dashboard` skill's
+   section 2 into `.claude/settings.local.json` / `.github/hooks/ocpf-dashboard.json`, keeping every
+   existing hook — without it the page freezes for the length of any turn that delegates to a
+   sub-agent. **Then re-run the usage table refresh** (the `usage` skill, both editions): scripts
+   before v5.3.2.0 never read `<session>/subagents/agent-*.jsonl`, so every closed step's rows are
+   missing the Reasoning, Light, and Generator roles' tokens and cost; the refreshed table gains
+   their rows, and the closing-message figures already pasted for those steps are superseded — say
+   so in the project's `ChangeLog.md` entry.
 3b. **Refresh both companion guides to the versions the new runbook expects.** The Operations
    Guide comes from the framework repository:
    `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/opsGuide/ocpfOperationsGuide.md`
@@ -109,7 +118,7 @@ Guide versions it expects. If a local copy's major version differs, say so: the 
    repository at the tag the new framework pins** — read the pin from the framework's
    `standardsGuide/README.md` (fetch that prelude into `ocpfFramework/standardsGuide/README.md` too):
    `https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfALDevStandardsGuide.md`
-   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v5.3.1.0 the pin is
+   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v5.3.2.0 the pin is
    `v1.12.0.0`). Update each folder's `SNAPSHOT.json` (`repo`, `ref`, `sha`, `fetchedAt`). A project that
    began before v5.2.0.0 needs **no file move**: the on-disk path and filename are unchanged; the
    refresh only changes the source recorded in `SNAPSHOT.json`. A runbook and a companion from

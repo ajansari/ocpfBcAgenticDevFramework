@@ -666,7 +666,8 @@ def main():
         return copilot_main(a, root, usage, usage_path, pricing)
     tdir = a.transcripts or os.path.expanduser(usage.get("transcriptDir") or
             os.path.join("~", ".claude", "projects", project_key(root)))
-    files = sorted(glob.glob(os.path.join(tdir, "*.jsonl")))
+    # a session is <id>.jsonl; its sub-agents (Agent tool) are journaled beside it in <id>/subagents/agent-*.jsonl
+    files = sorted(glob.glob(os.path.join(tdir, "*.jsonl")) + glob.glob(os.path.join(tdir, "*", "subagents", "*.jsonl")))
     notes = []
     if not files:
         sys.exit(f"error: no transcripts in {tdir} — set transcriptDir in {os.path.join(STATE, 'usage.json')} (ls ~/.claude/projects/)")

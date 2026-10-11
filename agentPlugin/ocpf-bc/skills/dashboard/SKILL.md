@@ -81,7 +81,10 @@ the notifications skill uses; keep every existing hook):
     "Stop":        [ { "hooks": [ { "type": "command", "command": "sh", "args": ["-c", "python3 \"${CLAUDE_PROJECT_DIR}/ocpfFramework/scripts/ocpf-dashboard.py\" --project \"${CLAUDE_PROJECT_DIR}\" --quiet --live"] } ] } ],
     "SubagentStop":[ { "hooks": [ { "type": "command", "command": "sh", "args": ["-c", "python3 \"${CLAUDE_PROJECT_DIR}/ocpfFramework/scripts/ocpf-dashboard.py\" --project \"${CLAUDE_PROJECT_DIR}\" --quiet --live"] } ] } ],
     "PreToolUse":  [ { "matcher": "AskUserQuestion", "hooks": [ { "type": "command", "command": "sh", "args": ["-c", "python3 \"${CLAUDE_PROJECT_DIR}/ocpfFramework/scripts/ocpf-dashboard.py\" --project \"${CLAUDE_PROJECT_DIR}\" --quiet --live --waiting-json \"$(cat)\""] } ] } ],
-    "PostToolUse": [ { "matcher": "AskUserQuestion", "hooks": [ { "type": "command", "command": "sh", "args": ["-c", "python3 \"${CLAUDE_PROJECT_DIR}/ocpfFramework/scripts/ocpf-dashboard.py\" --project \"${CLAUDE_PROJECT_DIR}\" --quiet --live --clear-waiting"] } ] } ]
+    "PostToolUse": [
+      { "matcher": "AskUserQuestion", "hooks": [ { "type": "command", "command": "sh", "args": ["-c", "python3 \"${CLAUDE_PROJECT_DIR}/ocpfFramework/scripts/ocpf-dashboard.py\" --project \"${CLAUDE_PROJECT_DIR}\" --quiet --live --clear-waiting"] } ] },
+      { "hooks": [ { "type": "command", "command": "sh", "args": ["-c", "python3 \"${CLAUDE_PROJECT_DIR}/ocpfFramework/scripts/ocpf-dashboard.py\" --project \"${CLAUDE_PROJECT_DIR}\" --quiet --live --throttle 45"] } ] }
+    ]
   }
 }
 ```
@@ -91,14 +94,19 @@ Windows: `"command": "pwsh"` (**PowerShell 7** — the twin uses `??` and `Conve
 "${CLAUDE_PROJECT_DIR}\\ocpfFramework\\scripts\\ocpf-dashboard.ps1", "-Project",
 "${CLAUDE_PROJECT_DIR}", "-Quiet", "-Live"]`; the PreToolUse hook adds `"-WaitingJson", "-"` (a
 lone `-` tells the script to read the hook's JSON from stdin) and the PostToolUse hook adds
-`"-ClearWaiting"`. `--quiet` makes every failure silent and exit 0: a dashboard that can't
-render must never interrupt the agent. The *Stop* hook is what makes the page live: it re-renders
-after every turn, reads the transcript for who is working and the time split, and costs no tokens.
+`"-ClearWaiting"`; the unmatched PostToolUse hook adds `"-Throttle", "45"`. `--quiet` makes every
+failure silent and exit 0: a dashboard that can't render must never interrupt the agent. The
+*Stop* hook re-renders after every turn; the **unmatched `PostToolUse` hook** (no `matcher`: every
+tool call, including the sub-agents' own) re-renders *inside* a turn, at most once per 45 seconds
+(`--throttle 45` returns at once when the page is younger than that). Without it a long turn — Main
+waiting minutes on the Reasoning sub-agent — leaves the page frozen at the turn's start, which is
+what happened on the first v5.2.0.0 project. Both read the transcripts for who is working and the
+time split, and cost no tokens.
 
-**GitHub Copilot CLI.** The same four moments in `.github/hooks/ocpf-dashboard.json` (project
+**GitHub Copilot CLI.** The same five moments in `.github/hooks/ocpf-dashboard.json` (project
 level, gitignored) with the CLI's event names — `agentStop`, `subagentStop` where available,
-`preToolUse` / `postToolUse` matched on `ask_user` — each a `command` hook running the same script
-with `--quiet --live`.
+`preToolUse` / `postToolUse` matched on `ask_user`, and an unmatched `postToolUse` with
+`--throttle 45` — each a `command` hook running the same script with `--quiet --live`.
 
 **GitHub Copilot Chat in VS Code** has no hooks. The page refreshes **at every step boundary**: the
 `usage` skill's step-close ritual runs the renderer after it writes the rows (both editions), and
@@ -119,8 +127,13 @@ Record what was installed in `ocpfFramework/state/dashboard.json` (`hooks: true/
   header). The page carries a theme selector in its footer for the themes to come; more themes are
   templates in this skill's `templates/`, chosen by `theme` in `dashboard.json`.
 - **Repair.** A project from v5.2.0.0 still has `ocpfFramework/state/dashboard.html`: render once
-  (the page lands at the root), delete the old file, `git add ProjectDashboard.html`; the hooks
-  need no change. A page that no longer refreshes: check the hooks file still names the scripts, that
+  (the page lands at the root), delete the old file, `git add ProjectDashboard.html`. A project
+  whose hooks predate v5.3.2.0 lacks the unmatched `PostToolUse` hook: merge it (section 2) — its
+  absence is why a page **freezes for a whole turn** (the step and the sub-agents only change at
+  `Stop`). A page that shows the Reasoning or Light role idle while it is plainly working, or whose
+  token totals lack that role's model: the renderer and the usage script are older than v5.3.2.0
+  and read only the top-level session files, not `<session>/subagents/agent-*.jsonl` — refresh
+  `ocpfFramework/scripts/` (`update-framework`). A page that no longer refreshes: check the hooks file still names the scripts, that
   `ocpfFramework/scripts/` still holds them (the `update-framework` skill refreshes them with the
   rest), and run the renderer once by hand to see its notes. A page that opens blank: the browser
   blocked a `file://` script — none is used; the page is self-contained — so re-render and reopen.

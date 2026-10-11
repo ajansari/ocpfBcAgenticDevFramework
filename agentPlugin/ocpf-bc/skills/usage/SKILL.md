@@ -54,7 +54,7 @@ and Lite keep the main role running the script itself.
 
 - **Missing?** Create it now with `aiTool` (`claude-code`, `copilot-chat`, or `copilot-cli` — the
   tool this session is running in, which decides the source and the table), `transcriptDir`
-  (Claude Code: `~/.claude/projects/<key>` where `<key>` is the project's absolute path with every
+  (Claude Code: `~/.claude/projects/<key>` — the session files `*.jsonl` **and** each session's sub-agent files `<id>/subagents/agent-*.jsonl`, which carry the Reasoning, Light, and Generator roles' usage — where `<key>` is the project's absolute path with every
   `/` replaced by `-`; Copilot: `null`), and an empty `steps` list. In a Copilot project the script
   adds `copilot.journalDirs` itself (and, on a pre-SDK chat, `copilot.sessionDirs` and
   `copilot.checkpoints`); never edit those by hand. Earlier steps get `n/a — no timestamps` in the table; never back-fill a guess.

@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.3.1.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.3.1.0**, and Lite at **v5.3.1.0** — but
+**v5.3.2.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.3.2.0**, and Lite at **v5.3.2.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -21,6 +21,38 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v5.3.2.0 — October 10, 2026
+
+**Sub-agent usage is counted, sub-agents show as running, and the dashboard refreshes inside a
+turn.** Lite **v5.3.2.0**, Operations Guide **v5.3.2.0**, Standards Guide **v1.12.0.0** (unchanged),
+plugin **5.3.2**. Scripts and one hook; `update-framework` merges the hook and refreshes the
+usage table.
+
+- **What went wrong.** On the first v5.2.0.0 project, during Step 02, the dashboard sat frozen at
+  the end of Step 01 — *3 of 3 reached, none in progress* — while `ProjectProgress.md` said Step 02
+  *In Progress*, and it showed the Reasoning role idle while Opus was plainly drafting the FRD.
+  Two causes. (1) Claude Code journals each sub-agent (`Agent` tool) in its own file,
+  `<session>/subagents/agent-*.jsonl`, beside the session's `<session>.jsonl`; both the usage
+  script and the dashboard renderer globbed only the top-level files, so the Reasoning, Light,
+  and Generator roles never appeared as running and **their tokens and cost were missing from
+  every usage row and total** — on that project 2.16M Opus tokens. (2) The page is re-rendered by
+  hooks, and the only hooks that fire during a turn were the question hooks; `Stop` and
+  `SubagentStop` fire at the end. A turn that delegates the FRD to a sub-agent lasts many minutes,
+  so the page kept the snapshot from the turn's start, and reloading it reloaded the same file.
+- **The fix.** Both usage scripts and both renderers read `<id>/subagents/*.jsonl` with the
+  session files (Ops § Usage & Cost → *Where* names the path and the trap). A running sub-agent
+  now also marks Main as working — it is waiting on its sub-agent, not idle. A new unmatched
+  `PostToolUse` hook (every tool call, the sub-agents' included) runs the renderer with
+  `--throttle 45`, which returns at once when the page is younger than 45 seconds; Ops § Dashboard
+  → 3 and the `dashboard` skill's section 2 carry it for Claude Code and the Copilot CLI.
+- **Migration** (`update-framework` 3a): merge the new hook into the project's hook file, then
+  re-run the usage table refresh — every closed step's rows gain the sub-agent models, and the
+  figures pasted in earlier closing messages are superseded; the project's `ChangeLog.md` says so.
+- Also: `status` and `dashboard` skills name both symptoms (page frozen for a turn; a role idle
+  while working, or its model missing from the totals) with the repair.
 
 ---
 

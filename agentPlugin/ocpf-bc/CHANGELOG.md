@@ -4,6 +4,25 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.3.2 — October 10, 2026
+
+**Bundles:** full runbook v5.3.2.0, Lite v5.3.2.0, Standards Guide v1.12.0.0 (unchanged),
+Operations Guide v5.3.2.0. Scripts and one hook; `update-framework` migrates.
+
+- **`usage` and `dashboard` skills: sub-agent transcripts were never read.** Claude Code journals
+  each `Agent` call in `<session>/subagents/agent-*.jsonl`; `ocpf-usage.py`, `ocpf-usage.ps1`,
+  `ocpf-dashboard.py`, and `ocpf-dashboard.ps1` globbed only `<tdir>/*.jsonl`. Result on a real
+  project: the Reasoning role's 2.16M Opus tokens absent from every usage row and total, and the
+  role shown idle while it drafted the FRD. All four now read both; a running sub-agent marks
+  Main as working.
+- **`dashboard` skill: the page refreshes inside a turn.** New unmatched `PostToolUse` hook
+  (Claude Code) / `postToolUse` (Copilot CLI) running the renderer with `--throttle 45`
+  (`-Throttle 45`): every tool call, the sub-agents' included, re-renders at most once per 45
+  seconds. Before it the page froze from a turn's start to its `Stop` — a whole FRD draft.
+- **`update-framework` skill:** merges the new hook into existing projects and re-runs the usage
+  table so closed steps gain their sub-agent rows.
+- **`status` skill:** names both symptoms and the repair.
+
 ## 5.3.1 — October 10, 2026
 
 **Bundles:** full runbook v5.3.1.0, Lite v5.3.1.0, Standards Guide v1.12.0.0 (unchanged),
