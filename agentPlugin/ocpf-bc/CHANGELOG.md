@@ -4,6 +4,19 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.3.5 — October 10, 2026
+
+**Bundles:** full runbook v5.3.5.0, Lite v5.3.5.0, Standards Guide v1.12.0.0 (unchanged),
+Operations Guide v5.3.5.0. Dashboard template and renderers.
+
+- **`dashboard` skill: in-place data refresh with a countdown.** `templates/dashboard.html` no
+  longer calls `location.reload()`; its render code is one `paint(D)` function that runs on load
+  and again whenever the page pulls `ocpfFramework/state/dashboard-data.js` (every
+  `refreshSeconds`, via a `<script>` tag so it works from `file://`) and finds a newer
+  `generatedAt`. Entrance animations play once; the Live pill reads *next in N s* and pulses on
+  new data. `ocpf-dashboard.py` and `ocpf-dashboard.ps1` write the sidecar beside the page's
+  embedded data and set `dataUrl`. Without the sidecar the page falls back to a reload.
+
 ## 5.3.4 — October 10, 2026
 
 **Bundles:** full runbook v5.3.4.0, Lite v5.3.4.0, Standards Guide v1.12.0.0 (unchanged),

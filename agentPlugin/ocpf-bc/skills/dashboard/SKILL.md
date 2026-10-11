@@ -9,7 +9,7 @@ description: Create, refresh, and open the live HTML dashboard of a Business Cen
 This skill does the mechanics: first creation, the hooks that keep the page fresh, the one-time
 explanation to the human, refreshes on request, and repair.
 
-**What it is.** One self-contained HTML file, `ProjectDashboard.html` **at the project root,
+**What it is.** One HTML file, `ProjectDashboard.html` **at the project root,
 beside `ProjectProgress.md`, tracked in git** (never under `ocpfFramework/`, never ignored — Ops §
 Repository Hygiene; v5.2.0.0 wrote it to the always-ignored `ocpfFramework/state/` and it did not
 persist with the project), rendered by the
@@ -54,7 +54,8 @@ moment the page has a name and an icon to show; earlier it would be an empty she
    >
    > **The file:** `ProjectDashboard.html` at the root of this project, next to
    > `ProjectProgress.md`, tracked in git like any other project file — it is your view, and it
-   > travels with the project. It reloads itself every 30 seconds while open.
+   > travels with the project. While open it refreshes its data in place every 30 seconds — no
+   > page reload — and the header shows the seconds to the next refresh.
    >
    > **If you close the tab or window:** in VS Code's Explorer, right-click the file → **Open
    > Externally** *(when that entry isn't offered, **Reveal in Finder** / **Reveal in File
@@ -136,7 +137,9 @@ Record what was installed in `ocpfFramework/state/dashboard.json` (`hooks: true/
   `ocpfFramework/scripts/` (`update-framework`). A page that no longer refreshes: check the hooks file still names the scripts, that
   `ocpfFramework/scripts/` still holds them (the `update-framework` skill refreshes them with the
   rest), and run the renderer once by hand to see its notes. A page that opens blank: the browser
-  blocked a `file://` script — none is used; the page is self-contained — so re-render and reopen.
+  blocked a `file://` script — none is needed for the first paint — so re-render and reopen. A
+  page that paints but never updates: the renderer did not write
+  `ocpfFramework/state/dashboard-data.js` (older than v5.3.5.0) — refresh `ocpfFramework/scripts/`.
 
 ## 4. What the page can and cannot know
 

@@ -372,12 +372,16 @@ def render(root, data):
     for cand in (os.path.join(HERE, "..", "templates", "dashboard.html"), os.path.join(root, "ocpfFramework", "scripts", "dashboard.html")):
         if os.path.isfile(cand): tpl = read(cand); break
     if not tpl: sys.exit("error: dashboard.html template not found beside the script (templates/dashboard.html) or in ocpfFramework/scripts/")
+    data["dataUrl"] = "ocpfFramework/state/dashboard-data.js"  # the page pulls this sidecar and repaints in place (no full reload)
     payload = json.dumps(data, ensure_ascii=False, default=str).replace("</", "<\\/")
     html = tpl.replace("/*__OCPF_DATA__*/null", payload, 1)
     out = os.path.join(root, "ProjectDashboard.html")  # project root: tracked, beside ProjectProgress.md
     tmp = out + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f: f.write(html)
     os.replace(tmp, out)
+    side = os.path.join(root, STATE, "dashboard-data.js")  # per developer, gitignored with the rest of state/
+    with open(side + ".tmp", "w", encoding="utf-8") as f: f.write("window.__ocpfData=" + payload + ";")
+    os.replace(side + ".tmp", side)
     return out
 
 def open_in_browser(path):

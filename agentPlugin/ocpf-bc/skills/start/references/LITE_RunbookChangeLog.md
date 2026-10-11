@@ -16,6 +16,17 @@ framework.
 
 ---
 
+## v5.3.5.0 — October 10, 2026
+
+Derived from full framework **v5.3.5.0**; Operations Guide **v5.3.5.0**; Standards Guide
+**v1.12.0.0** (unchanged); plugin **5.3.5**. Dashboard template and renderers only.
+
+- **Dashboard refreshes in place.** No more 30-second page reload: the renderers write a data
+  sidecar (`ocpfFramework/state/dashboard-data.js`) that the page pulls and repaints from, with a
+  *next in N s* countdown in the Live pill. Full changelog: *v5.3.5.0*.
+
+---
+
 ## v5.3.4.0 — October 10, 2026
 
 Derived from full framework **v5.3.4.0**; Operations Guide **v5.3.4.0**; Standards Guide

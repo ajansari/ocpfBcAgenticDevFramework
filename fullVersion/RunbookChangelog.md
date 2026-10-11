@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.3.4.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.3.4.0**, and Lite at **v5.3.4.0** — but
+**v5.3.5.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.3.5.0**, and Lite at **v5.3.5.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -21,6 +21,25 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v5.3.5.0 — October 10, 2026
+
+**Dashboard: data refreshes in place, with a countdown.** Lite **v5.3.5.0**, Operations Guide
+**v5.3.5.0**, Standards Guide **v1.12.0.0** (unchanged), plugin **5.3.5**. Template and renderers;
+`update-framework` refreshes `ocpfFramework/scripts/` and re-renders.
+
+- **What went wrong.** The page reloaded itself every 30 seconds — a full navigation, with the
+  entrance animations replaying — which AJ found jarring on a real project.
+- **The fix.** Both renderers now write the same data a second time as
+  `ocpfFramework/state/dashboard-data.js` (per developer, gitignored with the rest of `state/`).
+  The page pulls that sidecar every 30 seconds through a `<script>` tag — the one local load every
+  browser permits from `file://` — and repaints its sections in place only when `generatedAt`
+  changed; entrance animations play once, on first open. The *Live* pill now shows *next in N s*,
+  and pulses when new data lands. A page rendered by an older renderer (no sidecar) falls back to
+  the old reload. Ops § Dashboard → 3 and 5 and the `dashboard` skill describe it; the explanation
+  text the human reads says "refreshes its data in place".
 
 ---
 

@@ -54,6 +54,12 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 10, 2026 — Full v5.3.5.0 · Lite v5.3.5.0 · Operations Guide v5.3.5.0 · Plugin v5.3.5
+
+**The dashboard refreshes its data in place.** No more full page reload every 30 seconds: the
+renderer writes a data sidecar the page pulls and repaints from, and the Live pill counts down to
+the next refresh. `/ocpf-bc:update-framework` picks it up.
+
 ## October 10, 2026 — Full v5.3.4.0 · Lite v5.3.4.0 · Operations Guide v5.3.4.0 · Plugin v5.3.4
 
 **Dashboard header carries the Business Central product icon** under the status pills, embedded

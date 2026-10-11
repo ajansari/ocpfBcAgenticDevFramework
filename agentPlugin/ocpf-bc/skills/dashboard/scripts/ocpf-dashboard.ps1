@@ -185,10 +185,12 @@ $data = [ordered]@{ generatedAt = (NowUtc).ToString("o"); refreshSeconds = $Refr
 # ---- render ----
 $tpl = $null; foreach ($c in @((Join-Path $here "../templates/dashboard.html"), (Join-Path $root "ocpfFramework/scripts/dashboard.html"))) { if (Test-Path $c) { $tpl = Get-Content $c -Raw; break } }
 if (-not $tpl) { Write-Error "dashboard.html template not found beside the script (templates/dashboard.html) or in ocpfFramework/scripts/"; exit 1 }
+$data.dataUrl = "ocpfFramework/state/dashboard-data.js"  # the page pulls this sidecar and repaints in place (no full reload)
 $payload = ($data | ConvertTo-Json -Depth 8 -Compress) -replace '</', '<\/'
 $html = $tpl.Replace('/*__OCPF_DATA__*/null', $payload)
 $out = Join-Path $root "ProjectDashboard.html"  # project root: tracked, beside ProjectProgress.md
 [IO.File]::WriteAllText("$out.tmp", $html, [Text.UTF8Encoding]::new($false)); Move-Item -Force "$out.tmp" $out
+$side = Join-Path $stateDir "dashboard-data.js"; [IO.File]::WriteAllText("$side.tmp", "window.__ocpfData=$payload;", [Text.UTF8Encoding]::new($false)); Move-Item -Force "$side.tmp" $side
 if ($Open) { try { if ($IsMacOS) { & open $out } elseif ($IsWindows) { Start-Process $out } else { & xdg-open $out } } catch { } }
 if (-not $Quiet) { $out; foreach ($n in $notes) { Write-Host "note: $n" } }
 } catch { if ($Quiet) { exit 0 }; throw }

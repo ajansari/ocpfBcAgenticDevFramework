@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.3.4.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number; the previous version of this guide was 2.0.1.0)
+**Version:** 5.3.5.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number; the previous version of this guide was 2.0.1.0)
 **Last Updated:** October 10, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
@@ -1360,7 +1360,8 @@ working language:
 >
 > **The file:** `ProjectDashboard.html` at the root of this project, next to
 > `ProjectProgress.md`, tracked in git like any other project file — it is your view, and it
-> travels with the project. It reloads itself every 30 seconds while open.
+> travels with the project. While open it refreshes its data in place every 30 seconds — no page
+> reload — and the header shows the seconds to the next refresh.
 >
 > **If you close the tab or window:** in VS Code's Explorer, right-click the file → **Open
 > Externally** *(when that entry isn't offered: **Reveal in Finder** / **Reveal in File Explorer**
@@ -1408,7 +1409,11 @@ On Windows the hooks run the PowerShell twin under **`pwsh` (PowerShell 7)**, ne
 PowerShell 5.1, which cannot parse it; where `pwsh` is absent and Python 3 is present, run the
 `.py` instead (Ops § Tooling Checks records both). A hook run costs no tokens: the script reads files and writes one file. `--quiet` makes every
 failure silent with exit 0 — a dashboard that cannot render must never interrupt the agent. The
-page reloads itself every 30 seconds while open, so a hook's render appears without a keypress.
+page pulls fresh data every 30 seconds while open and repaints in place (the header counts down to
+the next pull), so a hook's render appears without a keypress and without the page flashing: the
+renderer writes the same data a second time as `ocpfFramework/state/dashboard-data.js`, which
+the page loads through a `<script>` tag — the one kind of local load every browser allows from
+`file://`. v5.3.4.0 and earlier reloaded the whole page, which AJ found jarring.
 **Why the every-tool hook:** `Stop` fires only when the turn ends. On a real v5.2.0.0 project Main
 delegated the FRD to the Reasoning sub-agent and the page sat frozen for the whole turn — still
 showing the previous step as current and the sub-agent idle — because nothing had fired since the
@@ -1430,8 +1435,10 @@ renderer embeds is the same for every theme.
 "Open the dashboard" → render, then open; say the path. "Refresh it" → render. "Where is it?" →
 the path and the right-click route. A page that stopped refreshing: check the hooks still name the
 scripts and `ocpfFramework/scripts/` still holds them, then run the renderer by hand and read its
-notes. The page uses no network and no local script file: it is self-contained, so a blank page
-means the file was not re-rendered, not that a browser blocked it.
+notes. The page uses no network; it is self-contained for its first paint and loads one local
+file, `ocpfFramework/state/dashboard-data.js`, for the in-place refresh — so a blank page means
+the file was not re-rendered, and a page that paints but never updates means the sidecar is
+missing (a renderer older than v5.3.5.0): refresh `ocpfFramework/scripts/`.
 
 ---
 
@@ -1902,7 +1909,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v5.3.4.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
+folder as `README.md`. For runbook **v5.3.5.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2075,7 +2082,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.3.4.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.3.5.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
