@@ -120,6 +120,8 @@ Record what was installed in `ocpfFramework/state/dashboard.json` (`hooks: true/
 
 ## 3. On request
 
+- **Nothing to do for these** — they are on the page: tiles and the Journey panel collapse with their
+  chevron (remembered per browser); the ticker has pause / resume and restart-from-newest buttons.
 - **"Open the dashboard"** → render, then `--open`. Say the path.
 - **"Refresh the dashboard"** → render without `--open`; say what changed if anything stands out.
 - **"Where is the dashboard?"** → `ProjectDashboard.html` at the project root, and the right-click

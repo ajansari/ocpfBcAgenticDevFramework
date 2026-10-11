@@ -441,6 +441,23 @@
   body.painted .tb .bar div{animation:none;width:var(--w)}
   .next{color:var(--text-3);font-weight:500;letter-spacing:0;text-transform:none}
   body.updated #livePill{animation:pulse .9s ease-out 1}
+  /* collapsible tiles and panels */
+  .tiles{align-items:start}
+  .tile,.panel{position:relative}
+  .cbtn{position:absolute;right:9px;top:9px;width:22px;height:22px;border-radius:6px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-3);cursor:pointer;display:grid;place-items:center;padding:0;opacity:.55;z-index:3;transition:opacity .2s}
+  .cbtn:hover{opacity:1;color:var(--text)}
+  .cbtn svg{width:12px;height:12px;transition:transform .25s}
+  .collapsed>.cbtn svg{transform:rotate(-90deg)}
+  .tile .k{padding-right:26px}
+  .tile.collapsed>*:not(.k):not(.cbtn){display:none}
+  .tile.collapsed{padding-bottom:12px}.tile.collapsed .k{margin:0}
+  .panel.collapsed>*:not(h2):not(.cbtn){display:none}
+  .panel.collapsed h2{margin:0}
+  .panel[data-cid] h2{padding-right:30px}
+  /* ticker controls */
+  .feed .fctl{display:inline-flex;gap:4px;flex:0 0 auto}
+  .feed .fb{width:22px;height:22px;border-radius:6px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-3);cursor:pointer;display:grid;place-items:center;padding:0}
+  .feed .fb:hover{color:var(--text)}.feed .fb svg{width:11px;height:11px;fill:currentColor}
 </style>
 <style>
   /* ---- template additions (data-driven page) ---- */
@@ -492,7 +509,7 @@
 
   <div class="tiles" id="tiles"></div>
 
-  <div class="panel in" style="--d:.6s">
+  <div class="panel in" data-cid="journey" style="--d:.6s"><button class="cbtn" type="button" title="Collapse / expand"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg></button>
     <h2>Journey <span class="sub" id="journeySub" style="color:var(--text-3);font-weight:500;font-size:12px"></span></h2>
     <div class="phases" id="phases"></div>
     <div class="line" id="line"></div>
@@ -505,7 +522,7 @@
     <div class="card gate in" style="--d:1.1s" id="gateCard"></div>
   </div>
 
-  <div class="feed in" style="--d:1.3s"><span class="lab">RECENT</span><div class="track"><div class="items" id="feed"></div></div></div>
+  <div class="feed in" style="--d:1.3s"><span class="lab">RECENT</span><span class="fctl"><button class="fb" id="feedPause" type="button" title="Pause the ticker"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2.5" width="3.6" height="11" rx="1"/><rect x="9.4" y="2.5" width="3.6" height="11" rx="1"/></svg></button><button class="fb" id="feedReset" type="button" title="Restart from the newest message"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9"/><path d="M13.5 2.5v3.6H9.9"/></svg></button></span><div class="track"><div class="items" id="feed"></div></div></div>
 
   <footer class="in" style="--d:1.5s">
     <span id="foot"></span>
@@ -528,6 +545,11 @@ const usd=n=>n==null?'—':'$'+Number(n).toFixed(2);
 (function(){const R=document.documentElement;const mq=matchMedia('(prefers-color-scheme: dark)');let saved=null;try{saved=localStorage.getItem('ocpf-dash-theme');}catch(e){}
   R.dataset.theme=saved||'dark';window.__paintTheme=()=>{const b=$('themeBtn');if(!b)return;const d=R.dataset.theme==='dark';b.innerHTML=`<span>${d?'☀️':'🌙'}</span> <b>${d?'Day':'Night'}</b>`;};
   window.__toggleTheme=()=>{R.dataset.theme=R.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('ocpf-dash-theme',R.dataset.theme);}catch(e){}window.__paintTheme();};})();
+
+// ---- collapsible tiles and panels: per-viewer, remembered in localStorage, re-applied after every repaint ----
+const ICO_CHEV='<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>';const CK='ocpf-dash-collapsed';let collapsed=new Set();try{collapsed=new Set(JSON.parse(localStorage.getItem(CK)||'[]'));}catch(e){}
+function applyCollapse(){document.querySelectorAll('[data-cid]').forEach(el=>el.classList.toggle('collapsed',collapsed.has(el.dataset.cid)));}
+document.addEventListener('click',e=>{const bt=e.target.closest('.cbtn');if(!bt)return;const el=bt.closest('[data-cid]');if(!el)return;const id=el.dataset.cid;collapsed.has(id)?collapsed.delete(id):collapsed.add(id);try{localStorage.setItem(CK,JSON.stringify([...collapsed]));}catch(x){}applyCollapse();});
 
 // ---- paint: everything below reads D and rewrites the page in place; it runs on load and on every data pull ----
 function paint(D){
@@ -567,6 +589,7 @@ if(est&&est.estimated){const pct=Math.min(100,Math.round(100*est.used/est.estima
 else estHtml=`<div class="k">Step ${esc(cur.id||'')} vs AI Effort Estimate</div><div class="v" style="font-size:16px;margin-top:8px;color:var(--text-2)">${est&&est.note?esc(est.note):'No estimate yet'}</div><div class="m">${fw.edition==='lite'?'written at Step 2':'written at Step 03'} · docs/2-design/AiEffortEstimate.md</div>`;
 tiles.push(`<div class="tile est in" style="--d:.5s">${estHtml}</div>`);
 $('tiles').innerHTML=tiles.join('');
+(function(){const ids=['tokens','cost','elapsed','decisions','estimate'];[...$('tiles').children].forEach((el,i)=>{el.dataset.cid=ids[i]||('tile'+i);el.insertAdjacentHTML('afterbegin','<button class="cbtn" type="button" title="Collapse / expand">'+ICO_CHEV+'</button>');});applyCollapse();})();
 
 // ---- journey ----
 const steps=D.steps||[];const PH=['DEFINE','DESIGN','BUILD','PROVE'];
@@ -620,6 +643,7 @@ $('gateCard').innerHTML=`<h3>${cur.id?'Step '+esc(cur.id)+' exit gate':'Exit gat
 const ev=D.events||[];const fh=ev.map(e=>`<span><i>${esc(e.time)}</i><b>${esc(e.who)}</b> ${esc(e.text)}</span>`).join('')||'<span><i>—</i>No events yet</span>';
 $('feed').innerHTML=fh+fh;
 
+if(typeof feedApply==='function')feedApply();
 $('foot').textContent=`ProjectDashboard.html · rendered by ${D.renderer||'ocpf-dashboard'} · ${D.refreshSeconds?'data refreshes in place every '+D.refreshSeconds+' s':''}`;
 }
 
@@ -636,6 +660,13 @@ function pull(){if(!D.refreshSeconds)return;pulling=true;tick();const sc=documen
   sc.onerror=()=>{sc.remove();if(!D.dataUrl){location.reload();return;}done();};
   function done(){pulling=false;nextAt=Date.now()+(D.refreshSeconds||30)*1000;tick();}
   document.head.appendChild(sc);}
+applyCollapse();
+// ---- ticker controls: pause / resume, and restart from the newest message (no page reload) ----
+var ICO_PAUSE='<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2.5" width="3.6" height="11" rx="1"/><rect x="9.4" y="2.5" width="3.6" height="11" rx="1"/></svg>',ICO_PLAY='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>',feedPaused=false;  // var: hoisted, so paint() may call feedApply() before this line runs
+function feedApply(){const it=$('feed');if(it)it.style.animationPlayState=feedPaused?'paused':'running';const bt=$('feedPause');if(bt){bt.innerHTML=feedPaused?ICO_PLAY:ICO_PAUSE;bt.title=feedPaused?'Resume the ticker':'Pause the ticker';}}
+$('feedPause').addEventListener('click',()=>{feedPaused=!feedPaused;feedApply();});
+$('feedReset').addEventListener('click',()=>{const it=$('feed');if(!it)return;it.style.animation='none';void it.offsetWidth;it.style.animation='';feedPaused=false;feedApply();});
+feedApply();
 fresh();tick();setInterval(fresh,15000);setInterval(tick,1000);
 // theme selector: the renderer chooses the template from ocpfFramework/state/dashboard.json → "theme"; the page can only ask
 $('themeSel').value='brand';$('themeSel').addEventListener('change',e=>{const v=e.target.value;e.target.value='brand';const tt=$('toast');tt.innerHTML=`To switch to <b>${v==='f1'?'F1':'OnlyBCFans'}</b>, tell the agent: "use the ${v==='f1'?'F1':'OnlyBCFans'} dashboard theme" — it sets <code>theme</code> in ocpfFramework/state/dashboard.json and re-renders.`;tt.classList.add('show');setTimeout(()=>tt.classList.remove('show'),9000);});

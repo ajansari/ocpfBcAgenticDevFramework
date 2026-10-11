@@ -54,6 +54,12 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 10, 2026 — Full v5.4.1.0 · Lite v5.4.1.0 · Operations Guide v5.4.1.0 · Plugin v5.4.1
+
+**Dashboard polish.** KPI tiles and the Journey panel collapse; the ticker can be paused and
+restarted from the newest message; the F1 header carries the OnlyBCFans wordmark, the app, and
+the BC icon.
+
 ## October 10, 2026 — Full v5.4.0.0 · Lite v5.4.0.0 · Operations Guide v5.4.0.0 · Plugin v5.4.0
 
 **A second dashboard theme: F1.** A trackside pit-wall view of the same build — the Main agent is

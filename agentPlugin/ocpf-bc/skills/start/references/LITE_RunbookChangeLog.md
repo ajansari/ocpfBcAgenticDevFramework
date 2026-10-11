@@ -16,6 +16,17 @@ framework.
 
 ---
 
+## v5.4.1.0 — October 10, 2026
+
+Derived from full framework **v5.4.1.0**; Operations Guide **v5.4.1.0**; Standards Guide
+**v1.12.0.0** (unchanged); plugin **5.4.1**. Dashboard templates only.
+
+- Collapsible KPI tiles and Journey panel (OnlyBCFans page); ticker pause / resume and
+  restart-from-newest on both pages; the F1 header gains the OnlyBCFans wordmark, app icon and
+  name, and the BC icon. Full changelog: *v5.4.1.0*.
+
+---
+
 ## v5.4.0.0 — October 10, 2026
 
 Derived from full framework **v5.4.0.0**; Operations Guide **v5.4.0.0**; Standards Guide

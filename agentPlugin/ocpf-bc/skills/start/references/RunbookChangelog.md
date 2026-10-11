@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.4.0.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.4.0.0**, and Lite at **v5.4.0.0** — but
+**v5.4.1.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.4.1.0**, and Lite at **v5.4.1.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -21,6 +21,23 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v5.4.1.0 — October 10, 2026
+
+**Dashboard: collapsible tiles, ticker controls, F1 header completed.** Lite **v5.4.1.0**,
+Operations Guide **v5.4.1.0**, Standards Guide **v1.12.0.0** (unchanged), plugin **5.4.1**.
+Templates only; `update-framework` refreshes them.
+
+- **OnlyBCFans page:** every KPI tile and the Journey panel collapse and expand with a chevron in
+  their corner; the choice is per browser (localStorage) and survives the in-place repaints.
+- **Both pages:** the bottom ticker has a pause / resume button and a restart button that starts
+  it again from the newest message — the page is not reloaded.
+- **F1 page:** the header now carries the OnlyBCFans wordmark (day and night versions), the app
+  icon and name, and the Business Central icon, like the OnlyBCFans page.
+- Fixed in passing: the *next in N s* countdown was blank on the first paint of v5.4.0.0 (a
+  declaration-order error in the page script).
 
 ---
 

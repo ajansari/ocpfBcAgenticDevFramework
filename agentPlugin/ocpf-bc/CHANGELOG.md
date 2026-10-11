@@ -4,6 +4,16 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.4.1 — October 10, 2026
+
+**Bundles:** full runbook v5.4.1.0, Lite v5.4.1.0, Standards Guide v1.12.0.0 (unchanged),
+Operations Guide v5.4.1.0. Dashboard templates only.
+
+- **`dashboard` skill:** `dashboard.html` — KPI tiles and the Journey panel collapse with a
+  chevron (per-browser, re-applied after each repaint); ticker pause / resume and restart
+  buttons. `dashboard-f1.html` — same ticker controls; header gains the OnlyBCFans wordmark
+  (day / night), app icon and name, and the BC icon. Countdown blank on first paint fixed.
+
 ## 5.4.0 — October 10, 2026
 
 **Bundles:** full runbook v5.4.0.0, Lite v5.4.0.0, Standards Guide v1.12.0.0 (unchanged),
