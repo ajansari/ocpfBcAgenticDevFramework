@@ -12,7 +12,7 @@
     {
       "name": "ocpf-bc",
       "source": "./agentPlugin/ocpf-bc",
-      "description": "The OnlyCopilotFans Business Central Agentic Development Framework: a guided DEFINE, DESIGN, BUILD, PROVE routine for building AL extensions the right way, per-tenant or for AppSource. Picks Full or Lite, sets up the latest runbook, connects Microsoft's AL tools with nothing to install, adds reasoning and light sub-agents, writes every project document from a template, and measures token usage and cost per step.",
+      "description": "The OnlyCopilotFans Business Central Agentic Development Framework: a guided DEFINE, DESIGN, BUILD, PROVE routine for building AL extensions the right way, per-tenant or for AppSource. Picks Full, Lite, or Build-a-Feature (one object or a few, no steps, no documents), sets up the latest runbook, connects Microsoft's AL tools with nothing to install, adds reasoning, light, and generator sub-agents, writes every project document from a template, measures token usage and cost at every step boundary, and keeps a live HTML dashboard of the build.",
       "author": {
         "name": "OnlyCopilotFans",
         "url": "https://github.com/ajansari"
