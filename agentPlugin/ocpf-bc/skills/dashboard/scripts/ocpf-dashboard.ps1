@@ -155,8 +155,11 @@ if (-not $main.model -and $gen.model) { $main.model = $gen.model; $main.effort =
 if (-not $main.model -and $copilot -and $uj.sessions) { $ms = @(foreach ($x in $uj.sessions) { @($x.models) }); if ($ms.Count) { $main.model = $ms[-1] } }
 if (-not $main.model -and $models.Count) { $main.model = $models[0].model }
 if ($liveState) { if (-not $main.model) { $main.model = $liveState.main.model }; $main.status = $(if ($liveState.main.state -eq "working") { "working" } else { "idle" }); if ($liveState.main.text) { $main.detail = $liveState.main.text.Substring(0, [Math]::Min(90, $liveState.main.text.Length)) }
-  foreach ($sub in @($liveState.subs | Select-Object -First 3)) { $target = $rl | Where-Object { $_.role -in "Reasoning","Light","Generator" -and $_.model -and $sub.model -and ("$($sub.model)" -like "*$($_.model)*" -or "$($_.model)" -like "*$($sub.model)*") -and $_.status -eq "idle" } | Select-Object -First 1
-    if ($target) { $target.status = $(if ($sub.running) { "running" } else { "idle" }); $target.runningSeconds = $(if ($sub.running) { $sub.seconds }); $target.lastDetail = $(if ($sub.running) { $null } else { "returned " + $sub.last.ToLocalTime().ToString("HH:mm") }) } } }
+  # every sub-agent is matched to a role by model; a role shows how many of its sub-agents run right now (runningCount)
+  foreach ($r in $rl) { if ($r.role -notin "Reasoning","Light","Generator" -or -not $r.model) { continue }
+    $ms = @($liveState.subs | Where-Object { $_.model -and ("$($_.model)" -like "*$($r.model)*" -or "$($r.model)" -like "*$($_.model)*") }); $run = @($ms | Where-Object { $_.running })
+    if ($run.Count) { $r.status = "running"; $r.runningSeconds = ($run | ForEach-Object { $_.seconds } | Measure-Object -Maximum).Maximum; $r.runningCount = $run.Count; $r.lastDetail = $null }
+    elseif ($ms.Count) { $r.lastDetail = "returned " + (($ms | ForEach-Object { $_.last } | Measure-Object -Maximum).Maximum).ToLocalTime().ToString("HH:mm") } } }
 foreach ($r in $rl) { if ($r.model) { $mm = $models | Where-Object { $_.model -and ("$($_.model)" -like "*$($r.model)*" -or "$($r.model)" -like "*$($_.model)*") } | Select-Object -First 1; if ($mm) { $r.tokens = $mm.tokens; $r.credits = [Math]::Round($mm.credits, 1) } } }
 if ($gen.model -and $main.model -and $gen.model -eq $main.model) { $gen.Remove("tokens"); $gen.Remove("credits"); $gen.detail = "same model as Main; its usage is counted in Main's row" }
 $waiting = Load-Json (Join-Path $stateDir "waiting.json") $null
@@ -183,16 +186,21 @@ $data = [ordered]@{ generatedAt = (NowUtc).ToString("o"); refreshSeconds = $Refr
   pricing = [ordered]@{ source = $priceSrc; fetchedAt = $pricing.fetchedAt; usdPerCredit = $pricing.aiCredit.usd }; notes = $notes; toast = $Toast }
 
 # ---- render ----
-$THEMES = @{ brand = "dashboard.html"; f1 = "dashboard-f1.html" }  # theme key (dashboard.json -> theme) -> template file
-$themeKey = "$($dj0.theme)".ToLower(); if (-not $THEMES.ContainsKey($themeKey)) { $themeKey = "brand" }; $data.theme = $themeKey; $tplName = $THEMES[$themeKey]
-$tpl = $null; foreach ($c in @((Join-Path $here "../templates/$tplName"), (Join-Path $root "ocpfFramework/scripts/$tplName"), (Join-Path $here "../templates/dashboard.html"), (Join-Path $root "ocpfFramework/scripts/dashboard.html"))) { if (Test-Path $c) { $tpl = Get-Content $c -Raw; break } }
-if (-not $tpl) { Write-Error "dashboard.html template not found beside the script (templates/dashboard.html) or in ocpfFramework/scripts/"; exit 1 }
-$data.dataUrl = "ocpfFramework/state/dashboard-data.js"  # the page pulls this sidecar and repaints in place (no full reload)
-$payload = ($data | ConvertTo-Json -Depth 8 -Compress) -replace '</', '<\/'
-$html = $tpl.Replace('/*__OCPF_DATA__*/null', $payload)
-$out = Join-Path $root "ProjectDashboard.html"  # project root: tracked, beside ProjectProgress.md
-[IO.File]::WriteAllText("$out.tmp", $html, [Text.UTF8Encoding]::new($false)); Move-Item -Force "$out.tmp" $out
-$side = Join-Path $stateDir "dashboard-data.js"; [IO.File]::WriteAllText("$side.tmp", "window.__ocpfData=$payload;", [Text.UTF8Encoding]::new($false)); Move-Item -Force "$side.tmp" $side
+# Every theme is rendered on every run; `theme` in dashboard.json only says which page -Open opens.
+$THEMES = [ordered]@{ brand = @("dashboard.html", "ProjectDashboard.html"); f1 = @("dashboard-f1.html", "ProjectDashboard-f1.html") }
+$themeKey = "$($dj0.theme)".ToLower(); if (-not $THEMES.Contains($themeKey)) { $themeKey = "brand" }
+$data.dataUrl = "ocpfFramework/state/dashboard-data.js"  # the pages pull this sidecar and repaint in place (no full reload)
+$outs = @{}; $firstPayload = $null
+foreach ($k in $THEMES.Keys) { $tplName = $THEMES[$k][0]; $outName = $THEMES[$k][1]
+  $tpl = $null; foreach ($c in @((Join-Path $here "../templates/$tplName"), (Join-Path $root "ocpfFramework/scripts/$tplName"))) { if (Test-Path $c) { $tpl = Get-Content $c -Raw; break } }
+  if (-not $tpl) { if ($k -eq "brand") { Write-Error "dashboard.html template not found beside the script (templates/dashboard.html) or in ocpfFramework/scripts/"; exit 1 }; continue }
+  $data.theme = $k
+  $payload = ($data | ConvertTo-Json -Depth 8 -Compress) -replace '</', '<\/'
+  if ($null -eq $firstPayload) { $firstPayload = $payload }
+  $o = Join-Path $root $outName  # project root: tracked, beside ProjectProgress.md
+  [IO.File]::WriteAllText("$o.tmp", $tpl.Replace('/*__OCPF_DATA__*/null', $payload), [Text.UTF8Encoding]::new($false)); Move-Item -Force "$o.tmp" $o; $outs[$k] = $o }
+$out = $outs[$themeKey]; if (-not $out) { $out = $outs["brand"] }
+$side = Join-Path $stateDir "dashboard-data.js"; [IO.File]::WriteAllText("$side.tmp", "window.__ocpfData=$firstPayload;", [Text.UTF8Encoding]::new($false)); Move-Item -Force "$side.tmp" $side
 if ($Open) { try { if ($IsMacOS) { & open $out } elseif ($IsWindows) { Start-Process $out } else { & xdg-open $out } } catch { } }
 if (-not $Quiet) { $out; foreach ($n in $notes) { Write-Host "note: $n" } }
 } catch { if ($Quiet) { exit 0 }; throw }

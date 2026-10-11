@@ -100,7 +100,8 @@ Guide versions it expects. If a local copy's major version differs, say so: the 
    `ocpfFramework/state/dashboard.html`, which is gitignored:** since v5.3.0.0 the renderer writes
    `ProjectDashboard.html` to the project root, tracked. After the first render with the new
    scripts, delete `ocpfFramework/state/dashboard.html`, run `git check-ignore -v
-   ProjectDashboard.html` (must print nothing), and `git add ProjectDashboard.html`. Tell the human
+   ProjectDashboard.html ProjectDashboard-f1.html` (must print nothing), and `git add` both pages (since
+   v5.4.2.0 every render writes the F1 page too). Tell the human
    the page moved and now persists with the project. **A project whose hooks predate v5.3.2.0:**
    merge the unmatched `PostToolUse` hook (`--quiet --live --throttle 45`; Copilot CLI: the
    unmatched `postToolUse` with `-Throttle 45` / `--throttle 45`) from the `dashboard` skill's
@@ -118,7 +119,7 @@ Guide versions it expects. If a local copy's major version differs, say so: the 
    repository at the tag the new framework pins** — read the pin from the framework's
    `standardsGuide/README.md` (fetch that prelude into `ocpfFramework/standardsGuide/README.md` too):
    `https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfALDevStandardsGuide.md`
-   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v5.4.1.0 the pin is
+   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v5.4.2.0 the pin is
    `v1.12.0.0`). Update each folder's `SNAPSHOT.json` (`repo`, `ref`, `sha`, `fetchedAt`). A project that
    began before v5.2.0.0 needs **no file move**: the on-disk path and filename are unchanged; the
    refresh only changes the source recorded in `SNAPSHOT.json`. A runbook and a companion from

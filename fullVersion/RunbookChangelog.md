@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.4.1.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.4.1.0**, and Lite at **v5.4.1.0** — but
+**v5.4.2.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.4.2.0**, and Lite at **v5.4.2.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -21,6 +21,29 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v5.4.2.0 — October 10, 2026
+
+**Dashboard: both themes always rendered; sub-agent counters; all cards collapsible.** Lite
+**v5.4.2.0**, Operations Guide **v5.4.2.0**, Standards Guide **v1.12.0.0** (unchanged), plugin
+**5.4.2**. Renderers and templates; `update-framework` refreshes them and stages the second page.
+
+- **Switching themes is opening the other page.** AJ's objection to v5.4.0.0 ("tell the agent to
+  switch" for a file on disk) was right: a second template render costs one ~150 KB write and
+  nothing else. Every run now writes `ProjectDashboard.html` (OnlyBCFans) and
+  `ProjectDashboard-f1.html` (F1), both at the root, both tracked; the footer selector on each
+  page navigates to the other; either page refreshes in place from the shared sidecar. `theme` in
+  `dashboard.json` only decides which page `--open` opens. Ops § Repository Hygiene lists the
+  second page with the first.
+- **Sub-agent counters.** The renderers now match every running sub-agent to its role by model
+  (not just the first three, and not only to an idle role): a role shows a green counter — 1, 3,
+  6 — with the number of its sub-agents running right now, in *Who is working* (OnlyBCFans) and
+  *Drivers* (F1). The running light is a brighter green with a pulsing glow.
+- **Every card collapses.** *Who is working*, *Tokens by model*, *Exit gate*, and *Waiting on
+  you* join the tiles and the Journey panel; a collapsed *Waiting on you* card with a question
+  open pulses a glowing ring so it is not missed.
 
 ---
 

@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.4.1.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number; the previous version of this guide was 2.0.1.0)
+**Version:** 5.4.2.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number; the previous version of this guide was 2.0.1.0)
 **Last Updated:** October 10, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
@@ -770,6 +770,7 @@ requirements/        raw input, verbatim
 outputAppPackage/    every built package (Ops § Packaging)
 ProjectProgress.md   both editions
 ProjectDashboard.html  both editions — the live dashboard page (Ops § Dashboard), tracked, never ignored
+ProjectDashboard-f1.html  the same page in the F1 theme, rendered on every run; tracked, never ignored
 ocpfFramework/       everything the framework fetches or keeps (below)
 ```
 
@@ -852,10 +853,10 @@ Then, in order:
 7. **Check the layout and the ignore list before design begins.** The root holds only what the
    layout above lists; `docs/` holds every document written so far, each in its phase folder
    (nothing from the runbook's document list loose in `docs/` or in the root, `ProjectProgress.md`
-   and `ProjectDashboard.html` excepted); `.gitignore` carries the full block from Ops § Repository
+   and the dashboard pages `ProjectDashboard.html` / `ProjectDashboard-f1.html` excepted); `.gitignore` carries the full block from Ops § Repository
    Hygiene; `git check-ignore -v` names each framework file that exists **and does not name**
-   `ProjectDashboard.html` or `ProjectProgress.md`; and `git status --porcelain` lists
-   `ProjectDashboard.html` as untracked or modified, never as nothing (stage it). A miss here is
+   `ProjectDashboard.html`, `ProjectDashboard-f1.html`, or `ProjectProgress.md`; and `git status --porcelain` lists
+   both dashboard pages as untracked or modified, never as nothing (stage it). A miss here is
    cheap now and a client-facing mistake later.
 
 ---
@@ -1433,12 +1434,14 @@ underneath; the renderer picks the template from `theme` in `ocpfFramework/state
 | `brand` (default) | `dashboard.html` | *OnlyBCFans* — the Build Map page: tiles, journey line, roles, models, exit gate |
 | `f1` | `dashboard-f1.html` | *F1* — a trackside pit-wall view: the Main agent is the Ferrari, the Reasoning, Light, and Generator roles are the Mercedes, McLaren, and Red Bull; steps are laps on a timing screen; tokens are fuel, cost is budget, decisions are pit stops; an open question is **BOX BOX** with the car held in its box and the question on the team radio; sub-agents leave their garages and run on the far straight while they work |
 
-**Switching.** The page cannot switch itself (it is a file; the footer selector only tells the
-human how). The human asks — *"use the F1 dashboard theme"*, *"switch the dashboard to
-OnlyBCFans"* — and the agent runs the renderer with `--theme f1` / `--theme brand` (PowerShell:
-`-Theme`), which records the choice in `dashboard.json` and re-renders; every hook render after
-that uses it. Both templates are copied into `ocpfFramework/scripts/` at first creation and
-refreshed by `update-framework`, so a switch never needs a fetch. The F1 theme reads the same
+**Switching.** Every render writes **every theme** — `ProjectDashboard.html` (OnlyBCFans) and
+`ProjectDashboard-f1.html` (F1), both at the project root, both tracked — from one data build;
+the second file costs a write of ~150 KB and nothing else (no tokens, no model call). So the
+human switches by opening the other page: the footer selector on each page navigates to it, and
+whichever page is open keeps refreshing in place from the shared sidecar. `theme` in
+`dashboard.json` (set with `--theme` / `-Theme`) only decides which page `--open` opens and which
+path the agent names. Both templates are copied into `ocpfFramework/scripts/` at first creation
+and refreshed by `update-framework`. The F1 theme reads the same
 data as the brand page, so it works with GitHub Copilot exactly as the brand page does — AI
 credits instead of tokens, the Copilot pill, and the same refresh cadence per tool (every turn in
 Claude Code and the Copilot CLI, every step close in Copilot Chat).
@@ -1446,7 +1449,10 @@ Claude Code and the Copilot CLI, every step close in Copilot Chat).
 ### 5. On request, and repair
 
 **On the page itself** (both themes, no agent involved): each KPI tile and the Journey panel
-collapse and expand with the chevron in their corner, and the choice is remembered per browser;
+collapse and expand with the chevron in their corner — the *Who is working*, *Tokens by model*,
+*Exit gate*, and *Waiting on you* cards too; a collapsed *Waiting on you* card with a question open
+pulses a glowing ring — and the choice is remembered per browser; the *Who is working* card shows a
+green counter beside a role with the number of its sub-agents running right now;
 the bottom ticker has a pause / resume button and a restart button that starts it again from the
 newest message without reloading anything.
 
@@ -1692,7 +1698,7 @@ With the answer *No, track them*, only the first group is written. The first gro
 they are what keeps the always-ignored files out when the answer is *No*, and a reader of the file
 sees which rule is a choice and which isn't. Drop an agent-definition entry only for a harness the
 project doesn't use. **Never** ignore `docs/`, `requirements/`, `outputAppPackage/`, `*.app`,
-`Translations/*.xlf`, `ProjectProgress.md`, `ProjectDashboard.html`, or `src/`. The dashboard page
+`Translations/*.xlf`, `ProjectProgress.md`, `ProjectDashboard.html`, `ProjectDashboard-f1.html`, or `src/`. The dashboard page
 is the one file the framework renders that **is** the project's: it lives at the root for that
 reason (Ops § Dashboard), and a renderer, a hook, or a hand-written entry that puts it under
 `ocpfFramework/` or adds `*.html` to `.gitignore` is a bug — v5.2.0.0 made exactly that mistake.
@@ -1701,15 +1707,15 @@ reason (Ops § Dashboard), and a renderer, a hook, or a hand-written entry that 
 framework file that exists on disk and `git status --porcelain` in the root: a framework file that
 `check-ignore` doesn't name, or that `status` lists as untracked or modified, means an entry is
 missing or misspelled — fix it before moving on. Then run `git check-ignore -v ProjectDashboard.html
-ProjectProgress.md`: it must print **nothing** (exit 1) — a match means an entry is too broad, and
+ProjectDashboard-f1.html ProjectProgress.md`: it must print **nothing** (exit 1) — a match means an entry is too broad, and
 the human's dashboard would vanish from every clone. A `.gitignore` that was "written per the runbook"
 but never checked is how the changelog reached a client's remote on a real project.
 
 **Always tracked:** the project's own documents — all of them under `docs/`, in their phase folders
 `docs/0-project`, `docs/1-define`, `docs/2-design`, `docs/3-build`, and `docs/4-prove` (the
 runbook's rule: Full Operating Rule 9, Lite's header note; the map is in Ops § Documents), with
-`ProjectProgress.md` the one document at the root in **both** editions, and `ProjectDashboard.html`
-beside it (the live dashboard page, Ops § Dashboard) — its AL source under `src/`
+`ProjectProgress.md` the one document at the root in **both** editions, and the dashboard pages
+`ProjectDashboard.html` / `ProjectDashboard-f1.html` beside it (Ops § Dashboard) — its AL source under `src/`
 (the app icon included), `requirements/`, `Translations/*.xlf`, and every package in
 `outputAppPackage/` (Ops § Packaging).
 
@@ -1928,7 +1934,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v5.4.1.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
+folder as `README.md`. For runbook **v5.4.2.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2101,7 +2107,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.4.1.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.4.2.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**

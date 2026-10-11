@@ -336,12 +336,15 @@ def build(root, a):
         main["model"] = main["model"] or live["main"]["model"]
         main["status"] = "working" if live["main"]["state"] == "working" else "idle"
         if live["main"]["text"]: main["detail"] = live["main"]["text"][:90]
-        for sub in live["subs"][:3]:
-            # match a sub-agent to a role by model when the roles name different models, else label it by order
-            target = next((r for r in rl if r["role"] in ("Reasoning", "Light", "Generator") and r.get("model") and sub.get("model") and (r["model"] in sub["model"] or sub["model"] in r["model"]) and r.get("status") == "idle"), None)
-            if target:
-                target["status"] = "running" if sub["running"] else "idle"; target["runningSeconds"] = sub["seconds"] if sub["running"] else None
-                target["lastDetail"] = None if sub["running"] else f"returned {sub['last'].astimezone().strftime('%H:%M')}"
+        # every sub-agent is matched to a role by model; a role shows how many of its sub-agents run right now (runningCount)
+        for r in rl:
+            if r["role"] not in ("Reasoning", "Light", "Generator") or not r.get("model"): continue
+            ms = [s for s in live["subs"] if s.get("model") and (r["model"] in s["model"] or s["model"] in r["model"])]
+            run = [s for s in ms if s["running"]]
+            if run:
+                r["status"] = "running"; r["runningSeconds"] = max(s["seconds"] for s in run); r["runningCount"] = len(run); r["lastDetail"] = None
+            elif ms:
+                r["lastDetail"] = f"returned {max(s['last'] for s in ms).astimezone().strftime('%H:%M')}"
     # per-role totals from models (by model name match)
     for r in rl:
         if r.get("model"):
@@ -367,25 +370,30 @@ def build(root, a):
             "notes": notes, "toast": a.toast}
     return data
 
-THEMES = {"brand": "dashboard.html", "f1": "dashboard-f1.html"}  # theme key (ocpfFramework/state/dashboard.json → "theme") → template file
+# Every theme is rendered on every run (one data build, one extra file write), so the human switches by opening the
+# other page; the footer selector on each page just navigates. `theme` in dashboard.json only says which page --open opens.
+THEMES = {"brand": ("dashboard.html", "ProjectDashboard.html"), "f1": ("dashboard-f1.html", "ProjectDashboard-f1.html")}
 
 def render(root, data):
-    theme = (data.get("theme") or "brand").lower(); fname = THEMES.get(theme, THEMES["brand"])
-    tpl = None
-    for cand in (os.path.join(HERE, "..", "templates", fname), os.path.join(root, "ocpfFramework", "scripts", fname), os.path.join(HERE, "..", "templates", "dashboard.html"), os.path.join(root, "ocpfFramework", "scripts", "dashboard.html")):
-        if os.path.isfile(cand): tpl = read(cand); break
-    if not tpl: sys.exit("error: dashboard.html template not found beside the script (templates/dashboard.html) or in ocpfFramework/scripts/")
-    data["dataUrl"] = "ocpfFramework/state/dashboard-data.js"  # the page pulls this sidecar and repaints in place (no full reload)
-    payload = json.dumps(data, ensure_ascii=False, default=str).replace("</", "<\\/")
-    html = tpl.replace("/*__OCPF_DATA__*/null", payload, 1)
-    out = os.path.join(root, "ProjectDashboard.html")  # project root: tracked, beside ProjectProgress.md
-    tmp = out + ".tmp"
-    with open(tmp, "w", encoding="utf-8") as f: f.write(html)
-    os.replace(tmp, out)
+    data["dataUrl"] = "ocpfFramework/state/dashboard-data.js"  # the pages pull this sidecar and repaint in place (no full reload)
+    outs = {}; first_payload = None
+    for theme, (fname, outname) in THEMES.items():
+        tpl = None
+        for cand in (os.path.join(HERE, "..", "templates", fname), os.path.join(root, "ocpfFramework", "scripts", fname)):
+            if os.path.isfile(cand): tpl = read(cand); break
+        if not tpl:
+            if theme == "brand": sys.exit("error: dashboard.html template not found beside the script (templates/dashboard.html) or in ocpfFramework/scripts/")
+            continue  # an older scripts/ folder without this theme's template: skip it
+        data["theme"] = theme
+        payload = json.dumps(data, ensure_ascii=False, default=str).replace("</", "<\\/")
+        if first_payload is None: first_payload = payload
+        out = os.path.join(root, outname)  # project root: tracked, beside ProjectProgress.md
+        with open(out + ".tmp", "w", encoding="utf-8") as f: f.write(tpl.replace("/*__OCPF_DATA__*/null", payload, 1))
+        os.replace(out + ".tmp", out); outs[theme] = out
     side = os.path.join(root, STATE, "dashboard-data.js")  # per developer, gitignored with the rest of state/
-    with open(side + ".tmp", "w", encoding="utf-8") as f: f.write("window.__ocpfData=" + payload + ";")
+    with open(side + ".tmp", "w", encoding="utf-8") as f: f.write("window.__ocpfData=" + first_payload + ";")
     os.replace(side + ".tmp", side)
-    return out
+    return outs
 
 def open_in_browser(path):
     try:
@@ -406,7 +414,7 @@ def main():
     ap.add_argument("--waiting-json", help="hook input of an AskUserQuestion / ask_user call: record the open question and render")
     ap.add_argument("--clear-waiting", action="store_true", help="hook: the question was answered")
     ap.add_argument("--event", nargs=2, metavar=("WHO", "TEXT"), help="append a feed event and render")
-    ap.add_argument("--theme", choices=sorted(THEMES), help="set the theme (recorded in ocpfFramework/state/dashboard.json) and render with it")
+    ap.add_argument("--theme", choices=sorted(THEMES), help="which page --open opens and the skill names (recorded in ocpfFramework/state/dashboard.json); every theme is rendered on every run")
     ap.add_argument("--throttle", type=int, default=0, metavar="SECONDS", help="hook on every tool call: skip the render when the page is younger than this (unless a question, answer, or event is being recorded)")
     a = ap.parse_args()
     root = os.path.abspath(a.project)
@@ -448,8 +456,9 @@ def main():
         dj["theme"] = dj.get("theme") or "brand"
         with open(os.path.join(root, STATE, "dashboard.json"), "w", encoding="utf-8") as f: json.dump(dj, f, indent=2)
     data = build(root, a)
-    data["theme"] = (dj.get("theme") or "brand")
-    out = render(root, data)
+    data["theme"] = (dj.get("theme") or "brand")  # which page --open opens; every theme is rendered regardless
+    outs = render(root, data)
+    out = outs.get(data.get("theme") or "brand") or outs["brand"]
     if a.open: open_in_browser(out)
     if not a.quiet:
         print(out)

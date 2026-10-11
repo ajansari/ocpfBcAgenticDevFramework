@@ -454,6 +454,19 @@
   .panel.collapsed>*:not(h2):not(.cbtn){display:none}
   .panel.collapsed h2{margin:0}
   .panel[data-cid] h2{padding-right:30px}
+  .grid{align-items:start}
+  .card{position:relative}
+  .card h3{padding-right:28px}
+  .card.collapsed h3 .sub{display:none}
+  .card.collapsed>*:not(h3):not(.cbtn){display:none}
+  .card.collapsed h3{margin:0}
+  .grid.asking .ask.collapsed{animation:ringPulse 1.3s ease-in-out infinite}
+  @keyframes ringPulse{0%,100%{box-shadow:0 0 0 2px rgba(47,211,106,.35),0 0 18px rgba(47,211,106,.25)}50%{box-shadow:0 0 0 7px rgba(47,211,106,.0),0 0 34px rgba(47,211,106,.7)}}
+  /* running: a brighter, glowing light; and the count of sub-agents running on the model */
+  .av .live{background:#3dff7a;box-shadow:0 0 0 2px rgba(61,255,122,.22),0 0 10px #3dff7a;animation:livePulse 1.2s ease-in-out infinite}
+  .av .live.idle{background:var(--text-3);box-shadow:none;animation:none}
+  @keyframes livePulse{50%{box-shadow:0 0 0 4px rgba(61,255,122,.08),0 0 16px #3dff7a}}
+  .rcount{display:inline-grid;place-items:center;min-width:20px;height:20px;padding:0 6px;border-radius:6px;margin-left:6px;background:#3dff7a;color:#06240f;font:800 11px/1 Inter,sans-serif;vertical-align:middle;box-shadow:0 0 10px rgba(61,255,122,.6)}
   /* ticker controls */
   .feed .fctl{display:inline-flex;gap:4px;flex:0 0 auto}
   .feed .fb{width:22px;height:22px;border-radius:6px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-3);cursor:pointer;display:grid;place-items:center;padding:0}
@@ -516,10 +529,10 @@
   </div>
 
   <div class="grid" id="grid">
-    <div class="card ask in" id="askCard" style="--d:.85s"></div>
-    <div class="card in" style="--d:.9s"><h3>Who is working <span class="sub">roles · models · now</span></h3><div id="roles"></div></div>
-    <div class="card in" style="--d:1.0s" id="modelsCard"></div>
-    <div class="card gate in" style="--d:1.1s" id="gateCard"></div>
+    <div class="card ask in" id="askCard" data-cid="waiting" style="--d:.85s"></div>
+    <div class="card in" data-cid="roles" style="--d:.9s"><h3>Who is working <span class="sub">roles · models · now</span></h3><div id="roles"></div></div>
+    <div class="card in" data-cid="models" style="--d:1.0s" id="modelsCard"></div>
+    <div class="card gate in" data-cid="gate" style="--d:1.1s" id="gateCard"></div>
   </div>
 
   <div class="feed in" style="--d:1.3s"><span class="lab">RECENT</span><span class="fctl"><button class="fb" id="feedPause" type="button" title="Pause the ticker"><svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2.5" width="3.6" height="11" rx="1"/><rect x="9.4" y="2.5" width="3.6" height="11" rx="1"/></svg></button><button class="fb" id="feedReset" type="button" title="Restart from the newest message"><svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M13.5 8a5.5 5.5 0 1 1-1.6-3.9"/><path d="M13.5 2.5v3.6H9.9"/></svg></button></span><div class="track"><div class="items" id="feed"></div></div></div>
@@ -548,7 +561,7 @@ const usd=n=>n==null?'—':'$'+Number(n).toFixed(2);
 
 // ---- collapsible tiles and panels: per-viewer, remembered in localStorage, re-applied after every repaint ----
 const ICO_CHEV='<svg viewBox="0 0 16 16" aria-hidden="true" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M4 6l4 4 4-4"/></svg>';const CK='ocpf-dash-collapsed';let collapsed=new Set();try{collapsed=new Set(JSON.parse(localStorage.getItem(CK)||'[]'));}catch(e){}
-function applyCollapse(){document.querySelectorAll('[data-cid]').forEach(el=>el.classList.toggle('collapsed',collapsed.has(el.dataset.cid)));}
+function applyCollapse(){document.querySelectorAll('[data-cid]').forEach(el=>{if(!el.querySelector(':scope>.cbtn'))el.insertAdjacentHTML('afterbegin','<button class="cbtn" type="button" title="Collapse / expand">'+ICO_CHEV+'</button>');el.classList.toggle('collapsed',collapsed.has(el.dataset.cid));});}
 document.addEventListener('click',e=>{const bt=e.target.closest('.cbtn');if(!bt)return;const el=bt.closest('[data-cid]');if(!el)return;const id=el.dataset.cid;collapsed.has(id)?collapsed.delete(id):collapsed.add(id);try{localStorage.setItem(CK,JSON.stringify([...collapsed]));}catch(x){}applyCollapse();});
 
 // ---- paint: everything below reads D and rewrites the page in place; it runs on load and on every data pull ----
@@ -589,7 +602,7 @@ if(est&&est.estimated){const pct=Math.min(100,Math.round(100*est.used/est.estima
 else estHtml=`<div class="k">Step ${esc(cur.id||'')} vs AI Effort Estimate</div><div class="v" style="font-size:16px;margin-top:8px;color:var(--text-2)">${est&&est.note?esc(est.note):'No estimate yet'}</div><div class="m">${fw.edition==='lite'?'written at Step 2':'written at Step 03'} · docs/2-design/AiEffortEstimate.md</div>`;
 tiles.push(`<div class="tile est in" style="--d:.5s">${estHtml}</div>`);
 $('tiles').innerHTML=tiles.join('');
-(function(){const ids=['tokens','cost','elapsed','decisions','estimate'];[...$('tiles').children].forEach((el,i)=>{el.dataset.cid=ids[i]||('tile'+i);el.insertAdjacentHTML('afterbegin','<button class="cbtn" type="button" title="Collapse / expand">'+ICO_CHEV+'</button>');});applyCollapse();})();
+(function(){const ids=['tokens','cost','elapsed','decisions','estimate'];[...$('tiles').children].forEach((el,i)=>{el.dataset.cid=ids[i]||('tile'+i);});})();
 
 // ---- journey ----
 const steps=D.steps||[];const PH=['DEFINE','DESIGN','BUILD','PROVE'];
@@ -622,7 +635,7 @@ $('grid').classList.toggle('asking',!!waiting);if(!waiting)$('askCard').innerHTM
 
 // ---- roles ----
 const RC={Main:'main',Reasoning:'reas',Light:'light',Generator:''};
-$('roles').innerHTML=(D.roles||[]).map((r,i)=>{const cls=RC[r.role]||'';const st=r.status||'idle';const chip=st==='working'||st==='running'?`<span class="chip on">${st}${r.runningSeconds?' '+hm(r.runningSeconds):''}</span>`:`<span class="chip">${esc(st)}</span>`;
+$('roles').innerHTML=(D.roles||[]).map((r,i)=>{const cls=RC[r.role]||'';const st=r.status||'idle';const chip=st==='working'||st==='running'?`<span class="chip on">${st}${r.runningSeconds?' '+hm(r.runningSeconds):''}</span>${r.runningCount?`<span class="rcount" title="${r.runningCount} sub-agent${r.runningCount>1?'s':''} running on this model right now">${r.runningCount}</span>`:''}`:`<span class="chip">${esc(st)}</span>`;
   const right=copilot?`<b>${r.credits!=null?fmtN(r.credits)+' cr':'—'}</b>${r.stepCredits!=null?'this step '+fmtN(r.stepCredits):''}`:`<b>${r.tokens!=null?fmtTok(r.tokens):'—'}</b>${r.stepTokens!=null?'this step '+fmtTok(r.stepTokens):''}`;
   return `<div class="agent" style="--d:${1.2+i*0.2}s${st==='not started'?';opacity:.6':''}"><div class="av ${cls}" ${cls?'':'style="background:var(--text-3)"'}>${esc(r.role[0])}${cls?`<span class="live ${st==='working'||st==='running'?'':'idle'}"></span>`:''}</div><div><div class="n">${esc(r.role)}${r.role!=='Main'&&r.role!=='Generator'?' sub-agent':''} ${chip}</div><div class="d">${esc([r.model,r.effort?'effort '+r.effort:null,r.detail].filter(Boolean).join(' · '))}${st==='working'?'<span class="typing"></span>':''}</div></div><div class="r">${right}</div></div>`;}).join('')||'<div class="empty">No role assignment recorded yet (asked at PRE-01 / Step 1).</div>';
 
@@ -643,7 +656,7 @@ $('gateCard').innerHTML=`<h3>${cur.id?'Step '+esc(cur.id)+' exit gate':'Exit gat
 const ev=D.events||[];const fh=ev.map(e=>`<span><i>${esc(e.time)}</i><b>${esc(e.who)}</b> ${esc(e.text)}</span>`).join('')||'<span><i>—</i>No events yet</span>';
 $('feed').innerHTML=fh+fh;
 
-if(typeof feedApply==='function')feedApply();
+if(typeof feedApply==='function')feedApply();if(typeof applyCollapse==='function')applyCollapse();
 $('foot').textContent=`ProjectDashboard.html · rendered by ${D.renderer||'ocpf-dashboard'} · ${D.refreshSeconds?'data refreshes in place every '+D.refreshSeconds+' s':''}`;
 }
 
@@ -669,7 +682,8 @@ $('feedReset').addEventListener('click',()=>{const it=$('feed');if(!it)return;it
 feedApply();
 fresh();tick();setInterval(fresh,15000);setInterval(tick,1000);
 // theme selector: the renderer chooses the template from ocpfFramework/state/dashboard.json → "theme"; the page can only ask
-$('themeSel').value='brand';$('themeSel').addEventListener('change',e=>{const v=e.target.value;e.target.value='brand';const tt=$('toast');tt.innerHTML=`To switch to <b>${v==='f1'?'F1':'OnlyBCFans'}</b>, tell the agent: "use the ${v==='f1'?'F1':'OnlyBCFans'} dashboard theme" — it sets <code>theme</code> in ocpfFramework/state/dashboard.json and re-renders.`;tt.classList.add('show');setTimeout(()=>tt.classList.remove('show'),9000);});
+// theme selector: every theme is rendered on every run, so switching is just opening the other page
+$('themeSel').value='brand';$('themeSel').addEventListener('change',e=>{const v=e.target.value;if(v!=='brand')location.href=v==='f1'?'ProjectDashboard-f1.html':'ProjectDashboard.html';});
 if(D.toast){const t=$('toast');t.innerHTML=esc(D.toast);t.classList.add('show');}
 })();
 

@@ -16,6 +16,18 @@ framework.
 
 ---
 
+## v5.4.2.0 — October 10, 2026
+
+Derived from full framework **v5.4.2.0**; Operations Guide **v5.4.2.0**; Standards Guide
+**v1.12.0.0** (unchanged); plugin **5.4.2**. Dashboard renderers and templates.
+
+- Both themes are rendered on every run (`ProjectDashboard.html`, `ProjectDashboard-f1.html`, both
+  tracked) and the footer selector just opens the other page; roles show a counter of their
+  running sub-agents with a brighter, glowing light; every card collapses, and a collapsed
+  *Waiting on you* card pulses a ring while a question is open. Full changelog: *v5.4.2.0*.
+
+---
+
 ## v5.4.1.0 — October 10, 2026
 
 Derived from full framework **v5.4.1.0**; Operations Guide **v5.4.1.0**; Standards Guide

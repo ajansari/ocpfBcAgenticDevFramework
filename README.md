@@ -54,6 +54,13 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 10, 2026 — Full v5.4.2.0 · Lite v5.4.2.0 · Operations Guide v5.4.2.0 · Plugin v5.4.2
+
+**Both dashboard themes are always rendered** — `ProjectDashboard.html` and
+`ProjectDashboard-f1.html` — so switching is just opening the other page. Roles show how many of
+their sub-agents are running right now, with a brighter glowing light; every card collapses, and a
+collapsed *Waiting on you* card pulses while a question is open.
+
 ## October 10, 2026 — Full v5.4.1.0 · Lite v5.4.1.0 · Operations Guide v5.4.1.0 · Plugin v5.4.1
 
 **Dashboard polish.** KPI tiles and the Journey panel collapse; the ticker can be paused and

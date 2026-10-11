@@ -4,6 +4,19 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.4.2 — October 10, 2026
+
+**Bundles:** full runbook v5.4.2.0, Lite v5.4.2.0, Standards Guide v1.12.0.0 (unchanged),
+Operations Guide v5.4.2.0. Dashboard renderers and templates.
+
+- **`dashboard` skill: every theme rendered on every run.** `ocpf-dashboard.py` / `.ps1` write
+  `ProjectDashboard.html` and `ProjectDashboard-f1.html` from one data build; `--theme` only picks
+  the page `--open` opens; the footer selector navigates instead of telling the human to ask.
+- **Sub-agent counters:** `roles[].runningCount` — every running sub-agent matched to its role by
+  model; shown as a green counter in both themes; brighter glowing running light.
+- **All cards collapsible** on the OnlyBCFans page; a collapsed *Waiting on you* card with a
+  question open pulses a ring.
+
 ## 5.4.1 — October 10, 2026
 
 **Bundles:** full runbook v5.4.1.0, Lite v5.4.1.0, Standards Guide v1.12.0.0 (unchanged),

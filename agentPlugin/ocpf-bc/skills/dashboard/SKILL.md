@@ -38,8 +38,8 @@ moment the page has a name and an icon to show; earlier it would be an empty she
    appears in the default browser once, now. Nothing else ever opens it unasked.
 3. **Install the hooks** (section 2) so the page refreshes by itself, then re-render with `--live`
    so the header reads *Live* instead of *Refreshed*. Prove the page is tracked:
-   `git check-ignore -v ProjectDashboard.html` must print nothing; if it prints a rule, fix
-   `.gitignore` (Ops § Repository Hygiene) before going on, then `git add ProjectDashboard.html`.
+   `git check-ignore -v ProjectDashboard.html ProjectDashboard-f1.html` must print nothing; if it prints a rule, fix
+   `.gitignore` (Ops § Repository Hygiene) before going on, then `git add ProjectDashboard.html ProjectDashboard-f1.html`.
 4. **Explain it, once, through the options mechanism** (Rule 6a) — the next thing after the page
    opens, before any other question. One question, two options: **I understand** / *Other*
    (free text, for a question or a request). The question's text, in the working language:
@@ -128,11 +128,12 @@ Record what was installed in `ocpfFramework/state/dashboard.json` (`hooks: true/
   route. It is tracked: it shows as modified after every refresh, which is expected.
 - **Theme.** Two ship: `brand` (*OnlyBCFans*, the default) and `f1` (the trackside pit-wall view —
   Ferrari for Main, Mercedes / McLaren / Red Bull for the sub-agents, steps as laps, BOX BOX when a
-  question waits). Both have a Day/Night switch. **"Use the F1 theme" / "switch to OnlyBCFans"** →
-  run the renderer with `--theme f1` / `--theme brand` (`-Theme` in PowerShell): it records the
-  choice in `ocpfFramework/state/dashboard.json` and re-renders; the hooks keep using it. The
-  footer selector on the page only tells the human to ask you. Both templates live in
-  `ocpfFramework/scripts/`, so no fetch is needed. Ops § Dashboard → 4 has the table.
+  question waits). Both have a Day/Night switch. **Every render writes both pages** —
+  `ProjectDashboard.html` and `ProjectDashboard-f1.html`, both at the root, both tracked (stage
+  both) — so the human switches by opening the other one; the footer selector navigates.
+  **"Use the F1 theme"** → run the renderer with `--theme f1` (`-Theme f1`), which records the
+  preference in `ocpfFramework/state/dashboard.json` so `--open` and your answers name that page;
+  then `--open` it. Both templates live in `ocpfFramework/scripts/`. Ops § Dashboard → 4.
 - **Repair.** A project from v5.2.0.0 still has `ocpfFramework/state/dashboard.html`: render once
   (the page lands at the root), delete the old file, `git add ProjectDashboard.html`. A project
   whose hooks predate v5.3.2.0 lacks the unmatched `PostToolUse` hook: merge it (section 2) — its
