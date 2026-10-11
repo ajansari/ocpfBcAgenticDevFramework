@@ -8,7 +8,7 @@ description: The OnlyCopilotFans (OCPF) AL Development Standards Guide for Micro
 The full guide is in [`references/ocpfALDevStandardsGuide.md`](references/ocpfALDevStandardsGuide.md),
 bundled with this plugin from the guide's own repository,
 <https://github.com/ajansari/ocpfBCALStandards>, at the release tag the framework pins (`v1.12.0.0`
-for runbook v5.3.0.0; the pin is named in the framework's `standardsGuide/README.md`). Its version is
+for runbook v5.3.1.0; the pin is named in the framework's `standardsGuide/README.md`). Its version is
 on its own `**Version:**` line.
 
 ## When a project follows the OCPF runbook

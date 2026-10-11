@@ -54,6 +54,12 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 10, 2026 — Full v5.3.1.0 · Lite v5.3.1.0 · Operations Guide v5.3.1.0 · Plugin v5.3.1
+
+**Dashboard fix.** The *Waiting on you* card let a long option label run out of the card and
+squeezed its description into a one-word column. Options now stack the label over the description
+and wrap at any width. Template only; `/ocpf-bc:update-framework` refreshes it.
+
 ## October 10, 2026 — Full v5.3.0.0 · Lite v5.3.0.0 · Operations Guide v5.3.0.0 · Plugin v5.3.0
 
 **The dashboard persists with the project.** The first project built on v5.2.0.0 found its

@@ -16,6 +16,18 @@ framework.
 
 ---
 
+## v5.3.1.0 — October 10, 2026
+
+Derived from full framework **v5.3.1.0**; Operations Guide **v5.3.1.0**; Standards Guide
+**v1.12.0.0** (unchanged); plugin **5.3.1**. Dashboard template fix only.
+
+- **Dashboard: the *Waiting on you* card no longer overflows.** A long option label (the
+  recommended one carries its *"(Recommended …)"* suffix) ran out of the card and squeezed the
+  description into a sliver. Options now stack label over description and wrap. Full changelog:
+  *v5.3.1.0*.
+
+---
+
 ## v5.3.0.0 — October 10, 2026
 
 Derived from full framework **v5.3.0.0**; Operations Guide **v5.3.0.0**; Standards Guide

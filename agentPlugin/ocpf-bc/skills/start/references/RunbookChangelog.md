@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.3.0.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.3.0.0**, and Lite at **v5.3.0.0** — but
+**v5.3.1.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.3.1.0**, and Lite at **v5.3.1.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -21,6 +21,24 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v5.3.1.0 — October 10, 2026
+
+**Dashboard: the *Waiting on you* card no longer overflows.** Lite **v5.3.1.0**, Operations Guide
+**v5.3.1.0** (version only), Standards Guide **v1.12.0.0** (unchanged), plugin **5.3.1**. Template
+fix only; `update-framework` refreshes `ocpfFramework/scripts/dashboard.html` and re-renders.
+
+- **What went wrong.** On the first v5.3.0.0 project the open question *Who signs off on the design
+  documents?* rendered with its first option's label running out of the card and its description
+  squeezed into a one-word-per-line column; the second option looked the same. Each option was a
+  two-column grid — label left, description right — with the label forbidden to wrap, so any
+  label longer than the card (the recommended one carries *"(Recommended if it's just you)"*)
+  overflowed and left the description almost no width.
+- **The fix.** Options are stacked: the label on its own line, wrapping as needed, the description
+  under it. Both wrap at any card width; an empty description takes no space. Verified in both
+  themes with the exact question from the project, headless.
 
 ---
 

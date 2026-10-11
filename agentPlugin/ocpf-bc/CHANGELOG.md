@@ -4,6 +4,17 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.3.1 — October 10, 2026
+
+**Bundles:** full runbook v5.3.1.0, Lite v5.3.1.0, Standards Guide v1.12.0.0 (unchanged),
+Operations Guide v5.3.1.0. Template fix only.
+
+- **`dashboard` skill: the *Waiting on you* card's options no longer overflow.** `templates/dashboard.html`
+  laid each option out as label | description on one row with the label set to `nowrap`; a long
+  label (the recommended option's suffix) pushed out of the card and left the description a
+  one-word column. Options now stack: label (wrapping) over description. Verified headless in both
+  themes with a real question. `update-framework` refreshes the template and re-renders.
+
 ## 5.3.0 — October 10, 2026
 
 **Bundles:** full runbook v5.3.0.0 (core + 14 step files), Lite v5.3.0.0 (core + 7 step files),
