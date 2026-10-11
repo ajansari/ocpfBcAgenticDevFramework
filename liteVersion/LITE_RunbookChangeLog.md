@@ -16,6 +16,18 @@ framework.
 
 ---
 
+## v5.4.0.0 — October 10, 2026
+
+Derived from full framework **v5.4.0.0**; Operations Guide **v5.4.0.0**; Standards Guide
+**v1.12.0.0** (unchanged); plugin **5.4.0**. A second dashboard template; no step changes.
+
+- **The F1 dashboard theme.** `dashboard-f1.html`: a trackside pit-wall view — Ferrari for Main,
+  Mercedes / McLaren / Red Bull for the sub-agents, the 7 steps as laps, BOX BOX when a question
+  waits. `theme` in `ocpfFramework/state/dashboard.json`; "use the F1 dashboard theme" switches
+  it. The brand page stays the default. Full changelog: *v5.4.0.0*.
+
+---
+
 ## v5.3.5.0 — October 10, 2026
 
 Derived from full framework **v5.3.5.0**; Operations Guide **v5.3.5.0**; Standards Guide

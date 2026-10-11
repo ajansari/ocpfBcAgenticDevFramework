@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.3.5.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number; the previous version of this guide was 2.0.1.0)
+**Version:** 5.4.0.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number; the previous version of this guide was 2.0.1.0)
 **Last Updated:** October 10, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
@@ -1425,14 +1425,28 @@ reports a project whose hooks are missing.
 
 ### 4. Themes
 
-One theme ships in v5.2.0.0 — *OnlyBCFans*, the brand page, dark by default with a Day / Night
-switch in its header. The footer carries a theme selector for the themes to come; each future theme
-is another template beside `dashboard.html`, chosen by `theme` in `dashboard.json`. The data the
-renderer embeds is the same for every theme.
+Two themes ship since v5.4.0.0, both with a Day / Night switch in the header and the same data
+underneath; the renderer picks the template from `theme` in `ocpfFramework/state/dashboard.json`:
+
+| `theme` | Template | What it is |
+|---|---|---|
+| `brand` (default) | `dashboard.html` | *OnlyBCFans* — the Build Map page: tiles, journey line, roles, models, exit gate |
+| `f1` | `dashboard-f1.html` | *F1* — a trackside pit-wall view: the Main agent is the Ferrari, the Reasoning, Light, and Generator roles are the Mercedes, McLaren, and Red Bull; steps are laps on a timing screen; tokens are fuel, cost is budget, decisions are pit stops; an open question is **BOX BOX** with the car held in its box and the question on the team radio; sub-agents leave their garages and run on the far straight while they work |
+
+**Switching.** The page cannot switch itself (it is a file; the footer selector only tells the
+human how). The human asks — *"use the F1 dashboard theme"*, *"switch the dashboard to
+OnlyBCFans"* — and the agent runs the renderer with `--theme f1` / `--theme brand` (PowerShell:
+`-Theme`), which records the choice in `dashboard.json` and re-renders; every hook render after
+that uses it. Both templates are copied into `ocpfFramework/scripts/` at first creation and
+refreshed by `update-framework`, so a switch never needs a fetch. The F1 theme reads the same
+data as the brand page, so it works with GitHub Copilot exactly as the brand page does — AI
+credits instead of tokens, the Copilot pill, and the same refresh cadence per tool (every turn in
+Claude Code and the Copilot CLI, every step close in Copilot Chat).
 
 ### 5. On request, and repair
 
-"Open the dashboard" → render, then open; say the path. "Refresh it" → render. "Where is it?" →
+"Open the dashboard" → render, then open; say the path. "Refresh it" → render. "Use the F1 theme" /
+"switch to OnlyBCFans" → render with `--theme f1` / `--theme brand` (section 4). "Where is it?" →
 the path and the right-click route. A page that stopped refreshing: check the hooks still name the
 scripts and `ocpfFramework/scripts/` still holds them, then run the renderer by hand and read its
 notes. The page uses no network; it is self-contained for its first paint and loads one local
@@ -1909,7 +1923,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v5.3.5.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
+folder as `README.md`. For runbook **v5.4.0.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2082,7 +2096,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.3.5.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.4.0.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**

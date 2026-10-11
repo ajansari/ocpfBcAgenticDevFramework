@@ -9,7 +9,7 @@ references, fetches, invokes, or recommends, and records the license each one is
 
 **How the framework uses third-party material.** This repository **does not bundle or
 redistribute** any third-party code; the one exception is three icons embedded in the
-dashboard page, credited under *Embedded in the dashboard page* below. The framework's documents:
+dashboard pages, credited under *Embedded in the dashboard page* below. The framework's documents:
 
 - **link** to external documentation and repositories,
 - instruct the agent to **fetch** a local snapshot of certain repositories into *your* project,
@@ -48,7 +48,7 @@ September 14, 2026 (Node.js and PowerShell 7 on September 27, 2026). The upstrea
 - **License:** MIT — AJ Ansari (same author as this framework)
 - **Used for:** the verified reference design, templates, API reference, and false-assumptions
   table the runbooks follow when a project builds a Business Central Copilot feature. Fetched at a
-  pinned tag (`v1.0.0.0` for runbook v5.3.5.0), only on projects with such a feature, into a sibling
+  pinned tag (`v1.0.0.0` for runbook v5.4.0.0), only on projects with such a feature, into a sibling
   folder outside the project root; the snapshot keeps its `LICENSE` file. Nothing from it is
   copied into this repository or the plugin.
 
@@ -87,6 +87,16 @@ only to identify the tool the project runs in; the framework is free and sells n
   (<https://www.microsoft.com/legal/intellectualproperty/trademarks>). No affiliation with or
   endorsement by Microsoft is implied.
 - **Used for:** the platform mark under the status pills in the dashboard header.
+
+### Formula 1 team names and colours (the F1 dashboard theme)
+- **What:** the optional `f1` dashboard theme names four constructors — Ferrari, Mercedes,
+  McLaren, Red Bull — and uses colour schemes evocative of their liveries to tell the framework's
+  four AI roles apart. No team logo, car design, driver name, or photograph is used; the cars are
+  the framework author's own generic drawings.
+- **Trademark:** Formula 1, the team names, and their marks belong to their respective owners
+  (Formula One Licensing B.V., Ferrari S.p.A., Mercedes-Benz Group AG, McLaren Racing Ltd, Red Bull
+  GmbH). They are used nominatively, as a fan's homage in a free, non-commercial theme; no
+  affiliation, sponsorship, or endorsement is implied. The theme is off by default.
 
 ### GitHub Copilot icon (Octicons)
 - **Source:** Primer Octicons, `copilot-24.svg` — <https://github.com/primer/octicons>

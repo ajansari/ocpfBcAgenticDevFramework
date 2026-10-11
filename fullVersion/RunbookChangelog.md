@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.3.5.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.3.5.0**, and Lite at **v5.3.5.0** — but
+**v5.4.0.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.4.0.0**, and Lite at **v5.4.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -21,6 +21,31 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v5.4.0.0 — October 10, 2026
+
+**The F1 dashboard theme.** Lite **v5.4.0.0**, Operations Guide **v5.4.0.0**, Standards Guide
+**v1.12.0.0** (unchanged), plugin **5.4.0**. A second template and a theme switch; the brand page
+stays the default; `update-framework` copies the new template into `ocpfFramework/scripts/`.
+
+- **What it is.** `templates/dashboard-f1.html` — a trackside pit-wall view of the same data: the
+  Main agent is the Ferrari, the Reasoning, Light, and Generator roles are the Mercedes, McLaren,
+  and Red Bull; the 14 steps are laps on a timing screen (lap time, cost, tokens or credits,
+  status); tokens are fuel, cost is budget, elapsed time is race time with stints (car / pit wall /
+  red flag), decisions are pit stops; an open question is **BOX BOX** — the Ferrari is held in its
+  box, lollipop up, the question on the team radio; a working sub-agent leaves its garage and runs
+  on the far straight beside the Ferrari; telemetry traces per lap; race control carries the exit
+  gate. Day / Night switch, in-place refresh with countdown, Copilot credits — all as the brand page.
+- **Choosing it.** `theme` in `ocpfFramework/state/dashboard.json` (`brand` | `f1`); both
+  renderers take `--theme` / `-Theme`, record it, and render with the matching template, falling
+  back to the brand page. The human says *"use the F1 dashboard theme"*; the footer selector on
+  either page explains that. Ops § Dashboard → 4 has the table; the `dashboard` skill the request.
+- **Why these names.** Real constructor names and evocative colours were chosen for instant
+  recognition (AJ's call); no logos, car designs, or driver names are used. `THIRD_PARTY_NOTICES.md`
+  carries the trademark note. Design history is in the framework author's concept notes
+  (`BuildMapDashboard/ConceptF1/`, not in the repository).
 
 ---
 

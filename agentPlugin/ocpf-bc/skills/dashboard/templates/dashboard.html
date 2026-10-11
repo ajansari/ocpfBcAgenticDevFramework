@@ -509,7 +509,7 @@
 
   <footer class="in" style="--d:1.5s">
     <span id="foot"></span>
-    <span class="fx"><label>Theme <select id="themeSel"><option value="brand">OnlyBCFans</option></select></label><span>Created by AJ Ansari · Microsoft MVP</span></span>
+    <span class="fx"><label>Theme <select id="themeSel"><option value="brand">OnlyBCFans</option><option value="f1">F1</option></select></label><span>Created by AJ Ansari · Microsoft MVP</span></span>
   </footer>
 </div>
 <div class="fresh" id="fresh"></div>
@@ -637,6 +637,8 @@ function pull(){if(!D.refreshSeconds)return;pulling=true;tick();const sc=documen
   function done(){pulling=false;nextAt=Date.now()+(D.refreshSeconds||30)*1000;tick();}
   document.head.appendChild(sc);}
 fresh();tick();setInterval(fresh,15000);setInterval(tick,1000);
+// theme selector: the renderer chooses the template from ocpfFramework/state/dashboard.json → "theme"; the page can only ask
+$('themeSel').value='brand';$('themeSel').addEventListener('change',e=>{const v=e.target.value;e.target.value='brand';const tt=$('toast');tt.innerHTML=`To switch to <b>${v==='f1'?'F1':'OnlyBCFans'}</b>, tell the agent: "use the ${v==='f1'?'F1':'OnlyBCFans'} dashboard theme" — it sets <code>theme</code> in ocpfFramework/state/dashboard.json and re-renders.`;tt.classList.add('show');setTimeout(()=>tt.classList.remove('show'),9000);});
 if(D.toast){const t=$('toast');t.innerHTML=esc(D.toast);t.classList.add('show');}
 })();
 

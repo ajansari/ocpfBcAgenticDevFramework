@@ -1,0 +1,397 @@
+<!doctype html>
+<html lang="en" data-theme="dark">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<title>OCPF Build Map · F1</title>
+<link rel="preconnect" href="https://fonts.googleapis.com"><link href="https://fonts.googleapis.com/css2?family=Archivo:wdth,wght@112,500..900&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@500;700&display=swap" rel="stylesheet">
+<style>
+  /* ---------- OCPF Build Map · theme "f1" (Pit Wall) · trackside broadcast view ---------- */
+  :root{
+    --bg:#07090d; --surface:#10131a; --surface-2:#171b24; --border:#222835; --text:#f3f5f9; --text-2:#a9b1bf; --text-3:#6b7382;
+    --sky:#0b1020; --sky-2:#16213a; --wall:#1b1f28; --wall-2:#242934; --road:#2b2f37; --road-2:#20232a; --line:#e9ecf1; --stand:#2a303c;
+    --ferrari:#dc0000; --ferrari-a:#ffffff; --merc:#0d0f12; --merc-a:#00a19c; --mclaren:#ff8000; --mclaren-a:#111111; --redbull:#0b1d4a; --redbull-a:#8f0f1f; --redbull-y:#ffcc00; --aston:#229971;
+    --s1:#2d6ee8; --s2:#1fa98a; --s3:#7a4fd8; --s4:#d3368a;
+    --good:#2fd36a; --warn:#ffc14d; --bad:#ff4d4d; --flag:#ffd400; --purple:#b45cff;
+    --lamp:rgba(255,240,190,.10);
+  }
+  :root[data-theme="light"]{
+    --bg:#e6e9ee; --surface:#fff; --surface-2:#f2f4f7; --border:#d3d8e0; --text:#12151c; --text-2:#48505f; --text-3:#7b8494;
+    --merc:#1a1d24; --sky:#bfe0ff; --sky-2:#e9f4ff; --wall:#d9dde4; --wall-2:#c7ccd5; --road:#5a5e67; --road-2:#4c5059; --line:#fafafa; --stand:#b9c0cb; --lamp:transparent;
+  }
+  *{box-sizing:border-box} html,body{margin:0}
+  body{background:var(--bg);color:var(--text);font:13px/1.45 Inter,-apple-system,"Segoe UI",Helvetica,Arial,sans-serif;-webkit-font-smoothing:antialiased;transition:background-color .4s,color .4s}
+  .wrap{max-width:1500px;margin:0 auto;padding:18px 22px 28px}
+  .mono{font-family:"JetBrains Mono",ui-monospace,Menlo,monospace}
+  .disp{font-family:Archivo,Inter,sans-serif;font-stretch:112%;font-weight:800;letter-spacing:-.01em}
+  .in{opacity:0;animation:in .7s cubic-bezier(.2,.8,.2,1) var(--d,0s) forwards}
+  @keyframes in{from{opacity:0;transform:translateY(8px)}to{opacity:1;transform:none}}
+
+  /* broadcast header bar */
+  header{display:grid;grid-template-columns:auto 1fr auto;align-items:center;gap:16px;padding:10px 14px;border-radius:12px;background:linear-gradient(90deg,var(--surface),var(--surface-2));border:1px solid var(--border);margin-bottom:12px;position:relative;overflow:hidden}
+  header::before{content:"";position:absolute;left:0;top:0;bottom:0;width:6px;background:var(--ferrari)}
+  .brand{display:flex;gap:12px;align-items:center;padding-left:6px}
+  .appimg{width:46px;height:46px;border-radius:10px;object-fit:cover;background:var(--surface-2);display:grid;place-items:center;font-weight:800;font-size:18px;border:1px solid var(--border)}
+  h1{margin:0;font-size:22px;line-height:1.05}
+  h1 small{display:block;font:700 10px/1.3 Inter,sans-serif;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);margin-top:4px}
+  .lower{display:flex;gap:8px;align-items:center;justify-content:center;flex-wrap:wrap}
+  .lt{padding:6px 12px;border-radius:6px;background:#0d0f14;color:#fff;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:800;border-left:4px solid var(--c,var(--flag))}
+  :root[data-theme="light"] .lt{background:#1a1d24}
+  .lt b{font-family:"JetBrains Mono",monospace;font-size:12px;margin-left:6px;color:var(--c,var(--flag))}
+  .pills{display:flex;gap:6px;flex-wrap:wrap;justify-content:flex-end}
+  .pill{display:inline-flex;align-items:center;gap:6px;padding:5px 9px;border-radius:6px;background:var(--surface);border:1px solid var(--border);font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700;color:var(--text-2);white-space:nowrap}
+  .pill b{color:var(--text)} .pill.live{border-color:var(--good);color:var(--text)}
+  .pill .dot{width:7px;height:7px;border-radius:50%;background:var(--good);animation:ping 1.6s ease-out infinite}
+  @keyframes ping{0%{box-shadow:0 0 0 0 rgba(47,211,106,.55)}100%{box-shadow:0 0 0 8px rgba(47,211,106,0)}}
+  .pill.theme{cursor:pointer;font:inherit;font-size:10px;letter-spacing:.08em;text-transform:uppercase;font-weight:700}
+  .tool-ic{width:14px;height:14px;display:inline-grid;place-items:center}.tool-ic svg{width:100%;height:100%}.tool-cc svg{fill:#d97757}.tool-gh svg{fill:currentColor}
+
+  /* pit lane cam */
+  .cam{position:relative;border:1px solid var(--border);border-radius:12px;overflow:hidden;background:var(--sky);margin-bottom:12px}
+  .cam svg{display:block;width:100%;height:auto}
+  .cam .tag{position:absolute;left:14px;top:12px;display:flex;gap:8px;align-items:center}
+  .cam .tag span{padding:4px 9px;border-radius:5px;background:rgba(0,0,0,.6);color:#fff;font-size:10px;letter-spacing:.14em;text-transform:uppercase;font-weight:800}
+  .cam .tag .rec{display:inline-flex;align-items:center;gap:6px}.cam .tag .rec i{width:8px;height:8px;border-radius:50%;background:#ff2a2a;animation:blink 1s steps(2) infinite}
+  @keyframes blink{50%{opacity:.35}}
+  .cam .lapbox{position:absolute;right:14px;top:12px;background:rgba(0,0,0,.6);color:#fff;border-radius:8px;padding:8px 12px;text-align:right}
+  .lapbox .big{font-family:"JetBrains Mono",monospace;font-size:24px;font-weight:700;line-height:1}.lapbox .big small{font-size:12px;opacity:.7}
+  .lapbox .lbl{font-size:9.5px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;opacity:.85}
+  /* svg bits */
+  .lamp{fill:var(--lamp);animation:flick 5s ease-in-out infinite}@keyframes flick{50%{opacity:.7}}
+  .board{fill:#111;stroke:#fff;stroke-width:1}
+  .board-t{font:800 8px Inter;fill:#fff;text-anchor:middle;letter-spacing:.08em}
+  .board.done{fill:var(--c)} .board.now{fill:var(--flag);animation:pulseS 1.2s ease-in-out infinite}.board.now + .board-t{fill:#000}
+  @keyframes pulseS{50%{filter:drop-shadow(0 0 8px var(--flag))}}
+  .board.todo{opacity:.55}
+  .gar-t{font:800 8.5px Inter;fill:#fff;letter-spacing:.12em;text-transform:uppercase;text-anchor:middle}
+  :root[data-theme="light"] .gar-t{fill:#12151c}
+  .sub-t{font:600 7.5px Inter;fill:var(--text-3);text-anchor:middle}
+  .wheel .spokes{animation:spin .25s linear infinite;animation-play-state:paused;transform-origin:center}
+  .run .wheel .spokes{animation-play-state:running}
+  @keyframes spin{to{transform:rotate(360deg)}}
+  .speed{opacity:0}.run .speed{opacity:1}
+  .speed line{stroke:#fff;stroke-width:2.5;stroke-linecap:round;animation:dash .35s linear infinite;opacity:.45}
+  @keyframes dash{from{transform:translateX(0)}to{transform:translateX(-18px)}}
+  .drs{transition:transform .3s}.run .drs{animation:drs 1.6s ease-in-out infinite}
+  @keyframes drs{0%,40%{transform:rotate(0)}60%,100%{transform:rotate(-22deg)}}
+  .heat{opacity:0}.run .heat{opacity:1;animation:heat .45s linear infinite}
+  @keyframes heat{0%{transform:translateX(0) scaleX(1);opacity:.8}100%{transform:translateX(-14px) scaleX(1.8);opacity:0}}
+  .jack{animation:jack 2.2s ease-in-out infinite alternate;transform-origin:center bottom}
+  @keyframes jack{from{transform:translateY(0)}to{transform:translateY(-1.5px)}}
+  .crew.c1{animation:crew .6s ease-in-out infinite alternate}.crew.c2{animation:crew .7s ease-in-out .25s infinite alternate}
+  @keyframes crew{to{transform:translateY(-2px)}}
+  .crew{transform-box:fill-box}
+  .lolli{animation:lolli 1.2s ease-in-out infinite alternate;transform-origin:bottom center}
+  @keyframes lolli{from{transform:rotate(-6deg)}to{transform:rotate(6deg)}}
+  .carlabel{font:800 8px Inter;fill:#fff;paint-order:stroke;stroke:rgba(0,0,0,.65);stroke-width:2.5px;text-anchor:middle}
+  .drsline{stroke:var(--good);stroke-width:3;stroke-dasharray:10 8;animation:crawl 1s linear infinite}
+  @keyframes crawl{to{stroke-dashoffset:-18}}
+  .tcar{transition:transform 1.2s cubic-bezier(.2,.8,.2,1)}
+
+  /* grid */
+  .grid{display:grid;grid-template-columns:1.25fr 1fr;gap:12px}
+  .grid.asking{grid-template-columns:1.25fr 1fr 1fr}
+  .panel{background:var(--surface);border:1px solid var(--border);border-radius:12px;padding:14px 16px;min-width:0}
+  .panel h3{margin:0 0 10px;font-size:10.5px;letter-spacing:.16em;text-transform:uppercase;color:var(--text-3);display:flex;justify-content:space-between;gap:8px}
+  .panel h3 .sub{font-weight:600;letter-spacing:.04em;text-transform:none}
+
+  /* timing screen (steps as laps) */
+  .ts{font-family:"JetBrains Mono",monospace;font-size:11.5px}
+  .ts .r{display:grid;grid-template-columns:30px 6px 1fr 64px 68px 64px 84px;gap:8px;align-items:center;padding:5px 4px;border-bottom:1px solid var(--border)}
+  .ts .r.h{font:800 9px Inter;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3);border-bottom:1px solid var(--text-3)}
+  .ts .r:last-child{border-bottom:0}
+  .ts .lap{color:var(--text-3);font-weight:700}.ts .r.now .lap{color:var(--flag)}.ts .r.done .lap{color:var(--text)}
+  .ts .sec{width:6px;height:22px;border-radius:2px;background:var(--c)}
+  .ts .nm{font-family:Inter;font-weight:700;font-size:12px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
+  .ts .nm small{display:block;font-weight:600;font-size:9.5px;color:var(--text-3);letter-spacing:.08em;text-transform:uppercase}
+  .ts .r.todo .nm{color:var(--text-3)}
+  .ts .t{text-align:right;color:var(--text-2)}.ts .r.done .t{color:var(--good)}.ts .r.now .t{color:var(--flag)}
+  .ts .st{text-align:right}
+  .ts .r.now{background:linear-gradient(90deg,transparent,rgba(255,212,0,.08));animation:rowglow 1.6s ease-in-out infinite}
+  @keyframes rowglow{50%{background:linear-gradient(90deg,transparent,rgba(255,212,0,.02))}}
+  .chip{display:inline-block;padding:2px 6px;border-radius:4px;font:800 9px Inter;letter-spacing:.1em;text-transform:uppercase;background:var(--surface-2);color:var(--text-3)}
+  .chip.done{background:var(--good);color:#06240f}.chip.now{background:var(--flag);color:#332a00;animation:blink 1s steps(2) infinite}.chip.box{background:var(--flag);color:#332a00;animation:blink .7s steps(2) infinite}
+  .chip.on{background:var(--good);color:#06240f;animation:blink 1.2s steps(2) infinite}
+
+  /* right column */
+  .trace{position:relative}
+  .trace svg{display:block;width:100%;height:120px;border-radius:8px;background:var(--surface-2)}
+  .trace .k{display:flex;gap:14px;font-size:10.5px;color:var(--text-2);margin-top:6px}.trace .k i{display:inline-block;width:10px;height:3px;border-radius:2px;margin-right:5px;vertical-align:middle}
+  .tl{fill:none;stroke-width:2;stroke-linejoin:round;stroke-dasharray:2000;stroke-dashoffset:2000;animation:draw 2.4s ease-out forwards}
+  @keyframes draw{to{stroke-dashoffset:0}}
+  .scan{stroke:var(--flag);stroke-width:1.5;animation:scan 3s linear infinite}
+  @keyframes scan{from{transform:translateX(0)}to{transform:translateX(100%)}}
+  .kpi{display:grid;grid-template-columns:repeat(2,1fr);gap:8px;margin-top:10px}
+  .kpi div{background:var(--surface-2);border-radius:8px;padding:8px 10px}
+  .kpi .k{font:800 9px Inter;letter-spacing:.14em;text-transform:uppercase;color:var(--text-3)}
+  .kpi .v{font-family:"JetBrains Mono",monospace;font-size:17px;font-weight:700;margin-top:2px}.kpi .v small{font-family:Inter;font-size:10px;color:var(--text-3)}
+  .kpi .m{font-size:10.5px;color:var(--text-2)}
+  .stint{display:flex;height:6px;border-radius:3px;overflow:hidden;margin-top:6px;background:var(--surface)}.stint i{display:block;height:100%;width:var(--w)}
+  .eng .m{display:grid;grid-template-columns:1fr auto;gap:8px;align-items:center;padding:5px 0}
+  .eng .m .l{font-size:11.5px;display:flex;align-items:center;gap:7px}.eng .m .l i{width:9px;height:9px;border-radius:2px;background:var(--c)}
+  .eng .m .b{grid-column:1/3;height:5px;border-radius:3px;background:var(--surface-2);overflow:hidden}.eng .m .b i{display:block;height:100%;width:var(--w);background:var(--c);animation:grow 1.2s cubic-bezier(.2,.8,.2,1) both}
+  @keyframes grow{from{width:0}}
+  .eng .m .r{font-family:"JetBrains Mono",monospace;font-size:11.5px;font-weight:700}.eng .m .r small{color:var(--text-3);font-family:Inter;margin-left:5px;font-weight:600}
+  .rc ul{list-style:none;margin:0;padding:0}.rc li{display:flex;gap:9px;padding:6px 0;border-bottom:1px dashed var(--border);font-size:12px;color:var(--text-2);line-height:1.4}.rc li:last-child{border-bottom:0}
+  .rc li .n{font-family:"JetBrains Mono",monospace;font-weight:700;color:var(--flag);min-width:22px}.empty{color:var(--text-3);font-size:12px}
+  .mt{margin-top:12px}
+
+  /* team radio */
+  .radio{border-color:var(--flag);box-shadow:0 0 0 2px rgba(255,212,0,.15),0 0 24px rgba(255,212,0,.15);animation:in .6s cubic-bezier(.2,.8,.2,1) forwards, rglow 2.4s ease-in-out 1.4s infinite}
+  @keyframes rglow{50%{box-shadow:0 0 0 2px rgba(255,212,0,.05),0 0 6px rgba(255,212,0,.05)}}
+  .radio h3{color:var(--flag)}
+  .wave{display:flex;gap:3px;align-items:flex-end;height:18px;margin-bottom:8px}.wave i{width:4px;background:var(--flag);border-radius:2px;animation:wv .9s ease-in-out infinite alternate}
+  @keyframes wv{from{height:20%}to{height:100%}}
+  .radio .q{font-size:13.5px;line-height:1.45;margin-bottom:10px;padding:10px 12px;border-radius:8px;background:var(--surface-2);border-left:4px solid var(--flag)}
+  .radio .q::before{content:"PIT WALL → DRIVER";display:block;font-size:9px;letter-spacing:.14em;color:var(--text-3);font-weight:800;margin-bottom:4px}
+  .radio .opt{padding:9px 12px;border:1px solid var(--border);border-radius:8px;background:var(--surface-2);margin-bottom:7px;overflow-wrap:anywhere}
+  .radio .opt b{display:block;font-size:11px;letter-spacing:.06em;text-transform:uppercase;line-height:1.35}
+  .radio .opt span{display:block;font-size:12px;color:var(--text-2);margin-top:3px;line-height:1.45}
+  .radio .opt.rec{border-color:var(--good)}.radio .opt.rec b{color:var(--good)}
+  .radio .where{margin-top:10px;padding-top:9px;border-top:1px dashed var(--border);font-size:12px;color:var(--text-2);line-height:1.45}.radio .where b{color:var(--text)}
+  .grid:not(.asking) .radio{display:none}
+
+  .ticker{margin-top:12px;display:flex;align-items:center;gap:14px;border:1px solid var(--border);border-radius:10px;background:var(--surface);padding:8px 12px;overflow:hidden}
+  .ticker .t{font-size:10px;letter-spacing:.16em;text-transform:uppercase;font-weight:800;color:var(--flag);white-space:nowrap}
+  .feed{display:flex;gap:28px;white-space:nowrap;animation:scroll 40s linear infinite}
+  .feed span{font-size:12px;color:var(--text-2)}.feed span i{font-style:normal;font-family:"JetBrains Mono",monospace;color:var(--text-3);margin-right:6px}.feed span b{color:var(--text);margin-right:4px}
+  @keyframes scroll{to{transform:translateX(-50%)}}
+  footer{display:flex;justify-content:space-between;margin-top:12px;font-size:10px;letter-spacing:.12em;text-transform:uppercase;color:var(--text-3);font-weight:700}
+  footer select{font:inherit;background:var(--surface);color:var(--text);border:1px solid var(--border);border-radius:6px;padding:3px 6px}
+  .fresh{position:fixed;right:18px;bottom:14px;font-size:10px;letter-spacing:.1em;text-transform:uppercase;color:var(--text-3)}
+  @media (max-width:1100px){.grid,.grid.asking{grid-template-columns:1fr}}
+  /* repaint in place: entrance animations play once, later data pulls only swap content */
+  body.painted .in{animation:none;opacity:1;transform:none}
+  body.painted .radio{animation:rglow 2.4s ease-in-out infinite}
+  body.painted .tl{animation:none;stroke-dashoffset:0}
+  body.painted .eng .m .b i{animation:none}
+  .next{color:var(--text-3);font-weight:500;letter-spacing:0;text-transform:none}
+  body.updated #livePill{animation:ping .9s ease-out 1}
+  .toast{position:fixed;left:50%;bottom:22px;transform:translate(-50%,20px);opacity:0;max-width:640px;padding:10px 14px;border-radius:10px;background:var(--surface);border:1px solid var(--flag);color:var(--text);font-size:12.5px;line-height:1.45;box-shadow:0 10px 30px rgba(0,0,0,.35);transition:.3s;pointer-events:none;z-index:9}
+  .toast.show{opacity:1;transform:translate(-50%,0)}
+  .toast code{font-family:"JetBrains Mono",monospace;font-size:11.5px}
+</style>
+</head>
+<body>
+<div class="wrap">
+  <header class="in">
+    <div class="brand"><span id="appicon"></span><div><h1 id="h1" class="disp"></h1></div></div>
+    <div class="lower" id="lower"></div>
+    <div class="pills" id="pills"></div>
+  </header>
+  <div class="cam in" style="--d:.15s" id="cam"></div>
+  <div class="grid" id="grid">
+    <div class="panel ts in" style="--d:.3s"><h3>Timing screen · laps <span class="sub" id="tsSub"></span></h3><div id="ts"></div></div>
+    <div class="panel radio in" id="radio"></div>
+    <div>
+      <div class="panel trace in" style="--d:.4s" id="trace"></div>
+      <div class="panel eng mt in" style="--d:.5s" id="eng"></div>
+      <div class="panel rc mt in" style="--d:.6s" id="rc"></div>
+    </div>
+  </div>
+  <div class="ticker in" style="--d:.75s"><span class="t">Race control</span><div class="feed" id="feed"></div></div>
+  <footer><span id="foot"></span><span>Theme <select id="themeSel"><option value="f1">F1</option><option value="brand">OnlyBCFans</option></select> · Created by AJ Ansari · Microsoft MVP</span></footer>
+<div class="toast" id="toast"></div>
+</div>
+<div class="fresh" id="fresh"></div>
+<script id="ocpf-data" type="application/json">/*__OCPF_DATA__*/null</script>
+<script>
+(function(){
+let D=JSON.parse(document.getElementById('ocpf-data').textContent.replace(/^\/\*__OCPF_DATA__\*\//,''))||{};let gen=null;
+const $=id=>document.getElementById(id);
+const esc=s=>String(s==null?'':s).replace(/[&<>"]/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;'}[c]));
+const fmtN=(n,d=0)=>n==null?'—':Number(n).toLocaleString('en-US',{minimumFractionDigits:d,maximumFractionDigits:d});
+const fmtTok=n=>n==null?'—':(n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?(n/1e3).toFixed(1)+'k':String(n));
+const hm=s=>{if(s==null)return 'n/a';s=Math.max(0,Math.round(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h}h ${String(m).padStart(2,'0')}m`:`${m}m ${String(s%60).padStart(2,'0')}s`;};
+const lapT=s=>{if(s==null)return '—';s=Math.max(0,Math.round(s));const m=Math.floor(s/60);return `${m}:${String(s%60).padStart(2,'0')}`;};
+const usd=n=>n==null?'—':'$'+Number(n).toFixed(2);
+const SC={DEFINE:'var(--s1)',DESIGN:'var(--s2)',BUILD:'var(--s3)',PROVE:'var(--s4)'};
+const TEAM={
+  Main:{id:'fer',name:'Ferrari',c:'var(--ferrari)',a:'var(--ferrari-a)',n:'16',body:'#dc0000',body2:'#8e0000',acc:'#ffffff',acc2:'#1a1a1a',rim:'#2b2b2b',ui:'var(--ferrari)',txt:'#ffffff'},
+  Reasoning:{id:'mer',name:'Mercedes',c:'var(--merc-a)',a:'var(--merc)',n:'44',body:'#15181f',body2:'#05060a',acc:'#00a19c',acc2:'#c9ced6',rim:'#1b1f27',ui:'var(--merc-a)',txt:'#00d2bd'},
+  Light:{id:'mcl',name:'McLaren',c:'var(--mclaren)',a:'var(--mclaren-a)',n:'4',body:'#ff8000',body2:'#b85600',acc:'#111111',acc2:'#ffb15c',rim:'#1a1a1a',ui:'var(--mclaren)',txt:'#111111'},
+  Generator:{id:'rbr',name:'Red Bull',c:'var(--redbull-y)',a:'var(--redbull)',n:'1',body:'#0b1d4a',body2:'#040d26',acc:'#8f0f1f',acc2:'#ffcc00',rim:'#1a1f2e',ui:'var(--redbull-y)',txt:'#ffcc00'}};
+const running=r=>r.status==='working'||r.status==='running';
+
+(function(){const R=document.documentElement;let saved=null;try{saved=localStorage.getItem('ocpf-dash-theme');}catch(e){}R.dataset.theme=saved||'dark';
+  window.__paintTheme=()=>{const b=$('themeBtn');if(!b)return;const d=R.dataset.theme==='dark';b.innerHTML=`${d?'☀️ Day race':'🌙 Night race'}`;};
+  window.__toggleTheme=()=>{R.dataset.theme=R.dataset.theme==='dark'?'light':'dark';try{localStorage.setItem('ocpf-dash-theme',R.dataset.theme);}catch(e){}window.__paintTheme();};})();
+
+// ---- paint: everything below reads D and rewrites the page in place; it runs on load and on every data pull ----
+function paint(D){
+const copilot=(D.tool||'').startsWith('copilot');
+const app=D.app||{},fw=D.framework||{},T=D.totals||{},cur=D.current||{},waiting=D.waiting||null;
+const steps=D.steps||[],roles=D.roles||[],M=D.models||[];
+const nowI=steps.findIndex(s=>s.status==='now'),doneN=steps.filter(s=>s.status==='done').length;
+document.body.classList.toggle('copilot',copilot);
+// header
+$('appicon').innerHTML=app.iconDataUri?`<img class="appimg" src="${app.iconDataUri}" alt="">`:`<span class="appimg">${esc((app.name||'?')[0].toUpperCase())}</span>`;
+$('h1').innerHTML=`${esc(app.name||'Untitled extension')}<small>Pit wall · ${esc(fw.edition==='lite'?'Lite':'Full')}${fw.version?' v'+esc(fw.version):''}${app.bc?' · BC '+esc(app.bc):''}${app.publisher?' · '+esc(app.publisher):''}</small>`;
+gen=D.generatedAt?new Date(D.generatedAt):null;
+const stepT=cur.totals||{};const tk=T.tokens||{};
+$('lower').innerHTML=[
+  `<span class="lt" style="--c:var(--ferrari)">${copilot?'Fuel':'Fuel'}<b>${copilot?fmtN(T.credits)+' cr':fmtTok(tk.total)}</b></span>`,
+  `<span class="lt" style="--c:var(--good)">Budget<b>${usd(T.costUsd)}</b></span>`,
+  `<span class="lt" style="--c:var(--flag)">Race time<b>${hm(T.elapsedSeconds)}</b></span>`,
+  `<span class="lt" style="--c:var(--merc-a)">Pit stops<b>${fmtN(T.decisions)}</b></span>`,
+  `<span class="lt" style="--c:var(--purple)">Lap<b>${Math.min(doneN+(nowI>=0?1:0),steps.length)}/${steps.length}</b></span>`].join('');
+const ICON_CLAUDE='<svg viewBox="0 0 24 24"><path d="m4.7144 15.9555 4.7174-2.6471.079-.2307-.079-.1275h-.2307l-.7893-.0486-2.6956-.0729-2.3375-.0971-2.2646-.1214-.5707-.1215-.5343-.7042.0546-.3522.4797-.3218.686.0608 1.5179.1032 2.2767.1578 1.6514.0972 2.4468.255h.3886l.0546-.1579-.1336-.0971-.1032-.0972L6.973 9.8356l-2.55-1.6879-1.3356-.9714-.7225-.4918-.3643-.4614-.1578-1.0078.6557-.7225.8803.0607.2246.0607.8925.686 1.9064 1.4754 2.4893 1.8336.3643.3035.1457-.1032.0182-.0728-.164-.2733-1.3539-2.4467-1.445-2.4893-.6435-1.032-.17-.6194c-.0607-.255-.1032-.4674-.1032-.7285L6.287.1335 6.6997 0l.9957.1336.419.3642.6192 1.4147 1.0018 2.2282 1.5543 3.0296.4553.8985.2429.8318.091.255h.1579v-.1457l.1275-1.706.2368-2.0947.2307-2.6957.0789-.7589.3764-.9107.7468-.4918.5828.2793.4797.686-.0668.4433-.2853 1.8517-.5586 2.9021-.3643 1.9429h.2125l.2429-.2429.9835-1.3053 1.6514-2.0643.7286-.8196.85-.9046.5464-.4311h1.0321l.759 1.1293-.34 1.1657-1.0625 1.3478-.8804 1.1414-1.2628 1.7-.7893 1.36.0729.1093.1882-.0183 2.8535-.607 1.5421-.2794 1.8396-.3157.8318.3886.091.3946-.3278.8075-1.967.4857-2.3072.4614-3.4364.8136-.0425.0304.0486.0607 1.5482.1457.6618.0364h1.621l3.0175.2247.7892.522.4736.6376-.079.4857-1.2142.6193-1.6393-.3886-3.825-.9107-1.3113-.3279h-.1822v.1093l1.0929 1.0686 2.0035 1.8092 2.5075 2.3314.1275.5768-.3218.4554-.34-.0486-2.2039-1.6575-.85-.7468-1.9246-1.621h-.1275v.17l.4432.6496 2.3436 3.5214.1214 1.0807-.17.3521-.6071.2125-.6679-.1214-1.3721-1.9246L14.38 17.959l-1.1414-1.9428-.1397.079-.674 7.2552-.3156.3703-.7286.2793-.6071-.4614-.3218-.7468.3218-1.4753.3886-1.9246.3157-1.53.2853-1.9004.17-.6314-.0121-.0425-.1397.0182-1.4328 1.9672-2.1796 2.9446-1.7243 1.8456-.4128.164-.7164-.3704.0667-.6618.4008-.5889 2.386-3.0357 1.4389-1.882.929-1.0868-.0062-.1579h-.0546l-6.3385 4.1164-1.1293.1457-.4857-.4554.0608-.7467.2307-.2429 1.9064-1.3114Z"/></svg>';
+const ICON_COPILOT='<svg viewBox="0 0 24 24"><path d="M23.922 16.992c-.861 1.495-5.859 5.023-11.922 5.023-6.063 0-11.061-3.528-11.922-5.023A.641.641 0 0 1 0 16.736v-2.869a.841.841 0 0 1 .053-.22c.372-.935 1.347-2.292 2.605-2.656.167-.429.414-1.055.644-1.517a10.195 10.195 0 0 1-.052-1.086c0-1.331.282-2.499 1.132-3.368.397-.406.89-.717 1.474-.952 1.399-1.136 3.392-2.093 6.122-2.093 2.731 0 4.767.957 6.166 2.093.584.235 1.077.546 1.474.952.85.869 1.132 2.037 1.132 3.368 0 .368-.014.733-.052 1.086.23.462.477 1.088.644 1.517 1.258.364 2.233 1.721 2.605 2.656a.832.832 0 0 1 .053.22v2.869a.641.641 0 0 1-.078.256ZM12.172 11h-.344a4.323 4.323 0 0 1-.355.508C10.703 12.455 9.555 13 7.965 13c-1.725 0-2.989-.359-3.782-1.259a2.005 2.005 0 0 1-.085-.104L4 11.741v6.585c1.435.779 4.514 2.179 8 2.179 3.486 0 6.565-1.4 8-2.179v-6.585l-.098-.104s-.033.045-.085.104c-.793.9-2.057 1.259-3.782 1.259-1.59 0-2.738-.545-3.508-1.492a4.323 4.323 0 0 1-.355-.508h-.016.016Zm.641-2.935c.136 1.057.403 1.913.878 2.497.442.544 1.134.938 2.344.938 1.573 0 2.292-.337 2.657-.751.384-.435.558-1.15.558-2.361 0-1.14-.243-1.847-.705-2.319-.477-.488-1.319-.862-2.824-1.025-1.487-.161-2.192.138-2.533.529-.269.307-.437.808-.438 1.578v.021c0 .265.021.562.063.893Zm-1.626 0c.042-.331.063-.628.063-.894v-.02c-.001-.77-.169-1.271-.438-1.578-.341-.391-1.046-.69-2.533-.529-1.505.163-2.347.537-2.824 1.025-.462.472-.705 1.179-.705 2.319 0 1.211.175 1.926.558 2.361.365.414 1.084.751 2.657.751 1.21 0 1.902-.394 2.344-.938.475-.584.742-1.44.878-2.497Z"/><path d="M14.5 14.25a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1Zm-5 0a1 1 0 0 1 1 1v2a1 1 0 0 1-2 0v-2a1 1 0 0 1 1-1Z"/></svg>';
+const toolPill=copilot?`<span class="pill"><span class="tool-ic tool-gh">${ICON_COPILOT}</span><b>${D.tool==='copilot-cli'?'Copilot CLI':'Copilot Chat'}</b></span>`:`<span class="pill"><span class="tool-ic tool-cc">${ICON_CLAUDE}</span><b>Claude Code</b></span>`;
+$('pills').innerHTML=`<span class="pill live" id="livePill"><span class="dot"></span>${D.live?'Live':'Refreshed'} · <span class="mono">${gen?gen.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit',second:'2-digit'}):'—'}</span>${D.refreshSeconds?' · <span id="next" class="next"></span>':''}</span>${toolPill}<span class="pill">AL MCP <b>${esc(fw.alMcp||'unknown')}</b></span><button class="pill theme" id="themeBtn" type="button" onclick="__toggleTheme()"></button>`;
+window.__paintTheme();
+
+// ---------------- pit lane cam (side view) ----------------
+// A modern ground-effect F1 car in profile, nose to the right, ground at y=0. Each team gets gradient
+// fills (defs below) so the bodywork reads as shaded, not flat.
+function carDefs(t){return `<linearGradient id="bd-${t.id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="${t.body}"/><stop offset=".55" stop-color="${t.body}"/><stop offset="1" stop-color="${t.body2}"/></linearGradient>
+  <linearGradient id="gl-${t.id}" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#fff" stop-opacity=".35"/><stop offset=".5" stop-color="#fff" stop-opacity="0"/></linearGradient>
+  <radialGradient id="tyre" cx=".4" cy=".35" r=".7"><stop offset="0" stop-color="#3a3a3a"/><stop offset=".6" stop-color="#161616"/><stop offset="1" stop-color="#0a0a0a"/></radialGradient>
+  <linearGradient id="carbon" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#2a2d33"/><stop offset="1" stop-color="#0f1115"/></linearGradient>
+  <linearGradient id="glass" x1="0" y1="0" x2="1" y2="1"><stop offset="0" stop-color="#9fb6d6" stop-opacity=".55"/><stop offset=".5" stop-color="#4b5d7a" stop-opacity=".35"/><stop offset="1" stop-color="#1b2435" stop-opacity=".6"/></linearGradient>
+  <linearGradient id="road" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3b3f47"/><stop offset=".5" stop-color="#2a2d34"/><stop offset="1" stop-color="#1e2127"/></linearGradient>
+  <linearGradient id="roadL" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#6a6e77"/><stop offset=".5" stop-color="#575b64"/><stop offset="1" stop-color="#474b54"/></linearGradient>
+  <linearGradient id="gantry" x1="0" y1="0" x2="0" y2="1"><stop offset="0" stop-color="#3a3f4a"/><stop offset="1" stop-color="#1c2028"/></linearGradient>
+  <filter id="soft"><feGaussianBlur stdDeviation="2.2"/></filter>`;}
+function wheel(t,x){return `<g class="wheel" transform="translate(${x},-13)"><ellipse cx="2" cy="14" rx="14" ry="3" fill="#000" opacity=".35" filter="url(#soft)"/><circle r="13.5" fill="url(#tyre)"/><circle r="13.5" fill="none" stroke="#000" stroke-width="1"/><circle r="11.2" fill="none" stroke="${t.acc2}" stroke-width=".9" opacity=".55" stroke-dasharray="9 26"/><circle r="8.6" fill="${t.rim}" stroke="#555" stroke-width=".7"/><g class="spokes"><path d="M0,-7.5 L2.2,-1 L-2.2,-1 Z M7.1,-2.3 L2,1.6 L0.5,-2.4 Z M4.4,6.1 L-0.3,2.4 L3.1,0.2 Z M-4.4,6.1 L-3.1,0.2 L0.3,2.4 Z M-7.1,-2.3 L-0.5,-2.4 L-2,1.6 Z" fill="#9aa0a8" opacity=".9"/></g><circle r="2.2" fill="${t.acc}"/><circle r="2.2" fill="none" stroke="#000" stroke-width=".4"/></g>`;}
+function carSide(t,cls,label){const b=`url(#bd-${t.id})`;return `<g class="${cls}" style="--c:${t.c}">
+  <ellipse cx="0" cy="2" rx="84" ry="4" fill="#000" opacity=".35" filter="url(#soft)"/>
+  <g class="speed"><line x1="-112" y1="-34" x2="-86" y2="-34"/><line x1="-126" y1="-22" x2="-92" y2="-22"/><line x1="-118" y1="-10" x2="-90" y2="-10"/></g>
+  <path class="heat" d="M-90,-18 q-16,6 0,12 z" fill="rgba(255,255,255,.35)"/>
+  <!-- rear wing: endplate, main plane, DRS flap, swan-neck -->
+  <path d="M-88,-44 L-72,-44 L-70,-14 L-86,-14 Z" fill="url(#carbon)" stroke="#000" stroke-width=".5"/>
+  <path d="M-86,-30 L-66,-30 L-66,-26 L-86,-26 Z" fill="${t.acc}" opacity=".9"/>
+  <rect x="-90" y="-35" width="26" height="3.2" rx="1.2" fill="${t.body}"/><rect class="drs" x="-90" y="-41" width="26" height="3" rx="1.2" fill="${t.body}" style="transform-origin:-64px -40px"/>
+  <path d="M-70,-35 L-62,-26" stroke="#111" stroke-width="2"/>
+  <!-- floor + diffuser -->
+  <path d="M-70,-4 L66,-4 L66,-1.5 L-74,-1.5 Z" fill="#0d0f12"/><path d="M-74,-1.5 L-82,-6 L-70,-7 Z" fill="#1a1d22"/>
+  <!-- main body: nose, chassis, airbox, engine cover, tail -->
+  <path d="M90,-9 C84,-11 70,-12.5 54,-14 L40,-18 C36,-20 32,-21 26,-21 L22,-21 C18,-25 12,-30 2,-33 L-6,-36 C-20,-37 -40,-30 -56,-22 L-66,-16 L-68,-6 L-60,-5 L56,-5 L88,-6 Z" fill="${b}"/>
+  <path d="M90,-9 C84,-11 70,-12.5 54,-14 L40,-18 C36,-20 32,-21 26,-21 L22,-21 C18,-25 12,-30 2,-33 L-6,-36 C-20,-37 -40,-30 -56,-22 L-66,-16" fill="none" stroke="url(#gl-${t.id})" stroke-width="3"/>
+  <!-- shark fin + engine cover accent -->
+  <path d="M-8,-36 L-50,-24 L-20,-30 Z" fill="${t.acc}" opacity=".85"/>
+  <path d="M-30,-31 C-24,-33 -16,-35 -6,-36 L-8,-33 C-16,-32 -24,-30 -30,-28 Z" fill="${t.acc2}" opacity=".7"/>
+  <!-- sidepod with inlet and undercut -->
+  <path d="M30,-21 C34,-24 44,-23 46,-18 L46,-9 C40,-7 34,-6 28,-6 L-48,-7 C-56,-8 -58,-12 -54,-16 C-44,-22 -10,-22 30,-21 Z" fill="${b}"/>
+  <path d="M28,-21 C34,-24 44,-23 46,-18 L46,-14 L30,-14 Z" fill="#000" opacity=".8"/>
+  <path d="M-54,-16 C-44,-22 -10,-22 30,-21" fill="none" stroke="url(#gl-${t.id})" stroke-width="2"/>
+  <path d="M-46,-12 L20,-12 L22,-9 L-44,-9 Z" fill="${t.acc}" opacity=".9"/>
+  <!-- cockpit, halo, helmet -->
+  <path d="M24,-21 C20,-22 10,-23 4,-23 L0,-27 L22,-27 Z" fill="#06070a"/>
+  <circle cx="8" cy="-27" r="4.6" fill="${t.acc}" stroke="#000" stroke-width=".6"/><path d="M11.5,-28.5 a4.6,4.6 0 0 1 -1,4" stroke="#0a0a0a" stroke-width="2" fill="none"/>
+  <path d="M26,-22 C22,-31 10,-35 -2,-31" fill="none" stroke="#6f7680" stroke-width="2.6" stroke-linecap="round"/><path d="M12,-33.5 L13,-25" stroke="#6f7680" stroke-width="2"/>
+  <!-- mirrors -->
+  <rect x="30" y="-25" width="5" height="2.5" rx=".8" fill="#222"/>
+  <!-- front wing: endplate + three elements -->
+  <path d="M86,-18 L92,-18 L94,-4 L86,-4 Z" fill="url(#carbon)" stroke="#000" stroke-width=".5"/>
+  <path d="M60,-8 C70,-9 80,-9.5 92,-9.5 L92,-7 C80,-7 70,-6.5 60,-5.5 Z" fill="${t.body}"/>
+  <path d="M64,-12 C72,-13 80,-13.5 90,-13.5 L90,-11.5 C80,-11.5 72,-11 64,-10 Z" fill="${t.acc}"/>
+  <path d="M68,-15.5 C74,-16.5 80,-17 88,-17 L88,-15 C80,-15 74,-14.5 68,-13.5 Z" fill="${t.body2}"/>
+  <!-- number -->
+  <text x="-14" y="-10" style="font:900 7px Archivo,Inter;fill:${t.acc};letter-spacing:.04em" text-anchor="middle">${t.n}</text>
+  ${wheel(t,-50)}${wheel(t,48)}
+  <text class="carlabel" x="0" y="-50">${esc(label)}</text></g>`;}
+function crewman(t,x,y,cls){return `<g class="crew ${cls}" transform="translate(${x},${y})"><ellipse cx="0" cy="14" rx="6" ry="1.5" fill="#000" opacity=".3"/><rect x="-4.5" y="-6" width="9" height="16" rx="3" fill="${t.body}"/><rect x="-4.5" y="-6" width="9" height="4" rx="2" fill="${t.acc}" opacity=".9"/><circle cy="-10" r="4" fill="${t.acc}" stroke="#000" stroke-width=".5"/><rect x="-2.5" y="-11" width="5" height="2" fill="#111"/></g>`;}
+function tyreStack(x,y,n,t){let o='';for(let i=0;i<n;i++)o+=`<ellipse cx="${x}" cy="${y-i*7}" rx="11" ry="3.6" fill="#141414" stroke="#2c2c2c" stroke-width=".8"/><ellipse cx="${x}" cy="${y-i*7-1}" rx="6.5" ry="2" fill="#1f1f1f"/><ellipse cx="${x}" cy="${y-i*7}" rx="11" ry="3.6" fill="none" stroke="${t.acc2}" stroke-width=".7" opacity=".5"/>`;return o;}
+(function(){
+  const W=1500,H=330;const svg=document.createElementNS('http://www.w3.org/2000/svg','svg');svg.setAttribute('viewBox',`0 0 ${W} ${H}`);
+  const n=steps.length||14;const light=document.documentElement.dataset.theme==='light';
+  let s=`<defs><linearGradient id="sky" x1="0" x2="0" y1="0" y2="1"><stop offset="0" stop-color="var(--sky)"/><stop offset="1" stop-color="var(--sky-2)"/></linearGradient>${Object.values(TEAM).map(carDefs).join('')}</defs>
+  <rect width="${W}" height="${H}" fill="url(#sky)"/>
+  ${[150,500,850,1200].map(x=>`<g><rect x="${x}" y="14" width="4" height="54" fill="url(#gantry)"/><rect x="${x-26}" y="8" width="56" height="9" rx="3" fill="url(#gantry)"/><rect x="${x-20}" y="11" width="44" height="3" rx="1.5" fill="#ffe9a8" opacity=".9"/><circle class="lamp" cx="${x+2}" cy="120" r="170"/></g>`).join('')}
+  <!-- grandstand on the far side -->
+  <rect x="40" y="38" width="${W-80}" height="30" rx="3" fill="var(--stand)"/><path d="M50,46 H${W-50} M50,54 H${W-50} M50,62 H${W-50}" stroke="rgba(255,255,255,.14)" stroke-width="2"/>
+  <rect x="40" y="68" width="${W-80}" height="10" fill="#0d0f14" opacity=".9"/><rect x="40" y="70" width="${W-80}" height="2" fill="#ff2a2a" opacity=".5"/>
+  <!-- the far straight -->
+  <rect x="0" y="80" width="${W}" height="66" fill="url(#${light?'roadL':'road'})"/><rect x="0" y="80" width="${W}" height="2.5" fill="var(--line)" opacity=".85"/><rect x="0" y="143" width="${W}" height="2.5" fill="var(--line)" opacity=".85"/>
+  <path d="M0,88 H${W}" stroke="#fff" stroke-width="1" opacity=".07"/>
+  <line class="drsline" x1="0" y1="113" x2="${W}" y2="113" opacity="${nowI>=0?.9:.25}"/>`;
+  const x0=90,x1=W-90;const xs=i=>x0+(i+0.5)/n*(x1-x0);
+  steps.forEach((s2,i)=>{const x=xs(i);const c=SC[s2.phase]||'var(--text-3)';const num=s2.id.replace('PRE-0','P').replace(/^0/,'');
+    s+=`<g style="--c:${c}"><rect x="${x-1}" y="146" width="2" height="6" fill="#888"/><rect class="board ${s2.status}" x="${x-17}" y="150" width="34" height="18" rx="3"/><text class="board-t" x="${x}" y="163">${s2.status==='done'?'✓ '+esc(num):esc(num)}</text><text class="sub-t" x="${x}" y="181">${esc(s2.short||s2.id)}</text></g>`;});
+  const mainOnTrack=nowI>=0&&!waiting;
+  // pit building: glass facade, team garages, gantry lights, floor markings
+  const gx=[150,500,850,1200];
+  s+=`<rect x="0" y="190" width="${W}" height="74" fill="var(--wall)"/><rect x="0" y="190" width="${W}" height="5" fill="var(--wall-2)"/>
+  <rect x="0" y="264" width="${W}" height="66" fill="url(#${light?'roadL':'road'})"/><path d="M0,268 H${W}" stroke="var(--line)" stroke-dasharray="16 12" opacity=".45"/><path d="M0,322 H${W}" stroke="#ffd400" stroke-width="2" opacity=".55"/>
+  <text x="${W-20}" y="316" class="sub-t" style="text-anchor:end;fill:#9aa3b2">PIT LANE · 80 km/h · sub-agents box here when idle</text>`;
+  roles.forEach((r,i)=>{const t=TEAM[r.role]||TEAM.Generator;const x=gx[i]||1350;const on=running(r)||(r.role==='Main'&&nowI>=0);const box=r.role==='Main'&&waiting;
+    s+=`<g style="--c:${t.c}">
+      <rect x="${x-124}" y="196" width="248" height="68" fill="#0b0d12"/><rect x="${x-120}" y="200" width="240" height="60" fill="url(#glass)"/>
+      <path d="M${x-120},200 L${x-60},260 M${x-80},200 L${x-20},260 M${x+10},200 L${x+70},260" stroke="#fff" stroke-width="10" opacity=".05"/>
+      <rect x="${x-124}" y="196" width="248" height="14" fill="${t.body}"/><rect x="${x-124}" y="210" width="248" height="2" fill="${t.txt}" opacity=".9"/>
+      <text class="gar-t" x="${x}" y="206.5" style="fill:${t.txt};font-size:8.5px">${esc(t.name)} · #${t.n}</text>
+      <rect x="${x-60}" y="216" width="120" height="16" rx="3" fill="#0b0d12" opacity=".8"/><text class="gar-t" x="${x}" y="227" style="fill:#e9ecf1;font-size:7.5px;letter-spacing:.1em">${esc(r.role)}${r.role!=='Main'&&r.role!=='Generator'?' sub-agent':''} · ${esc(r.model||'')}</text>
+      ${[-18,0,18].map(dx=>`<circle cx="${x+dx}" cy="244" r="3.2" fill="${on?'#2fd36a':'#3a3f4a'}" ${on?'style="filter:drop-shadow(0 0 4px #2fd36a)"':''}/>`).join('')}
+      ${tyreStack(x-104,258,3,t)}${tyreStack(x+106,258,2,t)}
+      <rect x="${x-110}" y="262" width="220" height="2.5" fill="${t.acc}" opacity=".9"/><path d="M${x-110},264 V300 M${x+110},264 V300" stroke="${t.acc}" stroke-width="2" opacity=".6"/>`;
+    const onTrack=r.role==='Main'?mainOnTrack:running(r)&&nowI>=0;
+    if(!onTrack){s+=`<g transform="translate(${x},300) scale(1.12)"><g class="${box?'':'jack'}">${carSide(t,'parked',box?'BOX':r.role.toUpperCase())}</g>${box?`<g transform="translate(104,0)"><g class="lolli"><rect x="-1.2" y="-24" width="2.4" height="24" fill="#cfd3d8"/><circle cy="-30" r="8" fill="var(--flag)" stroke="#000" stroke-width=".6"/><text y="-27.5" class="carlabel" style="fill:#000;stroke:none;font-size:6.5px">IN</text></g></g>${crewman(t,-96,-2,'c1')}${crewman(t,-70,-2,'c2')}${crewman(t,74,-2,'c1')}`:`${crewman(t,-96,-2,'')}`}</g>`;}
+    s+=`</g>`;});
+  if(mainOnTrack){const x=xs(nowI);s+=`<g class="tcar" transform="translate(${x},136) scale(.86)">${carSide(TEAM.Main,'run','MAIN · '+esc(steps[nowI].short||''))}</g>`;
+    roles.filter(r=>r.role!=='Main'&&running(r)).forEach((r,i)=>{const t=TEAM[r.role]||TEAM.Generator;s+=`<g class="tcar" transform="translate(${x-180*(i+1)},136) scale(.8)">${carSide(t,'run',r.role.toUpperCase())}</g>`;});}
+  $('cam').innerHTML='';svg.innerHTML=s;$('cam').appendChild(svg);
+  $('cam').insertAdjacentHTML('beforeend',`<div class="tag"><span class="rec"><i></i>Pit lane cam</span><span>${esc(app.name||'')}</span>${mainOnTrack?`<span style="background:var(--flag);color:#000">On track · ${esc(steps[nowI].short||steps[nowI].id)}</span>`:waiting?`<span style="background:var(--flag);color:#000">BOX BOX · waiting on you</span>`:`<span>In the garage</span>`}</div><div class="lapbox"><div class="lbl">Lap</div><div class="big">${Math.min(doneN+(nowI>=0?1:0),n)}<small>/${n}</small></div><div class="lbl">${hm(stepT.elapsedSeconds)} this lap</div></div>`);
+})();
+
+// ---------------- timing screen ----------------
+const stChip=s=>s.status==='done'?'<span class="chip done">Lap done</span>':s.status==='now'?(waiting?'<span class="chip box">Box</span>':'<span class="chip now">On track</span>'):'<span class="chip">&nbsp;</span>';
+$('tsSub').textContent=`${doneN} of ${steps.length} laps · ${nowI>=0?'1 on track':'none on track'}`;
+$('ts').innerHTML=`<div class="r h"><span>Lap</span><span></span><span>Corner · step</span><span style="text-align:right">Time</span><span style="text-align:right">Cost</span><span style="text-align:right">${copilot?'Credits':'Tokens'}</span><span style="text-align:right">Status</span></div>`+steps.map((s,i)=>`<div class="r ${s.status}" style="--c:${SC[s.phase]||'var(--text-3)'}"><span class="lap">${String(i+1).padStart(2,'0')}</span><span class="sec"></span><span class="nm">${esc(s.short||s.title)}<small>${esc(s.phase)} · ${esc(s.id)}</small></span><span class="t">${s.status==='todo'?'—':lapT(s.elapsedSeconds)}</span><span class="t" style="color:var(--text-2)">${s.status==='todo'?'—':usd(s.costUsd)}</span><span class="t" style="color:var(--text-2)">${s.status==='todo'?'—':copilot?fmtN(s.credits):fmtTok(s.tokens)}</span><span class="st">${stChip(s)}</span></div>`).join('');
+
+// ---------------- telemetry trace + KPIs ----------------
+(function(){const done=steps.filter(s=>s.status!=='todo');const W=600,H=120,pad=10;
+  const tv=done.map(s=>copilot?(s.credits||0):(s.tokens||0)),cv=done.map(s=>s.costUsd||0),ev=done.map(s=>s.elapsedSeconds||0);
+  const line=(arr,color)=>{if(arr.length<2)return '';const mx=Math.max(1,...arr);const pts=arr.map((v,i)=>`${pad+i*(W-2*pad)/(arr.length-1)},${H-pad-(v/mx)*(H-2*pad)}`).join(' ');return `<polyline class="tl" points="${pts}" stroke="${color}"/>`;};
+  const grid=[0.25,0.5,0.75].map(f=>`<line x1="0" x2="${W}" y1="${H*f}" y2="${H*f}" stroke="var(--border)" stroke-width="1"/>`).join('');
+  const split=T.agentSeconds!=null&&T.elapsedSeconds;const tot=Math.max(1,(T.agentSeconds||0)+(T.humanSeconds||0)+(T.waitingSeconds||0));const p=x=>Math.round(100*(x||0)/tot)+'%';
+  const est=D.estimate;const pct=est&&est.estimated?Math.min(100,Math.round(100*est.used/est.estimated)):null;
+  $('trace').innerHTML=`<h3>Telemetry <span class="sub">per lap · ${done.length} laps logged</span></h3><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${grid}${line(tv,'var(--ferrari)')}${line(cv,'var(--good)')}${line(ev,'var(--flag)')}<line class="scan" x1="0" x2="0" y1="0" y2="${H}"/></svg><div class="k"><span><i style="background:var(--ferrari)"></i>${copilot?'Credits':'Tokens'} / lap</span><span><i style="background:var(--good)"></i>Cost / lap</span><span><i style="background:var(--flag)"></i>Time / lap</span></div>
+  <div class="kpi"><div><div class="k">Who had the wheel</div>${split?`<div class="stint"><i style="--w:${p(T.agentSeconds)};background:var(--ferrari)"></i><i style="--w:${p(T.humanSeconds)};background:var(--aston)"></i><i style="--w:${p(T.waitingSeconds)};background:var(--flag)"></i></div><div class="m">car ${hm(T.agentSeconds)} · pit wall ${hm(T.humanSeconds)} · red flag ${hm(T.waitingSeconds)}</div>`:`<div class="m">needs the Claude Code transcript</div>`}</div>
+  <div><div class="k">Lap ${esc(cur.id||'')} vs target</div>${pct!=null?`<div class="v">${pct}<small>%</small></div><div class="m">${copilot?fmtN(est.used)+' of '+fmtN(est.estimated)+' cr':fmtTok(est.used)+' of '+fmtTok(est.estimated)}</div>`:`<div class="m" style="margin-top:4px">${est&&est.note?esc(est.note):'No target yet — set at Step 03'}</div>`}</div>
+  <div><div class="k">Fuel mix</div><div class="m">${copilot?`main ${fmtN(T.creditsMain)} · subs ${fmtN(T.creditsSub)}`:`in ${fmtTok(tk.input)} · out ${fmtTok(tk.output)}<br>cache ${fmtTok((tk.cacheRead||0)+(tk.cacheWrite||0))}`}</div></div>
+  <div><div class="k">This lap</div><div class="m">${hm(stepT.elapsedSeconds)} · ${usd(stepT.costUsd)}${stepT.agentSeconds!=null?`<br>car ${hm(stepT.agentSeconds)} · you ${hm((stepT.humanSeconds||0)+(stepT.waitingSeconds||0))}`:''}</div></div></div>`;})();
+
+// engines
+const col=['var(--ferrari)','var(--merc-a)','var(--mclaren)','var(--redbull)','var(--aston)'];const mx=Math.max(1,...M.map(m=>copilot?(m.credits||0):(m.tokens||0)));
+$('eng').innerHTML=`<h3>${copilot?'AI credits by engine':'Tokens by engine'} <span class="sub">cumulative</span></h3>`+(M.map((m,i)=>{const v=copilot?(m.credits||0):(m.tokens||0);return `<div class="m" style="--c:${col[i%col.length]}"><div class="l"><i></i>${esc(m.model)}</div><div class="r">${copilot?fmtN(v):fmtTok(v)}<small>${usd(m.costUsd)}</small></div><div class="b"><i style="--w:${Math.round(100*v/mx)}%"></i></div></div>`;}).join('')||'<div class="empty">Nothing measured yet — rows appear after the first lap.</div>');
+// drivers
+const sorted=[...roles].sort((a,b)=>(b.tokens||b.credits||0)-(a.tokens||a.credits||0));
+$('eng').insertAdjacentHTML('beforeend',`<h3 style="margin-top:12px">Drivers <span class="sub">roles · now</span></h3>`+sorted.map((r,i)=>{const t=TEAM[r.role]||TEAM.Generator;const st=r.status||'idle';const chip=st==='waiting on you'?'<span class="chip box">Box</span>':running(r)?`<span class="chip on">${st}${r.runningSeconds?' '+hm(r.runningSeconds):''}</span>`:`<span class="chip">${esc(st)}</span>`;
+  return `<div class="m" style="--c:${t.ui}"><div class="l"><i></i><b>${esc(t.name)}</b> <span style="color:var(--text-3)">#${t.n} · ${esc(r.role)}</span> ${chip}</div><div class="r">${r.tokens!=null?fmtTok(r.tokens):r.credits!=null?fmtN(r.credits)+' cr':'—'}</div></div>`;}).join(''));
+
+// race control = exit gate
+const gate=cur.exitGate||[];
+$('rc').innerHTML=`<h3>Race control · ${cur.id?'to clear lap '+esc(cur.id):'exit gate'} <span class="sub">${cur.id?'runbookSteps/'+esc(cur.id)+'.md':''}</span></h3>${gate.length?'<ul>'+gate.map((t,i)=>`<li><span class="n">${String(i+1).padStart(2,'0')}</span><span>${esc(t)}</span></li>`).join('')+'</ul>':'<div class="empty">No lap in progress — the car is in the garage.</div>'}`;
+
+// team radio
+const WHERE={'claude-code':'Answer in <b>Visual Studio Code</b> (the Claude Code panel or terminal) or on your <b>phone</b> via Claude Code Remote Control. This page only shows the message.','copilot-chat':'Answer in <b>Visual Studio Code</b> (GitHub Copilot Chat). This page only shows the message.','copilot-cli':'Answer in the <b>Copilot CLI</b> terminal. This page only shows the message.'};
+$('grid').classList.toggle('asking',!!waiting);if(!waiting)$('radio').innerHTML='';if(waiting){const since=waiting.since?new Date(waiting.since):null;
+  $('radio').innerHTML=`<h3>Team radio · waiting on you <span class="sub">${since?'since '+since.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):''}</span></h3><div class="wave">${Array.from({length:14},(_,i)=>`<i style="animation-delay:${(i*0.07).toFixed(2)}s"></i>`).join('')}</div><div class="q">${esc(waiting.question||'A question or approval is open.')}</div>${(waiting.options||[]).map(o=>`<div class="opt ${o.recommended||/recommended/i.test(o.label||'')?'rec':''}"><b>${esc(o.label)}</b><span>${esc(o.description||'')}</span></div>`).join('')}<div class="where"><b>The car stays in the box until you answer.</b> ${WHERE[D.tool]||WHERE['claude-code']}</div>`;}
+
+// ticker, footer
+const ev=D.events||[];const fh=ev.map(e=>`<span><i>${esc(e.time)}</i><b>${esc(e.who)}</b>${esc(e.text)}</span>`).join('')||'<span><i>—</i>No messages yet</span>';
+$('feed').innerHTML=fh+fh;
+$('foot').textContent=`ProjectDashboard.html · theme F1 · rendered by ${D.renderer||'ocpf-dashboard'} · ${D.refreshSeconds?'data refreshes in place every '+D.refreshSeconds+' s':''}`;
+}
+
+// ---- first paint, freshness, in-place refresh ----
+paint(D);
+requestAnimationFrame(()=>requestAnimationFrame(()=>document.body.classList.add('painted')));
+let nextAt=Date.now()+(D.refreshSeconds||30)*1000,pulling=false;
+function fresh(){if(!gen)return;const age=Math.round((Date.now()-gen.getTime())/1000);$('fresh').textContent=`rendered ${age<90?age+' s':Math.round(age/60)+' min'} ago`;$('livePill').classList.toggle('stale',age>900);}
+function tick(){const n=$('next');if(n){const left=Math.max(0,Math.ceil((nextAt-Date.now())/1000));n.textContent=pulling?'updating…':`next in ${left} s`;}if(!pulling&&Date.now()>=nextAt)pull();}
+// Pull the renderer's sidecar (ocpfFramework/state/dashboard-data.js) through a <script> tag — works from file:// — and repaint only on change.
+function pull(){if(!D.refreshSeconds)return;pulling=true;tick();const sc=document.createElement('script');sc.src=(D.dataUrl||'ocpfFramework/state/dashboard-data.js')+'?t='+Date.now();
+  sc.onload=()=>{sc.remove();const n=window.__ocpfData;window.__ocpfData=null;if(n&&n.generatedAt&&n.generatedAt!==D.generatedAt){D=n;paint(D);fresh();document.body.classList.remove('updated');void document.body.offsetWidth;document.body.classList.add('updated');}done();};
+  sc.onerror=()=>{sc.remove();if(!D.dataUrl){location.reload();return;}done();};
+  function done(){pulling=false;nextAt=Date.now()+(D.refreshSeconds||30)*1000;tick();}
+  document.head.appendChild(sc);}
+fresh();tick();setInterval(fresh,15000);setInterval(tick,1000);
+// theme selector: the renderer chooses the template from ocpfFramework/state/dashboard.json → "theme"; the page can only ask
+$('themeSel').value='f1';$('themeSel').addEventListener('change',e=>{const v=e.target.value;e.target.value='f1';const t=$('toast');t.innerHTML=`To switch to <b>${v==='brand'?'OnlyBCFans':'F1'}</b>, tell the agent: "use the ${v==='brand'?'OnlyBCFans':'F1'} dashboard theme" — it sets <code>theme</code> in ocpfFramework/state/dashboard.json and re-renders.`;t.classList.add('show');setTimeout(()=>t.classList.remove('show'),9000);});
+if(D.toast){const t=$('toast');t.innerHTML=esc(D.toast);t.classList.add('show');setTimeout(()=>t.classList.remove('show'),8000);}
+})();
+
+</script>
+</body>
+</html>

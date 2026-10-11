@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 2 — Write the Design Doc & Self-Check
 
-**Runbook version:** 5.3.5.0 · Lite edition · Phase: DESIGN
+**Runbook version:** 5.4.0.0 · Lite edition · Phase: DESIGN
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook

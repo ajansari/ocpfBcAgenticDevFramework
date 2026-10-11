@@ -4,6 +4,19 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.4.0 — October 10, 2026
+
+**Bundles:** full runbook v5.4.0.0, Lite v5.4.0.0, Standards Guide v1.12.0.0 (unchanged),
+Operations Guide v5.4.0.0. New dashboard theme.
+
+- **`dashboard` skill: the `f1` theme.** New `templates/dashboard-f1.html` (trackside pit-wall
+  view; same data contract, in-place refresh, Day/Night, Copilot credits). `ocpf-dashboard.py` /
+  `.ps1` pick the template from `theme` in `dashboard.json` (`brand` default, `f1`) and take
+  `--theme` / `-Theme` to set it; first creation copies every file in `templates/`. The footer
+  selector on both pages tells the human to ask the agent to switch. Skill text covers *"use the
+  F1 theme"*.
+- **`update-framework` skill:** refreshes both templates.
+
 ## 5.3.5 — October 10, 2026
 
 **Bundles:** full runbook v5.3.5.0, Lite v5.3.5.0, Standards Guide v1.12.0.0 (unchanged),

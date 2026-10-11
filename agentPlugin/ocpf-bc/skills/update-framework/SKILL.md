@@ -93,7 +93,7 @@ Guide versions it expects. If a local copy's major version differs, say so: the 
    `ocpfFramework/documentTemplates/`, always ignored). Check each step file's
    `**Runbook version:**` line equals the new runbook's version. Refresh
    `ocpfFramework/patterns/` and `ocpfFramework/scripts/` the same way. That includes the dashboard
-   renderer, its PowerShell twin, and its `dashboard.html` template (from the plugin's `dashboard`
+   renderer, its PowerShell twin, and both templates `dashboard.html` and `dashboard-f1.html` (from the plugin's `dashboard`
    skill); then render the page once so it reflects the new version. A project that began before
    v5.2.0.0 has no dashboard yet: create it with the `dashboard` skill (hooks, one render, the
    explanation question) as part of this update. **A project on v5.2.0.0 has the page at
@@ -118,7 +118,7 @@ Guide versions it expects. If a local copy's major version differs, say so: the 
    repository at the tag the new framework pins** — read the pin from the framework's
    `standardsGuide/README.md` (fetch that prelude into `ocpfFramework/standardsGuide/README.md` too):
    `https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfALDevStandardsGuide.md`
-   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v5.3.5.0 the pin is
+   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v5.4.0.0 the pin is
    `v1.12.0.0`). Update each folder's `SNAPSHOT.json` (`repo`, `ref`, `sha`, `fetchedAt`). A project that
    began before v5.2.0.0 needs **no file move**: the on-disk path and filename are unchanged; the
    refresh only changes the source recorded in `SNAPSHOT.json`. A runbook and a companion from

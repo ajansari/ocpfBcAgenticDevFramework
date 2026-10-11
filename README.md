@@ -54,6 +54,13 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 10, 2026 — Full v5.4.0.0 · Lite v5.4.0.0 · Operations Guide v5.4.0.0 · Plugin v5.4.0
+
+**A second dashboard theme: F1.** A trackside pit-wall view of the same build — the Main agent is
+the Ferrari, the sub-agents are the Mercedes, McLaren, and Red Bull, steps are laps on a timing
+screen, and an open question is BOX BOX. Say "use the F1 dashboard theme"; the OnlyBCFans page
+stays the default. Works with GitHub Copilot the same way the default does.
+
 ## October 10, 2026 — Full v5.3.5.0 · Lite v5.3.5.0 · Operations Guide v5.3.5.0 · Plugin v5.3.5
 
 **The dashboard refreshes its data in place.** No more full page reload every 30 seconds: the
@@ -146,9 +153,13 @@ yours, which models are working, the current step's exit gate, and — when the 
 you — the open question and where to answer it. `ProjectProgress.md` stays the written record; the
 page is a view of it. **To reopen it after closing the tab:** right-click
 `ProjectDashboard.html` in VS Code's Explorer → **Open Externally** (or *Reveal in
-Finder / File Explorer* and double-click), or ask the agent to "open the dashboard". One theme
-ships, *OnlyBCFans*, dark with a Day / Night switch; the page's footer carries a selector for the
-themes to come. To make the app's name and icon available that early, **the three identity
+Finder / File Explorer* and double-click), or ask the agent to "open the dashboard". Two themes
+ship, each with a Day / Night switch: *OnlyBCFans* (the default) and *F1*, a trackside pit-wall
+view where the Main agent is the Ferrari and the sub-agents are the Mercedes, McLaren, and Red
+Bull — say "use the F1 dashboard theme" and the agent switches it.
+
+![The F1 theme — the pit-wall view of the same project](images/ocpfDashboardF1.png)
+ To make the app's name and icon available that early, **the three identity
 questions — extension name, publisher, app icon — now come first**, right after the notification
 question, and `app.json` is written the moment they are answered; the rest of `app.json` (ID
 ranges, BC version, features) is still written when the intake sheet is confirmed.

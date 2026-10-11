@@ -11,7 +11,7 @@
 #   pwsh ocpf-dashboard.ps1 -Project <root> -Event who,text                 # append a feed event
 param(
   [string]$Project = ".", [switch]$Open, [switch]$Quiet, [int]$Refresh = 30, [string]$Toast, [switch]$Live,
-  [string]$WaitingJson, [switch]$ClearWaiting, [string[]]$Event, [int]$Throttle = 0
+  [string]$WaitingJson, [switch]$ClearWaiting, [string[]]$Event, [int]$Throttle = 0, [string]$Theme
 )
 $ErrorActionPreference = "Stop"
 try {
@@ -46,7 +46,7 @@ if ($WaitingJson) {
 }
 if ($ClearWaiting) { $wp = Join-Path $stateDir "waiting.json"; if (Test-Path $wp) { $w = Load-Json $wp @{}; $w["clearedAt"] = Iso (NowUtc); $w | ConvertTo-Json -Depth 5 | Set-Content -Path $wp -Encoding utf8; Add-Event "You" "answered" } }
 if ($Event -and $Event.Count -ge 2) { Add-Event $Event[0] $Event[1] }
-if ($Live) { $dj = Load-Json (Join-Path $stateDir "dashboard.json") @{}; $dj["hooks"] = $true; if (-not $dj.theme) { $dj["theme"] = "brand" }; $dj | ConvertTo-Json | Set-Content -Path (Join-Path $stateDir "dashboard.json") -Encoding utf8 }
+if ($Live -or $Theme) { $dj = Load-Json (Join-Path $stateDir "dashboard.json") @{}; if ($Live) { $dj["hooks"] = $true }; if ($Theme) { $dj["theme"] = $Theme.ToLower() }; if (-not $dj.theme) { $dj["theme"] = "brand" }; $dj | ConvertTo-Json | Set-Content -Path (Join-Path $stateDir "dashboard.json") -Encoding utf8 }
 
 # ---- facts ----
 $fw = Load-Json (Join-Path $root "ocpfFramework/framework.json") @{}
@@ -183,7 +183,9 @@ $data = [ordered]@{ generatedAt = (NowUtc).ToString("o"); refreshSeconds = $Refr
   pricing = [ordered]@{ source = $priceSrc; fetchedAt = $pricing.fetchedAt; usdPerCredit = $pricing.aiCredit.usd }; notes = $notes; toast = $Toast }
 
 # ---- render ----
-$tpl = $null; foreach ($c in @((Join-Path $here "../templates/dashboard.html"), (Join-Path $root "ocpfFramework/scripts/dashboard.html"))) { if (Test-Path $c) { $tpl = Get-Content $c -Raw; break } }
+$THEMES = @{ brand = "dashboard.html"; f1 = "dashboard-f1.html" }  # theme key (dashboard.json -> theme) -> template file
+$themeKey = "$($dj0.theme)".ToLower(); if (-not $THEMES.ContainsKey($themeKey)) { $themeKey = "brand" }; $data.theme = $themeKey; $tplName = $THEMES[$themeKey]
+$tpl = $null; foreach ($c in @((Join-Path $here "../templates/$tplName"), (Join-Path $root "ocpfFramework/scripts/$tplName"), (Join-Path $here "../templates/dashboard.html"), (Join-Path $root "ocpfFramework/scripts/dashboard.html"))) { if (Test-Path $c) { $tpl = Get-Content $c -Raw; break } }
 if (-not $tpl) { Write-Error "dashboard.html template not found beside the script (templates/dashboard.html) or in ocpfFramework/scripts/"; exit 1 }
 $data.dataUrl = "ocpfFramework/state/dashboard-data.js"  # the page pulls this sidecar and repaints in place (no full reload)
 $payload = ($data | ConvertTo-Json -Depth 8 -Compress) -replace '</', '<\/'

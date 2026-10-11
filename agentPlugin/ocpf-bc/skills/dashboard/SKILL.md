@@ -26,7 +26,7 @@ moment the page has a name and an icon to show; earlier it would be an empty she
 
 1. **Place the scripts.** Copy `scripts/ocpf-dashboard.py` and `scripts/ocpf-dashboard.ps1`, the
    `usage` skill's `scripts/ocpf-usage.py` and `ocpf-usage.ps1` (the renderer calls it), and
-   `templates/dashboard.html` into the project's `ocpfFramework/scripts/` (already gitignored —
+   every file in `templates/` (`dashboard.html`, `dashboard-f1.html`) into the project's `ocpfFramework/scripts/` (already gitignored —
    Ops § Repository Hygiene). Byte for byte, from this plugin or from
    `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/dashboard/<path>`.
 2. **Render once and open it:**
@@ -124,9 +124,13 @@ Record what was installed in `ocpfFramework/state/dashboard.json` (`hooks: true/
 - **"Refresh the dashboard"** → render without `--open`; say what changed if anything stands out.
 - **"Where is the dashboard?"** → `ProjectDashboard.html` at the project root, and the right-click
   route. It is tracked: it shows as modified after every refresh, which is expected.
-- **Theme.** One theme ships today (*OnlyBCFans*, dark by default with a Day/Night switch in the
-  header). The page carries a theme selector in its footer for the themes to come; more themes are
-  templates in this skill's `templates/`, chosen by `theme` in `dashboard.json`.
+- **Theme.** Two ship: `brand` (*OnlyBCFans*, the default) and `f1` (the trackside pit-wall view —
+  Ferrari for Main, Mercedes / McLaren / Red Bull for the sub-agents, steps as laps, BOX BOX when a
+  question waits). Both have a Day/Night switch. **"Use the F1 theme" / "switch to OnlyBCFans"** →
+  run the renderer with `--theme f1` / `--theme brand` (`-Theme` in PowerShell): it records the
+  choice in `ocpfFramework/state/dashboard.json` and re-renders; the hooks keep using it. The
+  footer selector on the page only tells the human to ask you. Both templates live in
+  `ocpfFramework/scripts/`, so no fetch is needed. Ops § Dashboard → 4 has the table.
 - **Repair.** A project from v5.2.0.0 still has `ocpfFramework/state/dashboard.html`: render once
   (the page lands at the root), delete the old file, `git add ProjectDashboard.html`. A project
   whose hooks predate v5.3.2.0 lacks the unmatched `PostToolUse` hook: merge it (section 2) — its
