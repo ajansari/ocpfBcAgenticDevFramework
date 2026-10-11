@@ -8,7 +8,8 @@ The framework stands on the work of others. This file credits every third-party 
 references, fetches, invokes, or recommends, and records the license each one is used under.
 
 **How the framework uses third-party material.** This repository **does not bundle or
-redistribute** any third-party code. The framework's documents:
+redistribute** any third-party code; the one exception is two icon drawings embedded in the
+dashboard page, credited under *Embedded in the dashboard page* below. The framework's documents:
 
 - **link** to external documentation and repositories,
 - instruct the agent to **fetch** a local snapshot of certain repositories into *your* project,
@@ -47,7 +48,7 @@ September 14, 2026 (Node.js and PowerShell 7 on September 27, 2026). The upstrea
 - **License:** MIT — AJ Ansari (same author as this framework)
 - **Used for:** the verified reference design, templates, API reference, and false-assumptions
   table the runbooks follow when a project builds a Business Central Copilot feature. Fetched at a
-  pinned tag (`v1.0.0.0` for runbook v5.3.2.0), only on projects with such a feature, into a sibling
+  pinned tag (`v1.0.0.0` for runbook v5.3.3.0), only on projects with such a feature, into a sibling
   folder outside the project root; the snapshot keeps its `LICENSE` file. Nothing from it is
   copied into this repository or the plugin.
 
@@ -59,6 +60,33 @@ September 14, 2026 (Node.js and PowerShell 7 on September 27, 2026). The upstrea
   release tag (`v1.12.0.0`, named in `standardsGuide/README.md`) into each project's
   `ocpfFramework/standardsGuide/`, and bundled at that tag in the `ocpf-bc` plugin's `al-standards`
   skill as the offline copy.
+
+---
+
+## Embedded in the dashboard page
+
+The live dashboard (`ProjectDashboard.html`, rendered from the plugin's
+`skills/dashboard/templates/dashboard.html`) is a single self-contained file, so the icon that
+names the project's AI tool is embedded as inline SVG rather than fetched. Two marks are used,
+only to identify the tool the project runs in; the framework is free and sells nothing.
+
+### Claude mark (Anthropic)
+- **Drawing source:** simple-icons, `claude.svg` — <https://github.com/simple-icons/simple-icons>
+- **Drawing license:** CC0 1.0 Universal (the SVG path, as published by simple-icons)
+- **Trademark:** the Claude mark and name belong to Anthropic, PBC; shown in Anthropic's brand
+  orange (`#D97757`) solely to identify Claude Code as the AI tool the project runs in. No
+  affiliation with or endorsement by Anthropic is implied.
+- **Used for:** the *Claude Code* pill in the dashboard header.
+
+### GitHub Copilot icon (Octicons)
+- **Source:** Primer Octicons, `copilot-24.svg` — <https://github.com/primer/octicons>
+- **License:** MIT — Copyright (c) 2026 GitHub Inc.
+- **Trademark:** GitHub and GitHub Copilot are trademarks of GitHub, Inc.; the icon is shown
+  monochrome, in the page's text color, solely to identify the AI tool. No affiliation with or
+  endorsement by GitHub is implied.
+- **Used for:** the *Copilot Chat* / *Copilot CLI* pill in the dashboard header.
+- **Obligation met:** this notice reproduces the copyright line; the full MIT text is in the
+  Octicons repository's `LICENSE`.
 
 ---
 

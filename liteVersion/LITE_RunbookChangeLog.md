@@ -16,6 +16,17 @@ framework.
 
 ---
 
+## v5.3.3.0 — October 10, 2026
+
+Derived from full framework **v5.3.3.0**; Operations Guide **v5.3.3.0**; Standards Guide
+**v1.12.0.0** (unchanged); plugin **5.3.3**. Dashboard template and notices only.
+
+- **Dashboard header shows the AI tool's official mark** — the Claude mark for Claude Code, the
+  Octicons Copilot icon for Copilot Chat / CLI — inline, credited in `THIRD_PARTY_NOTICES.md`.
+  Full changelog: *v5.3.3.0*.
+
+---
+
 ## v5.3.2.0 — October 10, 2026
 
 Derived from full framework **v5.3.2.0**; Operations Guide **v5.3.2.0**; Standards Guide

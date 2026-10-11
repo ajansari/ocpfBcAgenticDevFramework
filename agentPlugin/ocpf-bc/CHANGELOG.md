@@ -4,6 +4,16 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.3.3 — October 10, 2026
+
+**Bundles:** full runbook v5.3.3.0, Lite v5.3.3.0, Standards Guide v1.12.0.0 (unchanged),
+Operations Guide v5.3.3.0. Template and notices only.
+
+- **`dashboard` skill: official tool marks in the header pill.** `templates/dashboard.html` embeds
+  the Claude mark (simple-icons `claude`, CC0; Anthropic's mark, brand orange `#D97757`) for Claude
+  Code and Primer Octicons `copilot-24` (MIT, © GitHub Inc.) for Copilot Chat / CLI, replacing the
+  *CC* / *GH* letter badges. Inline SVG, no network. Credited in `THIRD_PARTY_NOTICES.md`.
+
 ## 5.3.2 — October 10, 2026
 
 **Bundles:** full runbook v5.3.2.0, Lite v5.3.2.0, Standards Guide v1.12.0.0 (unchanged),

@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.3.2.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.3.2.0**, and Lite at **v5.3.2.0** — but
+**v5.3.3.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.3.3.0**, and Lite at **v5.3.3.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -21,6 +21,21 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v5.3.3.0 — October 10, 2026
+
+**Dashboard: the AI tool's official mark in the header.** Lite **v5.3.3.0**, Operations Guide
+**v5.3.3.0** (version only), Standards Guide **v1.12.0.0** (unchanged), plugin **5.3.3**. Template
+and notices only; `update-framework` refreshes the template.
+
+- The header pill that names the project's AI tool showed a two-letter badge (*CC* / *GH*). It
+  now shows the real mark, inline so the page stays one file: the Claude mark (drawing from
+  simple-icons, CC0; the mark is Anthropic's, in its brand orange) for Claude Code, and the
+  Octicons `copilot-24` icon (MIT, © GitHub Inc.) for Copilot Chat and the Copilot CLI. Both are
+  credited in `THIRD_PARTY_NOTICES.md` under *Embedded in the dashboard page*, with the trademark
+  note; the file's "bundles no third-party code" statement names this one exception.
 
 ---
 
