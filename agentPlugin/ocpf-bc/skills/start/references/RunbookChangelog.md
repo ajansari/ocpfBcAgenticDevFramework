@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.2.0.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.2.0.0**, and Lite at **v5.2.0.0** — but
+**v5.3.0.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.3.0.0**, and Lite at **v5.3.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -21,6 +21,42 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v5.3.0.0 — October 10, 2026
+
+**The dashboard page persists with the project: `ProjectDashboard.html` at the project root,
+tracked in git.** Lite **v5.3.0.0**, Operations Guide **v5.3.0.0**, Standards Guide **v1.12.0.0**
+(unchanged), plugin **5.3.0**. No layout change beyond the one file; `update-framework` moves it.
+
+- **What went wrong.** The first project run on v5.2.0.0 found its dashboard gitignored. The
+  renderer wrote the page to `ocpfFramework/state/dashboard.html`, and `ocpfFramework/state/` is
+  on the always-ignored list (Ops § Repository Hygiene) — so the human's own view of the build
+  stayed out of the repository and would not survive a clone. The human wanted it to persist with
+  the project.
+- **The fix is a path, not a rule.** Both renderers (`ocpf-dashboard.py`, `ocpf-dashboard.ps1`)
+  now write `ProjectDashboard.html` to the project root, beside `ProjectProgress.md` — the one
+  file the framework renders that *is* the project's — and nothing else. The hooks are unchanged
+  (they call the renderer; the renderer chose the path). Ops § Dashboard says the page is a
+  tracked project file and why; the root layout in Ops § Project Setup lists it; Ops § Repository
+  Hygiene adds it to the paths that are **never** ignored and extends the *Prove it* check:
+  `git check-ignore -v ProjectDashboard.html ProjectProgress.md` must print nothing. The
+  project-setup layout check (Ops § Project Setup → 7) runs that too. The PRE-01 exit gate names
+  it. The page changes at every refresh, so it shows as modified after every turn — expected;
+  commit it with the rest.
+- **Migration** (`update-framework` 3a): after the first render with the new scripts, delete
+  `ocpfFramework/state/dashboard.html`, prove the new path is not ignored, `git add` it. The
+  `status` skill reports a project still carrying the old file; the `dashboard` skill's repair
+  bullet covers the same move.
+- **PowerShell renderer fixed.** `ocpf-dashboard.ps1` assigned a step's open-window count to
+  `$open`, which is the script's own `[switch]$Open` parameter (PowerShell variable names are
+  case-insensitive), so every render on PowerShell 7 failed with *Cannot convert the "1" value of
+  type Int32 to SwitchParameter* — silently under `-Quiet`, which is how the hooks run it. Renamed;
+  both renderers verified on a bare project with and without `usage.json`.
+- Touched: Ops § Dashboard, § Project Setup, § Repository Hygiene, § Documents; both cores' ALL
+  ALONG → *Dashboard*; PRE-01 / Lite Step 1 (bullet, outputs, exit gate); the `dashboard`,
+  `status`, `start`, and `update-framework` skills; README, Framework User Guide, plugin README.
 
 ---
 

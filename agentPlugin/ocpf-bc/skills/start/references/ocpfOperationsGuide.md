@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.2.0.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number; the previous version of this guide was 2.0.1.0)
+**Version:** 5.3.0.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number; the previous version of this guide was 2.0.1.0)
 **Last Updated:** October 10, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
@@ -769,6 +769,7 @@ docs/                project documents (Ops § Documents gives the phase folders
 requirements/        raw input, verbatim
 outputAppPackage/    every built package (Ops § Packaging)
 ProjectProgress.md   both editions
+ProjectDashboard.html  both editions — the live dashboard page (Ops § Dashboard), tracked, never ignored
 ocpfFramework/       everything the framework fetches or keeps (below)
 ```
 
@@ -851,9 +852,11 @@ Then, in order:
 7. **Check the layout and the ignore list before design begins.** The root holds only what the
    layout above lists; `docs/` holds every document written so far, each in its phase folder
    (nothing from the runbook's document list loose in `docs/` or in the root, `ProjectProgress.md`
-   excepted); `.gitignore` carries the full block from Ops § Repository Hygiene; and
-   `git check-ignore -v` names each framework file that exists. A miss here is cheap now and a
-   client-facing mistake later.
+   and `ProjectDashboard.html` excepted); `.gitignore` carries the full block from Ops § Repository
+   Hygiene; `git check-ignore -v` names each framework file that exists **and does not name**
+   `ProjectDashboard.html` or `ProjectProgress.md`; and `git status --porcelain` lists
+   `ProjectDashboard.html` as untracked or modified, never as nothing (stage it). A miss here is
+   cheap now and a client-facing mistake later.
 
 ---
 
@@ -1317,7 +1320,7 @@ notify: say so and record `"channels": []`.
 
 ## Ops § Dashboard
 
-**Every project gets a live HTML dashboard — `ocpfFramework/state/dashboard.html`, the *Build Map*
+**Every project gets a live HTML dashboard — `ProjectDashboard.html`, the *Build Map*
 page — from the first minutes of the routine on.** It shows the app's name and icon, which phase
 and step the project is on, tokens (Copilot: AI credits) and cost so far, elapsed time split
 between the agent's work and the human's, which models are working, the current step's exit gate,
@@ -1326,6 +1329,15 @@ record: `ProjectProgress.md` stays the written tracker, and the page is rendered
 framework already keeps. In a plugin project the `dashboard` skill (`/ocpf-bc:dashboard`) does
 everything below; without the plugin, the scripts are fetched byte for byte from
 `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/dashboard/`.
+
+**The page is a project file, tracked in git.** It lives at the project root, beside
+`ProjectProgress.md`, and nowhere under `ocpfFramework/`; Ops § Repository Hygiene names it among
+the paths that are never ignored, and the setup check proves it with `git check-ignore`. Why: in
+v5.2.0.0 the renderer wrote it to `ocpfFramework/state/`, which is always ignored, so on the first
+real project the dashboard did not persist with the project — exactly what the human wanted it to
+do. Since v5.3.0.0 the renderer writes `ProjectDashboard.html` to the root and nothing else; the
+hooks need no change. The page changes at every refresh, so `git status` shows it modified after
+every turn: that is expected — commit it with the rest of the project.
 
 ### 1. When it first appears
 
@@ -1346,8 +1358,9 @@ working language:
 > costs nothing: the page re-renders itself from files the framework already keeps, by hooks, with
 > no model call. `ProjectProgress.md` remains the written record.
 >
-> **The file:** `ocpfFramework/state/dashboard.html` in this project (gitignored — it is your view,
-> not a deliverable). It reloads itself every 30 seconds while open.
+> **The file:** `ProjectDashboard.html` at the root of this project, next to
+> `ProjectProgress.md`, tracked in git like any other project file — it is your view, and it
+> travels with the project. It reloads itself every 30 seconds while open.
 >
 > **If you close the tab or window:** in VS Code's Explorer, right-click the file → **Open
 > Externally** *(when that entry isn't offered: **Reveal in Finder** / **Reveal in File Explorer**
@@ -1647,18 +1660,24 @@ With the answer *No, track them*, only the first group is written. The first gro
 they are what keeps the always-ignored files out when the answer is *No*, and a reader of the file
 sees which rule is a choice and which isn't. Drop an agent-definition entry only for a harness the
 project doesn't use. **Never** ignore `docs/`, `requirements/`, `outputAppPackage/`, `*.app`,
-`Translations/*.xlf`, `ProjectProgress.md`, or `src/`.
+`Translations/*.xlf`, `ProjectProgress.md`, `ProjectDashboard.html`, or `src/`. The dashboard page
+is the one file the framework renders that **is** the project's: it lives at the root for that
+reason (Ops § Dashboard), and a renderer, a hook, or a hand-written entry that puts it under
+`ocpfFramework/` or adds `*.html` to `.gitignore` is a bug — v5.2.0.0 made exactly that mistake.
 
 **Prove it, don't assume it.** After writing the file, run `git check-ignore -v <path>` for each
 framework file that exists on disk and `git status --porcelain` in the root: a framework file that
 `check-ignore` doesn't name, or that `status` lists as untracked or modified, means an entry is
-missing or misspelled — fix it before moving on. A `.gitignore` that was "written per the runbook"
+missing or misspelled — fix it before moving on. Then run `git check-ignore -v ProjectDashboard.html
+ProjectProgress.md`: it must print **nothing** (exit 1) — a match means an entry is too broad, and
+the human's dashboard would vanish from every clone. A `.gitignore` that was "written per the runbook"
 but never checked is how the changelog reached a client's remote on a real project.
 
 **Always tracked:** the project's own documents — all of them under `docs/`, in their phase folders
 `docs/0-project`, `docs/1-define`, `docs/2-design`, `docs/3-build`, and `docs/4-prove` (the
 runbook's rule: Full Operating Rule 9, Lite's header note; the map is in Ops § Documents), with
-`ProjectProgress.md` the one document at the root in **both** editions — its AL source under `src/`
+`ProjectProgress.md` the one document at the root in **both** editions, and `ProjectDashboard.html`
+beside it (the live dashboard page, Ops § Dashboard) — its AL source under `src/`
 (the app icon included), `requirements/`, `Translations/*.xlf`, and every package in
 `outputAppPackage/` (Ops § Packaging).
 
@@ -1877,7 +1896,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v5.2.0.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
+folder as `README.md`. For runbook **v5.3.0.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2050,7 +2069,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.2.0.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.3.0.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
@@ -2109,6 +2128,8 @@ docs/
 ```
 
 `ProjectProgress.md` is the one document outside `docs/`: in the project root, both editions.
+`ProjectDashboard.html` sits beside it — not a document but the rendered view of this one (Ops §
+Dashboard), tracked the same way.
 Nothing is written loose in `docs/`.
 
 | Template | Document | Written at |

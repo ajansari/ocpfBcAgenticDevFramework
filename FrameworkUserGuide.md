@@ -5,8 +5,8 @@
 *by AJ Ansari*
 
 **Last Updated:** Thursday, October 1, 2026
-**Covers:** Full runbook v5.2.0.0 · Lite v5.2.0.0 · Standards Guide v1.12.0.0 · Operations Guide
-v5.2.0.0 · `ocpf-bc` agent plugin v5.2.0 · Visual Studio Code setup extension v0.0.10
+**Covers:** Full runbook v5.3.0.0 · Lite v5.3.0.0 · Standards Guide v1.12.0.0 · Operations Guide
+v5.3.0.0 · `ocpf-bc` agent plugin v5.3.0 · Visual Studio Code setup extension v0.0.10
 
 > This guide is for the person driving a project with the framework: a Business Central
 > functional consultant or an AL developer working in Visual Studio Code with Claude Code or GitHub Copilot.
@@ -36,7 +36,7 @@ know which one you are looking at.
 
 | Part | What it is | Where it lives | Version today |
 |---|---|---|---|
-| **The framework** | The runbook (Full or Lite), its step files, the document templates, the **Standards Guide**, and the **Operations Guide**. This is the content the AI agent follows. | The public GitHub repository, `ajansari/ocpfBcAgenticDevFramework`, on its `main` branch. | Full 5.2.0.0 · Lite 5.2.0.0 · Standards 1.12.0.0 · Ops 5.2.0.0 |
+| **The framework** | The runbook (Full or Lite), its step files, the document templates, the **Standards Guide**, and the **Operations Guide**. This is the content the AI agent follows. | The public GitHub repository, `ajansari/ocpfBcAgenticDevFramework`, on its `main` branch. | Full 5.3.0.0 · Lite 5.3.0.0 · Standards 1.12.0.0 · Ops 5.3.0.0 |
 | **The agent plugin** `ocpf-bc` | Ten skills (the `/ocpf-bc:` commands), three sub-agent definitions, the AL tooling helper scripts, the dashboard renderer, and an *offline fallback copy* of the framework. Installed once per machine into Claude Code or GitHub Copilot. | Same repository, folder `agentPlugin/ocpf-bc`, published as a plugin marketplace. | 5.2.0 |
 | **The Visual Studio Code setup extension** | A bootstrapper and extension pack, published to the Visual Studio Marketplace and Open VSX. Installs the AL toolchain and the agent extensions, wires your agent to the plugin marketplace, and adds five Command Palette commands. It contains **no framework content**. | A separate repository, published as [`ajansari.ocpf-bc-dev-setup`](https://marketplace.visualstudio.com/items?itemName=ajansari.ocpf-bc-dev-setup) (also on [Open VSX](https://open-vsx.org/extension/ajansari/ocpf-bc-dev-setup)). | 0.0.10 |
 | **Your project's copy** | The runbook and companions fetched into one AL project, pinned at the version fetched. | Your AL project folder: `CLAUDE.md` or `.github/copilot-instructions.md`, plus one `ocpfFramework/` folder holding the step files, templates, both guides, patterns, scripts, the changelog, the plugin's marker, and each developer's state. | Whatever was current when you started, until you approve an update |
@@ -235,7 +235,7 @@ recognises.
 | `/ocpf-bc:notifications` | Turns on "your turn" notifications: Claude app push, sound, desktop notification, or none. Records the answer in `ocpfFramework/state/notifications.json` and applies it through the tool's own settings and hooks. Nothing to install. The runbook does this at the first step; use the command on an older project or to repair. | "notify me when you're done", "alert me when it's my turn" |
 | `/ocpf-bc:al-mcp-setup` | Connects the agent to Microsoft's AL tools (build, compile, symbols, diagnostics, publish, tests) using the AL Language extension already on the machine. Nothing installed, no PATH edits. In Copilot Chat there is nothing to do; in Claude Code and Copilot CLI it registers the bundled AL MCP Server. `start` normally does this for you. | "connect the AL tools", "why can't you compile" |
 | `/ocpf-bc:al-standards` | Loads the OCPF AL Development Standards Guide: naming and abbreviations, object ID allocation, API page design, field inclusion, anti-patterns, events, upgrade code, multilanguage and XLIFF rules, parent-child pages and number series. The routine applies it automatically; run it directly for an ad-hoc review. | "check this AL against OCPF standards" |
-| `/ocpf-bc:dashboard` | Creates, refreshes, or opens the project's live dashboard, `ocpfFramework/state/dashboard.html` — the Build Map page with the app's name and icon, phase and step, tokens or AI credits and cost, the agent / you time split, who is working, the exit gate, and the open question. The runbook calls it at PRE-01 / Lite Step 1 the moment `app.json` exists; it opens the page once, installs the zero-token refresh hooks, and asks the one explanation question. Reopen a closed page with right-click → **Open Externally** in VS Code's Explorer, or ask for it. |
+| `/ocpf-bc:dashboard` | Creates, refreshes, or opens the project's live dashboard, `ProjectDashboard.html` at the project root (tracked in git, so it persists with the project) — the Build Map page with the app's name and icon, phase and step, tokens or AI credits and cost, the agent / you time split, who is working, the exit gate, and the open question. The runbook calls it at PRE-01 / Lite Step 1 the moment `app.json` exists; it opens the page once, installs the zero-token refresh hooks, and asks the one explanation question. Reopen a closed page with right-click → **Open Externally** in VS Code's Explorer, or ask for it. |
 | `/ocpf-bc:update-framework` | Checks whether a newer runbook has been published, summarises every changelog entry between your version and the latest, says whether any touches a step you have already completed, and updates the project's copy only after you choose **Update now**. Backs up the old copy first. On a project from an older layout (Full before 5.0.0.0, Lite before 5.0.0.0) it also runs the migration: moves the framework files into `ocpfFramework/`, the documents into the `docs/` phase folders, rewrites the `.gitignore` block and the tool paths, creates Lite's `ProjectProgress.md` from the old usage report, and lists every move in the ChangeLog. | "is there a newer runbook", "update the framework" |
 
 Three sub-agents ship with the plugin — the first two for the Full framework, the generator for both editions: **ocpf-reasoning** (FRD and TDD
@@ -251,7 +251,8 @@ In Claude Code, permission prompts from a background sub-agent still surface in 
 ## 6. What lands in your project
 
 The two editions place the same framework files and differ in the documents they produce. The
-project root holds only what the tools require; everything the framework fetches or keeps lives
+project root holds only what the tools require, plus `ProjectProgress.md` and the live dashboard
+page `ProjectDashboard.html` (both tracked); everything the framework fetches or keeps lives
 in one folder, `ocpfFramework/`, and every project document lives in a phase folder under
 `docs/`.
 

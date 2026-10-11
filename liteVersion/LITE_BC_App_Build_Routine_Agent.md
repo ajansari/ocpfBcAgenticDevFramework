@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 5.2.0.0 (Lite, derived from the full framework v5.2.0.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
+**Version:** 5.3.0.0 (Lite, derived from the full framework v5.3.0.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
 **Last Updated:** October 10, 2026
 
 > Version history for this edition lives in `ocpfFramework/LITE_RunbookChangeLog.md`, tracked
@@ -21,7 +21,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.12.0.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.2.0.0), cited as
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.3.0.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
 >   tooling checks, analyzers, symbols, editor sync, notifications, packaging, repository hygiene,
 >   translations, fetched companions, documents, usage and cost, and the plugin.
@@ -279,7 +279,7 @@ requirements verbatim, write the problem statement and entity list with a quick 
 fill every parameter — the app icon included — through the options mechanism (Ops § Intake) and
 set up the AL project yourself (Ops § Project Setup), AL source under `src/`.
 
-**Outputs:** `ocpfFramework/` with its six-line `README.md`; `ocpfFramework/standardsGuide/`, `ocpfFramework/opsGuide/`, `ocpfFramework/runbookSteps/`, and `ocpfFramework/documentTemplates/` (all fetched, gitignored); `app.json` (first write: name, publisher, logo, version, id) and `src/` early in the step, complete at project setup; `ocpfFramework/state/dashboard.html` rendered, opened, explained, with its hooks and `ocpfFramework/state/dashboard.json`; `ocpfFramework/state/usage.json` (Step 1's start timestamp) and `ProjectProgress.md` (seeded, project root, Lite step table only, Step 1 `In Progress`); `ocpfFramework/state/copilot.json` and the Copilot keys in `.vscode/settings.json` (when Copilot is in use); `requirements/` (if any raw input was
+**Outputs:** `ocpfFramework/` with its six-line `README.md`; `ocpfFramework/standardsGuide/`, `ocpfFramework/opsGuide/`, `ocpfFramework/runbookSteps/`, and `ocpfFramework/documentTemplates/` (all fetched, gitignored); `app.json` (first write: name, publisher, logo, version, id) and `src/` early in the step, complete at project setup; `ProjectDashboard.html` (project root, tracked) rendered, opened, explained, with its hooks and `ocpfFramework/state/dashboard.json`; `ocpfFramework/state/usage.json` (Step 1's start timestamp) and `ProjectProgress.md` (seeded, project root, Lite step table only, Step 1 `In Progress`); `ocpfFramework/state/copilot.json` and the Copilot keys in `.vscode/settings.json` (when Copilot is in use); `requirements/` (if any raw input was
 captured); `docs/` with `0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` (created before the first document); `docs/1-define/ProblemStatement.md` (purpose, scope, out-of-scope, entity list, open questions);
 `docs/1-define/ProjectParameters.md` (the completed Project Parameters block, all placeholders
 replaced, the Main model and effort, version, and app icon answer included);
@@ -680,8 +680,9 @@ for a remote first, since collaborators will see the files as deleted.
 
 ## Dashboard — the Build Map Page
 
-- **Every project has a live HTML dashboard at `ocpfFramework/state/dashboard.html`**, created at
-  Step 1 the moment `app.json` exists (the three identity questions come first for that reason),
+- **Every project has a live HTML dashboard at `ProjectDashboard.html`** — at the project root
+  beside `ProjectProgress.md`, tracked in git, never under `ocpfFramework/` and never ignored (Ops §
+  Repository Hygiene) — created at Step 1 the moment `app.json` exists (the three identity questions come first for that reason),
   opened once in the default browser, explained once through the options mechanism (**I
   understand** / *Other*), and kept fresh by hooks at zero token cost — every turn in Claude Code
   and the Copilot CLI, every step boundary in Copilot Chat. **Full procedure: Ops § Dashboard**; in

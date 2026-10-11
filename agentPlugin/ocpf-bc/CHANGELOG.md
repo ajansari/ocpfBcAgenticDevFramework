@@ -4,6 +4,29 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.3.0 — October 10, 2026
+
+**Bundles:** full runbook v5.3.0.0 (core + 14 step files), Lite v5.3.0.0 (core + 7 step files),
+Standards Guide v1.12.0.0 (unchanged), Operations Guide v5.3.0.0. One file moves on an existing
+project; `update-framework` moves it.
+
+- **`dashboard` skill: the page is `ProjectDashboard.html` at the project root, tracked in git.**
+  5.2.0 rendered it into `ocpfFramework/state/`, which every project gitignores, so the first real
+  project found its dashboard missing from the repository. Both renderers (`ocpf-dashboard.py`,
+  `ocpf-dashboard.ps1`) and the template's footer now name the root path; the hooks are unchanged.
+  First creation proves the page is not ignored (`git check-ignore -v ProjectDashboard.html` prints
+  nothing) and stages it; the explanation text tells the human it is tracked and travels with the
+  project. The repair bullet moves a 5.2.0 project's page.
+- **`dashboard` skill: `ocpf-dashboard.ps1` rendered nothing on PowerShell 7.** A local `$open`
+  collided with the script's `[switch]$Open` parameter (names are case-insensitive): *Cannot
+  convert the "1" value of type Int32 to SwitchParameter* on every run, hidden by `-Quiet` in the
+  hooks. Renamed; verified with and without `usage.json`.
+- **`update-framework` skill:** step 3a deletes `ocpfFramework/state/dashboard.html` after the
+  first render with the new scripts, proves the new path is tracked, and stages it.
+- **`status` skill:** reports a project still carrying `ocpfFramework/state/dashboard.html` as
+  needing `update-framework`; gives the root path.
+- **`start` skill:** names the root path.
+
 ## 5.2.0 — October 10, 2026
 
 **Bundles:** full runbook v5.2.0.0 (core + 14 step files), Lite v5.2.0.0 (core + 7 step files),

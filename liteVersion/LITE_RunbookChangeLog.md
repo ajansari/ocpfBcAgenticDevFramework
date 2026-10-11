@@ -16,6 +16,25 @@ framework.
 
 ---
 
+## v5.3.0.0 — October 10, 2026
+
+Derived from full framework **v5.3.0.0**; Operations Guide **v5.3.0.0**; Standards Guide
+**v1.12.0.0** (unchanged); plugin **5.3.0**. One file moves; `update-framework` moves it.
+
+- **The dashboard page persists with the project.** On the first v5.2.0.0 project the page was
+  gitignored: the renderer wrote it to `ocpfFramework/state/`, which the hygiene rules always
+  ignore. Both renderers now write **`ProjectDashboard.html` at the project root**, beside
+  `ProjectProgress.md`, tracked in git and never ignored (Ops § Repository Hygiene lists it; the
+  *Prove it* check now also runs `git check-ignore -v ProjectDashboard.html`, which must print
+  nothing). Step 1's dashboard bullet, outputs, and ALL ALONG → *Dashboard* name the new path. The
+  hooks are unchanged. A v5.2.0.0 project: render once, delete the old file, `git add` the new one
+- **PowerShell renderer fixed.** `ocpf-dashboard.ps1` failed on every render (a local variable
+  collided with its own `[switch]$Open` parameter); the hooks hid it under `-Quiet`. Fixed and
+  verified. Full changelog: *v5.3.0.0*.
+  (`update-framework` 3a). Full changelog: *v5.3.0.0*.
+
+---
+
 ## v5.2.0.0 — October 10, 2026
 
 Derived from full framework **v5.2.0.0**; Operations Guide **v5.2.0.0**; Standards Guide

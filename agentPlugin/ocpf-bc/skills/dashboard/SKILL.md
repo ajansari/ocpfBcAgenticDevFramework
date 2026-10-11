@@ -1,6 +1,6 @@
 ---
 name: dashboard
-description: Create, refresh, and open the live HTML dashboard of a Business Central project following the OCPF BC Agentic Development Framework - ocpfFramework/state/dashboard.html, the Build Map page that shows the app's name and icon, the phase and step the project is on, tokens or AI credits and cost so far, elapsed time split between agent and human, which models are working, the current step's exit gate, and the question waiting on the human. Renders from state the framework already keeps, costs no tokens per refresh once its hooks are installed, and opens in the default browser. Use when a project reaches the point in PRE-01 / Lite Step 1 where app.json exists, when the user asks to "open the dashboard", "refresh the dashboard", "show the build map", "where is the dashboard file", or runs /ocpf-bc:dashboard, and to repair a project whose page stopped refreshing.
+description: Create, refresh, and open the live HTML dashboard of a Business Central project following the OCPF BC Agentic Development Framework - ProjectDashboard.html, the Build Map page that shows the app's name and icon, the phase and step the project is on, tokens or AI credits and cost so far, elapsed time split between agent and human, which models are working, the current step's exit gate, and the question waiting on the human. Renders from state the framework already keeps, costs no tokens per refresh once its hooks are installed, and opens in the default browser. Use when a project reaches the point in PRE-01 / Lite Step 1 where app.json exists, when the user asks to "open the dashboard", "refresh the dashboard", "show the build map", "where is the dashboard file", or runs /ocpf-bc:dashboard, and to repair a project whose page stopped refreshing.
 ---
 
 # OCPF project dashboard — the Build Map page
@@ -9,7 +9,10 @@ description: Create, refresh, and open the live HTML dashboard of a Business Cen
 This skill does the mechanics: first creation, the hooks that keep the page fresh, the one-time
 explanation to the human, refreshes on request, and repair.
 
-**What it is.** One self-contained HTML file, `ocpfFramework/state/dashboard.html`, rendered by the
+**What it is.** One self-contained HTML file, `ProjectDashboard.html` **at the project root,
+beside `ProjectProgress.md`, tracked in git** (never under `ocpfFramework/`, never ignored — Ops §
+Repository Hygiene; v5.2.0.0 wrote it to the always-ignored `ocpfFramework/state/` and it did not
+persist with the project), rendered by the
 bundled script from files the framework already writes — `app.json`, `framework.json`,
 `state/usage.json`, `ProjectProgress.md`, the step files, `pricing.json`, the sub-agent definitions,
 the usage script's JSON, and (in Claude Code) the transcripts. **The agent never writes the HTML and
@@ -34,7 +37,9 @@ moment the page has a name and an icon to show; earlier it would be an empty she
    `--open` uses the operating system's default opener (`open`, `start`, `xdg-open`) — the page
    appears in the default browser once, now. Nothing else ever opens it unasked.
 3. **Install the hooks** (section 2) so the page refreshes by itself, then re-render with `--live`
-   so the header reads *Live* instead of *Refreshed*.
+   so the header reads *Live* instead of *Refreshed*. Prove the page is tracked:
+   `git check-ignore -v ProjectDashboard.html` must print nothing; if it prints a rule, fix
+   `.gitignore` (Ops § Repository Hygiene) before going on, then `git add ProjectDashboard.html`.
 4. **Explain it, once, through the options mechanism** (Rule 6a) — the next thing after the page
    opens, before any other question. One question, two options: **I understand** / *Other*
    (free text, for a question or a request). The question's text, in the working language:
@@ -47,8 +52,9 @@ moment the page has a name and an icon to show; earlier it would be an empty she
    > also costs nothing: the page re-renders itself from files the framework already keeps, by
    > hooks, with no model call. `ProjectProgress.md` remains the written record.
    >
-   > **The file:** `ocpfFramework/state/dashboard.html` in this project (gitignored — it is your
-   > view, not a deliverable). It reloads itself every 30 seconds while open.
+   > **The file:** `ProjectDashboard.html` at the root of this project, next to
+   > `ProjectProgress.md`, tracked in git like any other project file — it is your view, and it
+   > travels with the project. It reloads itself every 30 seconds while open.
    >
    > **If you close the tab or window:** in VS Code's Explorer, right-click the file → **Open
    > Externally** *(when that entry isn't offered, **Reveal in Finder** / **Reveal in File
@@ -107,11 +113,14 @@ Record what was installed in `ocpfFramework/state/dashboard.json` (`hooks: true/
 
 - **"Open the dashboard"** → render, then `--open`. Say the path.
 - **"Refresh the dashboard"** → render without `--open`; say what changed if anything stands out.
-- **"Where is the dashboard?"** → `ocpfFramework/state/dashboard.html`, and the right-click route.
+- **"Where is the dashboard?"** → `ProjectDashboard.html` at the project root, and the right-click
+  route. It is tracked: it shows as modified after every refresh, which is expected.
 - **Theme.** One theme ships today (*OnlyBCFans*, dark by default with a Day/Night switch in the
   header). The page carries a theme selector in its footer for the themes to come; more themes are
   templates in this skill's `templates/`, chosen by `theme` in `dashboard.json`.
-- **Repair.** A page that no longer refreshes: check the hooks file still names the scripts, that
+- **Repair.** A project from v5.2.0.0 still has `ocpfFramework/state/dashboard.html`: render once
+  (the page lands at the root), delete the old file, `git add ProjectDashboard.html`; the hooks
+  need no change. A page that no longer refreshes: check the hooks file still names the scripts, that
   `ocpfFramework/scripts/` still holds them (the `update-framework` skill refreshes them with the
   rest), and run the renderer once by hand to see its notes. A page that opens blank: the browser
   blocked a `file://` script — none is used; the page is self-contained — so re-render and reopen.

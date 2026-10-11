@@ -19,10 +19,11 @@ conversation memory.
    runbook, the step's section in `CLAUDE.md`, `.github/copilot-instructions.md`, or the file named
    in `ocpfFramework/framework.json`): that step's **Exit gate** and outputs. Read it; don't paraphrase from
    memory. Read only the current step's file.
-2b. **`ocpfFramework/state/dashboard.json`** and the page beside it: whether the dashboard exists
+2b. **`ocpfFramework/state/dashboard.json`** and the page at the project root: whether the dashboard exists
    and its hooks are installed (`hooks`); report a project without a dashboard, or one whose hooks
    are missing, as something to repair with the `dashboard` skill, and give the path
-   `ocpfFramework/state/dashboard.html` and the right-click → **Open Externally** route.
+   `ProjectDashboard.html` and the right-click → **Open Externally** route. A project that still
+   has `ocpfFramework/state/dashboard.html` (v5.2.0.0) needs the `update-framework` skill.
 3. **`ocpfFramework/framework.json`**, if present: edition, runbook version, `layout`, `alMcp`, and
    `tooling` (mermaid and pwsh, recorded by Ops § Tooling Checks). Also
    **`ocpfFramework/state/notifications.json`**, if present: the notification kinds this developer chose.

@@ -1,5 +1,6 @@
 # OCPF BC Agentic Development Framework — the live dashboard renderer, PowerShell port.
-# Renders ocpfFramework/state/dashboard.html for one project from the state the framework already keeps
+# Renders ProjectDashboard.html (project root, tracked in git - never under the ignored ocpfFramework/state/)
+# for one project from the state the framework already keeps
 # (app.json, framework.json, usage.json, ProjectProgress.md, the step files, pricing.json, waiting.json,
 # the sub-agent definitions, the usage script's -Json output, and — in Claude Code — the transcripts).
 # Mirrors ocpf-dashboard.py (the Python script is the reference implementation); exercised on PowerShell 7
@@ -116,7 +117,7 @@ if (-not $copilot -and $wins.Count) {
 
 # ---- steps ----
 $steps = @(foreach ($c in $catalog) { $sid = $c.id; $rs = Rows-For $sid
-  $st = $status[$sid]; if (-not $st) { $open = @($wins | Where-Object { $_[0] -eq $sid -and $null -eq $_[2] }).Count; $any = @($wins | Where-Object { $_[0] -eq $sid }).Count; $st = $(if ($any -and -not $open) { "done" } elseif ($any) { "now" } else { "todo" }) }
+  $st = $status[$sid]; if (-not $st) { $openWins = @($wins | Where-Object { $_[0] -eq $sid -and $null -eq $_[2] }).Count; $any = @($wins | Where-Object { $_[0] -eq $sid }).Count; $st = $(if ($any -and -not $openWins) { "done" } elseif ($any) { "now" } else { "todo" }) }
   if ($el.ContainsKey($sid) -and $st -eq "todo") { $st = $(if (@($wins | Where-Object { $_[0] -eq $sid -and $null -eq $_[2] }).Count) { "now" } else { "done" }) }
   [ordered]@{ id = $sid; title = $c.title; short = $c.short; phase = $c.phase; status = $st; elapsedSeconds = $el[$sid]
     costUsd = $(if ($rs.Count) { Sum $rs "costUsd" } else { $null })
@@ -183,7 +184,7 @@ $tpl = $null; foreach ($c in @((Join-Path $here "../templates/dashboard.html"), 
 if (-not $tpl) { Write-Error "dashboard.html template not found beside the script (templates/dashboard.html) or in ocpfFramework/scripts/"; exit 1 }
 $payload = ($data | ConvertTo-Json -Depth 8 -Compress) -replace '</', '<\/'
 $html = $tpl.Replace('/*__OCPF_DATA__*/null', $payload)
-$out = Join-Path $stateDir "dashboard.html"
+$out = Join-Path $root "ProjectDashboard.html"  # project root: tracked, beside ProjectProgress.md
 [IO.File]::WriteAllText("$out.tmp", $html, [Text.UTF8Encoding]::new($false)); Move-Item -Force "$out.tmp" $out
 if ($Open) { try { if ($IsMacOS) { & open $out } elseif ($IsWindows) { Start-Process $out } else { & xdg-open $out } } catch { } }
 if (-not $Quiet) { $out; foreach ($n in $notes) { Write-Host "note: $n" } }

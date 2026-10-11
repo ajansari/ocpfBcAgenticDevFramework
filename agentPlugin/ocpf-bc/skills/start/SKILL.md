@@ -250,7 +250,7 @@ notification kind at the runbook's first step counts as asking, for the settings
    questions — the agent-mode request limit (150 / 100 / default) and tool approvals (ask each
    time / allow the framework's commands / allow everything) — and writes `.vscode/settings.json`
    (Ops § Asking and Approvals → *GitHub Copilot session settings*).
-2c. **Note the dashboard.** PRE-01 / Lite Step 1 creates `ocpfFramework/state/dashboard.html` the
+2c. **Note the dashboard.** PRE-01 / Lite Step 1 creates `ProjectDashboard.html` (project root, tracked) the
    moment `app.json` exists (right after the identity questions), opens it, installs its hooks, and
    asks the one explanation question — the `dashboard` skill does it (`/ocpf-bc:dashboard`). Don't
    create it here; the runbook's step owns the moment.

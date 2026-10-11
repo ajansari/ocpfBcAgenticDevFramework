@@ -96,7 +96,12 @@ Guide versions it expects. If a local copy's major version differs, say so: the 
    renderer, its PowerShell twin, and its `dashboard.html` template (from the plugin's `dashboard`
    skill); then render the page once so it reflects the new version. A project that began before
    v5.2.0.0 has no dashboard yet: create it with the `dashboard` skill (hooks, one render, the
-   explanation question) as part of this update.
+   explanation question) as part of this update. **A project on v5.2.0.0 has the page at
+   `ocpfFramework/state/dashboard.html`, which is gitignored:** since v5.3.0.0 the renderer writes
+   `ProjectDashboard.html` to the project root, tracked. After the first render with the new
+   scripts, delete `ocpfFramework/state/dashboard.html`, run `git check-ignore -v
+   ProjectDashboard.html` (must print nothing), and `git add ProjectDashboard.html`. The hooks need
+   no change. Tell the human the page moved and now persists with the project.
 3b. **Refresh both companion guides to the versions the new runbook expects.** The Operations
    Guide comes from the framework repository:
    `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/opsGuide/ocpfOperationsGuide.md`
@@ -104,7 +109,7 @@ Guide versions it expects. If a local copy's major version differs, say so: the 
    repository at the tag the new framework pins** — read the pin from the framework's
    `standardsGuide/README.md` (fetch that prelude into `ocpfFramework/standardsGuide/README.md` too):
    `https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfALDevStandardsGuide.md`
-   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v5.2.0.0 the pin is
+   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v5.3.0.0 the pin is
    `v1.12.0.0`). Update each folder's `SNAPSHOT.json` (`repo`, `ref`, `sha`, `fetchedAt`). A project that
    began before v5.2.0.0 needs **no file move**: the on-disk path and filename are unchanged; the
    refresh only changes the source recorded in `SNAPSHOT.json`. A runbook and a companion from

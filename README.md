@@ -54,6 +54,17 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 10, 2026 — Full v5.3.0.0 · Lite v5.3.0.0 · Operations Guide v5.3.0.0 · Plugin v5.3.0
+
+**The dashboard persists with the project.** The first project built on v5.2.0.0 found its
+dashboard gitignored: the page was rendered into `ocpfFramework/state/`, the folder the framework
+always keeps out of git. It now lives at the project root as `ProjectDashboard.html`, beside
+`ProjectProgress.md`, tracked like any other project file and never ignored — Ops § Repository
+Hygiene lists it, and the setup check proves it with `git check-ignore`. The hooks are unchanged.
+A project on v5.2.0.0 gets the move from `/ocpf-bc:update-framework`: one render, the old file
+deleted, the new one staged. The page changes at every refresh, so it shows as modified after
+every turn; commit it with the rest.
+
 ## October 10, 2026 — Full v5.2.0.0 · Lite v5.2.0.0 · Operations Guide v5.2.0.0 · Plugin v5.2.0
 
 **Copilot credits are read from the session journal — nobody types a number any more.** Since
@@ -93,7 +104,8 @@ by contract, so **Standards §** citations keep resolving. Standards changes are
 ![The OCPF project dashboard — the Build Map page, rendered from a real project](images/ocpfDashboard.png)
 
 From the first minutes of PRE-01 (Lite Step 1), the
-framework renders `ocpfFramework/state/dashboard.html` — the *Build Map* page — opens it once in
+framework renders `ProjectDashboard.html` — the *Build Map* page, at the project root beside
+`ProjectProgress.md` and tracked in git — opens it once in
 your default browser, explains it once, and then keeps it fresh for free: hooks re-render it after
 every turn in Claude Code and the Copilot CLI (every step boundary in Copilot Chat, which has no
 hooks), with no model call. It shows your app's name and icon, which phase and step the build is
@@ -101,7 +113,7 @@ on, tokens or AI credits and cost so far, how the elapsed time splits between th
 yours, which models are working, the current step's exit gate, and — when the agent is waiting on
 you — the open question and where to answer it. `ProjectProgress.md` stays the written record; the
 page is a view of it. **To reopen it after closing the tab:** right-click
-`ocpfFramework/state/dashboard.html` in VS Code's Explorer → **Open Externally** (or *Reveal in
+`ProjectDashboard.html` in VS Code's Explorer → **Open Externally** (or *Reveal in
 Finder / File Explorer* and double-click), or ask the agent to "open the dashboard". One theme
 ships, *OnlyBCFans*, dark with a Day / Night switch; the page's footer carries a selector for the
 themes to come. To make the app's name and icon available that early, **the three identity
@@ -167,7 +179,7 @@ guides, step files, templates, patterns, scripts, the plugin's marker, the runbo
 `state/` folder for each developer's own usage, pricing, notification, and Copilot settings and the
 update backups. The `.ocpf/` folder and the loose root-level folders are gone. Project documents
 are grouped by phase — `docs/0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` — and
-AL source lives under `src/`. The project root holds only what the tools require.
+AL source lives under `src/`. The project root holds only what the tools require, plus `ProjectProgress.md` and the dashboard page `ProjectDashboard.html`.
 
 ### Lite gets `ProjectProgress.md`
 

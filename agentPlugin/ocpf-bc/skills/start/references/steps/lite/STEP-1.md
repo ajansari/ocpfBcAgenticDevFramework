@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 1 — Define the Problem & Lock Parameters
 
-**Runbook version:** 5.2.0.0 · Lite edition · Phase: DEFINE
+**Runbook version:** 5.3.0.0 · Lite edition · Phase: DEFINE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -47,8 +47,9 @@
   does not ask them again. Why first: the dashboard in the next bullet shows the app's name and icon.
 - **Create the live dashboard the moment `app.json` exists, open it, and explain it once**
   (ALL ALONG → Dashboard; **Ops § Dashboard — read it now**; plugin: `/ocpf-bc:dashboard`): copy the
-  renderer and template into `ocpfFramework/scripts/`, render `ocpfFramework/state/dashboard.html`,
-  open it (`--open`), install the refresh hooks for this AI tool (Claude Code and Copilot CLI:
+  renderer and template into `ocpfFramework/scripts/`, render `ProjectDashboard.html` at the
+  project root (beside `ProjectProgress.md`; tracked — `git check-ignore` must not name it), open
+  it (`--open`), install the refresh hooks for this AI tool (Claude Code and Copilot CLI:
   every turn; Copilot Chat: every step boundary), then ask the one explanation question — **I
   understand** / *Other* — with Ops § Dashboard's text (what, why, how, the file and where it is,
   and reopening with right-click → **Open Externally** or *Reveal* + double-click).
@@ -185,7 +186,7 @@ the human's (Rule 6d). **Full procedure: Ops § Project Setup.**
    Symbols).
 5. **Keep the editor in sync** (ALL ALONG → Keeping the Editor in Sync).
 
-**Outputs:** `ocpfFramework/` with its six-line `README.md`; `ocpfFramework/standardsGuide/`, `ocpfFramework/opsGuide/`, `ocpfFramework/runbookSteps/`, and `ocpfFramework/documentTemplates/` (all fetched, gitignored); `app.json` (first write: name, publisher, logo, version, id) and `src/` early in the step, complete at project setup; `ocpfFramework/state/dashboard.html` rendered, opened, explained, with its hooks and `ocpfFramework/state/dashboard.json`; `ocpfFramework/state/usage.json` (Step 1's start timestamp) and `ProjectProgress.md` (seeded, project root, Lite step table only, Step 1 `In Progress`); `ocpfFramework/state/copilot.json` and the Copilot keys in `.vscode/settings.json` (when Copilot is in use); `requirements/` (if any raw input was
+**Outputs:** `ocpfFramework/` with its six-line `README.md`; `ocpfFramework/standardsGuide/`, `ocpfFramework/opsGuide/`, `ocpfFramework/runbookSteps/`, and `ocpfFramework/documentTemplates/` (all fetched, gitignored); `app.json` (first write: name, publisher, logo, version, id) and `src/` early in the step, complete at project setup; `ProjectDashboard.html` (project root, tracked) rendered, opened, explained, with its hooks and `ocpfFramework/state/dashboard.json`; `ocpfFramework/state/usage.json` (Step 1's start timestamp) and `ProjectProgress.md` (seeded, project root, Lite step table only, Step 1 `In Progress`); `ocpfFramework/state/copilot.json` and the Copilot keys in `.vscode/settings.json` (when Copilot is in use); `requirements/` (if any raw input was
 captured); `docs/` with `0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` (created before the first document); `docs/1-define/ProblemStatement.md` (purpose, scope, out-of-scope, entity list, open questions);
 `docs/1-define/ProjectParameters.md` (the completed Project Parameters block, all placeholders
 replaced, the Main model and effort, version, and app icon answer included);

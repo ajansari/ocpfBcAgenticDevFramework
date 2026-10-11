@@ -1,7 +1,8 @@
 #!/usr/bin/env python3
 """OCPF BC Agentic Development Framework — the live dashboard renderer.
 
-Renders ocpfFramework/state/dashboard.html for one project from state the framework already keeps:
+Renders ProjectDashboard.html (project root, tracked in git — never under the ignored ocpfFramework/state/)
+for one project from state the framework already keeps:
 
   app.json                               name, publisher, version, BC version, logo (embedded as a data URI)
   ocpfFramework/framework.json           edition, runbook version, AL MCP state
@@ -371,8 +372,7 @@ def render(root, data):
     if not tpl: sys.exit("error: dashboard.html template not found beside the script (templates/dashboard.html) or in ocpfFramework/scripts/")
     payload = json.dumps(data, ensure_ascii=False, default=str).replace("</", "<\\/")
     html = tpl.replace("/*__OCPF_DATA__*/null", payload, 1)
-    out = os.path.join(root, STATE, "dashboard.html")
-    os.makedirs(os.path.dirname(out), exist_ok=True)
+    out = os.path.join(root, "ProjectDashboard.html")  # project root: tracked, beside ProjectProgress.md
     tmp = out + ".tmp"
     with open(tmp, "w", encoding="utf-8") as f: f.write(html)
     os.replace(tmp, out)
@@ -387,7 +387,7 @@ def open_in_browser(path):
     except OSError: return False
 
 def main():
-    ap = argparse.ArgumentParser(description="Render the OCPF project dashboard (ocpfFramework/state/dashboard.html).")
+    ap = argparse.ArgumentParser(description="Render the OCPF project dashboard (ProjectDashboard.html at the project root).")
     ap.add_argument("--project", default=".")
     ap.add_argument("--open", action="store_true", help="open the rendered page in the default browser (first creation)")
     ap.add_argument("--quiet", action="store_true")

@@ -600,7 +600,7 @@ const ev=D.events||[];const fh=ev.map(e=>`<span><i>${esc(e.time)}</i><b>${esc(e.
 $('feed').innerHTML=fh+fh;
 
 // ---- footer, freshness, refresh ----
-$('foot').textContent=`ocpfFramework/state/dashboard.html · rendered by ${D.renderer||'ocpf-dashboard'} · ${D.refreshSeconds?'reloads every '+D.refreshSeconds+' s':''}`;
+$('foot').textContent=`ProjectDashboard.html · rendered by ${D.renderer||'ocpf-dashboard'} · ${D.refreshSeconds?'reloads every '+D.refreshSeconds+' s':''}`;
 function fresh(){if(!gen)return;const age=Math.round((Date.now()-gen.getTime())/1000);$('fresh').textContent=`rendered ${age<90?age+' s':Math.round(age/60)+' min'} ago`;$('livePill').classList.toggle('stale',age>900);}
 fresh();setInterval(fresh,15000);
 if(D.refreshSeconds)setTimeout(()=>location.reload(),D.refreshSeconds*1000);
