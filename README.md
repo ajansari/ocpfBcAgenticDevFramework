@@ -54,6 +54,11 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 10, 2026 — Full v5.3.4.0 · Lite v5.3.4.0 · Operations Guide v5.3.4.0 · Plugin v5.3.4
+
+**Dashboard header carries the Business Central product icon** under the status pills, embedded
+inline and credited in `THIRD_PARTY_NOTICES.md`. Template only.
+
 ## October 10, 2026 — Full v5.3.3.0 · Lite v5.3.3.0 · Operations Guide v5.3.3.0 · Plugin v5.3.3
 
 **Dashboard header shows the real Claude and GitHub Copilot marks** instead of letter badges,

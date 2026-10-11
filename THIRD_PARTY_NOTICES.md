@@ -8,7 +8,7 @@ The framework stands on the work of others. This file credits every third-party 
 references, fetches, invokes, or recommends, and records the license each one is used under.
 
 **How the framework uses third-party material.** This repository **does not bundle or
-redistribute** any third-party code; the one exception is two icon drawings embedded in the
+redistribute** any third-party code; the one exception is three icons embedded in the
 dashboard page, credited under *Embedded in the dashboard page* below. The framework's documents:
 
 - **link** to external documentation and repositories,
@@ -48,7 +48,7 @@ September 14, 2026 (Node.js and PowerShell 7 on September 27, 2026). The upstrea
 - **License:** MIT — AJ Ansari (same author as this framework)
 - **Used for:** the verified reference design, templates, API reference, and false-assumptions
   table the runbooks follow when a project builds a Business Central Copilot feature. Fetched at a
-  pinned tag (`v1.0.0.0` for runbook v5.3.3.0), only on projects with such a feature, into a sibling
+  pinned tag (`v1.0.0.0` for runbook v5.3.4.0), only on projects with such a feature, into a sibling
   folder outside the project root; the snapshot keeps its `LICENSE` file. Nothing from it is
   copied into this repository or the plugin.
 
@@ -77,6 +77,16 @@ only to identify the tool the project runs in; the framework is free and sells n
   orange (`#D97757`) solely to identify Claude Code as the AI tool the project runs in. No
   affiliation with or endorsement by Anthropic is implied.
 - **Used for:** the *Claude Code* pill in the dashboard header.
+
+### Microsoft Dynamics 365 Business Central product icon
+- **Source:** Microsoft's product icon for Dynamics 365 Business Central, as distributed by
+  Microsoft (embedded as a PNG data URI)
+- **Trademark:** Microsoft, Dynamics 365, and Business Central are trademarks of the Microsoft
+  group of companies; the icon is shown solely to identify the platform every project built with
+  this framework targets, per Microsoft's trademark and brand guidelines
+  (<https://www.microsoft.com/legal/intellectualproperty/trademarks>). No affiliation with or
+  endorsement by Microsoft is implied.
+- **Used for:** the platform mark under the status pills in the dashboard header.
 
 ### GitHub Copilot icon (Octicons)
 - **Source:** Primer Octicons, `copilot-24.svg` — <https://github.com/primer/octicons>

@@ -16,6 +16,16 @@ framework.
 
 ---
 
+## v5.3.4.0 — October 10, 2026
+
+Derived from full framework **v5.3.4.0**; Operations Guide **v5.3.4.0**; Standards Guide
+**v1.12.0.0** (unchanged); plugin **5.3.4**. Dashboard template and notices only.
+
+- **Dashboard header carries the Business Central product icon** under the status pills, embedded
+  inline and credited in `THIRD_PARTY_NOTICES.md`. Full changelog: *v5.3.4.0*.
+
+---
+
 ## v5.3.3.0 — October 10, 2026
 
 Derived from full framework **v5.3.3.0**; Operations Guide **v5.3.3.0**; Standards Guide

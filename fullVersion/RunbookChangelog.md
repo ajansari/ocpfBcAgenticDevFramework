@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.3.3.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.3.3.0**, and Lite at **v5.3.3.0** — but
+**v5.3.4.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.3.4.0**, and Lite at **v5.3.4.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -21,6 +21,20 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v5.3.4.0 — October 10, 2026
+
+**Dashboard: the Business Central product icon in the header.** Lite **v5.3.4.0**, Operations
+Guide **v5.3.4.0** (version only), Standards Guide **v1.12.0.0** (unchanged), plugin **5.3.4**.
+Template and notices only; `update-framework` refreshes the template.
+
+- The header's right column now stacks the status pills over the Microsoft Dynamics 365 Business
+  Central product icon, filling the space that sat empty between the pills and the KPI tiles. The
+  icon is embedded as a PNG data URI (the page stays one file) and is credited in
+  `THIRD_PARTY_NOTICES.md` with Microsoft's trademark note; it identifies the platform every
+  project targets.
 
 ---
 

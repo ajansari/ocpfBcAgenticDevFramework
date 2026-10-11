@@ -4,6 +4,15 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.3.4 — October 10, 2026
+
+**Bundles:** full runbook v5.3.4.0, Lite v5.3.4.0, Standards Guide v1.12.0.0 (unchanged),
+Operations Guide v5.3.4.0. Template and notices only.
+
+- **`dashboard` skill: Business Central product icon in the header.** `templates/dashboard.html`
+  stacks the status pills over the Microsoft Dynamics 365 Business Central icon (PNG data URI,
+  64 px), filling the empty space above the KPI tiles. Credited in `THIRD_PARTY_NOTICES.md`.
+
 ## 5.3.3 — October 10, 2026
 
 **Bundles:** full runbook v5.3.3.0, Lite v5.3.3.0, Standards Guide v1.12.0.0 (unchanged),
