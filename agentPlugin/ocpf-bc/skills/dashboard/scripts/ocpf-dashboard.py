@@ -7,8 +7,8 @@ for one project from state the framework already keeps:
   app.json                               name, publisher, version, BC version, logo (embedded as a data URI)
   ocpfFramework/framework.json           edition, runbook version, AL MCP state
   ocpfFramework/state/usage.json         aiTool, step windows (startedAt / completedAt)
-  ProjectProgress.md                     the step table (status per step)
-  ocpfFramework/runbookSteps/<step>.md   the current step's Exit gate text, each step's phase and title
+  ProjectProgress.md                     the step table (status per step); Build-a-Feature: the feature table (one row per object)
+  ocpfFramework/runbookSteps/<step>.md   the current step's Exit gate text, each step's phase and title (Full, Lite)
   ocpfFramework/state/pricing.json       price source and date, credit price
   ocpfFramework/state/waiting.json       the open question, written by the hooks (see the dashboard skill)
   ocpfFramework/state/dashboard-events.jsonl   recent events, appended by this script and the hooks
@@ -37,6 +37,16 @@ SHORT = {"PRE-01": "State the Problem", "PRE-02": "Gap Analysis", "01": "Intake 
          "10": "Update Design Docs", "11": "Document the Code", "12": "Release for Testing",
          "STEP-1": "Define & Lock", "STEP-2": "Design Doc", "STEP-3": "Plan & Scaffold", "STEP-4": "Generate", "STEP-5": "Compile & Test",
          "STEP-6": "Review & Finalize", "STEP-7": "Release for Testing"}
+PHASES = ["DEFINE", "DESIGN", "BUILD", "PROVE"]
+# Build-a-Feature (edition "feature"): no step files; one row per object, read from usage.json's windows and the feature table
+FEATURE_PHASES = ["INTAKE", "BUILD", "PACKAGE", "REVIEW"]
+FEATURE_GATES = {
+    "INTAKE": ["The one intake question answered and the plan said back, object by object.", "The F00 window closed with its usage rows."],
+    "BUILD": ["Asked: what the object is and what it holds.", "Confirmed: fields, types, and the key confirmed in one box.",
+              "Built: the file written whole from the Standards Guide and the patterns library.", "Compiled: 0 errors / 0 warnings with the analyzers.",
+              "Closed: usage rows written and pasted; the companion box answered."],
+    "PACKAGE": ["Version moved per Ops § Packaging → Version numbers; the package in outputAppPackage/; Shipped in filled on every row it holds."],
+    "REVIEW": ["Standards Guide, BCQuality, and the AL Guidelines read against this session's files; findings presented once; approved fixes compiled clean."]}
 
 def load_json(p, default):
     try:
@@ -94,6 +104,41 @@ def step_catalog(root, edition):
                 gate = [(s.strip()[:220] + ('…' if len(s.strip()) > 220 else '')) for s in re.split(r"(?<=[.;])\s+(?=[A-Z§`])", g) if len(s.strip()) > 3][:7]
         out.append({"id": sid, "phase": phase, "title": title or SHORT.get(sid, sid), "short": SHORT.get(sid, title or sid), "exitGate": gate})
     return out
+
+def feature_phase(sid): return "INTAKE" if sid == "F00" else "PACKAGE" if sid == "FPK" else "REVIEW" if sid == "FRV" else "BUILD"
+
+def feature_rows(root):
+    """The feature table of ProjectProgress.md: {row id: {object, kind, oid, stage, status, shipped}} in file order."""
+    out = {}
+    for line in read(os.path.join(root, "ProjectProgress.md")).splitlines():
+        if re.match(r"^##\s+Usage and cost", line): break  # the usage table's rows start with the same ids and have 13 or 10 cells
+        m = re.match(r"^\|\s*(F\d{2}|FPK|FRV)\s*\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|\s*$", line)
+        if not m: continue
+        c = [x.strip() for x in m.groups()]
+        out[c[0]] = {"object": c[1], "kind": c[2], "oid": c[3], "stage": c[4], "status": c[5], "shipped": c[6]}
+    return out
+
+def feature_catalog(root, usage, wins):
+    """Rows in window-start order, then table rows that have no window yet; status from the table."""
+    rows = feature_rows(root)
+    ids = []
+    for w in wins:
+        if w[0] not in ids: ids.append(w[0])
+    for rid in rows:
+        if rid not in ids: ids.append(rid)
+    titles = {s.get("step"): s.get("title") for s in usage.get("steps", []) if s.get("title")}
+    cat = []; status = {}
+    for sid in ids:
+        r = rows.get(sid, {}); ph = feature_phase(sid)
+        kind = r.get("kind") if r.get("kind") not in (None, "", "—", "-") else None
+        obj = r.get("object") or titles.get(sid) or sid
+        title = f"{kind} {obj}" if kind else obj
+        st = (r.get("status") or "").lower()
+        if st: status[sid] = "now" if "in progress" in st else ("done" if st.startswith("complet") or st.startswith("done") else "todo")
+        cat.append({"id": sid, "phase": ph, "title": title, "short": obj, "exitGate": FEATURE_GATES[ph], "stage": r.get("stage") or None,
+                    "kind": kind, "objectId": r.get("oid") if r.get("oid") not in (None, "", "—", "-") else None,
+                    "shippedIn": r.get("shipped") if r.get("shipped") not in (None, "", "—", "-") else None})
+    return cat, status
 
 def progress_status(root, catalog):
     txt = read(os.path.join(root, "ProjectProgress.md"))
@@ -267,9 +312,11 @@ def build(root, a):
     tool = usage.get("aiTool") or ("copilot-chat" if ".github/copilot-instructions.md" in str(fw.get("placedAs")) else "claude-code")
     copilot = tool.startswith("copilot")
     edition = (fw.get("edition") or ("lite" if os.path.isfile(os.path.join(root, "ocpfFramework", "runbookSteps", "STEP-1.md")) else "full")).lower()
-    catalog = step_catalog(root, edition)
-    status = progress_status(root, catalog)
     wins = windows(usage); el = elapsed_by_step(wins)
+    if edition == "feature":
+        catalog, status = feature_catalog(root, usage, wins); phases = FEATURE_PHASES
+    else:
+        catalog = step_catalog(root, edition); status = progress_status(root, catalog); phases = PHASES
     notes = []
     uj, err = usage_rows(root, tool) if wins else (None, "no step windows yet")
     if err: notes.append(f"usage: {err}")
@@ -284,7 +331,8 @@ def build(root, a):
         steps.append({"id": sid, "title": c["title"], "short": c["short"], "phase": c["phase"], "status": st, "elapsedSeconds": el.get(sid),
                       "costUsd": sum((r.get("costUsd") or 0) for r in rs) if rs else None,
                       "tokens": sum((r.get("input") or 0) + (r.get("output") or 0) + (r.get("cacheWrite") or 0) + (r.get("cacheRead") or 0) for r in rs) if rs and not copilot else None,
-                      "credits": sum((r.get("aiCredits") or 0) for r in rs) if rs and copilot else None})
+                      "credits": sum((r.get("aiCredits") or 0) for r in rs) if rs and copilot else None,
+                      **{k: c[k] for k in ("stage", "kind", "objectId", "shippedIn") if c.get(k)}})
     cur = next((s for s in steps if s["status"] == "now"), None)
     # totals
     tot = {"costUsd": sum((r.get("costUsd") or 0) for r in rows) if rows else None, "elapsedSeconds": sum(el.values()) if el else None,
@@ -310,7 +358,7 @@ def build(root, a):
     current = {}
     if cur:
         rs = rows_for(cur["id"]); ps = (live or {}).get("perStep", {}).get(cur["id"]) if live else None
-        current = {"id": cur["id"], "title": cur["title"], "phase": cur["phase"], "exitGate": next(c["exitGate"] for c in catalog if c["id"] == cur["id"]),
+        current = {"id": cur["id"], "title": cur["title"], "phase": cur["phase"], "exitGate": next(c["exitGate"] for c in catalog if c["id"] == cur["id"]), "stage": cur.get("stage"),
                    "totals": {"costUsd": cur["costUsd"], "elapsedSeconds": cur["elapsedSeconds"], "agentSeconds": ps["agent"] if ps else None,
                               "humanSeconds": ps["human"] if ps else None, "waitingSeconds": ps["waiting"] if ps else None,
                               "tokens": cur["tokens"], "credits": cur["credits"]}}
@@ -354,17 +402,18 @@ def build(root, a):
     if gen_.get("model") and main_.get("model") and gen_["model"] == main_["model"]:
         gen_.pop("tokens", None); gen_.pop("credits", None); gen_["detail"] = "same model as Main; its usage is counted in Main's row"
     if cur is None and not wins: rl = [r for r in rl if r["model"]] or rl
+    if edition == "feature": rl = [r for r in rl if r["role"] == "Main"]  # one model does everything on this journey
     waiting = load_json(os.path.join(root, STATE, "waiting.json"), None)
     if waiting and waiting.get("clearedAt"): waiting = None
     if waiting:
         m_ = next(r for r in rl if r["role"] == "Main"); m_["status"] = "waiting on you"; m_["detail"] = (waiting.get("question") or "")[:90]
-    est = estimate_for(root, cur["id"], copilot) if cur else None
+    est = estimate_for(root, cur["id"], copilot) if (cur and edition != "feature") else None
     if est and est.get("estimated") is not None and cur:
         est["used"] = (cur["credits"] if copilot else cur["tokens"]) or 0
     data = {"generatedAt": now_utc().isoformat(), "refreshSeconds": a.refresh, "tool": tool, "live": bool(a.live or load_json(os.path.join(root, STATE, "dashboard.json"), {}).get("hooks")),
             "renderer": "ocpf-dashboard.py", "app": app_facts(root),
             "framework": {"edition": edition, "version": fw.get("runbookVersion"), "alMcp": "connected" if fw.get("alMcp") else "unknown"},
-            "steps": steps, "current": current, "totals": tot, "estimate": est, "models": models, "roles": rl, "waiting": waiting,
+            "phases": phases, "steps": steps, "current": current, "totals": tot, "estimate": est, "models": models, "roles": rl, "waiting": waiting,
             "events": recent_events(root), "pricing": {"source": (pricing.get("aiCredit") or {}).get("source") if copilot else ", ".join(sorted({v.get("source", "") for v in (pricing.get("perMillionTokens") or {}).values() if v.get("source")})),
                         "fetchedAt": pricing.get("fetchedAt"), "usdPerCredit": (pricing.get("aiCredit") or {}).get("usd")},
             "notes": notes, "toast": a.toast}

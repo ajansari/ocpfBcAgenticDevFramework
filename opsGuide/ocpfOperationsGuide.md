@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.4.2.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number; the previous version of this guide was 2.0.1.0)
-**Last Updated:** October 10, 2026
+**Version:** 5.5.0.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
+**Last Updated:** October 11, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
 > `fullVersion/BC_App_Build_Routine_Agent.md` and `liteVersion/LITE_BC_App_Build_Routine_Agent.md`.
@@ -65,8 +65,9 @@
 16. [Documents](#ops--documents)
 17. [Usage & Cost](#ops--usage--cost)
 18. [Dashboard](#ops--dashboard)
-18. [Reference Sources](#ops--reference-sources)
-19. [Plugin](#ops--plugin)
+19. [Build-a-Feature](#ops--build-a-feature) *(the third journey: one object or a few, no steps, no documents)*
+20. [Reference Sources](#ops--reference-sources)
+21. [Plugin](#ops--plugin)
 
 ---
 
@@ -1424,6 +1425,18 @@ costs well under a second of file reading and no tokens.
 `ocpfFramework/state/dashboard.json` records `hooks`, `theme`, and `tool`; the `status` skill
 reports a project whose hooks are missing.
 
+**On a Build-a-Feature project** (`"edition": "feature"` in the marker, Ops § Build-a-Feature) the
+page has no steps to show: the renderer builds its rows from the usage windows and the feature
+table in `ProjectProgress.md` instead — **one row per object asked for** (`F01`, `F02`, …), plus
+the intake, the package, and the review rows — grouped under the phases *Intake · Build · Package
+· Review*, each row carrying its stage (*Asked → Confirmed → Built → Compiled → Packaged →
+Reviewed*), its object ID, its time, and its cost; the *Objects built* tile replaces the estimate
+bar (there is no estimate on this journey), the exit-gate card shows the ladder a row climbs to
+close, and the roles card shows Main alone. Everything else — tokens or credits, cost, the time
+split, the open question, the hooks, both themes — is the same page. A Full or Lite project on
+which Build-a-Feature runs keeps its edition and its step map; its feature rows live in the usage
+table and the feature table, not on the Build Map.
+
 ### 4. Themes
 
 Two themes ship since v5.4.0.0, both with a Day / Night switch in the header and the same data
@@ -1934,7 +1947,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v5.4.2.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
+folder as `README.md`. For runbook **v5.5.0.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2107,7 +2120,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.4.2.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.5.0.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
@@ -2248,7 +2261,9 @@ ritual*). Per developer, always gitignored.
 ```
 
 `aiTool` is `claude-code`, `copilot-chat`, or `copilot-cli`. **`step` is the step file's name without
-`.md`, and nothing else:** `PRE-01`, `PRE-02`, `01` … `12` in Full; `STEP-1` … `STEP-7` in Lite. The
+`.md`, and nothing else:** `PRE-01`, `PRE-02`, `01` … `12` in Full; `STEP-1` … `STEP-7` in Lite;
+on Build-a-Feature, where there are no step files, the feature table's row ids — `F00`, `F01`, …,
+`FPK`, `FRV` — with an optional `title` the dashboard shows (Ops § Build-a-Feature). The
 usage table's first column, the `usage` skill's `--step` argument, and this file all use that
 spelling. A step reopened later gets a second entry with the same `step`; windows are summed. **An
 open window ends where the next window starts**, so a step left without `completedAt` never absorbs
@@ -2490,6 +2505,135 @@ Tell the human once, when the first file is written, where it is and what reads 
 
 ---
 
+## Ops § Build-a-Feature
+
+**The third journey.** Full builds a solution in 14 steps; Lite a small one in 7. Build-a-Feature
+builds **one object, or a few**, in a new or an existing per-tenant extension — a table and its
+list and card pages, a field on the Customer Card, a report, an API page or API query, a query,
+an enum or enum extension, a codeunit with an event subscriber, a permission set — **with no
+steps and no documents**. It exists because most day-to-day Business Central work is a quick mod,
+not a project, and a quick mod done through a 14-step routine is either skipped or done without
+the framework's standards. In the plugin the `build-a-feature` skill does everything below; `start`
+is the documented way in (Ops § Plugin), and a direct `/ocpf-bc:build-a-feature` runs the same
+checks — it is one journey, not a second one.
+
+**One governing rule:** *jump straight to what the human wants, find out what you need as fast as
+possible, build it to the Standards Guide, offer the natural next object, stop.* Speed is bought
+by dropping deliverables — the FRD, the TDD, the Design Doc, the estimates, the test script, the
+documentation, the translation files, the publish step — never by dropping the rules the code is
+written to.
+
+### Where it runs
+
+| Case | Recognised by | Setup |
+|---|---|---|
+| A Full or Lite project | the marker says `full` or `lite` | nothing new: the parameters, prefix, ranges, models, notifications, dashboard, and `ProjectProgress.md` are reused; the feature table is appended; one ChangeLog line per object |
+| A feature project | the marker says `feature` | continue: the row ids carry on from the highest |
+| An existing extension that never used the framework | `app.json`, no `ocpfFramework/` | read `app.json` and `src/` for the name, version, ranges, prefix, and namespace; confirm what was read in one box; the companions, the marker (`"edition": "feature"`), notifications, the dashboard, the Main model, the AL tools, the symbols |
+| An empty folder | nothing | the same, plus Box 0 (name, publisher, icon) and one naming-and-range box (Deployment Target — PTE only; prefix; namespace; ID range) |
+
+Nothing from PRE-01 / Lite Step 1 beyond that and the working-language question (asked first, so
+every later box is in the human's language): no parameter sheet, no problem statement, no
+per-country language questions, no estimates. AppSource is not a Build-a-Feature target; the
+journey says so and offers Full.
+
+### The journey
+
+1. **Intake — one question.** *What do you want to build today?* with four preset options (a new
+   table and its pages; extend a standard table or page; an API page or query; something else) and
+   free text — **the one place free text is expected**. `requirements/`, or a file the human
+   points at, is read first and pre-fills the answer. The answer is parsed into a plan of objects
+   in build order (enums before tables, tables before pages, a table extension before its page
+   extension) and said back in one list. No approval box here; each object's confirmation is the
+   approval.
+2. **The object loop.** For each object: open its usage window and its row (stage *Asked*); read
+   the object's reference file in the skill (what it needs, which Standards sections and patterns
+   files to read first, the skeleton, the pre-flight, the companion offer); **infer, then
+   confirm** (below) — stage *Confirmed*; allocate the ID from the project's range (the AL tools'
+   next-object-ID where the session has it, else the highest in `src/` plus one) and the file
+   name (Standards §1.8); write the file whole, once, from the skeleton and the Standards Guide —
+   stage *Built*; compile with the analyzers to 0 errors / 0 warnings, patterns library first on
+   any failure — stage *Compiled*; close the window with its usage rows pasted; end with the
+   **companion box** — the options box every close has (Full Rule 6c / Lite Rule 6c), two to
+   four options — offering
+   the object's natural next object and *Done*. Never a file that was not asked for or offered
+   and accepted; never a publish to a tenant.
+3. **Package, offered once** when the plan is empty: *Package it as a `.app` now* / *Not now*.
+   Ops § Packaging → *Version numbers* applies unchanged — a new extension's first package at
+   `0.0.0.1` as `app.json` says, every later package after a mechanical increment of the fourth
+   segment, an existing extension's first package incremented from its installed version, never
+   two at one version — into `outputAppPackage/`, with the fixed *Package built* message and the
+   version written into every row's *Shipped in*. Then, for a new extension only and only when a
+   package was built: *The package is tested and approved — build the release candidate 1.0.0.0
+   now* / *Not yet — I'll test it first (recommended)*; on *Not yet* the offer returns the next
+   time the human comes back to the project. An existing extension's release candidate is the
+   next Minor or Major, proposed the same way.
+4. **Review, offered once:** *Review the code now (recommended)* / *Skip*. On yes the BCQuality
+   snapshot is fetched now (the one moment this journey fetches it; a sibling folder, Ops §
+   Fetched Companions) and **this session's files** are reviewed on the Main model against the
+   Standards Guide (§1, Part 2 for API objects, §5.3–§5.4, Part 7 in full, Part 11), BCQuality's
+   dispatch flow, and the AL Guidelines' *Best Practices* and *Vibe Coding Rules*; every finding
+   in one message with root cause and fix; one box *Apply all / Apply selected / Discuss first*;
+   applied fixes recompile and, if a package was built, a new package supersedes it.
+5. **Close:** the list of what was built, the package, the session's usage rows, the dashboard
+   path, and the last box: *Done / Build another object / Open the dashboard*. Every row
+   `Completed` with its rows present; `ProjectProgress.md` and the dashboard pages staged.
+
+### Infer, then confirm
+
+Field types are the one place a quick mod turns into twenty questions. The rule: **types the
+human gave are validated, not re-asked** — the agent comes back only on something wrong or
+non-standard (`Option` → `Enum`; `Text` without a length; `Integer` for money; a relation with no
+table), with the recommended fix first. **Types the human did not give are inferred from the
+names** (`No.` → `Code[20]`; `Description` → `Text[100]`; `Amount` → `Decimal`; `Start Date` →
+`Date`; `Blocked` → `Boolean`; `Status` → an enum; `Customer No.` → `Code[20]` with the relation)
+and **shown as one table in one question** — *Looks right — build it* / *Change something*. Only a
+field that genuinely cannot be inferred gets its own question. The primary key is always
+confirmed. The full inference table is the skill's `references/field-types.md`.
+
+### One model, every role
+
+The Main model asks, writes, compiles and fixes, and reviews. No Light, Reasoning, or Generator
+sub-agent runs on this journey, even on a Full project that has them: the objects are simple, the
+review's value is its three checklists rather than deeper reasoning, and a fresh context buys
+little when the whole session is a handful of files. If an intake turns into a whole process —
+posting, documents, a wizard, a role center — the journey says so in one sentence and offers Lite;
+the work so far is an existing app to Lite's Step 1.
+
+### The record, the usage, the dashboard
+
+- **`ProjectProgress.md`** (project root, tracked) keeps the **feature table** — the template's
+  third step table: `Row | Object | Type | ID | Stage | Status | Shipped in`, one row per object
+  (`F01`, `F02`, … continuing across sessions), plus `F00` intake, `FPK` package, `FRV` review;
+  stage *Asked → Confirmed → Built → Compiled → Packaged → Reviewed*; status `In Progress` while
+  the row's window is open, `Completed` once its usage rows are written. On a Full or Lite project
+  the table is appended under its own heading between the step table and the usage table, and
+  the step table is never touched.
+- **Usage** (Ops § Usage & Cost, unchanged): every row is a window in `ocpfFramework/state/usage.json`
+  — `step` is the row id, `title` names it — opened at the row's start and closed at its close
+  with `/ocpf-bc:usage --step <id>`, one row per model (Claude Code) or per window (Copilot),
+  pasted into the closing message, never hand-written. `F00` opens with the session so that
+  nothing before the first object is *Unattributed*; the package and the review have their own
+  windows because one package or one review covers every object of the session.
+- **The dashboard** (Ops § Dashboard) is the same page: on a feature project its rows are the
+  objects, with their stage, ID, time, and cost, under *Intake · Build · Package · Review*; the
+  hooks and the in-place refresh are unchanged; the explanation question gains one sentence.
+- **The ChangeLog line** (Full or Lite project only): one line per object under the day's heading
+  — date, object type, ID, name, file, *Build-a-Feature*, and the package version it shipped in.
+  No other project document changes.
+
+### What the journey never does
+
+No FRD, TDD, Design Doc, Sanity Check, estimates, test script, documentation, user guide, or
+acknowledgements; no translation files (`TranslationFile` stays on so the `.g.xlf` exists for
+whoever adds languages later; labels are the source text, Standards §1.7 and §8.3 apply in full);
+no publish to a sandbox or a tenant; no AppSource target; no sub-agents; no calibration export
+unless asked; no second launch command. It works the same in Claude Code, GitHub Copilot Chat,
+and the Copilot CLI (`askQuestions` / `ask_user` for every box; AI credits in the usage table;
+the dashboard refreshed by hook or at every row close in Copilot Chat).
+
+---
+
 ## Ops § Reference Sources
 
 Alongside the fetched companions (Ops § Fetched Companions) and the AL tools, the framework grounds
@@ -2612,6 +2756,16 @@ started with until the human chooses otherwise.
   project stands (the model per role, whether the project-local definitions exist, a missing usage
   row for a closed step as a blocker, and `tooling`); `al-standards` answers ad hoc AL questions
   from the Standards Guide.
+- **Build-a-Feature:** the `start` skill is the one launching point for every journey — it offers
+  **Full, Lite, or Build-a-Feature** (recommending Build-a-Feature first on an existing extension
+  that never used the framework), and on a project that already follows the framework it offers
+  *Status / Check for a framework update / Build a feature in this project*. The third choice
+  invokes the `build-a-feature` skill (Ops § Build-a-Feature); a direct `/ocpf-bc:build-a-feature`
+  runs the same checks and is not a different journey. On a Full or Lite project (a quick mod
+  between or after steps; a step left `In Progress` has its window reopened when the journey
+  closes) the journey leaves the marker, the runbook, the steps, and
+  the documents alone, appends its feature table to `ProjectProgress.md`, and adds one ChangeLog
+  line per object.
 
 **Optional github.com reviewer.** The repository also ships a GitHub Copilot custom agent,
 `agentPlugin/github/agents/ocpf-code-reviewer.agent.md`. It reviews the extension against the Code

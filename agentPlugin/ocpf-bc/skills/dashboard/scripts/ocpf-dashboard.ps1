@@ -1,7 +1,7 @@
 # OCPF BC Agentic Development Framework — the live dashboard renderer, PowerShell port.
 # Renders ProjectDashboard.html (project root, tracked in git - never under the ignored ocpfFramework/state/)
 # for one project from the state the framework already keeps
-# (app.json, framework.json, usage.json, ProjectProgress.md, the step files, pricing.json, waiting.json,
+# (app.json, framework.json, usage.json, ProjectProgress.md — the step table, or Build-a-Feature's feature table — the step files, pricing.json, waiting.json,
 # the sub-agent definitions, the usage script's -Json output, and — in Claude Code — the transcripts).
 # Mirrors ocpf-dashboard.py (the Python script is the reference implementation); exercised on PowerShell 7
 # on macOS, untested on Windows. Internal variables avoid the parameter names (names are case-insensitive).
@@ -28,6 +28,16 @@ function NowUtc { [datetime]::UtcNow }
 function Iso($d) { $d.ToString("yyyy-MM-ddTHH:mm:ssZ") }
 $FULL = @(@("PRE-01","DEFINE"),@("PRE-02","DEFINE"),@("01","DEFINE"),@("02","DESIGN"),@("03","DESIGN"),@("04","DESIGN"),@("05","BUILD"),@("06","BUILD"),@("07","BUILD"),@("08","PROVE"),@("09","PROVE"),@("10","PROVE"),@("11","PROVE"),@("12","PROVE"))
 $LITE = @(@("STEP-1","DEFINE"),@("STEP-2","DESIGN"),@("STEP-3","BUILD"),@("STEP-4","BUILD"),@("STEP-5","BUILD"),@("STEP-6","PROVE"),@("STEP-7","PROVE"))
+$PHASES = @("DEFINE","DESIGN","BUILD","PROVE")
+# Build-a-Feature (edition "feature"): no step files; one row per object, read from usage.json's windows and the feature table
+$FEATURE_PHASES = @("INTAKE","BUILD","PACKAGE","REVIEW")
+$FEATURE_GATES = @{
+  "INTAKE" = @("The one intake question answered and the plan said back, object by object.", "The F00 window closed with its usage rows.")
+  "BUILD" = @("Asked: what the object is and what it holds.", "Confirmed: fields, types, and the key confirmed in one box.", "Built: the file written whole from the Standards Guide and the patterns library.", "Compiled: 0 errors / 0 warnings with the analyzers.", "Closed: usage rows written and pasted; the companion box answered.")
+  "PACKAGE" = @("Version moved per Ops § Packaging → Version numbers; the package in outputAppPackage/; Shipped in filled on every row it holds.")
+  "REVIEW" = @("Standards Guide, BCQuality, and the AL Guidelines read against this session's files; findings presented once; approved fixes compiled clean.") }
+function Feature-Phase($sid) { if ($sid -eq "F00") { "INTAKE" } elseif ($sid -eq "FPK") { "PACKAGE" } elseif ($sid -eq "FRV") { "REVIEW" } else { "BUILD" } }
+function Blank($v) { -not $v -or "$v" -in "—","-" }
 $SHORT = @{ "PRE-01"="State the Problem"; "PRE-02"="Gap Analysis"; "01"="Intake Sheet"; "02"="FRD"; "03"="TDD"; "04"="Sanity Check"; "05"="Plan the Code"; "06"="Code Generation"; "07"="Compile & Package"; "08"="Gap-Fit Test"; "09"="Code Review"; "10"="Update Design Docs"; "11"="Document the Code"; "12"="Release for Testing"; "STEP-1"="Define & Lock"; "STEP-2"="Design Doc"; "STEP-3"="Plan & Scaffold"; "STEP-4"="Generate"; "STEP-5"="Compile & Test"; "STEP-6"="Review & Finalize"; "STEP-7"="Release for Testing" }
 
 # ---- events / waiting (hook entry points) ----
@@ -61,6 +71,21 @@ if ($app.logo -and (Test-Path (Join-Path $root $app.logo))) { $bytes = [IO.File]
 $bc = $null; foreach ($k in "application","platform") { $v = $app[$k]; if ($v -is [string] -and $v -match '^(\d+)\.') { $bc = $Matches[1]; break } }
 $appFacts = [ordered]@{ name = $app.name; publisher = $app.publisher; version = $app.version; bc = $bc; iconDataUri = $icon; target = $app.target }
 
+$wins = @(); foreach ($s in @($usage.steps)) { $a = Parse-Ts $s.startedAt; if ($a -and $s.step) { $wins += ,@($s.step, $a, (Parse-Ts $s.completedAt)) } }
+$wins = @($wins | Sort-Object { $_[1] }); for ($i = 0; $i -lt $wins.Count; $i++) { if ($null -eq $wins[$i][2] -and $i + 1 -lt $wins.Count) { $wins[$i][2] = $wins[$i + 1][1] } }
+$phases = $PHASES; $status = @{}
+if ($edition -eq "feature") {
+  $phases = $FEATURE_PHASES
+  $frows = [ordered]@{}
+  foreach ($line in (Read-Text (Join-Path $root "ProjectProgress.md")) -split "`n") { if ($line -match '^##\s+Usage and cost') { break }; if ($line -match '^\|\s*(F\d{2}|FPK|FRV)\s*\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|([^|]*)\|\s*$') { $frows[$Matches[1].Trim()] = @{ object = $Matches[2].Trim(); kind = $Matches[3].Trim(); oid = $Matches[4].Trim(); stage = $Matches[5].Trim(); status = $Matches[6].Trim(); shipped = $Matches[7].Trim() } } }
+  $ids = @(); foreach ($w in $wins) { if ($w[0] -notin $ids) { $ids += $w[0] } }; foreach ($rid in $frows.Keys) { if ($rid -notin $ids) { $ids += $rid } }
+  $titles = @{}; foreach ($s in @($usage.steps)) { if ($s.title -and $s.step) { $titles[$s.step] = $s.title } }
+  $catalog = @(foreach ($sid in $ids) { $r = $frows[$sid]; if (-not $r) { $r = @{} }; $ph = Feature-Phase $sid
+    $kind = $(if (Blank $r.kind) { $null } else { $r.kind }); $obj = $(if ($r.object) { $r.object } elseif ($titles[$sid]) { $titles[$sid] } else { $sid })
+    $st = "$($r.status)".ToLower(); if ($st) { $status[$sid] = $(if ($st -like "*in progress*") { "now" } elseif ($st -like "complet*" -or $st -like "done*") { "done" } else { "todo" }) }
+    [ordered]@{ id = $sid; phase = $ph; title = $(if ($kind) { "$kind $obj" } else { $obj }); short = $obj; exitGate = @($FEATURE_GATES[$ph]); stage = $(if ($r.stage) { $r.stage } else { $null }); kind = $kind
+      objectId = $(if (Blank $r.oid) { $null } else { $r.oid }); shippedIn = $(if (Blank $r.shipped) { $null } else { $r.shipped }) } })
+} else {
 $base = if ($edition -eq "lite") { $LITE } else { $FULL }
 $catalog = @(foreach ($pair in $base) { $sid = $pair[0]; $ph = $pair[1]; $txt = Read-Text (Join-Path $root "ocpfFramework/runbookSteps/$sid.md"); $title = $null; $gate = @()
   if ($txt) { if ($txt -match '(?m)^# .*? — (?:PRE-0[12]|[0-9]{2}|STEP [0-9]) — (.+)$') { $title = $Matches[1].Trim() }
@@ -69,11 +94,9 @@ $catalog = @(foreach ($pair in $base) { $sid = $pair[0]; $ph = $pair[1]; $txt = 
       $gate = @([regex]::Split($g, '(?<=[.;])\s+(?=[A-Z§`])') | Where-Object { $_.Trim().Length -gt 3 } | ForEach-Object { $x = $_.Trim(); if ($x.Length -gt 220) { $x.Substring(0,220) + "…" } else { $x } } | Select-Object -First 7) } }
   [ordered]@{ id = $sid; phase = $ph; title = ($title ?? $SHORT[$sid] ?? $sid); short = ($SHORT[$sid] ?? $title ?? $sid); exitGate = $gate } })
 
-$status = @{}
 foreach ($line in (Read-Text (Join-Path $root "ProjectProgress.md")) -split "`n") { if ($line -match '^\|\s*(DEFINE|DESIGN|BUILD|PROVE)\s*\|\s*([A-Z0-9-]+)\s*[—-]\s*[^|]*\|\s*([^|]*)\|') { $st = $Matches[3].Trim().ToLower(); $status[$Matches[2].Trim()] = $(if ($st -like "*in progress*") { "now" } elseif ($st -like "complet*" -or $st -like "done*") { "done" } elseif (-not $st -or $st -in "pending","not started") { "todo" } elseif ($st -like "*complet*") { "done" } else { "todo" }) } }
+}
 
-$wins = @(); foreach ($s in @($usage.steps)) { $a = Parse-Ts $s.startedAt; if ($a -and $s.step) { $wins += ,@($s.step, $a, (Parse-Ts $s.completedAt)) } }
-$wins = @($wins | Sort-Object { $_[1] }); for ($i = 0; $i -lt $wins.Count; $i++) { if ($null -eq $wins[$i][2] -and $i + 1 -lt $wins.Count) { $wins[$i][2] = $wins[$i + 1][1] } }
 $el = @{}; foreach ($w in $wins) { $end = $w[2] ?? (NowUtc); $el[$w[0]] = ($el[$w[0]] ?? 0) + [Math]::Max(0, ($end - $w[1]).TotalSeconds) }
 function Step-Of($ts) { $hit = $null; foreach ($w in $wins) { if ($ts -ge $w[1] -and ($null -eq $w[2] -or $ts -le $w[2])) { $hit = $w[0] } }; $hit }
 
@@ -122,10 +145,12 @@ if (-not $copilot -and $wins.Count) {
 $steps = @(foreach ($c in $catalog) { $sid = $c.id; $rs = Rows-For $sid
   $st = $status[$sid]; if (-not $st) { $openWins = @($wins | Where-Object { $_[0] -eq $sid -and $null -eq $_[2] }).Count; $any = @($wins | Where-Object { $_[0] -eq $sid }).Count; $st = $(if ($any -and -not $openWins) { "done" } elseif ($any) { "now" } else { "todo" }) }
   if ($el.ContainsKey($sid) -and $st -eq "todo") { $st = $(if (@($wins | Where-Object { $_[0] -eq $sid -and $null -eq $_[2] }).Count) { "now" } else { "done" }) }
-  [ordered]@{ id = $sid; title = $c.title; short = $c.short; phase = $c.phase; status = $st; elapsedSeconds = $el[$sid]
+  $row = [ordered]@{ id = $sid; title = $c.title; short = $c.short; phase = $c.phase; status = $st; elapsedSeconds = $el[$sid]
     costUsd = $(if ($rs.Count) { Sum $rs "costUsd" } else { $null })
     tokens = $(if ($rs.Count -and -not $copilot) { (Sum $rs "input") + (Sum $rs "output") + (Sum $rs "cacheWrite") + (Sum $rs "cacheRead") } else { $null })
-    credits = $(if ($rs.Count -and $copilot) { Sum $rs "aiCredits" } else { $null }) } })
+    credits = $(if ($rs.Count -and $copilot) { Sum $rs "aiCredits" } else { $null }) }
+  foreach ($k in "stage","kind","objectId","shippedIn") { if ($c.Contains($k) -and $c[$k]) { $row[$k] = $c[$k] } }
+  $row })
 $cur = $steps | Where-Object { $_.status -eq "now" } | Select-Object -First 1
 
 # ---- totals ----
@@ -137,7 +162,7 @@ else { $tk = [ordered]@{}; foreach ($k in "input","output","cacheWrite","cacheRe
 if ($liveState) { $ag = 0.0; $hu = 0.0; $wa = 0.0; foreach ($v in $liveState.perStep.Values) { $ag += $v.agent; $hu += $v.human; $wa += $v.waiting }; $tot.agentSeconds = $ag; $tot.humanSeconds = $hu; $tot.waitingSeconds = $wa }
 $current = [ordered]@{}
 if ($cur) { $ps = if ($liveState -and $liveState.perStep.ContainsKey($cur.id)) { $liveState.perStep[$cur.id] } else { $null }; $gateC = ($catalog | Where-Object { $_.id -eq $cur.id } | Select-Object -First 1).exitGate
-  $current = [ordered]@{ id = $cur.id; title = $cur.title; phase = $cur.phase; exitGate = @($gateC); totals = [ordered]@{ costUsd = $cur.costUsd; elapsedSeconds = $cur.elapsedSeconds; agentSeconds = $(if ($ps) { $ps.agent }); humanSeconds = $(if ($ps) { $ps.human }); waitingSeconds = $(if ($ps) { $ps.waiting }); tokens = $cur.tokens; credits = $cur.credits } } }
+  $current = [ordered]@{ id = $cur.id; title = $cur.title; phase = $cur.phase; exitGate = @($gateC); stage = $(if ($cur.Contains("stage")) { $cur.stage } else { $null }); totals = [ordered]@{ costUsd = $cur.costUsd; elapsedSeconds = $cur.elapsedSeconds; agentSeconds = $(if ($ps) { $ps.agent }); humanSeconds = $(if ($ps) { $ps.human }); waitingSeconds = $(if ($ps) { $ps.waiting }); tokens = $cur.tokens; credits = $cur.credits } } }
 
 # ---- models ----
 $agg = [ordered]@{}
@@ -162,13 +187,14 @@ if ($liveState) { if (-not $main.model) { $main.model = $liveState.main.model };
     elseif ($ms.Count) { $r.lastDetail = "returned " + (($ms | ForEach-Object { $_.last } | Measure-Object -Maximum).Maximum).ToLocalTime().ToString("HH:mm") } } }
 foreach ($r in $rl) { if ($r.model) { $mm = $models | Where-Object { $_.model -and ("$($_.model)" -like "*$($r.model)*" -or "$($r.model)" -like "*$($_.model)*") } | Select-Object -First 1; if ($mm) { $r.tokens = $mm.tokens; $r.credits = [Math]::Round($mm.credits, 1) } } }
 if ($gen.model -and $main.model -and $gen.model -eq $main.model) { $gen.Remove("tokens"); $gen.Remove("credits"); $gen.detail = "same model as Main; its usage is counted in Main's row" }
+if ($edition -eq "feature") { $rl = @($rl | Where-Object { $_.role -eq "Main" }) }  # one model does everything on this journey
 $waiting = Load-Json (Join-Path $stateDir "waiting.json") $null
 if ($waiting -and $waiting.clearedAt) { $waiting = $null }
 if ($waiting) { $main.status = "waiting on you"; $main.detail = "$($waiting.question)".Substring(0, [Math]::Min(90, "$($waiting.question)".Length)) }
 
 # ---- estimate ----
 $est = $null
-if ($cur) { $etxt = Read-Text (Join-Path $root "docs/2-design/AiEffortEstimate.md")
+if ($cur -and $edition -ne "feature") { $etxt = Read-Text (Join-Path $root "docs/2-design/AiEffortEstimate.md")
   if ($etxt) { $tokT = 0.0; $cred = 0.0; $hit = $false
     function NumE($s) { $s = ("$s" -replace ',', '').Trim().ToLower(); if ($s -match '^([0-9.]+)\s*([km]?)') { $v = [double]$Matches[1]; if ($Matches[2] -eq 'm') { $v * 1e6 } elseif ($Matches[2] -eq 'k') { $v * 1e3 } else { $v } } else { 0.0 } }
     foreach ($line in $etxt -split "`n") { $cells = @(($line.Trim().Trim('|')) -split '\|' | ForEach-Object { $_.Trim() }); if ($cells.Count -lt 6 -or $cells[0].Trim('*') -ne $cur.id) { continue }; $hit = $true; $tokT += (NumE $cells[2]) + (NumE $cells[3]) + (NumE $cells[4]) + (NumE $cells[5]); if ($cells.Count -ge 8) { $cred += NumE $cells[7] } }
@@ -182,7 +208,7 @@ $dj0 = Load-Json (Join-Path $stateDir "dashboard.json") @{}
 $isLive = $false; if ($Live.IsPresent) { $isLive = $true } elseif ($dj0.hooks -eq $true) { $isLive = $true }
 $data = [ordered]@{ generatedAt = (NowUtc).ToString("o"); refreshSeconds = $Refresh; tool = $tool; live = $isLive
   renderer = "ocpf-dashboard.ps1"; app = $appFacts; framework = [ordered]@{ edition = $edition; version = $fw.runbookVersion; alMcp = $(if ($fw.alMcp) { "connected" } else { "unknown" }) }
-  steps = $steps; current = $current; totals = $tot; estimate = $est; models = $models; roles = $rl; waiting = $waiting; events = $events
+  phases = $phases; steps = $steps; current = $current; totals = $tot; estimate = $est; models = $models; roles = $rl; waiting = $waiting; events = $events
   pricing = [ordered]@{ source = $priceSrc; fetchedAt = $pricing.fetchedAt; usdPerCredit = $pricing.aiCredit.usd }; notes = $notes; toast = $Toast }
 
 # ---- render ----

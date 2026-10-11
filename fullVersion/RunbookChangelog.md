@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.4.2.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.4.2.0**, and Lite at **v5.4.2.0** — but
+**v5.5.0.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.5.0.0**, and Lite at **v5.5.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -21,6 +21,62 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v5.5.0.0 — October 11, 2026
+
+**Build-a-Feature: a third journey beside Full and Lite.** Lite **v5.5.0.0**, Operations Guide
+**v5.5.0.0** (new section *Ops § Build-a-Feature*), Standards Guide **v1.12.0.0** (unchanged),
+plugin **5.5.0** (new `build-a-feature` skill; `start`, `dashboard`, `usage`, `status`,
+`update-framework`, `roles`, and `documents` updated). The Full runbook itself gains one bullet in
+ALL ALONG → OCPF Plugin and the version line; no step changes.
+
+- **What it is.** One object, or a few, in a new or existing per-tenant extension — a table and its
+  list and card pages, a field on the Customer Card (table extension + page extension), a report or
+  report extension, an API page or API query, a query, an enum or enum extension, a codeunit with
+  an event subscriber, a permission set or permission set extension — **with no steps and no
+  documents**. Most day-to-day Business Central work is a quick mod, not a project; this journey
+  gives it the framework's standards without the framework's ceremony. AJ's brief, October 11,
+  2026: "rapid development for things that are not a whole solution but quick mods."
+- **How it runs** (Ops § Build-a-Feature). One intake question — *What do you want to build
+  today?* — with four preset options and free text, the one place free text is expected;
+  `requirements/` is read first. The answer becomes a plan of objects in build order. Per object:
+  **infer, then confirm** (types the human gave are validated, not re-asked; missing types are
+  inferred from the field names and shown as one table in one question); the ID from the
+  project's range and the file name per Standards §1.8; the file written whole from the object's
+  reference skeleton, the Standards Guide, and the patterns library; compiled with the analyzers to
+  0 / 0; closed with its usage rows and the **companion box** (table → list page, card page, both,
+  API page, permission grants, done). Then one offer to **package a `.app`** (Ops § Packaging →
+  *Version numbers*, unchanged: `0.0.0.1` first for a new extension, incremented from the installed
+  version for an existing one; the release-candidate `1.0.0.0` offered only once the human says the
+  package was tested and approved), and one offer to **review the code** on the Main model against
+  the Standards Guide, BCQuality (fetched only then), and the AL Guidelines, with *Apply all / Apply
+  selected / Discuss first*.
+- **One launching point.** `start` now offers **Full, Lite, or Build-a-Feature** (the third
+  recommended first on an existing extension that never used the framework), and on a project that
+  already follows the framework it asks *Status / Check for a framework update / Build a feature in
+  this project* instead of refusing; a direct `/ocpf-bc:build-a-feature` runs the same checks. On a Full or Lite project
+  the journey leaves the runbook, the step table, and every document alone, appends its feature
+  table to `ProjectProgress.md`, and adds one ChangeLog line per object.
+- **One model.** The Main model asks, writes, compiles and fixes, and reviews; no Light,
+  Reasoning, or Generator sub-agent, even on a Full project. AppSource is not a target; a request
+  that grows into a whole process is handed to Lite with the work kept.
+- **The record, the usage, the dashboard.** `ProjectProgress.md` gains a third step table in the
+  template — `Row | Object | Type | ID | Stage | Status | Shipped in`, one row per object (`F01`,
+  `F02`, …) plus `F00` intake, `FPK` package, `FRV` review, stage *Asked → Confirmed → Built →
+  Compiled → Packaged → Reviewed*. Every row is a usage window (`step` = the row id, plus a
+  `title`), so the `usage` skill's rows, prices, and Copilot credits work unchanged; `F00` opens
+  with the session so nothing is *Unattributed*. The dashboard renderers (`ocpf-dashboard.py` /
+  `.ps1`) accept `"edition": "feature"`: rows come from the windows and the feature table instead of
+  the step files, the data carries `phases` (*Intake · Build · Package · Review*) and each row's
+  `stage`, `kind`, `objectId`, and `shippedIn`; both templates read `phases` instead of the four
+  hard-coded phase names, show the stage on each station or lap, replace the estimate tile with
+  *Objects built*, and show Main alone in the roles card. Full and Lite pages render exactly as
+  before. The usage scripts count objects for the calibration file from the feature table on a
+  feature project.
+- **Documents mode** (Claude Chat, Cowork): Build-a-Feature needs a compiler, so `start` says so
+  there and offers Full or Lite's DEFINE and DESIGN work.
 
 ---
 

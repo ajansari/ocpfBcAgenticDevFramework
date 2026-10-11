@@ -19,13 +19,17 @@ In an AL project folder (or a new, empty one):
 Or just ask: *"Start a Business Central project with the OCPF framework."*
 
 The `start` skill:
-1. helps you choose **Full** (14 steps) or **Lite** (7 steps),
+1. helps you choose **Full** (14 steps), **Lite** (7 steps), or **Build-a-Feature** (one object or
+   a few, in a new or existing extension, no steps, no documents),
 2. installs the **latest** runbook from GitHub as `CLAUDE.md` and/or
-   `.github/copilot-instructions.md`, and never overwrites an existing file,
+   `.github/copilot-instructions.md`, and never overwrites an existing file (Full and Lite),
 3. connects **Microsoft's AL tools**, with nothing to install, using the AL Language extension you already have,
-4. begins the routine.
+4. begins the routine — or, for Build-a-Feature, asks *What do you want to build today?*
 
-**Project layout (since plugin 5.0.0, Full 5.0.0.0 / Lite 5.0.0.0; current 5.4.2 / 5.4.2.0):** everything the framework fetches
+On a project that already follows the framework, `start` offers *Status*, *Check for a framework
+update*, or *Build a feature in this project*.
+
+**Project layout (since plugin 5.0.0, Full 5.0.0.0 / Lite 5.0.0.0; current 5.5.0 / 5.5.0.0):** everything the framework fetches
 or keeps lives under one folder, `ocpfFramework/` (step files, templates, guides, patterns,
 scripts, the marker, and per-developer `state/`); project documents go in `docs/` by phase
 (`0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/`); `ProjectProgress.md` stays in the
@@ -35,14 +39,15 @@ moved to this layout by `update-framework`'s migration.
 **Model recommendations** (the `roles` skill offers these first; High effort only where judgment
 matters most, because it makes every task slower): Full on Claude Code — Main Sonnet Medium,
 Light Haiku Medium, Reasoning Opus High; Full on GitHub Copilot — Gemini 3.8 Flash Medium, Auto
-Balanced, Claude Opus 5.5 High; Lite — Sonnet Medium (Copilot: Gemini 3.8 Flash Medium). The
-generator sub-agent runs on the Main model.
+Balanced, Claude Opus 5.5 High; Lite and Build-a-Feature — Sonnet Medium (Copilot: Gemini 3.8
+Flash Medium). The generator sub-agent runs on the Main model; Build-a-Feature uses no sub-agent.
 
 ## What's included
 
 | Component | What it does |
 |---|---|
-| `start` skill | Sets up a new project and begins the routine. |
+| `start` skill | The one launching point: chooses Full, Lite, or Build-a-Feature, sets up the project, and begins; on an existing framework project offers status, an update check, or a feature build. |
+| `build-a-feature` skill | The quick-mod journey: one object or a few — a table and its pages, a table / page / report extension, a report, an API page or query, a query, an enum or enum extension, a codeunit, a permission set — asked in one question, field types inferred and confirmed once, written from the Standards Guide and the patterns library, compiled clean, the next object offered at every close, then a `.app` and an optional review on the Main model. Keeps the feature table in `ProjectProgress.md`, usage per object, and the dashboard. Reached through `start`. |
 | `status` skill | Reports where a project stands: current step, exit gate, what's waiting on you. |
 | `update-framework` skill | Checks for a newer runbook, shows what changed, and updates the project's copy only when you approve. The runbook also checks once per session. |
 | `al-standards` skill | The OCPF AL Development Standards Guide, for writing and reviewing AL. The shared **Operations Guide** — the framework's procedures, cited as Ops § — is bundled with the `start` skill and fetched into each project. |

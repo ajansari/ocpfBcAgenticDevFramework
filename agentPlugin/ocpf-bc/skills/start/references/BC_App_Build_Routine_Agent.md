@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.4.2.0
-**Last Updated:** October 10, 2026
+**Version:** 5.5.0.0
+**Last Updated:** October 11, 2026
 
 > Version history for this framework lives in `ocpfFramework/RunbookChangelog.md`, tracked
 > independently of any one project built with it — check there for what changed between the version
@@ -18,7 +18,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.12.0.0): the AL *rules* this sequence applies (Parts 1–11, Appendices A–E), cited below as
 >   **Standards §**.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.4.2.0): the *procedures*
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.5.0.0): the *procedures*
 >   this sequence uses — asking, intake, project setup, the AL tools, tooling checks, analyzers,
 >   symbols, editor sync, notifications, packaging, repository hygiene, translations, fetched
 >   companions, documents, usage and cost, and the plugin — cited below as **Ops §**. Both editions
@@ -997,6 +997,13 @@ Tooling Checks). Without that file, skip it entirely.
   calibration file at close) skills.
 - **Optional github.com reviewer:** offer `ocpf-code-reviewer` once at Step 09 if the project is on
   GitHub and the team uses Copilot; its report is a Step 09 input like any other.
+- **Build-a-Feature on this project (Ops § Build-a-Feature):** the plugin's third journey builds
+  one object or a few — a table and its pages, a field on a standard page, a report, an API page,
+  an enum, a permission set — with no steps and no documents, on the Main model alone. The
+  `start` skill offers it as *Build a feature in this project*; it leaves this runbook, the step
+  table, and every document alone, appends its own feature table to `ProjectProgress.md` (one row
+  per object, with usage rows under `F` ids), and adds one ChangeLog line per object. It is for a
+  quick mod between or after the routine's steps, never a substitute for a step.
 
 ## Stage ↔ Step Map
 

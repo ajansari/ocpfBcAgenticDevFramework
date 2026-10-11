@@ -16,6 +16,20 @@ framework.
 
 ---
 
+## v5.5.0.0 — October 11, 2026
+
+Derived from full framework **v5.5.0.0**; Operations Guide **v5.5.0.0**; Standards Guide
+**v1.12.0.0** (unchanged); plugin **5.5.0**. The Build-a-Feature journey.
+
+- A third journey beside Full and Lite — one object or a few, in a new or existing extension, with
+  no steps and no documents — reached through the plugin's `start` skill (*Full / Lite /
+  Build-a-Feature*, and *Build a feature in this project* on a project already on the framework).
+  Lite gains one bullet in its OCPF Plugin section and the version line; no step changes. On a Lite
+  project the journey appends its feature table to `ProjectProgress.md` and adds one ChangeLog line
+  per object, leaving the steps and documents alone. Full changelog: *v5.5.0.0*.
+
+---
+
 ## v5.4.2.0 — October 10, 2026
 
 Derived from full framework **v5.4.2.0**; Operations Guide **v5.4.2.0**; Standards Guide

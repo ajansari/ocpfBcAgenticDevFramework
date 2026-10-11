@@ -4,6 +4,37 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.5.0 — October 11, 2026
+
+**Bundles:** full runbook v5.5.0.0, Lite v5.5.0.0, Standards Guide v1.12.0.0 (unchanged),
+Operations Guide v5.5.0.0 (new *Ops § Build-a-Feature*). New skill; dashboard renderers and
+templates; usage scripts; `start` and five other skills.
+
+- **New `build-a-feature` skill — the third journey.** One object or a few, in a new or existing
+  per-tenant extension, no steps, no documents: one intake question (the only free-text one),
+  infer-then-confirm field types (`references/field-types.md`), one reference file per object type
+  under `references/objects/` (table, table extension, page, page extension, report, report
+  extension, API page, API query, query, enum, enum extension, codeunit, permission set, permission
+  set extension — what to ask, what to validate, the skeleton, the pre-flight, the companion
+  offer), compile clean with the analyzers, the companion box at every close, one offer to package
+  a `.app` and one to review on the Main model against the Standards Guide, BCQuality, and the AL
+  Guidelines. Keeps `ProjectProgress.md`'s feature table (`references/feature-record.md`), the
+  usage windows under `F` ids, and the dashboard. `start` is the documented way in; a direct
+  `/ocpf-bc:build-a-feature` runs the same checks.
+- **`start` skill:** offers **Full, Lite, or Build-a-Feature**; recommends Build-a-Feature first on
+  an existing extension with no framework; on a project already on the framework asks *Status /
+  Check for a framework update / Build a feature in this project* instead of stopping; accepts
+  `feature` as an argument; Documents mode says the journey needs a compiler.
+- **`dashboard` skill:** `ocpf-dashboard.py` / `.ps1` render `"edition": "feature"` — rows from the
+  usage windows and the feature table, `phases` in the data, `stage` / `kind` / `objectId` /
+  `shippedIn` per row, Main alone in the roles; both templates read `D.phases`, show the stage per
+  station or lap, and show *Objects built* instead of the estimate. Full and Lite unchanged.
+- **`usage` skill:** the scripts count objects from the feature table on a feature project
+  (calibration); `F` ids documented as step ids.
+- **`status`, `update-framework`, `roles`, `documents` skills:** edition `feature` awareness (the
+  feature rows in a status report; no runbook to update, companions and scripts refreshed; Lite's
+  two model questions; the template's third step table).
+
 ## 5.4.2 — October 10, 2026
 
 **Bundles:** full runbook v5.4.2.0, Lite v5.4.2.0, Standards Guide v1.12.0.0 (unchanged),

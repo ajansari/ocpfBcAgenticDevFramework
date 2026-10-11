@@ -13,7 +13,10 @@ boundary — and, at project close, the calibration export.
 
 The normal invocation is at a step boundary, with the step id (Full Operating Rule 11, Lite
 Operating Rule 9; Ops § Usage & Cost → *The step boundary ritual*). Step ids are the step file
-names: `PRE-01`, `PRE-02`, `01` … `12`, `STEP-1` … `STEP-7`.
+names: `PRE-01`, `PRE-02`, `01` … `12`, `STEP-1` … `STEP-7` — and, on the Build-a-Feature journey
+(Ops § Build-a-Feature), the feature table's row ids: `F00` intake, `F01`, `F02`, … one per object,
+`FPK` package, `FRV` review. The ritual is the same at every row's start and close; the window may
+carry a `title` the dashboard shows, which this skill ignores.
 
 - **Step start:** append `{ "step", "startedAt" }` to `ocpfFramework/state/usage.json` and set the
   step's `ProjectProgress.md` row to `In Progress` — same moment, same message.
@@ -136,7 +139,9 @@ pwsh   <this skill's folder>/scripts/ocpf-usage.ps1 -Project "<project root>" -S
 
 ## Step 4: Write the table
 
-- **Both editions:** the second table of `ProjectProgress.md`, under the step table. The columns
+- **Every journey:** the second table of `ProjectProgress.md`, under the step table (under the
+  feature table on a Build-a-Feature project, or under both on a Full or Lite project the journey
+  ran on — the `F` rows sit beside the step rows in the one usage table). The columns
   are fixed by the template (`ocpfFramework/documentTemplates/ProjectProgress.md`), **one set per
   AI tool: keep the table that matches `aiTool` and delete the other** — *Claude Code — tokens by
   type* (thirteen columns) or *GitHub Copilot — AI credits* (ten). A project that changed tools

@@ -106,14 +106,15 @@ def price(row, rates):
             + row["cacheRead"] * r.get("cacheRead", 0)) / m
 
 def object_counts(root, edition):
-    """Objects by type from the Object Register (Full) or the Design Doc's object table (Lite).
+    """Objects by type from the Object Register (Full), the Design Doc's object table (Lite), or the feature table in ProjectProgress.md (Build-a-Feature).
 
     Reads every Markdown table whose header has an ID column and a Type column, keyed by (type, ID)
     — BC IDs are unique per object type — so an object listed in two tables counts once. Placeholder rows (an ID starting with '<', or empty)
     are skipped. Returns {"source", "byType", "total"} plus a "note" when nothing could be read.
     """
     candidates = [("full", os.path.join("docs", "1-define", "ObjectRegister.md")),
-                  ("lite", os.path.join("docs", "2-design", "DesignDoc.md"))]
+                  ("lite", os.path.join("docs", "2-design", "DesignDoc.md")),
+                  ("feature", "ProjectProgress.md")]
     candidates.sort(key=lambda c: c[0] != (edition or "full"))
     clean = lambda cell: re.sub(r"[`*]", "", cell).strip()
     for _, rel in candidates:
@@ -135,7 +136,8 @@ def object_counts(root, edition):
                     cells = [clean(c) for c in lines[i].strip().strip("|").split("|")]
                     if len(cells) > max(id_col, type_col):
                         oid, otype = cells[id_col], cells[type_col]
-                        if oid and not oid.startswith("<") and otype and not otype.startswith("<"):
+                        if oid and not oid.startswith("<") and oid not in ("—", "-") and otype and not otype.startswith("<") and otype not in ("—", "-"):
+                            otype = re.sub(r"\s*\(.*\)$", "", otype)  # the feature table's "Page (List)" counts as "Page", like the Object Register
                             by_id[(otype, oid)] = otype
                     i += 1
                 continue
@@ -145,7 +147,7 @@ def object_counts(root, edition):
             for t in by_id.values(): by_type[t] += 1
             return {"source": rel.replace(os.sep, "/"), "byType": dict(sorted(by_type.items())), "total": len(by_id)}
     return {"source": None, "byType": {}, "total": 0,
-            "note": "no object table with ID and Type columns found in docs/1-define/ObjectRegister.md or docs/2-design/DesignDoc.md"}
+            "note": "no object table with ID and Type columns found in docs/1-define/ObjectRegister.md, docs/2-design/DesignDoc.md, or ProjectProgress.md"}
 
 
 # ───────────────────────────── GitHub Copilot Chat in VS Code ─────────────────────────────

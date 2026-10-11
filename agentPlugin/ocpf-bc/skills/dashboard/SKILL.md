@@ -148,6 +148,19 @@ Record what was installed in `ocpfFramework/state/dashboard.json` (`hooks: true/
   page that paints but never updates: the renderer did not write
   `ocpfFramework/state/dashboard-data.js` (older than v5.3.5.0) — refresh `ocpfFramework/scripts/`.
 
+## 3a. Build-a-Feature projects
+
+On a marker with `"edition": "feature"` (Ops § Build-a-Feature) there are no steps: the renderers
+build the rows from the usage windows and the feature table in `ProjectProgress.md` — one row per
+object (`F01`, `F02`, …), plus `F00` intake, `FPK` package, `FRV` review — under the phases
+*Intake · Build · Package · Review*, each row with its stage, object ID, time, and cost; the
+estimate tile becomes *Objects built*; the exit-gate card shows the row's stage ladder; the roles
+card shows Main alone. The data gains `phases` and, per row, `stage`, `kind`, `objectId`, and
+`shippedIn`. First creation is the same (the `build-a-feature` skill calls this skill the moment
+`app.json` exists, adding one sentence to the explanation question); hooks and refresh are the
+same. Renderers and templates older than plugin 5.5.0 show a feature project as an empty Full
+map: refresh `ocpfFramework/scripts/` (`update-framework`).
+
 ## 4. What the page can and cannot know
 
 It shows only what is on disk and says so where it can't: *No estimate yet* before Step 03 / Lite

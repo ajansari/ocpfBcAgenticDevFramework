@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 5.4.2.0 (Lite, derived from the full framework v5.4.2.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
-**Last Updated:** October 10, 2026
+**Version:** 5.5.0.0 (Lite, derived from the full framework v5.5.0.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
+**Last Updated:** October 11, 2026
 
 > Version history for this edition lives in `ocpfFramework/LITE_RunbookChangeLog.md`, tracked
 > independently of the full framework's own `fullVersion/RunbookChangelog.md` (though a change to
@@ -21,7 +21,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.12.0.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.4.2.0), cited as
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.5.0.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
 >   tooling checks, analyzers, symbols, editor sync, notifications, packaging, repository hygiene,
 >   translations, fetched companions, documents, usage and cost, and the plugin.
@@ -809,6 +809,13 @@ skill creates (with `"layout"` and `"tooling"` fields). Without that file, skip 
   its template), and `usage` (`--step <id>` at every boundary; the calibration export at Step 7)
   skills. (The `ocpf-light` and `ocpf-reasoning` sub-agents belong to the full framework's role
   split, which Lite doesn't use.)
+- **Build-a-Feature on this project (Ops § Build-a-Feature):** the plugin's third journey builds
+  one object or a few — a table and its pages, a field on a standard page, a report, an API page,
+  an enum, a permission set — with no steps and no documents, on the Main model. The `start`
+  skill offers it as *Build a feature in this project*; it leaves this runbook, the step table,
+  and every document alone, appends its own feature table to `ProjectProgress.md` (one row per
+  object, usage rows under `F` ids), and adds one ChangeLog line per object. For a quick mod
+  between or after the steps, never a substitute for one.
 
 ## Tooling Checks — Node, mermaid, PowerShell
 

@@ -92,9 +92,11 @@ TDD and Sanity Check do; the User Guide doesn't).
   with author, license, and how it was used (the framework, BCQuality, the patterns library, the
   AL tools, XLIFF Sync or NAB AL Tools if used, mermaid-cli, the AI tool and models). Keep the
   template's closing note verbatim. Always committed.
-- **Project Progress** (`ProjectProgress`): both editions, seeded at Full PRE-01 / Lite Step 1 —
-  keep the step table for this edition, delete the other; the usage table follows and is the
-  `usage` skill's to fill, one row per model per step.
+- **Project Progress** (`ProjectProgress`): every journey, seeded at Full PRE-01 / Lite Step 1 /
+  Build-a-Feature setup — keep the step table for this journey (Full, Lite, or the Build-a-Feature
+  feature table), delete the other two; the usage table follows and is the `usage` skill's to fill,
+  one row per model per step (or per object row). A Full or Lite project on which Build-a-Feature
+  runs keeps its step table and appends the feature table under `## Build-a-Feature`.
 
 ## Step 4: Write and record
 

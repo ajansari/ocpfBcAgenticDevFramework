@@ -70,7 +70,10 @@ picker on the day, offer the nearest and say so.
 
 **Lite — two questions, one box:** Main model (*Sonnet (recommended)* / *Opus* / *Haiku*) and Main
 thinking effort (*Medium (recommended)* / *High* / *Low*). Lite continues with Step 3 for the
-generator only, then Step 4.
+generator only, then Step 4. **Build-a-Feature asks the same two** (the `build-a-feature` skill
+calls this skill at its setup); it records the answer in `ocpfFramework/state/feature.json`
+instead of `ProjectParameters.md`, and **skips Step 3 entirely** — the journey delegates to no
+sub-agent, so no project-local definition is written into the extension.
 
 If the Main answer differs from what the session is running, ask the human to switch now and
 confirm the session shows the new model before you continue. Never record a Main model that isn't

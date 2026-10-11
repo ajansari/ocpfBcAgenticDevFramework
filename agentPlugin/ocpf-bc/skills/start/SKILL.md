@@ -1,15 +1,16 @@
 ---
 name: start
-description: Start a new Microsoft Dynamics 365 Business Central AL extension project with the OnlyCopilotFans (OCPF) BC Agentic Development Framework. Guides the choice between the Full framework (14 steps) and Lite (7 steps), installs the latest runbook into the project, connects Microsoft's AL tools with nothing to install, then begins the routine. Use when the user asks to "start a Business Central project", "start a BC extension", "use the OCPF framework", "set up the agentic development framework", "kick off an AL project", or runs /ocpf-bc:start (optionally with "full" or "lite").
+description: Start a Microsoft Dynamics 365 Business Central AL extension project with the OnlyCopilotFans (OCPF) BC Agentic Development Framework - the one launching point for every journey. Guides the choice between the Full framework (14 steps), Lite (7 steps), and Build-a-Feature (one object or a few, in a new or existing extension, no documents and no steps), installs the latest runbook into the project (Full and Lite), connects Microsoft's AL tools with nothing to install, then begins the routine. On a project that already follows the framework it offers status, an update check, or building a feature in that project. Use when the user asks to "start a Business Central project", "start a BC extension", "use the OCPF framework", "set up the agentic development framework", "kick off an AL project", "add a table to my extension", "build a feature", or runs /ocpf-bc:start (optionally with "full", "lite", or "feature").
 ---
 
 # Start an OCPF BC Agentic Development Framework project
 
-This skill automates the framework's manual setup: download the runbook, rename it to `CLAUDE.md`
-or `.github/copilot-instructions.md`, put everything else the framework keeps under
+This skill is the **one launching point** for every journey the framework offers. It automates
+the framework's manual setup: download the runbook, rename it to `CLAUDE.md` or
+`.github/copilot-instructions.md`, put everything else the framework keeps under
 `ocpfFramework/`, and begin. It adds three things on top:
-- it helps choose Full or Lite,
-- it always installs the **latest** published runbook,
+- it helps choose **Full, Lite, or Build-a-Feature**,
+- it always installs the **latest** published runbook (Full and Lite; Build-a-Feature has none),
 - it connects the AL tools with nothing to install.
 
 It never overwrites an existing file.
@@ -39,16 +40,37 @@ Decide which of these applies before asking anything:
 2. **Already set up?** Look for `ocpfFramework/framework.json` (or the older `.ocpf/framework.json`),
    or a `CLAUDE.md`, `.github/copilot-instructions.md`, `ocpfFramework/BC_App_Build_Routine_Agent.md`,
    or `ocpfFramework/LITE_BC_App_Build_Routine_Agent.md` (in the root on a pre-5.0.0.0 project)
-   whose first lines contain `# BC App Build Routine`. If
-   found, this project already follows the framework. Don't start again. Tell the human, and offer
-   the `status` skill (where the project stands) or the `update-framework` skill (check for a newer
-   runbook).
+   whose first lines contain `# BC App Build Routine`. If found, this project already follows the
+   framework. **Don't start Full or Lite again.** Tell the human which edition and version it is
+   on, and ask, through the options mechanism, one question with three choices:
+   - **Status** — where the project stands (the `status` skill);
+   - **Check for a framework update** (the `update-framework` skill);
+   - **Build a feature in this project** — one object or a few, now, without touching the
+     project's steps or documents: invoke the `build-a-feature` skill, which reads the
+     project's parameters and appends its own table to `ProjectProgress.md`. On a marker whose
+     `edition` is already `feature`, this is the recommended first option and continues the
+     previous session.
+   Nothing else; skip the rest of this skill.
+2a. **An existing extension that never used the framework?** `app.json` exists and there is no
+   marker and no runbook. Say what you found (name, publisher, version, ID ranges from `app.json`;
+   how many objects under `src/`), and go to Step 3 with **Build-a-Feature recommended first**:
+   on an existing app the human almost always wants one more object, not a fresh 14-step build.
+   Full and Lite stay available (both read `app.json` as an existing app at their first step).
 
-## Step 3: Choose the edition
+## Step 3: Choose the journey
 
 Ask the human to choose, recommending based on what they've told you. If you don't know enough,
-ask about scope first.
+ask about scope first. One question, three options, the recommended one first:
 
+- **Build-a-Feature (no steps, no documents).** One object, or a few, in a new or existing
+  per-tenant extension: a table and its list and card pages, an extension of a standard table,
+  page, or report, a report, an API page or API query, a query, an enum or enum extension, a
+  codeunit, a permission set. Pick it when the human already knows what they want and it is not a
+  whole solution. It asks what to build in one question, infers and confirms field types, writes
+  the AL from the Standards Guide and the patterns library, compiles clean with the analyzers,
+  offers the natural next object, then offers to package a `.app` and to review the code. One
+  model does everything; the dashboard shows one row per object. Recommended first on an existing
+  extension (Step 2a), and whenever the request names a single object.
 - **Lite (7 steps, 4 documents).** For roughly 5–10 AL files, one person driving it, and one AI
   model doing the work, with no separate Dev Manager, Technical Lead, and Functional Consultant
   sign-offs.
@@ -58,10 +80,18 @@ ask about scope first.
   generate code with the `ocpf-generator` sub-agent, one per batch, in parallel.
 
 Mention that nothing is lost by switching later: Lite's `DesignDoc.md` and `ChangeLog.md` carry
-straight over into the full framework. A project follows one edition, never both.
+straight over into the full framework, and a Build-a-Feature extension is an existing app to
+Lite's Step 1. A project follows one edition, never both; Build-a-Feature can run **on** a Full
+or Lite project later through Step 2's third choice.
 
-If the human invoked the skill with `full` or `lite`, confirm that choice instead of asking from
-scratch.
+If the human invoked the skill with `full`, `lite`, or `feature`, confirm that choice instead of
+asking from scratch.
+
+**Build-a-Feature chosen → invoke the `build-a-feature` skill now and stop here.** Its Part 1
+and Part 2 do the whole setup that journey needs (companions, marker with `"edition":
+"feature"`, notifications, identity, dashboard, model, AL tools, symbols, the feature table).
+Steps 4–9 below are Full and Lite only: there is no runbook to place, no changelog, no step
+files, and no routine to begin.
 
 ## Step 4: Choose where the runbook goes
 
@@ -165,7 +195,7 @@ Nothing else in the root.
    ```json
    {
      "framework": "OCPF BC Agentic Development Framework",
-     "edition": "full | lite",
+     "edition": "full | lite",      // "feature" is written by the build-a-feature skill, never here
      "runbookVersion": "<from the **Version:** line>",
      "source": "github | plugin-bundle",
      "repository": "https://github.com/ajansari/ocpfBcAgenticDevFramework",
@@ -268,7 +298,8 @@ On Claude Chat, Claude Cowork, or Microsoft Copilot Cowork, the framework's BUIL
 aren't possible. There's no AL compiler, VS Code project, or Git. Say so plainly, then offer the
 part that is:
 
-1. **Choose the edition** (Step 3).
+1. **Choose the edition** (Step 3). Build-a-Feature needs a compiler and a code workspace, so
+   it is not available here; say so and offer Full or Lite's DEFINE and DESIGN work instead.
 2. **Get the runbook text and both companions:** fetch them (Step 5) if the environment can reach
    GitHub, otherwise use the bundled copies and name their versions — the runbook and the
    **Operations Guide** in this skill's `references/`, the **Standards Guide** in the `al-standards`

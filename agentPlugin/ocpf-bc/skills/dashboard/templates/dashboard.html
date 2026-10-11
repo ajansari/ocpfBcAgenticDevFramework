@@ -573,7 +573,8 @@ const app=D.app||{},fw=D.framework||{},T=D.totals||{},cur=D.current||{};
 // ---- header ----
 const icon=app.iconDataUri?`<img class="appimg" src="${app.iconDataUri}" alt="">`:`<span class="appimg ph">${esc((app.name||'?').slice(0,1).toUpperCase())}</span>`;
 $('h1').innerHTML=`${icon}${esc(app.name||'Untitled extension')} <span>Build Map · ${D.live?'Live':'Snapshot'}</span>`;
-$('sub').textContent=['Business Central · Agentic Dev Framework',fw.edition?(fw.edition==='lite'?'Lite':'Full')+(fw.version?' v'+fw.version:''):null,app.bc?'BC '+app.bc:null,app.publisher?'by '+app.publisher:null].filter(Boolean).join(' · ');
+const feature=fw.edition==='feature';const EDN={lite:'Lite',full:'Full',feature:'Build-a-Feature'};
+$('sub').textContent=['Business Central · Agentic Dev Framework',fw.edition?(EDN[fw.edition]||fw.edition)+(fw.version?' v'+fw.version:''):null,app.bc?'BC '+app.bc:null,app.publisher?'by '+app.publisher:null].filter(Boolean).join(' · ');
 gen=D.generatedAt?new Date(D.generatedAt):null;
 // Official marks, inline so the page stays one file: Claude — simple-icons `claude` (CC0; the mark is Anthropic's);
 // GitHub Copilot — Primer Octicons `copilot-24` (MIT, © GitHub Inc.). See THIRD_PARTY_NOTICES.md.
@@ -597,7 +598,9 @@ let tbar='';if(split){const tot=Math.max(1,(T.agentSeconds||0)+(T.humanSeconds||
 tiles.push(`<div class="tile time in" style="--d:.3s"><div class="k">Elapsed${split?' · who had the clock':''}</div><div class="v">${hm(T.elapsedSeconds)}</div>${tbar}<div class="m">this step ${hm(stepT.elapsedSeconds)}${stepT.agentSeconds!=null?` · agent ${hm(stepT.agentSeconds)} · you ${hm((stepT.humanSeconds||0)+(stepT.waitingSeconds||0))}`:' · wall-clock'}</div>${split?'':'<div class="na" style="display:block">Agent / you split needs the Claude Code transcript; Copilot journals turn starts only.</div>'}</div>`);
 tiles.push(`<div class="tile in" style="--d:.4s"><div class="k">Decisions asked</div><div class="v">${fmtN(T.decisions)}</div><div class="m" ${waiting?'style="color:var(--wait-amber);font-weight:600"':''}>${waiting?'1 waiting on you':'none open'}</div></div>`);
 const est=D.estimate;let estHtml;
-if(est&&est.estimated){const pct=Math.min(100,Math.round(100*est.used/est.estimated));const ok=pct<=100?(pct<=90?['✓ On track','var(--good)']:['Near estimate','var(--warning)']):['Over estimate','var(--critical)'];
+if(feature){const objs=(D.steps||[]).filter(s=>/^F\d{2}$/.test(s.id)&&s.id!=='F00');const built=objs.filter(s=>s.status==='done').length;const curObj=objs.find(s=>s.status==='now');
+  estHtml=`<div class="k">Objects built</div><div class="v">${built}<small> of ${objs.length}</small></div><div class="m">${curObj?esc((curObj.kind?curObj.kind+' ':'')+curObj.short)+(curObj.stage?' · '+esc(curObj.stage):''):(objs.length?'none in progress':'nothing asked for yet')}${(D.steps||[]).some(s=>s.id==='FPK'&&s.status==='done')?' · packaged':''}</div>`;}
+else if(est&&est.estimated){const pct=Math.min(100,Math.round(100*est.used/est.estimated));const ok=pct<=100?(pct<=90?['✓ On track','var(--good)']:['Near estimate','var(--warning)']):['Over estimate','var(--critical)'];
   estHtml=`<div class="k" style="display:flex;justify-content:space-between;align-items:center"><span>Step ${esc(cur.id||'')} vs AI Effort Estimate</span><span class="status"><span class="sw" style="background:${ok[1]}"></span>${ok[0]}</span></div><div class="bar"><div class="fill" style="animation:none;width:${pct}%"></div><div class="head" style="animation:none;left:${pct}%"></div><div class="mark"></div></div><div class="legend"><span>${copilot?fmtN(est.used)+' of '+fmtN(est.estimated)+' credits estimated':fmtTok(est.used)+' used of '+fmtTok(est.estimated)+' estimated'}</span><span>${pct}%</span></div>`;}
 else estHtml=`<div class="k">Step ${esc(cur.id||'')} vs AI Effort Estimate</div><div class="v" style="font-size:16px;margin-top:8px;color:var(--text-2)">${est&&est.note?esc(est.note):'No estimate yet'}</div><div class="m">${fw.edition==='lite'?'written at Step 2':'written at Step 03'} · docs/2-design/AiEffortEstimate.md</div>`;
 tiles.push(`<div class="tile est in" style="--d:.5s">${estHtml}</div>`);
@@ -605,20 +608,21 @@ $('tiles').innerHTML=tiles.join('');
 (function(){const ids=['tokens','cost','elapsed','decisions','estimate'];[...$('tiles').children].forEach((el,i)=>{el.dataset.cid=ids[i]||('tile'+i);});})();
 
 // ---- journey ----
-const steps=D.steps||[];const PH=['DEFINE','DESIGN','BUILD','PROVE'];
+const steps=D.steps||[];const PH=D.phases||['DEFINE','DESIGN','BUILD','PROVE'];
 const byPh=PH.map((p,i)=>{const ss=steps.filter(s=>s.phase===p);const done=ss.filter(s=>s.status==='done').length;const now=ss.find(s=>s.status==='now');
   const el=ss.reduce((a,s)=>a+(s.elapsedSeconds||0),0),cost=ss.reduce((a,s)=>a+(s.costUsd||0),0);
   const st=done===ss.length&&ss.length?'done':now||done?'now':'';
-  const sub=st==='done'?`<b>${done} of ${ss.length}</b> · ${hm(el)} · ${usd(cost)}`:now?`<b>Step ${ss.indexOf(now)+1} of ${ss.length}</b> · ${hm(el)} · ${usd(cost)}`:done?`<b>${done} of ${ss.length}</b> done · ${hm(el)} · ${usd(cost)}`:`<b>${ss.length} step${ss.length>1?'s':''}</b> ahead`;
+  const unit=feature?(p==='BUILD'?'object':'row'):'step';
+  const sub=st==='done'?`<b>${done} of ${ss.length}</b> · ${hm(el)} · ${usd(cost)}`:now?`<b>${feature?(unit[0].toUpperCase()+unit.slice(1)):'Step'} ${ss.indexOf(now)+1} of ${ss.length}</b> · ${hm(el)} · ${usd(cost)}`:done?`<b>${done} of ${ss.length}</b> done · ${hm(el)} · ${usd(cost)}`:ss.length?`<b>${ss.length} ${unit}${ss.length>1?'s':''}</b> ahead`:(feature?'<b>not yet</b>':'');
   const pct=ss.length?Math.round(100*(done+(now?0.5:0))/ss.length):0;
   return {p,ss,st,html:`<div class="phase ${st}"><span class="num">0${i+1}</span><span class="nm">${p[0]+p.slice(1).toLowerCase()}</span><span class="sub">${sub}</span><span class="pct"><i style="--p:${pct}%"></i></span></div>`};});
 $('phases').style.gridTemplateColumns=byPh.map(x=>Math.max(1,x.ss.length)+'fr').join(' ');
 $('phases').innerHTML=byPh.map(x=>x.html).join('');
 const n=steps.length,doneN=steps.filter(s=>s.status==='done').length,nowI=steps.findIndex(s=>s.status==='now');
-$('journeySub').textContent=`${n} stations · ${doneN} reached · ${nowI>=0?'1 in progress':'none in progress'}`;
+$('journeySub').textContent=feature?`${n} row${n===1?'':'s'} · ${doneN} closed · ${nowI>=0?'1 in progress':'none in progress'} · one row per object`:`${n} stations · ${doneN} reached · ${nowI>=0?'1 in progress':'none in progress'}`;
 (function(){const line=$('line');const W=line.clientWidth||1360;const pad=40;const gap=n>1?(W-2*pad)/(n-1):0;const progPct=n>1?((nowI>=0?nowI:doneN-0.5)/(n-1))*100:0;
   let h=`<div class="rail"><div class="prog" style="animation:none;width:${Math.max(0,progPct)}%"></div>${nowI>=0?`<div class="comet" style="animation:none;left:${progPct}%"></div><div class="pulse" style="left:${progPct}%"></div>`:''}</div>`;
-  steps.forEach((s,i)=>{const x=pad+i*gap;const meta=s.status==='done'?`${hm(s.elapsedSeconds)} · ${usd(s.costUsd)}`:s.status==='now'?`${hm(s.elapsedSeconds)} · ${usd(s.costUsd)}${s.note?' · '+esc(s.note):''}`:'';
+  steps.forEach((s,i)=>{const x=pad+i*gap;const stg=s.stage?esc(s.stage)+(s.objectId?' · '+esc(s.objectId):''):'';const meta=s.status==='done'?`${stg?stg+' · ':''}${hm(s.elapsedSeconds)} · ${usd(s.costUsd)}`:s.status==='now'?`${stg?stg+' · ':''}${hm(s.elapsedSeconds)} · ${usd(s.costUsd)}${s.note?' · '+esc(s.note):''}`:(stg||'');
     const idTxt=s.status==='now'?'IN PROGRESS':s.id;const node=s.status==='done'?'':esc(s.id.replace('PRE-','P'));
     h+=`<div class="st ${s.status}" style="left:${x}px;--d:${(0.3+i*0.12).toFixed(2)}s;width:${Math.min(110,Math.max(70,gap-6))}px;margin-left:-${Math.min(55,Math.max(35,(gap-6)/2))}px"><div class="node">${node}</div><div class="id">${idTxt}</div><div class="nm">${esc(s.short||s.title)}</div><div class="meta">${meta}</div></div>`;});
   // sub-agent spurs under the current station
@@ -637,7 +641,7 @@ $('grid').classList.toggle('asking',!!waiting);if(!waiting)$('askCard').innerHTM
 const RC={Main:'main',Reasoning:'reas',Light:'light',Generator:''};
 $('roles').innerHTML=(D.roles||[]).map((r,i)=>{const cls=RC[r.role]||'';const st=r.status||'idle';const chip=st==='working'||st==='running'?`<span class="chip on">${st}${r.runningSeconds?' '+hm(r.runningSeconds):''}</span>${r.runningCount?`<span class="rcount" title="${r.runningCount} sub-agent${r.runningCount>1?'s':''} running on this model right now">${r.runningCount}</span>`:''}`:`<span class="chip">${esc(st)}</span>`;
   const right=copilot?`<b>${r.credits!=null?fmtN(r.credits)+' cr':'—'}</b>${r.stepCredits!=null?'this step '+fmtN(r.stepCredits):''}`:`<b>${r.tokens!=null?fmtTok(r.tokens):'—'}</b>${r.stepTokens!=null?'this step '+fmtTok(r.stepTokens):''}`;
-  return `<div class="agent" style="--d:${1.2+i*0.2}s${st==='not started'?';opacity:.6':''}"><div class="av ${cls}" ${cls?'':'style="background:var(--text-3)"'}>${esc(r.role[0])}${cls?`<span class="live ${st==='working'||st==='running'?'':'idle'}"></span>`:''}</div><div><div class="n">${esc(r.role)}${r.role!=='Main'&&r.role!=='Generator'?' sub-agent':''} ${chip}</div><div class="d">${esc([r.model,r.effort?'effort '+r.effort:null,r.detail].filter(Boolean).join(' · '))}${st==='working'?'<span class="typing"></span>':''}</div></div><div class="r">${right}</div></div>`;}).join('')||'<div class="empty">No role assignment recorded yet (asked at PRE-01 / Step 1).</div>';
+  return `<div class="agent" style="--d:${1.2+i*0.2}s${st==='not started'?';opacity:.6':''}"><div class="av ${cls}" ${cls?'':'style="background:var(--text-3)"'}>${esc(r.role[0])}${cls?`<span class="live ${st==='working'||st==='running'?'':'idle'}"></span>`:''}</div><div><div class="n">${esc(r.role)}${r.role!=='Main'&&r.role!=='Generator'?' sub-agent':''} ${chip}</div><div class="d">${esc([r.model,r.effort?'effort '+r.effort:null,r.detail].filter(Boolean).join(' · '))}${st==='working'?'<span class="typing"></span>':''}</div></div><div class="r">${right}</div></div>`;}).join('')||'<div class="empty">No role assignment recorded yet (asked at PRE-01 / Step 1 / Build-a-Feature setup).</div>';
 
 // ---- models ----
 const M=D.models||[];const mx=Math.max(1,...M.map(m=>copilot?(m.credits||0):(m.tokens||0)));const col=['var(--main)','var(--reasoning)','var(--light)','var(--b-magenta)','var(--b-orange)'];
@@ -650,7 +654,7 @@ $('modelsCard').innerHTML=mh;
 
 // ---- exit gate ----
 const g=cur.exitGate||[];
-$('gateCard').innerHTML=`<h3>${cur.id?'Step '+esc(cur.id)+' exit gate':'Exit gate'} <span class="sub">${cur.id?'from runbookSteps/'+esc(cur.id)+'.md':''}</span></h3>${g.length?'<ul>'+g.map((t,i)=>`<li style="--i:${i}"><span class="ck n">·</span><span class="txt">${esc(t)}</span></li>`).join('')+'</ul>':'<div class="empty">No step in progress.</div>'}<div class="note-line">The gate is met when the agent says so in the closing message; this list is the step file's wording.</div>`;
+$('gateCard').innerHTML=`<h3>${cur.id?(feature?esc(cur.title||cur.id)+' · to close':'Step '+esc(cur.id)+' exit gate'):'Exit gate'} <span class="sub">${cur.id?(feature?(cur.stage?'stage: '+esc(cur.stage):esc(cur.id)):'from runbookSteps/'+esc(cur.id)+'.md'):''}</span></h3>${g.length?'<ul>'+g.map((t,i)=>`<li style="--i:${i}"><span class="ck n">·</span><span class="txt">${esc(t)}</span></li>`).join('')+'</ul>':`<div class="empty">${feature?'No object in progress.':'No step in progress.'}</div>`}<div class="note-line">${feature?'The row closes when the agent says so in the closing message; this ladder is Ops § Build-a-Feature\'s wording.':'The gate is met when the agent says so in the closing message; this list is the step file\'s wording.'}</div>`;
 
 // ---- feed ----
 const ev=D.events||[];const fh=ev.map(e=>`<span><i>${esc(e.time)}</i><b>${esc(e.who)}</b> ${esc(e.text)}</span>`).join('')||'<span><i>—</i>No events yet</span>';

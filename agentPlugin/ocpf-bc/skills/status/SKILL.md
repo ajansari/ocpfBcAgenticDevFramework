@@ -1,6 +1,6 @@
 ---
 name: status
-description: Report where a Business Central project following the OCPF BC Agentic Development Framework stands - current phase and step, its exit gate, what's waiting on the human, whether every closed step has its usage rows, framework edition and version, tooling recorded, and AL MCP Server status. Use when the user asks "where are we", "project status", "what's next", "what step are we on", or resumes an OCPF project in a new session or from another device.
+description: Report where a Business Central project following the OCPF BC Agentic Development Framework stands - current phase and step, its exit gate, what's waiting on the human, whether every closed step has its usage rows, framework edition and version (Full, Lite, or Build-a-Feature, whose rows are objects), tooling recorded, and AL MCP Server status. Use when the user asks "where are we", "project status", "what's next", "what step are we on", or resumes an OCPF project in a new session or from another device.
 ---
 
 # OCPF project status
@@ -10,12 +10,17 @@ conversation memory.
 
 ## What to read
 
-1. **`ProjectProgress.md`** (project root, both editions): the step-by-step tracker and, below it,
-   the usage table. Find the step marked `In Progress`, or the first one not complete. Then check
+1. **`ProjectProgress.md`** (project root, every journey): the step-by-step tracker and, below it,
+   the usage table. **On a Build-a-Feature project** (`"edition": "feature"` in the marker) the
+   tracker is the **feature table** — one row per object (`F01`, `F02`, …), plus `F00` intake,
+   `FPK` package, `FRV` review, each with a stage (*Asked → Confirmed → Built → Compiled →
+   Packaged → Reviewed*) and a status — and a Full or Lite project may carry that table too, under
+   `## Build-a-Feature`, when the journey ran on it: report those rows as well, after the steps. Find the step marked `In Progress`, or the first one not complete. Then check
    the usage table against the step table: **every step marked `Completed` must have at least one
    usage row** (one per model that ran); a closed step with no row is a blocker (Full Operating
    Rule 11 / Lite Rule 9 — the exit gate wasn't met).
-2. **The step file** — `ocpfFramework/runbookSteps/<step>.md` (Full v4.0.0.0 / Lite v3.0.0.0 on; on an older
+2. **The step file** — `ocpfFramework/runbookSteps/<step>.md` (Full v4.0.0.0 / Lite v3.0.0.0 on; a
+   Build-a-Feature project has none: the row's "gate" is the stage ladder in Ops § Build-a-Feature; on an older
    runbook, the step's section in `CLAUDE.md`, `.github/copilot-instructions.md`, or the file named
    in `ocpfFramework/framework.json`): that step's **Exit gate** and outputs. Read it; don't paraphrase from
    memory. Read only the current step's file.
@@ -40,7 +45,8 @@ conversation memory.
    model assignment (Full §1.7: Main, Light, Reasoning — the generator runs on Main; Lite: the Main
    model row).
 
-If `ProjectProgress.md` doesn't exist — and, for Lite, neither `docs/1-define/ProjectParameters.md`
+A Build-a-Feature project keeps no `ProjectParameters.md`; its model and language are in
+`ocpfFramework/state/feature.json`. If `ProjectProgress.md` doesn't exist — and, for Lite, neither `docs/1-define/ProjectParameters.md`
 nor `docs/2-design/DesignDoc.md` exists either — the routine hasn't started. Say so, and offer the
 `start` skill. (A Lite project from before Lite v5.0.0.0 has no tracker and keeps its usage table
 in `docs/UsageReport.md`; report from the ChangeLog and offer `update-framework`.)
@@ -49,8 +55,11 @@ in `docs/UsageReport.md`; report from the ChangeLog and offer `update-framework`
 
 Keep it to a compact block:
 
-- **Project:** extension name, framework edition, and runbook version.
+- **Project:** extension name, framework edition (Full, Lite, or Build-a-Feature), and runbook
+  version (Build-a-Feature: the framework version the companions came from).
 - **Now:** phase and step (for example "DESIGN, Step 03: Craft the TDD"), and what's done within it.
+  Build-a-Feature: the row in progress — "F03 Rental Unit Card (Page), stage Built" — and the
+  rows completed, packaged (with the version), and reviewed.
 - **Exit gate:** what must be true to close this step, and which parts are met — including the
   step's usage rows.
 - **Blockers:** a closed step with no usage row (name it: "Step 04 is Completed but has no row in

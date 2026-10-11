@@ -215,7 +215,7 @@ const fmtTok=n=>n==null?'—':(n>=1e6?(n/1e6).toFixed(2)+'M':n>=1e3?(n/1e3).toFi
 const hm=s=>{if(s==null)return 'n/a';s=Math.max(0,Math.round(s));const h=Math.floor(s/3600),m=Math.floor(s%3600/60);return h?`${h}h ${String(m).padStart(2,'0')}m`:`${m}m ${String(s%60).padStart(2,'0')}s`;};
 const lapT=s=>{if(s==null)return '—';s=Math.max(0,Math.round(s));const m=Math.floor(s/60);return `${m}:${String(s%60).padStart(2,'0')}`;};
 const usd=n=>n==null?'—':'$'+Number(n).toFixed(2);
-const SC={DEFINE:'var(--s1)',DESIGN:'var(--s2)',BUILD:'var(--s3)',PROVE:'var(--s4)'};
+const SC={DEFINE:'var(--s1)',DESIGN:'var(--s2)',BUILD:'var(--s3)',PROVE:'var(--s4)',INTAKE:'var(--s1)',PACKAGE:'var(--s4)',REVIEW:'var(--s2)'};
 const TEAM={
   Main:{id:'fer',name:'Ferrari',c:'var(--ferrari)',a:'var(--ferrari-a)',n:'16',body:'#dc0000',body2:'#8e0000',acc:'#ffffff',acc2:'#1a1a1a',rim:'#2b2b2b',ui:'var(--ferrari)',txt:'#ffffff'},
   Reasoning:{id:'mer',name:'Mercedes',c:'var(--merc-a)',a:'var(--merc)',n:'44',body:'#15181f',body2:'#05060a',acc:'#00a19c',acc2:'#c9ced6',rim:'#1b1f27',ui:'var(--merc-a)',txt:'#00d2bd'},
@@ -236,7 +236,8 @@ const nowI=steps.findIndex(s=>s.status==='now'),doneN=steps.filter(s=>s.status==
 document.body.classList.toggle('copilot',copilot);
 // header
 $('appicon').innerHTML=app.iconDataUri?`<img class="appimg" src="${app.iconDataUri}" alt="">`:`<span class="appimg">${esc((app.name||'?')[0].toUpperCase())}</span>`;
-$('h1').innerHTML=`${esc(app.name||'Untitled extension')}<small>Pit wall · ${esc(fw.edition==='lite'?'Lite':'Full')}${fw.version?' v'+esc(fw.version):''}${app.bc?' · BC '+esc(app.bc):''}${app.publisher?' · '+esc(app.publisher):''}</small>`;
+const feature=fw.edition==='feature';const EDN={lite:'Lite',full:'Full',feature:'Build-a-Feature'};
+$('h1').innerHTML=`${esc(app.name||'Untitled extension')}<small>Pit wall · ${esc(EDN[fw.edition]||fw.edition||'Full')}${fw.version?' v'+esc(fw.version):''}${app.bc?' · BC '+esc(app.bc):''}${app.publisher?' · '+esc(app.publisher):''}</small>`;
 gen=D.generatedAt?new Date(D.generatedAt):null;
 const stepT=cur.totals||{};const tk=T.tokens||{};
 $('lower').innerHTML=[
@@ -317,7 +318,7 @@ function tyreStack(x,y,n,t){let o='';for(let i=0;i<n;i++)o+=`<ellipse cx="${x}" 
   <path d="M0,88 H${W}" stroke="#fff" stroke-width="1" opacity=".07"/>
   <line class="drsline" x1="0" y1="113" x2="${W}" y2="113" opacity="${nowI>=0?.9:.25}"/>`;
   const x0=90,x1=W-90;const xs=i=>x0+(i+0.5)/n*(x1-x0);
-  steps.forEach((s2,i)=>{const x=xs(i);const c=SC[s2.phase]||'var(--text-3)';const num=s2.id.replace('PRE-0','P').replace(/^0/,'');
+  steps.forEach((s2,i)=>{const x=xs(i);const c=SC[s2.phase]||'var(--text-3)';const num=feature?s2.id:s2.id.replace('PRE-0','P').replace(/^0/,'');
     s+=`<g style="--c:${c}"><rect x="${x-1}" y="146" width="2" height="6" fill="#888"/><rect class="board ${s2.status}" x="${x-17}" y="150" width="34" height="18" rx="3"/><text class="board-t" x="${x}" y="163">${s2.status==='done'?'✓ '+esc(num):esc(num)}</text><text class="sub-t" x="${x}" y="181">${esc(s2.short||s2.id)}</text></g>`;});
   const mainOnTrack=nowI>=0&&!waiting;
   // pit building: glass facade, team garages, gantry lights, floor markings
@@ -347,7 +348,7 @@ function tyreStack(x,y,n,t){let o='';for(let i=0;i<n;i++)o+=`<ellipse cx="${x}" 
 // ---------------- timing screen ----------------
 const stChip=s=>s.status==='done'?'<span class="chip done">Lap done</span>':s.status==='now'?(waiting?'<span class="chip box">Box</span>':'<span class="chip now">On track</span>'):'<span class="chip">&nbsp;</span>';
 $('tsSub').textContent=`${doneN} of ${steps.length} laps · ${nowI>=0?'1 on track':'none on track'}`;
-$('ts').innerHTML=`<div class="r h"><span>Lap</span><span></span><span>Corner · step</span><span style="text-align:right">Time</span><span style="text-align:right">Cost</span><span style="text-align:right">${copilot?'Credits':'Tokens'}</span><span style="text-align:right">Status</span></div>`+steps.map((s,i)=>`<div class="r ${s.status}" style="--c:${SC[s.phase]||'var(--text-3)'}"><span class="lap">${String(i+1).padStart(2,'0')}</span><span class="sec"></span><span class="nm">${esc(s.short||s.title)}<small>${esc(s.phase)} · ${esc(s.id)}</small></span><span class="t">${s.status==='todo'?'—':lapT(s.elapsedSeconds)}</span><span class="t" style="color:var(--text-2)">${s.status==='todo'?'—':usd(s.costUsd)}</span><span class="t" style="color:var(--text-2)">${s.status==='todo'?'—':copilot?fmtN(s.credits):fmtTok(s.tokens)}</span><span class="st">${stChip(s)}</span></div>`).join('');
+$('ts').innerHTML=`<div class="r h"><span>Lap</span><span></span><span>Corner · step</span><span style="text-align:right">Time</span><span style="text-align:right">Cost</span><span style="text-align:right">${copilot?'Credits':'Tokens'}</span><span style="text-align:right">Status</span></div>`+steps.map((s,i)=>`<div class="r ${s.status}" style="--c:${SC[s.phase]||'var(--text-3)'}"><span class="lap">${String(i+1).padStart(2,'0')}</span><span class="sec"></span><span class="nm">${esc(s.short||s.title)}<small>${esc(s.phase)} · ${esc(s.id)}${s.stage?' · '+esc(s.stage):''}${s.objectId?' · '+esc(s.objectId):''}</small></span><span class="t">${s.status==='todo'?'—':lapT(s.elapsedSeconds)}</span><span class="t" style="color:var(--text-2)">${s.status==='todo'?'—':usd(s.costUsd)}</span><span class="t" style="color:var(--text-2)">${s.status==='todo'?'—':copilot?fmtN(s.credits):fmtTok(s.tokens)}</span><span class="st">${stChip(s)}</span></div>`).join('');
 
 // ---------------- telemetry trace + KPIs ----------------
 (function(){const done=steps.filter(s=>s.status!=='todo');const W=600,H=120,pad=10;
@@ -358,7 +359,7 @@ $('ts').innerHTML=`<div class="r h"><span>Lap</span><span></span><span>Corner ·
   const est=D.estimate;const pct=est&&est.estimated?Math.min(100,Math.round(100*est.used/est.estimated)):null;
   $('trace').innerHTML=`<h3>Telemetry <span class="sub">per lap · ${done.length} laps logged</span></h3><svg viewBox="0 0 ${W} ${H}" preserveAspectRatio="none">${grid}${line(tv,'var(--ferrari)')}${line(cv,'var(--good)')}${line(ev,'var(--flag)')}<line class="scan" x1="0" x2="0" y1="0" y2="${H}"/></svg><div class="k"><span><i style="background:var(--ferrari)"></i>${copilot?'Credits':'Tokens'} / lap</span><span><i style="background:var(--good)"></i>Cost / lap</span><span><i style="background:var(--flag)"></i>Time / lap</span></div>
   <div class="kpi"><div><div class="k">Who had the wheel</div>${split?`<div class="stint"><i style="--w:${p(T.agentSeconds)};background:var(--ferrari)"></i><i style="--w:${p(T.humanSeconds)};background:var(--aston)"></i><i style="--w:${p(T.waitingSeconds)};background:var(--flag)"></i></div><div class="m">car ${hm(T.agentSeconds)} · pit wall ${hm(T.humanSeconds)} · red flag ${hm(T.waitingSeconds)}</div>`:`<div class="m">needs the Claude Code transcript</div>`}</div>
-  <div><div class="k">Lap ${esc(cur.id||'')} vs target</div>${pct!=null?`<div class="v">${pct}<small>%</small></div><div class="m">${copilot?fmtN(est.used)+' of '+fmtN(est.estimated)+' cr':fmtTok(est.used)+' of '+fmtTok(est.estimated)}</div>`:`<div class="m" style="margin-top:4px">${est&&est.note?esc(est.note):'No target yet — set at Step 03'}</div>`}</div>
+  <div><div class="k">${feature?'Objects built':'Lap '+esc(cur.id||'')+' vs target'}</div>${feature?(()=>{const objs=steps.filter(s=>/^F\d{2}$/.test(s.id)&&s.id!=='F00');const b=objs.filter(s=>s.status==='done').length;const c=objs.find(s=>s.status==='now');return `<div class="v">${b}<small>/${objs.length}</small></div><div class="m">${c?esc((c.kind?c.kind+' ':'')+c.short)+(c.stage?' · '+esc(c.stage):''):'none on track'}</div>`;})():pct!=null?`<div class="v">${pct}<small>%</small></div><div class="m">${copilot?fmtN(est.used)+' of '+fmtN(est.estimated)+' cr':fmtTok(est.used)+' of '+fmtTok(est.estimated)}</div>`:`<div class="m" style="margin-top:4px">${est&&est.note?esc(est.note):'No target yet — set at Step 03'}</div>`}</div>
   <div><div class="k">Fuel mix</div><div class="m">${copilot?`main ${fmtN(T.creditsMain)} · subs ${fmtN(T.creditsSub)}`:`in ${fmtTok(tk.input)} · out ${fmtTok(tk.output)}<br>cache ${fmtTok((tk.cacheRead||0)+(tk.cacheWrite||0))}`}</div></div>
   <div><div class="k">This lap</div><div class="m">${hm(stepT.elapsedSeconds)} · ${usd(stepT.costUsd)}${stepT.agentSeconds!=null?`<br>car ${hm(stepT.agentSeconds)} · you ${hm((stepT.humanSeconds||0)+(stepT.waitingSeconds||0))}`:''}</div></div></div>`;})();
 
@@ -372,7 +373,7 @@ $('eng').insertAdjacentHTML('beforeend',`<h3 style="margin-top:12px">Drivers <sp
 
 // race control = exit gate
 const gate=cur.exitGate||[];
-$('rc').innerHTML=`<h3>Race control · ${cur.id?'to clear lap '+esc(cur.id):'exit gate'} <span class="sub">${cur.id?'runbookSteps/'+esc(cur.id)+'.md':''}</span></h3>${gate.length?'<ul>'+gate.map((t,i)=>`<li><span class="n">${String(i+1).padStart(2,'0')}</span><span>${esc(t)}</span></li>`).join('')+'</ul>':'<div class="empty">No lap in progress — the car is in the garage.</div>'}`;
+$('rc').innerHTML=`<h3>Race control · ${cur.id?'to clear lap '+esc(cur.id):'exit gate'} <span class="sub">${cur.id?(feature?esc(cur.title||'')+(cur.stage?' · '+esc(cur.stage):''):'runbookSteps/'+esc(cur.id)+'.md'):''}</span></h3>${gate.length?'<ul>'+gate.map((t,i)=>`<li><span class="n">${String(i+1).padStart(2,'0')}</span><span>${esc(t)}</span></li>`).join('')+'</ul>':'<div class="empty">No lap in progress — the car is in the garage.</div>'}`;
 
 // team radio
 const WHERE={'claude-code':'Answer in <b>Visual Studio Code</b> (the Claude Code panel or terminal) or on your <b>phone</b> via Claude Code Remote Control. This page only shows the message.','copilot-chat':'Answer in <b>Visual Studio Code</b> (GitHub Copilot Chat). This page only shows the message.','copilot-cli':'Answer in the <b>Copilot CLI</b> terminal. This page only shows the message.'};

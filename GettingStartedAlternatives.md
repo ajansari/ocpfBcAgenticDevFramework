@@ -12,6 +12,12 @@ preferred path is in the [README](README.md#setup-plugin): install the
 - you run the agent somewhere else — github.com, the Claude apps, Microsoft Copilot Cowork;
 - you'd rather not use the plugin and want to set the framework up **by hand**.
 
+**Build-a-Feature** — the quick-mod journey (one object or a few, no steps, no documents) — has no
+runbook to copy: it lives in the plugin's `build-a-feature` skill and is reached through
+`/ocpf-bc:start`. Without the plugin, follow *Ops § Build-a-Feature* in the Operations Guide with
+the skill's reference files from `agentPlugin/ocpf-bc/skills/build-a-feature/references/` in this
+repository.
+
 Whichever way you install, **Step 2 is the same**: open your AL project folder and run
 `/ocpf-bc:start` (or ask *"Start a Business Central project with the OCPF framework."*). The
 README's [Step 2](README.md#setup-plugin) describes what happens next.

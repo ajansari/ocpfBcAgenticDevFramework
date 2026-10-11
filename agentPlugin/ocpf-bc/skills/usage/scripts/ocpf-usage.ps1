@@ -16,7 +16,7 @@
 # Defaults: ocpfFramework\state\usage.json and ocpfFramework\state\pricing.json under the project.
 # -Calibrate (project close, Full Step 12 / Lite Step 7) writes ~\.ocpf\calibration\<project>-<date>.json —
 # per step and per model tokens by type, elapsed, turns, decisions, sub-agent calls, and the object counts
-# by type from docs\1-define\ObjectRegister.md (Full) or docs\2-design\DesignDoc.md's object table (Lite) —
+# by type from docs\1-define\ObjectRegister.md (Full), docs\2-design\DesignDoc.md's object table (Lite), or ProjectProgress.md's feature table (Build-a-Feature) —
 # and prints the path it wrote.
 param(
   [string]$Project = ".",
@@ -386,10 +386,10 @@ if ($Step -and -not $out) { $notes += "no transcript lines fall inside step $Ste
 }
 
 function Get-ObjectCounts($root, $edition) {
-  # Objects by type from the Object Register (Full) or the Design Doc's object table (Lite): every Markdown
-  # table with an ID and a Type column, keyed by (type, ID) — BC IDs are unique per object type.
-  $candidates = @(@("full", "docs/1-define/ObjectRegister.md"), @("lite", "docs/2-design/DesignDoc.md"))
-  if ($edition -eq "lite") { [array]::Reverse($candidates) }
+  # Objects by type from the Object Register (Full), the Design Doc's object table (Lite), or the feature table in
+  # ProjectProgress.md (Build-a-Feature): every Markdown table with an ID and a Type column, keyed by (type, ID).
+  $candidates = @(@("full", "docs/1-define/ObjectRegister.md"), @("lite", "docs/2-design/DesignDoc.md"), @("feature", "ProjectProgress.md"))
+  $candidates = @(@($candidates | Where-Object { $_[0] -eq $edition }) + @($candidates | Where-Object { $_[0] -ne $edition }))
   foreach ($c in $candidates) {
     $path = Join-Path $root $c[1]; if (-not (Test-Path $path)) { continue }
     $lines = Get-Content $path; $byKey = @{}; $i = 0
@@ -404,7 +404,7 @@ function Get-ObjectCounts($root, $edition) {
           $cells = @($lines[$i].Trim().Trim('|').Split('|') | ForEach-Object { ($_ -replace '[`*]', '').Trim() })
           if ($cells.Count -gt [math]::Max($idCol, $typeCol)) {
             $oid = $cells[$idCol]; $otype = $cells[$typeCol]
-            if ($oid -and -not $oid.StartsWith("<") -and $otype -and -not $otype.StartsWith("<")) { $byKey["$otype|$oid"] = $otype }
+            if ($oid -and -not $oid.StartsWith("<") -and $oid -notin "—","-" -and $otype -and -not $otype.StartsWith("<") -and $otype -notin "—","-") { $otype = $otype -replace '\s*\(.*\)$', ''; $byKey["$otype|$oid"] = $otype }
           }
           $i++
         }
@@ -417,7 +417,7 @@ function Get-ObjectCounts($root, $edition) {
       return @{ source = $c[1]; byType = $byType; total = $byKey.Count }
     }
   }
-  return @{ source = $null; byType = @{}; total = 0; note = "no object table with ID and Type columns found in docs/1-define/ObjectRegister.md or docs/2-design/DesignDoc.md" }
+  return @{ source = $null; byType = @{}; total = 0; note = "no object table with ID and Type columns found in docs/1-define/ObjectRegister.md, docs/2-design/DesignDoc.md, or ProjectProgress.md" }
 }
 
 if ($Calibrate) {

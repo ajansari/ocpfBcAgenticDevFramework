@@ -24,8 +24,14 @@ Repository: `https://github.com/ajansari/ocpfBcAgenticDevFramework` (default bra
    (the pre-5.0.0.0 place).
    - Read its `**Version:**` line. The title says whether it's Lite.
    - Offer to create the marker so future sessions check automatically. Create it only on a yes.
-3. **If there's no runbook at all,** this project isn't using the framework. Offer the `start`
-   skill instead.
+3. **If there's no runbook at all,** this project isn't using the framework — unless the marker
+   says `"edition": "feature"`: a **Build-a-Feature project** has no runbook by design. For it,
+   compare `runbookVersion` against the latest Operations Guide's `**Version:**` line
+   (`https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/opsGuide/ocpfOperationsGuide.md`,
+   first kilobyte), and on *Update now* do only Step 4's 3a (patterns, scripts, both dashboard
+   templates — then render once), 3b (both companions), and 4 (the marker); skip the runbook, the
+   changelog, the step files, the templates except `ProjectProgress.md`, and the sub-agents. Say
+   so in the report. Otherwise offer the `start` skill.
 
 ## Step 2: Find the latest version
 
@@ -119,7 +125,7 @@ Guide versions it expects. If a local copy's major version differs, say so: the 
    repository at the tag the new framework pins** — read the pin from the framework's
    `standardsGuide/README.md` (fetch that prelude into `ocpfFramework/standardsGuide/README.md` too):
    `https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfALDevStandardsGuide.md`
-   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v5.4.2.0 the pin is
+   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v5.5.0.0 the pin is
    `v1.12.0.0`). Update each folder's `SNAPSHOT.json` (`repo`, `ref`, `sha`, `fetchedAt`). A project that
    began before v5.2.0.0 needs **no file move**: the on-disk path and filename are unchanged; the
    refresh only changes the source recorded in `SNAPSHOT.json`. A runbook and a companion from

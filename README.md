@@ -41,7 +41,7 @@ The framework incorporates the AL MCP Server, BC Base App and System App documen
 
 Both editions are multilanguage from the ground up. Captions and messages use XLIFF translation files, never `CaptionML`. Regional terminology comes from Microsoft's own Business Central translations. The agent drafts translations, a named human approves them, and UAT runs in every required language. You can also work with the agent in your own language. See [Multilanguage Support](translationAndMultiLanguage/MultilanguageSupportOverview.md).
 
-It comes in two editions: the **full framework** (14 steps) for substantial projects, and **[Lite](GettingStartedAlternatives.md#lite-edition)** (7 steps) for smaller ones that need to move fast. Both apply the same AL standards.
+It comes in two editions: the **full framework** (14 steps) for substantial projects, and **[Lite](GettingStartedAlternatives.md#lite-edition)** (7 steps) for smaller ones that need to move fast. Both apply the same AL standards. A third journey, **Build-a-Feature**, is for the quick mod that is not a project at all — a table and its pages, a field on the Customer Card, a report, an API page, an enum, a permission set — in a new or existing extension, with no steps and no documents, to the same standards; `/ocpf-bc:start` offers all three.
 
 </details>
 
@@ -53,6 +53,19 @@ Each month's release notes in brief. The complete, versioned record is in
 [fullVersion/RunbookChangelog.md](fullVersion/RunbookChangelog.md),
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
+
+## October 11, 2026 — Full v5.5.0.0 · Lite v5.5.0.0 · Operations Guide v5.5.0.0 · Plugin v5.5.0
+
+**Build-a-Feature, a third journey.** One object, or a few, in a new or existing extension —
+a table and its list and card pages, a field on a standard card, a report, an API page or query,
+an enum, a codeunit, a permission set — with no steps and no documents. One question (*What do
+you want to build today?*), field types inferred from the names and confirmed in one box, the AL
+written from the Standards Guide and the patterns library, compiled clean with the analyzers, the
+natural next object offered at every close, then one offer to package a `.app` and one to review
+the code. `/ocpf-bc:start` now offers **Full, Lite, or Build-a-Feature**, recommends
+Build-a-Feature first on an existing extension, and on a project already on the framework offers
+*Build a feature in this project*. The dashboard shows one row per object with its stage and
+cost; usage is recorded per object.
 
 ## October 10, 2026 — Full v5.4.2.0 · Lite v5.4.2.0 · Operations Guide v5.4.2.0 · Plugin v5.4.2
 
@@ -551,9 +564,10 @@ boundary.
 > | **1. Install the Visual Studio Code extension** | Once per machine. One install brings everything. |
 > | **2. Start your project** | Open your AL folder and run `/ocpf-bc:start`. |
 
-That's it. From there the plugin **helps you choose Full or Lite**, **installs the latest runbook**,
-**connects Microsoft's AL tools** with nothing to install, **adds sub-agents** for the Reasoning,
-Light, and Generator roles, and **checks for updates** each session before changing anything.
+That's it. From there the plugin **helps you choose Full, Lite, or Build-a-Feature**, **installs
+the latest runbook** (Full and Lite), **connects Microsoft's AL tools** with nothing to install,
+**adds sub-agents** for the Reasoning, Light, and Generator roles, and **checks for updates** each
+session before changing anything.
 
 ## Step 1 — Install the Visual Studio Code extension
 
@@ -601,7 +615,7 @@ In GitHub Copilot, the commands are identical.
 
 | | What happens | What you do |
 |---|---|---|
-| **1** | **Full or Lite.** It asks about the project — object count, people and sign-off roles, whether it's heading to AppSource — and recommends an edition with its reasoning. | Confirm or override. You can switch later without losing work. |
+| **1** | **Full, Lite, or Build-a-Feature.** It asks about the project — object count, people and sign-off roles, whether it's heading to AppSource — and recommends a journey with its reasoning. **Build-a-Feature** is for one object or a few, in a new or existing extension, with no steps and no documents: it asks what you want to build, confirms the fields in one box, writes and compiles, offers the next object, then a `.app` and a review — and skips rows 2 and 4 below. On an existing extension it is recommended first. | Confirm or override. You can switch later without losing work. |
 | **2** | **Where the runbook goes.** It places the latest runbook as `CLAUDE.md`, `.github/copilot-instructions.md`, or both for mixed teams. | Nothing, unless a file already exists — then it asks. **It never overwrites.** |
 | **3** | **AL tools, nothing to install.** It connects Microsoft's AL tools using the AL Language extension you already have. | In Copilot Chat, nothing — they're built in. In Claude Code, approve the connection once. |
 | **4** | **The routine begins.** | Tell it your working language, how you want to be notified, which models do the work, and — with Copilot — the request limit and approval mode — Full asks for a Main, Light, and Reasoning model with a thinking effort each (recommended **Sonnet Medium / Haiku Medium / Opus High** in Claude Code, **Gemini 3.8 Flash Medium / Auto Balanced / Claude Opus 5.5 High** in Copilot); Lite asks for one (Sonnet Medium or Gemini 3.8 Flash Medium). It warns first that a High thinking effort makes every task slower, and recommends High only where judgment matters most. The Full framework then runs its Reasoning, Light, and Generator sub-agents — Lite its Generator — on exactly the models you chose, and every document lands in its phase folder — `docs/0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` — with the usage table in `ProjectProgress.md` for both editions. |
@@ -610,6 +624,7 @@ In GitHub Copilot, the commands are identical.
 
 | Command | What it does |
 |---|---|
+| `/ocpf-bc:start` on a project already on the framework | Offers *Status*, *Check for a framework update*, or *Build a feature in this project* — the quick-mod journey on top of a Full or Lite project, leaving its steps and documents alone |
 | `/ocpf-bc:status` | Shows where the project stands |
 | `/ocpf-bc:update-framework` | Checks for a newer runbook |
 | `/ocpf-bc:al-mcp-setup` | Connects the AL tools, if you skipped it at start |
