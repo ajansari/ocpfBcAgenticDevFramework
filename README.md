@@ -41,7 +41,7 @@ The framework incorporates the AL MCP Server, BC Base App and System App documen
 
 Both editions are multilanguage from the ground up. Captions and messages use XLIFF translation files, never `CaptionML`. Regional terminology comes from Microsoft's own Business Central translations. The agent drafts translations, a named human approves them, and UAT runs in every required language. You can also work with the agent in your own language. See [Multilanguage Support](translationAndMultiLanguage/MultilanguageSupportOverview.md).
 
-It comes in two editions: the **full framework** (14 steps) for substantial projects, and **[Lite](GettingStartedAlternatives.md#lite-edition)** (7 steps) for smaller ones that need to move fast. Both apply the same AL standards. A third journey, **Build-a-Feature**, is for the quick mod that is not a project at all — a table and its pages, a field on the Customer Card, a report, an API page, an enum, a permission set — in a new or existing extension, with no steps and no documents, to the same standards; `/ocpf-bc:start` offers all three.
+It comes in two editions: the **full framework** (14 steps) for substantial projects, and **[Lite](GettingStartedAlternatives.md#lite-edition)** (7 steps) for smaller ones that need to move fast. Both apply the same AL standards. A third journey, **Build-a-Feature**, is for the quick mod that is not a project at all — a table and its pages, a field on the Customer Card, a report, an API page, an enum, a permission set — in a new or existing extension, with no steps and only four quick documents at the close, to the same standards; `/ocpf-bc:start` offers all three.
 
 </details>
 
@@ -53,6 +53,20 @@ Each month's release notes in brief. The complete, versioned record is in
 [fullVersion/RunbookChangelog.md](fullVersion/RunbookChangelog.md),
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
+
+## October 13, 2026 — Full v5.6.0.0 · Lite v5.6.0.0 · Operations Guide v5.6.0.0 · Plugin v5.6.0
+
+**Build-a-Feature starts new work at `0.0.0.1`, like every journey.** A folder scaffolded by
+AL: Go! (`1.0.0.0`, no package, `HelloWorld.al` only) is a new app, not an installed one; the
+journey keeps the scaffold's `id`, writes `0.0.0.1`, asks new-or-existing whenever `app.json`
+already exists instead of reading a version off the file, and asks for the name, publisher, and
+ID range instead of keeping the template's `ALProject1`, `Default publisher`, and `50100–50149`.
+And the dashboard the agent opens is the OnlyBCFans page, on every journey, unless you ask for
+F1 by name; its KPI tiles now share one height and its Elapsed split adds up. A rebuild after
+Step 7 (Lite Step 5) is a **remediation** with its own row on the journey, `07a — Remediation`.
+Build-a-Feature writes four quick documents at its close — problem statement, feature register
+with a schema diagram, documentation, progress. The F1 page: lighter track, Ferrari-red team
+radio with a *Box box. Box box.* line, cars that surge and lull and overtake.
 
 ## October 11, 2026 — Full v5.5.0.0 · Lite v5.5.0.0 · Operations Guide v5.5.0.0 · Plugin v5.5.0
 

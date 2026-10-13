@@ -441,8 +441,10 @@
   body.painted .tb .bar div{animation:none;width:var(--w)}
   .next{color:var(--text-3);font-weight:500;letter-spacing:0;text-transform:none}
   body.updated #livePill{animation:pulse .9s ease-out 1}
-  /* collapsible tiles and panels */
-  .tiles{align-items:start}
+  /* collapsible tiles and panels — every tile in the row takes the row's height (the Elapsed tile's,
+     with its time bar), so the Tokens and Decisions tiles are never shorter; a collapsed tile sits at the top */
+  .tiles{align-items:stretch}
+  .tile.collapsed{align-self:start}
   .tile,.panel{position:relative}
   .cbtn{position:absolute;right:9px;top:9px;width:22px;height:22px;border-radius:6px;border:1px solid var(--border);background:var(--surface-2);color:var(--text-3);cursor:pointer;display:grid;place-items:center;padding:0;opacity:.55;z-index:3;transition:opacity .2s}
   .cbtn:hover{opacity:1;color:var(--text)}

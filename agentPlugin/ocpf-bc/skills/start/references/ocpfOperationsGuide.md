@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.5.0.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
-**Last Updated:** October 11, 2026
+**Version:** 5.6.0.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
+**Last Updated:** October 13, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
 > `fullVersion/BC_App_Build_Routine_Agent.md` and `liteVersion/LITE_BC_App_Build_Routine_Agent.md`.
@@ -65,7 +65,7 @@
 16. [Documents](#ops--documents)
 17. [Usage & Cost](#ops--usage--cost)
 18. [Dashboard](#ops--dashboard)
-19. [Build-a-Feature](#ops--build-a-feature) *(the third journey: one object or a few, no steps, no documents)*
+19. [Build-a-Feature](#ops--build-a-feature) *(the third journey: one object or a few, no steps; four quick documents at the close)*
 20. [Reference Sources](#ops--reference-sources)
 21. [Plugin](#ops--plugin)
 
@@ -1387,7 +1387,7 @@ same page) and its template `dashboard.html`, copied from the plugin's `dashboar
 | `ocpfFramework/framework.json` | edition, runbook version, AL MCP state |
 | `ocpfFramework/state/usage.json` | the AI tool and every step's start / close window |
 | `ProjectProgress.md` | each step's status (the step table is the source of truth for *done / in progress*) |
-| `ocpfFramework/runbookSteps/<step>.md` | each step's phase and title; the current step's **Exit gate** text |
+| `ocpfFramework/runbookSteps/<step>.md` | each step's phase and title; the current step's **Exit gate** text. A remediation row (`07a`, `STEP-5a` — Ops § Usage & Cost → 7) has no step file: it sits after its base step with the title *Remediation* and a fixed three-line gate |
 | the usage script's `--json` (Ops § Usage & Cost) | tokens or credits, cost, turns, decisions per step and model |
 | `ocpfFramework/state/pricing.json` | price source and date; the credit price |
 | the sub-agent definitions (`.claude/agents/`, `.github/agents/`) | each role's model and effort |
@@ -1428,9 +1428,9 @@ reports a project whose hooks are missing.
 **On a Build-a-Feature project** (`"edition": "feature"` in the marker, Ops § Build-a-Feature) the
 page has no steps to show: the renderer builds its rows from the usage windows and the feature
 table in `ProjectProgress.md` instead — **one row per object asked for** (`F01`, `F02`, …), plus
-the intake, the package, and the review rows — grouped under the phases *Intake · Build · Package
-· Review*, each row carrying its stage (*Asked → Confirmed → Built → Compiled → Packaged →
-Reviewed*), its object ID, its time, and its cost; the *Objects built* tile replaces the estimate
+the intake, the package, and the review rows — grouped under the phases *Intake · Build · Review
+· Package*, each row carrying its stage (*Asked → Confirmed → Built → Compiled → Reviewed →
+Packaged*), its object ID, its time, and its cost; the *Objects built* tile replaces the estimate
 bar (there is no estimate on this journey), the exit-gate card shows the ladder a row climbs to
 close, and the roles card shows Main alone. Everything else — tokens or credits, cost, the time
 split, the open question, the hooks, both themes — is the same page. A Full or Lite project on
@@ -1440,20 +1440,28 @@ table and the feature table, not on the Build Map.
 ### 4. Themes
 
 Two themes ship since v5.4.0.0, both with a Day / Night switch in the header and the same data
-underneath; the renderer picks the template from `theme` in `ocpfFramework/state/dashboard.json`:
+underneath; every theme is rendered on every run; `theme` in `ocpfFramework/state/dashboard.json` records the human's stated preference:
 
 | `theme` | Template | What it is |
 |---|---|---|
-| `brand` (default) | `dashboard.html` | *OnlyBCFans* — the Build Map page: tiles, journey line, roles, models, exit gate |
+| `brand` (default — the one the agent opens and names unless the human asks for F1) | `dashboard.html` | *OnlyBCFans* — the Build Map page: tiles, journey line, roles, models, exit gate |
 | `f1` | `dashboard-f1.html` | *F1* — a trackside pit-wall view: the Main agent is the Ferrari, the Reasoning, Light, and Generator roles are the Mercedes, McLaren, and Red Bull; steps are laps on a timing screen; tokens are fuel, cost is budget, decisions are pit stops; an open question is **BOX BOX** with the car held in its box and the question on the team radio; sub-agents leave their garages and run on the far straight while they work |
+
+**OnlyBCFans is the default, on every journey, always.** The agent opens and names
+`ProjectDashboard.html` — at first creation, on "open the dashboard", in every message — and
+**never passes `--theme f1`, opens `ProjectDashboard-f1.html`, or mentions the F1 page unless the
+human asked for F1 by name in this session**. Since v5.6.0.0 the renderers enforce the first
+half: `--open` opens the OnlyBCFans page whatever `dashboard.json` remembers; the F1 page opens
+only when `--theme f1` is passed on that very call. Why: on a real project the agent opened the
+F1 page unasked, more than once; a theme is the human's taste, not the agent's.
 
 **Switching.** Every render writes **every theme** — `ProjectDashboard.html` (OnlyBCFans) and
 `ProjectDashboard-f1.html` (F1), both at the project root, both tracked — from one data build;
 the second file costs a write of ~150 KB and nothing else (no tokens, no model call). So the
 human switches by opening the other page: the footer selector on each page navigates to it, and
 whichever page is open keeps refreshing in place from the shared sidecar. `theme` in
-`dashboard.json` (set with `--theme` / `-Theme`) only decides which page `--open` opens and which
-path the agent names. Both templates are copied into `ocpfFramework/scripts/` at first creation
+`dashboard.json` (set with `--theme` / `-Theme`) records the human's stated preference for the
+record; it no longer decides which page opens. Both templates are copied into `ocpfFramework/scripts/` at first creation
 and refreshed by `update-framework`. The F1 theme reads the same
 data as the brand page, so it works with GitHub Copilot exactly as the brand page does — AI
 credits instead of tokens, the Copilot pill, and the same refresh cadence per tool (every turn in
@@ -1947,7 +1955,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v5.5.0.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
+folder as `README.md`. For runbook **v5.6.0.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2120,7 +2128,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.5.0.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.6.0.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
@@ -2262,6 +2270,7 @@ ritual*). Per developer, always gitignored.
 
 `aiTool` is `claude-code`, `copilot-chat`, or `copilot-cli`. **`step` is the step file's name without
 `.md`, and nothing else:** `PRE-01`, `PRE-02`, `01` … `12` in Full; `STEP-1` … `STEP-7` in Lite;
+a remediation is the base step plus a letter — `07a`, `STEP-5a` — with a `title` (*7. Remediation*);
 on Build-a-Feature, where there are no step files, the feature table's row ids — `F00`, `F01`, …,
 `FPK`, `FRV` — with an optional `title` the dashboard shows (Ops § Build-a-Feature). The
 usage table's first column, the `usage` skill's `--step` argument, and this file all use that
@@ -2503,6 +2512,41 @@ section — ±30 % until three or more measured projects are in the store, then 
 target. A project with no store is estimated from the template's baselines and says that instead.
 Tell the human once, when the first file is written, where it is and what reads it.
 
+### 7. Remediation — `07a`, `07b`, `STEP-5a` …
+
+**When testing or a late requirement change forces a major rebuild — the FRD and TDD (Lite: the
+Design Doc) have to be redone and objects regenerated — that work is a *remediation*, and it gets
+its own row on the journey, not a reopened step.** Why: a reopened Step 07 window hides that the
+design changed after it was approved, makes one row carry two builds' cost, and leaves the human
+reading the dashboard unable to see that the project went back. A remediation row shows it.
+
+- **Id:** the base step's id plus a letter — Full `07a`, then `07b`, …; Lite `STEP-5a`, `STEP-5b`,
+  … The base is **the compile-and-package step** (Full Step 07, Lite Step 5), because that is what
+  the remediation must bring back to green, whatever step the project was on when the change
+  arrived (Step 08's gap-fit, Step 09's review, Step 12's release test, Lite Step 7's testing).
+- **A fix inside the Step 07 / Step 5 cycle is not a remediation.** A failed test, a wrong field,
+  a missed tooltip: the cycle in the step file handles it, under the same window. A remediation
+  is when the *design* changes — a new or removed object, a changed schema, a changed rule — and
+  the FRD or TDD (Lite: the Design Doc) is updated in place with a ChangeLog entry that names the
+  remediation.
+- **The ritual is the step ritual** (*5. The step boundary ritual*): the moment the human agrees
+  the change is a rebuild, append `{ "step": "07a", "title": "Remediation — <what changed>",
+  "startedAt": "<now>" }` to `usage.json` and add the row `| BUILD | 07a — Remediation | In
+  Progress |` to `ProjectProgress.md`'s step table, **directly under the base step's row**. Do
+  the FRD / TDD update, the regeneration, and the compile-and-package under that window; close it
+  with `/ocpf-bc:usage --step 07a` and the rows pasted; end with the Rule 6c box offering the step
+  the project came from (*Back to Step 12's release test* / *Stop here*). **Opening `07a` closes
+  the window of the step the project was on** (an open window ends where the next starts, *1.*),
+  so *Back to Step 12* **reopens it**: a second entry with `"step": "12"` and a new `startedAt`
+  (summed as a reopened step), its row left `In Progress` throughout; Step 12's own close later
+  writes its rows from both windows. While `07a` is open two rows read `In Progress`; the
+  dashboard shows the remediation, which precedes Step 12 on the journey.
+- **The dashboard** (Ops § Dashboard) inserts the row on the journey line after its base step —
+  `07a · Remediation` — in the base step's phase, with its own time, tokens, and cost; the
+  exit-gate card shows the remediation's three conditions. Nothing else changes.
+- **Which steps say so:** Full Step 07, Step 08, and Step 12, Lite Step 5 and Step 7 each carry
+  one paragraph pointing here; the `usage` and `status` skills accept the ids.
+
 ---
 
 ## Ops § Build-a-Feature
@@ -2511,7 +2555,7 @@ Tell the human once, when the first file is written, where it is and what reads 
 builds **one object, or a few**, in a new or an existing per-tenant extension — a table and its
 list and card pages, a field on the Customer Card, a report, an API page or API query, a query,
 an enum or enum extension, a codeunit with an event subscriber, a permission set — **with no
-steps and no documents**. It exists because most day-to-day Business Central work is a quick mod,
+steps and no design documents** (four quick documents at the close are the whole record). It exists because most day-to-day Business Central work is a quick mod,
 not a project, and a quick mod done through a 14-step routine is either skipped or done without
 the framework's standards. In the plugin the `build-a-feature` skill does everything below; `start`
 is the documented way in (Ops § Plugin), and a direct `/ocpf-bc:build-a-feature` runs the same
@@ -2527,10 +2571,10 @@ written to.
 
 | Case | Recognised by | Setup |
 |---|---|---|
-| A Full or Lite project | the marker says `full` or `lite` | nothing new: the parameters, prefix, ranges, models, notifications, dashboard, and `ProjectProgress.md` are reused; the feature table is appended; one ChangeLog line per object |
+| A Full or Lite project | the marker says `full` or `lite` | nothing new: the parameters, prefix, ranges, models, notifications, dashboard, and `ProjectProgress.md` are reused; the feature table is appended; one ChangeLog line per object; the four quick documents of the close are appended beside the project's own, never replacing |
 | A feature project | the marker says `feature` | continue: the row ids carry on from the highest |
-| An existing extension that never used the framework | `app.json`, no `ocpfFramework/` | read `app.json` and `src/` for the name, version, ranges, prefix, and namespace; confirm what was read in one box; the companions, the marker (`"edition": "feature"`), notifications, the dashboard, the Main model, the AL tools, the symbols |
-| An empty folder | nothing | the same, plus Box 0 (name, publisher, icon) and one naming-and-range box (Deployment Target — PTE only; prefix; namespace; ID range) |
+| An existing extension that never used the framework | `app.json`, no `ocpfFramework/`, and a package or real objects exist | read `app.json` and `src/` for the name, ranges, prefix, and namespace; confirm what was read in one box; **ask intake question 4b** (new app at `0.0.0.1` / existing app at the installed version, confirmed on Extension Management) — the version is never taken from the file unasked; the companions, the marker (`"edition": "feature"`), notifications, the dashboard, the Main model, the AL tools, the symbols |
+| An empty folder, or an AL: Go! scaffold (`1.0.0.0`, no package, `HelloWorld.al` only) | nothing, or the template's `app.json` | the same, plus Box 0 (name, publisher, icon) and one naming-and-range box (Deployment Target — PTE only; prefix; namespace; ID range); the scaffold keeps its `id`, loses `HelloWorld.al`, and is written **`0.0.0.1`** — the template's `1.0.0.0` is never kept (Ops § Packaging → *Version numbers*); **its `ALProject1`, `Default publisher`, and `50100–50149` are placeholders, not answers** — Box 0 and the range question are asked exactly as for an empty folder, and a publisher is never assumed from a file (Ops § Intake) |
 
 Nothing from PRE-01 / Lite Step 1 beyond that and the working-language question (asked first, so
 every later box is in the human's language): no parameter sheet, no problem statement, no
@@ -2558,7 +2602,15 @@ journey says so and offers Full.
    four options — offering
    the object's natural next object and *Done*. Never a file that was not asked for or offered
    and accepted; never a publish to a tenant.
-3. **Package, offered once** when the plan is empty: *Package it as a `.app` now* / *Not now*.
+3. **Review, offered once, before anything is packaged:** when the plan is empty, *Review the
+   code now (recommended)* / *Skip*. The package offer waits for this answer. On yes the BCQuality
+   snapshot is fetched now (the one moment this journey fetches it; a sibling folder, Ops §
+   Fetched Companions) and **this session's files** are reviewed on the Main model against the
+   Standards Guide (§1, Part 2 for API objects, §5.3–§5.4, Part 7 in full, Part 11), BCQuality's
+   dispatch flow, and the AL Guidelines' *Best Practices* and *Vibe Coding Rules*; every finding
+   in one message with root cause and fix; one box *Apply all / Apply selected / Discuss first*;
+   applied fixes recompile before the package offer.
+4. **Package, offered once**, after the review box is answered: *Package it as a `.app` now* / *Not now*.
    Ops § Packaging → *Version numbers* applies unchanged — a new extension's first package at
    `0.0.0.1` as `app.json` says, every later package after a mechanical increment of the fourth
    segment, an existing extension's first package incremented from its installed version, never
@@ -2568,15 +2620,9 @@ journey says so and offers Full.
    now* / *Not yet — I'll test it first (recommended)*; on *Not yet* the offer returns the next
    time the human comes back to the project. An existing extension's release candidate is the
    next Minor or Major, proposed the same way.
-4. **Review, offered once:** *Review the code now (recommended)* / *Skip*. On yes the BCQuality
-   snapshot is fetched now (the one moment this journey fetches it; a sibling folder, Ops §
-   Fetched Companions) and **this session's files** are reviewed on the Main model against the
-   Standards Guide (§1, Part 2 for API objects, §5.3–§5.4, Part 7 in full, Part 11), BCQuality's
-   dispatch flow, and the AL Guidelines' *Best Practices* and *Vibe Coding Rules*; every finding
-   in one message with root cause and fix; one box *Apply all / Apply selected / Discuss first*;
-   applied fixes recompile and, if a package was built, a new package supersedes it.
-5. **Close:** the list of what was built, the package, the session's usage rows, the dashboard
-   path, and the last box: *Done / Build another object / Open the dashboard*. Every row
+5. **Close:** the four quick documents (*The record*, below), then the list of what was built,
+   the documents by path, the package, the session's usage rows, the dashboard path, and the last
+   box: *Done / Build another object / Open the dashboard*. Every row
    `Completed` with its rows present; `ProjectProgress.md` and the dashboard pages staged.
 
 ### Infer, then confirm
@@ -2605,7 +2651,7 @@ the work so far is an existing app to Lite's Step 1.
 - **`ProjectProgress.md`** (project root, tracked) keeps the **feature table** — the template's
   third step table: `Row | Object | Type | ID | Stage | Status | Shipped in`, one row per object
   (`F01`, `F02`, … continuing across sessions), plus `F00` intake, `FPK` package, `FRV` review;
-  stage *Asked → Confirmed → Built → Compiled → Packaged → Reviewed*; status `In Progress` while
+  stage *Asked → Confirmed → Built → Compiled → Reviewed → Packaged*; status `In Progress` while
   the row's window is open, `Completed` once its usage rows are written. On a Full or Lite project
   the table is appended under its own heading between the step table and the usage table, and
   the step table is never touched.
@@ -2616,16 +2662,25 @@ the work so far is an existing app to Lite's Step 1.
   nothing before the first object is *Unattributed*; the package and the review have their own
   windows because one package or one review covers every object of the session.
 - **The dashboard** (Ops § Dashboard) is the same page: on a feature project its rows are the
-  objects, with their stage, ID, time, and cost, under *Intake · Build · Package · Review*; the
+  objects, with their stage, ID, time, and cost, under *Intake · Build · Review · Package*; the
   hooks and the in-place refresh are unchanged; the explanation question gains one sentence.
 - **The ChangeLog line** (Full or Lite project only): one line per object under the day's heading
   — date, object type, ID, name, file, *Build-a-Feature*, and the package version it shipped in.
-  No other project document changes.
+- **Four quick documents at the close, one to two minutes in all**, written from what the session
+  already knows — no research, no sub-agent: `docs/1-define/ProblemStatement.md` (the intake in
+  the human's words, the plan as built, what was left out; a dated section per session),
+  `docs/1-define/FeatureRegister.md` (template `FeatureRegister.md`: the parameters Full keeps in
+  `ProjectParameters.md`, the object table Full keeps in `ObjectRegister.md`, and a Mermaid
+  `erDiagram` of the owned tables and the standard tables they touch), `docs/4-prove/Documentation.md`
+  (template `FeatureDocumentation.md`: a short section per object, how they fit, API routes,
+  permissions, how to use it), and `ProjectProgress.md`. On a Full or Lite project they sit beside
+  the project's own documents and append, never replace. Why: AJ wants to know, after any quick
+  mod, what objects exist and how they relate — without the journey growing a document phase.
 
 ### What the journey never does
 
-No FRD, TDD, Design Doc, Sanity Check, estimates, test script, documentation, user guide, or
-acknowledgements; no translation files (`TranslationFile` stays on so the `.g.xlf` exists for
+No FRD, TDD, Design Doc, Sanity Check, estimates, test script, user guide, or acknowledgements
+(the four quick documents above are the whole record); no translation files (`TranslationFile` stays on so the `.g.xlf` exists for
 whoever adds languages later; labels are the source text, Standards §1.7 and §8.3 apply in full);
 no publish to a sandbox or a tenant; no AppSource target; no sub-agents; no calibration export
 unless asked; no second launch command. It works the same in Claude Code, GitHub Copilot Chat,

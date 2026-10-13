@@ -31,6 +31,7 @@ header note). `ProjectProgress.md` is the one document in the project root, both
 | BuildPlan | `docs/3-build/BuildPlan.md` | Full Step 05 (Lite keeps the plan in chat and the ChangeLog) |
 | GapAnalysis, CodeReview, PostDevTDD | `docs/4-prove/` | Full Steps 08, 09, 10 |
 | Documentation, UserGuide, HumanUnitTestScript, Deployment, AutomatedTestScripts | `docs/4-prove/` | Full Step 11 |
+| FeatureRegister (`docs/1-define/`), FeatureDocumentation (written as `docs/4-prove/Documentation.md`) | as named | Build-a-Feature close (Part 7) — one to two minutes, from what the session knows |
 | ReleaseTestResults | `docs/4-prove/ReleaseTestResults.md` | Full Step 12 |
 | Docs, TestScript | `docs/4-prove/` | Lite Step 6 |
 | Translated copies (`UserGuide.fr-CA.md`, `Docs.fr-CA.md`, `TestScript.fr-CA.md`) | beside their source in `docs/4-prove/` | with the source |

@@ -52,17 +52,20 @@ Decide which of these applies before asking anything:
      previous session.
    Nothing else; skip the rest of this skill.
 2a. **An existing extension that never used the framework?** `app.json` exists and there is no
-   marker and no runbook. Say what you found (name, publisher, version, ID ranges from `app.json`;
-   how many objects under `src/`), and go to Step 3 with **Build-a-Feature recommended first**:
-   on an existing app the human almost always wants one more object, not a fresh 14-step build.
-   Full and Lite stay available (both read `app.json` as an existing app at their first step).
+   marker and no runbook. Say what you found (name, publisher, ID ranges from `app.json`; how
+   many objects under `src/`; whether a package exists), and go to Step 3 with **Build-a-Feature
+   recommended first**: on an existing app the human almost always wants one more object, not a
+   fresh 14-step build. **Do not call the file's version "installed":** an AL: Go! scaffold says
+   `1.0.0.0` with only `HelloWorld.al` and no package, and every journey treats that as a *new*
+   app that starts at `0.0.0.1` — the new-or-existing question (intake 4b) is asked by the
+   journey, never answered from the file. Full and Lite stay available.
 
 ## Step 3: Choose the journey
 
 Ask the human to choose, recommending based on what they've told you. If you don't know enough,
 ask about scope first. One question, three options, the recommended one first:
 
-- **Build-a-Feature (no steps, no documents).** One object, or a few, in a new or existing
+- **Build-a-Feature (no steps; four quick documents at the close).** One object, or a few, in a new or existing
   per-tenant extension: a table and its list and card pages, an extension of a standard table,
   page, or report, a report, an API page or API query, a query, an enum or enum extension, a
   codeunit, a permission set. Pick it when the human already knows what they want and it is not a

@@ -30,8 +30,8 @@ table, *Build-a-Feature*. Keep this shape exactly; the renderer parses it by the
   `API Query`, `Query`, `Enum`, `Enum Extension`, `Codeunit`, `Permission Set`,
   `Permission Set Extension`. **ID:** the object ID.
 - **Stage:** `Asked` → `Confirmed` → `Built` → `Compiled` → (`Packaged`) → (`Reviewed`), moved by
-  the loop as each thing happens. `Packaged` and `Reviewed` are written on the object rows when
-  the package or the review covers them.
+  the loop as each thing happens. `Reviewed` and then `Packaged` are written on the object rows
+  when the review and the package cover them — the review is offered first, the package after.
 - **Status:** `In Progress` while the row's window is open; `Completed` once its usage rows are
   written; blank for a planned object not started yet.
 - **Shipped in:** the first package version that contained the object; blank until packaged, and
@@ -56,6 +56,14 @@ go into the usage table under the feature table — one row per model that ran (
 one row per window (Copilot) — written by `/ocpf-bc:usage --step <id>` at every close and
 pasted into the closing message. Never hand-written.
 
+## The four quick documents (Part 7)
+
+`docs/1-define/ProblemStatement.md`, `docs/1-define/FeatureRegister.md` (template
+`FeatureRegister.md`: parameters, object table, schema diagram), `docs/4-prove/Documentation.md`
+(template `FeatureDocumentation.md`), and `ProjectProgress.md`. Written at the close from what
+the session knows, appended on later sessions, one to two minutes in all. On a Full or Lite
+project they sit beside the project's documents and append, never replace.
+
 ## The ChangeLog line (framework projects only)
 
 A Full or Lite project keeps `docs/0-project/ChangeLog.md`. Each object built by this journey
@@ -65,8 +73,9 @@ adds one line to it, under a dated heading if the day has none yet:
 - 2026-10-11 — Build-a-Feature: table 50100 "PFX Rental Unit" (src/RentalUnit/PFXRentalUnit.Table.al), shipped in 0.3.0.4.
 ```
 
-No other project document changes. A feature project (edition `feature`) has no ChangeLog; its
-feature table is the record.
+Beyond that line and the four quick documents (appended), no project document changes. A feature
+project (edition `feature`) has no ChangeLog; its feature table and the four documents are the
+record.
 
 ## Versioning, in one paragraph
 

@@ -45,10 +45,22 @@ Decide which of these applies before asking anything. Read, don't ask.
 
 | Case | How you know | What it means |
 |---|---|---|
-| **A. Framework project** | `ocpfFramework/framework.json` exists with `edition` `full` or `lite` (or a `CLAUDE.md` / `.github/copilot-instructions.md` starting `# BC App Build Routine`) | The project's parameters, prefix, namespace, ID ranges, models, notifications, dashboard, and `ProjectProgress.md` already exist. Reuse all of it. Add nothing to the project's documents except one ChangeLog line per object. |
+| **A. Framework project** | `ocpfFramework/framework.json` exists with `edition` `full` or `lite` (or a `CLAUDE.md` / `.github/copilot-instructions.md` starting `# BC App Build Routine`) | The project's parameters, prefix, namespace, ID ranges, models, notifications, dashboard, and `ProjectProgress.md` already exist. Reuse all of it. Add nothing to the project's documents except one ChangeLog line per object and the quick documents of Part 7, appended beside the project's own, never replacing. |
 | **B. Feature project** | `ocpfFramework/framework.json` exists with `edition` `feature` | A previous Build-a-Feature session. Continue: ids continue from the highest `F` row in `ProjectProgress.md`. |
-| **C. Existing extension, no framework** | `app.json` exists, no `ocpfFramework/` | Read `app.json` and `src/` for everything that can be read (Part 2); ask only what cannot. |
-| **D. Empty or new folder** | no `app.json` | A new per-tenant extension. Part 2 asks the identity and range questions, once. |
+| **C. Existing extension, no framework** | `app.json` exists, no `ocpfFramework/`, **and the extension has been built or installed somewhere**: `outputAppPackage/` or a `*.app` holds a package, or `src/` has real objects beyond the AL template's `HelloWorld.al` | Read `app.json` and `src/` for everything that can be read (Part 2); ask only what cannot. Its version is **asked**, never assumed (Part 2 step 5). |
+| **D. Empty or new folder, or a fresh scaffold** | no `app.json`; **or** `app.json` from **AL: Go!** — version `1.0.0.0`, no package anywhere, `src/` empty or only `HelloWorld.al` | A new per-tenant extension. Keep the scaffold's `id` GUID and delete `HelloWorld.al`; Part 2 asks the identity and range questions, once, and writes **`version` `0.0.0.1`** (Ops § Packaging → *Version numbers*). AL: Go!'s `1.0.0.0` is the template's default, not a release, and is never kept. |
+
+**New app or existing app is a question, exactly as Full and Lite ask it (intake 4b), never an
+inference from `app.json`.** Whenever `app.json` exists and the project is not already a framework
+project, ask it in Part 2 step 5 with the answer the evidence suggests first.
+
+**Template placeholders are not answers.** AL: Go! writes `name` `ALProject1` (or similar),
+`publisher` `Default publisher`, `version` `1.0.0.0`, `idRanges` `50100–50149`, and
+`HelloWorld.al`. None of these was decided by a human. A value that matches a template default
+— or that is plainly a placeholder (`Default`, `My`, `Test`, `ALProject`, `Sample`) — is treated
+as **unanswered**: it is asked through the options mechanism like an empty folder's would be,
+and the file is rewritten with the answer. Ops § Intake's rule applies in full: a publisher is
+only ever a name the human wrote, never inferred and never assumed from a file.
 
 If the folder is unclear, confirm the workspace root with the human first.
 
@@ -67,8 +79,9 @@ Do it in this order; skip what the case already has.
    `ocpfFramework/patterns/`, and this plugin's `usage` and `dashboard` scripts and templates into
    `ocpfFramework/scripts/`. GitHub unreachable: use the bundled copies (`al-standards` and
    `start` skills' `references/`) and say which versions. **No step files, no runbook, and no
-   document templates except `ProjectProgress.md`'s** (step 13). BCQuality is fetched only when
-   the human chooses a review (Part 6).
+   document templates except the three this journey writes** — `ProjectProgress.md`,
+   `FeatureRegister.md`, `FeatureDocumentation.md` (step 13, Part 7). BCQuality is fetched only when
+   the human chooses a review (Part 5).
 3. **Marker** (B: update; C, D: create) `ocpfFramework/framework.json`:
    ```json
    {
@@ -90,19 +103,35 @@ Do it in this order; skip what the case already has.
    marker untouched** — the project stays Full or Lite; the feature table in
    `ProjectProgress.md` is what says Build-a-Feature ran on it.
 4. **Notifications** (B, C, D): the `notifications` skill, right after the language.
-5. **Identity, new extension only (D)**, one box, three questions (Ops § Intake → *Box 0*):
-   extension name (suggestions from the human's wording + *I'll type it*), publisher (only a
-   name they already wrote, else *I'll type it*, never inferred), app icon (*Yes — I'll provide an
-   image* / *No icon* / *Later*). Write `app.json` at once: `name`, `publisher`, `logo` when
-   given, `version` `0.0.0.1`, a new `id`, platform defaults; create `src/`.
-   **Existing extension (C):** keep `app.json` as it is. Its `version` is the installed version;
-   confirm it with one question — *`<version>` is what's installed in the target environment* /
-   *I'll type the installed version* — and write the answer back (Ops § Packaging → *Version
-   numbers*).
+5. **Identity (D — an empty folder or a scaffold)**, one box, three questions (Ops § Intake →
+   *Box 0*): extension name (suggestions from the human's wording + *I'll type it*; a scaffold's
+   `ALProject1` is never offered), publisher (only a name they already wrote, else *I'll type
+   it*, never inferred — `Default publisher` is a placeholder, not a publisher), app icon (*Yes —
+   I'll provide an image* / *No icon* / *Later*). Write `app.json` at once: `name`, `publisher`,
+   `logo` when given, `version` `0.0.0.1`, the scaffold's `id` or a new one, platform defaults;
+   create `src/` (delete `HelloWorld.al`).
+   **Identity (C — an existing extension):** keep `id`; show `name` and `publisher` as read and
+   **confirm them in one box** (*That's right* / *Change the name* / *Change the publisher*) —
+   a value that looks like a placeholder is asked outright, as above — and, in the same box, ask
+   the **app icon** question when `app.json` has no `logo` (*Yes — I'll provide an image* / *No
+   icon* / *Later*; placed and resized per Ops § Intake → *The app icon*). Box 0 is Box 0 on
+   every journey: the same three questions Full's PRE-01 and Lite's Step 1 ask, in the same
+   order, before the dashboard is created.
+   **`app.json` already exists (C, or a scaffold under D):** then ask the intake's question 4b,
+   one box, two options, the one the evidence suggests first:
+   - *New app — the version starts at `0.0.0.1`* — **recommended, and first, when no package
+     exists anywhere and `src/` is empty or only the template's `HelloWorld.al`** (an AL: Go!
+     scaffold always says `1.0.0.0`; that is the template's default and is overwritten);
+   - *Existing app — installed in a target environment; `<version from app.json>` is the
+     installed version* / *I'll type the installed version* — first only when a package or real
+     objects exist, and confirmed on the **Extension Management** page as Ops § Packaging says.
+   Write the answer to `app.json` now. A new app is written `0.0.0.1` whatever the file said.
 6. **Dashboard, the moment `app.json` exists** (B, C, D; A already has it): the `dashboard` skill
    — render, `--open`, hooks, and the one explanation question (*I understand* / *Other*) with
    Ops § Dashboard's text, adding one sentence: *On this journey the Build Map shows one row per
    object you ask for, with its stage, its time, and its cost, instead of the framework's steps.*
+   Open and name `ProjectDashboard.html` (OnlyBCFans); never the F1 page unless the human asks
+   for F1 by name (Ops § Dashboard → 4).
 7. **Main model and effort** (B, C, D; A has them recorded): the `roles` skill, Lite's two
    questions (Main model, Main thinking effort), after its one-sentence High-effort warning. On
    edition `feature` the `roles` skill writes **no** sub-agent copy — this journey delegates to
@@ -117,7 +146,9 @@ Do it in this order; skip what the case already has.
    Full), **AL object prefix** (two or three short lowercase suggestions from the name and
    publisher), **namespace** (`<Publisher>.<ExtensionShort>` recommended / *No namespace*),
    **object ID range** (a range the human's material names / *50100–50149 — the AL template's
-   default, only if no range has been assigned* / type `start–end`). Then the **Permission Set
+   default, only if no range has been assigned* / type `start–end`). A scaffold's `50100–50149`
+   is the template default, not an allocation (Standards §5.5): the range is asked, never kept
+   silently. Then the **Permission Set
    App Code** (Standards §5.4, two or three uppercase suggestions that fit `13 − prefix
    length`), only when a permission set is built or a table makes one necessary (Part 4). Case C
    reads the prefix and namespace from the existing objects (the first `namespace` line; the
@@ -235,37 +266,17 @@ For each object in the plan, in order. Each object is one row and one usage wind
    **four options at most** — for a table: *Both list and card pages (recommended)* / *List page
    only* / *An API page for it* / *Done with this table*. *Done* is always one of them. A chosen
    companion goes to the front of the plan and the loop continues at step 1. *Done* with objects
-   still in the plan continues the plan; *Done* with an empty plan goes to Part 5.
+   still in the plan continues the plan; *Done* with an empty plan goes to Part 5 (the review
+   offer), then Part 6 (the package offer) — in that order, each its own box.
 
 Never generate a file that was not asked for or offered and accepted. Never publish to a tenant
-in this journey; say that the package (Part 5) is what the human uploads.
+in this journey; say that the package (Part 6) is what the human uploads.
 
-## Part 5: Package
+## Part 5: Review, optional — offered BEFORE anything is packaged
 
-When the plan is empty, one box: **Package it as a `.app` now (recommended)** / *Not now — I'll
-build it from VS Code*.
-
-- **Yes:** open window `FPK` (`title` `Package`); apply Ops § Packaging → *Version numbers*
-  mechanically — a new extension builds its first package at `0.0.0.1` as `app.json` says;
-  otherwise increment the fourth segment, write it back, and build; never twice at one version —
-  into `outputAppPackage/<Name>_<version>.app`; say the fixed *Package built* message block from
-  Ops § Packaging; write the version into the **Shipped in** column of every row whose column is
-  still blank (a row already shipped keeps its first version); close the window with its usage
-  rows. On a second package later in the same session
-  (a fix after a review), the `FPK` row gets a second window; its stage shows the latest version.
-- **No:** say how to build it (`AL: Package` in VS Code) and that the version rule still applies.
-
-Then, **only when a package was built and the extension is new (`0.x`):** one box — *The
-package is tested and approved — build the release candidate 1.0.0.0 now* / *Not yet — I'll test
-it first (recommended)*. On yes: set `1.0.0.0`, package again under the same rules, record it. On
-*Not yet*: say in one sentence that the next time they return to this project with
-*Build a feature in this project*, the first box offers the 1.0.0.0 build if they confirm the
-`0.x` package was tested and approved. For an existing extension the release candidate is the
-next Minor (or Major) from the starting version, proposed the same way.
-
-## Part 6: Review, optional
-
-One box: **Review the code now (recommended)** / *Skip the review*.
+When the plan is empty, and **before any package is built**, one box: **Review the code now
+(recommended)** / *Skip the review*. Packaging (Part 6) is never started, and never offered,
+until this box has been answered; a run that packages first has skipped a step.
 
 - **Yes:** open window `FRV` (`title` `Review`). Fetch the BCQuality snapshot now, into a sibling
   folder outside the project root, exactly as Ops § Fetched Companions says (`git clone --depth 1`,
@@ -279,16 +290,59 @@ One box: **Review the code now (recommended)** / *Skip the review*.
      the Standards Guide does not cover; the Standards Guide wins on any conflict, said out loud.
   Present every finding in one message with its root cause and proposed fix, then one box:
   **Apply all** / *Apply selected* / *Discuss first*. Nothing is applied before the answer.
-  Applied fixes go through Part 4's compile (step 6) again; a package built before the fix is
-  superseded by a new one (Part 5, `FPK` reopened). Close the window with its rows; stage
-  **Reviewed** on every row the review covered.
-- **Skip:** stage stays **Compiled** (or **Packaged**). Say in one line what a review would have
-  checked.
+  Applied fixes go through Part 4's compile (step 6) again. Close the window with its rows; stage
+  **Reviewed** on every row the review covered. Then Part 6.
+- **Skip:** stage stays **Compiled**. Say in one line what a review would have checked. Then
+  Part 6.
+
+## Part 6: Package
+
+After the review box (Part 5) is answered — and only then — one box: **Package it as a `.app`
+now (recommended)** / *Not now — I'll build it from VS Code*.
+
+- **Yes:** open window `FPK` (`title` `Package`); apply Ops § Packaging → *Version numbers*
+  mechanically — a new extension builds its first package at `0.0.0.1` as `app.json` says;
+  otherwise increment the fourth segment, write it back, and build; never twice at one version —
+  into `outputAppPackage/<Name>_<version>.app`; say the fixed *Package built* message block from
+  Ops § Packaging; write the version into the **Shipped in** column of every row whose column is
+  still blank (a row already shipped keeps its first version); close the window with its usage
+  rows. On a second package later in the same session (a fix found after packaging), the `FPK`
+  row gets a second window; its stage shows the latest version.
+- **No:** say how to build it (`AL: Package` in VS Code) and that the version rule still applies.
+
+Then, **only when a package was built and the extension is new (`0.x`):** one box — *The
+package is tested and approved — build the release candidate 1.0.0.0 now* / *Not yet — I'll test
+it first (recommended)*. On yes: set `1.0.0.0`, package again under the same rules, record it. On
+*Not yet*: say in one sentence that the next time they return to this project with
+*Build a feature in this project*, the first box offers the 1.0.0.0 build if they confirm the
+`0.x` package was tested and approved. For an existing extension the release candidate is the
+next Minor (or Major) from the starting version, proposed the same way.
 
 ## Part 7: Close
 
+**Quick documents first — one to two minutes in total, from what the session already knows, no
+research, no sub-agent.** Four files, each short, each written or appended now so the next person
+(or the next session) can see what happened and how the objects relate:
+
+| File | From the template | What goes in it |
+|---|---|---|
+| `docs/1-define/ProblemStatement.md` | none — Lite Step 1's shape: purpose, scope, out of scope | the intake answer in the human's words, the plan as built, what was deliberately left out; one dated section per session, appended |
+| `docs/1-define/FeatureRegister.md` | `ocpfFramework/documentTemplates/FeatureRegister.md` | the parameters block (what Full keeps in `ProjectParameters.md`), the object table — type, ID, name, file, base object, what it relates to (what Full keeps in `ObjectRegister.md`), and a Mermaid `erDiagram` of the owned tables and the standard tables they touch, drawn from the code; rows appended, the diagram redrawn |
+| `docs/4-prove/Documentation.md` | `ocpfFramework/documentTemplates/FeatureDocumentation.md` | one short section per object — purpose, fields, relations, file — plus how they fit together, API routes, permissions, and how to use it in BC; sections appended |
+| `ProjectProgress.md` | already kept | the feature table and the usage rows (Part 4) |
+
+Render the diagram **only if `ocpfFramework/framework.json` already records `tooling.mermaid` as
+`npx-cached` or `installed`** (a Full or Lite project that ran Ops § Tooling Checks); otherwise
+leave the source block, add one line under it — *not rendered here; GitHub and VS Code render
+Mermaid* — and **never run the tooling ladder or offer an install at a quick mod's close**: a
+cold `npx` pulls mermaid-cli and a browser, minutes, and the promise here is one to two. **Case A (a Full or Lite project):** the same three documents are written beside the
+project's own — `FeatureRegister.md` next to `ObjectRegister.md`, the Documentation sections
+appended under a `## Build-a-Feature` heading in the existing `docs/4-prove/Documentation.md`
+(Full) or `docs/4-prove/Docs.md` (Lite), the problem-statement section appended to the existing
+`ProblemStatement.md` — never replacing anything. Stage all of it with the rest.
+
 The closing message, in this order: what was built (type, ID, name, file, one line each); the
-package path and version if one was built; the usage rows of the session (run
+four documents, by path; the package path and version if one was built; the usage rows of the session (run
 `/ocpf-bc:usage` without `--step` once so every `F` row is current; paste the session's rows);
 the dashboard path; and the last box: **Done** / *Build another object* (back to Part 3's
 question) / *Open the dashboard*. The exit condition of the journey is that every `F` row is

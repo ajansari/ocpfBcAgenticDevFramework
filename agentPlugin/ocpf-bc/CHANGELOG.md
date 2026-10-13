@@ -4,6 +4,43 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.6.0 — October 13, 2026
+
+**Bundles:** full runbook v5.6.0.0, Lite v5.6.0.0, Standards Guide v1.12.0.0 (unchanged),
+Operations Guide v5.6.0.0. `build-a-feature`, `start`, `dashboard`, `usage`, `status`, and
+`documents` skills; two new document templates; both renderers and both templates.
+
+- **`build-a-feature` skill:** a fresh AL: Go! scaffold (`app.json` `1.0.0.0`, no package,
+  `HelloWorld.al` only) is a **new** app — `id` kept, `HelloWorld.al` dropped, version written
+  `0.0.0.1`; an existing extension is one with a package or real objects, and even then the
+  new-or-existing question (intake 4b) is asked, evidence-backed answer first, never answered from
+  the file. Found on AJ's first run: the skill offered the template's `1.0.0.0` as the installed
+  version.
+- **`start` skill:** the existing-extension detection names the package and object evidence and
+  no longer reports the file's version as installed.
+- **Placeholders are asked, not kept:** a scaffold's `ALProject1`, `Default publisher`, and
+  `50100–50149` are treated as unanswered — Box 0 and the range question run as for an empty
+  folder; an existing extension's name and publisher are confirmed in one box, and the icon is
+  asked when it has none — Box 0 on every journey.
+- **`build-a-feature` skill: the review is offered before the package** — Part 5 review, Part 6
+  package, each its own box; the package box waits for the review answer. Renderers: phases
+  *Intake · Build · Review · Package*.
+- **Remediation rows:** `ocpf-dashboard.py` / `.ps1` insert `07a` / `STEP-5a` rows after their
+  base step from the usage window and the `ProjectProgress.md` row (Ops § Usage & Cost → 7);
+  `usage` and `status` accept the ids.
+- **Build-a-Feature's four quick documents** at the close: `FeatureRegister.md` and
+  `FeatureDocumentation.md` templates added to the `documents` skill's references.
+- **Renderers: elapsed-time math.** Each step's agent / you / waiting split is scaled to its
+  window so the three add up to Elapsed exactly.
+- **`dashboard-f1.html`:** lighter grey track and pit lane; Ferrari-red *Team radio* with a
+  pit-wall line (*Box box. Box box.*, bleeped `*** ***`); cars on track drive with a slow, varied
+  speed cycle and overtake, state kept across repaints; header re-laid out — wordmark above the
+  app icon and name, the five stickers in two rows, the status pills in two rows.
+- **`dashboard` skill: OnlyBCFans opens, always.** `ocpf-dashboard.py` / `.ps1`: `--open` opens
+  `ProjectDashboard.html` whatever `dashboard.json` remembers; the F1 page opens only when
+  `--theme f1` is on that call, and the skill passes it only when the human asked for F1 by name.
+  `dashboard.html`: the KPI tiles of the first row share one height (the Elapsed tile's).
+
 ## 5.5.0 — October 11, 2026
 
 **Bundles:** full runbook v5.5.0.0, Lite v5.5.0.0, Standards Guide v1.12.0.0 (unchanged),

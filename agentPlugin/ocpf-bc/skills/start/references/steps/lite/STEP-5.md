@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 5 — Compile, Package, Test & Iterate
 
-**Runbook version:** 5.5.0.0 · Lite edition · Phase: BUILD
+**Runbook version:** 5.6.0.0 · Lite edition · Phase: BUILD
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -104,6 +104,16 @@ Appendix A**):
 say so plainly, publish, and suggest Postman, Power Automate, or Copilot Studio instead. Endpoint
 URL shapes, including the company segment most endpoints need, are **Standards Appendix A**. It's an early filter over the API pages only —
 never the BC client — and Step 7's human pass still decides.
+
+**Remediation — when the design has to change after this step closed (Ops § Usage & Cost →
+7).** If testing at Step 7, or a late requirement change, means the Design Doc
+must be redone and objects regenerated — not a fix inside this step's cycle — open a
+**remediation** the moment the human agrees it is a rebuild: window `STEP-5a` (then `STEP-5b`, …) titled
+*Remediation — <what changed>*, row `| BUILD | STEP-5a — Remediation | In Progress |` directly under
+this step's row in `ProjectProgress.md`. Redo the Design Doc in place (ChangeLog entry naming
+the remediation), regenerate, and bring the extension back to 0 / 0 under that window; close it
+with its usage rows and the Rule 6c box offering the step the project came from. The dashboard
+shows it as `STEP-5a · Remediation` on the journey line.
 
 **Outputs:** All files compiling and packaging with **0 errors, 0 warnings**; every build's package
 in `outputAppPackage/`, one file per version, none overwritten; at least one package

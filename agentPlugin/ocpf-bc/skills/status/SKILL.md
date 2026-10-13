@@ -13,9 +13,11 @@ conversation memory.
 1. **`ProjectProgress.md`** (project root, every journey): the step-by-step tracker and, below it,
    the usage table. **On a Build-a-Feature project** (`"edition": "feature"` in the marker) the
    tracker is the **feature table** — one row per object (`F01`, `F02`, …), plus `F00` intake,
-   `FPK` package, `FRV` review, each with a stage (*Asked → Confirmed → Built → Compiled →
-   Packaged → Reviewed*) and a status — and a Full or Lite project may carry that table too, under
-   `## Build-a-Feature`, when the journey ran on it: report those rows as well, after the steps. Find the step marked `In Progress`, or the first one not complete. Then check
+   `FRV` review, `FPK` package, each with a stage (*Asked → Confirmed → Built → Compiled →
+   Reviewed → Packaged*) and a status — and a Full or Lite project may carry that table too, under
+   `## Build-a-Feature`, when the journey ran on it: report those rows as well, after the steps.
+   A **remediation row** (`07a — Remediation`, `STEP-5a — Remediation`; Ops § Usage & Cost → 7)
+   sits under its base step: report it as its own step, with the step the project returns to. Find the step marked `In Progress`, or the first one not complete. Then check
    the usage table against the step table: **every step marked `Completed` must have at least one
    usage row** (one per model that ran); a closed step with no row is a blocker (Full Operating
    Rule 11 / Lite Rule 9 — the exit gate wasn't met).

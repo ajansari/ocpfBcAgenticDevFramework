@@ -126,14 +126,19 @@ Record what was installed in `ocpfFramework/state/dashboard.json` (`hooks: true/
 - **"Refresh the dashboard"** → render without `--open`; say what changed if anything stands out.
 - **"Where is the dashboard?"** → `ProjectDashboard.html` at the project root, and the right-click
   route. It is tracked: it shows as modified after every refresh, which is expected.
-- **Theme.** Two ship: `brand` (*OnlyBCFans*, the default) and `f1` (the trackside pit-wall view —
+- **Theme — OnlyBCFans unless the human says "F1".** Open and name `ProjectDashboard.html`,
+  always; never pass `--theme f1`, open `ProjectDashboard-f1.html`, or bring up the F1 page
+  unless the human asked for it by name in this session (Ops § Dashboard → 4; the renderers
+  open the OnlyBCFans page on `--open` whatever `dashboard.json` remembers). Two ship: `brand`
+  (*OnlyBCFans*, the default) and `f1` (the trackside pit-wall view —
   Ferrari for Main, Mercedes / McLaren / Red Bull for the sub-agents, steps as laps, BOX BOX when a
   question waits). Both have a Day/Night switch. **Every render writes both pages** —
   `ProjectDashboard.html` and `ProjectDashboard-f1.html`, both at the root, both tracked (stage
   both) — so the human switches by opening the other one; the footer selector navigates.
-  **"Use the F1 theme"** → run the renderer with `--theme f1` (`-Theme f1`), which records the
-  preference in `ocpfFramework/state/dashboard.json` so `--open` and your answers name that page;
-  then `--open` it. Both templates live in `ocpfFramework/scripts/`. Ops § Dashboard → 4.
+  **"Use the F1 theme"** (the human's words) → run the renderer with `--theme f1 --open`
+  (`-Theme f1 -Open`): it opens the F1 page on that call and records the preference in
+  `ocpfFramework/state/dashboard.json` for the record. Every later open without `--theme` is the
+  OnlyBCFans page again; say so. Both templates live in `ocpfFramework/scripts/`. Ops § Dashboard → 4.
 - **Repair.** A project from v5.2.0.0 still has `ocpfFramework/state/dashboard.html`: render once
   (the page lands at the root), delete the old file, `git add ProjectDashboard.html`. A project
   whose hooks predate v5.3.2.0 lacks the unmatched `PostToolUse` hook: merge it (section 2) — its
@@ -148,12 +153,19 @@ Record what was installed in `ocpfFramework/state/dashboard.json` (`hooks: true/
   page that paints but never updates: the renderer did not write
   `ocpfFramework/state/dashboard-data.js` (older than v5.3.5.0) — refresh `ocpfFramework/scripts/`.
 
+## 3b. Remediation rows
+
+A remediation (Ops § Usage & Cost → 7) — window `07a` / `STEP-5a` with a title, and its row under
+the base step in `ProjectProgress.md` — appears on the journey line after its base step as
+`07a · Remediation`, in the base step's phase, with its own time, tokens, and cost and a fixed
+three-line exit gate. Nothing to do here: the renderers read it from the window and the row.
+
 ## 3a. Build-a-Feature projects
 
 On a marker with `"edition": "feature"` (Ops § Build-a-Feature) there are no steps: the renderers
 build the rows from the usage windows and the feature table in `ProjectProgress.md` — one row per
 object (`F01`, `F02`, …), plus `F00` intake, `FPK` package, `FRV` review — under the phases
-*Intake · Build · Package · Review*, each row with its stage, object ID, time, and cost; the
+*Intake · Build · Review · Package*, each row with its stage, object ID, time, and cost; the
 estimate tile becomes *Objects built*; the exit-gate card shows the row's stage ladder; the roles
 card shows Main alone. The data gains `phases` and, per row, `stage`, `kind`, `objectId`, and
 `shippedIn`. First creation is the same (the `build-a-feature` skill calls this skill the moment

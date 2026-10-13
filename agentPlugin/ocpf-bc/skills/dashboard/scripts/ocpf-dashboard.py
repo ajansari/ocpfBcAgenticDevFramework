@@ -39,7 +39,7 @@ SHORT = {"PRE-01": "State the Problem", "PRE-02": "Gap Analysis", "01": "Intake 
          "STEP-6": "Review & Finalize", "STEP-7": "Release for Testing"}
 PHASES = ["DEFINE", "DESIGN", "BUILD", "PROVE"]
 # Build-a-Feature (edition "feature"): no step files; one row per object, read from usage.json's windows and the feature table
-FEATURE_PHASES = ["INTAKE", "BUILD", "PACKAGE", "REVIEW"]
+FEATURE_PHASES = ["INTAKE", "BUILD", "REVIEW", "PACKAGE"]  # the review is offered before the package
 FEATURE_GATES = {
     "INTAKE": ["The one intake question answered and the plan said back, object by object.", "The F00 window closed with its usage rows."],
     "BUILD": ["Asked: what the object is and what it holds.", "Confirmed: fields, types, and the key confirmed in one box.",
@@ -140,11 +140,30 @@ def feature_catalog(root, usage, wins):
                     "shippedIn": r.get("shipped") if r.get("shipped") not in (None, "", "—", "-") else None})
     return cat, status
 
+REMEDIATION_RE = re.compile(r"^(PRE-0[12]|[0-9]{2}|STEP-[0-9])([a-z])$")
+REMEDIATION_GATE = ["The changed requirement is in the FRD and the TDD (Lite: the Design Doc), each updated in place with a ChangeLog entry naming this remediation.",
+                    "Every affected object regenerated and the whole extension compiled and packaged clean again, as the base step requires.",
+                    "The remediation's usage rows written and pasted; the base step's exit gate met again."]
+
+def with_remediations(catalog, usage, wins, status):
+    """Insert 07a, 07b, STEP-5a … after their base step: a Remediation window or row (Ops § Usage & Cost → 7)."""
+    titles = {s.get("step"): s.get("title") for s in usage.get("steps", []) if s.get("title")}
+    ids = []
+    for sid in [w[0] for w in wins] + list(status.keys()):
+        if REMEDIATION_RE.match(sid) and sid not in ids: ids.append(sid)
+    for sid in sorted(ids):
+        base = REMEDIATION_RE.match(sid).group(1)
+        anchor = max((i for i, c in enumerate(catalog) if c["id"] == base or (REMEDIATION_RE.match(c["id"]) and REMEDIATION_RE.match(c["id"]).group(1) == base and c["id"] < sid)), default=None)
+        if anchor is None: continue
+        b = catalog[anchor if catalog[anchor]["id"] == base else next(i for i, c in enumerate(catalog) if c["id"] == base)]
+        catalog.insert(anchor + 1, {"id": sid, "phase": b["phase"], "title": titles.get(sid) or "Remediation", "short": "Remediation", "exitGate": REMEDIATION_GATE, "remediation": True})
+    return catalog
+
 def progress_status(root, catalog):
     txt = read(os.path.join(root, "ProjectProgress.md"))
     status = {}
     for line in txt.splitlines():
-        m = re.match(r"^\|\s*(DEFINE|DESIGN|BUILD|PROVE)\s*\|\s*([A-Z0-9-]+)\s*[—-]\s*[^|]*\|\s*([^|]*)\|", line)
+        m = re.match(r"^\|\s*(DEFINE|DESIGN|BUILD|PROVE)\s*\|\s*([A-Za-z0-9-]+)\s*[—-]\s*[^|]*\|\s*([^|]*)\|", line)
         if m:
             sid = m.group(2).strip(); st = m.group(3).strip().lower()
             status[sid] = "now" if "in progress" in st else ("done" if st.startswith("complete") or st.startswith("done") else ("todo" if not st or st in ("", "pending", "not started") else "done" if "complet" in st else "todo"))
@@ -317,12 +336,23 @@ def build(root, a):
         catalog, status = feature_catalog(root, usage, wins); phases = FEATURE_PHASES
     else:
         catalog = step_catalog(root, edition); status = progress_status(root, catalog); phases = PHASES
+        catalog = with_remediations(catalog, usage, wins, status)
     notes = []
     uj, err = usage_rows(root, tool) if wins else (None, "no step windows yet")
     if err: notes.append(f"usage: {err}")
     rows = (uj or {}).get("rows", [])
     def rows_for(sid): return [r for r in rows if r.get("step", "").replace(" (open)", "") == sid]
     live = claude_live(root, usage, wins, None) if (not copilot and wins) else None
+    if live:
+        # The split comes from gaps between transcript events, the elapsed from the step windows; the two never
+        # agreed to the second (events outside every window, a capped gap, time before the first event). Scale
+        # each step's split to its window so agent + you + waiting == elapsed, exactly (v5.6.0.0).
+        per = {}
+        for sid, sec in el.items():
+            v = live["perStep"].get(sid) or {"agent": 0.0, "human": 0.0, "waiting": 0.0}
+            tot = v["agent"] + v["human"] + v["waiting"]
+            if tot > 0: per[sid] = {k: v[k] * sec / tot for k in v}  # a step with no transcript events stays out of the split: unmeasured, not "you"
+        live["perStep"] = per
     steps = []
     for c in catalog:
         sid = c["id"]; rs = rows_for(sid)
@@ -332,7 +362,7 @@ def build(root, a):
                       "costUsd": sum((r.get("costUsd") or 0) for r in rs) if rs else None,
                       "tokens": sum((r.get("input") or 0) + (r.get("output") or 0) + (r.get("cacheWrite") or 0) + (r.get("cacheRead") or 0) for r in rs) if rs and not copilot else None,
                       "credits": sum((r.get("aiCredits") or 0) for r in rs) if rs and copilot else None,
-                      **{k: c[k] for k in ("stage", "kind", "objectId", "shippedIn") if c.get(k)}})
+                      **{k: c[k] for k in ("stage", "kind", "objectId", "shippedIn", "remediation") if c.get(k)}})
     cur = next((s for s in steps if s["status"] == "now"), None)
     # totals
     tot = {"costUsd": sum((r.get("costUsd") or 0) for r in rows) if rows else None, "elapsedSeconds": sum(el.values()) if el else None,
@@ -463,7 +493,7 @@ def main():
     ap.add_argument("--waiting-json", help="hook input of an AskUserQuestion / ask_user call: record the open question and render")
     ap.add_argument("--clear-waiting", action="store_true", help="hook: the question was answered")
     ap.add_argument("--event", nargs=2, metavar=("WHO", "TEXT"), help="append a feed event and render")
-    ap.add_argument("--theme", choices=sorted(THEMES), help="which page --open opens and the skill names (recorded in ocpfFramework/state/dashboard.json); every theme is rendered on every run")
+    ap.add_argument("--theme", choices=sorted(THEMES), help="open this theme's page on THIS call only (--open), and record it as the human's stated preference in ocpfFramework/state/dashboard.json; without it --open always opens the OnlyBCFans page; every theme is rendered on every run")
     ap.add_argument("--throttle", type=int, default=0, metavar="SECONDS", help="hook on every tool call: skip the render when the page is younger than this (unless a question, answer, or event is being recorded)")
     a = ap.parse_args()
     root = os.path.abspath(a.project)
@@ -505,9 +535,11 @@ def main():
         dj["theme"] = dj.get("theme") or "brand"
         with open(os.path.join(root, STATE, "dashboard.json"), "w", encoding="utf-8") as f: json.dump(dj, f, indent=2)
     data = build(root, a)
-    data["theme"] = (dj.get("theme") or "brand")  # which page --open opens; every theme is rendered regardless
+    data["theme"] = (dj.get("theme") or "brand")  # recorded preference, informational; every theme is rendered regardless
     outs = render(root, data)
-    out = outs.get(data.get("theme") or "brand") or outs["brand"]
+    # --open always opens the OnlyBCFans page. The F1 page opens only when --theme f1 is passed on this very
+    # call, i.e. when the human asked for it by name now; a remembered preference never decides it (v5.6.0.0).
+    out = outs.get(a.theme) if a.theme in THEMES else outs["brand"]
     if a.open: open_in_browser(out)
     if not a.quiet:
         print(out)

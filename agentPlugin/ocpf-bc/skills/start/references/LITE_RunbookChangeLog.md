@@ -16,6 +16,25 @@ framework.
 
 ---
 
+## v5.6.0.0 — October 13, 2026
+
+Derived from full framework **v5.6.0.0**; Operations Guide **v5.6.0.0**; Standards Guide
+**v1.12.0.0** (unchanged); plugin **5.6.0**. Build-a-Feature fixes; remediation rows (Step 5 and
+Step 7 gain one paragraph each); dashboard math, order, and F1 motion.
+
+- Build-a-Feature treats an AL: Go! scaffold (`1.0.0.0`, no package, `HelloWorld.al` only) as a
+  new app at `0.0.0.1`, and asks new-or-existing (intake 4b) whenever `app.json` already exists,
+  as Lite's Step 1 does — the version is never inferred from the file; a scaffold's placeholder
+  name, publisher, and ID range are asked, not kept. The review is offered before the package. The dashboard renderers open the OnlyBCFans
+  page on `--open` always, F1 only when the human asks for it by name, and that page's KPI tiles
+  share one height. A rebuild after Step 5 — the Design Doc redone, objects regenerated — is a
+  remediation with its own row, `STEP-5a — Remediation`, under Step 5 (Ops § Usage & Cost → 7).
+  Build-a-Feature writes four quick documents at its close. The Elapsed tile's split adds up; the
+  F1 page's track is lighter, its team radio Ferrari red with a *Box box* line, its cars in
+  motion. Full changelog: *v5.6.0.0*.
+
+---
+
 ## v5.5.0.0 — October 11, 2026
 
 Derived from full framework **v5.5.0.0**; Operations Guide **v5.5.0.0**; Standards Guide

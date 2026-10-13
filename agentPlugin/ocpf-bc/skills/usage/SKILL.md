@@ -15,8 +15,9 @@ The normal invocation is at a step boundary, with the step id (Full Operating Ru
 Operating Rule 9; Ops § Usage & Cost → *The step boundary ritual*). Step ids are the step file
 names: `PRE-01`, `PRE-02`, `01` … `12`, `STEP-1` … `STEP-7` — and, on the Build-a-Feature journey
 (Ops § Build-a-Feature), the feature table's row ids: `F00` intake, `F01`, `F02`, … one per object,
-`FPK` package, `FRV` review. The ritual is the same at every row's start and close; the window may
-carry a `title` the dashboard shows, which this skill ignores.
+`FPK` package, `FRV` review — and a **remediation** (Ops § Usage & Cost → 7): the base step plus a
+letter, `07a` / `STEP-5a`, with a `title`. The ritual is the same at every row's start and close;
+the window may carry a `title` the dashboard shows, which this skill ignores.
 
 - **Step start:** append `{ "step", "startedAt" }` to `ocpfFramework/state/usage.json` and set the
   step's `ProjectProgress.md` row to `In Progress` — same moment, same message.

@@ -20,7 +20,7 @@ Or just ask: *"Start a Business Central project with the OCPF framework."*
 
 The `start` skill:
 1. helps you choose **Full** (14 steps), **Lite** (7 steps), or **Build-a-Feature** (one object or
-   a few, in a new or existing extension, no steps, no documents),
+   a few, in a new or existing extension, no steps, four quick documents at the close),
 2. installs the **latest** runbook from GitHub as `CLAUDE.md` and/or
    `.github/copilot-instructions.md`, and never overwrites an existing file (Full and Lite),
 3. connects **Microsoft's AL tools**, with nothing to install, using the AL Language extension you already have,
@@ -29,7 +29,7 @@ The `start` skill:
 On a project that already follows the framework, `start` offers *Status*, *Check for a framework
 update*, or *Build a feature in this project*.
 
-**Project layout (since plugin 5.0.0, Full 5.0.0.0 / Lite 5.0.0.0; current 5.5.0 / 5.5.0.0):** everything the framework fetches
+**Project layout (since plugin 5.0.0, Full 5.0.0.0 / Lite 5.0.0.0; current 5.6.0 / 5.6.0.0):** everything the framework fetches
 or keeps lives under one folder, `ocpfFramework/` (step files, templates, guides, patterns,
 scripts, the marker, and per-developer `state/`); project documents go in `docs/` by phase
 (`0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/`); `ProjectProgress.md` stays in the

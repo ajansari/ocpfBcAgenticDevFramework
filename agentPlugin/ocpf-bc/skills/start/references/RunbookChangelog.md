@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.5.0.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.5.0.0**, and Lite at **v5.5.0.0** — but
+**v5.6.0.0**, the Standards Guide is at **v1.12.0.0**, the Operations Guide at **v5.6.0.0**, and Lite at **v5.6.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -21,6 +21,83 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v5.6.0.0 — October 13, 2026
+
+**Build-a-Feature fixes from the first runs; remediation rows on the journey; the dashboard's
+math, order, and F1 motion.** Lite **v5.6.0.0**, Operations Guide **v5.6.0.0** (new *Usage & Cost
+→ 7. Remediation*), Standards Guide **v1.12.0.0** (unchanged), plugin **5.6.0**. Step 07 and Step
+12 gain one paragraph each (Lite: Step 5 and Step 7); two new document templates.
+
+- **The run that found it:** AJ ran Build-a-Feature in a folder scaffolded by AL: Go!, whose
+  `app.json` says `1.0.0.0` with only `HelloWorld.al` and no package. The skill's "existing
+  extension" case treated any `app.json` as an installed app and offered `1.0.0.0` as the version
+  to continue from. Full and Lite never do that: intake question 4b asks *New app (`0.0.0.1`,
+  recommended)* / *Existing app (the installed version)*, and Ops § Packaging → *Version numbers*
+  says a new app starts at `0.0.0.1`. AJ's rule, restated: **every journey starts new work at
+  `0.0.0.1`.**
+- **The fix is a mechanism.** The journey's case table now distinguishes an *existing extension*
+  (a package exists somewhere, or `src/` has real objects) from a *fresh scaffold* (`1.0.0.0`, no
+  package, `HelloWorld.al` only), which is a new app: it keeps the scaffold's `id`, drops
+  `HelloWorld.al`, and is written `0.0.0.1`. Whenever `app.json` exists and the project is not a
+  framework project, the skill asks question 4b with the evidence-backed answer first, and the
+  version is never taken from the file unasked. Ops § Build-a-Feature's table says the same; the
+  `start` skill's existing-extension detection no longer calls the file's version "installed".
+- **Template placeholders are not answers.** The same run accepted AL: Go!'s `ALProject1` and
+  `Default publisher` as the extension's name and publisher without asking. The skill now treats
+  any value matching a template default or a plain placeholder as unanswered: a scaffold gets
+  Box 0 (name, publisher, icon) and the range question exactly as an empty folder does; an
+  existing extension's name and publisher are shown and confirmed in one box. Ops § Intake's
+  rule — a publisher is only ever a name the human wrote — now has the file case written out.
+  Box 0 is Box 0 on every journey: name, publisher, icon, in that order, before the dashboard —
+  an existing extension confirms name and publisher and is asked for an icon when it has none.
+- **OnlyBCFans is the dashboard the agent opens, on every journey, always.** On AJ's project the
+  agent kept opening the F1 page unasked. The renderers now open the OnlyBCFans page on `--open`
+  whatever `dashboard.json` remembers; the F1 page opens only when `--theme f1` is passed on that
+  very call, which the `dashboard` skill does only when the human asked for F1 by name in this
+  session. Ops § Dashboard → 4 says so; `theme` in `dashboard.json` is a recorded preference, no
+  longer the page that opens.
+- **The review is offered before the package.** On AJ's run the journey went straight to
+  packaging without offering the code review. The skill's Part 5 is now the review offer and
+  Part 6 the package offer, each its own box, in that order; the package box is never shown until
+  the review box is answered. The stage ladder and the dashboard's phases follow: *Compiled →
+  Reviewed → Packaged*, *Intake · Build · Review · Package*.
+- **Remediation rows — `07a`, `07b`, … (Lite `STEP-5a`).** When testing or a late change forces
+  the FRD and TDD (Lite: the Design Doc) to be redone and objects regenerated, that work is a
+  *remediation* with its own window and its own row directly under the compile-and-package step,
+  not a reopened step: Ops § Usage & Cost → 7 is the mechanism, Step 07 / Step 12 and Lite Step
+  5 / Step 7 point at it, the `usage` and `status` skills accept the ids, and the dashboard
+  renderers insert `07a · Remediation` on the journey line after its base step, in its phase,
+  with its own time, tokens, cost, and a fixed three-line exit gate. AJ's ask: a rebuild after
+  Step 7 must be visible as a step, not hidden inside Step 7's numbers.
+- **Build-a-Feature writes four quick documents at the close, one to two minutes in all:**
+  `ProblemStatement.md` (the intake in the human's words and the plan as built),
+  `FeatureRegister.md` (new template: the parameters of `ProjectParameters.md` plus the object
+  table of `ObjectRegister.md` plus a Mermaid schema of the owned and touched tables),
+  `Documentation.md` (new template `FeatureDocumentation.md`: a short section per object, how
+  they fit, API routes, permissions, how to use it), and `ProjectProgress.md`. On a Full or Lite
+  project they sit beside the project's documents and append. AJ: "I want to know objects
+  created, how they relate schematically."
+- **Elapsed-time math.** The OnlyBCFans Elapsed tile's agent / you / waiting bar came from gaps
+  between transcript events while Elapsed came from the step windows, and the two never agreed
+  (events outside every window, capped gaps, time before the first event). Each step's split is
+  now scaled to its window, so the three add up to Elapsed exactly, in both renderers; a step
+  with no transcript events is left out of the split rather than shown as the human's time.
+- **F1 page.** The track and the pit lane are a lighter grey in both day and night. The *Team
+  radio* card is Ferrari red — border, glow, heading, waveform, message bar — instead of yellow,
+  and opens with a pit-wall line that fits the moment (*Box box. Box box.*; the longer the car
+  sits in the box, or the further over the fuel target, the saltier, with the swearing bleeped as
+  `*** ***`), stable across repaints. Cars on track now drive the far straight with a slow,
+  varied speed cycle — a surge and a lull over five to ten seconds, the period redrawn each cycle
+  and different per car, so two cars overtake — and keep their place across the in-place
+  refresh. The header uses its space: the OnlyBCFans wordmark sits above the app icon and name,
+  the five stickers (Fuel, Budget, Race time, Pit stops, Lap) sit in two rows, and the status
+  pills (Live and the tool; AL MCP and Day / Night) in two rows beside the BC mark.
+- **OnlyBCFans page: the KPI tiles share one height.** The first row's tiles stretched to their
+  own content, so the Tokens and Decisions tiles sat shorter than the Elapsed tile with its time
+  bar; every tile in the row now matches the tallest (the Elapsed tile).
 
 ---
 
@@ -65,11 +142,11 @@ ALL ALONG → OCPF Plugin and the version line; no step changes.
 - **The record, the usage, the dashboard.** `ProjectProgress.md` gains a third step table in the
   template — `Row | Object | Type | ID | Stage | Status | Shipped in`, one row per object (`F01`,
   `F02`, …) plus `F00` intake, `FPK` package, `FRV` review, stage *Asked → Confirmed → Built →
-  Compiled → Packaged → Reviewed*. Every row is a usage window (`step` = the row id, plus a
+  Compiled → Reviewed → Packaged*. Every row is a usage window (`step` = the row id, plus a
   `title`), so the `usage` skill's rows, prices, and Copilot credits work unchanged; `F00` opens
   with the session so nothing is *Unattributed*. The dashboard renderers (`ocpf-dashboard.py` /
   `.ps1`) accept `"edition": "feature"`: rows come from the windows and the feature table instead of
-  the step files, the data carries `phases` (*Intake · Build · Package · Review*) and each row's
+  the step files, the data carries `phases` (*Intake · Build · Review · Package*) and each row's
   `stage`, `kind`, `objectId`, and `shippedIn`; both templates read `phases` instead of the four
   hard-coded phase names, show the stage on each station or lap, replace the estimate tile with
   *Objects built*, and show Main alone in the roles card. Full and Lite pages render exactly as

@@ -6,7 +6,7 @@
 # Project Progress — <Extension Name>
 
 ## Steps
-Keep the table for this journey, delete the other two, and drop the `### Full` / `### Lite` / `### Build-a-Feature` heading that remains. A Full or Lite project on which Build-a-Feature later runs keeps its step table **and** appends the Build-a-Feature table under its own `## Build-a-Feature` heading, between the step table and the usage table.
+A remediation (Ops § Usage & Cost → 7) is a row added directly under its base step: `| BUILD | 07a — Remediation | In Progress |` (Lite: `STEP-5a`). Keep the table for this journey, delete the other two, and drop the `### Full` / `### Lite` / `### Build-a-Feature` heading that remains. A Full or Lite project on which Build-a-Feature later runs keeps its step table **and** appends the Build-a-Feature table under its own `## Build-a-Feature` heading, between the step table and the usage table.
 
 ### Full
 | Phase | Step | Status |
@@ -38,7 +38,7 @@ Keep the table for this journey, delete the other two, and drop the `### Full` /
 | PROVE | STEP-7 — Release for Testing | |
 
 ### Build-a-Feature
-One row per object asked for, in start order, plus the intake, the package, and the review (Ops § Build-a-Feature). `Row`: `F00` intake · `F01`, `F02`, … objects, continuing across sessions · `FPK` package · `FRV` review. `Stage`: Asked → Confirmed → Built → Compiled → Packaged → Reviewed. `Status`: `In Progress` while the row's usage window is open, `Completed` once its usage rows are written. `Shipped in`: the first package version that held the object.
+One row per object asked for, in start order, plus the intake, the package, and the review (Ops § Build-a-Feature). `Row`: `F00` intake · `F01`, `F02`, … objects, continuing across sessions · `FPK` package · `FRV` review. `Stage`: Asked → Confirmed → Built → Compiled → Reviewed → Packaged. `Status`: `In Progress` while the row's usage window is open, `Completed` once its usage rows are written. `Shipped in`: the first package version that held the object.
 
 | Row | Object | Type | ID | Stage | Status | Shipped in |
 |---|---|---|---|---|---|---|

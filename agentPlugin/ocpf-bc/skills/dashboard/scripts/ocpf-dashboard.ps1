@@ -30,7 +30,7 @@ $FULL = @(@("PRE-01","DEFINE"),@("PRE-02","DEFINE"),@("01","DEFINE"),@("02","DES
 $LITE = @(@("STEP-1","DEFINE"),@("STEP-2","DESIGN"),@("STEP-3","BUILD"),@("STEP-4","BUILD"),@("STEP-5","BUILD"),@("STEP-6","PROVE"),@("STEP-7","PROVE"))
 $PHASES = @("DEFINE","DESIGN","BUILD","PROVE")
 # Build-a-Feature (edition "feature"): no step files; one row per object, read from usage.json's windows and the feature table
-$FEATURE_PHASES = @("INTAKE","BUILD","PACKAGE","REVIEW")
+$FEATURE_PHASES = @("INTAKE","BUILD","REVIEW","PACKAGE")  # the review is offered before the package
 $FEATURE_GATES = @{
   "INTAKE" = @("The one intake question answered and the plan said back, object by object.", "The F00 window closed with its usage rows.")
   "BUILD" = @("Asked: what the object is and what it holds.", "Confirmed: fields, types, and the key confirmed in one box.", "Built: the file written whole from the Standards Guide and the patterns library.", "Compiled: 0 errors / 0 warnings with the analyzers.", "Closed: usage rows written and pasted; the companion box answered.")
@@ -94,9 +94,22 @@ $catalog = @(foreach ($pair in $base) { $sid = $pair[0]; $ph = $pair[1]; $txt = 
       $gate = @([regex]::Split($g, '(?<=[.;])\s+(?=[A-Z§`])') | Where-Object { $_.Trim().Length -gt 3 } | ForEach-Object { $x = $_.Trim(); if ($x.Length -gt 220) { $x.Substring(0,220) + "…" } else { $x } } | Select-Object -First 7) } }
   [ordered]@{ id = $sid; phase = $ph; title = ($title ?? $SHORT[$sid] ?? $sid); short = ($SHORT[$sid] ?? $title ?? $sid); exitGate = $gate } })
 
-foreach ($line in (Read-Text (Join-Path $root "ProjectProgress.md")) -split "`n") { if ($line -match '^\|\s*(DEFINE|DESIGN|BUILD|PROVE)\s*\|\s*([A-Z0-9-]+)\s*[—-]\s*[^|]*\|\s*([^|]*)\|') { $st = $Matches[3].Trim().ToLower(); $status[$Matches[2].Trim()] = $(if ($st -like "*in progress*") { "now" } elseif ($st -like "complet*" -or $st -like "done*") { "done" } elseif (-not $st -or $st -in "pending","not started") { "todo" } elseif ($st -like "*complet*") { "done" } else { "todo" }) } }
+foreach ($line in (Read-Text (Join-Path $root "ProjectProgress.md")) -split "`n") { if ($line -match '^\|\s*(DEFINE|DESIGN|BUILD|PROVE)\s*\|\s*([A-Za-z0-9-]+)\s*[—-]\s*[^|]*\|\s*([^|]*)\|') { $st = $Matches[3].Trim().ToLower(); $status[$Matches[2].Trim()] = $(if ($st -like "*in progress*") { "now" } elseif ($st -like "complet*" -or $st -like "done*") { "done" } elseif (-not $st -or $st -in "pending","not started") { "todo" } elseif ($st -like "*complet*") { "done" } else { "todo" }) } }
 }
 
+if ($edition -ne "feature") {
+  # Remediation rows — 07a, 07b, STEP-5a … — sit after their base step (Ops § Usage & Cost → 7)
+  $REM = '^(PRE-0[12]|[0-9]{2}|STEP-[0-9])([a-z])$'
+  $REMGATE = @("The changed requirement is in the FRD and the TDD (Lite: the Design Doc), each updated in place with a ChangeLog entry naming this remediation.", "Every affected object regenerated and the whole extension compiled and packaged clean again, as the base step requires.", "The remediation's usage rows written and pasted; the base step's exit gate met again.")
+  $titles = @{}; foreach ($s in @($usage.steps)) { if ($s.title -and $s.step) { $titles[$s.step] = $s.title } }
+  $rids = @(); foreach ($sid in (@($wins | ForEach-Object { $_[0] }) + @($status.Keys))) { if ($sid -match $REM -and $sid -notin $rids) { $rids += $sid } }
+  foreach ($sid in ($rids | Sort-Object)) { $null = $sid -match $REM; $base = $Matches[1]
+    $anchor = -1; for ($i = 0; $i -lt $catalog.Count; $i++) { $cid = $catalog[$i].id; if ($cid -eq $base -or ($cid -match $REM -and $Matches[1] -eq $base -and $cid -lt $sid)) { $anchor = $i } }
+    if ($anchor -lt 0) { continue }
+    $b = $catalog | Where-Object { $_.id -eq $base } | Select-Object -First 1
+    $row = [ordered]@{ id = $sid; phase = $b.phase; title = $(if ($titles[$sid]) { $titles[$sid] } else { "Remediation" }); short = "Remediation"; exitGate = @($REMGATE); remediation = $true }
+    $catalog = @($catalog[0..$anchor]) + @($row) + @(if ($anchor + 1 -lt $catalog.Count) { $catalog[($anchor + 1)..($catalog.Count - 1)] }) }
+}
 $el = @{}; foreach ($w in $wins) { $end = $w[2] ?? (NowUtc); $el[$w[0]] = ($el[$w[0]] ?? 0) + [Math]::Max(0, ($end - $w[1]).TotalSeconds) }
 function Step-Of($ts) { $hit = $null; foreach ($w in $wins) { if ($ts -ge $w[1] -and ($null -eq $w[2] -or $ts -le $w[2])) { $hit = $w[0] } }; $hit }
 
@@ -141,6 +154,12 @@ if (-not $copilot -and $wins.Count) {
       $liveState = @{ perStep = $per; main = @{ state = $mainState; model = $lastModel; text = $lastTxt }; subs = $subs } } }
 }
 
+# the agent / you / waiting split of each step is scaled to its window, so the three add up to Elapsed exactly (v5.6.0.0)
+if ($liveState) { $per = @{}; foreach ($sid in $el.Keys) { $sec = [double]$el[$sid]; $v = $liveState.perStep[$sid]; if (-not $v) { $v = @{ agent = 0.0; human = 0.0; waiting = 0.0 } }
+    $tot = [double]$v.agent + [double]$v.human + [double]$v.waiting
+    if ($tot -gt 0) { $per[$sid] = @{ agent = [double]$v.agent * $sec / $tot; human = [double]$v.human * $sec / $tot; waiting = [double]$v.waiting * $sec / $tot } } }  # no transcript events: unmeasured, left out
+  $liveState.perStep = $per }
+
 # ---- steps ----
 $steps = @(foreach ($c in $catalog) { $sid = $c.id; $rs = Rows-For $sid
   $st = $status[$sid]; if (-not $st) { $openWins = @($wins | Where-Object { $_[0] -eq $sid -and $null -eq $_[2] }).Count; $any = @($wins | Where-Object { $_[0] -eq $sid }).Count; $st = $(if ($any -and -not $openWins) { "done" } elseif ($any) { "now" } else { "todo" }) }
@@ -149,7 +168,7 @@ $steps = @(foreach ($c in $catalog) { $sid = $c.id; $rs = Rows-For $sid
     costUsd = $(if ($rs.Count) { Sum $rs "costUsd" } else { $null })
     tokens = $(if ($rs.Count -and -not $copilot) { (Sum $rs "input") + (Sum $rs "output") + (Sum $rs "cacheWrite") + (Sum $rs "cacheRead") } else { $null })
     credits = $(if ($rs.Count -and $copilot) { Sum $rs "aiCredits" } else { $null }) }
-  foreach ($k in "stage","kind","objectId","shippedIn") { if ($c.Contains($k) -and $c[$k]) { $row[$k] = $c[$k] } }
+  foreach ($k in "stage","kind","objectId","shippedIn","remediation") { if ($c.Contains($k) -and $c[$k]) { $row[$k] = $c[$k] } }
   $row })
 $cur = $steps | Where-Object { $_.status -eq "now" } | Select-Object -First 1
 
@@ -214,7 +233,8 @@ $data = [ordered]@{ generatedAt = (NowUtc).ToString("o"); refreshSeconds = $Refr
 # ---- render ----
 # Every theme is rendered on every run; `theme` in dashboard.json only says which page -Open opens.
 $THEMES = [ordered]@{ brand = @("dashboard.html", "ProjectDashboard.html"); f1 = @("dashboard-f1.html", "ProjectDashboard-f1.html") }
-$themeKey = "$($dj0.theme)".ToLower(); if (-not $THEMES.Contains($themeKey)) { $themeKey = "brand" }
+# -Open always opens the OnlyBCFans page; the F1 page opens only when -Theme f1 is passed on this very call (v5.6.0.0).
+$themeKey = "$Theme".ToLower(); if (-not $THEMES.Contains($themeKey)) { $themeKey = "brand" }
 $data.dataUrl = "ocpfFramework/state/dashboard-data.js"  # the pages pull this sidecar and repaint in place (no full reload)
 $outs = @{}; $firstPayload = $null
 foreach ($k in $THEMES.Keys) { $tplName = $THEMES[$k][0]; $outName = $THEMES[$k][1]

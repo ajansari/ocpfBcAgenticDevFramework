@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 7 — Release for Testing
 
-**Runbook version:** 5.5.0.0 · Lite edition · Phase: PROVE
+**Runbook version:** 5.6.0.0 · Lite edition · Phase: PROVE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -79,6 +79,13 @@
   and diagram from the now-changed code, plus any translated document already produced from what
   changed. Say explicitly which parts a given fix actually requires re-running.
 - Repeat until every green-team test passes and every red-team test fails gracefully.
+
+**A test finding that changes the design is a remediation, not a fix** (Ops § Usage & Cost → 7):
+open window `STEP-5a` — *Remediation — <what changed>* — and its row under Step 5, redo the
+Design Doc and the affected objects there, bring Step 5 back to green, then return here through
+its Rule 6c box — *Back to Step 7* reopens this step's window (a second `STEP-7` entry; opening
+`STEP-5a` closed it) and this row stays `In Progress` throughout. Findings that are fixes stay
+in this step's cycle.
 
 **Outputs:** `docs/0-project/ChangeLog.md` updated with every test finding and its resolution.
 
