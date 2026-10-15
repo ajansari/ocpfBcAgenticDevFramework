@@ -1,6 +1,6 @@
 ---
 name: al-mcp-setup
-description: Connect the AI to Microsoft's AL tools (build, compile, symbols, diagnostics, publish, tests) for a Business Central AL project, with nothing to install, using the AL Language extension already on the machine. Use when the user asks to "set up the AL MCP server", "connect the AL tools", "check AL tooling", "why can't you compile", or when the OCPF start skill reaches its tooling step.
+description: Connect the AI to Microsoft's AL tools (build, compile, symbols, diagnostics) for a Business Central AL project, with nothing to install, using the AL Language extension already on the machine. Use when the user asks to "set up the AL MCP server", "connect the AL tools", "check AL tooling", "why can't you compile", or when the OCPF start skill reaches its tooling step.
 ---
 
 # Connect the AL tools, zero-install
@@ -29,7 +29,8 @@ running in.
 The AL Language extension provides its AL tools to Copilot Chat directly: `al_build`,
 `al_publish`, `al_downloadsymbols`, `al_symbolsearch`, `al_getdiagnostics`, `al_getnextobjectid`,
 `al_symbolrelations`, `al_debug`, `al_setbreakpoint`, `al_snapshotdebugging`.
-- **If you have those tools,** tell the human the AL tools are ready. Record
+- **If you have those tools,** tell the human the AL tools are ready. (`al_publish` is one of them and
+  the framework never calls it: the human uploads every package — Ops § Packaging.) Record
   `"alMcp": "al-extension-tools"` in `ocpfFramework/framework.json` if it exists, and stop. (The runbook
   turns on Microsoft's code analyzers for these tools later, in `.vscode/settings.json` at
   scaffolding — ALL ALONG → Analyzers. Nothing to do for that here.)
@@ -166,8 +167,9 @@ Copy `al-analyze.sh` into the project's `ocpfFramework/scripts/` folder, as in S
 tool's own analyzers and a .NET runtime it can run on, so the mandatory compile runs with
 analyzers here too.
 
-Cloud sessions can compile but can't complete Business Central's interactive sign-in, so
-publishing stays a local step.
+Cloud sessions can compile but can't complete Business Central's interactive sign-in, so a
+non-global symbol download stays a local step. (Publishing is nobody's agent step: the human
+uploads every package — Ops § Packaging.)
 
 ## Terminal-only machine without VS Code
 
@@ -180,5 +182,6 @@ It needs a .NET 8+ SDK from Microsoft's standard installer, which also puts the 
 
 ## Signing in
 
-Tools that reach a live Business Central environment (publish, downloading non-global symbols)
-open an interactive Microsoft sign-in the first time they're used in a session. That's expected.
+Tools that reach a live Business Central environment (downloading non-global symbols) open an
+interactive Microsoft sign-in the first time they're used in a session. That's expected. The
+framework never calls `al_publish` or `al_run_tests`, so those never trigger one.

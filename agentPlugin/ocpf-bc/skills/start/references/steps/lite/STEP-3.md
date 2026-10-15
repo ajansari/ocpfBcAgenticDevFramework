@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 3 — Plan & Scaffold
 
-**Runbook version:** 5.6.2.0 · Lite edition · Phase: BUILD
+**Runbook version:** 5.7.0.0 · Lite edition · Phase: BUILD
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook

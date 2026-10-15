@@ -199,8 +199,8 @@ flowchart TD
     Gate2 --> S5
     subgraph S5["STEP 5 — Compile, Package, Test & Iterate"]
         direction LR
-        Compile["FIRST: increment the Revision<br/>in app.json, then compile the whole<br/>extension once with the analyzers,<br/>then package it — the one<br/>mandatory compile-and-package<br/>(Op. Rule 4); fixed 'Package built'<br/>message with Schema Sync Mode"] --> Deploy["Publish package<br/>to BC sandbox"]
-        Deploy --> Test["Test — by hand (the default:<br/>Postman, Power Automate, Power<br/>Apps, Copilot Studio), or agent-run<br/>if round 1's offer was accepted<br/>AND an HTTP route exists —<br/>the AL MCP Server is not one"]
+        Compile["FIRST: increment the Revision<br/>in app.json, then compile the whole<br/>extension once with the analyzers,<br/>then package it — the one<br/>mandatory compile-and-package<br/>(Op. Rule 4); fixed 'Package built'<br/>message with Schema Sync Mode"] --> Deploy["Human installs the package<br/>in a BC sandbox from<br/>docs/4-prove/SandboxInstall.md<br/>(§1 rewritten every build) —<br/>the agent never uploads"]
+        Deploy --> Test["Human tests by hand:<br/>the BC client, Postman, Power<br/>Automate, Power Apps, or<br/>Copilot Studio"]
         Test --> Q{"Errors, warnings,<br/>or issues found?"}
         Q -- "Yes" --> Diag["Check ocpfFramework/patterns/ first, then:<br/>one-off or pattern? where<br/>from? what rule missed it?"]
         Diag --> Approve["Human approves the round's<br/>fixes together: apply all /<br/>selected / discuss"]

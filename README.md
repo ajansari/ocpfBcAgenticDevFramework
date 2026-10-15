@@ -54,6 +54,16 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 15, 2026 — Full v5.7.0.0 · Lite v5.7.0.0 · Operations Guide v5.7.0.0 · Plugin v5.7.0
+
+**The agent never publishes.** Full and Lite now package the `.app` and stop; you upload it to a
+sandbox yourself, following a new `docs/4-prove/SandboxInstall.md` the agent writes with the first
+package and keeps current — both of Microsoft's upload routes step by step, with §1 naming the exact
+file, version, and Schema Sync Mode of the build in hand. Automated tests are yours to run too: when
+AL test codeunits are created, a new `docs/4-prove/AutomatedTestGuide.md` walks you through installing
+Microsoft's test apps and the test app and running every test one at a time on the AL Test Tool page,
+assuming you have never seen it. The agent-run API pass is gone with the publish it needed.
+
 ## October 15, 2026 — Full v5.6.2.0 · Lite v5.6.2.0 · Operations Guide v5.6.2.0 · Plugin v5.6.2
 
 **The dashboard's bottom row of cards shares one height**, as the first-row tiles do. Template

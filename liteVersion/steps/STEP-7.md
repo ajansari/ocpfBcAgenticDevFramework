@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 7 — Release for Testing
 
-**Runbook version:** 5.6.2.0 · Lite edition · Phase: PROVE
+**Runbook version:** 5.7.0.0 · Lite edition · Phase: PROVE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -43,12 +43,13 @@
 **Inputs:** The most recently built package; `docs/4-prove/TestScript.md`; `docs/4-prove/Docs.md`.
 
 **Actions:**
-- Confirm the latest package — the release candidate `1.0.0.0` from Step 6, or the latest `0.x`
-  build if the human chose to keep testing — is published to a BC sandbox tenant; republish if
-  anything changed.
+- Confirm the human has installed the latest package — the release candidate `1.0.0.0` from Step
+  6, or the latest `0.x` build if the human chose to keep testing — in a BC sandbox, following
+  `docs/4-prove/SandboxInstall.md`; the agent never uploads. If anything changed, build again and
+  the human installs the new version.
 - **If this isn't the first release, test the upgrade path first** (**Standards §9.6**): install the
-  previous version on a clean sandbox with data in the fields this version changes, publish and
-  install this one, verify the migrated data, install it again to confirm the upgrade tag makes the
+  previous version on a clean sandbox with data in the fields this version changes, the human
+  installs this one over it (`SandboxInstall.md` §6), verifies the migrated data, install it again to confirm the upgrade tag makes the
   second run a no-op, and check that a fresh install doesn't run upgrade code at all. A failed
   upgrade path fails this step — by the time anyone notices, the tenant's data is already wrong.
 - Real users/testers — not the agent, not a simulated pass — run `docs/4-prove/TestScript.md` end to end: every

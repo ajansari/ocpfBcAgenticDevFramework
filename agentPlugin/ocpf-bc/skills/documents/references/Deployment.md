@@ -6,7 +6,7 @@
 # Deployment — <Extension Name>
 
 **Version:** <app.json version> · **Package:** `outputAppPackage/<ExtensionName>_<version>.app` · **Date:** <date>
-**Rule:** the agent never publishes to production. The production deploy is the human's, from this document, after the Step 12 release test passes.
+**Rule:** the agent never publishes to any environment. The production deploy is the human's, from this document, after the Step 12 release test passes — the same procedure rehearsed in every sandbox install from `docs/4-prove/SandboxInstall.md`.
 
 ## 1. What ships
 | Item | Value |
@@ -22,8 +22,8 @@
 - [ ] Version bump approved and recorded.
 - [ ] Backup / restore point per the customer's policy.
 
-## 3. Deploy — per-tenant (Extension Management)
-1. <step, with the exact page and action names in BC>
+## 3. Deploy — per-tenant (Admin Center → Manage Apps → Install Extension, or Extension Management → Upload Extension)
+1. <step, with the exact page and action names — the route `docs/4-prove/SandboxInstall.md` §3 or §4 describes, with the production environment named>
 2. <…>
 
 ## 3a. Deploy — AppSource (if Deployment Target = AppSource)

@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 6 — Review, Gap-Check & Finalize Docs
 
-**Runbook version:** 5.6.2.0 · Lite edition · Phase: PROVE
+**Runbook version:** 5.7.0.0 · Lite edition · Phase: PROVE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -66,7 +66,7 @@
   relevant `docs/0-project/ChangeLog.md` entries. There's no separate as-built document in Lite; one file, kept
   current, is the point.
 - Present this step's fixes together for one approval, as in Step 5. Any fix this step produces
-  follows the Step 5 cycle (recompile, repackage, redeploy, retest) before this step closes; a
+  follows the Step 5 cycle (recompile, repackage, the human installs, retest) before this step closes; a
   comment/formatting-only fix doesn't need a fresh package.
 - **Write `docs/4-prove/Docs.md`** — one combined reference covering everything the full framework splits
   across four documents:
@@ -92,11 +92,16 @@
   documents walked once per required language, checking for untranslated text, truncation,
   regional terms, and formats. Each case names the glossary terms the tester should see, so a
   tester who reads English can run it without a translated copy.
-- **If the project has AL test codeunits, run them — don't leave it to the human.** The AL MCP
-  Server's `al_run_tests` runs them against the sandbox, one codeunit per call (**Ops § Automated
-  Tests**), never against production. A failing test fails this step like a compiler error. If the
-  server isn't connected, say so and list the codeunit IDs rather than reporting untested code as
-  tested.
+- **If the project has AL test codeunits, write `docs/4-prove/AutomatedTestGuide.md` from its
+  template and build the test app** (`outputAppPackage/<Name>_Tests_<version>.app`, versioned with
+  the extension; dependencies limited to what an online sandbox can install — **Ops § Automated
+  Tests**). The guide is the human's step-by-step: install Microsoft's Test Runner and the three
+  framework libraries once, install the extension and the test app, open the **AL Test Tool** page,
+  and run §6's rows one at a time with **Run Tests → Active Line**, reporting each **Result** and
+  the full **Error Message** on a Failure. It assumes the reader has never seen the page. **The
+  agent never runs the tests itself** (`al_run_tests` is not used) and never reports a pass nobody
+  ran: a reported Failure fails this step like a compiler error — diagnose, fix, rebuild both
+  packages at the next version, revise the guide, and the human runs again.
 - **Write `docs/0-project/Acknowledgements.md`** from its template — one row per resource actually
   used on this project, with author, license, and how it was used (the framework, BCQuality, the
   patterns library, the AL Language extension and AL MCP Server, XLIFF Sync or NAB AL Tools if
@@ -122,7 +127,7 @@ documents follow at Step 7. Also: the code-review scorecard in this step's Chang
 **Exit gate:** Every gap classified and resolved or explicitly deferred (logged in
 `docs/0-project/ChangeLog.md`); dead-code scan clean; no obsolete references; `docs/4-prove/Docs.md`'s diagram renders;
 `docs/4-prove/TestScript.md` is executable by a non-developer; translation checks clean; any AL test codeunits
-have been run and pass, or it's recorded why they couldn't be; the eight-dimension scorecard is in
+have been run by the human from `docs/4-prove/AutomatedTestGuide.md` with every row reported Success, or it's recorded why they couldn't be; the eight-dimension scorecard is in
 the ChangeLog entry; `docs/0-project/Acknowledgements.md` exists with one row per resource used;
 the release-candidate question is answered and, on yes, `1.0.0.0` is built. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
 

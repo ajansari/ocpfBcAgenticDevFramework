@@ -1,6 +1,6 @@
 ---
 name: documents
-description: Write any project document of the OCPF BC Agentic Development Framework from its template - FRD, TDD, Sanity Check, Human Effort Estimate (with the Human Effort Baselines), AI Effort Estimate, Build Plan, ChangeLog, Gap Analysis, Code Review, Documentation, User Guide, Human Unit Test Script, Deployment, Release Test Results, Acknowledgements, Project Progress (both editions), and Lite's Design Doc, Docs, and Test Script. Reads the template and the step file, gathers only the named inputs, briefs the reasoning sub-agent narrowly where the step delegates, and writes the file into its docs/ phase folder. Use when a runbook step reaches a document, when the user asks to "write the FRD", "draft the TDD", "estimate the human effort", "estimate the AI cost", "create the build plan", "generate the user guide", "write the acknowledgements", or runs /ocpf-bc:documents <name>.
+description: Write any project document of the OCPF BC Agentic Development Framework from its template - FRD, TDD, Sanity Check, Human Effort Estimate (with the Human Effort Baselines), AI Effort Estimate, Build Plan, ChangeLog, Gap Analysis, Code Review, Documentation, User Guide, Human Unit Test Script, Deployment, Sandbox Install (the human's upload guide), Automated Test Guide (install the test app and run each test in BC), Release Test Results, Acknowledgements, Project Progress (both editions), and Lite's Design Doc, Docs, and Test Script. Reads the template and the step file, gathers only the named inputs, briefs the reasoning sub-agent narrowly where the step delegates, and writes the file into its docs/ phase folder. Use when a runbook step reaches a document, when the user asks to "write the FRD", "draft the TDD", "estimate the human effort", "estimate the AI cost", "create the build plan", "generate the user guide", "write the acknowledgements", or runs /ocpf-bc:documents <name>.
 ---
 
 # OCPF project documents
@@ -31,6 +31,8 @@ header note). `ProjectProgress.md` is the one document in the project root, both
 | BuildPlan | `docs/3-build/BuildPlan.md` | Full Step 05 (Lite keeps the plan in chat and the ChangeLog) |
 | GapAnalysis, CodeReview, PostDevTDD | `docs/4-prove/` | Full Steps 08, 09, 10 |
 | Documentation, UserGuide, HumanUnitTestScript, Deployment, AutomatedTestScripts | `docs/4-prove/` | Full Step 11 |
+| SandboxInstall | `docs/4-prove/SandboxInstall.md` — §1 rewritten by the agent after every build | Full Step 07 / Lite Step 5, with the first package |
+| AutomatedTestGuide | `docs/4-prove/AutomatedTestGuide.md` — one row per test method; the human runs them one at a time | Full Step 11 / Lite Step 6, only when AL test codeunits exist |
 | FeatureRegister (`docs/1-define/`), FeatureDocumentation (written as `docs/4-prove/Documentation.md`) | as named | Build-a-Feature close (Part 7) — one to two minutes, from what the session knows |
 | ReleaseTestResults | `docs/4-prove/ReleaseTestResults.md` | Full Step 12 |
 | Docs, TestScript | `docs/4-prove/` | Lite Step 6 |

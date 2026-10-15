@@ -21,7 +21,7 @@ Tasks the runbook assigns to you:
 - **Step 02:** draft the Functional Requirements Document (FRD).
 - **Step 03:** draft the Technical Design Document (TDD).
 - **Step 04:** Sanity Check and Validation of the FRD and TDD.
-- **Step 07:** root-cause troubleshooting of compile, package, publish, or test failures.
+- **Step 07:** root-cause troubleshooting of compile, package, or test failures — including a test Failure the human reports from the AL Test Tool page.
 - **Step 08:** Gap-Fit Test and fidelity validation of the built code against the design.
 - **Step 09:** Code Review.
 - **PROVE phase:** diagnose whether a testing-feedback report reflects a real defect, before the

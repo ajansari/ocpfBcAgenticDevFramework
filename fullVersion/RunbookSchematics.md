@@ -241,14 +241,9 @@ flowchart TD
     Gate2 --> S07
     subgraph S07["07 — Compile and Package,<br/>Troubleshoot, Iterate"]
         direction LR
-        Compile["FIRST: increment the Revision in<br/>app.json, compile the whole<br/>extension once with the analyzers,<br/>then package it — the one<br/>mandatory compile-and-package<br/>(Op. Rule 4) — and end with the<br/>'Package built:' block"] --> Deploy["Publish package<br/>to BC sandbox"]
-        Deploy --> Offer{"Round 1 only — offer an<br/>agent-run API pass. Needs an<br/>HTTP-capable route; the AL MCP<br/>Server is NOT one"}
-        Offer -- "No — publish and test<br/>by hand (recommended<br/>default)" --> Test["Human tests by hand:<br/>Postman, Power Automate,<br/>Power Apps, or Copilot Studio"]
-        Offer -- "Yes, but no route<br/>turns out to exist" --> NoRoute["Say so plainly, don't<br/>improvise a route —<br/>fall back to testing by hand"]
-        Offer -- "Yes, and a route exists" --> APITest["Agent runs the full green/<br/>red-team checklist against the<br/>sandbox API — this round<br/>and every round after"]
-        NoRoute --> Test
+        Compile["FIRST: increment the Revision in<br/>app.json, compile the whole<br/>extension once with the analyzers,<br/>then package it — the one<br/>mandatory compile-and-package<br/>(Op. Rule 4) — and end with the<br/>'Package built:' block"] --> Deploy["Human installs the package<br/>in a BC sandbox from<br/>docs/4-prove/SandboxInstall.md<br/>(§1 rewritten every build) —<br/>the agent never uploads"]
+        Deploy --> Test["Human tests by hand:<br/>the BC client, Postman, Power<br/>Automate, Power Apps, or<br/>Copilot Studio"]
         Test --> Q{"Errors, warnings,<br/>or issues found?"}
-        APITest --> Q
         Q -- "Yes" --> Diag["Check ocpfFramework/patterns/ first, then<br/>reasoning role diagnoses:<br/>one-off or pattern? where<br/>from? what rule missed it?"]
         Diag --> Approve["Human approves the round's<br/>fixes together: apply all /<br/>selected / discuss (a TDD or<br/>design-rule change asked separately)"]
         Approve --> Fix["Main role fixes root cause,<br/>regenerates files, logs<br/>ChangeLog + updates TDD"]
@@ -271,7 +266,7 @@ flowchart TD
     classDef endpoint fill:#f2f2f2,stroke:#888,stroke-width:1px;
     classDef decision fill:#fde2e2,stroke:#c0504d,stroke-width:1px;
     class In1,Out1 io;
-    class Act1,B1,Fix,Compile,Deploy,Test,Repackage,APITest,NoRoute,AskHuman act;
+    class Act1,B1,Fix,Compile,Deploy,Test,Repackage,AskHuman act;
     class Gen generator;
     class PostGen light;
     class PreGen act;
@@ -279,7 +274,7 @@ flowchart TD
     class Gate1,Gate2,Gate3 gate;
     class Start,Next,Clean endpoint;
     class Approve gate;
-    class MoreBatches,Stop,Q,Offer decision;
+    class MoreBatches,Stop,Q decision;
 ```
 
 ### 3.4 PROVE
@@ -324,7 +319,7 @@ flowchart TD
     Gate4 --> S11
     subgraph S11["11 — Document the Code"]
         direction LR
-        In5[/"Inputs:<br/>PostDevTDD.md, built AL,<br/>optional Step 07 API test result"/] --> Act5["Actions:<br/>Generate reference docs +<br/>Mermaid ER diagram (render it —<br/>renderer per Ops § Tooling Checks),<br/>human test script (per Step 07's<br/>checklist), UserGuide.md,<br/>Deployment.md, Acknowledgements.md;<br/>ASK: also want Automated Test<br/>Scripts? Then ASK: build the<br/>release candidate v1.0.0.0 now?"] --> Out5[/"Output:<br/>5 docs (Documentation, UserGuide,<br/>HumanUnitTestScript, Deployment,<br/>0-project/Acknowledgements)<br/>+ AutomatedTestScripts.md if yes;<br/>the 1.0.0.0 package on yes"/]
+        In5[/"Inputs:<br/>PostDevTDD.md, built AL,<br/>the human's Step 07 test results"/] --> Act5["Actions:<br/>Generate reference docs +<br/>Mermaid ER diagram (render it —<br/>renderer per Ops § Tooling Checks),<br/>human test script (per Step 07's<br/>checklist), UserGuide.md,<br/>Deployment.md, Acknowledgements.md;<br/>ASK: also want Automated Test<br/>Scripts? Then ASK: build the<br/>release candidate v1.0.0.0 now?"] --> Out5[/"Output:<br/>5 docs (Documentation, UserGuide,<br/>HumanUnitTestScript, Deployment,<br/>0-project/Acknowledgements)<br/>+ AutomatedTestScripts.md if yes;<br/>the 1.0.0.0 package on yes"/]
     end
     S11 --> Gate5{{"Exit gate:<br/>Reference generated from code,<br/>Automated Test Scripts and<br/>release-candidate questions<br/>answered, ready for release testing"}}
 

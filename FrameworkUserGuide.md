@@ -5,8 +5,8 @@
 *by AJ Ansari*
 
 **Last Updated:** Tuesday, October 13, 2026
-**Covers:** Full runbook v5.6.2.0 · Lite v5.6.2.0 · Standards Guide v1.12.0.0 · Operations Guide
-v5.6.2.0 · `ocpf-bc` agent plugin v5.6.2 · Visual Studio Code setup extension v0.0.10
+**Covers:** Full runbook v5.7.0.0 · Lite v5.7.0.0 · Standards Guide v1.12.0.0 · Operations Guide
+v5.7.0.0 · `ocpf-bc` agent plugin v5.7.0 · Visual Studio Code setup extension v0.0.10
 
 > This guide is for the person driving a project with the framework: a Business Central
 > functional consultant or an AL developer working in Visual Studio Code with Claude Code or GitHub Copilot.
@@ -36,8 +36,8 @@ know which one you are looking at.
 
 | Part | What it is | Where it lives | Version today |
 |---|---|---|---|
-| **The framework** | The runbook (Full or Lite), its step files, the document templates, the **Standards Guide**, and the **Operations Guide**. This is the content the AI agent follows. | The public GitHub repository, `ajansari/ocpfBcAgenticDevFramework`, on its `main` branch. | Full 5.6.2.0 · Lite 5.6.2.0 · Standards 1.12.0.0 · Ops 5.6.2.0 |
-| **The agent plugin** `ocpf-bc` | Eleven skills (the `/ocpf-bc:` commands), three sub-agent definitions, the AL tooling helper scripts, the dashboard renderer, and an *offline fallback copy* of the framework. Installed once per machine into Claude Code or GitHub Copilot. | Same repository, folder `agentPlugin/ocpf-bc`, published as a plugin marketplace. | 5.6.2 |
+| **The framework** | The runbook (Full or Lite), its step files, the document templates, the **Standards Guide**, and the **Operations Guide**. This is the content the AI agent follows. | The public GitHub repository, `ajansari/ocpfBcAgenticDevFramework`, on its `main` branch. | Full 5.7.0.0 · Lite 5.7.0.0 · Standards 1.12.0.0 · Ops 5.7.0.0 |
+| **The agent plugin** `ocpf-bc` | Eleven skills (the `/ocpf-bc:` commands), three sub-agent definitions, the AL tooling helper scripts, the dashboard renderer, and an *offline fallback copy* of the framework. Installed once per machine into Claude Code or GitHub Copilot. | Same repository, folder `agentPlugin/ocpf-bc`, published as a plugin marketplace. | 5.7.0 |
 | **The Visual Studio Code setup extension** | A bootstrapper and extension pack, published to the Visual Studio Marketplace and Open VSX. Installs the AL toolchain and the agent extensions, wires your agent to the plugin marketplace, and adds five Command Palette commands. It contains **no framework content**. | A separate repository, published as [`ajansari.ocpf-bc-dev-setup`](https://marketplace.visualstudio.com/items?itemName=ajansari.ocpf-bc-dev-setup) (also on [Open VSX](https://open-vsx.org/extension/ajansari/ocpf-bc-dev-setup)). | 0.0.10 |
 | **Your project's copy** | The runbook and companions fetched into one AL project, pinned at the version fetched. | Your AL project folder: `CLAUDE.md` or `.github/copilot-instructions.md`, plus one `ocpfFramework/` folder holding the step files, templates, both guides, patterns, scripts, the changelog, the plugin's marker, and each developer's state. | Whatever was current when you started, until you approve an update |
 
@@ -234,7 +234,7 @@ recognises.
 | `/ocpf-bc:usage --step <id>` | The step boundary ritual. At a step's start, the runbook timestamps it and marks its `ProjectProgress.md` row *In Progress*; at its close, before the exit-gate message, this command measures what the step consumed — input, output, cache-write, and cache-read tokens per model in Claude Code, or AI credits per step in GitHub Copilot, read from the Copilot SDK's session journal, VS Code's chat and the CLI alike (sub-agents included in both), elapsed time, turns, decisions asked, and cost at published API prices fetched from the publisher — and writes **one row per model that ran in the step** into the usage table in `ProjectProgress.md`, in both editions. The exit gate is not met until the rows exist, and a row is never typed by hand. Run without `--step` for the whole project; at project close it also exports a calibration file to `~/.ocpf/calibration/` for the AI effort estimator. | "what has this cost", "how many tokens", "update the usage table" |
 | `/ocpf-bc:roles` | Says once that a High thinking effort makes every task slower, then asks which models do the work (Full: Main, Light, Reasoning, each with a thinking effort; Lite: one), offering the recommended pair first, and makes it take effect by writing the three project-local sub-agent copies — reasoning, light, and the generator on the Main model — with the chosen model and effort, then verifies the session model. The runbook runs it at the first step; run it by hand to change or repair the assignment. | "choose models", "use Opus for reasoning", "which model runs the FRD" |
 | `/ocpf-bc:notifications` | Turns on "your turn" notifications: Claude app push, sound, desktop notification, or none. Records the answer in `ocpfFramework/state/notifications.json` and applies it through the tool's own settings and hooks. Nothing to install. The runbook does this at the first step; use the command on an older project or to repair. | "notify me when you're done", "alert me when it's my turn" |
-| `/ocpf-bc:al-mcp-setup` | Connects the agent to Microsoft's AL tools (build, compile, symbols, diagnostics, publish, tests) using the AL Language extension already on the machine. Nothing installed, no PATH edits. In Copilot Chat there is nothing to do; in Claude Code and Copilot CLI it registers the bundled AL MCP Server. `start` normally does this for you. | "connect the AL tools", "why can't you compile" |
+| `/ocpf-bc:al-mcp-setup` | Connects the agent to Microsoft's AL tools (build, compile, symbols, diagnostics) using the AL Language extension already on the machine. Nothing installed, no PATH edits. In Copilot Chat there is nothing to do; in Claude Code and Copilot CLI it registers the bundled AL MCP Server. `start` normally does this for you. | "connect the AL tools", "why can't you compile" |
 | `/ocpf-bc:al-standards` | Loads the OCPF AL Development Standards Guide: naming and abbreviations, object ID allocation, API page design, field inclusion, anti-patterns, events, upgrade code, multilanguage and XLIFF rules, parent-child pages and number series. The routine applies it automatically; run it directly for an ad-hoc review. | "check this AL against OCPF standards" |
 | `/ocpf-bc:dashboard` | Creates, refreshes, or opens the project's live dashboard, `ProjectDashboard.html` at the project root (tracked in git, so it persists with the project) — the Build Map page with the app's name and icon, phase and step, tokens or AI credits and cost, the agent / you time split, who is working, the exit gate, and the open question. The runbook calls it at PRE-01 / Lite Step 1 the moment `app.json` exists; it opens the page once, installs the zero-token refresh hooks, and asks the one explanation question. Reopen a closed page with right-click → **Open Externally** in VS Code's Explorer, or ask for it. |
 | `/ocpf-bc:update-framework` | Checks whether a newer runbook has been published, summarises every changelog entry between your version and the latest, says whether any touches a step you have already completed, and updates the project's copy only after you choose **Update now**. Backs up the old copy first. On a project from an older layout (Full before 5.0.0.0, Lite before 5.0.0.0) it also runs the migration: moves the framework files into `ocpfFramework/`, the documents into the `docs/` phase folders, rewrites the `.gitignore` block and the tool paths, creates Lite's `ProjectProgress.md` from the old usage report, and lists every move in the ChangeLog. | "is there a newer runbook", "update the framework" |
@@ -465,6 +465,15 @@ your approval: `winget install --id Microsoft.PowerShell --source winget` on Win
 from the PowerShell releases page on macOS, Microsoft's package repository on Ubuntu and Debian,
 `sudo dnf install powershell` on RHEL and Fedora. The outcome is recorded under `tooling` in
 `ocpfFramework/framework.json`.
+
+**The agent never uploads a package — you do.** Every build ends with a "Package built:" block that
+names the file and points at `docs/4-prove/SandboxInstall.md`, written with the first package: both
+of Microsoft's upload routes (the Admin Center's Manage Apps, or Extension Management, which
+Microsoft retires in 2027 release wave 1) step by step, and a §1 the agent rewrites after every build
+with that build's file, version, and Schema Sync Mode. Tell the agent the version and environment you
+installed; nothing counts as "on the sandbox" until you do. When the project has AL test codeunits,
+`docs/4-prove/AutomatedTestGuide.md` does the same for the test app: which Microsoft test apps to
+install once, and how to run each test one at a time on the AL Test Tool page and what to report.
 
 **Extension Management refuses the upload: the same version cannot be uploaded twice.** A version
 already installed in a tenant can never be uploaded again, which is why the framework never builds

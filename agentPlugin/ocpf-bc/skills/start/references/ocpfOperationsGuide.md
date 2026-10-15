@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.6.2.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
+**Version:** 5.7.0.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
 **Last Updated:** October 13, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
@@ -867,7 +867,11 @@ Then, in order:
 The AL Language extension ships a standalone MCP server (`altool launchmcpserver`) exposing AL
 build, publish, symbol, and diagnostic tools over the Model Context Protocol, so any MCP-capable
 agent can drive them directly instead of shelling out to the compiler. Nothing runs until an MCP
-host spawns it, and it exits when the host tears it down.
+host spawns it, and it exits when the host tears it down. **Two of its tools the framework never
+calls: `al_publish` and `al_run_tests`** — uploading a package and running tests in Business
+Central are the human's, by `docs/4-prove/SandboxInstall.md` and `docs/4-prove/AutomatedTestGuide.md`
+(Ops § Packaging, Ops § Automated Tests). The rest — build, compile, symbols, diagnostics, object
+IDs, translations — is what the agent uses them for.
 
 **When they're needed:** from the end of intake (Full §1.10 / Lite Step 1), which downloads symbols
 before DESIGN — not at the start of BUILD.
@@ -877,7 +881,7 @@ anyone developing AL in VS Code.
 - **GitHub Copilot Chat in VS Code:** the extension's tools are built in (`al_build`, `al_publish`,
   `al_downloadsymbols`, `al_symbolsearch`, `al_getdiagnostics`, `al_getnextobjectid`,
   `al_symbolrelations`, debugging tools). Bootstrap the server below only for a tool that set lacks,
-  such as `al_compile`, `al_run_tests`, or the translation tools.
+  such as `al_compile` or the translation tools.
 - **Claude Code, Copilot CLI, or any other MCP host:** bootstrap below, using the extension's
   bundled `altool` and the .NET runtime VS Code already provisioned. If this session already has
   the server's tools, don't register a duplicate; add this project with `al_addproject`.
@@ -940,12 +944,12 @@ anyone developing AL in VS Code.
    under 10 seconds, compile about 5.
 5. **Verify** with a call that isn't a compile, such as `al_getpackagedependencies`, or by listing
    the tools once they appear. The first compile belongs to the runbook's compile step, not here.
-6. **Signing in:** tools that reach a live BC cloud environment (publish, downloading non-global
-   symbols) trigger an interactive sign-in the first time they're used, cached for the session. Log
-   out when the task that reached the cloud is done.
+6. **Signing in:** tools that reach a live BC cloud environment (downloading non-global symbols)
+   trigger an interactive sign-in the first time they're used, cached for the session. Log out when
+   the task that reached the cloud is done.
 
-**Standing use.** Once registered, prefer the MCP build/publish/symbol tools over an ad hoc
-terminal compiler invocation: they're the first-party path and stay current with the extension.
+**Standing use.** Once registered, prefer the MCP build/symbol tools over an ad hoc terminal
+compiler invocation: they're the first-party path and stay current with the extension.
 **The one exception is the analysis compile** (Ops § Analyzers). `launchmcpserver` also accepts AL
 project paths and flags for package cache path, ruleset, and output folder; check `--help` against
 the installed version rather than assuming a fixed flag set, and re-verify tool names and arguments
@@ -1559,18 +1563,38 @@ Package built: outputAppPackage/<Name>_<version>.app (previous build <version-1>
 Schema: additive only → upload with Schema Sync Mode = Add
    or: <what was removed / shrunk / retyped / re-keyed> → upload with Schema Sync Mode = Force Sync
        (Microsoft: test a forced sync in a sandbox first; it can lose data in <where>)
-Upload: Extension Management → Manage → Upload Extension, choose the file, set Schema Sync Mode, Deploy.
+Install: you upload it (I never do) — docs/4-prove/SandboxInstall.md, §1 updated for this build.
+Then: tell me the version and environment you installed; I record it as the last installed version.
 ```
 
 The schema line compares this build's objects against the **last package installed in a tenant**
 (the recorded last installed version), not against the previous build — three additive builds after
 one destructive change still need Force Sync until the destructive one has been installed. The
-upload path is Microsoft's own: on the **Extension Management** page, **Manage → Upload
-Extension**, choose the `.app`, **Accept**, then **Deploy**; for breaking schema changes the page
-offers the **Force** option under **Schema Sync Mode** (Microsoft Learn, *Install and uninstall
-apps*, <https://learn.microsoft.com/en-us/dynamics365/business-central/ui-extensions-install-uninstall>,
-read September 27, 2026 — the page names the option **Force**; the framework's message says *Force
-Sync* so it can't be mistaken for anything else).
+upload is Microsoft's own, and the human's: the Admin Center's **Manage Apps → Install Extension**
+(Microsoft's recommended route), or the environment's **Extension Management → Manage → Upload
+Extension** (deprecated, removed in 2027 release wave 1); for breaking schema changes both offer
+the **Force** option under **Sync Mode** / **Schema Sync Mode** (Microsoft Learn, *Deploying a
+tenant customization* and *Managing apps*, read October 15, 2026 — the pages name the option
+**Force**; the framework's message says *Force Sync* so it can't be mistaken for anything else).
+
+### The sandbox install guide — `docs/4-prove/SandboxInstall.md`
+
+**The agent never uploads a package to any Business Central environment — sandbox or production.**
+It builds; a person installs. So the first package of a project (Full Step 07 / Lite Step 5) is
+written together with the document that person follows: `docs/4-prove/SandboxInstall.md`, from
+its template (Ops § Documents). The template is nine-tenths fixed — both of Microsoft's routes,
+step by step, with the exact page and action names, the permission the uploader needs, what to do
+after the install, how to update to a newer build, how to uninstall, and a table of the errors
+people actually hit — and one section that is this build's: **§1 names the exact package file, its
+version, the Schema Sync Mode this build needs, the sandbox, and the dependencies.** The agent
+rewrites §1 after every build, with the "Package built:" block, so the person always opens a
+document that names the file they are about to upload. Nothing else in it changes between builds.
+
+The cycle then waits on the human: nothing is "on the sandbox" until the human says which version
+they installed and where. The agent records that as the last installed version (above) and only
+then judges the next build's schema line against it. **Never assume an upload happened** because
+a package was built, and never offer to do it — not through `al_publish`, not through `launch.json`
+and F5, not through the Automation API, not "just this once".
 
 **Built packages are git-tracked, never gitignored.** Track every `.app` this project builds like
 any other deliverable, and never delete its history. Downloaded dependency symbols in
@@ -1617,14 +1641,13 @@ action instead of silently complying. If the human insists, get an explicit over
 mismatch first. Inside the cycle, packaging with known open issues is the whole point: that's how
 they get tested.
 
-**The agent never publishes to a production environment.** Before every publish, read the target
-from `launch.json` or the explicit arguments and state it plainly: environment name and type. If it
-isn't a sandbox, stop and ask. The agent's own publish tool takes `environmentType`
-(`Sandbox` / `Production`), `schemaUpdateMode` (`Synchronize` / `ForceSync` / `Recreate`), and
-`forceUpgrade` — so it *can* force a destructive schema change on a production tenant. **Never pass
-`ForceSync`, `Recreate`, or `forceUpgrade: true` without a separate approval that names what can be
-lost**, and never at all against production. The production deploy at the release step is the
-human's, through Extension Management.
+**The agent never publishes to any environment — sandbox or production.** The AL tools it holds can
+publish (`al_publish` takes `environmentType`, `schemaUpdateMode`, and `forceUpgrade`, so it *can*
+force a destructive schema change on a live tenant), and the framework never calls them: every
+package reaches a sandbox by the human's upload, following `docs/4-prove/SandboxInstall.md` (above),
+and reaches production by the human's deploy at the release step, following `docs/4-prove/Deployment.md`.
+A human who asks the agent to publish "to save a minute" is told, once, why not — the upload is the
+human's checkpoint on what runs where, and the framework keeps it — and pointed at the guide.
 
 **Flag Schema Sync Mode on every completed build, not only when asked** — it is the second line of
 the fixed message above. Uploading a `.app` to a Business Central Online tenant through **Extension
@@ -1635,8 +1658,8 @@ test a forced sync in a sandbox first). Check what the build actually changed ag
 installed version and fill the line: additive only → Add; anything removed, shrunk, retyped, or
 re-keyed → Force Sync, naming what can be lost and where. Never assume the human knows, and never
 let a schema-breaking change go out without the warning. (`schemaUpdateMode` — `Synchronize` / `Recreate` / `ForceSync` — is the same-named but separate
-setting used by `launch.json` for F5 publishing *and* by the agent's publish tool; it isn't the
-Extension Management choice, so don't conflate the two when explaining this to the human.)
+setting `launch.json` holds for a developer's own F5 publish; it isn't the Extension Management or
+Admin Center choice, so don't conflate the two when explaining this to the human.)
 
 ---
 
@@ -1796,7 +1819,8 @@ caption change sends back to `needs-adaptation`.
    to `needs-review-translation`. The agent never sets `signed-off`.
 2. **Run the full technical checks** with every rule enabled (for example
    `Test-XliffTranslations -checkForMissing -checkForProblems`) and fix findings at their root.
-3. **Package, publish, and test in each language** — the tester switches **My Settings → Language**
+3. **Package, have the human install it (`docs/4-prove/SandboxInstall.md`), and test in each
+   language** — the tester switches **My Settings → Language**
    (and **Region** for formats) and walks the changed pages, messages, and reports, looking for
    untranslated text (usually a hard-coded string), truncation, and wrong regional terms.
 
@@ -1851,7 +1875,7 @@ one-time manual script doesn't.
 
 - **AL Test Framework (native).** Business Central's own mechanism: a test codeunit
   (`Subtype = Test`) per feature area, with `[Test]`-attributed methods and the platform's test
-  libraries (`Library Assert`, `Library - Random`, and the rest), exercising the app's actual business logic — tables, codeunits, pages — directly in AL,
+  libraries (`Library Assert`, `Any`, `Library Variable Storage` — the three an online sandbox can install, below), exercising the app's actual business logic — tables, codeunits, pages — directly in AL,
   not limited to what an API happens to expose. Run from the in-client **Test Tool** page during
   development and headlessly in CI (AL-Go for GitHub's test pipeline, or `BcContainerHelper`'s
   `Run-TestsInBcContainer`). Conventionally shipped as its own **test app**: a separate `app.json`
@@ -1878,54 +1902,46 @@ API-level automation.
 - **If any are created**, write a companion `AutomatedTestScripts.md` — a separate document from the
   human unit test script — naming which kinds were created, what they cover, how to run them, and
   how to keep them current as the app, not just its API, changes.
+- **If AL test codeunits are created, write `docs/4-prove/AutomatedTestGuide.md` as well**, from its
+  template (Ops § Documents): the person's step-by-step for getting the test app and Microsoft's test
+  framework into a sandbox and running the tests **one at a time** on the **AL Test Tool** page — a
+  row per test method saying what it checks, the expected result, and the setup it needs, with the
+  exact page captions, action names, and the prompt choices. It assumes the reader has never opened
+  the page. Both documents are revised every time the tests change.
 
-### Running AL test codeunits: `al_run_tests`
+**What an AL test app may depend on — online sandboxes decide this.** Microsoft's **Test Runner**
+(the AL Test Tool page) and the three Test Framework libraries — **Library Assert**, **Any**,
+**Library Variable Storage** — are installable in an online sandbox from the marketplace. The
+**Tests-TestLibraries** and **System Application Test Library** apps (`Library - Sales`,
+`Library - Random`, `Library - Utility`, and the rest) are **not**, and Microsoft has said there are
+no plans to add them (Freddy Kristiansen, February 2021; still true October 15, 2026). So a test app
+this framework writes depends on the extension under test and, of Microsoft's, only those three
+libraries — never on Tests-TestLibraries — or the human cannot install it. Build it as its own
+package, `outputAppPackage/<ExtensionName>_Tests_<version>.app`, versioned in step with the
+extension, from a `test/` folder with its own `app.json` and its own object ID range in the Object
+Register.
 
-When AL Test Framework codeunits exist and the AL MCP Server is connected, **the agent runs them
-itself** — the human doesn't open the Test Tool page to find out whether the build is green.
-Verified against the live tool schema on AL Language extension 18.0.2732683 (September 15, 2026);
-re-verify on a newer release.
+### Running AL test codeunits — the human, from the guide
 
-**The call.** Arguments go at the **top level** — no `parameters` wrapper (Ops § Analyzers explains
-why that distinction bites). Only `codeunitId` is required:
+**The agent never runs tests in Business Central**, for the same reason it never uploads a package:
+what runs on a tenant is the human's call, and the AL MCP Server's `al_run_tests` is not used. When
+AL test codeunits exist, the agent writes `docs/4-prove/AutomatedTestGuide.md` (above), builds the
+test app, and hands both over. The human installs the test framework apps once, installs the
+extension and the test app (`docs/4-prove/SandboxInstall.md`), opens the **AL Test Tool** page, and
+runs the rows of the guide's §6 one at a time — **Run Tests → Active Line** — reporting each row's
+**Result** and, on a Failure, the full **Error Message** text (message and call stack).
 
-```
-al_run_tests  { "codeunitId": 60310,
-                "projectPath": "<project folder>",
-                "environmentName": "<sandbox name>",
-                "environmentType": "Sandbox",
-                "company": "<company>" }
-```
+**`environmentType` is never `Production`.** Tests write data; Microsoft refuses to run them in a
+production environment and the guide says so. The guide also carries Microsoft's sandbox limits:
+no test method over fifteen minutes, and not more than an hour or two of test runs a day.
 
-- **Name the target explicitly, every time.** `codeunitId` is the only required argument, so
-  everything about *where* the tests run comes from what else is passed — never from a default.
-  `projectPath` is the tool's own documented route to the connection ("Optional project folder
-  path. Used to read connection settings from `launch.json`"), and it's the least error-prone
-  source because `launch.json` is the file the human already maintains. Pass `environmentName` and
-  `environmentType` alongside it and state the resolved target out loud before running, rather than
-  trusting whichever environment the server would otherwise pick.
-- **One codeunit per call.** `codeunitId` is a single integer, so the agent iterates the test
-  codeunits in the Object Register and aggregates the results itself. `testMethods` narrows a run
-  to named methods while fixing one failure — never for the run that reports the build green.
-- **Other arguments**, all optional: `company`, `tenant`, `authentication`
-  (`AAD` | `Windows` | `UserPassword`), `useInteractiveLogin` (default `true` — it opens a browser),
-  `noCache`, and for on-premises `serverUrl`, `serverInstance`, `port`. The tool also reads
-  `BC_SERVER_URL`, `BC_SERVER_INSTANCE`, `BC_SERVER_PORT`, `BC_SERVER_USERNAME`, and
-  `BC_SERVER_PASSWORD` from the environment.
-- **It returns a pass/fail summary with detail for failures** — read the failures, don't report the
-  summary line alone.
-
-**`environmentType` is never `Production`.** Tests write data. The same rule as publishing applies
-(Ops § Packaging): state the target environment before running, and if `launch.json` points at
-production, stop and ask rather than passing an override.
-
-**Where it fits.** The tests run after a clean analyzer compile and a successful publish, as part of
-the runbook's testing step — not instead of the human unit test script, which covers what a person
-must see in the UI. **A failing test codeunit fails the step**, exactly like a compiler error: it's
-fixed, not annotated.
-
-**When the server isn't connected**, or sign-in was skipped, say so plainly and leave the test run
-to the human with the codeunit IDs listed — never report untested code as tested.
+**Where it fits.** The tests run after a clean analyzer compile, once the human has installed the
+build — as part of the runbook's documentation step and again at release testing — not instead of
+the human unit test script, which covers what a person must see in the UI. **A failing test fails
+the step**, exactly like a compiler error: the agent diagnoses from the reported message and stack
+(reasoning role), fixes the extension or the test, builds both packages at the next version, and
+the human runs the failed rows again, then a full pass. The step closes on a full pass with no
+Failure, or with a written record of why a test could not be run — never on a pass nobody ran.
 
 ---
 
@@ -1955,7 +1971,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v5.6.2.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
+folder as `README.md`. For runbook **v5.7.0.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2003,7 +2019,8 @@ not folders):
   `HumanEffortBaselines.md`, `AiEffortEstimate.md`, `BuildPlan.md`, `ChangeLog.md`,
   `GapAnalysis.md`, `CodeReview.md`, `Documentation.md`, `UserGuide.md`, `HumanUnitTestScript.md`,
   `Deployment.md`, `ReleaseTestResults.md`, `Acknowledgements.md`, `ProjectProgress.md`,
-  `DesignDoc.md`, `Docs.md`, `TestScript.md`. Both editions fetch the whole set.
+  `SandboxInstall.md`, `AutomatedTestGuide.md`, `DesignDoc.md`, `Docs.md`, `TestScript.md`. Both
+  editions fetch the whole set.
 
 **The URL for every one of them** is the raw file, never the repository page:
 `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/<folder>/<file>` — for
@@ -2128,7 +2145,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.6.2.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.7.0.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
@@ -2182,7 +2199,9 @@ docs/
   3-build/     BuildPlan.md (Full)
   4-prove/     GapAnalysis.md  CodeReview.md  PostDevTDD.md  Documentation.md  UserGuide.md
                HumanUnitTestScript.md  AutomatedTestScripts.md  Deployment.md  ReleaseTestResults.md
-               (Full)  ·  Docs.md  TestScript.md (Lite)  ·  translated copies beside their source:
+               (Full)  ·  Docs.md  TestScript.md (Lite)  ·  SandboxInstall.md (both, at the first
+               package)  ·  AutomatedTestGuide.md (both, when AL test codeunits exist)  ·
+               translated copies beside their source:
                UserGuide.fr-CA.md, Docs.fr-CA.md, TestScript.fr-CA.md
 ```
 
@@ -2204,6 +2223,8 @@ Nothing is written loose in `docs/`.
 | `GapAnalysis.md` | `docs/4-prove/GapAnalysis.md` | Full Step 08 |
 | `CodeReview.md` | `docs/4-prove/CodeReview.md` — §0 Scorecard (eight dimensions, A–F, overall = the lowest) before the findings | Full Step 09 (Lite writes the same scorecard table into its Step 6 ChangeLog entry) |
 | `Documentation.md`, `UserGuide.md`, `HumanUnitTestScript.md`, `Deployment.md` | the four Step 11 documents, in `docs/4-prove/` | Full Step 11 |
+| `SandboxInstall.md` | `docs/4-prove/SandboxInstall.md` — the human's upload procedure; §1 rewritten with every build | Full Step 07 / Lite Step 5, with the first package |
+| `AutomatedTestGuide.md` | `docs/4-prove/AutomatedTestGuide.md` — install the test app and run each test on the AL Test Tool page | Full Step 11 / Lite Step 6, only when AL test codeunits exist |
 | `Acknowledgements.md` | `docs/0-project/Acknowledgements.md` — one row per resource actually used (author, license, how it was used), always committed | Full Step 11 / Lite Step 6 |
 | `ReleaseTestResults.md` | `docs/4-prove/ReleaseTestResults.md` | Full Step 12 |
 | `ProjectProgress.md` | `ProjectProgress.md` (root) — the step table for the project's edition (the template carries both; delete the other) and the usage table, **both editions** | Full PRE-01 / Lite Step 1, then every step start and close |

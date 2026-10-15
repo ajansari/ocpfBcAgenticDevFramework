@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.6.2.0
+**Version:** 5.7.0.0
 **Last Updated:** October 13, 2026
 
 > Version history for this framework lives in `ocpfFramework/RunbookChangelog.md`, tracked
@@ -18,7 +18,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.12.0.0): the AL *rules* this sequence applies (Parts 1–11, Appendices A–E), cited below as
 >   **Standards §**.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.6.2.0): the *procedures*
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.7.0.0): the *procedures*
 >   this sequence uses — asking, intake, project setup, the AL tools, tooling checks, analyzers,
 >   symbols, editor sync, notifications, packaging, repository hygiene, translations, fetched
 >   companions, documents, usage and cost, and the plugin — cited below as **Ops §**. Both editions
@@ -58,7 +58,7 @@
 1. **Part 1 is authoritative.** Publisher, prefix, namespace, versions, ID ranges, localization — read them from the Project Parameters block (Step 01) and derive everything else. Never hardcode.
 2. **Verify against BC symbol files, not memory.** Table numbers, `using` namespaces, field IDs, `ObsoleteState` — confirm each in the symbol file named in Parameter 1.4. Agent knowledge of BC table numbers is not reliable; the verification procedure is Standards Appendix B. The agent downloads those symbols itself at Step 01 §1.10 (ALL ALONG → Symbols); the human never has to. **The downloaded symbols are the source of truth and the *only* routine lookup.** Consult Microsoft Learn's Base Application or System Application reference (Standards Appendix B; links in ALL ALONG → Reference Sources) **only** when (a) symbols could not be downloaded, (b) the object, field, method, or event is not in the downloaded symbols, or (c) the task needs a code pattern, a snippet, or an event's signature to subscribe to it. Never as a second check on something the symbols already answered, and never "to be safe". Every Learn lookup costs time and tokens; say why it was needed when one happens. The downloaded symbols win when the two disagree.
 3. **Phase large scope into batches.** A batch is a self-contained, reviewable increment (by module or document-type group) — designed to be independently correct even though, under Operating Rule 4, it is not compiled on its own to prove it. Define batch boundaries during DESIGN and record them in the TDD.
-4. **Lint every batch as it's written; don't compile per batch.** Run Step 05's pre-flight checklist (in `ocpfFramework/runbookSteps/05.md`) on each batch as it's generated, both passes, including symbol verification (Operating Rule 2). The whole extension compiles and packages once, at Step 07, the moment Step 06 finishes — a real compile catches cross-file problems lint can't, and one pass keeps generation fast. After that, every code change anywhere in BUILD or PROVE goes through the same cycle: compile, package, deploy to a sandbox, test, fix, repeat. A human-requested spot-check compile mid-BUILD is extra, never a substitute. Gap-fill code, once written, gets its own pass through Steps 05–07. Treat any compile error as systemic: fix the rule or template, then every file it touched.
+4. **Lint every batch as it's written; don't compile per batch.** Run Step 05's pre-flight checklist (in `ocpfFramework/runbookSteps/05.md`) on each batch as it's generated, both passes, including symbol verification (Operating Rule 2). The whole extension compiles and packages once, at Step 07, the moment Step 06 finishes — a real compile catches cross-file problems lint can't, and one pass keeps generation fast. After that, every code change anywhere in BUILD or PROVE goes through the same cycle: compile, package, the human installs it in a sandbox, test, fix, repeat. A human-requested spot-check compile mid-BUILD is extra, never a substitute. Gap-fill code, once written, gets its own pass through Steps 05–07. Treat any compile error as systemic: fix the rule or template, then every file it touched.
 5. **Zero errors, zero warnings before PROVE.** A warning is a defect, not noise. Step 07's compile must reach 0/0, with the analyzers and nothing suppressed (ALL ALONG → Analyzers), before Step 08 begins.
 6. **Human-in-the-loop is a feature — approve in batches, not one click at a time.** Pause for human approval before:
    - **generating code** — once, for the whole batch plan at Step 05, unless the human chose to be asked before each batch (how the batches run — all in parallel, one at a time, or ask per batch — is a Rule 6a decision asked once in the same step);
@@ -175,8 +175,8 @@
      `AiEffortEstimate.md`;
    - `docs/3-build/` — `BuildPlan.md`;
    - `docs/4-prove/` — `GapAnalysis.md`, `CodeReview.md`, `PostDevTDD.md`, `Documentation.md`,
-     `UserGuide.md`, `HumanUnitTestScript.md`, `AutomatedTestScripts.md`, `Deployment.md`,
-     `ReleaseTestResults.md`, and every translated copy beside its source
+     `UserGuide.md`, `HumanUnitTestScript.md`, `AutomatedTestScripts.md`, `AutomatedTestGuide.md`,
+     `Deployment.md`, `SandboxInstall.md`, `ReleaseTestResults.md`, and every translated copy beside its source
      (`docs/4-prove/UserGuide.fr-CA.md`).
 
    Create `docs/` and its five subfolders at PRE-01, before the first document is written.
@@ -396,7 +396,7 @@ and *Parallel batches*.**
 **Read `ocpfFramework/runbookSteps/07.md` in full before starting this step.**
 
 **In one line:** the first full compile-and-package with the analyzers, then the continuous cycle —
-increment the Revision, compile, package, say "Package built:", deploy to a sandbox, test, diagnose
+increment the Revision, compile, package, say "Package built:", the human installs it in a sandbox, test, diagnose
 (check `ocpfFramework/patterns/` first), fix, repeat — until 0 errors / 0 warnings (Operating Rule
 5); root-cause fixes approved together per round (Operating Rule 6); translations drafted and
 reviewed inside this cycle (Ops § Translations).
@@ -408,7 +408,7 @@ gets each build onto the sandbox. Same division for any bug surfaced later durin
 testing (see Testing Feedback Log, ALL ALONG) — diagnosis is a reasoning-role task, fixing is the
 main role's.
 
-**Outputs:** All batches compiling and packaging with **0 errors, 0 warnings**; one package per build in `outputAppPackage/`, each at its own Revision, each announced with the "Package built:" block; at least one package published and manually tested on a sandbox, with "last installed version" recorded; ChangeLog current; TDD updated for every rule change; an agent-run API test result for each round, if the human opted in at the first round and a connection was available; every target translation file synced, drafted, and passing technical checks, with the glossary current.
+**Outputs:** All batches compiling and packaging with **0 errors, 0 warnings**; one package per build in `outputAppPackage/`, each at its own Revision, each announced with the "Package built:" block; `docs/4-prove/SandboxInstall.md` written with the first package and its §1 current; at least one package installed by the human and manually tested on a sandbox, with "last installed version" recorded; ChangeLog current; TDD updated for every rule change; every target translation file synced, drafted, and passing technical checks, with the glossary current.
 
 **Exit gate:** Full extension compiles clean, with the analyzers and nothing suppressed (Ops § Analyzers); the human confirms sandbox testing is clean; no known systemic issue outstanding; `app.json`'s version equals the last package built and no two packages in `outputAppPackage/` share a version; ChangeLog and TDD reconciled (Operating Rule 5); no translation unit in any language required at first release is in `needs-translation` or `needs-adaptation`, and the technical translation checks are clean. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 11).
 
@@ -440,7 +440,7 @@ to notice its own batch-to-batch drift. The reasoning role reports findings and 
 scorecard** — eight dimensions, A–F, one line of evidence each; the main role records the grades,
 applies every fix, and normalizes whatever drift the findings call out.
 
-**Outputs:** `docs/4-prove/CodeReview.md` — §0 Scorecard (eight grades with evidence, the overall grade as the lowest), then findings by dimension, severity, and resolution. Findings that need a code fix are presented together for one approval, the way Step 07 presents a test round's diagnoses (design-rule changes asked separately). Fixes applied at the rule level where a pattern repeats, with ChangeLog entries. Any fix that touches code follows the same Step 07 cycle — increment the Revision, recompile, repackage with the "Package built:" block, redeploy to the sandbox, retest — before this step closes (Operating Rule 4); a comment/formatting-only fix does not need a fresh package. If a finding repeats across batches and looks generalizable beyond this project — not a one-off, project-specific defect — flag it to the human as a candidate for a new entry in the OCPF BC AL Patterns Library (ALL ALONG), the same way Step 07 does; this pass, reading every batch side by side, is one of the best places in the whole routine to actually notice that shape of repetition.
+**Outputs:** `docs/4-prove/CodeReview.md` — §0 Scorecard (eight grades with evidence, the overall grade as the lowest), then findings by dimension, severity, and resolution. Findings that need a code fix are presented together for one approval, the way Step 07 presents a test round's diagnoses (design-rule changes asked separately). Fixes applied at the rule level where a pattern repeats, with ChangeLog entries. Any fix that touches code follows the same Step 07 cycle — increment the Revision, recompile, repackage with the "Package built:" block, the human installs it, retest — before this step closes (Operating Rule 4); a comment/formatting-only fix does not need a fresh package. If a finding repeats across batches and looks generalizable beyond this project — not a one-off, project-specific defect — flag it to the human as a candidate for a new entry in the OCPF BC AL Patterns Library (ALL ALONG), the same way Step 07 does; this pass, reading every batch side by side, is one of the best places in the whole routine to actually notice that shape of repetition.
 
 **Exit gate:** All critical findings resolved; dead-code scan 100% clean across every file (Standards §1.5); no obsolete references remain; any code fix from this step has been recompiled, repackaged at a new Revision, and retested; §0 Scorecard of `docs/4-prove/CodeReview.md` carries all eight grades with their evidence lines and the overall grade, graded by the reasoning role after the fixes landed, with no **F** left unaccepted. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 11).
 
@@ -462,13 +462,14 @@ amended where scope moved, `docs/1-define/TranslationGlossary.md` and Parameter 
 
 **In one line:** write the five mandatory documents — `docs/4-prove/Documentation.md`,
 `docs/4-prove/UserGuide.md`, `docs/4-prove/HumanUnitTestScript.md`, `docs/4-prove/Deployment.md`,
-`docs/0-project/Acknowledgements.md` — offer automated test scripts (Ops § Automated Tests), never
-ship a diagram you haven't seen render, then ask whether to build the release candidate v1.0.0.0
-before handing off.
+`docs/0-project/Acknowledgements.md` — offer automated test scripts (Ops § Automated Tests) and,
+if AL test codeunits are created, write `docs/4-prove/AutomatedTestGuide.md` for the human who
+runs them; never ship a diagram you haven't seen render; then ask whether to build the release
+candidate v1.0.0.0 before handing off.
 
-**Outputs:** `docs/4-prove/Documentation.md` (consumer/API reference, includes the Mermaid schema diagram), `docs/4-prove/HumanUnitTestScript.md`, **`docs/4-prove/UserGuide.md`** (end-user, Markdown), `docs/4-prove/Deployment.md`, `docs/0-project/Acknowledgements.md`, and `docs/4-prove/AutomatedTestScripts.md` (only if the human opted in above). Five mandatory documents — check all five exist before claiming the step is complete; the sixth is conditional. The release-candidate answer recorded, and — on yes — `outputAppPackage/<Name>_1.0.0.0.app` built and announced, with its ChangeLog entry; `tooling.mermaid` recorded in `ocpfFramework/framework.json`.
+**Outputs:** `docs/4-prove/Documentation.md` (consumer/API reference, includes the Mermaid schema diagram), `docs/4-prove/HumanUnitTestScript.md`, **`docs/4-prove/UserGuide.md`** (end-user, Markdown), `docs/4-prove/Deployment.md`, `docs/0-project/Acknowledgements.md`, and — only if the human opted in above — `docs/4-prove/AutomatedTestScripts.md` with, when AL test codeunits were created, `docs/4-prove/AutomatedTestGuide.md` and the test app `outputAppPackage/<Name>_Tests_<version>.app`. Five mandatory documents — check all five exist before claiming the step is complete; the others are conditional. The release-candidate answer recorded, and — on yes — `outputAppPackage/<Name>_1.0.0.0.app` built and announced, with its ChangeLog entry; `tooling.mermaid` recorded in `ocpfFramework/framework.json`.
 
-**Exit gate:** Reference is generated from actual code and current, and its diagram was seen to render (or the document says it could not be checked); test script executable by a non-developer; the human has been asked about Automated Test Scripts (Ops § Automated Tests; answer recorded either way); any AL test codeunits have been run and pass, or it's recorded why they couldn't be run; `docs/0-project/Acknowledgements.md` lists every resource the project used and nothing it didn't; the release-candidate question was asked and answered, and on yes the `1.0.0.0` package exists in `outputAppPackage/`; app ready to hand to Step 12 for release testing. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 11).
+**Exit gate:** Reference is generated from actual code and current, and its diagram was seen to render (or the document says it could not be checked); test script executable by a non-developer; the human has been asked about Automated Test Scripts (Ops § Automated Tests; answer recorded either way); any AL test codeunits have been run by the human from `docs/4-prove/AutomatedTestGuide.md` with every row reported Success, or it's recorded why they couldn't be run; `docs/0-project/Acknowledgements.md` lists every resource the project used and nothing it didn't; the release-candidate question was asked and answered, and on yes the `1.0.0.0` package exists in `outputAppPackage/`; app ready to hand to Step 12 for release testing. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 11).
 
 ## 12 — Release to Users for Testing
 
@@ -481,7 +482,7 @@ first release; results go to `docs/4-prove/ReleaseTestResults.md`; feedback is l
 continue `1.0.0.1`, `1.0.0.2` …; the package that passes ships as it is, and the production deploy
 is the human's.
 
-**Role:** this is a **main-role** step end to end — confirming the publish, coordinating the human testers, recording results in `docs/4-prove/ReleaseTestResults.md`, and triaging findings via the Testing Feedback Log. Any diagnosis a finding needs still routes to the reasoning role first, same as everywhere else (Step 07, Testing Feedback Log).
+**Role:** this is a **main-role** step end to end — confirming the human's install, coordinating the human testers, recording results in `docs/4-prove/ReleaseTestResults.md`, and triaging findings via the Testing Feedback Log. Any diagnosis a finding needs still routes to the reasoning role first, same as everywhere else (Step 07, Testing Feedback Log).
 
 **Outputs:** `docs/4-prove/ReleaseTestResults.md` — the Dev Manager's review (who, when, findings), every test case, its result, and a link to any ChangeLog issue it produced; the name of the package that passed, stated explicitly.
 
@@ -540,8 +541,7 @@ mandatory there, in BUILD, not something that waits for PROVE — and continues 
 words, not yet triaged into decisions.
 This is distinct from both of the above: the ChangeLog records *decisions and reasoning*; the
 Step 12 test-run record (`docs/4-prove/ReleaseTestResults.md`) captures the human-run green-team/red-team
-pass/fail (with an earlier, optional agent-run pass at Step 07 if the human opted in there and a route was
-available there). Neither preserves what the human actually said before it becomes a summary of
+pass/fail (the same checklist the human worked by hand at Step 07). Neither preserves what the human actually said before it becomes a summary of
 what the human said.
 
 - Record every testing/feedback session in `docs/0-project/TestingFeedback.md` — date, what was tested, and the
@@ -711,10 +711,13 @@ translation files*, except Operating Rule 8 and Standards §1.7.
   build time. Say the folder once at intake, and the exact path every time a build completes.
 - **Built packages are git-tracked, never gitignored.** No `outputAppPackage/` or blanket `*.app`
   entry in `.gitignore`.
-- **The agent never publishes to a production environment.** Before every publish, state the target
-  environment and type; if it isn't a sandbox, stop and ask. Never force a destructive schema change
-  (`ForceSync`, `Recreate`, `forceUpgrade`) without a separate approval naming what can be lost. The
-  production deploy at Step 12 is the human's, through Extension Management (Ops § Packaging).
+- **The agent never publishes to any environment — sandbox or production.** It builds the package;
+  the human uploads it, following `docs/4-prove/SandboxInstall.md` — written with the first package,
+  its §1 (file, version, Schema Sync Mode, sandbox) rewritten by the agent after every build (Ops §
+  Packaging). Nothing is on a sandbox until the human says which version they installed and where;
+  that answer is the "last installed version". `al_publish`, `launch.json` + F5, and the Automation
+  API are never used by the agent. The production deploy at Step 12 is the human's too, from
+  `docs/4-prove/Deployment.md`.
 - **Version numbers.** A **new app** starts at `0.0.0.1` (the Step 01 parameter default). An
   **existing app** starts from the version installed in the target environment (asked at intake,
   confirmed on the Extension Management page) and continues from it. **The first build of a new
@@ -744,7 +747,8 @@ translation files*, except Operating Rule 8 and Standards §1.7.
   Schema: additive only → upload with Schema Sync Mode = Add
      or: <what was removed / shrunk / retyped / re-keyed> → upload with Schema Sync Mode = Force Sync
          (Microsoft: test a forced sync in a sandbox first; it can lose data in <where>)
-  Upload: Extension Management → Manage → Upload Extension, choose the file, set Schema Sync Mode, Deploy.
+  Install: you upload it (I never do) — docs/4-prove/SandboxInstall.md, §1 updated for this build.
+  Then: tell me the version and environment you installed; I record it as the last installed version.
   ```
 
   The schema line compares the objects against the **last package installed in a tenant** — the
@@ -790,8 +794,9 @@ stay on disk) — and check for a remote first, since collaborators will see the
   command for this, and no third-party bridge extension is ever installed or used.
 - A server registered mid-session appears only in the next session; until then, use the one-shot
   helper rather than stopping or asking for a restart.
-- Prefer the MCP build/publish/symbol tools over ad hoc terminal calls — except the analysis
-  compile (ALL ALONG → Analyzers).
+- Prefer the MCP build/symbol tools over ad hoc terminal calls — except the analysis compile (ALL
+  ALONG → Analyzers). `al_publish` and `al_run_tests` are never called: uploading and running tests
+  are the human's (ALL ALONG → Packaging & Versioning; Ops § Automated Tests).
 
 ## Analyzers
 

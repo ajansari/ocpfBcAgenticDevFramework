@@ -4,6 +4,41 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.7.0 — October 15, 2026
+
+**Bundles:** full runbook v5.7.0.0, Lite v5.7.0.0, Standards Guide v1.12.0.0 (unchanged),
+Operations Guide v5.7.0.0. Two new document templates (`SandboxInstall.md`,
+`AutomatedTestGuide.md`) in the `documents` skill; `al-mcp-setup` and `documents` skill text; the
+reasoning sub-agent's task list.
+
+- **The agent never publishes — to a sandbox or anywhere.** Full and Lite now package only; the
+  human uploads every `.app`, and the human runs every automated test. `al_publish` and
+  `al_run_tests` are never called (Ops § AL Tools, § Packaging, § Automated Tests; the `al-mcp-setup`
+  skill no longer lists publish or tests among what it connects). AJ's decision, October 15, 2026.
+- **`SandboxInstall.md` — the human's upload guide**, written with the first package (Full Step 07 /
+  Lite Step 5) and kept current: both of Microsoft's routes step by step (Admin Center → Manage Apps
+  → Install Extension, the recommended one; Extension Management → Upload Extension, deprecated and
+  removed in 2027 release wave 1), the permission the uploader needs, after-install steps, updating,
+  uninstalling, and a table of the errors people hit — all fixed — plus §1, which the agent rewrites
+  after every build with that build's file, version, Schema Sync Mode, sandbox, and dependencies.
+  The "Package built:" block now ends with an *Install:* line pointing at it and a *Then:* line
+  asking for the installed version. Sources: Microsoft Learn, read October 15, 2026.
+- **`AutomatedTestGuide.md` — the human's test guide**, written whenever AL test codeunits are
+  created (Full Step 11 / Lite Step 6): which Microsoft test apps to install once in a sandbox
+  (Test Runner, Library Assert, Any, Library Variable Storage — with their app IDs), installing the
+  extension and the test app, the **AL Test Tool** page with its exact captions, one row per test
+  method (what it checks, expected result, setup), and running them **one at a time** with
+  *Run Tests → Active Line*, reading *Result* and *Error Message*, and what to send the agent.
+  Written for someone who has never opened the page. Sources: Microsoft Learn and the Test Runner's
+  own source in microsoft/BCApps, read October 15, 2026.
+- **Test apps depend only on what an online sandbox can install** — the extension under test plus
+  Library Assert, Any, and Library Variable Storage; never Tests-TestLibraries or System Application
+  Test Library, which Microsoft does not offer for online sandboxes. Built as
+  `outputAppPackage/<Name>_Tests_<version>.app` (Ops § Automated Tests).
+- **The agent-run API pass is gone** from Full Step 07 and Lite Step 5: it needed a publish. The
+  green-team / red-team checklist stays, as the human's, and Step 12 / Lite Step 7 remain the
+  authoritative pass. The schematics and the Deployment template follow.
+
 ## 5.6.2 — October 15, 2026
 
 **Bundles:** full runbook v5.6.2.0, Lite v5.6.2.0, Standards Guide v1.12.0.0 (unchanged),

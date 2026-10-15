@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 5.6.2.0 (Lite, derived from the full framework v5.6.2.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
+**Version:** 5.7.0.0 (Lite, derived from the full framework v5.7.0.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
 **Last Updated:** October 13, 2026
 
 > Version history for this edition lives in `ocpfFramework/LITE_RunbookChangeLog.md`, tracked
@@ -21,7 +21,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.12.0.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.6.2.0), cited as
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.7.0.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
 >   tooling checks, analyzers, symbols, editor sync, notifications, packaging, repository hygiene,
 >   translations, fetched companions, documents, usage and cost, and the plugin.
@@ -142,7 +142,7 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
    verification (Rule 2) — in parallel mode, the post-generation pass runs per batch as each
    generator returns (Step 4). The whole extension compiles and packages once, at Step 5, the moment
    Step 4 finishes. After that, every code change goes through the same cycle: compile, package,
-   deploy to a sandbox, test, fix, repeat. Treat any compile error as systemic: fix the rule, then
+   the human installs it in a sandbox, test, fix, repeat. Treat any compile error as systemic: fix the rule, then
    every file it touched.
 5. **Zero errors, zero warnings before PROVE.** A warning is a defect. Step 5's compile must reach
    0/0, with the analyzers and nothing suppressed (ALL ALONG → Analyzers), before Step 6 begins.
@@ -367,14 +367,15 @@ Step 5's mandatory compile-and-package. This step's usage rows — one per model
 **Read `ocpfFramework/runbookSteps/STEP-5.md` in full before starting this step.**
 
 **In one line:** the first full compile-and-package with the analyzers, then the cycle — increment
-the Revision, compile, package (the fixed *Package built* message after every build), deploy to a
+the Revision, compile, package (the fixed *Package built* message after every build), the human installs it in a
 sandbox, test, diagnose (check `ocpfFramework/patterns/` first), fix, repeat — to 0 errors /
 0 warnings; translations drafted and reviewed inside this cycle (Ops § Translations).
 
 **Outputs:** All files compiling and packaging with **0 errors, 0 warnings**; every build's package
-in `outputAppPackage/`, one file per version, none overwritten; at least one package
-published and manually tested on a sandbox; `docs/0-project/ChangeLog.md` current (last installed
-version included); `docs/2-design/DesignDoc.md` updated for every rule change.
+in `outputAppPackage/`, one file per version, none overwritten; `docs/4-prove/SandboxInstall.md`
+written with the first package and its §1 current; at least one package installed by the human
+and manually tested on a sandbox; `docs/0-project/ChangeLog.md` current (last installed version
+included); `docs/2-design/DesignDoc.md` updated for every rule change.
 
 **Exit gate:** Full extension compiles clean, with the analyzers and nothing suppressed (Ops § Analyzers); human confirms sandbox testing is clean; no known
 systemic issue outstanding; no unit in a language required at first release is
@@ -395,7 +396,8 @@ human-run release test.
 Standards Guide, AL Guidelines, and BCQuality and grade the eight-dimension scorecard into the
 ChangeLog, apply the fixes through the compile cycle, bring the Design Doc to as-built, write
 `docs/4-prove/Docs.md`, `docs/4-prove/TestScript.md`, and `docs/0-project/Acknowledgements.md`
-(`documents` templates), then ask whether to build the release candidate v1.0.0.0 now.
+(`documents` templates) — plus `docs/4-prove/AutomatedTestGuide.md` when the project has AL test
+codeunits, for the human who runs them — then ask whether to build the release candidate v1.0.0.0 now.
 
 **Outputs:** `docs/2-design/DesignDoc.md` (updated in place, glossary included), `docs/4-prove/Docs.md`, and `docs/4-prove/TestScript.md`.
 Together with `docs/0-project/ChangeLog.md` from Step 1 onward, that's Lite's four maintained documents; translated
@@ -407,7 +409,7 @@ documents follow at Step 7. Also: the code-review scorecard in this step's Chang
 **Exit gate:** Every gap classified and resolved or explicitly deferred (logged in
 `docs/0-project/ChangeLog.md`); dead-code scan clean; no obsolete references; `docs/4-prove/Docs.md`'s diagram renders;
 `docs/4-prove/TestScript.md` is executable by a non-developer; translation checks clean; any AL test codeunits
-have been run and pass, or it's recorded why they couldn't be; the eight-dimension scorecard is in
+have been run by the human from `docs/4-prove/AutomatedTestGuide.md` with every row reported Success, or it's recorded why they couldn't be; the eight-dimension scorecard is in
 the ChangeLog entry; `docs/0-project/Acknowledgements.md` exists with one row per resource used;
 the release-candidate question is answered and, on yes, `1.0.0.0` is built. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
 
@@ -548,7 +550,8 @@ first package and before Step 6's release-candidate question. The non-negotiable
   Schema: additive only → upload with Schema Sync Mode = Add
      or: <what was removed / shrunk / retyped / re-keyed> → upload with Schema Sync Mode = Force Sync
          (Microsoft: test a forced sync in a sandbox first; it can lose data in <where>)
-  Upload: Extension Management → Manage → Upload Extension, choose the file, set Schema Sync Mode, Deploy.
+  Install: you upload it (I never do) — docs/4-prove/SandboxInstall.md, §1 updated for this build.
+  Then: tell me the version and environment you installed; I record it as the last installed version.
   ```
 
   The schema line compares the objects against the last package installed in a tenant; record
@@ -568,10 +571,13 @@ first package and before Step 6's release-candidate question. The non-negotiable
   ships as it is** — no rename, no copy, no rebuild. Existing app: the RC is the next Minor (or
   Major) from the starting version, proposed.
 - **Built packages are tracked, never gitignored** — no blanket `*.app` entry.
-- **The agent never publishes to a production environment.** Before every publish, state the target
-  environment and type; if it isn't a sandbox, stop and ask. Never force a destructive schema change
-  (`ForceSync`, `Recreate`, `forceUpgrade`) without a separate approval naming what can be lost. The
-  production deploy at Step 7 is the human's, through Extension Management (Ops § Packaging).
+- **The agent never publishes to any environment — sandbox or production.** It builds the package;
+  the human uploads it, following `docs/4-prove/SandboxInstall.md` — written with the first package,
+  its §1 (file, version, Schema Sync Mode, sandbox) rewritten by the agent after every build (Ops §
+  Packaging). Nothing is on a sandbox until the human says which version they installed and where;
+  that answer is the last installed version in the ChangeLog. `al_publish`, `launch.json` + F5, and
+  the Automation API are never used by the agent. The production deploy at Step 7 is the human's
+  too, from `docs/4-prove/Docs.md`'s deployment section.
 - **Never delete or overwrite any package.** Every build has its own version, so every build has
   its own file; nothing is ever tidied.
 - **Major, Minor, and Build bumps are proposed and approved** (Rule 6a), never a silent `app.json`
@@ -643,6 +649,8 @@ for a remote first, since collaborators will see the files as deleted.
 - **The human only approves the AI tool's prompts.** No Command Palette command exists for this, and
   no third-party bridge extension is used.
 - A server registered mid-session appears only next session; until then use the one-shot helper.
+- `al_publish` and `al_run_tests` are never called: uploading a package and running tests in
+  Business Central are the human's (Packaging & Versioning; Ops § Automated Tests).
 
 ## Analyzers
 
@@ -845,12 +853,14 @@ editions fetch the same v1.12.0.0 file and apply the same AL rules — Lite diff
 `docs/4-prove/TestScript.md`), plus `ProjectProgress.md` (project root, both tables), Step 1's two
 kickoff artifacts (`docs/1-define/ProblemStatement.md`, `docs/1-define/ProjectParameters.md`), two
 estimates (`docs/2-design/HumanEffortEstimate.md`, `docs/2-design/AiEffortEstimate.md`), and
-`docs/0-project/Acknowledgements.md` (Step 6), versus the full framework's 25 (`ProblemStatement`,
+`docs/0-project/Acknowledgements.md` (Step 6), `docs/4-prove/SandboxInstall.md` (Step 5, with the
+first package), and `docs/4-prove/AutomatedTestGuide.md` (Step 6, only with AL test codeunits),
+versus the full framework's 27 (`ProblemStatement`,
 `ProjectParameters`, `FRD`, `TDD`, `SanityCheck`, `HumanEffortEstimate`, `AiEffortEstimate`,
 `BuildPlan`, `ObjectRegister`, `ChangeLog`, `ProjectMemory`, `ProjectProgress`, `GapAnalysis`,
 `CodeReview`, `PostDevTDD`, `Documentation`, `UserGuide`, `HumanUnitTestScript`, `Deployment`,
-`AutomatedTestScripts`, `ReleaseTestResults`, `TestingFeedback`, `Roadmap`, `TranslationGlossary`,
-`Acknowledgements`). Lite keeps its translation glossary inside `docs/2-design/DesignDoc.md`; translated copies
+`AutomatedTestScripts`, `AutomatedTestGuide`, `SandboxInstall`, `ReleaseTestResults`,
+`TestingFeedback`, `Roadmap`, `TranslationGlossary`, `Acknowledgements`). Lite keeps its translation glossary inside `docs/2-design/DesignDoc.md`; translated copies
 of `docs/4-prove/Docs.md` and `docs/4-prove/TestScript.md` don't count as separate documents.
 
 ---

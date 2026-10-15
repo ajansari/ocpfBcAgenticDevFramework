@@ -24,6 +24,42 @@ specifically to keep a superseded decision on record — see the runbook's ALL A
 
 ---
 
+## v5.7.0.0 — October 15, 2026
+
+**The agent never publishes; the human uploads every package and runs every automated test.**
+Lite **v5.7.0.0**, Operations Guide **v5.7.0.0**, Standards Guide **v1.12.0.0** (unchanged),
+plugin **5.7.0**. Two new document templates; Full Steps 07, 08, 09, 11, 12; Lite Steps 5, 6, 7;
+both cores' Packaging & Versioning and AL MCP Server sections; both schematics; Ops § AL Tools,
+§ Packaging, § Automated Tests, § Translations, § Documents.
+
+- **No publish to any environment — sandbox or production.** The rule used to be "never to
+  production"; now the agent builds packages and nothing else reaches a tenant from it: not
+  `al_publish`, not `launch.json` and F5, not the Automation API. The human uploads every build and
+  tells the agent which version went where; that answer is the "last installed version", and
+  nothing is "on the sandbox" until it is given. AJ's decision, October 15, 2026.
+- **`docs/4-prove/SandboxInstall.md`** — written from its template with the first package at Step
+  07 and rewritten (§1 only) after every build: the exact file, version, Schema Sync Mode, sandbox,
+  and dependencies, above a fixed procedure for both of Microsoft's upload routes (the Admin Center's
+  Manage Apps, recommended; Extension Management, deprecated and removed in 2027 release wave 1),
+  the permission needed, after-install steps, updating, uninstalling, and the errors people hit.
+  The "Package built:" block gains *Install:* and *Then:* lines. Microsoft Learn, read October 15,
+  2026.
+- **`docs/4-prove/AutomatedTestGuide.md`** — written at Step 11 whenever AL test codeunits are
+  created, beside `AutomatedTestScripts.md`: the Microsoft test apps a sandbox needs (Test Runner,
+  Library Assert, Any, Library Variable Storage, with app IDs and the marketplace steps), installing
+  the extension and the test app, the AL Test Tool page by its exact captions, one row per test
+  method, and the one-at-a-time run (*Run Tests → Active Line*) with how to read *Result* and
+  *Error Message* and what to report. The agent no longer calls `al_run_tests`; Step 11 and Step 12
+  close on the human's reported results, a Failure failing the step as before.
+- **Test apps depend only on the three Test Framework libraries** an online sandbox can install —
+  never Tests-TestLibraries or System Application Test Library — and are built as
+  `outputAppPackage/<Name>_Tests_<version>.app`, versioned with the extension (Ops § Automated Tests).
+- **The agent-run API pass is removed** from Step 07 (it needed a publish). The checklist stays, the
+  human's; Step 12 is the authoritative pass as before. Steps 08, 09, and 12's fix cycles say "the
+  human installs it" where they said "redeploy".
+
+---
+
 ## v5.6.2.0 — October 15, 2026
 
 **Dashboard: the bottom row shares one height.** Lite **v5.6.2.0**, Operations Guide

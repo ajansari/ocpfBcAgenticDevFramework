@@ -16,6 +16,24 @@ framework.
 
 ---
 
+## v5.7.0.0 — October 15, 2026
+
+Derived from full framework **v5.7.0.0**; Operations Guide **v5.7.0.0**; Standards Guide
+**v1.12.0.0** (unchanged); plugin **5.7.0**. Steps 5, 6, 7; Packaging & Versioning and AL MCP
+Server; the schematic; two new document templates.
+
+- **The agent never publishes — sandbox or production.** It packages; the human uploads, following
+  `docs/4-prove/SandboxInstall.md` (written with the first package at Step 5, §1 rewritten after
+  every build with the file, version, Schema Sync Mode, and sandbox), and reports the installed
+  version, logged in the ChangeLog. The "Package built:" block gains *Install:* and *Then:* lines.
+- **AL test codeunits are run by the human** from `docs/4-prove/AutomatedTestGuide.md` (Step 6,
+  only when the project has them): the Microsoft test apps to install once, the test app, the AL
+  Test Tool page, one row per test method, one at a time. `al_run_tests` is no longer called. Test
+  apps depend only on Library Assert, Any, and Library Variable Storage (Ops § Automated Tests).
+- **The agent-run API pass is removed** from Step 5. Full changelog: *v5.7.0.0*.
+
+---
+
 ## v5.6.2.0 — October 15, 2026
 
 Derived from full framework **v5.6.2.0**; Operations Guide **v5.6.2.0**; Standards Guide
