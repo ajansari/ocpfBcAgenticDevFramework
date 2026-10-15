@@ -21,7 +21,6 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 - [Background](#background)
 - [User Guide](FrameworkUserGuide.md) — the full guide for the person driving a project
-- [What's New?](#whats-new)
 - [What to Expect](#expect)
 - [GET STARTED: Agent Plugin (Recommended)](#setup-plugin)
 - [Staying Up to Date](#staying-up-to-date)
@@ -30,6 +29,7 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 - [Repo Contents](#contents)
 - [License](#license)
 - [Project Inspiration](#inspiration)
+- [What's New?](#whats-new)
 
 <a id="background"></a>
 <details open>
@@ -45,6 +45,275 @@ It comes in two editions: the **full framework** (14 steps) for substantial proj
 
 </details>
 
+<a id="expect"></a>
+<details open>
+<summary><h1>What to Expect</h1></summary>
+
+**Plan on the first hour being interactive, and treat it as the most important hour of the
+project.** Think of it as the kickoff meeting you would hold with a human developer you had just
+hired to build this extension. In that meeting you would not say "track bootcamp registrations"
+and leave the room. You would explain who uses it and why, which countries and languages they work
+in, what it must never do, what it connects to, and how you will know it is right — because
+anything you left vague, the developer would have to guess at, and you would find out about the
+guess weeks later, in the wrong place, at the cost of a rewrite. The framework is that developer.
+In its first hour it asks for everything it needs before it designs anything: your working language,
+how to be notified, which models do the work, who signs off, the extension's name and publisher, ID
+ranges, countries and languages, and the problem itself — what the app is for, who it serves, and
+what is out of scope.
+
+Stay at the keyboard for it. Answer the option boxes, correct anything it suggests, and say more
+rather than less when it asks about the problem. Nothing reaches the parameter sheet until you pick
+it, and nothing reaches the design until the problem statement is signed off — which means this is
+the one point in the project where a better answer costs a minute. **Vagueness here does not
+disappear; it flows downstream.** An unstated rule becomes a requirement the FRD never captured, an
+object the TDD designed wrong, code that compiles cleanly and does the wrong thing, and a rewrite
+that costs more time and more tokens than the conversation would have — exactly as it does with a
+human developer, and for the same reason.
+
+**Once the DESIGN phase begins — Full Step 02 (the FRD), Lite Step 2 (the Design Doc) — you can step
+away.** From there the framework works in longer stretches and comes back to you only to approve a
+document, decide between options, or answer a question. Turn on notifications at the first step and
+you'll know the moment it's your turn.
+
+### How you get notified
+
+| | Claude Code | GitHub Copilot |
+|---|---|---|
+| **Sound** on the computer | Yes | Yes |
+| **Desktop notification** (operating system) | Yes — Windows, Linux, and supported terminals on macOS (not the VS Code extension on macOS) | Yes — VS Code's own notification when input is needed |
+| **Mobile notification** | Yes — through **Remote Control**, with the Claude app installed on your phone and signed in to the same account as Claude Code in VS Code | No |
+| **Answer from the phone** | Yes — in the Claude app you can read the question, choose an option, and approve an action | No |
+
+The framework asks which of these you want at its first step (right after the working language),
+sets them up itself, and remembers the answer per project. With Claude Code, choosing *Claude app*
+turns on Remote Control; the framework explains what that stores before turning it on.
+
+**Using GitHub Copilot?** At the same first step the framework asks two Copilot-specific questions:
+how many requests an agent turn may make before Copilot pauses (the default is low enough that a
+design step hits *"Copilot has been working on this problem for a while…"* — 150 is recommended), and
+how tool approvals should work (ask each time, allow the framework's own commands, or allow
+everything, with its warning). It writes your answers to the workspace's `.vscode/settings.json`.
+
+**What it costs, and what it saves.** Every step is measured: tokens by type per model in
+Claude Code, AI credits per model in GitHub Copilot, priced from the publisher's
+published rates, next to an estimate of the hours an experienced senior AL developer would bill for
+the same step, and next to the AI effort estimate made before BUILD began. The table lives in
+`ProjectProgress.md` in both editions, with one row per step and model, written at every step
+boundary.
+
+</details>
+
+<a id="setup-plugin"></a>
+<details open>
+<summary><h1>GET STARTED: Agent Plugin (Recommended)</h1></summary>
+
+> ### Two steps. Install once, then one command per project.
+>
+> | | |
+> |---|---|
+> | **1. Install the Visual Studio Code extension** | Once per machine. One install brings everything. |
+> | **2. Start your project** | Open your AL folder and run `/ocpf-bc:start`. |
+
+That's it. From there the plugin **helps you choose Full, Lite, or Build-a-Feature**, **installs
+the latest runbook** (Full and Lite), **connects Microsoft's AL tools** with nothing to install,
+**adds sub-agents** for the Reasoning, Light, and Generator roles, and **checks for updates** each
+session before changing anything.
+
+## Step 1 — Install the Visual Studio Code extension
+
+You build Business Central extensions in **Visual Studio Code** with the **AL Language** extension,
+so the framework's front door is a Visual Studio Code extension:
+
+> ### [OnlyCopilotFans Business Central Agentic Dev Framework - Setup](https://marketplace.visualstudio.com/items?itemName=ajansari.ocpf-bc-dev-setup)
+> on the **Visual Studio Marketplace** — `ajansari.ocpf-bc-dev-setup`
+
+Install it from the Marketplace page, or paste this into Quick Open (**Ctrl+P**, **Cmd+P** on Mac):
+
+```text
+ext install ajansari.ocpf-bc-dev-setup
+```
+
+**One install brings:** the AL toolchain (the AL Language extension and its companions), the agent
+extension you choose (Claude Code or GitHub Copilot Chat), the framework's plugin marketplace wired
+into that agent, the `ocpf-bc` plugin itself, a Git check, five **OCPF BC** Command Palette commands
+(*New AL Project + Framework*, *Kickstart Framework Here*, *Set Up Claude Code*, *Set Up GitHub
+Copilot*, *Check Git Installation*), and a first-run walkthrough that ends at `/ocpf-bc:start`.
+The extension's own documentation is on its Marketplace page. Requirements: Visual Studio Code
+1.96 or later, Git, and a Claude or GitHub Copilot subscription.
+
+**Using VSCodium or another Open VSX client?** The same extension is on the
+[Open VSX Registry](https://open-vsx.org/extension/ajansari/ocpf-bc-dev-setup).
+
+**Extension not an option?** Working in the **Claude Code CLI** or the **GitHub Copilot CLI**,
+running the agent on github.com or in the Claude apps, or setting the framework
+up by hand without the plugin — every one of those is in
+**[Getting Started — Alternative Ways](GettingStartedAlternatives.md)**.
+
+## Step 2 — Start a project
+
+Open your AL project folder — or an empty one — and run:
+
+> # `/ocpf-bc:start`
+
+Or just ask:
+
+> # *"Start a Business Central project with the OCPF framework."*
+
+In GitHub Copilot, the commands are identical.
+
+**The plugin then walks you through four things:**
+
+| | What happens | What you do |
+|---|---|---|
+| **1** | **Full, Lite, or Build-a-Feature.** It asks about the project — object count, people and sign-off roles, whether it's heading to AppSource — and recommends a journey with its reasoning. **Build-a-Feature** is for one object or a few, in a new or existing extension, with no steps and no documents: it asks what you want to build, confirms the fields in one box, writes and compiles, offers the next object, then a `.app` and a review — and skips rows 2 and 4 below. On an existing extension it is recommended first. | Confirm or override. You can switch later without losing work. |
+| **2** | **Where the runbook goes.** It places the latest runbook as `CLAUDE.md`, `.github/copilot-instructions.md`, or both for mixed teams. | Nothing, unless a file already exists — then it asks. **It never overwrites.** |
+| **3** | **AL tools, nothing to install.** It connects Microsoft's AL tools using the AL Language extension you already have. | In Copilot Chat, nothing — they're built in. In Claude Code, approve the connection once. |
+| **4** | **The routine begins.** | Tell it your working language, how you want to be notified, which models do the work, and — with Copilot — the request limit and approval mode — Full asks for a Main, Light, and Reasoning model with a thinking effort each (recommended **Sonnet Medium / Haiku Medium / Opus High** in Claude Code, **Gemini 3.8 Flash Medium / Auto Balanced / Claude Opus 5.5 High** in Copilot); Lite asks for one (Sonnet Medium or Gemini 3.8 Flash Medium). It warns first that a High thinking effort makes every task slower, and recommends High only where judgment matters most. The Full framework then runs its Reasoning, Light, and Generator sub-agents — Lite its Generator — on exactly the models you chose, and every document lands in its phase folder — `docs/0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` — with the usage table in `ProjectProgress.md` for both editions. |
+
+**Other commands, for later:**
+
+| Command | What it does |
+|---|---|
+| `/ocpf-bc:start` on a project already on the framework | Offers *Status*, *Check for a framework update*, or *Build a feature in this project* — the quick-mod journey on top of a Full or Lite project, leaving its steps and documents alone |
+| `/ocpf-bc:status` | Shows where the project stands |
+| `/ocpf-bc:update-framework` | Checks for a newer runbook |
+| `/ocpf-bc:al-mcp-setup` | Connects the AL tools, if you skipped it at start |
+| `/ocpf-bc:notifications` | Turns on "your turn" notifications in an older project |
+| `/ocpf-bc:roles` | Asks which models do the work (Full: Main, Light, Reasoning, each with a thinking effort; Lite: one) and makes the answer take effect by writing the project's three sub-agent copies — the runbook runs it at its first step; run it by hand to change or repair the assignment |
+| `/ocpf-bc:documents <name>` | Writes any project document from its template into its phase folder under `docs/` — FRD, TDD, Sanity Check, Human and AI Effort Estimates, Build Plan, Code Review, User Guide, Acknowledgements, and the rest — with only the inputs its step names |
+| `/ocpf-bc:usage --step <id>` | Run at every step boundary: measures tokens and cost per step and model (Claude Code) or AI credits and cost per step and model (GitHub Copilot in VS Code), fetches published prices, and writes one row per model into the usage table in `ProjectProgress.md` (both editions); at project close it exports the calibration file for the AI effort estimator |
+
+</details>
+
+<a id="staying-up-to-date"></a>
+<details open>
+<summary><h1>Staying Up to Date</h1></summary>
+
+Two separate things get updated. The plugin handles each one differently.
+
+### 1. Your project's runbook: checked automatically, applied when you say so
+
+A project keeps its own copy of the runbook, so the rules don't change halfway through without
+your say.
+- **At the start of every session,** the framework checks this repository for a newer runbook.
+- **If there is one,** it tells you what changed and asks: **Update now**, **Not now**, or **Skip
+  this version**.
+- **On Update now,** it keeps a backup of the old copy in `ocpfFramework/state/previous/` and logs
+  the change in your project.
+- **Updating a project from an older layout** (Full before 5.0.0.0, Lite before 5.0.0.0) also
+  moves its files into the `ocpfFramework/` folder and the `docs/` phase folders — a migration,
+  applied only after you approve the update and listed move by move in the ChangeLog.
+
+**What it needs:** internet access to GitHub (`raw.githubusercontent.com`). There's nothing to set
+up. This applies to projects started with the plugin. Manually set-up projects work as before, and
+you can run `/ocpf-bc:update-framework` in them anytime.
+
+### 2. The plugin itself: depends on your tool
+
+| Tool | Automatic? | To turn on automatic updates | To check by hand |
+|---|---|---|---|
+| **Claude Code** (VS Code, CLI, Desktop) | **Off by default** for third-party marketplaces like this one | `/plugin` → **Marketplaces** → **onlycopilotfans** → **Enable auto-update**. Updates then install in the background, and you're prompted to run `/reload-plugins`. | `/plugin marketplace update onlycopilotfans`, then `/plugin update ocpf-bc@onlycopilotfans` |
+| **GitHub Copilot Chat in VS Code** | **On,** when VS Code's `extensions.autoUpdate` is on (the default). Checked every 24 hours. | Nothing to do | Command Palette → **Extensions: Check for Extension Updates** |
+| **GitHub Copilot CLI** | **Off** for added marketplaces, but `/plugin` shows when an update is available | Add `"autoUpdate": true` to the `onlycopilotfans` entry under `extraKnownMarketplaces` in `~/.copilot/settings.json` | `copilot plugin update ocpf-bc` |
+| **GitHub.com cloud agent** | **Yes:** the plugin is installed from this repository when a session starts | Nothing to do | Nothing to do |
+| **Claude apps (Chat, Cowork)** | Checked from the marketplace | Nothing to do | **Customize** → **Plugins** → **Update** on the marketplace |
+
+### Get notified of new releases
+
+- **Watch this repository** on GitHub: **Watch** → **Custom** → **Releases**. GitHub then emails
+  you when a new version is published.
+- The [fullVersion/RunbookChangelog.md](fullVersion/RunbookChangelog.md) and
+  [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md) files record what changed
+  in each version.
+
+</details>
+
+<a id="roadmap"></a>
+<details open>
+<summary><h1>Roadmap</h1></summary>
+
+- ~~Add support for AL MCP~~ ✅ Completed
+- ~~Add support for BCQuality~~ ✅ Completed
+- ~~Add support for multi language translations~~ ✅ Completed — see [Multilanguage Support](translationAndMultiLanguage/MultilanguageSupportOverview.md)
+- ~~Distribute as an agent plugin for Claude and GitHub Copilot~~ ✅ Completed — see [GET STARTED: Agent Plugin](#setup-plugin)
+- ~~Per-step runbook files, document templates, a human effort estimate, and per-step token and cost tracking~~ ✅ Completed — Full v4.0.0.0 / Lite v3.0.0.0, September 2026
+- ~~Token usage **estimator** — predicted tokens per model, by input, output, and cached, before a step runs~~ ✅ Completed — the AI Effort Estimate, Full v5.0.0.0 / Lite v5.0.0.0, September 2026; calibrates itself from measured projects
+- **Being considered**
+  - Answer the dashboard's open question from the dashboard page itself (today the page shows it and says where to answer)
+  - A live dashboard for GitHub Copilot CLI, with the agent / you time split Claude Code has
+  - More dashboard themes beside OnlyBCFans and F1
+- **Shelved, October 15, 2026** — designed, not built, kept for later
+  - A PoC Edition: a one-hour proof-of-concept journey with a promotion path into Full or Lite. The Build-a-Feature journey covers most of what it was for.
+  - An optional human-fillable intake sheet to answer the simple intake questions up front. The intake is fast enough now, and the dashboard carries the context the sheet was meant to.
+
+</details>
+
+<a id="contents"></a>
+<details open>
+<summary><h1>Repo Contents</h1></summary>
+
+| File | Purpose |
+|---|---|
+| `fullVersion/` | The **Full Framework** — the complete 14-step routine. See [Full Framework, by hand](GettingStartedAlternatives.md#setup-full). |
+| `standardsGuide/README.md` | The **prelude** to the companion **OCPF AL Development Standards Guide** — the guide itself now lives standalone at [ajansari/ocpfBCALStandards](https://github.com/ajansari/ocpfBCALStandards) (MIT) and is fetched at the release tag this file pins (`v1.12.0.0`) into each project's `ocpfFramework/standardsGuide/`. The prelude holds the framework's own framing: purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the map of what is deliberately not in the guide. |
+| `opsGuide/ocpfOperationsGuide.md` | The companion **OCPF Operations Guide** — the procedures both editions share, cited as **Ops §** (how the agent asks and gets approval, intake, roles, project setup, the AL tools, analyzers, symbols, editor sync, notifications, packaging, repository hygiene, translations, automated tests, fetched companions, reference sources, and the plugin). Fetched into each project's `ocpfFramework/opsGuide/` alongside the Standards Guide. |
+| `liteVersion/` | The **Lite Edition** — a 7-step version of the framework for small, fast-moving projects. See [Lite Edition, by hand](GettingStartedAlternatives.md#lite-edition). |
+| `documentTemplates/` | One template per document the framework produces (FRD, TDD, Sanity Check, Human Effort Estimate and its baselines, AI Effort Estimate, Build Plan, ChangeLog, Gap Analysis, Code Review, Documentation, User Guide, test scripts, Deployment, Release Test Results, Acknowledgements, Project Progress with its usage table for both editions, and Lite's Design Doc, Docs, and Test Script). Fetched into each project's `ocpfFramework/documentTemplates/` with the step files; shared by both editions. |
+| `translationAndMultiLanguage/MultilanguageSupportOverview.md` | How the framework handles multilanguage — captions and XLIFF translation files, regional terminology (GST vs. VAT, CR/Adj Note vs. Credit Memo in Australia), agent-drafted translations with a human review gate, and language-aware UAT. Shared by both editions. |
+| `agentPlugin/` | The optional **agent plugin**, `ocpf-bc`, for Claude Code, GitHub Copilot, and other tools. See [GET STARTED: Agent Plugin](#setup-plugin). This repository is also its plugin marketplace (`.claude-plugin/marketplace.json`). |
+| `THIRD_PARTY_NOTICES.md` | Credits and licenses for every third-party resource the framework references, fetches, or recommends — BCQuality, AL Guidelines, Microsoft Learn, and others. |
+| `FrameworkUserGuide.md` | The **User Guide** — everything the person driving a project needs: install, the Command Palette commands, the plugin commands, where every file lives, model recommendations, versioning, and updating. |
+| `GettingStartedAlternatives.md` | Every other way to get started: installing the plugin from the Claude Code CLI, the GitHub Copilot CLI, or inside Visual Studio Code without the setup extension; running the agent on github.com, in the Claude apps, or in Copilot Cowork; and the manual, no-plugin setup for Full and Lite. |
+
+</details>
+
+<a id="license"></a>
+<details open>
+<summary><h1>License</h1></summary>
+
+This project is licensed under the **[PolyForm Shield License 1.0.0](https://polyformproject.org/licenses/shield/1.0.0)**
+(see [LICENSE](LICENSE)). It is a **source-available** license, not an open source license, and
+in practice that means:
+
+- **Free to use.** There is nothing to buy and no registration.
+- **The source is available.** Every file in this repository — the runbooks, the Standards Guide,
+  the Operations Guide, the templates, the plugin, and the scripts — is here to read, run, and
+  adapt.
+- **Build what you like with it.** Use the framework to build Business Central AL extensions,
+  per-tenant or AppSource, free or commercial, for yourself or for clients. The extensions you
+  build are yours; the license says nothing about them.
+- **The one reservation** is the license's noncompete: you may not use the framework to provide a
+  product that competes with it, or with a product its licensor provides using it — for example
+  by repackaging it as your own agentic development framework or development tool.
+
+Copyright © 2026 AnsariCo, Inc. dba [OnlyCopilotFans](https://OnlyCopilotFans.com) and
+[OnlyBCFans](https://OnlyBCFans.com). Third-party resources the framework references, fetches, or
+recommends keep their own licenses, credited in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
+
+</details>
+
+<a id="inspiration"></a>
+<details open>
+<summary><h1>Project Inspiration</h1></summary>
+
+The spark for this project was Microsoft's **Business Central Agentic Engineering Process** vision, first unveiled at Directions North America in Orlando in April 2026.
+
+<img src="inspiration/BCAgenticEngineeringProcess-Vision.png" alt="Microsoft's Business Central Agentic Engineering Process vision, presented at BC TechDays 2026" width="75%">
+
+*Microsoft's Business Central Agentic Engineering Process vision, as presented at BC TechDays 2026.*
+
+I've been teaching an AL development bootcamp at Community Summit NA since 2023. The bootcamp is typically geared toward developers, but for many years I've also led workshops and sessions on AL development aimed squarely at Functional Consultants. With the rise of vibe coding — and all the ill effects that come with taking that approach to business-critical code and apps — I wanted to create a framework that would let Functional Consultants and other non-developers use AI and agentic development tools to build AL extensions not just quickly, but the **right** way: the way a professional developer would build a BC app.
+
+What I wanted was for a Functional Consultant to be able to interface with an AI or agentic dev tool the same way they would interface with a human BC developer — and to expect the same quality of work and the same outputs, without incurring unnecessary technical debt along the way.
+
+With that in mind, I built my first proof of concept by May, centered on an AL Standards Guide I had written, and had a proper first version of the agentic development framework by early June. After extensive prototyping, internal use, testing, and iteration, I debuted it to an external audience at Days of Knowledge ANZ in Melbourne in August 2026, to very positive feedback.
+
+In the time since, my focus has turned to fine-tuning the framework and enhancing its user experience — making it more interactive, creating a Lite version for smaller projects, and integrating with popular tools like the AL MCP Server and BCQuality.
+
+At the heart of this project is a simple vision: that this framework should be **Simple Enough for a Functional Consultant, but Robust Enough for a Pro Developer**.
+
+</details>
+
 <a id="whats-new"></a>
 <details open>
 <summary><h1>What's New?</h1></summary>
@@ -53,6 +322,16 @@ Each month's release notes in brief. The complete, versioned record is in
 [fullVersion/RunbookChangelog.md](fullVersion/RunbookChangelog.md),
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
+
+## October 15, 2026 — Full v5.7.3.0 · Lite v5.7.3.0 · Operations Guide v5.7.3.0 · Plugin v5.7.3
+
+**A Copilot feature always comes from the Blueprint.** A new `copilot-blueprint` skill fires on any
+ask for a Business Central Copilot feature — a *Suggest with Copilot* action, a PromptDialog page,
+a capability registration, Azure OpenAI — in any journey or in plain chat, fetches the OnlyBCFans BC
+Copilot Blueprint outside the project, and builds from its verified procedure and templates. Full and
+Lite already did this through their intake; now Build-a-Feature and ad hoc requests do too. This
+README: *What's New* now sits last, *License* collapses like the other sections, and the F1 image is
+replaced by a sentence.
 
 ## October 15, 2026 — Full v5.7.2.0 · Lite v5.7.2.0 · Operations Guide v5.7.2.0 · Plugin v5.7.2
 
@@ -235,12 +514,9 @@ yours, which models are working, the current step's exit gate, and — when the 
 you — the open question and where to answer it. `ProjectProgress.md` stays the written record; the
 page is a view of it. **To reopen it after closing the tab:** right-click
 `ProjectDashboard.html` in VS Code's Explorer → **Open Externally** (or *Reveal in
-Finder / File Explorer* and double-click), or ask the agent to "open the dashboard". Two themes
-ship, each with a Day / Night switch: *OnlyBCFans* (the default) and *F1*, a trackside pit-wall
-view where the Main agent is the Ferrari and the sub-agents are the Mercedes, McLaren, and Red
-Bull — say "use the F1 dashboard theme" and the agent switches it.
-
-![The F1 theme — the pit-wall view of the same project](images/ocpfDashboardF1.png)
+Finder / File Explorer* and double-click), or ask the agent to "open the dashboard". The page has a
+Day / Night switch, and an optional *F1* theme — a trackside pit-wall view of the same build — for
+anyone who asks the agent to "use the F1 dashboard theme".
  To make the app's name and icon available that early, **the three identity
 questions — extension name, publisher, app icon — now come first**, right after the notification
 question, and `app.json` is written the moment they are answered; the rest of `app.json` (ID
@@ -547,271 +823,5 @@ the change, not as a promise.
   your phone with Claude Code.
 - **Since then:** the token usage *estimator* shipped as the AI Effort Estimate (Full and Lite
   v5.0.0.0), calibrating itself from measured projects; the intake sheet is shelved — see Roadmap.
-
-</details>
-
-<a id="expect"></a>
-<details open>
-<summary><h1>What to Expect</h1></summary>
-
-**Plan on the first hour being interactive, and treat it as the most important hour of the
-project.** Think of it as the kickoff meeting you would hold with a human developer you had just
-hired to build this extension. In that meeting you would not say "track bootcamp registrations"
-and leave the room. You would explain who uses it and why, which countries and languages they work
-in, what it must never do, what it connects to, and how you will know it is right — because
-anything you left vague, the developer would have to guess at, and you would find out about the
-guess weeks later, in the wrong place, at the cost of a rewrite. The framework is that developer.
-In its first hour it asks for everything it needs before it designs anything: your working language,
-how to be notified, which models do the work, who signs off, the extension's name and publisher, ID
-ranges, countries and languages, and the problem itself — what the app is for, who it serves, and
-what is out of scope.
-
-Stay at the keyboard for it. Answer the option boxes, correct anything it suggests, and say more
-rather than less when it asks about the problem. Nothing reaches the parameter sheet until you pick
-it, and nothing reaches the design until the problem statement is signed off — which means this is
-the one point in the project where a better answer costs a minute. **Vagueness here does not
-disappear; it flows downstream.** An unstated rule becomes a requirement the FRD never captured, an
-object the TDD designed wrong, code that compiles cleanly and does the wrong thing, and a rewrite
-that costs more time and more tokens than the conversation would have — exactly as it does with a
-human developer, and for the same reason.
-
-**Once the DESIGN phase begins — Full Step 02 (the FRD), Lite Step 2 (the Design Doc) — you can step
-away.** From there the framework works in longer stretches and comes back to you only to approve a
-document, decide between options, or answer a question. Turn on notifications at the first step and
-you'll know the moment it's your turn.
-
-### How you get notified
-
-| | Claude Code | GitHub Copilot |
-|---|---|---|
-| **Sound** on the computer | Yes | Yes |
-| **Desktop notification** (operating system) | Yes — Windows, Linux, and supported terminals on macOS (not the VS Code extension on macOS) | Yes — VS Code's own notification when input is needed |
-| **Mobile notification** | Yes — through **Remote Control**, with the Claude app installed on your phone and signed in to the same account as Claude Code in VS Code | No |
-| **Answer from the phone** | Yes — in the Claude app you can read the question, choose an option, and approve an action | No |
-
-The framework asks which of these you want at its first step (right after the working language),
-sets them up itself, and remembers the answer per project. With Claude Code, choosing *Claude app*
-turns on Remote Control; the framework explains what that stores before turning it on.
-
-**Using GitHub Copilot?** At the same first step the framework asks two Copilot-specific questions:
-how many requests an agent turn may make before Copilot pauses (the default is low enough that a
-design step hits *"Copilot has been working on this problem for a while…"* — 150 is recommended), and
-how tool approvals should work (ask each time, allow the framework's own commands, or allow
-everything, with its warning). It writes your answers to the workspace's `.vscode/settings.json`.
-
-**What it costs, and what it saves.** Every step is measured: tokens by type per model in
-Claude Code, AI credits per model in GitHub Copilot, priced from the publisher's
-published rates, next to an estimate of the hours an experienced senior AL developer would bill for
-the same step, and next to the AI effort estimate made before BUILD began. The table lives in
-`ProjectProgress.md` in both editions, with one row per step and model, written at every step
-boundary.
-
-</details>
-
-<a id="setup-plugin"></a>
-<details open>
-<summary><h1>GET STARTED: Agent Plugin (Recommended)</h1></summary>
-
-> ### Two steps. Install once, then one command per project.
->
-> | | |
-> |---|---|
-> | **1. Install the Visual Studio Code extension** | Once per machine. One install brings everything. |
-> | **2. Start your project** | Open your AL folder and run `/ocpf-bc:start`. |
-
-That's it. From there the plugin **helps you choose Full, Lite, or Build-a-Feature**, **installs
-the latest runbook** (Full and Lite), **connects Microsoft's AL tools** with nothing to install,
-**adds sub-agents** for the Reasoning, Light, and Generator roles, and **checks for updates** each
-session before changing anything.
-
-## Step 1 — Install the Visual Studio Code extension
-
-You build Business Central extensions in **Visual Studio Code** with the **AL Language** extension,
-so the framework's front door is a Visual Studio Code extension:
-
-> ### [OnlyCopilotFans Business Central Agentic Dev Framework - Setup](https://marketplace.visualstudio.com/items?itemName=ajansari.ocpf-bc-dev-setup)
-> on the **Visual Studio Marketplace** — `ajansari.ocpf-bc-dev-setup`
-
-Install it from the Marketplace page, or paste this into Quick Open (**Ctrl+P**, **Cmd+P** on Mac):
-
-```text
-ext install ajansari.ocpf-bc-dev-setup
-```
-
-**One install brings:** the AL toolchain (the AL Language extension and its companions), the agent
-extension you choose (Claude Code or GitHub Copilot Chat), the framework's plugin marketplace wired
-into that agent, the `ocpf-bc` plugin itself, a Git check, five **OCPF BC** Command Palette commands
-(*New AL Project + Framework*, *Kickstart Framework Here*, *Set Up Claude Code*, *Set Up GitHub
-Copilot*, *Check Git Installation*), and a first-run walkthrough that ends at `/ocpf-bc:start`.
-The extension's own documentation is on its Marketplace page. Requirements: Visual Studio Code
-1.96 or later, Git, and a Claude or GitHub Copilot subscription.
-
-**Using VSCodium or another Open VSX client?** The same extension is on the
-[Open VSX Registry](https://open-vsx.org/extension/ajansari/ocpf-bc-dev-setup).
-
-**Extension not an option?** Working in the **Claude Code CLI** or the **GitHub Copilot CLI**,
-running the agent on github.com or in the Claude apps, or setting the framework
-up by hand without the plugin — every one of those is in
-**[Getting Started — Alternative Ways](GettingStartedAlternatives.md)**.
-
-## Step 2 — Start a project
-
-Open your AL project folder — or an empty one — and run:
-
-> # `/ocpf-bc:start`
-
-Or just ask:
-
-> # *"Start a Business Central project with the OCPF framework."*
-
-In GitHub Copilot, the commands are identical.
-
-**The plugin then walks you through four things:**
-
-| | What happens | What you do |
-|---|---|---|
-| **1** | **Full, Lite, or Build-a-Feature.** It asks about the project — object count, people and sign-off roles, whether it's heading to AppSource — and recommends a journey with its reasoning. **Build-a-Feature** is for one object or a few, in a new or existing extension, with no steps and no documents: it asks what you want to build, confirms the fields in one box, writes and compiles, offers the next object, then a `.app` and a review — and skips rows 2 and 4 below. On an existing extension it is recommended first. | Confirm or override. You can switch later without losing work. |
-| **2** | **Where the runbook goes.** It places the latest runbook as `CLAUDE.md`, `.github/copilot-instructions.md`, or both for mixed teams. | Nothing, unless a file already exists — then it asks. **It never overwrites.** |
-| **3** | **AL tools, nothing to install.** It connects Microsoft's AL tools using the AL Language extension you already have. | In Copilot Chat, nothing — they're built in. In Claude Code, approve the connection once. |
-| **4** | **The routine begins.** | Tell it your working language, how you want to be notified, which models do the work, and — with Copilot — the request limit and approval mode — Full asks for a Main, Light, and Reasoning model with a thinking effort each (recommended **Sonnet Medium / Haiku Medium / Opus High** in Claude Code, **Gemini 3.8 Flash Medium / Auto Balanced / Claude Opus 5.5 High** in Copilot); Lite asks for one (Sonnet Medium or Gemini 3.8 Flash Medium). It warns first that a High thinking effort makes every task slower, and recommends High only where judgment matters most. The Full framework then runs its Reasoning, Light, and Generator sub-agents — Lite its Generator — on exactly the models you chose, and every document lands in its phase folder — `docs/0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` — with the usage table in `ProjectProgress.md` for both editions. |
-
-**Other commands, for later:**
-
-| Command | What it does |
-|---|---|
-| `/ocpf-bc:start` on a project already on the framework | Offers *Status*, *Check for a framework update*, or *Build a feature in this project* — the quick-mod journey on top of a Full or Lite project, leaving its steps and documents alone |
-| `/ocpf-bc:status` | Shows where the project stands |
-| `/ocpf-bc:update-framework` | Checks for a newer runbook |
-| `/ocpf-bc:al-mcp-setup` | Connects the AL tools, if you skipped it at start |
-| `/ocpf-bc:notifications` | Turns on "your turn" notifications in an older project |
-| `/ocpf-bc:roles` | Asks which models do the work (Full: Main, Light, Reasoning, each with a thinking effort; Lite: one) and makes the answer take effect by writing the project's three sub-agent copies — the runbook runs it at its first step; run it by hand to change or repair the assignment |
-| `/ocpf-bc:documents <name>` | Writes any project document from its template into its phase folder under `docs/` — FRD, TDD, Sanity Check, Human and AI Effort Estimates, Build Plan, Code Review, User Guide, Acknowledgements, and the rest — with only the inputs its step names |
-| `/ocpf-bc:usage --step <id>` | Run at every step boundary: measures tokens and cost per step and model (Claude Code) or AI credits and cost per step and model (GitHub Copilot in VS Code), fetches published prices, and writes one row per model into the usage table in `ProjectProgress.md` (both editions); at project close it exports the calibration file for the AI effort estimator |
-
-</details>
-
-<a id="staying-up-to-date"></a>
-<details open>
-<summary><h1>Staying Up to Date</h1></summary>
-
-Two separate things get updated. The plugin handles each one differently.
-
-### 1. Your project's runbook: checked automatically, applied when you say so
-
-A project keeps its own copy of the runbook, so the rules don't change halfway through without
-your say.
-- **At the start of every session,** the framework checks this repository for a newer runbook.
-- **If there is one,** it tells you what changed and asks: **Update now**, **Not now**, or **Skip
-  this version**.
-- **On Update now,** it keeps a backup of the old copy in `ocpfFramework/state/previous/` and logs
-  the change in your project.
-- **Updating a project from an older layout** (Full before 5.0.0.0, Lite before 5.0.0.0) also
-  moves its files into the `ocpfFramework/` folder and the `docs/` phase folders — a migration,
-  applied only after you approve the update and listed move by move in the ChangeLog.
-
-**What it needs:** internet access to GitHub (`raw.githubusercontent.com`). There's nothing to set
-up. This applies to projects started with the plugin. Manually set-up projects work as before, and
-you can run `/ocpf-bc:update-framework` in them anytime.
-
-### 2. The plugin itself: depends on your tool
-
-| Tool | Automatic? | To turn on automatic updates | To check by hand |
-|---|---|---|---|
-| **Claude Code** (VS Code, CLI, Desktop) | **Off by default** for third-party marketplaces like this one | `/plugin` → **Marketplaces** → **onlycopilotfans** → **Enable auto-update**. Updates then install in the background, and you're prompted to run `/reload-plugins`. | `/plugin marketplace update onlycopilotfans`, then `/plugin update ocpf-bc@onlycopilotfans` |
-| **GitHub Copilot Chat in VS Code** | **On,** when VS Code's `extensions.autoUpdate` is on (the default). Checked every 24 hours. | Nothing to do | Command Palette → **Extensions: Check for Extension Updates** |
-| **GitHub Copilot CLI** | **Off** for added marketplaces, but `/plugin` shows when an update is available | Add `"autoUpdate": true` to the `onlycopilotfans` entry under `extraKnownMarketplaces` in `~/.copilot/settings.json` | `copilot plugin update ocpf-bc` |
-| **GitHub.com cloud agent** | **Yes:** the plugin is installed from this repository when a session starts | Nothing to do | Nothing to do |
-| **Claude apps (Chat, Cowork)** | Checked from the marketplace | Nothing to do | **Customize** → **Plugins** → **Update** on the marketplace |
-
-### Get notified of new releases
-
-- **Watch this repository** on GitHub: **Watch** → **Custom** → **Releases**. GitHub then emails
-  you when a new version is published.
-- The [fullVersion/RunbookChangelog.md](fullVersion/RunbookChangelog.md) and
-  [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md) files record what changed
-  in each version.
-
-</details>
-
-<a id="roadmap"></a>
-<details open>
-<summary><h1>Roadmap</h1></summary>
-
-- ~~Add support for AL MCP~~ ✅ Completed
-- ~~Add support for BCQuality~~ ✅ Completed
-- ~~Add support for multi language translations~~ ✅ Completed — see [Multilanguage Support](translationAndMultiLanguage/MultilanguageSupportOverview.md)
-- ~~Distribute as an agent plugin for Claude and GitHub Copilot~~ ✅ Completed — see [GET STARTED: Agent Plugin](#setup-plugin)
-- ~~Per-step runbook files, document templates, a human effort estimate, and per-step token and cost tracking~~ ✅ Completed — Full v4.0.0.0 / Lite v3.0.0.0, September 2026
-- ~~Token usage **estimator** — predicted tokens per model, by input, output, and cached, before a step runs~~ ✅ Completed — the AI Effort Estimate, Full v5.0.0.0 / Lite v5.0.0.0, September 2026; calibrates itself from measured projects
-- **Being considered**
-  - Answer the dashboard's open question from the dashboard page itself (today the page shows it and says where to answer)
-  - A live dashboard for GitHub Copilot CLI, with the agent / you time split Claude Code has
-  - More dashboard themes beside OnlyBCFans and F1
-- **Shelved, October 15, 2026** — designed, not built, kept for later
-  - A PoC Edition: a one-hour proof-of-concept journey with a promotion path into Full or Lite. The Build-a-Feature journey covers most of what it was for.
-  - An optional human-fillable intake sheet to answer the simple intake questions up front. The intake is fast enough now, and the dashboard carries the context the sheet was meant to.
-
-</details>
-
-<a id="contents"></a>
-<details open>
-<summary><h1>Repo Contents</h1></summary>
-
-| File | Purpose |
-|---|---|
-| `fullVersion/` | The **Full Framework** — the complete 14-step routine. See [Full Framework, by hand](GettingStartedAlternatives.md#setup-full). |
-| `standardsGuide/README.md` | The **prelude** to the companion **OCPF AL Development Standards Guide** — the guide itself now lives standalone at [ajansari/ocpfBCALStandards](https://github.com/ajansari/ocpfBCALStandards) (MIT) and is fetched at the release tag this file pins (`v1.12.0.0`) into each project's `ocpfFramework/standardsGuide/`. The prelude holds the framework's own framing: purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the map of what is deliberately not in the guide. |
-| `opsGuide/ocpfOperationsGuide.md` | The companion **OCPF Operations Guide** — the procedures both editions share, cited as **Ops §** (how the agent asks and gets approval, intake, roles, project setup, the AL tools, analyzers, symbols, editor sync, notifications, packaging, repository hygiene, translations, automated tests, fetched companions, reference sources, and the plugin). Fetched into each project's `ocpfFramework/opsGuide/` alongside the Standards Guide. |
-| `liteVersion/` | The **Lite Edition** — a 7-step version of the framework for small, fast-moving projects. See [Lite Edition, by hand](GettingStartedAlternatives.md#lite-edition). |
-| `documentTemplates/` | One template per document the framework produces (FRD, TDD, Sanity Check, Human Effort Estimate and its baselines, AI Effort Estimate, Build Plan, ChangeLog, Gap Analysis, Code Review, Documentation, User Guide, test scripts, Deployment, Release Test Results, Acknowledgements, Project Progress with its usage table for both editions, and Lite's Design Doc, Docs, and Test Script). Fetched into each project's `ocpfFramework/documentTemplates/` with the step files; shared by both editions. |
-| `translationAndMultiLanguage/MultilanguageSupportOverview.md` | How the framework handles multilanguage — captions and XLIFF translation files, regional terminology (GST vs. VAT, CR/Adj Note vs. Credit Memo in Australia), agent-drafted translations with a human review gate, and language-aware UAT. Shared by both editions. |
-| `agentPlugin/` | The optional **agent plugin**, `ocpf-bc`, for Claude Code, GitHub Copilot, and other tools. See [GET STARTED: Agent Plugin](#setup-plugin). This repository is also its plugin marketplace (`.claude-plugin/marketplace.json`). |
-| `THIRD_PARTY_NOTICES.md` | Credits and licenses for every third-party resource the framework references, fetches, or recommends — BCQuality, AL Guidelines, Microsoft Learn, and others. |
-| `FrameworkUserGuide.md` | The **User Guide** — everything the person driving a project needs: install, the Command Palette commands, the plugin commands, where every file lives, model recommendations, versioning, and updating. |
-| `GettingStartedAlternatives.md` | Every other way to get started: installing the plugin from the Claude Code CLI, the GitHub Copilot CLI, or inside Visual Studio Code without the setup extension; running the agent on github.com, in the Claude apps, or in Copilot Cowork; and the manual, no-plugin setup for Full and Lite. |
-
-</details>
-
-<a id="license"></a>
-## License
-
-This project is licensed under the **[PolyForm Shield License 1.0.0](https://polyformproject.org/licenses/shield/1.0.0)**
-(see [LICENSE](LICENSE)). It is a **source-available** license, not an open source license, and
-in practice that means:
-
-- **Free to use.** There is nothing to buy and no registration.
-- **The source is available.** Every file in this repository — the runbooks, the Standards Guide,
-  the Operations Guide, the templates, the plugin, and the scripts — is here to read, run, and
-  adapt.
-- **Build what you like with it.** Use the framework to build Business Central AL extensions,
-  per-tenant or AppSource, free or commercial, for yourself or for clients. The extensions you
-  build are yours; the license says nothing about them.
-- **The one reservation** is the license's noncompete: you may not use the framework to provide a
-  product that competes with it, or with a product its licensor provides using it — for example
-  by repackaging it as your own agentic development framework or development tool.
-
-Copyright © 2026 AnsariCo, Inc. dba [OnlyCopilotFans](https://OnlyCopilotFans.com) and
-[OnlyBCFans](https://OnlyBCFans.com). Third-party resources the framework references, fetches, or
-recommends keep their own licenses, credited in [THIRD_PARTY_NOTICES.md](THIRD_PARTY_NOTICES.md).
-
-<a id="inspiration"></a>
-<details open>
-<summary><h1>Project Inspiration</h1></summary>
-
-The spark for this project was Microsoft's **Business Central Agentic Engineering Process** vision, first unveiled at Directions North America in Orlando in April 2026.
-
-<img src="inspiration/BCAgenticEngineeringProcess-Vision.png" alt="Microsoft's Business Central Agentic Engineering Process vision, presented at BC TechDays 2026" width="75%">
-
-*Microsoft's Business Central Agentic Engineering Process vision, as presented at BC TechDays 2026.*
-
-I've been teaching an AL development bootcamp at Community Summit NA since 2023. The bootcamp is typically geared toward developers, but for many years I've also led workshops and sessions on AL development aimed squarely at Functional Consultants. With the rise of vibe coding — and all the ill effects that come with taking that approach to business-critical code and apps — I wanted to create a framework that would let Functional Consultants and other non-developers use AI and agentic development tools to build AL extensions not just quickly, but the **right** way: the way a professional developer would build a BC app.
-
-What I wanted was for a Functional Consultant to be able to interface with an AI or agentic dev tool the same way they would interface with a human BC developer — and to expect the same quality of work and the same outputs, without incurring unnecessary technical debt along the way.
-
-With that in mind, I built my first proof of concept by May, centered on an AL Standards Guide I had written, and had a proper first version of the agentic development framework by early June. After extensive prototyping, internal use, testing, and iteration, I debuted it to an external audience at Days of Knowledge ANZ in Melbourne in August 2026, to very positive feedback.
-
-In the time since, my focus has turned to fine-tuning the framework and enhancing its user experience — making it more interactive, creating a Lite version for smaller projects, and integrating with popular tools like the AL MCP Server and BCQuality.
-
-At the heart of this project is a simple vision: that this framework should be **Simple Enough for a Functional Consultant, but Robust Enough for a Pro Developer**.
 
 </details>

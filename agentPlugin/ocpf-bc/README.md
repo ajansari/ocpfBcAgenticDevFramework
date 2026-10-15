@@ -29,7 +29,7 @@ The `start` skill:
 On a project that already follows the framework, `start` offers *Status*, *Check for a framework
 update*, or *Build a feature in this project*.
 
-**Project layout (since plugin 5.0.0, Full 5.0.0.0 / Lite 5.0.0.0; current 5.7.2 / 5.7.2.0):** everything the framework fetches
+**Project layout (since plugin 5.0.0, Full 5.0.0.0 / Lite 5.0.0.0; current 5.7.3 / 5.7.3.0):** everything the framework fetches
 or keeps lives under one folder, `ocpfFramework/` (step files, templates, guides, patterns,
 scripts, the marker, and per-developer `state/`); project documents go in `docs/` by phase
 (`0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/`); `ProjectProgress.md` stays in the
@@ -51,6 +51,7 @@ Flash Medium). The generator sub-agent runs on the Main model; Build-a-Feature u
 | `status` skill | Reports where a project stands: current step, exit gate, what's waiting on you. |
 | `update-framework` skill | Checks for a newer runbook, shows what changed, and updates the project's copy only when you approve. The runbook also checks once per session. |
 | `al-standards` skill | The OCPF AL Development Standards Guide, for writing and reviewing AL. The shared **Operations Guide** — the framework's procedures, cited as Ops § — is bundled with the `start` skill and fetched into each project. |
+| `copilot-blueprint` skill | Fires on any ask for a Business Central Copilot feature — a *Suggest with Copilot* action, a `PromptDialog` page, a capability registration, Azure OpenAI — in any journey or none: fetches the OnlyBCFans BC Copilot Blueprint at the framework's pinned tag into a sibling folder and builds from its procedure and templates, never from memory. Full and Lite reach the Blueprint through their intake; this is what makes Build-a-Feature and plain chat reach it too. |
 | `al-mcp-setup` skill | Connects Microsoft's AL tools with nothing to install. In GitHub Copilot Chat, the AL Language extension's tools are built in. In Claude Code and Copilot CLI, it registers the extension's bundled AL MCP Server (compile, build, symbols, diagnostics, publish, tests) for the project, via a launcher that follows AL extension updates. |
 | `notifications` skill | Asks how you'd like to be notified whenever the agent finishes a turn, asks a question, or waits for an approval — Claude app, sound, desktop notification, or none — remembers the answer, and applies it through each AI tool's own notifications and hooks. The runbook sets this up at its first step; the skill adds it to older projects. |
 | `roles` skill | Asks which models do the work — Full: Main, Light, and Reasoning, each with a thinking effort; Lite: one — with the framework's recommendation first, and makes it take effect by writing project-local copies of the three sub-agents with the chosen model and effort, then verifying every delegation. The runbook runs it at its first step. |

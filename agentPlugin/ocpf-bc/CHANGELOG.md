@@ -4,6 +4,29 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.7.3 — October 15, 2026
+
+**Bundles:** full runbook v5.7.3.0, Lite v5.7.3.0, Standards Guide v1.12.1.0 (unchanged),
+Operations Guide v5.7.3.0. One new skill, `copilot-blueprint`; both manifests' description.
+
+- **New `copilot-blueprint` skill — the Blueprint rule holds in every journey.** Full and Lite fetch
+  the OnlyBCFans BC Copilot Blueprint when their intake records a Copilot feature; Build-a-Feature
+  has no Copilot entry and plain chat has no intake, so an ask like "add a Suggest with Copilot
+  action" there was built from memory — the exact failure the Blueprint exists to prevent. The new
+  skill's description triggers on a Copilot feature, a *Suggest with Copilot* action, a PromptDialog
+  page, a capability registration, Azure OpenAI or System.AI, and on the agent about to call
+  something impossible. It fetches the Blueprint at the framework's pinned tag into a sibling
+  folder outside the project (never the root; `.git` stripped, `LICENSE` kept, `SNAPSHOT.json`;
+  Claude Code also gets the project-skill copy), follows the Blueprint's fifteen-step procedure for
+  the objects — in Build-a-Feature, each object a row of the session, generated from the
+  Blueprint's templates renamed to the project's prefix and range — asks the billing path first,
+  checks the API reference and the false-assumptions table before memory on any failure, and never
+  writes a Copilot feature without the Blueprint on disk. Build-a-Feature itself is unchanged by
+  AJ's decision; the skill is journey-agnostic. October 15, 2026.
+- **README:** *What's New* moved below *Project Inspiration*; *License* is a collapsible section at
+  the same header level as the others; the F1 dashboard image is gone (the text says the theme is
+  optional).
+
 ## 5.7.2 — October 15, 2026
 
 **Bundles:** full runbook v5.7.2.0, Lite v5.7.2.0, **Standards Guide v1.12.1.0** (pin moved),

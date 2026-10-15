@@ -16,6 +16,17 @@ framework.
 
 ---
 
+## v5.7.3.0 — October 15, 2026
+
+Derived from full framework **v5.7.3.0**; Operations Guide **v5.7.3.0**; Standards Guide
+**v1.12.1.0** (unchanged); plugin **5.7.3**. No Lite step changes.
+
+- The plugin's new `copilot-blueprint` skill fires on any ask for a BC Copilot feature in any
+  journey or none and builds it from the OnlyBCFans BC Copilot Blueprint, as Lite's Steps 1–6
+  already do when the intake records one. Full changelog: *v5.7.3.0*.
+
+---
+
 ## v5.7.2.0 — October 15, 2026
 
 Derived from full framework **v5.7.2.0**; Operations Guide **v5.7.2.0**; Standards Guide

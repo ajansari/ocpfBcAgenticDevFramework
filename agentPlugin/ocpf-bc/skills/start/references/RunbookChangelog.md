@@ -24,6 +24,24 @@ specifically to keep a superseded decision on record — see the runbook's ALL A
 
 ---
 
+## v5.7.3.0 — October 15, 2026
+
+**The Copilot Blueprint rule holds in every journey — a new plugin skill.** Lite **v5.7.3.0**,
+Operations Guide **v5.7.3.0**, Standards Guide **v1.12.1.0** (unchanged), plugin **5.7.3**. No
+runbook step changes; Ops § Fetched Companions and § Plugin; the README.
+
+- **`copilot-blueprint` skill.** Full and Lite already fetch the OnlyBCFans BC Copilot Blueprint
+  when the intake records a Copilot feature, and every later step cites it. Build-a-Feature and
+  plain chat had no such trigger, so a Copilot ask there was built from memory. The plugin's new
+  skill fires on the ask in any journey or none, fetches the Blueprint exactly as Ops § Fetched
+  Companions describes (sibling folder, pinned tag, snapshot), and builds from its procedure and
+  templates — never from memory, never claiming impossibility without citing its false-assumptions
+  table. Ops § Fetched Companions → *When* names it; Ops § Plugin → *Other skills* names it.
+- **README:** *What's New* at the end, after *Project Inspiration*; *License* collapsible at the
+  same level as the other sections; the F1 dashboard image removed in favour of a sentence.
+
+---
+
 ## v5.7.2.0 — October 15, 2026
 
 **Build-a-Feature writes the install guide; exit gates record the upgrade branch; analyzer
