@@ -518,6 +518,8 @@
   .phase .sub{overflow:hidden}
   .st.now .id{letter-spacing:.06em}
   .st.now .id::after{content:none;animation:none}
+  /* below ~900px the four phase blocks (196px floor each) no longer fit on one row: two per row instead of overflowing */
+  @media (max-width:900px){.phases{grid-template-columns:1fr 1fr!important}}
 </style>
 </head>
 <body>

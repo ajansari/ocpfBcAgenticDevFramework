@@ -16,6 +16,19 @@ framework.
 
 ---
 
+## v5.7.1.0 — October 15, 2026
+
+Derived from full framework **v5.7.1.0**; Operations Guide **v5.7.1.0**; Standards Guide
+**v1.12.0.0** (unchanged); plugin **5.7.1**. Core, Steps 5 and 7, the schematic.
+
+- **"Publish it" and "run the tests" are honored on an explicit request** — a publish only after
+  the options box confirms a DEV extension to a named sandbox, a test run only against a sandbox;
+  never offered, never the default, never production; logged as human-ordered and kept apart from
+  the last installed version. The review of v5.7.0.0 applied (the test guide's marketplace steps,
+  "redeploy" wording, "(I never do)", the production route). Full changelog: *v5.7.1.0*.
+
+---
+
 ## v5.7.0.0 — October 15, 2026
 
 Derived from full framework **v5.7.0.0**; Operations Guide **v5.7.0.0**; Standards Guide

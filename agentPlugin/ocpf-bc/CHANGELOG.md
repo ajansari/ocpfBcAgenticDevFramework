@@ -4,6 +4,30 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.7.1 — October 15, 2026
+
+**Bundles:** full runbook v5.7.1.0, Lite v5.7.1.0, Standards Guide v1.12.0.0 (unchanged),
+Operations Guide v5.7.1.0. `AutomatedTestGuide` template, `al-mcp-setup` and `documents` skill
+text, the dashboard template.
+
+- **Publishing and test runs on explicit request — never offered, never the default.** A developer
+  who says "publish it" is first asked, through the options box, whether they mean a DEV-extension
+  publish to a named sandbox; on yes the agent does it with the AL tools (Synchronize; ForceSync /
+  Recreate / forceUpgrade still need their own approval; production never), reports the result
+  verbatim, and logs it as human-ordered — separate from the "last installed version", which stays
+  the per-tenant install the human reports. "Run the tests" works the same way against a sandbox
+  (`al_run_tests`, verified in the AL MCP Server of AL extension 18.1.2842859; it runs what is
+  installed and publishes nothing). Neither becomes the routine. AJ's clarification, October 15, 2026.
+- **Second-set-of-eyes review (Fable 5.1) applied.** The `AutomatedTestGuide` template no longer
+  promises that the three test libraries are a marketplace search away: it opens the *Microsoft
+  Marketplace Apps* page by its documented route, uses the page's own *Install* action, and tells
+  the tester to stop and report if an app isn't listed (a developer can install by App ID; no
+  Microsoft page confirms the libraries are offered online). Ops § Automated Tests says the same.
+  "Redeploy" in both schematics' fix-cycle nodes and one Ops sentence now reads "the human installs";
+  the "Package built:" block drops "(I never do)"; the user guide's document table lists the two new
+  documents; Full Step 12's exit gate names the Admin Center route. Dashboard: below 900px the
+  phase blocks go two per row instead of overflowing.
+
 ## 5.7.0 — October 15, 2026
 
 **Bundles:** full runbook v5.7.0.0, Lite v5.7.0.0, Standards Guide v1.12.0.0 (unchanged),

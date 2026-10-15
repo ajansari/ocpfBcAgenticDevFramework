@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.7.0.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
+**Version:** 5.7.1.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
 **Last Updated:** October 13, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
@@ -867,10 +867,13 @@ Then, in order:
 The AL Language extension ships a standalone MCP server (`altool launchmcpserver`) exposing AL
 build, publish, symbol, and diagnostic tools over the Model Context Protocol, so any MCP-capable
 agent can drive them directly instead of shelling out to the compiler. Nothing runs until an MCP
-host spawns it, and it exits when the host tears it down. **Two of its tools the framework never
-calls: `al_publish` and `al_run_tests`** — uploading a package and running tests in Business
-Central are the human's, by `docs/4-prove/SandboxInstall.md` and `docs/4-prove/AutomatedTestGuide.md`
-(Ops § Packaging, Ops § Automated Tests). The rest — build, compile, symbols, diagnostics, object
+host spawns it, and it exits when the host tears it down. **Two of its tools no step of the
+routine calls, and the agent never offers: `al_publish` and `al_run_tests`.** Uploading a package
+is the human's, by `docs/4-prove/SandboxInstall.md`, and running tests is the human's, by
+`docs/4-prove/AutomatedTestGuide.md`. A developer who explicitly asks for either in the session
+gets it — a publish only after confirming it means a DEV extension to a named sandbox (Ops §
+Packaging → *Publishing on explicit request*), a test run only against a sandbox (Ops § Automated
+Tests); never production, never as a default, never as an offered choice. The rest — build, compile, symbols, diagnostics, object
 IDs, translations — is what the agent uses them for.
 
 **When they're needed:** from the end of intake (Full §1.10 / Lite Step 1), which downloads symbols
@@ -1563,7 +1566,7 @@ Package built: outputAppPackage/<Name>_<version>.app (previous build <version-1>
 Schema: additive only → upload with Schema Sync Mode = Add
    or: <what was removed / shrunk / retyped / re-keyed> → upload with Schema Sync Mode = Force Sync
        (Microsoft: test a forced sync in a sandbox first; it can lose data in <where>)
-Install: you upload it (I never do) — docs/4-prove/SandboxInstall.md, §1 updated for this build.
+Install: you upload it — docs/4-prove/SandboxInstall.md, §1 updated for this build.
 Then: tell me the version and environment you installed; I record it as the last installed version.
 ```
 
@@ -1579,8 +1582,8 @@ tenant customization* and *Managing apps*, read October 15, 2026 — the pages n
 
 ### The sandbox install guide — `docs/4-prove/SandboxInstall.md`
 
-**The agent never uploads a package to any Business Central environment — sandbox or production.**
-It builds; a person installs. So the first package of a project (Full Step 07 / Lite Step 5) is
+**The agent never uploads a package on its own initiative, and never offers to — sandbox or
+production.** It builds; a person installs. So the first package of a project (Full Step 07 / Lite Step 5) is
 written together with the document that person follows: `docs/4-prove/SandboxInstall.md`, from
 its template (Ops § Documents). The template is nine-tenths fixed — both of Microsoft's routes,
 step by step, with the exact page and action names, the permission the uploader needs, what to do
@@ -1594,7 +1597,35 @@ The cycle then waits on the human: nothing is "on the sandbox" until the human s
 they installed and where. The agent records that as the last installed version (above) and only
 then judges the next build's schema line against it. **Never assume an upload happened** because
 a package was built, and never offer to do it — not through `al_publish`, not through `launch.json`
-and F5, not through the Automation API, not "just this once".
+and F5, not through the Automation API. The one way a package reaches a tenant from the agent is
+the explicit request below.
+
+### Publishing on explicit request — a DEV extension, to a sandbox, confirmed first
+
+A developer who knows the tooling may say "publish it". That is not an offer the framework makes
+and not a default it falls into; it is a request the agent honors **after confirming what is
+meant**, through the options mechanism (Rule 6a), because "publish" in Business Central can mean
+three different things:
+
+> You asked me to publish. To be sure: you mean publish the current package as a **DEV extension**
+> to the sandbox **`<environment name>`** (type Sandbox) through the AL tools — the way F5 does —
+> not a per-tenant upload through the Admin Center or Extension Management, and not production?
+> **Yes — publish `<Name>_<version>.app` as a DEV extension to `<sandbox>`** / **No — I'll upload it
+> myself (`docs/4-prove/SandboxInstall.md`)** / **I meant something else** (say what).
+
+On *Yes*: call `al_publish` (or the tooling in use) with `environmentType: Sandbox` and the named
+environment — read from `launch.json` and stated out loud, never from a default — and
+`schemaUpdateMode: Synchronize`; **`ForceSync`, `Recreate`, and `forceUpgrade: true` still need a
+separate approval naming what can be lost**, and **production is never a target, confirmed or
+not**. Report the tool's result verbatim and note in the ChangeLog that the publish was human-ordered,
+with the version and sandbox. **It is not the "last installed version"**: that record, and the
+schema line judged against it, follow the per-tenant install the human reports from
+`SandboxInstall.md`, because the testers' sandbox may still hold an older PTE while the developer's
+DEV publish sits in another — keep the two apart in `ProjectMemory.md` (Lite: the ChangeLog). The next build goes back to the "Package built:" block and the guide;
+the request does not become the routine, and the agent does not ask "shall I publish this one
+too?". A DEV-extension publish is a developer's convenience, not a tester's install: testers and
+administrators still follow `SandboxInstall.md`, and a package that passes release testing still
+reaches production only by the human's deploy.
 
 **Built packages are git-tracked, never gitignored.** Track every `.app` this project builds like
 any other deliverable, and never delete its history. Downloaded dependency symbols in
@@ -1619,7 +1650,7 @@ one that passed release testing is named in `ReleaseTestResults.md` (Lite: the C
 exact filename, never inferred from a timestamp.
 
 **Package by default during the compile-and-package cycle.** Once that cycle opens, every fix that
-touches code is recompiled and repackaged before redeploying for the next test round — the rhythm,
+touches code is recompiled and repackaged before the human installs it for the next test round — the rhythm,
 not an occasional offer. Outside the cycle, use judgment: a change significant enough for its own
 ChangeLog entry and commit is significant enough to offer a fresh package for; a doc-only edit
 isn't.
@@ -1641,13 +1672,14 @@ action instead of silently complying. If the human insists, get an explicit over
 mismatch first. Inside the cycle, packaging with known open issues is the whole point: that's how
 they get tested.
 
-**The agent never publishes to any environment — sandbox or production.** The AL tools it holds can
-publish (`al_publish` takes `environmentType`, `schemaUpdateMode`, and `forceUpgrade`, so it *can*
-force a destructive schema change on a live tenant), and the framework never calls them: every
-package reaches a sandbox by the human's upload, following `docs/4-prove/SandboxInstall.md` (above),
-and reaches production by the human's deploy at the release step, following `docs/4-prove/Deployment.md`.
-A human who asks the agent to publish "to save a minute" is told, once, why not — the upload is the
-human's checkpoint on what runs where, and the framework keeps it — and pointed at the guide.
+**The agent never publishes on its own initiative, and never offers to — sandbox or production.**
+The AL tools it holds can publish (`al_publish` takes `environmentType`, `schemaUpdateMode`, and
+`forceUpgrade`, so it *can* force a destructive schema change on a live tenant), and no step of the
+routine calls them: every package reaches a sandbox by the human's upload, following
+`docs/4-prove/SandboxInstall.md` (above), and reaches production by the human's deploy at the
+release step, following `docs/4-prove/Deployment.md`. The single exception is the developer's
+explicit request, confirmed as a DEV-extension publish to a named sandbox (*Publishing on explicit
+request*, above); production is never a target, asked or not.
 
 **Flag Schema Sync Mode on every completed build, not only when asked** — it is the second line of
 the fixed message above. Uploading a `.app` to a Business Central Online tenant through **Extension
@@ -1910,11 +1942,16 @@ API-level automation.
   the page. Both documents are revised every time the tests change.
 
 **What an AL test app may depend on — online sandboxes decide this.** Microsoft's **Test Runner**
-(the AL Test Tool page) and the three Test Framework libraries — **Library Assert**, **Any**,
-**Library Variable Storage** — are installable in an online sandbox from the marketplace. The
-**Tests-TestLibraries** and **System Application Test Library** apps (`Library - Sales`,
-`Library - Random`, `Library - Utility`, and the rest) are **not**, and Microsoft has said there are
-no plans to add them (Freddy Kristiansen, February 2021; still true October 15, 2026). So a test app
+(the AL Test Tool page) has been installable in an online sandbox from the marketplace since 17.2;
+the three Test Framework libraries — **Library Assert**, **Any**, **Library Variable Storage** —
+are Microsoft-published apps that practitioners report installing in online sandboxes by App ID
+(the Admin Center API, or BcContainerHelper's `Install-BcAppFromAppSource -appId`) when the
+marketplace page doesn't list them, and no Microsoft page confirms either way — so the guide tells
+the tester to stop and report if one isn't offered, and the agent then says plainly what that
+sandbox can and cannot run. The **Tests-TestLibraries** and **System Application Test Library**
+apps (`Library - Sales`, `Library - Random`, `Library - Utility`, and the rest) are **not**
+available online, and Microsoft said there were no plans to add them (Freddy Kristiansen, *Running
+tests in Business Central Online Sandbox environments*, February 2021). So a test app
 this framework writes depends on the extension under test and, of Microsoft's, only those three
 libraries — never on Tests-TestLibraries — or the human cannot install it. Build it as its own
 package, `outputAppPackage/<ExtensionName>_Tests_<version>.app`, versioned in step with the
@@ -1923,8 +1960,22 @@ Register.
 
 ### Running AL test codeunits — the human, from the guide
 
-**The agent never runs tests in Business Central**, for the same reason it never uploads a package:
-what runs on a tenant is the human's call, and the AL MCP Server's `al_run_tests` is not used. When
+**The agent never runs tests in Business Central on its own initiative**, for the same reason it
+never uploads a package unprompted: what runs on a tenant is the human's call. The AL MCP Server's
+`al_run_tests` is never offered and never part of any step's routine. **The one exception is an
+explicit instruction**: a developer who says, in this session, "run the test codeunits on the
+sandbox" gets exactly that — `codeunitId` per codeunit, `projectPath` and `environmentName` /
+`environmentType: Sandbox` named out loud before the call (never production, never from a default),
+the page's results reported verbatim, and the ChangeLog noting that the run was human-ordered. The
+run executes what is already installed: the test app must be in that sandbox at the version in
+hand — installed by the human (`AutomatedTestGuide.md` §4) or published on an explicit, confirmed
+request (Ops § Packaging) — because `al_run_tests` runs tests, it does not publish them. (The tool
+and its arguments — `codeunitId`, `testMethods`, `projectPath`, `environmentName`,
+`environmentType` — were verified in the AL MCP Server shipped with AL Language extension
+18.1.2842859 on October 15, 2026; Microsoft's *AL MCP Server* reference page does not list it, so
+re-verify with the server's own tool list on a newer release. GitHub Copilot Chat's built-in AL
+tools don't include it either — bootstrap the server, Ops § AL Tools.) It does not become the
+routine for the next round; the next round is the guide's again. When
 AL test codeunits exist, the agent writes `docs/4-prove/AutomatedTestGuide.md` (above), builds the
 test app, and hands both over. The human installs the test framework apps once, installs the
 extension and the test app (`docs/4-prove/SandboxInstall.md`), opens the **AL Test Tool** page, and
@@ -1971,7 +2022,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v5.7.0.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
+folder as `README.md`. For runbook **v5.7.1.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2145,7 +2196,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.7.0.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.7.1.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**

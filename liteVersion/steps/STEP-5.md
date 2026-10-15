@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 5 — Compile, Package, Test & Iterate
 
-**Runbook version:** 5.7.0.0 · Lite edition · Phase: BUILD
+**Runbook version:** 5.7.1.0 · Lite edition · Phase: BUILD
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -36,7 +36,7 @@ Package built: outputAppPackage/<Name>_<version>.app (previous build <version-1>
 Schema: additive only → upload with Schema Sync Mode = Add
    or: <what was removed / shrunk / retyped / re-keyed> → upload with Schema Sync Mode = Force Sync
        (Microsoft: test a forced sync in a sandbox first; it can lose data in <where>)
-Install: you upload it (I never do) — docs/4-prove/SandboxInstall.md, §1 updated for this build.
+Install: you upload it — docs/4-prove/SandboxInstall.md, §1 updated for this build.
 Then: tell me the version and environment you installed; I record it as the last installed version.
 ```
 
@@ -49,13 +49,16 @@ ranges, mean the editor's view is stale, not the code. Refresh the view; never c
 compiles clean to clear them.
 
 **From here it's a cycle, not a single event:**
-1. **The human installs the current package in a BC sandbox — the agent never uploads.** With the
+1. **The human installs the current package in a BC sandbox — the agent never uploads unprompted
+   and never offers to.** With the
    first package, write `docs/4-prove/SandboxInstall.md` from its template (Ops § Packaging → *The
    sandbox install guide*): Microsoft's two upload routes step by step, and §1 naming this build's
    file, version, Schema Sync Mode, sandbox, and dependencies. After every later build, rewrite §1
    only. Then wait: the round continues when the human says which version they installed and
    where; log that in `docs/0-project/ChangeLog.md` as the last installed version. Never assume the
-   upload happened, and never offer to do it.
+   upload happened, and never offer to do it. If the developer explicitly asks for a publish,
+   confirm first that they mean a DEV extension to the named sandbox, then do it (Ops § Packaging →
+   *Publishing on explicit request*) — once, on request, never as the routine.
 2. Test it — manually, by the human. **Every round includes the two Standards §11.3 client checks**: create a child from *every* parent entry point
    (each part and each action) and confirm it stays visible with the link field filled and the
    unfiltered child list has no blank-link rows; open the wizard and the setup card and confirm the

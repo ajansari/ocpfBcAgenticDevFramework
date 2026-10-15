@@ -6,7 +6,7 @@
 # Deployment — <Extension Name>
 
 **Version:** <app.json version> · **Package:** `outputAppPackage/<ExtensionName>_<version>.app` · **Date:** <date>
-**Rule:** the agent never publishes to any environment. The production deploy is the human's, from this document, after the Step 12 release test passes — the same procedure rehearsed in every sandbox install from `docs/4-prove/SandboxInstall.md`.
+**Rule:** the agent never publishes to production, and never publishes anywhere unprompted. The production deploy is the human's, from this document, after the Step 12 release test passes — the same procedure rehearsed in every sandbox install from `docs/4-prove/SandboxInstall.md`.
 
 ## 1. What ships
 | Item | Value |

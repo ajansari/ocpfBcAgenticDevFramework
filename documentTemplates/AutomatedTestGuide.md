@@ -8,7 +8,7 @@
 
 # Running the automated tests for <Extension Name>
 
-**The agent never uploads or runs anything in Business Central.** It writes the tests and this guide; a
+**The agent does not upload or run anything in Business Central unless a developer explicitly asks it to.** It writes the tests and this guide; a
 person installs the test app and runs the tests in a sandbox, then reports what the page showed. Plan on
 twenty minutes the first time (installing the test framework is most of it) and five minutes after that.
 
@@ -38,8 +38,7 @@ twenty minutes the first time (installing the test framework is most of it) and 
 ## 3. Install the test framework (once per sandbox)
 
 The test app depends on three small Microsoft apps, and the page that runs tests lives in a fourth. All
-four are free, published by Microsoft, and installable in an online sandbox from the marketplace.
-Install them in this order; each takes under a minute.
+four are free and published by Microsoft. Install them in this order; each takes under a minute.
 
 | Order | App | Publisher | App ID |
 |---|---|---|---|
@@ -51,18 +50,21 @@ Install them in this order; each takes under a minute.
 For each one:
 
 1. Open the sandbox, choose the **Search for Page or Report** icon (magnifying glass, top right), type
-   **Extension Management**, and open the page.
-2. Choose **Manage**, then **Extension Marketplace**. The **Microsoft Marketplace Apps** page opens with
-   the Business Central apps available to this environment.
-3. Search for the app by the exact name in the table and choose it. Check the publisher is **Microsoft**.
-4. Choose **Get it now** (or **Install**), accept the terms, and wait for the confirmation.
-5. Back on **Extension Management**, choose **Refresh** and confirm the app shows as **Installed**.
+   **Microsoft Marketplace Apps**, and open the page. It lists the Business Central apps available to
+   this environment.
+2. Find the app by the exact name in the table. Check the publisher is **Microsoft**.
+3. Select it and choose **Install**; accept the terms and wait for the confirmation.
+4. Open **Extension Management** the same way, choose **Refresh**, and confirm the app shows as
+   **Installed**.
 
-If one of them is not offered in the marketplace, do not look for the file on disk or in a Docker image:
-tell the agent which one, with the exact text the page shows. Two Microsoft test apps — **Tests-TestLibraries**
-and **System Application Test Library** — are *not* available in online sandboxes, which is why this
-project's tests use only the three libraries above. A test app that depends on either of those two cannot
-be installed in a sandbox, and the agent must not write one.
+**If one of them is not listed, stop and tell the agent which one.** Do not look for the file on disk or
+in a Docker image. A developer can install a Microsoft app that the page doesn't show by its App ID
+(the table above) through the Admin Center API — the agent knows the route — and if that isn't possible
+for this sandbox, the agent will say plainly that the test app cannot be installed there and what the
+alternatives are. Two Microsoft test apps — **Tests-TestLibraries** and **System Application Test
+Library** — are *not* available in online sandboxes at all, which is why this project's tests use only
+the three libraries above. A test app that depends on either of those two cannot be installed in a
+sandbox, and the agent must not write one.
 
 ## 4. Install the extension under test, then the test app
 
@@ -70,7 +72,7 @@ be installed in a sandbox, and the agent must not write one.
    not already installed at that exact version. (A test app is built against one version of the
    extension; a different version installed is the most common reason the test app refuses to install.)
 2. Install `outputAppPackage/<ExtensionName>_Tests_<version>.app` the same way — same route, same steps,
-   **Schema Sync Mode = Add** (a test app has no tables of its own).
+   **Schema Sync Mode = Add** unless §1 says otherwise (a test app normally has no tables of its own).
 3. On **Extension Management**, confirm both are **Installed**, each at the version from §1.
 
 ## 5. Open the AL Test Tool and load the tests
@@ -137,7 +139,7 @@ columns.
 |---|---|---|
 | **Success** | The method ran and every check in it held | Nothing but the row number |
 | **Failure** | A check did not hold, or the code raised an error the test did not expect | The row number, the full **Error Message** text, and anything you did differently from §6's setup column |
-| **Skipped** | The method was not run — usually a handler or setup the test runner could not satisfy | The row number and the Error Message text if there is one |
+| **Skipped** | The method was not run | The row number and the Error Message text if there is one |
 | Empty | The line has not been run yet | — |
 
 The agent diagnoses from the message and the stack, fixes the extension (or the test, when the test was
@@ -165,4 +167,5 @@ stay; they do nothing on their own.
 - *Test the advanced sample extension* (Test Tool walkthrough, error message and call stack) — <https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/devenv-extension-advanced-example-test>
 - *Install and uninstall apps* (Extension Management, marketplace) — <https://learn.microsoft.com/en-us/dynamics365/business-central/ui-extensions-install-uninstall>
 - The **AL Test Tool** page and the **Test Runner**, **Any**, **Library Assert**, and **Library Variable Storage** apps, with their IDs and the page's exact captions and actions — Microsoft's BCApps repository, `src/Tools/Test Framework/` — <https://github.com/microsoft/BCApps/tree/main/src/Tools/Test%20Framework>
-- Availability of the test framework apps in online sandboxes (Test Runner since 17.2; the three libraries later; the Tests-TestLibraries never) — Freddy Kristiansen, *Running tests in Business Central Online Sandbox environments* (February 2021) and the BcContainerHelper release notes for `Import-TestToolkitToBcContainer -includeTestFrameworkOnly` against an online environment — <https://freddysblog.com/2021/02/15/running-tests-in-business-central-online-sandbox-environments/>
+- *Manage Marketplace apps* (the Microsoft Marketplace Apps page) — <https://learn.microsoft.com/en-us/dynamics365/business-central/admin-manage-appsource-apps>
+- Availability of the test framework apps in online sandboxes (Test Runner from the marketplace since 17.2; Tests-TestLibraries never; the three libraries by App ID, as practitioners report — no Microsoft page confirms it) — Freddy Kristiansen, *Running tests in Business Central Online Sandbox environments* (February 2021) — <https://freddysblog.com/2021/02/15/running-tests-in-business-central-online-sandbox-environments/>

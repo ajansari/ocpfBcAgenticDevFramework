@@ -54,6 +54,15 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 15, 2026 — Full v5.7.1.0 · Lite v5.7.1.0 · Operations Guide v5.7.1.0 · Plugin v5.7.1
+
+**"Publish it" works when you say it.** The agent still never offers to publish and never does it
+by default, but a developer who asks is asked back, once, whether they mean a DEV-extension publish
+to a named sandbox — and on yes it happens through the AL tools, sandbox only, logged as
+human-ordered. "Run the tests" works the same way. A second-set-of-eyes review of v5.7.0.0 is
+applied: the automated-test guide's marketplace steps now match Microsoft's pages, and every
+"redeploy" became "the human installs".
+
 ## October 15, 2026 — Full v5.7.0.0 · Lite v5.7.0.0 · Operations Guide v5.7.0.0 · Plugin v5.7.0
 
 **The agent never publishes.** Full and Lite now package the `.app` and stop; you upload it to a

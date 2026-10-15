@@ -24,6 +24,40 @@ specifically to keep a superseded decision on record — see the runbook's ALL A
 
 ---
 
+## v5.7.1.0 — October 15, 2026
+
+**Publishing and test runs on explicit request; the review of v5.7.0.0 applied.** Lite
+**v5.7.1.0**, Operations Guide **v5.7.1.0**, Standards Guide **v1.12.0.0** (unchanged), plugin
+**5.7.1**. Both cores; Full Steps 07 and 12; Ops § AL Tools, § Packaging (new *Publishing on
+explicit request*), § Automated Tests; both schematics; the `AutomatedTestGuide`, `SandboxInstall`,
+and `Deployment` templates; the user guide.
+
+- **"Publish it" is honored, after confirmation — never offered, never the default.** A developer
+  who explicitly asks is first asked, through the options box, whether they mean a DEV-extension
+  publish to a named sandbox; on yes the agent does it with the AL tools (Synchronize mode;
+  ForceSync / Recreate / forceUpgrade still need their own approval; production never, confirmed
+  or not), reports the tool's result verbatim, and logs the publish as human-ordered. It is kept
+  apart from the "last installed version", which stays the per-tenant install the human reports
+  from `SandboxInstall.md`, since the testers' sandbox may still hold an older build. The next
+  build returns to the "Package built:" block and the guide; the agent never asks "shall I publish
+  this one too?". AJ's clarification, October 15, 2026.
+- **"Run the tests" works the same way**, against a sandbox only: `al_run_tests` runs what is
+  installed and publishes nothing, so the test app must already be in that sandbox. The tool and
+  its arguments were verified in the AL MCP Server of AL extension 18.1.2842859 on October 15,
+  2026 (Microsoft's reference page doesn't list it; re-verify on a newer release).
+- **Second-set-of-eyes review (Fable 5.1) applied.** `AutomatedTestGuide.md` no longer promises
+  that the three test libraries are a marketplace search away: it opens the *Microsoft Marketplace
+  Apps* page by its documented route, uses the page's *Install* action, and tells the tester to
+  stop and report if an app isn't listed (a developer can install by App ID; no Microsoft page
+  confirms the libraries are offered online) — Ops § Automated Tests says the same. "Redeploy" in
+  both schematics' fix-cycle nodes and one Ops sentence now reads "the human installs"; the
+  "Package built:" block drops "(I never do)"; two steps' "never uploads" became "uploads nothing
+  unprompted"; Step 12's exit gate and Lite Step 7 name the Admin Center's Manage Apps as the
+  production route (Extension Management "while it lasts"); the user guide's document table lists
+  the two new documents.
+
+---
+
 ## v5.7.0.0 — October 15, 2026
 
 **The agent never publishes; the human uploads every package and runs every automated test.**

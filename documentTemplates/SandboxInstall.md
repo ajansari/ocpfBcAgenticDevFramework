@@ -7,7 +7,7 @@
 
 # Installing <Extension Name> in a Business Central sandbox
 
-**The agent never uploads anything to Business Central.** It builds the package; a person installs it.
+**The agent does not upload packages — you do.** It builds the package; a person installs it. (A developer can explicitly ask the agent to publish a build as a DEV extension to a sandbox; that is never offered, and testers and administrators still install this way.)
 This document is that person's procedure, from the file on disk to a working extension in a sandbox.
 It takes about five minutes the first time and two minutes after that.
 

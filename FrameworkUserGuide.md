@@ -5,8 +5,8 @@
 *by AJ Ansari*
 
 **Last Updated:** Tuesday, October 13, 2026
-**Covers:** Full runbook v5.7.0.0 · Lite v5.7.0.0 · Standards Guide v1.12.0.0 · Operations Guide
-v5.7.0.0 · `ocpf-bc` agent plugin v5.7.0 · Visual Studio Code setup extension v0.0.10
+**Covers:** Full runbook v5.7.1.0 · Lite v5.7.1.0 · Standards Guide v1.12.0.0 · Operations Guide
+v5.7.1.0 · `ocpf-bc` agent plugin v5.7.1 · Visual Studio Code setup extension v0.0.10
 
 > This guide is for the person driving a project with the framework: a Business Central
 > functional consultant or an AL developer working in Visual Studio Code with Claude Code or GitHub Copilot.
@@ -36,8 +36,8 @@ know which one you are looking at.
 
 | Part | What it is | Where it lives | Version today |
 |---|---|---|---|
-| **The framework** | The runbook (Full or Lite), its step files, the document templates, the **Standards Guide**, and the **Operations Guide**. This is the content the AI agent follows. | The public GitHub repository, `ajansari/ocpfBcAgenticDevFramework`, on its `main` branch. | Full 5.7.0.0 · Lite 5.7.0.0 · Standards 1.12.0.0 · Ops 5.7.0.0 |
-| **The agent plugin** `ocpf-bc` | Eleven skills (the `/ocpf-bc:` commands), three sub-agent definitions, the AL tooling helper scripts, the dashboard renderer, and an *offline fallback copy* of the framework. Installed once per machine into Claude Code or GitHub Copilot. | Same repository, folder `agentPlugin/ocpf-bc`, published as a plugin marketplace. | 5.7.0 |
+| **The framework** | The runbook (Full or Lite), its step files, the document templates, the **Standards Guide**, and the **Operations Guide**. This is the content the AI agent follows. | The public GitHub repository, `ajansari/ocpfBcAgenticDevFramework`, on its `main` branch. | Full 5.7.1.0 · Lite 5.7.1.0 · Standards 1.12.0.0 · Ops 5.7.1.0 |
+| **The agent plugin** `ocpf-bc` | Eleven skills (the `/ocpf-bc:` commands), three sub-agent definitions, the AL tooling helper scripts, the dashboard renderer, and an *offline fallback copy* of the framework. Installed once per machine into Claude Code or GitHub Copilot. | Same repository, folder `agentPlugin/ocpf-bc`, published as a plugin marketplace. | 5.7.1 |
 | **The Visual Studio Code setup extension** | A bootstrapper and extension pack, published to the Visual Studio Marketplace and Open VSX. Installs the AL toolchain and the agent extensions, wires your agent to the plugin marketplace, and adds five Command Palette commands. It contains **no framework content**. | A separate repository, published as [`ajansari.ocpf-bc-dev-setup`](https://marketplace.visualstudio.com/items?itemName=ajansari.ocpf-bc-dev-setup) (also on [Open VSX](https://open-vsx.org/extension/ajansari/ocpf-bc-dev-setup)). | 0.0.10 |
 | **Your project's copy** | The runbook and companions fetched into one AL project, pinned at the version fetched. | Your AL project folder: `CLAUDE.md` or `.github/copilot-instructions.md`, plus one `ocpfFramework/` folder holding the step files, templates, both guides, patterns, scripts, the changelog, the plugin's marker, and each developer's state. | Whatever was current when you started, until you approve an update |
 
@@ -310,7 +310,7 @@ All tracked. Translated copies sit beside their source (`UserGuide.fr-CA.md`, `D
 | `docs/1-define/` | `ProblemStatement.md` (PRE-01), `ProjectParameters.md`, `ObjectRegister.md`, `TranslationGlossary.md` (Step 01) | `ProblemStatement.md`, `ProjectParameters.md` (Step 1) |
 | `docs/2-design/` | `FRD.md` (Step 02), `TDD.md`, `HumanEffortEstimate.md`, `AiEffortEstimate.md` (Step 03), `SanityCheck.md` (Step 04) | `DesignDoc.md`, `HumanEffortEstimate.md`, `AiEffortEstimate.md` (Step 2; the Design Doc is updated in place at Step 6) |
 | `docs/3-build/` | `BuildPlan.md` (Step 05) | — |
-| `docs/4-prove/` | `GapAnalysis.md` (08), `CodeReview.md` (09), `PostDevTDD.md` (10), `Documentation.md`, `UserGuide.md`, `HumanUnitTestScript.md`, `AutomatedTestScripts.md`, `Deployment.md` (11), `ReleaseTestResults.md` (12) | `Docs.md`, `TestScript.md` (Step 6) |
+| `docs/4-prove/` | `GapAnalysis.md` (08), `CodeReview.md` (09), `PostDevTDD.md` (10), `Documentation.md`, `UserGuide.md`, `HumanUnitTestScript.md`, `AutomatedTestScripts.md`, `AutomatedTestGuide.md`, `Deployment.md` (11), `ReleaseTestResults.md` (12), `SandboxInstall.md` (07, §1 rewritten every build) | `Docs.md`, `TestScript.md`, `AutomatedTestGuide.md` (Step 6), `SandboxInstall.md` (Step 5) |
 
 Lite keeps no Project Memory, and only one sub-agent file — the generator, on the Main model — because one model does all the work.
 There is no separate usage report in either edition; the usage table is in `ProjectProgress.md`.
@@ -466,7 +466,7 @@ from the PowerShell releases page on macOS, Microsoft's package repository on Ub
 `sudo dnf install powershell` on RHEL and Fedora. The outcome is recorded under `tooling` in
 `ocpfFramework/framework.json`.
 
-**The agent never uploads a package — you do.** Every build ends with a "Package built:" block that
+**The agent does not upload packages — you do.** Every build ends with a "Package built:" block that
 names the file and points at `docs/4-prove/SandboxInstall.md`, written with the first package: both
 of Microsoft's upload routes (the Admin Center's Manage Apps, or Extension Management, which
 Microsoft retires in 2027 release wave 1) step by step, and a §1 the agent rewrites after every build
@@ -474,6 +474,9 @@ with that build's file, version, and Schema Sync Mode. Tell the agent the versio
 installed; nothing counts as "on the sandbox" until you do. When the project has AL test codeunits,
 `docs/4-prove/AutomatedTestGuide.md` does the same for the test app: which Microsoft test apps to
 install once, and how to run each test one at a time on the AL Test Tool page and what to report.
+If you are a developer and you *tell* the agent to publish or to run the tests, it will — a publish
+only after it confirms you mean a DEV extension to a named sandbox, a test run only against a
+sandbox, never production. It never offers either, and neither becomes the routine.
 
 **Extension Management refuses the upload: the same version cannot be uploaded twice.** A version
 already installed in a tenant can never be uploaded again, which is why the framework never builds

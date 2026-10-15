@@ -30,7 +30,8 @@ The AL Language extension provides its AL tools to Copilot Chat directly: `al_bu
 `al_publish`, `al_downloadsymbols`, `al_symbolsearch`, `al_getdiagnostics`, `al_getnextobjectid`,
 `al_symbolrelations`, `al_debug`, `al_setbreakpoint`, `al_snapshotdebugging`.
 - **If you have those tools,** tell the human the AL tools are ready. (`al_publish` is one of them and
-  the framework never calls it: the human uploads every package — Ops § Packaging.) Record
+  no step calls it: the human uploads every package — Ops § Packaging — unless a developer explicitly
+  asks for a DEV-extension publish to a sandbox, confirmed first.) Record
   `"alMcp": "al-extension-tools"` in `ocpfFramework/framework.json` if it exists, and stop. (The runbook
   turns on Microsoft's code analyzers for these tools later, in `.vscode/settings.json` at
   scaffolding — ALL ALONG → Analyzers. Nothing to do for that here.)
@@ -168,8 +169,8 @@ tool's own analyzers and a .NET runtime it can run on, so the mandatory compile 
 analyzers here too.
 
 Cloud sessions can compile but can't complete Business Central's interactive sign-in, so a
-non-global symbol download stays a local step. (Publishing is nobody's agent step: the human
-uploads every package — Ops § Packaging.)
+non-global symbol download stays a local step. (Publishing is no step's job: the human uploads every
+package — Ops § Packaging — and the agent publishes only on an explicit, confirmed request.)
 
 ## Terminal-only machine without VS Code
 
@@ -184,4 +185,6 @@ It needs a .NET 8+ SDK from Microsoft's standard installer, which also puts the 
 
 Tools that reach a live Business Central environment (downloading non-global symbols) open an
 interactive Microsoft sign-in the first time they're used in a session. That's expected. The
-framework never calls `al_publish` or `al_run_tests`, so those never trigger one.
+framework calls `al_publish` and `al_run_tests` only when the human explicitly asks — a publish
+confirmed as a DEV extension to a sandbox, a test run against a sandbox (Ops § Packaging, Ops §
+Automated Tests) — so a sign-in for those is the human's doing.

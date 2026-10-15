@@ -199,7 +199,7 @@ flowchart TD
     Gate2 --> S5
     subgraph S5["STEP 5 — Compile, Package, Test & Iterate"]
         direction LR
-        Compile["FIRST: increment the Revision<br/>in app.json, then compile the whole<br/>extension once with the analyzers,<br/>then package it — the one<br/>mandatory compile-and-package<br/>(Op. Rule 4); fixed 'Package built'<br/>message with Schema Sync Mode"] --> Deploy["Human installs the package<br/>in a BC sandbox from<br/>docs/4-prove/SandboxInstall.md<br/>(§1 rewritten every build) —<br/>the agent never uploads"]
+        Compile["FIRST: increment the Revision<br/>in app.json, then compile the whole<br/>extension once with the analyzers,<br/>then package it — the one<br/>mandatory compile-and-package<br/>(Op. Rule 4); fixed 'Package built'<br/>message with Schema Sync Mode"] --> Deploy["Human installs the package<br/>in a BC sandbox from<br/>docs/4-prove/SandboxInstall.md<br/>(§1 rewritten every build) —<br/>never the agent, unprompted"]
         Deploy --> Test["Human tests by hand:<br/>the BC client, Postman, Power<br/>Automate, Power Apps, or<br/>Copilot Studio"]
         Test --> Q{"Errors, warnings,<br/>or issues found?"}
         Q -- "Yes" --> Diag["Check ocpfFramework/patterns/ first, then:<br/>one-off or pattern? where<br/>from? what rule missed it?"]
@@ -241,7 +241,7 @@ flowchart TD
         In1[/"Inputs:<br/>Built extension,<br/>DesignDoc.md, ChangeLog.md"/] --> Act1["Actions:<br/>Gap-check DesignDoc vs. as-built<br/>(classify: Intentional / Oversight /<br/>Spec stale); code review + full<br/>Anti-Patterns table (Standards<br/>Part 7) + BCQuality pass + the<br/>8-dimension scorecard (A-F) into<br/>the ChangeLog entry; update<br/>DesignDoc.md in place; write<br/>Docs.md (+ render ER diagram,<br/>Ops Tooling Checks), TestScript.md,<br/>Acknowledgements.md; last, ask:<br/>build the release candidate<br/>v1.0.0.0 now? (recommended)"] --> Out1[/"Output:<br/>DesignDoc.md (updated),<br/>Docs.md, TestScript.md,<br/>Acknowledgements.md, scorecard,<br/>RC package if chosen"/]
     end
     S6 --> GapFill{"Any Oversight gap or<br/>finding needs a code fix?"}
-    GapFill -- "Yes" --> GapCycle["Fixes approved together,<br/>then Step 5 cycle again —<br/>fix, compile, package,<br/>redeploy, retest"]
+    GapFill -- "Yes" --> GapCycle["Fixes approved together,<br/>then Step 5 cycle again —<br/>fix, compile, package,<br/>the human installs, retest"]
     GapCycle --> Gate1
     GapFill -- "No (doc-only)" --> Gate1
     Gate1{{"Exit gate:<br/>Gaps resolved/deferred, dead-code<br/>clean, Docs.md diagram renders,<br/>TestScript.md executable, scorecard<br/>logged, Acknowledgements written,<br/>RC question answered"}}
@@ -253,7 +253,7 @@ flowchart TD
         In2[/"Inputs:<br/>Latest package,<br/>TestScript.md, Docs.md"/] --> Act2["Actions:<br/>Upgrade path tested FIRST if not<br/>the first release; real users run<br/>TestScript.md by hand on the sandbox<br/>— green + red team, permission-set<br/>verification; translated docs once<br/>that pass is green, then language<br/>passes and translation approval;<br/>record findings in ChangeLog.md<br/>(implement / defer / reject)"] --> Out2[/"Output:<br/>ChangeLog.md updated with<br/>every test finding"/]
     end
     S7 --> ReleaseCheck{"Upgrade path passes (or<br/>first release), all green pass,<br/>all red fail gracefully?"}
-    ReleaseCheck -- "No" --> GapCycle2["Step 5 cycle again —<br/>fix, build 1.0.0.1, 1.0.0.2 ...,<br/>redeploy; re-run whatever<br/>Step 6 parts the fix touches"]
+    ReleaseCheck -- "No" --> GapCycle2["Step 5 cycle again —<br/>fix, build 1.0.0.1, 1.0.0.2 ...,<br/>the human installs; re-run<br/>whatever<br/>Step 6 parts the fix touches"]
     GapCycle2 --> S7
     ReleaseCheck -- "Yes" --> Gate2
 

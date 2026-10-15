@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 7 — Release for Testing
 
-**Runbook version:** 5.7.0.0 · Lite edition · Phase: PROVE
+**Runbook version:** 5.7.1.0 · Lite edition · Phase: PROVE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -45,7 +45,7 @@
 **Actions:**
 - Confirm the human has installed the latest package — the release candidate `1.0.0.0` from Step
   6, or the latest `0.x` build if the human chose to keep testing — in a BC sandbox, following
-  `docs/4-prove/SandboxInstall.md`; the agent never uploads. If anything changed, build again and
+  `docs/4-prove/SandboxInstall.md`; the agent never uploads unprompted. If anything changed, build again and
   the human installs the new version.
 - **If this isn't the first release, test the upgrade path first** (**Standards §9.6**): install the
   previous version on a clean sandbox with data in the fields this version changes, the human
@@ -97,7 +97,7 @@ language has passed its language pass and its state scan shows every unit `signe
 (Ops § Translations).
 **If everything passes, the package that was actually tested ships as it is** — the release
 candidate, or the last `1.0.0.x` fix build that passed — to Production, by the human through
-Extension Management, never the agent (Ops § Packaging). No rename, no copy, no rebuild: every
+the Admin Center's Manage Apps (or Extension Management while it lasts), never the agent (Ops § Packaging). No rename, no copy, no rebuild: every
 build already has its own version and file, so the shipped artifact is permanently identifiable.
 **Before that deploy, restate the Schema Sync Mode assessment for this exact package** in the
 fixed *Package built* message block (ALL ALONG → Packaging & Versioning) — **Add** if this release

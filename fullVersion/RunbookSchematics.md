@@ -241,7 +241,7 @@ flowchart TD
     Gate2 --> S07
     subgraph S07["07 — Compile and Package,<br/>Troubleshoot, Iterate"]
         direction LR
-        Compile["FIRST: increment the Revision in<br/>app.json, compile the whole<br/>extension once with the analyzers,<br/>then package it — the one<br/>mandatory compile-and-package<br/>(Op. Rule 4) — and end with the<br/>'Package built:' block"] --> Deploy["Human installs the package<br/>in a BC sandbox from<br/>docs/4-prove/SandboxInstall.md<br/>(§1 rewritten every build) —<br/>the agent never uploads"]
+        Compile["FIRST: increment the Revision in<br/>app.json, compile the whole<br/>extension once with the analyzers,<br/>then package it — the one<br/>mandatory compile-and-package<br/>(Op. Rule 4) — and end with the<br/>'Package built:' block"] --> Deploy["Human installs the package<br/>in a BC sandbox from<br/>docs/4-prove/SandboxInstall.md<br/>(§1 rewritten every build) —<br/>never the agent, unprompted"]
         Deploy --> Test["Human tests by hand:<br/>the BC client, Postman, Power<br/>Automate, Power Apps, or<br/>Copilot Studio"]
         Test --> Q{"Errors, warnings,<br/>or issues found?"}
         Q -- "Yes" --> Diag["Check ocpfFramework/patterns/ first, then<br/>reasoning role diagnoses:<br/>one-off or pattern? where<br/>from? what rule missed it?"]
@@ -292,7 +292,7 @@ flowchart TD
         In1[/"Inputs:<br/>FRD.md, TDD.md,<br/>built AL, ChangeLog"/] --> Act1["Actions (Reasoning role):<br/>Three-way comparison —<br/>FRD vs. TDD vs. as-built.<br/>Classify every gap"] --> Out1[/"Output:<br/>GapAnalysis.md,<br/>gap-fill work items"/]
     end
     S08 --> GapFill{"Any Oversight gap<br/>needs a code fix?"}
-    GapFill -- "Yes" --> GapCycle08["Step 07 cycle again —<br/>fix, compile, package,<br/>redeploy, retest<br/>(Operating Rule 4)"]
+    GapFill -- "Yes" --> GapCycle08["Step 07 cycle again —<br/>fix, compile, package,<br/>the human installs, retest<br/>(Operating Rule 4)"]
     GapCycle08 --> Gate1
     GapFill -- "No (doc-only)" --> Gate1
     Gate1{{"Exit gate:<br/>Every gap classified,<br/>resolved or scheduled,<br/>code fixes recompiled/repackaged"}}
@@ -304,7 +304,7 @@ flowchart TD
         In3[/"Inputs:<br/>Full built extension,<br/>TDD.md, Standards"/] --> Act3["Actions (Reasoning role):<br/>Code quality, dead code,<br/>obsolete refs, anti-patterns,<br/>permission set names,<br/>BCQuality knowledge-backed review;<br/>then grade the §0 Scorecard —<br/>eight dimensions, A–F, overall =<br/>lowest; Main role records"] --> Out3[/"Output:<br/>CodeReview.md<br/>(§0 Scorecard + findings)"/]
     end
     S09 --> ReviewFix{"Any finding<br/>needs a code fix?"}
-    ReviewFix -- "Yes" --> GapCycle09["Fixes approved together,<br/>then Step 07 cycle again —<br/>fix, compile, package,<br/>redeploy, retest"]
+    ReviewFix -- "Yes" --> GapCycle09["Fixes approved together,<br/>then Step 07 cycle again —<br/>fix, compile, package,<br/>the human installs, retest"]
     GapCycle09 --> Gate3
     ReviewFix -- "No (comment/format only)" --> Gate3
     Gate3{{"Exit gate:<br/>Critical findings resolved,<br/>dead-code scan 100% clean,<br/>code fixes recompiled/repackaged,<br/>scorecard graded, no F unaccepted"}}
@@ -330,7 +330,7 @@ flowchart TD
         In6[/"Inputs:<br/>The release candidate (1.0.0.0, or<br/>the latest 0.x build), HumanUnitTestScript.md,<br/>AutomatedTestScripts.md if any,<br/>UserGuide.md, Deployment.md"/] --> Act6["Actions:<br/>Dev Manager review; upgrade path<br/>tested FIRST if not the first release;<br/>real users run the script by hand on<br/>the sandbox — green + red team,<br/>permission-set verification;<br/>translated docs once that pass<br/>is green, then language passes;<br/>triage findings via Testing<br/>Feedback Log"] --> Out6[/"Output:<br/>ReleaseTestResults.md"/]
     end
     S12 --> ReleaseCheck{"Upgrade path passes (or<br/>first release), all green pass,<br/>all red fail gracefully?"}
-    ReleaseCheck -- "No" --> GapCycle12["Step 07 cycle again —<br/>fix, compile, package at 1.0.0.1,<br/>1.0.0.2 …, redeploy; re-run Step<br/>09/10/11 on whatever the fix touched"]
+    ReleaseCheck -- "No" --> GapCycle12["Step 07 cycle again —<br/>fix, compile, package at 1.0.0.1,<br/>1.0.0.2 …, the human installs;<br/>re-run Step<br/>09/10/11 on whatever the fix touched"]
     GapCycle12 --> S12
     ReleaseCheck -- "Yes" --> Gate6
 

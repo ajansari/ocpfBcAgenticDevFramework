@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.7.0.0
+**Version:** 5.7.1.0
 **Last Updated:** October 13, 2026
 
 > Version history for this framework lives in `ocpfFramework/RunbookChangelog.md`, tracked
@@ -18,7 +18,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.12.0.0): the AL *rules* this sequence applies (Parts 1–11, Appendices A–E), cited below as
 >   **Standards §**.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.7.0.0): the *procedures*
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.7.1.0): the *procedures*
 >   this sequence uses — asking, intake, project setup, the AL tools, tooling checks, analyzers,
 >   symbols, editor sync, notifications, packaging, repository hygiene, translations, fetched
 >   companions, documents, usage and cost, and the plugin — cited below as **Ops §**. Both editions
@@ -403,8 +403,8 @@ reviewed inside this cycle (Ops § Translations).
 
 **Role:** root-cause diagnosis (the three questions below)
 is done by the **reasoning role** (Operating Rule 10); the main role applies the resulting fix and does the
-ChangeLog/TDD bookkeeping, and is also the one who compiles, packages, and (with the human)
-gets each build onto the sandbox. Same division for any bug surfaced later during PROVE-phase
+ChangeLog/TDD bookkeeping, and is also the one who compiles, packages, keeps
+`docs/4-prove/SandboxInstall.md` current, and waits for the human to install each build. Same division for any bug surfaced later during PROVE-phase
 testing (see Testing Feedback Log, ALL ALONG) — diagnosis is a reasoning-role task, fixing is the
 main role's.
 
@@ -486,7 +486,7 @@ is the human's.
 
 **Outputs:** `docs/4-prove/ReleaseTestResults.md` — the Dev Manager's review (who, when, findings), every test case, its result, and a link to any ChangeLog issue it produced; the name of the package that passed, stated explicitly.
 
-**Exit gate:** The Dev Manager has reviewed `docs/4-prove/PostDevTDD.md`, the FRD baseline, and Step 11's documents (recorded in `docs/4-prove/ReleaseTestResults.md`); all green-team tests pass; all red-team tests fail gracefully; the upgrade path passes, or this is the extension's first release (Standards §9.6); permission sets verified; every translated document §1.9 requires exists and has been reviewed; every language required at first release has passed its language pass and its state scan shows every unit `signed-off` or `final` (Ops § Translations). **If everything passes, the package that was actually tested is the one deployed to the production environment, as it is** — no rename, no copy, no bump, no rebuild — and that deploy is the human's, through Extension Management, never the agent's (Ops § Packaging); say explicitly which package passed. **Before that deploy, restate the "Package built:" block for this exact package** (ALL ALONG → Packaging & Versioning), its schema line judged against the last version installed in production — **Add** if this release is additive-only, **Force Sync** with the explicit data-loss warning if anything was removed, shrunk, retyped, or re-keyed since that release. `ProjectProgress.md`'s Step 12 row is `Completed`, its usage rows are written (Operating Rule 11), and the calibration file is exported to `~/.ocpf/calibration/` — by the agent if brought back in, by hand otherwise.
+**Exit gate:** The Dev Manager has reviewed `docs/4-prove/PostDevTDD.md`, the FRD baseline, and Step 11's documents (recorded in `docs/4-prove/ReleaseTestResults.md`); all green-team tests pass; all red-team tests fail gracefully; the upgrade path passes, or this is the extension's first release (Standards §9.6); permission sets verified; every translated document §1.9 requires exists and has been reviewed; every language required at first release has passed its language pass and its state scan shows every unit `signed-off` or `final` (Ops § Translations). **If everything passes, the package that was actually tested is the one deployed to the production environment, as it is** — no rename, no copy, no bump, no rebuild — and that deploy is the human's, through the Admin Center's Manage Apps (or Extension Management while it lasts), never the agent's (Ops § Packaging); say explicitly which package passed. **Before that deploy, restate the "Package built:" block for this exact package** (ALL ALONG → Packaging & Versioning), its schema line judged against the last version installed in production — **Add** if this release is additive-only, **Force Sync** with the explicit data-loss warning if anything was removed, shrunk, retyped, or re-keyed since that release. `ProjectProgress.md`'s Step 12 row is `Completed`, its usage rows are written (Operating Rule 11), and the calibration file is exported to `~/.ocpf/calibration/` — by the agent if brought back in, by hand otherwise.
 
 ---
 
@@ -711,13 +711,16 @@ translation files*, except Operating Rule 8 and Standards §1.7.
   build time. Say the folder once at intake, and the exact path every time a build completes.
 - **Built packages are git-tracked, never gitignored.** No `outputAppPackage/` or blanket `*.app`
   entry in `.gitignore`.
-- **The agent never publishes to any environment — sandbox or production.** It builds the package;
-  the human uploads it, following `docs/4-prove/SandboxInstall.md` — written with the first package,
+- **The agent never publishes on its own initiative, and never offers to — sandbox or production.**
+  It builds the package; the human uploads it, following `docs/4-prove/SandboxInstall.md` — written with the first package,
   its §1 (file, version, Schema Sync Mode, sandbox) rewritten by the agent after every build (Ops §
   Packaging). Nothing is on a sandbox until the human says which version they installed and where;
-  that answer is the "last installed version". `al_publish`, `launch.json` + F5, and the Automation
-  API are never used by the agent. The production deploy at Step 12 is the human's too, from
-  `docs/4-prove/Deployment.md`.
+  that answer is the "last installed version". No step calls `al_publish`, `launch.json` + F5, or the
+  Automation API. **The one exception is the developer's explicit request** — "publish it" — which
+  the agent first confirms through the options box as *a DEV extension, to the named sandbox*, then
+  does with the AL tools, sandbox only, result reported verbatim and logged as human-ordered (Ops §
+  Packaging → *Publishing on explicit request*); it is never offered and never becomes the routine.
+  The production deploy at Step 12 is the human's, from `docs/4-prove/Deployment.md`, always.
 - **Version numbers.** A **new app** starts at `0.0.0.1` (the Step 01 parameter default). An
   **existing app** starts from the version installed in the target environment (asked at intake,
   confirmed on the Extension Management page) and continues from it. **The first build of a new
@@ -747,7 +750,7 @@ translation files*, except Operating Rule 8 and Standards §1.7.
   Schema: additive only → upload with Schema Sync Mode = Add
      or: <what was removed / shrunk / retyped / re-keyed> → upload with Schema Sync Mode = Force Sync
          (Microsoft: test a forced sync in a sandbox first; it can lose data in <where>)
-  Install: you upload it (I never do) — docs/4-prove/SandboxInstall.md, §1 updated for this build.
+  Install: you upload it — docs/4-prove/SandboxInstall.md, §1 updated for this build.
   Then: tell me the version and environment you installed; I record it as the last installed version.
   ```
 
@@ -795,8 +798,10 @@ stay on disk) — and check for a remote first, since collaborators will see the
 - A server registered mid-session appears only in the next session; until then, use the one-shot
   helper rather than stopping or asking for a restart.
 - Prefer the MCP build/symbol tools over ad hoc terminal calls — except the analysis compile (ALL
-  ALONG → Analyzers). `al_publish` and `al_run_tests` are never called: uploading and running tests
-  are the human's (ALL ALONG → Packaging & Versioning; Ops § Automated Tests).
+  ALONG → Analyzers). `al_publish` and `al_run_tests` are never offered and never run unprompted — uploading
+  and testing are the human's (ALL ALONG → Packaging & Versioning; Ops § Automated Tests). A
+  developer who explicitly asks gets it: a publish only after confirming it means a DEV extension to
+  a named sandbox, a test run only against a sandbox; results verbatim, never production.
 
 ## Analyzers
 
