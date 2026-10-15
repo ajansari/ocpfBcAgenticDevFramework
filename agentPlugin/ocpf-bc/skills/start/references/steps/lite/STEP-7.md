@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 7 — Release for Testing
 
-**Runbook version:** 5.7.1.0 · Lite edition · Phase: PROVE
+**Runbook version:** 5.7.2.0 · Lite edition · Phase: PROVE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -48,7 +48,8 @@
   `docs/4-prove/SandboxInstall.md`; the agent never uploads unprompted. If anything changed, build again and
   the human installs the new version.
 - **If this isn't the first release, test the upgrade path first** (**Standards §9.6**): install the
-  previous version on a clean sandbox with data in the fields this version changes, the human
+  previous version on a clean sandbox with data in the fields this version changes (in more than
+  one company wherever `PerCompany` upgrade code exists), the human
   installs this one over it (`SandboxInstall.md` §6), verifies the migrated data, install it again to confirm the upgrade tag makes the
   second run a no-op, and check that a fresh install doesn't run upgrade code at all. A failed
   upgrade path fails this step — by the time anyone notices, the tenant's data is already wrong.
@@ -91,7 +92,7 @@ in this step's cycle.
 **Outputs:** `docs/0-project/ChangeLog.md` updated with every test finding and its resolution.
 
 **Exit gate:** All green-team tests pass; all red-team tests fail gracefully; the upgrade path
-passes, or this is the first release (**Standards §9.6**); permission sets
+passes, or this is the first release — the ChangeLog entry says which of the two applied (**Standards §9.6**); permission sets
 verified; every translated document Step 1 asked for exists and has been reviewed; every required
 language has passed its language pass and its state scan shows every unit `signed-off` or `final`
 (Ops § Translations).

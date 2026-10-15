@@ -24,6 +24,33 @@ specifically to keep a superseded decision on record — see the runbook's ALL A
 
 ---
 
+## v5.7.2.0 — October 15, 2026
+
+**Build-a-Feature writes the install guide; exit gates record the upgrade branch; analyzer
+behaviour re-verified; Cowork removed; Standards pin 1.12.1.0.** Lite **v5.7.2.0**, Operations
+Guide **v5.7.2.0**, Standards Guide **v1.12.1.0**, plugin **5.7.2**.
+
+- **Build-a-Feature's package offer writes `docs/4-prove/SandboxInstall.md`** with the first
+  package and rewrites §1 with every later one, the same as Step 07 — no guide for a package the
+  agent didn't build (Ops § Build-a-Feature → 4).
+- **Step 12's exit gate records which upgrade branch applied** — "the upgrade path passes, or this
+  is the first release" now requires `docs/4-prove/ReleaseTestResults.md` to say which, as Step 03
+  already requires for "no upgrade code needed". (Lite Step 7: the ChangeLog; its upgrade-path test
+  also gains the multi-company clause.)
+- **AL MCP Server analyzer behaviour re-verified on AL Language extension 18.1.2842859** with a
+  fixture table and every argument shape: `al_build` still ignores its analyzer arguments and the
+  workspace settings and packages failing code as a success; `al_compile` still applies analyzers
+  only with `enableCodeAnalysis: true` plus a `codeAnalyzers` list under `options`. Newly recorded:
+  a server launched with `--codeanalyzers` makes both tools apply them (the build fails without rule
+  codes) — the framework's launcher never passes that flag, so `al-analyze.*` stays the mandatory
+  compile. Ops § Analyzers, both cores, and the script header carry both version stamps.
+- **Microsoft Copilot Cowork references removed** from the Operations Guide and the plugin (never
+  published; no longer planned). **Standards Guide pin moved to `v1.12.1.0`** (§3.2 wording).
+- **README:** PoC Edition and the intake sheet shelved; three dashboard ideas listed as being
+  considered; the stale "Coming next" line replaced.
+
+---
+
 ## v5.7.1.0 — October 15, 2026
 
 **Publishing and test runs on explicit request; the review of v5.7.0.0 applied.** Lite

@@ -16,6 +16,19 @@ framework.
 
 ---
 
+## v5.7.2.0 — October 15, 2026
+
+Derived from full framework **v5.7.2.0**; Operations Guide **v5.7.2.0**; Standards Guide
+**v1.12.1.0** (pin moved — §3.2 wording); plugin **5.7.2**. Step 7, the core, the plugin.
+
+- Step 7's exit gate records which upgrade branch applied (the ChangeLog says "upgrade path
+  passed" or "first release"); the upgrade-path test gains Full's multi-company clause.
+  Build-a-Feature's package writes `docs/4-prove/SandboxInstall.md` like Step 5. AL MCP Server
+  analyzer behaviour re-verified on 18.1.2842859 (unchanged in effect). Cowork references removed.
+  Full changelog: *v5.7.2.0*.
+
+---
+
 ## v5.7.1.0 — October 15, 2026
 
 Derived from full framework **v5.7.1.0**; Operations Guide **v5.7.1.0**; Standards Guide

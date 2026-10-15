@@ -31,7 +31,7 @@ header note). `ProjectProgress.md` is the one document in the project root, both
 | BuildPlan | `docs/3-build/BuildPlan.md` | Full Step 05 (Lite keeps the plan in chat and the ChangeLog) |
 | GapAnalysis, CodeReview, PostDevTDD | `docs/4-prove/` | Full Steps 08, 09, 10 |
 | Documentation, UserGuide, HumanUnitTestScript, Deployment, AutomatedTestScripts | `docs/4-prove/` | Full Step 11 |
-| SandboxInstall | `docs/4-prove/SandboxInstall.md` — §1 rewritten by the agent after every build | Full Step 07 / Lite Step 5, with the first package |
+| SandboxInstall | `docs/4-prove/SandboxInstall.md` — §1 rewritten by the agent after every build | Full Step 07 / Lite Step 5, with the first package; Build-a-Feature Part 6, with the package |
 | AutomatedTestGuide | `docs/4-prove/AutomatedTestGuide.md` — one row per test method; the human runs them one at a time | Full Step 11 / Lite Step 6, only when AL test codeunits exist |
 | FeatureRegister (`docs/1-define/`), FeatureDocumentation (written as `docs/4-prove/Documentation.md`) | as named | Build-a-Feature close (Part 7) — one to two minutes, from what the session knows |
 | ReleaseTestResults | `docs/4-prove/ReleaseTestResults.md` | Full Step 12 |

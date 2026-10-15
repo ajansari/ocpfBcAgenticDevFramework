@@ -54,6 +54,16 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 15, 2026 — Full v5.7.2.0 · Lite v5.7.2.0 · Operations Guide v5.7.2.0 · Plugin v5.7.2
+
+**Build-a-Feature writes the sandbox install guide with its package**, like Full and Lite. The
+release-test gates now record whether the upgrade path was tested or this was a first release. The
+AL MCP Server's analyzer behaviour was re-verified on AL Language extension 18.1: unchanged, so the
+framework's own analysis compile stays mandatory. Microsoft Copilot Cowork support is removed (never
+published, no longer planned). Standards Guide pin moved to v1.12.1.0 for a §3.2 wording fix. The
+roadmap shelves the PoC Edition and the intake sheet and lists three dashboard ideas as being
+considered.
+
 ## October 15, 2026 — Full v5.7.1.0 · Lite v5.7.1.0 · Operations Guide v5.7.1.0 · Plugin v5.7.1
 
 **"Publish it" works when you say it.** The agent still never offers to publish and never does it
@@ -202,7 +212,7 @@ carries the property explicitly either way.
 **The Standards Guide is now its own repository.** The *OCPF AL Development Standards Guide* has
 moved to [ajansari/ocpfBCALStandards](https://github.com/ajansari/ocpfBCALStandards), MIT, with its
 own README, CONTRIBUTING, CHANGELOG, and release tags, so the Business Central AL community can
-use it under any build process. This framework is one consumer: it pins a release tag (`v1.12.0.0`,
+use it under any build process. This framework is one consumer: it pins a release tag (`v1.12.1.0`,
 named in `standardsGuide/README.md`), fetches the guide at that tag into each project's
 `ocpfFramework/standardsGuide/` — same path, same filename as before, so no project file moves —
 and bundles the same release in the plugin for offline use. The guide's own text lost every
@@ -535,9 +545,8 @@ the change, not as a promise.
 - **What to Expect** — a new section of this README on the interactive first hour, when you can
   step away, and how each tool notifies you, including mobile notifications and answering from
   your phone with Claude Code.
-- **Coming next:** a token usage *estimator*, giving a predicted range before a step runs, once
-  enough measured projects exist to calibrate it; and an optional intake sheet you can fill in
-  outside the chat.
+- **Since then:** the token usage *estimator* shipped as the AI Effort Estimate (Full and Lite
+  v5.0.0.0), calibrating itself from measured projects; the intake sheet is shelved — see Roadmap.
 
 </details>
 
@@ -641,7 +650,7 @@ The extension's own documentation is on its Marketplace page. Requirements: Visu
 [Open VSX Registry](https://open-vsx.org/extension/ajansari/ocpf-bc-dev-setup).
 
 **Extension not an option?** Working in the **Claude Code CLI** or the **GitHub Copilot CLI**,
-running the agent on github.com, in the Claude apps, or in Copilot Cowork, or setting the framework
+running the agent on github.com or in the Claude apps, or setting the framework
 up by hand without the plugin — every one of those is in
 **[Getting Started — Alternative Ways](GettingStartedAlternatives.md)**.
 
@@ -713,7 +722,6 @@ you can run `/ocpf-bc:update-framework` in them anytime.
 | **GitHub Copilot CLI** | **Off** for added marketplaces, but `/plugin` shows when an update is available | Add `"autoUpdate": true` to the `onlycopilotfans` entry under `extraKnownMarketplaces` in `~/.copilot/settings.json` | `copilot plugin update ocpf-bc` |
 | **GitHub.com cloud agent** | **Yes:** the plugin is installed from this repository when a session starts | Nothing to do | Nothing to do |
 | **Claude apps (Chat, Cowork)** | Checked from the marketplace | Nothing to do | **Customize** → **Plugins** → **Update** on the marketplace |
-| **Microsoft Copilot Cowork** | **No** | Not available | Download the newer `.zip` from Releases and upload it again. If you shared it, select **Re-share**. |
 
 ### Get notified of new releases
 
@@ -735,7 +743,13 @@ you can run `/ocpf-bc:update-framework` in them anytime.
 - ~~Distribute as an agent plugin for Claude and GitHub Copilot~~ ✅ Completed — see [GET STARTED: Agent Plugin](#setup-plugin)
 - ~~Per-step runbook files, document templates, a human effort estimate, and per-step token and cost tracking~~ ✅ Completed — Full v4.0.0.0 / Lite v3.0.0.0, September 2026
 - ~~Token usage **estimator** — predicted tokens per model, by input, output, and cached, before a step runs~~ ✅ Completed — the AI Effort Estimate, Full v5.0.0.0 / Lite v5.0.0.0, September 2026; calibrates itself from measured projects
-- Optional human-fillable intake sheet (not Markdown) to answer the simple intake questions up front and skip them in chat
+- **Being considered**
+  - Answer the dashboard's open question from the dashboard page itself (today the page shows it and says where to answer)
+  - A live dashboard for GitHub Copilot CLI, with the agent / you time split Claude Code has
+  - More dashboard themes beside OnlyBCFans and F1
+- **Shelved, October 15, 2026** — designed, not built, kept for later
+  - A PoC Edition: a one-hour proof-of-concept journey with a promotion path into Full or Lite. The Build-a-Feature journey covers most of what it was for.
+  - An optional human-fillable intake sheet to answer the simple intake questions up front. The intake is fast enough now, and the dashboard carries the context the sheet was meant to.
 
 </details>
 

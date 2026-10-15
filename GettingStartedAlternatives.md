@@ -9,7 +9,7 @@ preferred path is in the [README](README.md#setup-plugin): install the
 
 - the extension doesn't work on your machine, or you can't install extensions at all;
 - you work in the **Claude Code CLI** or the **GitHub Copilot CLI** rather than in Visual Studio Code;
-- you run the agent somewhere else — github.com, the Claude apps, Microsoft Copilot Cowork;
+- you run the agent somewhere else — github.com or the Claude apps;
 - you'd rather not use the plugin and want to set the framework up **by hand**.
 
 **Build-a-Feature** — the quick-mod journey (one object or a few, no steps, no documents) — has no
@@ -47,7 +47,7 @@ only the wiring differs.
 > Copilot CLI automatically. So installing once usually covers your whole setup.
 
 <details>
-<summary><b>Other places you can run it</b> — github.com, Claude apps, and Copilot Cowork</summary>
+<summary><b>Other places you can run it</b> — github.com and the Claude apps</summary>
 
 <br>
 
@@ -74,16 +74,6 @@ commit `.github/copilot/settings.json`:
 `ajansari/ocpfBcAgenticDevFramework`, then install **ocpf-bc**. There's no AL compiler or VS Code
 project here, so it guides **DEFINE and DESIGN** and produces the documents; BUILD and PROVE
 continue in VS Code.
-
-**Microsoft Copilot Cowork (Microsoft 365 Copilot)** — *not yet fully vetted.* Download
-`ocpf-bc-cowork-<version>.zip` from
-[Releases](https://github.com/ajansari/ocpfBcAgenticDevFramework/releases), then in Cowork select
-**+** → **Customize** → **Plugins** → **Upload plugin** and choose who can use it.
-
-| Thing to know | Detail |
-|---|---|
-| **Licensing** | Needs a Microsoft 365 Copilot license and Cowork billing enabled by your admin. |
-| **What it covers** | DEFINE and DESIGN, like the Claude apps. Cowork doesn't support custom plugins on mobile. |
 
 </details>
 

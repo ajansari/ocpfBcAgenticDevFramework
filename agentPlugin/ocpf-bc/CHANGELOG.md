@@ -4,6 +4,44 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.7.2 — October 15, 2026
+
+**Bundles:** full runbook v5.7.2.0, Lite v5.7.2.0, **Standards Guide v1.12.1.0** (pin moved),
+Operations Guide v5.7.2.0. `build-a-feature`, `start`, `documents`, `al-standards`,
+`update-framework`, and `al-mcp-setup` skill text; the analysis-compile script header.
+
+- **Microsoft Copilot Cowork support is removed** — the package build script, the "not yet fully
+  vetted" install section, the release-checklist step, the update-table row, the `atk` credit, and
+  every mention in the `start` skill and the Operations Guide. It was never published (the
+  repository has no Releases for the documented download), and AJ does not intend to pursue it.
+  Claude's own Cowork surface is unaffected. October 15, 2026.
+- **Standards Guide pin moved to `v1.12.1.0`** — a wording fix to §3.2's *Obsolete removed* row,
+  which read as if an obsoleted field were deleted; it now says the field stays in the table and is
+  merely inaccessible, pointing at §9.4.
+
+- **Build-a-Feature writes the sandbox install guide with its package.** Part 6's *Yes* now writes
+  `docs/4-prove/SandboxInstall.md` from the template with the first package and rewrites §1 with
+  every later one, the same as Full Step 07 and Lite Step 5; the *Package built* block's *Install:*
+  line points at it. No guide for a package the agent didn't build. AJ, October 15, 2026.
+- **Release-test exit gates record which upgrade branch applied.** Full Step 12 / Lite Step 7
+  passed on "the upgrade path passes, or this is the first release" without saying which; the gate
+  now requires the choice recorded (`ReleaseTestResults.md` in Full, the ChangeLog in Lite), as
+  Step 03 already requires for "no upgrade code needed". Lite Step 7's upgrade-path test gains the
+  multi-company clause Full has (data in more than one company wherever `PerCompany` upgrade code
+  exists). Both from the September 16 issues log.
+- **AL MCP Server analyzer behaviour re-verified on AL Language extension 18.1.2842859** (a
+  fixture table with no permission set, every argument shape, the framework's own compile as the
+  control). `al_build` still ignores its analyzer arguments and workspace settings and packages
+  code with analyzer errors as `succeeded: true`; `al_compile` still applies analyzers only with
+  `enableCodeAnalysis: true` and a `codeAnalyzers` list under `options`. New nuance recorded: a
+  server launched with `--codeanalyzers` makes both tools apply analyzers (build fails without rule
+  codes; compile reports them) — the framework's launcher never passes that flag, so
+  `al-analyze.*` stays the mandatory compile. Ops § Analyzers, both cores, the `al-mcp-setup`
+  skill, and the script header say so, with both version stamps.
+- **README:** PoC Edition and the intake sheet shelved on the roadmap with the reason; dashboard
+  page-answers, a Copilot CLI live dashboard, and more themes listed as being considered; the
+  stale "Coming next" line in What's New replaced.
+
 ## 5.7.1 — October 15, 2026
 
 **Bundles:** full runbook v5.7.1.0, Lite v5.7.1.0, Standards Guide v1.12.0.0 (unchanged),

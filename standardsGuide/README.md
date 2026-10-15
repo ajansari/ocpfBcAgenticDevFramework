@@ -9,8 +9,8 @@ Central AL community can use it without this framework. This framework is one co
 |---|---|
 | Source repository | <https://github.com/ajansari/ocpfBCALStandards> |
 | File | `ocpfALDevStandardsGuide.md` at the repository root (same filename as before) |
-| **Pinned release this framework is validated against** | **`v1.12.0.0`** (Standards Guide 1.12.0.0) |
-| Raw URL the fetch uses | `https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/v1.12.0.0/ocpfALDevStandardsGuide.md` |
+| **Pinned release this framework is validated against** | **`v1.12.1.0`** (Standards Guide 1.12.1.0) |
+| Raw URL the fetch uses | `https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/v1.12.1.0/ocpfALDevStandardsGuide.md` |
 | Where a project keeps it | `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` + `SNAPSHOT.json` (unchanged on-disk path, gitignored) |
 | Offline copy | bundled in the `ocpf-bc` plugin's `al-standards` skill, refreshed from the pinned tag by `agentPlugin/tools/syncPlugin.sh` |
 

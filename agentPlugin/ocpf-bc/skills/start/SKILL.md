@@ -29,8 +29,8 @@ Decide which of these applies before asking anything:
 
 - **Project mode.** You can read and write files in a local or cloud workspace, for example Claude
   Code, GitHub Copilot in VS Code, Copilot CLI, or a cloud coding session. Continue with Step 2.
-- **Documents mode.** You can't write into a code project, for example Claude Chat, Claude Cowork
-  without a connected project folder, or Microsoft Copilot Cowork. Skip to
+- **Documents mode.** You can't write into a code project, for example Claude Chat, or Claude Cowork
+without a connected project folder. Skip to
   [Documents mode](#documents-mode-no-code-project) at the end.
 
 ## Step 2: Check the folder
@@ -297,7 +297,7 @@ notification kind at the runbook's first step counts as asking, for the settings
 
 ## Documents mode (no code project)
 
-On Claude Chat, Claude Cowork, or Microsoft Copilot Cowork, the framework's BUILD and PROVE phases
+On Claude Chat or Claude Cowork, the framework's BUILD and PROVE phases
 aren't possible. There's no AL compiler, VS Code project, or Git. Say so plainly, then offer the
 part that is:
 
@@ -315,8 +315,7 @@ part that is:
    - **Lite:** Steps 1–2: parameters and `DesignDoc.md`.
    The Human and AI Effort Estimates belong to the same pass as the TDD / Design Doc; the AI
    estimate needs fetched prices, so say it will be priced once the project is in a code workspace.
-4. **Produce each document as a file** the human can save, for example to OneDrive in Copilot
-   Cowork, or downloaded from Claude.
+4. **Produce each document as a file** the human can save or download from Claude.
 5. **Explain the hand-off.** In a VS Code AL project, run this skill again; it detects nothing is
    set up yet. Put the saved documents where the runbook expects them — `docs/1-define/` for the
    problem statement and parameters, `docs/2-design/` for the FRD, TDD, Sanity Check, Design Doc,

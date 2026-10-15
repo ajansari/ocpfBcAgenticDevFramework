@@ -303,12 +303,17 @@ now (recommended)** / *Not now — I'll build it from VS Code*.
 - **Yes:** open window `FPK` (`title` `Package`); apply Ops § Packaging → *Version numbers*
   mechanically — a new extension builds its first package at `0.0.0.1` as `app.json` says;
   otherwise increment the fourth segment, write it back, and build; never twice at one version —
-  into `outputAppPackage/<Name>_<version>.app`; say the fixed *Package built* message block from
-  Ops § Packaging; write the version into the **Shipped in** column of every row whose column is
+  into `outputAppPackage/<Name>_<version>.app`; **write `docs/4-prove/SandboxInstall.md`** from
+  its template (Ops § Packaging → *The sandbox install guide*) — the first package of the project
+  writes the whole document, every later package rewrites §1 only (file, version, Schema Sync
+  Mode, sandbox, dependencies); say the fixed *Package built* message block from Ops § Packaging,
+  whose *Install:* line points at that document (the human uploads; the agent never does
+  unprompted); write the version into the **Shipped in** column of every row whose column is
   still blank (a row already shipped keeps its first version); close the window with its usage
   rows. On a second package later in the same session (a fix found after packaging), the `FPK`
   row gets a second window; its stage shows the latest version.
-- **No:** say how to build it (`AL: Package` in VS Code) and that the version rule still applies.
+- **No:** say how to build it (`AL: Package` in VS Code) and that the version rule still applies;
+  no install guide is written for a package the agent didn't build.
 
 Then, **only when a package was built and the extension is new (`0.x`):** one box — *The
 package is tested and approved — build the release candidate 1.0.0.0 now* / *Not yet — I'll test

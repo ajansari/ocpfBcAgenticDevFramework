@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.7.1.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
+**Version:** 5.7.2.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
 **Last Updated:** October 13, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
@@ -551,7 +551,7 @@ Copilot, the picker's names from the table above):
   string a `.agent.md` file's `model:` needs.
 - **GitHub Copilot CLI:** `ask_user`, one question at a time in the same order, with *I'll type it*
   on each.
-- **A harness that can't run sub-agents at all** (Claude Chat, Microsoft Copilot Cowork, the
+- **A harness that can't run sub-agents at all** (Claude Chat, the
   github.com cloud agent): ask questions 1–2 only, say that the Light and Reasoning roles can't run
   here, and record `N/A — no sub-agents in this harness` for them.
 
@@ -1055,24 +1055,28 @@ syntax, **§1.7**). It doesn't replace symbol verification (Operating Rule 2), p
 Code uniqueness across extensions (**§5.4**), or judgment a compiler can't make, such as caption
 quality or the API caption-locking decisions.
 
-**How to run it** — verified on AL Language extension 18.0.2732683. On a newer release, re-verify by
-compiling a table with no permission set and confirming `PTE0004` appears:
+**How to run it** — verified on AL Language extension 18.0.2732683 and again on 18.1.2842859
+(October 15, 2026). On a newer release, re-verify by compiling a table with no permission set and
+confirming `PTE0004` appears:
 - **GitHub Copilot Chat in VS Code:** the built-in `al_build`, which reads the
   `.vscode/settings.json` analyzers when its `codeAnalyzers` argument is omitted.
 - **Claude Code, Copilot CLI, or any other MCP host: `ocpfFramework/scripts/al-analyze.*` is the mandatory
-  compile, not the AL MCP Server's own tools.** `al_build` never applies analyzers (observed on AL Language
-  extension 18.0.2732683; re-verify on a newer release) — whatever is passed as `codeAnalyzers`, as
-  the `--codeanalyzers` launch flag, or in workspace settings, even though its schema advertises
-  `enableCodeAnalysis` and `codeAnalyzers` — and
-  reports `succeeded: true` while packaging code that has analyzer *errors*. `al_compile` does
-  apply them, but only when `enableCodeAnalysis: true` **and** a `codeAnalyzers` list of the
+  compile, not the AL MCP Server's own tools.** `al_build` ignores its own `enableCodeAnalysis` and
+  `codeAnalyzers` arguments (top level or under `options`) and the workspace `.vscode/settings.json`
+  analyzers (observed on AL Language extension 18.0.2732683 and 18.1.2842859; re-verify on a newer
+  release) and reports `succeeded: true` while packaging code that has analyzer *errors*. It honours
+  analyzers only when the server itself was launched with `--codeanalyzers` — which the framework's
+  launcher never passes — and then it fails the build without listing the rule codes, so even that
+  shape can't serve as the analysis compile. `al_compile` does apply them, but only when `enableCodeAnalysis: true` **and** a `codeAnalyzers` list of the
   well-known tokens (`${CodeCop}`, `${PerTenantExtensionCop}`, `${UICop}`, `${AppSourceCop}`) are
   both passed **at the top level of `options`** — not wrapped in a `parameters` key, which only
   `al_symbolsearch` takes
   ([AL MCP Server](https://learn.microsoft.com/en-us/dynamics365/business-central/dev-itpro/developer/al-agent-tools/al-mcp-server)),
   and not as literal analyzer DLL paths, which return `AD0001` instead of rule results. **Get any
-  of that wrong and it returns a clean pass on failing code**, so never read an `al_compile` result
-  as a clean build unless the request had exactly that shape. It also produces no `.app`, so it's a
+  of that wrong and it returns a clean pass on failing code** (the one exception: a server launched
+  with `--codeanalyzers` applies them to an argument-less `al_compile`, per its schema's "uses the
+  server's startup configuration" — the framework's launcher doesn't launch it that way), so never
+  read an `al_compile` result as a clean build unless the request had exactly that shape. It also produces no `.app`, so it's a
   fast pre-check, never Operating Rule 4's compile-and-package. Run
   `ocpfFramework/scripts/al-analyze.sh <project folder> <output .app path> [pte|appsource]` instead (Windows:
   `ocpfFramework\scripts\al-analyze.cmd`, same arguments; the profile defaults to `pte`). The plugin's
@@ -1322,7 +1326,7 @@ the session?* Fix or drop whatever didn't, and update the record.
 settings and sounds (Microsoft's documentation and VS Code's source); the Copilot CLI's notifications
 and hooks (GitHub's documentation and changelog). Claude Code's VS Code extension has no
 notifications of its own (anthropics/claude-code issues #57230 and #29928). Windows and Linux weren't
-tested. Tools with neither notifications nor hooks (Claude Chat, Microsoft Copilot Cowork) can't
+tested. Tools with neither notifications nor hooks (Claude Chat) can't
 notify: say so and record `"channels": []`.
 
 ---
@@ -2022,7 +2026,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v5.7.1.0 the pin is `v1.12.0.0`** (Standards Guide 1.12.0.0).
+folder as `README.md`. For runbook **v5.7.2.0 the pin is `v1.12.1.0`** (Standards Guide 1.12.1.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2196,7 +2200,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.7.1.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.7.2.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
@@ -2274,7 +2278,7 @@ Nothing is written loose in `docs/`.
 | `GapAnalysis.md` | `docs/4-prove/GapAnalysis.md` | Full Step 08 |
 | `CodeReview.md` | `docs/4-prove/CodeReview.md` — §0 Scorecard (eight dimensions, A–F, overall = the lowest) before the findings | Full Step 09 (Lite writes the same scorecard table into its Step 6 ChangeLog entry) |
 | `Documentation.md`, `UserGuide.md`, `HumanUnitTestScript.md`, `Deployment.md` | the four Step 11 documents, in `docs/4-prove/` | Full Step 11 |
-| `SandboxInstall.md` | `docs/4-prove/SandboxInstall.md` — the human's upload procedure; §1 rewritten with every build | Full Step 07 / Lite Step 5, with the first package |
+| `SandboxInstall.md` | `docs/4-prove/SandboxInstall.md` — the human's upload procedure; §1 rewritten with every build | Full Step 07 / Lite Step 5, with the first package; Build-a-Feature Part 6, with the package |
 | `AutomatedTestGuide.md` | `docs/4-prove/AutomatedTestGuide.md` — install the test app and run each test on the AL Test Tool page | Full Step 11 / Lite Step 6, only when AL test codeunits exist |
 | `Acknowledgements.md` | `docs/0-project/Acknowledgements.md` — one row per resource actually used (author, license, how it was used), always committed | Full Step 11 / Lite Step 6 |
 | `ReleaseTestResults.md` | `docs/4-prove/ReleaseTestResults.md` | Full Step 12 |
@@ -2686,7 +2690,9 @@ journey says so and offers Full.
    Ops § Packaging → *Version numbers* applies unchanged — a new extension's first package at
    `0.0.0.1` as `app.json` says, every later package after a mechanical increment of the fourth
    segment, an existing extension's first package incremented from its installed version, never
-   two at one version — into `outputAppPackage/`, with the fixed *Package built* message and the
+   two at one version — into `outputAppPackage/`, with `docs/4-prove/SandboxInstall.md` written
+   with the first package and its §1 rewritten by every later one (*The sandbox install guide*,
+   above), with the fixed *Package built* message and the
    version written into every row's *Shipped in*. Then, for a new extension only and only when a
    package was built: *The package is tested and approved — build the release candidate 1.0.0.0
    now* / *Not yet — I'll test it first (recommended)*; on *Not yet* the offer returns the next
@@ -2799,7 +2805,7 @@ repository.
 
 The framework is also distributed as an agent plugin, `ocpf-bc`, from the same repository
 (`agentPlugin/ocpf-bc`, listed in `.claude-plugin/marketplace.json`). It works in Claude Code, the
-Claude apps, GitHub Copilot (VS Code, Copilot CLI, github.com), and Microsoft Copilot Cowork. It's
+Claude apps, and GitHub Copilot (VS Code, Copilot CLI, github.com). It's
 **optional**: copying the runbook into a project by hand, as `CLAUDE.md` or
 `.github/copilot-instructions.md`, is fully supported and behaves the same.
 

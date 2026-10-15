@@ -80,7 +80,8 @@ record.
 ## Versioning, in one paragraph
 
 Ops § Packaging → *Version numbers*, unchanged: a new extension starts at `0.0.0.1` and its first
-package is built at that version as is; every later package increments the fourth segment first,
+package is built at that version as is (and `docs/4-prove/SandboxInstall.md` is written with it —
+§1 rewritten by every later package — for the person who uploads it); every later package increments the fourth segment first,
 mechanically, with no approval; an existing extension's first package increments from the
 installed version; never two packages at one version (`al-analyze.*` refuses to overwrite, exit
 code 4). The release candidate — `1.0.0.0` for a new extension, the next Minor or Major for an

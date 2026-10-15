@@ -4,10 +4,12 @@
 # Compiles the project with Microsoft's bundled code analyzers actually engaged, using tools
 # already on this machine. Nothing is installed.
 #
-# Why not the AL MCP Server's al_build/al_compile (AL Language extension 18.0.2732683; see the
-# runbook's ALL ALONG → Analyzers and Ops § Analyzers). Re-verify against newer releases.
-#   al_build   never applies analyzers, whatever is passed, and reports succeeded:true while
-#              packaging code that has analyzer errors.
+# Why not the AL MCP Server's al_build/al_compile (AL Language extension 18.0.2732683, re-verified
+# on 18.1.2842859; see the runbook's ALL ALONG → Analyzers and Ops § Analyzers). Re-verify against
+# newer releases.
+#   al_build   ignores its enableCodeAnalysis/codeAnalyzers arguments and workspace settings, and
+#              reports succeeded:true while packaging code that has analyzer errors. Only a server
+#              launched with --codeanalyzers makes it fail, and then without the rule codes.
 #   al_compile applies them only when enableCodeAnalysis:true AND a codeAnalyzers list of the
 #              ${CodeCop} / ${PerTenantExtensionCop} / ${UICop} / ${AppSourceCop} tokens are both
 #              passed at the top level of "options" — not under a "parameters" key (that wrapper is

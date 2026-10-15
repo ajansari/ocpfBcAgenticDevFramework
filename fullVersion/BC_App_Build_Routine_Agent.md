@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.7.1.0
+**Version:** 5.7.2.0
 **Last Updated:** October 13, 2026
 
 > Version history for this framework lives in `ocpfFramework/RunbookChangelog.md`, tracked
@@ -16,9 +16,9 @@
 >
 > **Companion documents, both fetched at PRE-01 and kept for the life of the project:**
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
->   (v1.12.0.0): the AL *rules* this sequence applies (Parts 1–11, Appendices A–E), cited below as
+>   (v1.12.1.0): the AL *rules* this sequence applies (Parts 1–11, Appendices A–E), cited below as
 >   **Standards §**.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.7.1.0): the *procedures*
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.7.2.0): the *procedures*
 >   this sequence uses — asking, intake, project setup, the AL tools, tooling checks, analyzers,
 >   symbols, editor sync, notifications, packaging, repository hygiene, translations, fetched
 >   companions, documents, usage and cost, and the plugin — cited below as **Ops §**. Both editions
@@ -486,7 +486,7 @@ is the human's.
 
 **Outputs:** `docs/4-prove/ReleaseTestResults.md` — the Dev Manager's review (who, when, findings), every test case, its result, and a link to any ChangeLog issue it produced; the name of the package that passed, stated explicitly.
 
-**Exit gate:** The Dev Manager has reviewed `docs/4-prove/PostDevTDD.md`, the FRD baseline, and Step 11's documents (recorded in `docs/4-prove/ReleaseTestResults.md`); all green-team tests pass; all red-team tests fail gracefully; the upgrade path passes, or this is the extension's first release (Standards §9.6); permission sets verified; every translated document §1.9 requires exists and has been reviewed; every language required at first release has passed its language pass and its state scan shows every unit `signed-off` or `final` (Ops § Translations). **If everything passes, the package that was actually tested is the one deployed to the production environment, as it is** — no rename, no copy, no bump, no rebuild — and that deploy is the human's, through the Admin Center's Manage Apps (or Extension Management while it lasts), never the agent's (Ops § Packaging); say explicitly which package passed. **Before that deploy, restate the "Package built:" block for this exact package** (ALL ALONG → Packaging & Versioning), its schema line judged against the last version installed in production — **Add** if this release is additive-only, **Force Sync** with the explicit data-loss warning if anything was removed, shrunk, retyped, or re-keyed since that release. `ProjectProgress.md`'s Step 12 row is `Completed`, its usage rows are written (Operating Rule 11), and the calibration file is exported to `~/.ocpf/calibration/` — by the agent if brought back in, by hand otherwise.
+**Exit gate:** The Dev Manager has reviewed `docs/4-prove/PostDevTDD.md`, the FRD baseline, and Step 11's documents (recorded in `docs/4-prove/ReleaseTestResults.md`); all green-team tests pass; all red-team tests fail gracefully; the upgrade path passes, or this is the extension's first release — and `docs/4-prove/ReleaseTestResults.md` records which of the two applied (Standards §9.6); permission sets verified; every translated document §1.9 requires exists and has been reviewed; every language required at first release has passed its language pass and its state scan shows every unit `signed-off` or `final` (Ops § Translations). **If everything passes, the package that was actually tested is the one deployed to the production environment, as it is** — no rename, no copy, no bump, no rebuild — and that deploy is the human's, through the Admin Center's Manage Apps (or Extension Management while it lasts), never the agent's (Ops § Packaging); say explicitly which package passed. **Before that deploy, restate the "Package built:" block for this exact package** (ALL ALONG → Packaging & Versioning), its schema line judged against the last version installed in production — **Add** if this release is additive-only, **Force Sync** with the explicit data-loss warning if anything was removed, shrunk, retyped, or re-keyed since that release. `ProjectProgress.md`'s Step 12 row is `Completed`, its usage rows are written (Operating Rule 11), and the calibration file is exported to `~/.ocpf/calibration/` — by the agent if brought back in, by hand otherwise.
 
 ---
 
@@ -812,8 +812,8 @@ and at Step 07's compile.
   **PerTenantExtensionCop** (SaaS/OnPrem PTE) or **AppSourceCop** (AppSource) — never both.
 - `.vscode/settings.json` (and `AppSourceCop.json` for AppSource) is created at Step 05's scaffold
   (`ocpfFramework/runbookSteps/05.md`); a Copilot request-limit key written at PRE-01 is merged, never overwritten.
-- Outside GitHub Copilot Chat, run `ocpfFramework/scripts/al-analyze.*`. The AL MCP Server's `al_build` never
-  applies analyzers (observed on AL extension 18.0.2732683; re-verify on a newer release), and its
+- Outside GitHub Copilot Chat, run `ocpfFramework/scripts/al-analyze.*`. The AL MCP Server's `al_build` ignores
+  its analyzer arguments and workspace settings (observed on AL extension 18.0.2732683 and 18.1.2842859; re-verify on a newer release), and its
   `al_compile` only does so with one exact argument shape — anything
   else returns a clean pass on failing code (**Ops § Analyzers**). Never treat an `al_compile`
   result as the mandatory compile: it produces no `.app`.
@@ -880,7 +880,7 @@ change.
 
 ## OCPF AL Development Standards Guide
 
-The companion rules document — `ocpfALDevStandardsGuide.md`, v1.12.0.0 — holds the AL rules this
+The companion rules document — `ocpfALDevStandardsGuide.md`, v1.12.1.0 — holds the AL rules this
 runbook cites as **Standards §**, from PRE-02 onward. Its sibling, the **Operations Guide**
 (`ocpfOperationsGuide.md`, v5.1.0.0), holds the procedures, cited as **Ops §**.
 

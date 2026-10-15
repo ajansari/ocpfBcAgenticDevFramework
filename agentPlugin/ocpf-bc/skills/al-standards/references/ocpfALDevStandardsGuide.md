@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans — Business Central AL Development Standards
 
-**Version:** 1.12.0.0
-**Last Updated:** October 10, 2026
+**Version:** 1.12.1.0
+**Last Updated:** October 15, 2026
 
 > **Audience:** Human developers and agentic (AI) developers building Business Central AL
 > extensions — **Per-Tenant Extensions (PTEs) and AppSource apps alike**. Every Part applies to
@@ -515,7 +515,7 @@ planned, versioned API change.
 |---|---|---|
 | Localization-specific fields | Per the Localization parameter. For `W1`: exclude all field IDs **10,000–89,999**. For a specific localization: exclude fields outside that localization's applicable range. Verify each field's classification in the symbol file. | Prevents exposing irrelevant/region-specific data and protects deployment portability. |
 | Obsolete pending | `ObsoleteState = Pending` — **all**, unconditionally | Platform has flagged it for removal; do not expose it in new builds. |
-| Obsolete removed | `ObsoleteState = Removed` | Already removed from the platform. |
+| Obsolete removed | `ObsoleteState = Removed` | No longer accessible from AL — the field still exists in the table so the schema holds (§9.4), but nothing can read or expose it. |
 | BLOB fields | Type = `Blob` | Binary data; no OData serialization value. |
 | FlowFilter fields | Class = `FlowFilter` | Cannot be serialized via OData. |
 | Localization-specific tables | Verify each table against the Localization parameter; exclude tables that do not apply to the target (e.g., for `W1`: US Sales Tax, GST/HST, country-specific ledger tables). | Same principle as field-level localization, at table level. |

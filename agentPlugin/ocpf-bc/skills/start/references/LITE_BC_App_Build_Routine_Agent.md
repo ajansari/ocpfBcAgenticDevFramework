@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 5.7.1.0 (Lite, derived from the full framework v5.7.1.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
+**Version:** 5.7.2.0 (Lite, derived from the full framework v5.7.2.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
 **Last Updated:** October 13, 2026
 
 > Version history for this edition lives in `ocpfFramework/LITE_RunbookChangeLog.md`, tracked
@@ -19,9 +19,9 @@
 
 > **Companion documents, both fetched at Step 1 and shared unchanged with the full framework:**
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
->   (v1.12.0.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
+>   (v1.12.1.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.7.1.0), cited as
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.7.2.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
 >   tooling checks, analyzers, symbols, editor sync, notifications, packaging, repository hygiene,
 >   translations, fetched companions, documents, usage and cost, and the plugin.
@@ -426,7 +426,7 @@ the production deploy is the human's.
 **Outputs:** `docs/0-project/ChangeLog.md` updated with every test finding and its resolution.
 
 **Exit gate:** All green-team tests pass; all red-team tests fail gracefully; the upgrade path
-passes, or this is the first release (**Standards §9.6**); permission sets
+passes, or this is the first release — the ChangeLog entry says which of the two applied (**Standards §9.6**); permission sets
 verified; every translated document Step 1 asked for exists and has been reviewed; every required
 language has passed its language pass and its state scan shows every unit `signed-off` or `final`
 (Ops § Translations).
@@ -591,7 +591,7 @@ first package and before Step 6's release-candidate question. The non-negotiable
 ## OCPF AL Development Standards Guide
 
 Two companions are fetched at Step 1 and kept for the life of the project: the **Standards Guide**
-(`ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md`, v1.12.0.0), cited as **Standards §**, and the
+(`ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md`, v1.12.1.0), cited as **Standards §**, and the
 **Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v5.1.0.0), cited as **Ops §** and shared
 unchanged with the full framework.
 
@@ -664,8 +664,8 @@ for a remote first, since collaborators will see the files as deleted.
 - The mandatory compile runs **CodeCop**, **UICop**, and exactly one of **PerTenantExtensionCop**
   (SaaS/OnPrem PTE) or **AppSourceCop** (AppSource) — never both.
 - `.vscode/settings.json`, and `AppSourceCop.json` for AppSource, are created at Step 3.
-- Outside Copilot Chat, run `ocpfFramework/scripts/al-analyze.*`. The AL MCP Server's `al_build` never applies
-  analyzers (observed on AL extension 18.0.2732683; re-verify on a newer release), and its
+- Outside Copilot Chat, run `ocpfFramework/scripts/al-analyze.*`. The AL MCP Server's `al_build` ignores its
+  analyzer arguments and workspace settings (observed on AL extension 18.0.2732683 and 18.1.2842859; re-verify on a newer release), and its
   `al_compile` only does so with one exact argument shape — anything else
   returns a clean pass on failing code, and it produces no `.app` (**Ops § Analyzers**).
 - **Read the warnings, not just the result** — `al-analyze` exits `3` on warnings, and any warning
@@ -852,7 +852,7 @@ done silently.
 | Step 7 — Release for Testing | Step 12 |
 
 **Shared with the full framework, not reduced:** the OCPF AL Development Standards Guide. Both
-editions fetch the same v1.12.0.0 file and apply the same AL rules — Lite differs only in process.
+editions fetch the same v1.12.1.0 file and apply the same AL rules — Lite differs only in process.
 
 **Document count:** 4 maintained documents (`docs/2-design/DesignDoc.md`, `docs/0-project/ChangeLog.md`, `docs/4-prove/Docs.md`,
 `docs/4-prove/TestScript.md`), plus `ProjectProgress.md` (project root, both tables), Step 1's two
