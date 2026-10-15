@@ -24,6 +24,18 @@ specifically to keep a superseded decision on record — see the runbook's ALL A
 
 ---
 
+## v5.6.2.0 — October 15, 2026
+
+**Dashboard: the bottom row shares one height.** Lite **v5.6.2.0**, Operations Guide
+**v5.6.2.0**, Standards Guide **v1.12.0.0** (unchanged), plugin **5.6.2**. Dashboard template
+only; the runbooks carry the version.
+
+- *Who is working*, *Tokens by model*, the exit gate, and *Waiting on you* stretch to the tallest
+  card in the row, as the first-row tiles have since v5.6.0.0; a collapsed card sits at the top of
+  the row. Should have shipped with the tile change; AJ pointed it out.
+
+---
+
 ## v5.6.1.0 — October 14, 2026
 
 **Dashboard: text stays inside its boxes; the estimate tile reports an overrun.** Lite

@@ -4,6 +4,16 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.6.2 — October 15, 2026
+
+**Bundles:** full runbook v5.6.2.0, Lite v5.6.2.0, Standards Guide v1.12.0.0 (unchanged),
+Operations Guide v5.6.2.0. `dashboard` skill template only.
+
+- **Dashboard (OnlyBCFans page): the bottom row shares one height.** *Who is working*, *Tokens
+  by model*, the exit gate, and *Waiting on you* stretch to the tallest card in the row, as the
+  first-row tiles have since 5.6.0; a collapsed card sits at the top of the row. Should have
+  shipped with the tile change; AJ pointed it out.
+
 ## 5.6.1 — October 14, 2026
 
 **Bundles:** full runbook v5.6.1.0, Lite v5.6.1.0, Standards Guide v1.12.0.0 (unchanged),

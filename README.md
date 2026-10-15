@@ -54,6 +54,11 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 15, 2026 — Full v5.6.2.0 · Lite v5.6.2.0 · Operations Guide v5.6.2.0 · Plugin v5.6.2
+
+**The dashboard's bottom row of cards shares one height**, as the first-row tiles do. Template
+only.
+
 ## October 14, 2026 — Full v5.6.1.0 · Lite v5.6.1.0 · Operations Guide v5.6.1.0 · Plugin v5.6.1
 
 **Dashboard text stays inside its boxes.** Tile detail lines wrap instead of clipping, the

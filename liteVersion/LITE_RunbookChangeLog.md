@@ -16,6 +16,16 @@ framework.
 
 ---
 
+## v5.6.2.0 — October 15, 2026
+
+Derived from full framework **v5.6.2.0**; Operations Guide **v5.6.2.0**; Standards Guide
+**v1.12.0.0** (unchanged); plugin **5.6.2**. Dashboard template only.
+
+- The dashboard's bottom row of cards shares one height, as the first-row tiles do. Full
+  changelog: *v5.6.2.0*.
+
+---
+
 ## v5.6.1.0 — October 14, 2026
 
 Derived from full framework **v5.6.1.0**; Operations Guide **v5.6.1.0**; Standards Guide

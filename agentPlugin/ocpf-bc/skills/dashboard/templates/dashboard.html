@@ -456,8 +456,10 @@
   .panel.collapsed>*:not(h2):not(.cbtn){display:none}
   .panel.collapsed h2{margin:0}
   .panel[data-cid] h2{padding-right:30px}
-  .grid{align-items:start}
+  /* the bottom row, like the tiles: every card takes the row's height; a collapsed card sits at the top */
+  .grid{align-items:stretch}
   .card{position:relative}
+  .card.collapsed{align-self:start}
   .card h3{padding-right:28px}
   .card.collapsed h3 .sub{display:none}
   .card.collapsed>*:not(h3):not(.cbtn){display:none}
