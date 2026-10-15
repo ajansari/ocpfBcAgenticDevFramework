@@ -4,6 +4,28 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.6.1 — October 14, 2026
+
+**Bundles:** full runbook v5.6.1.0, Lite v5.6.1.0, Standards Guide v1.12.0.0 (unchanged),
+Operations Guide v5.6.1.0. `dashboard` skill templates only.
+
+- **Dashboard (OnlyBCFans page): text stays inside its box.** The first-row tiles can shrink below
+  their content and their detail line wraps instead of clipping (`in · out · cache` no longer ends
+  in `…`); the estimate tile's label wraps under its status chip and clears the collapse button;
+  the time legend wraps when the tile is narrow. On the Journey, stations sit fully inside the
+  panel, the rail spans the same range as the stations (the comet no longer sits to the right of
+  the current node), the current station's `IN PROGRESS` label fits its column, and a sub-agent
+  chip that would run off the right edge opens to the left of its spur. Found on AJ's Step 12 run.
+- **Journey phase blocks keep a minimum width.** The blocks are sized by row count, so on a
+  Build-a-Feature journey (one row in Intake, Review, and Package beside thirteen in Build) a
+  one-row phase was a sliver with its number, name, and summary written over each other. Each
+  block now has a floor of 196px and the Build block takes what is left. Found on AJ's Summit
+  Support POC01 run.
+- **Estimate tile shows an overrun.** The status chip and the percentage used the bar's capped
+  value, so 13.25M of 10.20M read "Near estimate · 100%". Both now use the real figure
+  ("Over estimate · 130%"); only the bar is capped. The F1 page's "Lap vs target" percentage is
+  uncapped the same way.
+
 ## 5.6.0 — October 13, 2026
 
 **Bundles:** full runbook v5.6.0.0, Lite v5.6.0.0, Standards Guide v1.12.0.0 (unchanged),

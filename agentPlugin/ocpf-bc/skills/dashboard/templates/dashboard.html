@@ -504,6 +504,18 @@
   .gate .txt{color:var(--text-2)}
   .grid .card{min-width:0}
   .st .nm{font-size:11px}
+  /* keep text inside the boxes: tiles may shrink below their content (min-width:0), the detail line wraps instead of
+     clipping, the estimate label wraps and clears the collapse button, the time legend wraps, and the station label
+     under the current step drops its trailing dots so it fits its column */
+  .tile{min-width:0}
+  .tile .m{white-space:normal;overflow:visible;text-overflow:clip;overflow-wrap:anywhere}
+  .tile .k{padding-right:34px}
+  .est .k{white-space:normal;flex-wrap:wrap;gap:2px 10px}
+  .status{white-space:nowrap}
+  .tile.time .tleg{flex-wrap:wrap;gap:3px 9px}
+  .phase .sub{overflow:hidden}
+  .st.now .id{letter-spacing:.06em}
+  .st.now .id::after{content:none;animation:none}
 </style>
 </head>
 <body>
@@ -602,8 +614,8 @@ tiles.push(`<div class="tile in" style="--d:.4s"><div class="k">Decisions asked<
 const est=D.estimate;let estHtml;
 if(feature){const objs=(D.steps||[]).filter(s=>/^F\d{2}$/.test(s.id)&&s.id!=='F00');const built=objs.filter(s=>s.status==='done').length;const curObj=objs.find(s=>s.status==='now');
   estHtml=`<div class="k">Objects built</div><div class="v">${built}<small> of ${objs.length}</small></div><div class="m">${curObj?esc((curObj.kind?curObj.kind+' ':'')+curObj.short)+(curObj.stage?' · '+esc(curObj.stage):''):(objs.length?'none in progress':'nothing asked for yet')}${(D.steps||[]).some(s=>s.id==='FPK'&&s.status==='done')?' · packaged':''}</div>`;}
-else if(est&&est.estimated){const pct=Math.min(100,Math.round(100*est.used/est.estimated));const ok=pct<=100?(pct<=90?['✓ On track','var(--good)']:['Near estimate','var(--warning)']):['Over estimate','var(--critical)'];
-  estHtml=`<div class="k" style="display:flex;justify-content:space-between;align-items:center"><span>Step ${esc(cur.id||'')} vs AI Effort Estimate</span><span class="status"><span class="sw" style="background:${ok[1]}"></span>${ok[0]}</span></div><div class="bar"><div class="fill" style="animation:none;width:${pct}%"></div><div class="head" style="animation:none;left:${pct}%"></div><div class="mark"></div></div><div class="legend"><span>${copilot?fmtN(est.used)+' of '+fmtN(est.estimated)+' credits estimated':fmtTok(est.used)+' used of '+fmtTok(est.estimated)+' estimated'}</span><span>${pct}%</span></div>`;}
+else if(est&&est.estimated){const raw=Math.round(100*est.used/est.estimated);const pct=Math.min(100,raw);const ok=raw<=100?(raw<=90?['✓ On track','var(--good)']:['Near estimate','var(--warning)']):['Over estimate','var(--critical)'];
+  estHtml=`<div class="k" style="display:flex;justify-content:space-between;align-items:center"><span>Step ${esc(cur.id||'')} vs AI Effort Estimate</span><span class="status"><span class="sw" style="background:${ok[1]}"></span>${ok[0]}</span></div><div class="bar"><div class="fill" style="animation:none;width:${pct}%"></div><div class="head" style="animation:none;left:${pct}%"></div><div class="mark"></div></div><div class="legend"><span>${copilot?fmtN(est.used)+' of '+fmtN(est.estimated)+' credits estimated':fmtTok(est.used)+' used of '+fmtTok(est.estimated)+' estimated'}</span><span>${raw}%</span></div>`;}
 else estHtml=`<div class="k">Step ${esc(cur.id||'')} vs AI Effort Estimate</div><div class="v" style="font-size:16px;margin-top:8px;color:var(--text-2)">${est&&est.note?esc(est.note):'No estimate yet'}</div><div class="m">${fw.edition==='lite'?'written at Step 2':'written at Step 03'} · docs/2-design/AiEffortEstimate.md</div>`;
 tiles.push(`<div class="tile est in" style="--d:.5s">${estHtml}</div>`);
 $('tiles').innerHTML=tiles.join('');
@@ -618,12 +630,12 @@ const byPh=PH.map((p,i)=>{const ss=steps.filter(s=>s.phase===p);const done=ss.fi
   const sub=st==='done'?`<b>${done} of ${ss.length}</b> · ${hm(el)} · ${usd(cost)}`:now?`<b>${feature?(unit[0].toUpperCase()+unit.slice(1)):'Step'} ${ss.indexOf(now)+1} of ${ss.length}</b> · ${hm(el)} · ${usd(cost)}`:done?`<b>${done} of ${ss.length}</b> done · ${hm(el)} · ${usd(cost)}`:ss.length?`<b>${ss.length} ${unit}${ss.length>1?'s':''}</b> ahead`:(feature?'<b>not yet</b>':'');
   const pct=ss.length?Math.round(100*(done+(now?0.5:0))/ss.length):0;
   return {p,ss,st,html:`<div class="phase ${st}"><span class="num">0${i+1}</span><span class="nm">${p[0]+p.slice(1).toLowerCase()}</span><span class="sub">${sub}</span><span class="pct"><i style="--p:${pct}%"></i></span></div>`};});
-$('phases').style.gridTemplateColumns=byPh.map(x=>Math.max(1,x.ss.length)+'fr').join(' ');
+$('phases').style.gridTemplateColumns=byPh.map(x=>`minmax(196px,${Math.max(1,x.ss.length)}fr)`).join(' ');  // a one-row phase still gets room for its number, name, and summary
 $('phases').innerHTML=byPh.map(x=>x.html).join('');
 const n=steps.length,doneN=steps.filter(s=>s.status==='done').length,nowI=steps.findIndex(s=>s.status==='now');
 $('journeySub').textContent=feature?`${n} row${n===1?'':'s'} · ${doneN} closed · ${nowI>=0?'1 in progress':'none in progress'} · one row per object`:`${n} stations · ${doneN} reached · ${nowI>=0?'1 in progress':'none in progress'}`;
-(function(){const line=$('line');const W=line.clientWidth||1360;const pad=40;const gap=n>1?(W-2*pad)/(n-1):0;const progPct=n>1?((nowI>=0?nowI:doneN-0.5)/(n-1))*100:0;
-  let h=`<div class="rail"><div class="prog" style="animation:none;width:${Math.max(0,progPct)}%"></div>${nowI>=0?`<div class="comet" style="animation:none;left:${progPct}%"></div><div class="pulse" style="left:${progPct}%"></div>`:''}</div>`;
+(function(){const line=$('line');const W=line.clientWidth||1360;const pad=60;const gap=n>1?(W-2*pad)/(n-1):0;const progPct=n>1?((nowI>=0?nowI:doneN-0.5)/(n-1))*100:0;
+  let h=`<div class="rail" style="left:${pad}px;right:${pad}px"><div class="prog" style="animation:none;width:${Math.max(0,progPct)}%"></div>${nowI>=0?`<div class="comet" style="animation:none;left:${progPct}%"></div><div class="pulse" style="left:${progPct}%"></div>`:''}</div>`;
   steps.forEach((s,i)=>{const x=pad+i*gap;const stg=s.stage?esc(s.stage)+(s.objectId?' · '+esc(s.objectId):''):'';const meta=s.status==='done'?`${stg?stg+' · ':''}${hm(s.elapsedSeconds)} · ${usd(s.costUsd)}`:s.status==='now'?`${stg?stg+' · ':''}${hm(s.elapsedSeconds)} · ${usd(s.costUsd)}${s.note?' · '+esc(s.note):''}`:(stg||'');
     const idTxt=s.status==='now'?'IN PROGRESS':s.id;const node=s.status==='done'?'':esc(s.id.replace('PRE-','P'));
     h+=`<div class="st ${s.status}" style="left:${x}px;--d:${(0.3+i*0.12).toFixed(2)}s;width:${Math.min(110,Math.max(70,gap-6))}px;margin-left:-${Math.min(55,Math.max(35,(gap-6)/2))}px"><div class="node">${node}</div><div class="id">${idTxt}</div><div class="nm">${esc(s.short||s.title)}</div><div class="meta">${meta}</div></div>`;});
@@ -631,7 +643,7 @@ $('journeySub').textContent=feature?`${n} row${n===1?'':'s'} · ${doneN} closed 
   const subs=(D.roles||[]).filter(r=>r.role!=='Main'&&r.role!=='Generator'&&(r.status==='running'||r.lastDetail));
   line.style.setProperty('--lineH',(nowI>=0&&subs.length?200:120)+'px');
   if(nowI>=0&&subs.length){const x=pad+nowI*gap;subs.slice(0,2).forEach((r,k)=>{const cls=r.role==='Reasoning'?'r':'l';const top=112+k*44;
-    h+=`<div class="spur ${cls}" style="left:${x-1}px;top:112px;height:${top-112+14}px;--d:3s"></div><div class="spurchip ${cls}" style="left:${x+10}px;top:${top+6}px;--d:3.1s;${r.status==='running'?'':'--o:.65'}"><span class="sc-av" style="background:var(--${cls==='r'?'reasoning':'light'})">${r.role[0]}${r.status==='running'?'<span class="spin"></span>':''}</span><span><b>${esc(r.role)}</b> · ${esc(r.model||'')}<br>${esc(r.status==='running'?('running · '+hm(r.runningSeconds)):(r.lastDetail||'idle'))}</span></div>`;});}
+    const flip=x+10+360>W;h+=`<div class="spur ${cls}" style="left:${x-1}px;top:112px;height:${top-112+14}px;--d:3s"></div><div class="spurchip ${cls}" style="${flip?`right:${Math.round(W-x+10)}px`:`left:${x+10}px`};top:${top+6}px;--d:3.1s;${r.status==='running'?'':'--o:.65'}"><span class="sc-av" style="background:var(--${cls==='r'?'reasoning':'light'})">${r.role[0]}${r.status==='running'?'<span class="spin"></span>':''}</span><span><b>${esc(r.role)}</b> · ${esc(r.model||'')}<br>${esc(r.status==='running'?('running · '+hm(r.runningSeconds)):(r.lastDetail||'idle'))}</span></div>`;});}
   line.innerHTML=h;})();
 
 // ---- waiting on you ----

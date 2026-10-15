@@ -24,6 +24,28 @@ specifically to keep a superseded decision on record — see the runbook's ALL A
 
 ---
 
+## v5.6.1.0 — October 14, 2026
+
+**Dashboard: text stays inside its boxes; the estimate tile reports an overrun.** Lite
+**v5.6.1.0**, Operations Guide **v5.6.1.0**, Standards Guide **v1.12.0.0** (unchanged), plugin
+**5.6.1**. Dashboard templates only; the runbooks carry the version.
+
+- **Tiles.** The first-row tiles can shrink below their content and their detail line wraps
+  instead of clipping; the estimate tile's label wraps under its status chip and clears the
+  collapse button; the time legend wraps when the tile is narrow. Found on AJ's Step 12 run,
+  where the tokens line ended in `…` and the estimate label ran under the button.
+- **Journey.** Stations sit fully inside the panel, the rail spans the same range as the
+  stations (the comet no longer sits to the right of the current node), the current station's
+  `IN PROGRESS` label fits its column, and a sub-agent chip that would run off the right edge
+  opens to the left of its spur. The phase blocks keep a minimum width: on a Build-a-Feature
+  journey (one row in Intake, Review, and Package beside thirteen in Build) a one-row phase was a
+  sliver with its number, name, and summary written over each other.
+- **Estimate tile.** The status chip and the percentage used the bar's capped value, so 13.25M
+  used of 10.20M estimated read "Near estimate · 100%". Both now use the real figure ("Over
+  estimate · 130%"); only the bar is capped. The F1 page's "Lap vs target" is uncapped too.
+
+---
+
 ## v5.6.0.0 — October 13, 2026
 
 **Build-a-Feature fixes from the first runs; remediation rows on the journey; the dashboard's

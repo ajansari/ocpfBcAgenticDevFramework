@@ -54,6 +54,14 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 14, 2026 — Full v5.6.1.0 · Lite v5.6.1.0 · Operations Guide v5.6.1.0 · Plugin v5.6.1
+
+**Dashboard text stays inside its boxes.** Tile detail lines wrap instead of clipping, the
+estimate label clears the collapse button, the Journey's stations and sub-agent chips stay inside
+the panel, and a one-row phase on a Build-a-Feature journey no longer writes its name over its
+number. The estimate tile now says "Over estimate · 130%" when a step overruns instead of capping
+at 100%. Templates only.
+
 ## October 13, 2026 — Full v5.6.0.0 · Lite v5.6.0.0 · Operations Guide v5.6.0.0 · Plugin v5.6.0
 
 **Build-a-Feature starts new work at `0.0.0.1`, like every journey.** A folder scaffolded by
