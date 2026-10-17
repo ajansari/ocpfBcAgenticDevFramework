@@ -44,6 +44,7 @@ FEATURE_GATES = {
     "INTAKE": ["The one intake question answered and the plan said back, object by object.", "The F00 window closed with its usage rows."],
     "BUILD": ["Asked: what the object is and what it holds.", "Confirmed: fields, types, and the key confirmed in one box.",
               "Built: the file written whole from the Standards Guide and the patterns library.", "Compiled: 0 errors / 0 warnings with the analyzers.",
+              "Documented: its section in docs/Documentation.md, its row in docs/FeatureRegister.md and docs/DataModel.md, its ChangeLog line.",
               "Closed: usage rows written and pasted; the companion box answered."],
     "PACKAGE": ["Version moved per Ops § Packaging → Version numbers; the package in outputAppPackage/; Shipped in filled on every row it holds."],
     "REVIEW": ["Standards Guide, BCQuality, and the AL Guidelines read against this session's files; findings presented once; approved fixes compiled clean."]}
@@ -179,6 +180,47 @@ def windows(usage):
         if w[2] is None and i + 1 < len(wins): w[2] = wins[i + 1][1]
     return wins
 
+def transcript_spans(root, usage):
+    """(first, last) timestamp of each top-level Claude Code session file in the project's transcript folder."""
+    spans = []
+    for f in glob.glob(os.path.join(transcript_dir(root, usage), "*.jsonl")):
+        lo = hi = None
+        try:
+            with open(f, encoding="utf-8", errors="replace") as fh:
+                for line in fh:
+                    i = line.find('"timestamp":"')
+                    if i < 0: continue
+                    ts = parse_ts(line[i + 13:i + 13 + 24].split('"')[0])
+                    if not ts: continue
+                    lo = ts if lo is None or ts < lo else lo; hi = ts if hi is None or ts > hi else hi
+        except OSError: continue
+        if lo and hi: spans.append((lo, hi))
+    return spans
+
+def anchor_first_window(wins, spans, notes):
+    """The first window starts where the session that opened it started (v5.8.0.0) — the same rule the usage script
+    applies, so the clock and the tokens begin together. Only a session that contains the recorded startedAt counts;
+    an earlier, separate session in the same folder never does."""
+    if not wins or not spans: return wins
+    step, a, b = wins[0]
+    hit = [s for s, e in spans if s and e and s <= a <= e and s < a]
+    if not hit: return wins
+    s0 = min(hit)
+    notes.append(f"{step} starts at the session's first event ({s0.astimezone().strftime('%H:%M')}), before its recorded startedAt")
+    return [[step, s0, b]] + list(wins[1:])
+
+def union_seconds(wins):
+    """Elapsed time of the whole project: the union of every window, so two windows open at once count once."""
+    iv = sorted((a, b or now_utc()) for _, a, b in wins)
+    total = 0.0; cur_a = cur_b = None
+    for a, b in iv:
+        if cur_b is None or a > cur_b:
+            if cur_b is not None: total += (cur_b - cur_a).total_seconds()
+            cur_a, cur_b = a, b
+        elif b > cur_b: cur_b = b
+    if cur_b is not None: total += (cur_b - cur_a).total_seconds()
+    return max(0.0, total)
+
 def elapsed_by_step(wins):
     out = {}
     for sid, a, b in wins:
@@ -254,6 +296,8 @@ def claude_live(root, usage, wins, steps_idx):
             gap = (ts - prev[0]).total_seconds(); sid = step_of(prev[0]) or step_of(ts)
             if k == "prompt":
                 add(sid, "waiting" if (pending and prev[1] != "prompt") else "human", gap)
+            elif prev[1] == "ask":
+                add(sid, "waiting", gap); pending = False  # an options box was open; its answer comes back as a tool result, not a prompt (v5.8.0.0 — before, this read as agent time and the box stayed 'pending')
             else:
                 if prev[1] == "prompt": add(sid, "agent", gap)
                 else: add(sid, "agent", min(gap, GAP)); add(sid, "human", max(0, gap - GAP))
@@ -327,20 +371,27 @@ def recent_events(root, n=12):
 def build(root, a):
     fw = load_json(os.path.join(root, "ocpfFramework", "framework.json"), {})
     usage = load_json(os.path.join(root, STATE, "usage.json"), {})
-    pricing = load_json(os.path.join(root, STATE, "pricing.json"), {})
     tool = usage.get("aiTool") or ("copilot-chat" if ".github/copilot-instructions.md" in str(fw.get("placedAs")) else "claude-code")
     copilot = tool.startswith("copilot")
     edition = (fw.get("edition") or ("lite" if os.path.isfile(os.path.join(root, "ocpfFramework", "runbookSteps", "STEP-1.md")) else "full")).lower()
-    wins = windows(usage); el = elapsed_by_step(wins)
+    notes = []
+    wins = windows(usage)
+    uj, err = usage_rows(root, tool) if wins else (None, "no step windows yet")
+    if err: notes.append(f"usage: {err}")
+    rows = (uj or {}).get("rows", [])
+    pricing = load_json(os.path.join(root, STATE, "pricing.json"), {})  # the usage script may just have fetched the prices (v5.8.0.0)
+    # The first window begins where its session began (Claude Code: the transcript file; Copilot: the journaled
+    # session the usage script summarises) — otherwise the tokens start before the clock does (v5.8.0.0).
+    if copilot:
+        spans = [(parse_ts(x.get("start")), parse_ts(x.get("lastKnownAt")) or now_utc()) for x in ((uj or {}).get("sessions") or []) if x.get("start")]
+    else:
+        spans = transcript_spans(root, usage)
+    wins = anchor_first_window(wins, spans, notes); el = elapsed_by_step(wins)
     if edition == "feature":
         catalog, status = feature_catalog(root, usage, wins); phases = FEATURE_PHASES
     else:
         catalog = step_catalog(root, edition); status = progress_status(root, catalog); phases = PHASES
         catalog = with_remediations(catalog, usage, wins, status)
-    notes = []
-    uj, err = usage_rows(root, tool) if wins else (None, "no step windows yet")
-    if err: notes.append(f"usage: {err}")
-    rows = (uj or {}).get("rows", [])
     def rows_for(sid): return [r for r in rows if r.get("step", "").replace(" (open)", "") == sid]
     live = claude_live(root, usage, wins, None) if (not copilot and wins) else None
     if live:
@@ -351,7 +402,8 @@ def build(root, a):
         for sid, sec in el.items():
             v = live["perStep"].get(sid) or {"agent": 0.0, "human": 0.0, "waiting": 0.0}
             tot = v["agent"] + v["human"] + v["waiting"]
-            if tot > 0: per[sid] = {k: v[k] * sec / tot for k in v}  # a step with no transcript events stays out of the split: unmeasured, not "you"
+            if tot > 0: per[sid] = {k: v[k] * sec / tot for k in v}
+            else: per[sid] = {"agent": 0.0, "human": sec, "waiting": 0.0}  # a window with no transcript event: nobody was in the chat — the human's time (v5.8.0.0; before, the step was left out and the three never added up to Elapsed)
         live["perStep"] = per
     steps = []
     for c in catalog:
@@ -365,7 +417,9 @@ def build(root, a):
                       **{k: c[k] for k in ("stage", "kind", "objectId", "shippedIn", "remediation") if c.get(k)}})
     cur = next((s for s in steps if s["status"] == "now"), None)
     # totals
-    tot = {"costUsd": sum((r.get("costUsd") or 0) for r in rows) if rows else None, "elapsedSeconds": sum(el.values()) if el else None,
+    # Elapsed is the union of the windows (a reopened step or a remediation open beside another step counts once), so
+    # the headline figure is wall-clock from the first session's first event to now (v5.8.0.0).
+    tot = {"costUsd": sum((r.get("costUsd") or 0) for r in rows) if rows else None, "elapsedSeconds": union_seconds(wins) if el else None,
            "decisions": sum(r.get("decisions") or 0 for r in rows if r.get("role") in (None, "main", "session", "all") or True) if rows else 0,
            "turns": sum(r.get("turns") or 0 for r in rows) if rows else 0}
     # decisions/turns are per step on the first row of each step; avoid double count
@@ -382,9 +436,21 @@ def build(root, a):
     else:
         tk = {k: sum((r.get(k) or 0) for r in rows) for k in ("input", "output", "cacheWrite", "cacheRead")}
         tk["total"] = sum(tk.values()); tot["tokens"] = tk if rows else None
+    # a row the usage script could not price (no rate for its model in pricing.json) must never read as $0
+    unpriced = sorted({r.get("model") or "unknown" for r in rows if r.get("costUsd") is None and ((r.get("input") or 0) + (r.get("output") or 0) + (r.get("aiCredits") or 0)) > 0})
+    outside = [r for r in rows if (r.get("step") or "").startswith("Unattributed")]
+    oc = sum((r.get("costUsd") or 0) for r in outside)
+    if outside and oc > 0:
+        notes.append(f"${oc:.2f} of the cost fell outside every step window — before the first window's session or after the last window closed — and is in the total but on no row")
+    if unpriced:
+        tot["costUnpriced"] = unpriced
+        notes.append("price unknown for " + ", ".join(unpriced) + " — the usage script fetches Anthropic's published rates itself at each measurement; if this stays, the machine is offline or the model's publisher is not covered (Ops § Usage & Cost → 3)")
     if live:
         ag = sum(v["agent"] for v in live["perStep"].values()); hu = sum(v["human"] for v in live["perStep"].values()); wa = sum(v["waiting"] for v in live["perStep"].values())
-        tot.update({"agentSeconds": ag, "humanSeconds": hu, "waitingSeconds": wa})
+        # the per-step splits are scaled to each step's window; the headline is the union of the windows, so scale once more
+        # and the three figures add up to Elapsed exactly
+        ssum = ag + hu + wa; k = (tot["elapsedSeconds"] / ssum) if ssum > 0 and tot.get("elapsedSeconds") else 1.0
+        tot.update({"agentSeconds": ag * k, "humanSeconds": hu * k, "waitingSeconds": wa * k})
     current = {}
     if cur:
         rs = rows_for(cur["id"]); ps = (live or {}).get("perStep", {}).get(cur["id"]) if live else None

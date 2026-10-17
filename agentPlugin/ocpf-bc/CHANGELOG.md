@@ -4,6 +4,74 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.8.0 — October 16, 2026
+
+**Bundles:** full runbook v5.8.0.0, Lite v5.8.0.0, Standards Guide v1.12.1.0 (unchanged),
+Operations Guide v5.8.0.0. Two new skills, `analyze` and `app-icon`; two new sub-agents, `ocpf-reviewer` and
+`ocpf-analyst`; three document templates (one new); both renderers, both usage scripts, both
+dashboard templates; `start`, `build-a-feature`, `roles`, `status`, `documents`, `dashboard`,
+`usage`, and `update-framework` skill text; both manifests' description; the marketplace entry.
+
+- **New `analyze` skill (`/ocpf-bc:analyze`) and `ocpf-analyst` sub-agent.** Documents an existing
+  extension that is not well documented before any journey extends it: asks what the human knows
+  and whether they have documents for `requirements/existing/`, which model (reasoning — Claude
+  Opus, recommended — or daily driver — Claude Sonnet; in Copilot the picker's GPT Sol and GPT Terra
+  beside them) and which effort (Medium recommended; High 1.5×–3× longer and dearer), writes the
+  analyst's project-local copy with that model, opens window `AN0`, and delivers a presumed FRD, a
+  presumed TDD, an Object Register, Documentation with the schema and flows, a Project Parameters
+  sheet, and a README into `requirements/existing/`. Every question through the options mechanism.
+  `start` offers it on an undocumented existing extension; Build-a-Feature's case C too. October
+  16, 2026 (Ops § Existing Apps).
+- **New `ocpf-reviewer` sub-agent — the pre-review.** Both editions, Main model and effort, read-only:
+  one read of every file between the first clean compile and the first package (Full Step 07 /
+  Lite Step 5), findings with root cause and fix in two tiers, no grades. The `roles` skill now
+  writes four definitions in Full and two in Lite; `update-framework` adds the missing one on an
+  older project; the hygiene block lists it (Ops § Roles → *The pre-review*).
+- **`start` describes the journeys by the kind of work** (Ops § Journeys): Full for a complete app
+  or solution end to end on three models; Lite for updating an existing app or a new one without a
+  large footprint on one model; Build-a-Feature for quick customizations in minutes — not
+  vibe-coding, lean on documentation, ideal for a PoC. It says once what to put in `requirements/`
+  and `images/`, and flags template placeholders in an existing `app.json` as the template's
+  defaults.
+- **`build-a-feature` — documents as it builds, flat `docs/`, no inferred publisher or range, a
+  role center.** Part 0 opens the `F00` window before anything else; Part 2 records
+  `publisherSource` and `idRangesSource` in `feature.json`, offers the `images/` icon first, asks
+  the range in every case (`50100–50149` named as the template's default, never first), and fetches
+  the Main model's price; Part 3 writes the problem statement and the register's parameters at the
+  intake close; Part 4 writes each object's proposed design to `docs/DataModel.md` **before** the
+  confirmation box, allocates an ID only through the source gate, and documents the object the
+  moment it compiles (new stage *Documented*); Part 7 finishes six documents in a flat `docs/` —
+  `ProblemStatement.md`, `FeatureRegister.md`, `DataModel.md`, `Documentation.md`, `ChangeLog.md`,
+  `SandboxInstall.md` (phase folders on a Full or Lite project). One window per object even when
+  several are written in one pass. New `references/objects/role-center.md` (cue table, activities
+  part, role center page, profile); `feature-record.md` rewritten. Templates: `FeatureRegister.md`
+  rewritten, `FeatureDataModel.md` new, `FeatureDocumentation.md` rewritten as documentation only.
+- **New `app-icon` skill (`/ocpf-bc:app-icon`) — *Create one for me* in every identity box.** Asks
+  style, colors, content, and a description in one box; the Main model writes the SVG to the
+  standard (square, rounded corners, transparent background, 300 × 300), renders it with nothing
+  installed (Quick Look, a headless Chrome or Edge, an installed converter, or a preview page with a
+  *Save as PNG* button), checks it, shows it, offers *Accept / Make another*; the accepted icon lives
+  in `images/` and is copied to `src/logo/AppLogo.png`, which `app.json` names. `references/icon-standard.md`
+  carries the standard, the SVG skeleton, the preview page, and the checks. Offered by PRE-01, Lite
+  Step 1, and Build-a-Feature (Ops § Intake → *The app icon → Creating one*).
+- **The usage scripts fetch published prices themselves** — a Claude model with no row in
+  `pricing.json` from Anthropic's pricing page (served as Markdown), a Copilot project's `aiCredit`
+  from GitHub's page — written with source and date, noted in the output, retried after an hour at
+  most when a fetch failed; a success clears the cooldown. On AJ's project the agent never wrote `pricing.json`, so Claude Sonnet 5.5 read *price
+  unknown* and the dashboard `$0` for the whole build. The dashboard reloads `pricing.json` after
+  the measurement so a freshly fetched price shows on the same render.
+- **Dashboard and usage scripts (both twins).** The first window starts at the first event of the
+  session that opened it (the clock and the tokens begin together; the usage script notes it);
+  elapsed is the union of the windows; a window with no transcript event is the human's time; time
+  with an options box open is *waiting* (it read as agent time before); agent + you + waiting
+  equals elapsed exactly; a model with no rate in `pricing.json` shows *+ unpriced* with the model
+  named instead of `$0`; work after the last window is noted. Feature gates gain *Documented*.
+  Verified against AJ's Build-a-Feature project of October 16, 2026, in Python and PowerShell.
+- **`status`** reports a `feature.json` without a publisher or range source as a blocker, the flat
+  feature `docs/`, and the `AN0` row; **`documents`** maps the feature templates to the flat layout;
+  **`dashboard`** gains *3c. Time and cost — what the figures mean*; **`usage`** says the first
+  window is the routine's first act and the price is fetched before it closes.
+
 ## 5.7.3 — October 15, 2026
 
 **Bundles:** full runbook v5.7.3.0, Lite v5.7.3.0, Standards Guide v1.12.1.0 (unchanged),

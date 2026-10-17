@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 4 — Generate the Code
 
-**Runbook version:** 5.7.3.0 · Lite edition · Phase: BUILD
+**Runbook version:** 5.8.0.0 · Lite edition · Phase: BUILD
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -17,7 +17,7 @@ file names fixed), pre-flight checklist, the generation mode chosen at Step 3.
 **Which mode** (Step 3's answer; **Ops § Roles → *Parallel batches* and *Generation speed***):
 - **Parallel — two batches, and the human chose it.** Start one **background** `ocpf-generator`
   sub-agent per batch — the project-local copy the `roles` skill wrote, on the Main model and
-  effort (Lite's only sub-agent; the plugin bundles it). Each brief carries: Action 4 below,
+  effort (one of Lite's two sub-agents, with the Step 5 reviewer; the plugin bundles both). Each brief carries: Action 4 below,
   verbatim; the batch's Design Doc sections; `docs/1-define/ProjectParameters.md`; Standards
   §1.1–§1.8 and §2 (plus Part 11 and the matching `ocpfFramework/patterns/` files when the batch
   has a child list, setup page, or wizard; plus, for a Copilot-feature batch, the Blueprint's

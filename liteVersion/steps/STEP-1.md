@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 1 — Define the Problem & Lock Parameters
 
-**Runbook version:** 5.7.3.0 · Lite edition · Phase: DEFINE
+**Runbook version:** 5.8.0.0 · Lite edition · Phase: DEFINE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -14,7 +14,12 @@
 **Inputs:** Stakeholder conversation notes; the business need in plain language.
 
 **Actions:**
-- **Ask the working language first — before anything else** (Operating Rule 8). Ask in English,
+- **Open the clock before anything else — the very first act of the routine, before the
+  working-language question** (Operating Rule 9; Ops § Usage & Cost → 1 and 8): create
+  `ocpfFramework/state/usage.json` (`aiTool`, `transcriptDir`, empty `steps`) and append
+  `{ "step": "STEP-1", "startedAt": "<now>" }`. A window opened after the setup questions left the
+  session's first decisions and tokens outside every window on real projects.
+- **Ask the working language next — the first question of the routine** (Operating Rule 8). Ask in English,
   through the options mechanism, with English listed first and free text for any other language.
   It's asked alone, so every later box can be in the language chosen. Continue in the language
   chosen.
@@ -38,8 +43,14 @@
   `app.json` at once** (Rule 6a; **Ops § Intake → *Box 0 — Identity first***): one box, three
   questions — **Extension name?** (suggestions from the human's own wording + *I'll type it*),
   **Publisher?** (only a name they already wrote, with its source, else *I'll type it*; never
-  inferred), **App icon?** (*Yes — I'll provide an image* / *No icon* / *Later*; on *Yes*, the path
-  as free text, placed at `src/logo/AppLogo.png` and resized per Ops § Intake → *The app icon*).
+  inferred from an email domain, git config, a folder name, or another project — Ops § Intake →
+  *Forbidden sources*; the source is recorded with the answer), **App icon?** (when `images/` holds
+  an image, *Use `images/<file>`* first; then *Yes — I'll provide an image* / *Create one for me* /
+  *No icon*, *Later* via the free-text entry; on *Yes*, the path as free text, placed at
+  `src/logo/AppLogo.png` and resized per Ops § Intake → *The app icon*; on *Create one for me*, the
+  plugin's `app-icon` skill asks the style, colors, content, and description in one box, draws the
+  icon to the standard — square, rounded corners, transparent background — renders and shows it, and
+  names it in `app.json` only once the human accepts it, Ops § Intake → *The app icon → Creating one*).
   Then create `src/` and write `app.json` now — `name`, `publisher`, `logo` when given, `version`
   `0.0.0.1`, a new or kept `id`, the platform defaults — as a **first write**; the complete write,
   with ID ranges, BC version, and features, is the project-setup step below once the sheet is
@@ -79,14 +90,23 @@
   *Lite* step table (STEP-1 … STEP-7), delete the *Full* one, every row blank except this one,
   marked `In Progress`; the usage table beneath it starts empty (ALL ALONG → Project Progress
   Tracker).
-- **Start the usage clock:** append Step 1's `startedAt` to `ocpfFramework/state/usage.json` the
-  moment `ProjectProgress.md` is created (Operating Rule 9; Ops § Usage & Cost). At this step's
-  close the same rule writes Step 1's usage rows — one per model in Claude Code, one per step in Copilot — into the second table.
+- **The usage clock is already running** — Step 1's `startedAt` was written as the routine's first
+  act (above); the moment `ProjectProgress.md` is created, its Step 1 row reads `In Progress`
+  (Operating Rule 9; Ops § Usage & Cost). At this step's close the same rule writes Step 1's usage
+  rows — one per model in Claude Code, one per step in Copilot — into the second table.
 - **Capture any raw requirements input verbatim, before interpreting it.** If the human pastes raw
   requirements in chat, or uploads a file, save it untouched in a `requirements/` folder (a
   descriptive filename, or the file's own name for an upload) before doing anything else with it.
   Never commit this folder to `.gitignore`. Re-apply this the moment any later requirements or
   change-request input arrives, not only at kickoff.
+- **An existing app? Offer the in-depth analysis before the problem statement** (Rule 6a; **Ops §
+  Existing Apps**). When `src/` already holds real objects beyond the AL template's `HelloWorld.al`
+  and `requirements/existing/` is empty, one box: **Run the in-depth analysis and documentation
+  first (recommended when the app has no design doc or docs — 10 to 30 minutes)** / *Skip — the
+  light read is enough*. On yes, run the plugin's `analyze` skill (`/ocpf-bc:analyze`; without the
+  plugin, the Ops § Existing Apps procedure), then read `requirements/existing/` with the rest of
+  `requirements/` as *what the app already is*. `requirements/` holds the human's raw input — `.md`
+  recommended; Word, PDF, and images read too — say so once if it is empty.
 - Write a short problem statement: what business outcome is required, who the consumers are
   (users, other systems, AI tools, BI/reporting), which countries and languages they work in, and
   what's explicitly out of scope. Capture the domain vocabulary the design will anchor to —
@@ -143,9 +163,9 @@ Packaging & Versioning). Mention it once, plainly, now.
 | **Permission Sets required?** | `Yes`/`No` | `No` only if the extension owns **zero new tables** (**Standards §5.3**); otherwise `Yes`, not asked. If `Yes`, reserve ≥ 2 IDs in the primary range. |
 | **AL Runtime / BC Application Minimum / Symbol Source** | — | BC version from Box 2; runtime from Microsoft Learn. Symbol Source is filled in by the agent after downloading: version, W1 or localized, and where from. |
 | **Onboarding extras** | `Yes`/`No` each | Assisted Setup Wizard? Role Center Activity Cues? Departments/"My Business Central" placement? Box 4; `No` to any is a final answer, not a placeholder — most small extensions answer `No` to all three, but ask anyway. |
-| **App icon** | `Yes — I'll provide an image` / `No icon` / `Later` | Box 1a, question 4a (Ops § Intake). *Later* is a release blocker for AppSource — the old AppSource icon question is folded in here. On *Yes*, ask for the path as free text with the guidance *"PNG, square, 300 × 300 px is ideal — Microsoft accepts 216 to 350 px for the marketplace listing. Larger is fine; I'll resize it, keeping the proportions, never stretching."* The agent copies it to `src/logo/AppLogo.png`, resizing when larger with what the machine has — macOS `sips -Z 300 <in> --out src/logo/AppLogo.png`; Windows a PowerShell `System.Drawing` snippet (Ops § Intake gives it); Linux `convert <in> -resize 300x300 src/logo/AppLogo.png` if ImageMagick is present, else Python Pillow, else ask the human to resize. A non-square image gets its longer side resized to 300 and is padded to square with transparency, never cropped silently — say what was done. `app.json` gets `"logo": "src/logo/AppLogo.png"`; the file is committed. |
+| **App icon** | `Use images/<file>` / `Yes — I'll provide an image` / `Create one for me` / `No icon` (`Later` typed) | Box 1a, question 4a (Ops § Intake); *Create one for me* is the plugin's `app-icon` skill (Ops § Intake → *The app icon → Creating one*). *Later* is a release blocker for AppSource — the old AppSource icon question is folded in here. On *Yes*, ask for the path as free text with the guidance *"PNG, square, 300 × 300 px is ideal — Microsoft accepts 216 to 350 px for the marketplace listing. Larger is fine; I'll resize it, keeping the proportions, never stretching."* The agent copies it to `src/logo/AppLogo.png`, resizing when larger with what the machine has — macOS `sips -Z 300 <in> --out src/logo/AppLogo.png`; Windows a PowerShell `System.Drawing` snippet (Ops § Intake gives it); Linux `convert <in> -resize 300x300 src/logo/AppLogo.png` if ImageMagick is present, else Python Pillow, else ask the human to resize. A non-square image gets its longer side resized to 300 and is padded to square with transparency, never cropped silently — say what was done. `app.json` gets `"logo": "src/logo/AppLogo.png"`; the file is committed. |
 | **Business Central Copilot feature** | `Yes` / `No` | A feature in Business Central's own Copilot UI (a `Copilot Capability`, a `PromptDialog` page, a *Suggest with Copilot* action, Azure OpenAI through System.AI). **`Yes` is valid for a PTE**; Microsoft-billed needs no Azure subscription. If `Yes`: the host page(s), what the AI suggests, and the billing path — *Microsoft-billed* (default) / *Partner-billed* / *both*. Triggers the OnlyBCFans BC Copilot Blueprint fetch at Step 3 (ALL ALONG → *Business Central Copilot Features*). |
-| **Framework files in `.gitignore`?** | `Yes` (default) | Box 5, asked as: *"`.gitignore` lists files Git leaves out of commits and pushes — they stay on disk and work normally. Should this framework's own files be left out of this project's repository?"* With `Yes`, the second block of Ops § Repository Hygiene goes into `.gitignore` — by name, every one, not "the framework files" in the agent's head: `ocpfFramework/` as a whole (it holds `LITE_RunbookChangeLog.md`, `LITE_RunbookSchematics.md`, `framework.json`, and the runbook itself when `CLAUDE.md` already existed), the runbook under whatever name it was given (`CLAUDE.md`, `.github/copilot-instructions.md`, `.github/instructions/ocpf-framework.instructions.md` — only the ones that exist), and the project-local sub-agent definitions (`.claude/agents/ocpf-light.md`, `ocpf-reasoning.md`, `ocpf-generator.md`; `.github/agents/ocpf-light.agent.md`, `ocpf-reasoning.agent.md`, `ocpf-generator.agent.md`). The first block — `.claude/settings.local.json`, `ocpfFramework/state/`, `ocpfFramework/standardsGuide/`, `opsGuide/`, `runbookSteps/`, `documentTemplates/`, `patterns/`, `scripts/`, `.alpackages/`, `*.g.xlf` — is written whatever the answer. **Then prove it:** `git check-ignore -v <file>` on each file that exists, and `git status --porcelain` on the root; a framework file still showing means the entry is wrong. On a real project the changelog was left out and shipped to the client's remote. **Never `docs/`, `requirements/`, `src/`, `ProjectProgress.md`, `outputAppPackage/`, `*.app`, or `Translations/*.xlf`** — `docs/0-project/ChangeLog.md` is always committed. The full block is Ops § Repository Hygiene. |
+| **Framework files in `.gitignore`?** | `Yes` (default) | Box 5, asked as: *"`.gitignore` lists files Git leaves out of commits and pushes — they stay on disk and work normally. Should this framework's own files be left out of this project's repository?"* With `Yes`, the second block of Ops § Repository Hygiene goes into `.gitignore` — by name, every one, not "the framework files" in the agent's head: `ocpfFramework/` as a whole (it holds `LITE_RunbookChangeLog.md`, `LITE_RunbookSchematics.md`, `framework.json`, and the runbook itself when `CLAUDE.md` already existed), the runbook under whatever name it was given (`CLAUDE.md`, `.github/copilot-instructions.md`, `.github/instructions/ocpf-framework.instructions.md` — only the ones that exist), and the project-local sub-agent definitions (`.claude/agents/ocpf-light.md`, `ocpf-reasoning.md`, `ocpf-generator.md`, `ocpf-reviewer.md`, `ocpf-analyst.md`; `.github/agents/ocpf-light.agent.md`, `ocpf-reasoning.agent.md`, `ocpf-generator.agent.md`). The first block — `.claude/settings.local.json`, `ocpfFramework/state/`, `ocpfFramework/standardsGuide/`, `opsGuide/`, `runbookSteps/`, `documentTemplates/`, `patterns/`, `scripts/`, `.alpackages/`, `*.g.xlf` — is written whatever the answer. **Then prove it:** `git check-ignore -v <file>` on each file that exists, and `git status --porcelain` on the root; a framework file still showing means the entry is wrong. On a real project the changelog was left out and shipped to the client's remote. **Never `docs/`, `requirements/`, `src/`, `ProjectProgress.md`, `outputAppPackage/`, `*.app`, or `Translations/*.xlf`** — `docs/0-project/ChangeLog.md` is always committed. The full block is Ops § Repository Hygiene. |
 | **Working language** | — | From the first question of this step. |
 | **Main model & thinking effort** | `<MainModel>` / `<MainEffort>` | Asked right after notifications (Ops § Roles): the model this one agent runs on and its thinking effort — recommended **Sonnet, Medium** in Claude Code, **Gemini 3.8 Flash, Medium** in GitHub Copilot; High only where judgment matters most. Recorded as the human named them, plus the harness's own identifier (e.g. `sonnet`). Must match what the session is actually running — the human switches the session, not the agent. The generator sub-agent Step 4 may use inherits this pair. Lite has no Light or Reasoning rows. |
 | **Target languages** | table | Box 5, for the countries from Box 1 — Lite groups the setup and language questions together (Ops § Intake) — never asked again (rules: **Standards §8.8**). Classify each chosen language as Microsoft-translated, partner-translated (ask which partner app, in the next box — it's the terminology source), or not supported by BC (every right-to-left language included). Don't offer an unsupported language; if typed, offer the country's English instead, and only record it if the human insists. Then, unless source wording is *US wording, no translation files*, per language, two questions: *Required at first release* / *Can follow later*; and who reviews it — names the human mentioned, or *I'll type it*; a named fluent person, never the agent. Flag any mismatch with **Localization**. |

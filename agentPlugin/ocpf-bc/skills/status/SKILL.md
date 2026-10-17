@@ -14,7 +14,7 @@ conversation memory.
    the usage table. **On a Build-a-Feature project** (`"edition": "feature"` in the marker) the
    tracker is the **feature table** — one row per object (`F01`, `F02`, …), plus `F00` intake,
    `FRV` review, `FPK` package, each with a stage (*Asked → Confirmed → Built → Compiled →
-   Reviewed → Packaged*) and a status — and a Full or Lite project may carry that table too, under
+   Documented → Reviewed → Packaged*) and a status — and a Full or Lite project may carry that table too, under
    `## Build-a-Feature`, when the journey ran on it: report those rows as well, after the steps.
    A **remediation row** (`07a — Remediation`, `STEP-5a — Remediation`; Ops § Usage & Cost → 7)
    sits under its base step: report it as its own step, with the step the project returns to. Find the step marked `In Progress`, or the first one not complete. Then check
@@ -47,8 +47,16 @@ conversation memory.
    model assignment (Full §1.7: Main, Light, Reasoning — the generator runs on Main; Lite: the Main
    model row).
 
-A Build-a-Feature project keeps no `ProjectParameters.md`; its model and language are in
-`ocpfFramework/state/feature.json`. If `ProjectProgress.md` doesn't exist — and, for Lite, neither `docs/1-define/ProjectParameters.md`
+A Build-a-Feature project keeps no `ProjectParameters.md`; its model, language, publisher, prefix,
+namespace, and ID ranges are in `ocpfFramework/state/feature.json`, **each with its source** —
+`publisherSource` and `idRangesSource` must name a box the human answered (Ops § Intake →
+*Forbidden sources*); a file that lacks either, or whose source says the value was read from
+`app.json` or a scaffold, is a blocker to report: the next object must not be built until the
+question is asked. Its documents are flat in `docs/` (`ProblemStatement.md`, `FeatureRegister.md`,
+`DataModel.md`, `Documentation.md`, `ChangeLog.md`, `SandboxInstall.md`); report an object row
+past *Compiled* whose section is missing from `docs/Documentation.md` or `docs/DataModel.md`. An
+`AN0` window or usage row is the `analyze` skill's run on this app (Ops § Existing Apps); its
+output is `requirements/existing/`. If `ProjectProgress.md` doesn't exist — and, for Lite, neither `docs/1-define/ProjectParameters.md`
 nor `docs/2-design/DesignDoc.md` exists either — the routine hasn't started. Say so, and offer the
 `start` skill. (A Lite project from before Lite v5.0.0.0 has no tracker and keeps its usage table
 in `docs/UsageReport.md`; report from the ChangeLog and offer `update-framework`.)

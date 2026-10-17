@@ -50,3 +50,5 @@ ProjectStandardsGuideSplit/
 BuildMapDashboard/
 #Build-a-Feature journey (rapid single-object mods in a new or existing PTE) working notes — local only, never pushed
 BuildAFeatureJourney/
+#Distributed-development guide (written for a Microsoft question) — local only, never pushed to the remote
+distributedDevelopment/

@@ -1,6 +1,6 @@
 ---
 name: start
-description: Start a Microsoft Dynamics 365 Business Central AL extension project with the OnlyCopilotFans (OCPF) BC Agentic Development Framework - the one launching point for every journey. Guides the choice between the Full framework (14 steps), Lite (7 steps), and Build-a-Feature (one object or a few, in a new or existing extension, no documents and no steps), installs the latest runbook into the project (Full and Lite), connects Microsoft's AL tools with nothing to install, then begins the routine. On a project that already follows the framework it offers status, an update check, or building a feature in that project. Use when the user asks to "start a Business Central project", "start a BC extension", "use the OCPF framework", "set up the agentic development framework", "kick off an AL project", "add a table to my extension", "build a feature", or runs /ocpf-bc:start (optionally with "full", "lite", or "feature").
+description: Start a Microsoft Dynamics 365 Business Central AL extension project with the OnlyCopilotFans (OCPF) BC Agentic Development Framework - the one launching point for every journey. Guides the choice between Full (a complete app or solution end to end, three models, the full document and testing trail), Lite (updating an existing app or a new app without a large footprint, one model, fewer steps), and Build-a-Feature (quick customizations in minutes, no steps, six short documents), offers to analyze and document an undocumented existing app first, installs the latest runbook into the project (Full and Lite), connects Microsoft's AL tools with nothing to install, then begins the routine. On a project that already follows the framework it offers status, an update check, or building a feature in that project. Use when the user asks to "start a Business Central project", "start a BC extension", "use the OCPF framework", "set up the agentic development framework", "kick off an AL project", "add a table to my extension", "build a feature", or runs /ocpf-bc:start (optionally with "full", "lite", or "feature").
 ---
 
 # Start an OCPF BC Agentic Development Framework project
@@ -9,7 +9,8 @@ This skill is the **one launching point** for every journey the framework offers
 the framework's manual setup: download the runbook, rename it to `CLAUDE.md` or
 `.github/copilot-instructions.md`, put everything else the framework keeps under
 `ocpfFramework/`, and begin. It adds three things on top:
-- it helps choose **Full, Lite, or Build-a-Feature**,
+- it helps choose **Full, Lite, or Build-a-Feature** (Ops § Journeys),
+- it offers to **analyze and document an existing, undocumented app first** (the `analyze` skill),
 - it always installs the **latest** published runbook (Full and Lite; Build-a-Feature has none),
 - it connects the AL tools with nothing to install.
 
@@ -53,39 +54,59 @@ without a connected project folder. Skip to
    Nothing else; skip the rest of this skill.
 2a. **An existing extension that never used the framework?** `app.json` exists and there is no
    marker and no runbook. Say what you found (name, publisher, ID ranges from `app.json`; how
-   many objects under `src/`; whether a package exists), and go to Step 3 with **Build-a-Feature
-   recommended first**: on an existing app the human almost always wants one more object, not a
-   fresh 14-step build. **Do not call the file's version "installed":** an AL: Go! scaffold says
-   `1.0.0.0` with only `HelloWorld.al` and no package, and every journey treats that as a *new*
-   app that starts at `0.0.0.1` — the new-or-existing question (intake 4b) is asked by the
-   journey, never answered from the file. Full and Lite stay available.
+   many objects under `src/`; whether a package exists; whether any `docs/`, README, or
+   `requirements/existing/` explains it) — **flagging a template placeholder as the AL template's
+   default, not a fact** (`ALProject1`, `Default publisher`, `1.0.0.0` with no package,
+   `50100–50149`; Ops § Intake → *Forbidden sources*). **If the app has real objects and no usable
+   documentation, ask first, one box** (Ops § Existing Apps): **Analyze and document the app first
+   (recommended — one run, 10 to 30 minutes, into `requirements/existing/`)** / *Skip — I know this
+   app, choose a journey*. On the first, invoke the `analyze` skill and stop here; it hands back to
+   this skill when the human is ready. Otherwise go to Step 3 with **Build-a-Feature recommended
+   first**: on an existing app the human almost always wants one more object or a quick change,
+   not a complete new solution. **Do not call the file's version "installed":** an AL: Go!
+   scaffold says `1.0.0.0` with only `HelloWorld.al` and no package, and every journey treats
+   that as a *new* app that starts at `0.0.0.1` — the new-or-existing question (intake 4b) is
+   asked by the journey, never answered from the file. Full and Lite stay available.
 
 ## Step 3: Choose the journey
 
-Ask the human to choose, recommending based on what they've told you. If you don't know enough,
-ask about scope first. One question, three options, the recommended one first:
+Ask the human to choose, recommending based on what they've told you — **the choice is about the
+kind of work, not a file count** (Ops § Journeys). If you don't know enough, ask about the work
+first: a complete solution, an update or a modest new app, or a quick customization. One question,
+three options, the recommended one first, each described in these terms:
 
-- **Build-a-Feature (no steps; four quick documents at the close).** One object, or a few, in a new or existing
-  per-tenant extension: a table and its list and card pages, an extension of a standard table,
-  page, or report, a report, an API page or API query, a query, an enum or enum extension, a
-  codeunit, a permission set. Pick it when the human already knows what they want and it is not a
-  whole solution. It asks what to build in one question, infers and confirms field types, writes
-  the AL from the Standards Guide and the patterns library, compiles clean with the analyzers,
-  offers the natural next object, then offers to package a `.app` and to review the code. One
-  model does everything; the dashboard shows one row per object. Recommended first on an existing
-  extension (Step 2a), and whenever the request names a single object.
-- **Lite (7 steps, 4 documents).** For roughly 5–10 AL files, one person driving it, and one AI
-  model doing the work, with no separate Dev Manager, Technical Lead, and Functional Consultant
-  sign-offs.
-- **Full (14 steps).** Choose it the moment any Lite condition stops holding: more than ~10
-  objects, multiple sign-off roles, splitting work across Main, Light, and Reasoning models (the
-  plugin's `ocpf-reasoning` and `ocpf-light` sub-agents), or heading to AppSource. Both editions
-  generate code with the `ocpf-generator` sub-agent, one per batch, in parallel.
+- **Build-a-Feature — quick customizations, in minutes.** Extend a table or a page, a processing
+  report, a table and its pages, an API page or query, a role center, an enum, a codeunit, a
+  permission set: a tactical change when time is of the essence. **Not vibe-coding** — the
+  Standards Guide, the patterns library, and the analyzers govern every file, the record is kept,
+  the dashboard is live — but lean on documentation: no design documents or test scripts; six short
+  documents in a flat `docs/`, written as the work happens. It builds what is asked for, not a
+  holistic solution, which makes it right for a PoC for a demo or a prototype that a Full or Lite
+  project can later turn into a solution. Usually 10–20 minutes; at published API rates most builds
+  cost $1–5. One model does everything; the dashboard shows one row per object. Recommended first
+  on an existing extension (Step 2a), and whenever the request names one object or a few.
+- **Lite — updating an existing app, or a new app without a large footprint.** One Main model does
+  everything, in 7 steps, with leaner documents (a Design Doc, Docs, a Test Script). Still a
+  reliable agentic engineering process with quality outcomes — faster, cheaper, and with less detail
+  than Full. One to two hours depending on complexity.
+- **Full — a complete app or solution end to end, or a major overhaul of a big existing app.** A
+  detailed review of the requirements, an FRD, a TDD and a Sanity Check, a build plan, a gap-fit
+  test, a graded code review, full documentation, a user guide, testing guides, and automated test
+  scripts, in 14 steps. Three models — Main, Reasoning, and Light (the plugin's `ocpf-reasoning` and
+  `ocpf-light` sub-agents) — for the highest-quality outcome, so it is the slowest of the three: at
+  least three to four hours end to end, longer for an extensive app, plus the human's own review
+  time — and still far less than a development team needs. Also the journey for AppSource. Both
+  editions generate code with the `ocpf-generator` sub-agent, one per batch, in parallel, and run
+  the `ocpf-reviewer` pre-review before the first package.
+
+Say once, when `requirements/` is empty: *the more well-formed and documented your idea, the faster
+the first stage goes — put requirements in `requirements/` (`.md` recommended; Word, PDF, and
+images work too) and an app icon in `images/`; every journey reads them at its first step.*
 
 Mention that nothing is lost by switching later: Lite's `DesignDoc.md` and `ChangeLog.md` carry
 straight over into the full framework, and a Build-a-Feature extension is an existing app to
-Lite's Step 1. A project follows one edition, never both; Build-a-Feature can run **on** a Full
-or Lite project later through Step 2's third choice.
+Lite's Step 1 or Full's PRE-01. A project follows one of Full or Lite, never both; Build-a-Feature
+can run **on** a Full or Lite project later through Step 2's third choice.
 
 If the human invoked the skill with `full`, `lite`, or `feature`, confirm that choice instead of
 asking from scratch.
@@ -266,9 +287,10 @@ notification kind at the runbook's first step counts as asking, for the settings
    which models do the work: Full asks six questions (Main, Light, and Reasoning model, each with
    a thinking effort), Lite asks two (Main model and effort), after a one-sentence warning that a
    High effort makes every task slower. Use this plugin's `roles` skill for that step: it asks, and
-   writes project-local copies of this plugin's three sub-agents carrying the chosen model and
-   effort — `ocpf-light` and `ocpf-reasoning` in Full, and `ocpf-generator` in both editions (it
-   runs on the Main model; one generator per batch, in parallel, at Full Step 06 / Lite Step 4) —
+   writes project-local copies of this plugin's sub-agents carrying the chosen model and
+   effort — `ocpf-light` and `ocpf-reasoning` in Full, and `ocpf-generator` and `ocpf-reviewer` in
+   both editions (both on the Main model; one generator per batch, in parallel, at Full Step 06 /
+   Lite Step 4; the reviewer's pre-review before the first package at Full Step 07 / Lite Step 5) —
    which the runbook delegates to in the background; the bundled ones carry no model (Ops § Roles
    → *Enforcement*). It works the same in Claude Code (VS Code or CLI) and GitHub Copilot (VS Code
    or CLI). Every document the routine produces goes in `docs/<phase folder>/`; both editions keep
@@ -301,8 +323,9 @@ On Claude Chat or Claude Cowork, the framework's BUILD and PROVE phases
 aren't possible. There's no AL compiler, VS Code project, or Git. Say so plainly, then offer the
 part that is:
 
-1. **Choose the edition** (Step 3). Build-a-Feature needs a compiler and a code workspace, so
-   it is not available here; say so and offer Full or Lite's DEFINE and DESIGN work instead.
+1. **Choose the edition** (Step 3). Build-a-Feature and the `analyze` skill need a code
+   workspace, so they are not available here; say so and offer Full or Lite's DEFINE and DESIGN
+   work instead.
 2. **Get the runbook text and both companions:** fetch them (Step 5) if the environment can reach
    GitHub, otherwise use the bundled copies and name their versions — the runbook and the
    **Operations Guide** in this skill's `references/`, the **Standards Guide** in the `al-standards`

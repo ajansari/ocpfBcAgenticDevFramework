@@ -8,15 +8,18 @@ to use the framework manually. Install steps for users are in the repository's
 |---|---|
 | `ocpf-bc/` | The plugin. Two manifests with the same metadata: `.claude-plugin/plugin.json` (Claude Code, Claude apps, VS Code) and `.github/plugin/plugin.json` (GitHub Copilot tooling, which looks for `plugin.json`, `.github/plugin/plugin.json`, or `.plugin/plugin.json`). |
 | `github/agents/ocpf-code-reviewer.agent.md` | Optional GitHub Copilot custom agent for github.com. Users copy it into their project's `.github/agents/`. |
-| `tools/syncPlugin.sh` | Copies the canonical runbooks, changelogs, and Standards Guide into the plugin's bundled references. `--check` reports drift. |
+| `tools/syncPlugin.sh` | Copies the canonical runbooks, their changelogs, the step files, the document templates, and the Operations Guide into the plugin's bundled references, fetches the Standards Guide at the pinned tag (`STANDARDS_TAG`), rebuilds the runbook stubs, and checks the two manifests agree. `--check` reports drift. Run it twice when the stubs change: the first run rebuilds them, the second copies the rebuilt cores. |
+| `tools/buildStubs.py` | Rebuilds each core runbook's per-step stubs (Role, Outputs, Exit gate) from the step files; `--check` verifies. Called by `syncPlugin.sh`. |
 | `../.github/workflows/plugin-check.yml` | CI: bundled copies in sync, manifests valid, `claude plugin validate` passes. |
 
 ## Single source of truth
 
-The runbooks, their changelogs, and the Standards Guide live at the repository root and in
-`liteVersion/` and `standardsGuide/`, exactly as before. The plugin only carries **copies**, as an
-offline fallback: `start` and the once-per-session update check read the latest from GitHub
-first. Never edit files under `ocpf-bc/skills/*/references/` by hand.
+The runbooks, their step files, and their changelogs live in `fullVersion/` and `liteVersion/`,
+the Operations Guide in `opsGuide/`, the document templates in `documentTemplates/`, and the
+Standards Guide in its own repository, `ajansari/ocpfBCALStandards`, at the tag
+`standardsGuide/README.md` pins. The plugin only carries **copies**, as an offline fallback:
+`start` and the once-per-session update check read the latest from GitHub first. Never edit files
+under `ocpf-bc/skills/*/references/` or `ocpf-bc/skills/documents/references/` by hand.
 
 ## Release checklist
 
@@ -30,7 +33,10 @@ Do this whenever a round of framework changes is ready to push:
      behavior, major for breaking changes.
    - Claude Code and VS Code only deliver an update when this number changes.
    - Set the version only in the two manifests. Don't add `version` to the marketplace entry.
-3. **Record it** in `ocpf-bc/CHANGELOG.md`, with the bundled framework versions.
+3. **Record it** in `ocpf-bc/CHANGELOG.md`, with the bundled framework versions — and in
+   `fullVersion/RunbookChangelog.md`, `liteVersion/LITE_RunbookChangeLog.md`, and the README's
+   *What's New* when the framework changed too; Full, Lite, the Operations Guide, and the plugin
+   share one version number since 5.0.0.0.
 4. **Validate** with the `claude` CLI:
    ```
    claude plugin validate ./agentPlugin/ocpf-bc --strict

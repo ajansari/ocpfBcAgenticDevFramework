@@ -16,6 +16,40 @@ framework.
 
 ---
 
+## v5.8.0.0 — October 16, 2026
+
+Derived from the full framework **v5.8.0.0**; Operations Guide **v5.8.0.0**; plugin **5.8.0**.
+
+- **Lite is defined by the work, not the file count.** The header's *When to use Lite* now reads:
+  updating an existing app, or building a new app without a large footprint — one Main model,
+  fewer steps, leaner documents, a reliable agentic engineering process with quality outcomes,
+  faster, cheaper, and with less detail than Full; one to two hours depending on complexity — with
+  Full and Build-a-Feature described beside it (Ops § Journeys). The "10 or fewer AL files" rule is
+  gone from the header, the README, the user guides, and the site.
+- **Step 1 opens the usage clock as the routine's very first act**, before the working-language
+  question (the old *Start the usage clock* bullet now says the clock is already running); the
+  icon question offers a file in `images/` first; the publisher's source is recorded with the
+  answer (Ops § Intake → *Forbidden sources*); and on an existing app the step offers the
+  in-depth analysis — the plugin's `analyze` skill, into `requirements/existing/` — before the
+  problem statement (Ops § Existing Apps).
+- **Step 5 gains the pre-review.** Between the first clean compile and the first package the
+  project-local `ocpf-reviewer` sub-agent (Main model and effort, in the background — Lite's second
+  sub-agent beside the generator) reads every file against the Design Doc, the Standards Guide, and
+  plain logic; its findings are presented once and decided in one box (*Apply all (recommended) /
+  Apply selected / Discuss first*), applied, recompiled, and each recorded with its decision in
+  `docs/0-project/ChangeLog.md`. Once per step; Step 6's review is the full one. The exit gate says
+  so; Step 4's "Lite's only sub-agent" is now "one of two"; the header's one-model paragraph names
+  both exceptions; the plugin section lists the reviewer and the `analyze` skill.
+- **Step 1's icon question offers *Create one for me*** — the new `app-icon` skill draws the icon to
+  the standard (square, rounded corners, transparent background) from the style, colors, content,
+  and description asked in one box, shows it, and names it in `app.json` once accepted (Ops § Intake
+  → *The app icon → Creating one*); the parameter row lists the four options.
+- **Prices are fetched by the usage script itself** when a model has no rate (Ops § Usage & Cost →
+  3) — on a real project the agent never wrote `pricing.json` and a Sonnet 5.5 build read `$0`.
+- **Everything shared with Full applies unchanged** — the flat `docs/` and incremental documents
+  of Build-a-Feature when it runs on a Lite project (its files go into Lite's phase folders), the
+  dashboard's honest clock, split, and price, `images/` and `requirements/existing/` in the root.
+
 ## v5.7.3.0 — October 15, 2026
 
 Derived from full framework **v5.7.3.0**; Operations Guide **v5.7.3.0**; Standards Guide

@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 5.7.3.0 (Lite, derived from the full framework v5.7.3.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
-**Last Updated:** October 13, 2026
+**Version:** 5.8.0.0 (Lite, derived from the full framework v5.8.0.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
+**Last Updated:** October 16, 2026
 
 > Version history for this edition lives in `ocpfFramework/LITE_RunbookChangeLog.md`, tracked
 > independently of the full framework's own `fullVersion/RunbookChangelog.md` (though a change to
@@ -14,14 +14,14 @@
 
 > This is the lightweight sibling of the full **OCPF BC Agentic Development Framework**
 > (`fullVersion/BC_App_Build_Routine_Agent.md`, in the same repo). Same author, same underlying
-> discipline — half the steps, one model doing all the work, and no ceremony that a
-> 10-files-or-fewer project doesn't need.
+> discipline — half the steps, one model doing all the work, and no ceremony that an update to an
+> existing app, or a new app without a large footprint, doesn't need.
 
 > **Companion documents, both fetched at Step 1 and shared unchanged with the full framework:**
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.12.1.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.7.3.0), cited as
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.8.0.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
 >   tooling checks, analyzers, symbols, editor sync, notifications, packaging, repository hygiene,
 >   translations, fetched companions, documents, usage and cost, and the plugin.
@@ -39,14 +39,18 @@
 > runbook states each rule in short form where you need it and cites the guides for the full
 > version.
 >
-> **When to use Lite:** a Business Central AL Per-Tenant Extension with **10 or fewer AL files** —
-> typically a handful of API pages over standard tables, maybe one or two new tables, a single
-> developer or functional consultant driving it, one AI model doing the work. **Graduate to the full
-> framework** the moment any of these stops being true: the object count grows past ~10, the project
-> needs multiple sign-off roles (Dev Manager, Technical Lead, Functional Consultant as separate
-> people), you want to split work across more than one AI model, or the extension is heading to
-> AppSource, which tends to demand the fuller documentation trail. Nothing is lost by switching
-> later — Lite's Design Doc and ChangeLog map directly onto the full framework's TDD and ChangeLog.
+> **When to use Lite** (Ops § Journeys): **updating an existing app, or building a new app without a
+> large footprint.** One Main model does everything, in fewer steps, with leaner documents — a
+> Design Doc, Docs, a Test Script — so it is faster and cheaper than Full and still a reliable
+> agentic engineering process with quality outcomes; one to two hours depending on complexity.
+> **Use the full framework** for a complete app or solution built end to end, or a major overhaul of
+> a big existing app — the work that needs a detailed requirements review, an FRD, a TDD, full
+> documentation, testing guides, and automated test scripts on three models, or that is heading to
+> AppSource. **Use Build-a-Feature** for a quick, tactical customization — a table and its pages, a
+> field on a page, a processing report, an API, a role center — in minutes, with no design
+> documents. Nothing is lost by switching later — Lite's Design Doc and ChangeLog map directly onto
+> the full framework's TDD and ChangeLog, and a Build-a-Feature extension is an existing app to
+> Step 1.
 >
 > **How the agent uses it:** work the phases in order (DEFINE → DESIGN → BUILD → PROVE). Don't
 > start a step until its predecessor's exit gate is met. The *Project Parameters* block in Step 1
@@ -60,9 +64,12 @@
 > **One model does everything.** Lite drops the full framework's Main/Light/Reasoning role split.
 > There's no delegation to configure — the executing agent plans, generates, reviews, and documents,
 > in that order, within each step. Step 1 still asks which model and thinking effort that one
-> agent runs on, and confirms the session matches (Ops § Roles). The one exception is speed, not
-> judgment: with two batches, Step 4 may run one background **generator** sub-agent per batch, on
-> that same model and effort (ALL ALONG → OCPF Plugin; Ops § Roles → *Parallel batches*).
+> agent runs on, and confirms the session matches (Ops § Roles). Two exceptions, both on that same
+> model and effort and neither a judgment call handed elsewhere: with two batches, Step 4 may run
+> one background **generator** sub-agent per batch (Ops § Roles → *Parallel batches*), and Step 5
+> runs the **reviewer** sub-agent once, between the first clean compile and the first package, for
+> a fresh read of every file whose findings the human decides in one box (Ops § Roles → *The
+> pre-review*).
 >
 > **Every project document lives in `docs/`, by phase.** Created at Step 1, before the first
 > document is written, with these subfolders — the same five as Full; Lite writes nothing into `3-build/`:
@@ -377,7 +384,7 @@ written with the first package and its §1 current; at least one package install
 and manually tested on a sandbox; `docs/0-project/ChangeLog.md` current (last installed version
 included); `docs/2-design/DesignDoc.md` updated for every rule change.
 
-**Exit gate:** Full extension compiles clean, with the analyzers and nothing suppressed (Ops § Analyzers); human confirms sandbox testing is clean; no known
+**Exit gate:** Full extension compiles clean, with the analyzers and nothing suppressed (Ops § Analyzers); the pre-review ran on the Main model before the first package and every finding was decided in the options box and recorded in the ChangeLog; human confirms sandbox testing is clean; no known
 systemic issue outstanding; no unit in a language required at first release is
 `needs-translation` or `needs-adaptation`, and translation checks are clean. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
 
@@ -626,7 +633,7 @@ translation files. BCQuality lives outside the project root entirely.
 `framework.json`, and the runbook itself when `CLAUDE.md` already existed), this runbook under
 whatever name it was placed (`CLAUDE.md`, `.github/copilot-instructions.md`,
 `.github/instructions/ocpf-framework.instructions.md`), and the project-local sub-agent
-definitions (`.claude/agents/ocpf-light.md`, `ocpf-reasoning.md`, `ocpf-generator.md`;
+definitions (`.claude/agents/ocpf-light.md`, `ocpf-reasoning.md`, `ocpf-generator.md`, `ocpf-reviewer.md`, `ocpf-analyst.md`;
 `.github/agents/ocpf-*.agent.md`). With *No, track them*, only the first block is written. Step 1's
 parameter table (in `ocpfFramework/runbookSteps/STEP-1.md`) has the list; Ops § Repository Hygiene
 has the block to paste. **Verify with `git check-ignore -v`** on each file that exists — that
@@ -815,20 +822,27 @@ skill creates (with `"layout"` and `"tooling"` fields). Without that file, skip 
   runbook and offer **Update now / Not now / Skip this version**. Never replace the runbook without
   an explicit yes.
 - **What the plugin adds:** offline copies of the runbooks, both companions, the step files, and the
-  templates; one-step AL tool setup; notification setup; the `ocpf-generator` sub-agent (the
-  `roles` skill writes the project-local copy on the Main model and effort — Step 4 uses it for
-  parallel batches); and the `status` (reads `ProjectProgress.md`), `al-standards`,
+  templates; one-step AL tool setup; notification setup; the `ocpf-generator` and `ocpf-reviewer`
+  sub-agents (the `roles` skill writes both project-local copies on the Main model and effort —
+  Step 4 uses the generator for parallel batches, Step 5 the reviewer for the pre-review); the
+  `analyze` skill (`/ocpf-bc:analyze` — documents an undocumented existing app into
+  `requirements/existing/` on a model the human chooses, offered at Step 1 when the app exists;
+  Ops § Existing Apps); the `app-icon` skill (draws the app icon when the human has none — *Create
+  one for me* in Step 1's identity box; Ops § Intake → *The app icon*); and the `status` (reads
+  `ProjectProgress.md`), `al-standards`,
   `notifications`, `roles` (asks Lite's two model questions), `documents` (writes any document from
   its template), and `usage` (`--step <id>` at every boundary; the calibration export at Step 7)
   skills. (The `ocpf-light` and `ocpf-reasoning` sub-agents belong to the full framework's role
   split, which Lite doesn't use.)
 - **Build-a-Feature on this project (Ops § Build-a-Feature):** the plugin's third journey builds
-  one object or a few — a table and its pages, a field on a standard page, a report, an API page,
-  an enum, a permission set — with no steps and no documents, on the Main model. The `start`
-  skill offers it as *Build a feature in this project*; it leaves this runbook, the step table,
-  and every document alone, appends its own feature table to `ProjectProgress.md` (one row per
-  object, usage rows under `F` ids), and adds one ChangeLog line per object. For a quick mod
-  between or after the steps, never a substitute for one.
+  quick customizations — a table and its pages, a field on a standard page, a processing report,
+  an API page, an enum, a permission set, a role center — with no steps and no design documents
+  (six short documents, written as the work happens), on the Main model. The `start` skill
+  offers it as *Build a feature in this project*; it leaves this runbook, the step table, and
+  every document alone, appends its own feature table to `ProjectProgress.md` (one row per
+  object, usage rows under `F` ids), writes its documents beside this project's own, and adds one
+  ChangeLog line per object. For a quick mod between or after the steps, never a substitute for
+  one.
 
 ## Tooling Checks — Node, mermaid, PowerShell
 

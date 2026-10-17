@@ -96,6 +96,176 @@ def step_for(ts, wins):
         if ts >= a and (b is None or ts <= b): hit = step
     return hit or "Unattributed"
 
+def anchor_first_window(wins, spans, notes, what):
+    """The first window starts where the session that opened it started (v5.8.0.0).
+
+    The agent writes the first startedAt after the language, notification, identity, and dashboard questions, so on a
+    real Build-a-Feature project the clock began minutes after the tokens did: the tokens before the first window were
+    'Unattributed' and the dashboard's elapsed time started late. spans is [(start, end)] of the sessions (Claude Code:
+    each top-level transcript file; Copilot: each journaled session). When the first window's start falls inside one
+    session and that session started earlier, the window is extended back to the session's start — never to another
+    session: a chat held in the folder a week earlier stays out. Returns the adjusted windows (a new list)."""
+    if not wins or not spans: return wins
+    step, a, b = wins[0]
+    hit = [s for s, e in spans if s and e and s <= a <= e and s < a]
+    if not hit: return wins
+    s0 = min(hit)
+    notes.append(f"step {step}'s window starts at {s0.strftime('%Y-%m-%dT%H:%M:%SZ')}, when the {what} that opened it started, not at its recorded startedAt ({a.strftime('%H:%M:%SZ')}) — the clock and the tokens begin together")
+    return [(step, s0, b)] + list(wins[1:])
+
+def transcript_spans(files):
+    """(first, last) timestamp of each top-level Claude Code session file (sub-agent files are not sessions)."""
+    spans = []
+    for f in files:
+        if os.sep + "subagents" + os.sep in f: continue
+        lo = hi = None
+        try:
+            with open(f, encoding="utf-8") as fh:
+                for line in fh:
+                    i = line.find('"timestamp":"')
+                    if i < 0: continue
+                    ts = parse_ts(line[i + 13:i + 13 + 24].split('"')[0])
+                    if not ts: continue
+                    lo = ts if lo is None or ts < lo else lo; hi = ts if hi is None or ts > hi else hi
+        except OSError: continue
+        if lo and hi: spans.append((lo, hi))
+    return spans
+
+# ---------------------------------------------------------------- published prices, fetched by the script (v5.8.0.0)
+ANTHROPIC_PRICING_MD = "https://platform.claude.com/docs/en/about-claude/pricing.md"   # the pricing page, served as Markdown
+ANTHROPIC_PRICING_URL = "https://platform.claude.com/docs/en/about-claude/pricing"
+COPILOT_PRICING_URL = "https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing"
+FETCH_COOLDOWN_S = 3600
+
+def _http_get(url, timeout=12):
+    import urllib.request
+    req = urllib.request.Request(url, headers={"User-Agent": "ocpf-bc usage script (+https://github.com/ajansari/ocpfBcAgenticDevFramework)"})
+    with urllib.request.urlopen(req, timeout=timeout) as r:
+        return r.read().decode("utf-8", errors="replace")
+
+def _money(cell):
+    m = re.search(r"\$\s*([0-9]+(?:\.[0-9]+)?)", cell)
+    return float(m.group(1)) if m else None
+
+def _norm_model_name(name):
+    """'Claude Sonnet 5.5' -> 'claude-sonnet-5-5' (the shape of a transcript's message.model, minus any date suffix)."""
+    name = re.sub(r"\(.*?\)", "", name)          # drop qualifiers: (retired …), (for prompts up to …)
+    name = re.sub(r"<[^>]+>", "", name)           # <sup>1</sup>
+    name = re.sub(r"\[([^\]]*)\]\([^)]*\)", r"\1", name)
+    return re.sub(r"[^a-z0-9]+", "-", name.strip().lower()).strip("-")
+
+def parse_anthropic_pricing_md(md):
+    """{normalized name: {input, cacheWrite5m, cacheWrite1h, cacheRead, output}} from the page's main pricing table."""
+    out = {}
+    cols = None
+    for line in md.splitlines():
+        if not line.startswith("|"): cols = cols if cols else None; continue
+        cells = [c.strip() for c in line.strip().strip("|").split("|")]
+        low = [c.lower() for c in cells]
+        if any("base input" in c for c in low) and any("output" in c for c in low):
+            cols = {}
+            for i, c in enumerate(low):
+                if "base input" in c: cols["input"] = i
+                elif "5m cache" in c: cols["cacheWrite5m"] = i
+                elif "1h cache" in c: cols["cacheWrite1h"] = i
+                elif "cache hits" in c or "cache read" in c: cols["cacheRead"] = i
+                elif "output" in c: cols["output"] = i
+            continue
+        if not cols or set(cols) != {"input", "cacheWrite5m", "cacheWrite1h", "cacheRead", "output"}: continue
+        if set(line.replace("|", "").strip()) <= set(":- "): continue
+        if len(cells) <= max(cols.values()) or not cells[0].lower().startswith("claude"): 
+            if cells and not cells[0].lower().startswith("claude") and out: cols = None   # the table ended
+            continue
+        if "over 100,000" in cells[0].lower(): continue    # Haiku's long-prompt tier: keep the base tier
+        key = _norm_model_name(cells[0])
+        rates = {k: _money(cells[i]) for k, i in cols.items()}
+        if key and all(v is not None for v in rates.values()) and key not in out:
+            out[key] = rates
+    return out
+
+def match_rate(model, table):
+    """The longest pricing key that is the model id, or the model id's prefix at a '-' boundary (date suffixes, variants)."""
+    m = model.lower()
+    best = None
+    for key in table:
+        if m == key or m.startswith(key + "-"):
+            if best is None or len(key) > len(best): best = key
+    return best
+
+def fetch_missing_rates(models, pricing, pricing_path, notes):
+    """Fetch Anthropic's published rates for every 'claude*' model that has no row in pricing.json and write them in.
+
+    v5.8.0.0: on a real project nobody wrote pricing.json until after the last window closed, so every row of the
+    build said 'price unknown' and the dashboard's cost tile read $0 for a model whose price has been public all
+    along. The script now does the fetch itself — the page is served as Markdown — once per hour at most, and
+    records the attempt, so a hook-driven render on an offline machine does not retry every 45 seconds."""
+    rates = pricing.setdefault("perMillionTokens", {})
+    missing = [m for m in models if m not in rates and m.lower().startswith("claude")]
+    others = [m for m in models if m not in rates and not m.lower().startswith("claude")]
+    if others: notes.append("price unknown for " + ", ".join(sorted(others)) + " — not an Anthropic model; add its publisher's rate to pricing.json (Ops § Usage & Cost → 3)")
+    if not missing: return False
+    last = parse_ts(pricing.get("autoFetchFailedAt"))   # set only by a failed fetch; a success clears it, so a new model is priced at once
+    if last and (datetime.now(timezone.utc) - last).total_seconds() < FETCH_COOLDOWN_S:
+        notes.append("price unknown for " + ", ".join(sorted(missing)) + " — the last fetch of " + ANTHROPIC_PRICING_URL + " failed less than an hour ago; retrying later")
+        return False
+    try:
+        table = parse_anthropic_pricing_md(_http_get(ANTHROPIC_PRICING_MD))
+        if not table: raise ValueError("no pricing table found on the page")
+        pricing.pop("autoFetchFailedAt", None)
+    except Exception as e:  # offline, blocked, or the page moved
+        table = {}
+        pricing["autoFetchFailedAt"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        notes.append(f"could not fetch {ANTHROPIC_PRICING_URL} ({e.__class__.__name__}) — price unknown for " + ", ".join(sorted(missing)) + "; fetch it by hand when online (Ops § Usage & Cost → 3)")
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    written = []
+    for m in missing:
+        key = match_rate(m, table)
+        if not key: continue
+        rates[m] = dict(table[key], source=ANTHROPIC_PRICING_URL, pricedAs=key, fetchedAt=today)
+        written.append(f"{m} (as {key})")
+    unmatched = [m for m in missing if m not in rates]
+    if table and unmatched: notes.append("price unknown for " + ", ".join(sorted(unmatched)) + " — not in the table at " + ANTHROPIC_PRICING_URL + "; add the rate to pricing.json by hand")
+    if written:
+        pricing["fetchedAt"] = today; pricing.setdefault("currency", "USD")
+        notes.append("prices fetched from " + ANTHROPIC_PRICING_URL + " on " + today + " for " + ", ".join(written))
+    try:
+        os.makedirs(os.path.dirname(pricing_path), exist_ok=True)
+        with open(pricing_path, "w", encoding="utf-8") as f: json.dump(pricing, f, indent=2, ensure_ascii=False); f.write("\n")
+    except OSError as e:
+        notes.append(f"could not write {pricing_path}: {e}")
+    return bool(written)
+
+def fetch_copilot_credit(pricing, pricing_path, notes):
+    """Fetch the USD value of one AI credit from GitHub's pricing page ('1 AI credit = $0.01 USD') when pricing.json lacks it."""
+    if (pricing.get("aiCredit") or {}).get("usd") is not None: return False
+    last = parse_ts(pricing.get("autoFetchFailedAt"))
+    if last and (datetime.now(timezone.utc) - last).total_seconds() < FETCH_COOLDOWN_S:
+        notes.append("the AI credit's price is unknown — the last fetch of " + COPILOT_PRICING_URL + " failed less than an hour ago; retrying later"); return False
+    usd = None
+    try:
+        page = _http_get(COPILOT_PRICING_URL)
+        m = re.search(r"1 AI credit\s*=\s*\$\s*([0-9]+(?:\.[0-9]+)?)\s*USD", page)
+        if m: usd = float(m.group(1))
+        else: notes.append("could not find '1 AI credit = $x USD' on " + COPILOT_PRICING_URL + " — write aiCredit.usd into pricing.json by hand")
+    except Exception as e:
+        notes.append(f"could not fetch {COPILOT_PRICING_URL} ({e.__class__.__name__}) — the AI credit's price stays unknown until the machine is online")
+    if usd is None:
+        pricing["autoFetchFailedAt"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+        try:
+            with open(pricing_path, "w", encoding="utf-8") as f: json.dump(pricing, f, indent=2, ensure_ascii=False); f.write("\n")
+        except OSError: pass
+        return False
+    today = datetime.now(timezone.utc).strftime("%Y-%m-%d")
+    pricing["aiCredit"] = {"usd": usd, "source": COPILOT_PRICING_URL, "fetchedAt": today}; pricing.pop("autoFetchFailedAt", None)
+    pricing["fetchedAt"] = today; pricing.setdefault("currency", "USD")
+    notes.append(f"1 AI credit = ${usd:g}, fetched from {COPILOT_PRICING_URL} on {today}")
+    try:
+        os.makedirs(os.path.dirname(pricing_path), exist_ok=True)
+        with open(pricing_path, "w", encoding="utf-8") as f: json.dump(pricing, f, indent=2, ensure_ascii=False); f.write("\n")
+    except OSError as e:
+        notes.append(f"could not write {pricing_path}: {e}")
+    return True
+
 def price(row, rates):
     r = rates.get(row["model"])
     if not r: return None
@@ -325,12 +495,11 @@ def add(a, b):
 EMPTY = {"byModel": {}, "turns": 0, "decisions": 0, "subAgentCalls": 0}
 
 def elapsed_for(step, usage, wins):
+    """Seconds of every window of `step`, from the (possibly anchored) windows — an open window runs to now."""
     elapsed = None
-    for s in usage.get("steps", []):
-        a = parse_ts(s.get("startedAt"))
-        if s.get("step") == step and a:
-            end = next((w[2] for w in wins if w[0] == step and w[1] == a), None) or datetime.now(timezone.utc)
-            elapsed = (elapsed or 0) + max(0, (end - a).total_seconds())
+    for w in wins:
+        if w[0] == step:
+            elapsed = (elapsed or 0) + max(0, ((w[2] or datetime.now(timezone.utc)) - w[1]).total_seconds())
     return elapsed
 
 NANO_AIU_PER_CREDIT = 1_000_000_000   # github/copilot-sdk NANO_AIU_PER_AIU; AIU = AI credit (verified on a real project)
@@ -451,7 +620,7 @@ def reconcile_github(month_total_hint):
     except (OSError, ValueError, subprocess.SubprocessError) as e:
         return None, str(e)
 
-def copilot_main(a, root, usage, usage_path, pricing):
+def copilot_main(a, root, usage, usage_path, pricing, pricing_path):
     notes = []
     wins = windows_from(usage)
     if not wins: notes.append(f"no step windows in {os.path.join(STATE, 'usage.json')} — everything is Unattributed")
@@ -489,6 +658,7 @@ def copilot_main(a, root, usage, usage_path, pricing):
                     turns = keep
                     if not turns: overhead = 0.0
         current = snapshot(turns, overhead); current["source"] = "journal" if sessions else "sessions"
+        wins = anchor_first_window(wins, [(x["start"], x["last"]) for x in sessions if x.get("start") and x.get("last")], notes, "Copilot session")
         if dirs: cp_state["sessionDirs"] = dirs
         if sessions and cp_state.get("journalDirs") != jdirs:
             cp_state["journalDirs"] = jdirs
@@ -567,6 +737,7 @@ def copilot_main(a, root, usage, usage_path, pricing):
         if est_any: notes.append("inside a session the SDK journals the cumulative credits only when the chat ends; between those points the figure is split across steps by each step's share of model requests")
         if open_sessions: notes.append(f"{open_sessions} session(s) still open — their credits are as of the last journaled checkpoint; the step rows will grow when the chat ends and the measurement runs again")
         if unj: notes.append(f"{unj} model request(s) ran after the last journaled checkpoint and are not yet counted anywhere")
+    fetch_copilot_credit(pricing, pricing_path, notes)
     usd = (pricing.get("aiCredit") or {}).get("usd")
     out = []
     for step in order:
@@ -665,7 +836,7 @@ def main():
     rates = pricing.get("perMillionTokens", {})
     tool = a.tool or usage.get("aiTool") or "claude-code"
     if tool in ("copilot-chat", "copilot-cli"):
-        return copilot_main(a, root, usage, usage_path, pricing)
+        return copilot_main(a, root, usage, usage_path, pricing, pricing_path)
     tdir = a.transcripts or os.path.expanduser(usage.get("transcriptDir") or
             os.path.join("~", ".claude", "projects", project_key(root)))
     # a session is <id>.jsonl; its sub-agents (Agent tool) are journaled beside it in <id>/subagents/agent-*.jsonl
@@ -675,6 +846,7 @@ def main():
         sys.exit(f"error: no transcripts in {tdir} — set transcriptDir in {os.path.join(STATE, 'usage.json')} (ls ~/.claude/projects/)")
     wins = windows_from(usage)
     if not wins: notes.append(f"no step windows in {os.path.join(STATE, 'usage.json')} — everything is Unattributed")
+    wins = anchor_first_window(wins, transcript_spans(files), notes, "session")
 
     seen = set(); rows = []; no_rid = 0   # one row per API response
     turns = defaultdict(int); decisions = defaultdict(int); agents = defaultdict(int); web = defaultdict(int)
@@ -715,6 +887,9 @@ def main():
                              "cacheRead": n(u.get("cache_read_input_tokens")),
                              "sidechain": bool(o.get("isSidechain"))})
     if no_rid: notes.append(f"{no_rid} assistant line(s) had no requestId and were excluded")
+    # every model that ran needs a published rate; the script fetches Anthropic's itself (v5.8.0.0)
+    fetch_missing_rates(sorted({r["model"] for r in rows}), pricing, pricing_path, notes)
+    rates = pricing.get("perMillionTokens", {})
     # aggregate per step, per model
     agg = defaultdict(lambda: {"input": 0, "output": 0, "cacheWrite": 0, "cache5m": 0, "cache1h": 0, "cacheRead": 0,
                                "requests": 0, "cost": 0.0, "priced": True, "first": None, "last": None})
@@ -734,10 +909,9 @@ def main():
         models = sorted({m for (s, m) in agg if s == step})
         if not models: continue
         elapsed = None
-        for s in usage.get("steps", []):
-            if s.get("step") == step and parse_ts(s.get("startedAt")):
-                end = next((w[2] for w in wins if w[0] == step and w[1] == parse_ts(s["startedAt"])), None) or datetime.now(timezone.utc)
-                elapsed = (elapsed or 0) + max(0, (end - parse_ts(s["startedAt"])).total_seconds())
+        for w in wins:
+            if w[0] == step:
+                elapsed = (elapsed or 0) + max(0, ((w[2] or datetime.now(timezone.utc)) - w[1]).total_seconds())
         for mdl in models:
             g = agg[(step, mdl)]
             out.append({"step": step, "model": mdl, "input": g["input"], "output": g["output"],

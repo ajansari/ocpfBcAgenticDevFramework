@@ -36,6 +36,70 @@ $usagePath  = $(if ($Usage) { $Usage } else { Join-Path $stateDir "usage.json" }
 $usageDoc   = Load-Json $usagePath @{}
 $pricingDoc = Load-Json ($(if ($Pricing) { $Pricing } else { Join-Path $stateDir "pricing.json" })) @{}
 $rates = if ($pricingDoc.perMillionTokens) { $pricingDoc.perMillionTokens } else { @{} }
+$pricingPath = $(if ($Pricing) { $Pricing } else { Join-Path $stateDir "pricing.json" })
+
+# ---- published prices, fetched by the script (v5.8.0.0) ----
+# On a real project nobody wrote pricing.json until after the last window closed, so every row said "price unknown" and
+# the dashboard read $0 for a model whose price has been public all along. The script fetches Anthropic's rates itself
+# (the pricing page is served as Markdown) and GitHub's AI-credit price, at most once an hour, and records the attempt.
+$ANTHROPIC_PRICING_MD = "https://platform.claude.com/docs/en/about-claude/pricing.md"
+$ANTHROPIC_PRICING_URL = "https://platform.claude.com/docs/en/about-claude/pricing"
+$COPILOT_PRICING_URL = "https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing"
+function Norm-ModelName($n) { $n = $n -replace '\(.*?\)', '' -replace '<[^>]+>', '' -replace '\[([^\]]*)\]\([^)]*\)', '$1'; (($n.Trim().ToLower() -replace '[^a-z0-9]+', '-').Trim('-')) }
+function Money($c) { if ("$c" -match '\$\s*([0-9]+(?:\.[0-9]+)?)') { [double]$Matches[1] } else { $null } }
+function Parse-AnthropicPricing($md) {
+  $out = @{}; $cols = $null
+  foreach ($line in ($md -split "`n")) {
+    if (-not $line.StartsWith('|')) { continue }
+    $cells = @($line.Trim().Trim('|').Split('|') | ForEach-Object { $_.Trim() }); $low = @($cells | ForEach-Object { $_.ToLower() })
+    if (@($low | Where-Object { $_ -like '*base input*' }).Count -and @($low | Where-Object { $_ -like '*output*' }).Count) {
+      $cols = @{}; for ($i = 0; $i -lt $low.Count; $i++) { $c = $low[$i]; if ($c -like '*base input*') { $cols.input = $i } elseif ($c -like '*5m cache*') { $cols.cacheWrite5m = $i } elseif ($c -like '*1h cache*') { $cols.cacheWrite1h = $i } elseif ($c -like '*cache hits*' -or $c -like '*cache read*') { $cols.cacheRead = $i } elseif ($c -like '*output*') { $cols.output = $i } }
+      continue }
+    if (-not $cols -or $cols.Count -ne 5) { continue }
+    if (($line -replace '[|:\- ]', '') -eq '') { continue }
+    if (-not $cells[0].ToLower().StartsWith('claude')) { if ($out.Count) { $cols = $null }; continue }
+    if ($cells[0].ToLower() -like '*over 100,000*') { continue }
+    if ($cells.Count -le ($cols.Values | Measure-Object -Maximum).Maximum) { continue }
+    $key = Norm-ModelName $cells[0]; $r = @{}; $ok = $true
+    foreach ($k in @($cols.Keys)) { $v = Money $cells[$cols[$k]]; if ($null -eq $v) { $ok = $false }; $r[$k] = $v }
+    if ($key -and $ok -and -not $out.ContainsKey($key)) { $out[$key] = $r }
+  }
+  $out
+}
+function Match-Rate($model, $table) { $m = $model.ToLower(); $best = $null; foreach ($k in $table.Keys) { if ($m -eq $k -or $m.StartsWith("$k-")) { if ($null -eq $best -or $k.Length -gt $best.Length) { $best = $k } } }; $best }
+function Save-Pricing { try { $null = New-Item -ItemType Directory -Force -Path (Split-Path $pricingPath) ; ($script:pricingDoc | ConvertTo-Json -Depth 6) | Set-Content -Path $pricingPath -Encoding utf8 } catch { $script:notes += "could not write ${pricingPath}: $_" } }
+function Cooldown-Active { $last = Parse-Ts $script:pricingDoc.autoFetchFailedAt; ($last -and (([datetime]::UtcNow - $last).TotalSeconds -lt 3600)) }   # set only by a failed fetch; a success clears it
+function Fetch-MissingRates($models) {
+  if (-not $script:pricingDoc.perMillionTokens) { $script:pricingDoc.perMillionTokens = @{} }
+  $tbl = $script:pricingDoc.perMillionTokens
+  $missing = @($models | Where-Object { -not $tbl.ContainsKey($_) -and $_.ToLower().StartsWith('claude') })
+  $others = @($models | Where-Object { -not $tbl.ContainsKey($_) -and -not $_.ToLower().StartsWith('claude') })
+  if ($others.Count) { $script:notes += "price unknown for $($others -join ', ') — not an Anthropic model; add its publisher's rate to pricing.json (Ops § Usage & Cost → 3)" }
+  if (-not $missing.Count) { return }
+  if (Cooldown-Active) { $script:notes += "price unknown for $($missing -join ', ') — the last fetch of $ANTHROPIC_PRICING_URL failed less than an hour ago; retrying later"; return }
+  $table = @{}
+  try { $md = (Invoke-WebRequest -Uri $ANTHROPIC_PRICING_MD -TimeoutSec 12 -UseBasicParsing -Headers @{ 'User-Agent' = 'ocpf-bc usage script' }).Content; $table = Parse-AnthropicPricing $md; if (-not $table.Count) { throw "no pricing table found on the page" }; $script:pricingDoc.Remove('autoFetchFailedAt') }
+  catch { $script:pricingDoc.autoFetchFailedAt = [datetime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ'); $script:notes += "could not fetch $ANTHROPIC_PRICING_URL ($($_.Exception.GetType().Name)) — price unknown for $($missing -join ', '); fetch it by hand when online (Ops § Usage & Cost → 3)" }
+  $today = [datetime]::UtcNow.ToString('yyyy-MM-dd'); $written = @()
+  foreach ($m in $missing) { $key = Match-Rate $m $table; if (-not $key) { continue }
+    $e = @{}; foreach ($k in $table[$key].Keys) { $e[$k] = $table[$key][$k] }; $e.source = $ANTHROPIC_PRICING_URL; $e.pricedAs = $key; $e.fetchedAt = $today
+    $tbl[$m] = $e; $written += "$m (as $key)" }
+  $unmatched = @($missing | Where-Object { -not $tbl.ContainsKey($_) })
+  if ($table.Count -and $unmatched.Count) { $script:notes += "price unknown for $($unmatched -join ', ') — not in the table at $ANTHROPIC_PRICING_URL; add the rate to pricing.json by hand" }
+  if ($written.Count) { $script:pricingDoc.fetchedAt = $today; if (-not $script:pricingDoc.currency) { $script:pricingDoc.currency = 'USD' }; $script:notes += "prices fetched from $ANTHROPIC_PRICING_URL on $today for $($written -join ', ')" }
+  Save-Pricing
+}
+function Fetch-CopilotCredit {
+  if ($script:pricingDoc.aiCredit -and $null -ne $script:pricingDoc.aiCredit.usd) { return }
+  if (Cooldown-Active) { $script:notes += "the AI credit's price is unknown — the last fetch of $COPILOT_PRICING_URL failed less than an hour ago; retrying later"; return }
+  $usd = $null
+  try { $page = (Invoke-WebRequest -Uri $COPILOT_PRICING_URL -TimeoutSec 12 -UseBasicParsing -Headers @{ 'User-Agent' = 'ocpf-bc usage script' }).Content
+    if ($page -match '1 AI credit\s*=\s*\$\s*([0-9]+(?:\.[0-9]+)?)\s*USD') { $usd = [double]$Matches[1] } else { $script:notes += "could not find '1 AI credit = `$x USD' on $COPILOT_PRICING_URL — write aiCredit.usd into pricing.json by hand" } }
+  catch { $script:notes += "could not fetch $COPILOT_PRICING_URL ($($_.Exception.GetType().Name)) — the AI credit's price stays unknown until the machine is online" }
+  if ($null -eq $usd) { $script:pricingDoc.autoFetchFailedAt = [datetime]::UtcNow.ToString('yyyy-MM-ddTHH:mm:ssZ') }
+  if ($null -ne $usd) { $script:pricingDoc.Remove('autoFetchFailedAt'); $today = [datetime]::UtcNow.ToString('yyyy-MM-dd'); $script:pricingDoc.aiCredit = @{ usd = $usd; source = $COPILOT_PRICING_URL; fetchedAt = $today }; $script:pricingDoc.fetchedAt = $today; if (-not $script:pricingDoc.currency) { $script:pricingDoc.currency = 'USD' }; $script:notes += "1 AI credit = `$$usd, fetched from $COPILOT_PRICING_URL on $today" }
+  Save-Pricing
+}
 $aiTool = if ($Tool) { $Tool } elseif ($usageDoc.aiTool) { $usageDoc.aiTool } else { "claude-code" }
 $isCopilot = $aiTool -in @("copilot-chat", "copilot-cli")
 $notes = @()
@@ -44,10 +108,30 @@ $wins = @($wins | Sort-Object { $_[1] })
 for ($i = 0; $i -lt $wins.Count; $i++) { if ($null -eq $wins[$i][2] -and $i + 1 -lt $wins.Count) { $wins[$i][2] = $wins[$i + 1][1] } }   # an open window ends where the next starts
 if (-not $wins) { $notes += "no step windows in ocpfFramework/state/usage.json — everything is Unattributed" }
 function Step-For($ts) { $hit = $null; foreach ($w in $wins) { if ($ts -ge $w[1] -and ($null -eq $w[2] -or $ts -le $w[2])) { $hit = $w[0] } }; if ($hit) { $hit } else { "Unattributed" } }
+# The first window starts where the session that opened it started (v5.8.0.0): the agent writes the first startedAt after
+# the language, notification, identity, and dashboard questions, so the tokens began before the clock did. Only a session
+# whose span contains the recorded startedAt counts — an earlier, separate chat in the same folder never does.
+function Anchor-FirstWindow($spans, $what) {
+  if (-not $script:wins.Count -or -not $spans.Count) { return }
+  $w0 = $script:wins[0]; $hits = @(foreach ($sp in $spans) { if ($sp[0] -and $sp[1] -and $sp[0] -le $w0[1] -and $w0[1] -le $sp[1] -and $sp[0] -lt $w0[1]) { $sp[0] } })
+  if (-not $hits.Count) { return }
+  $s0 = ($hits | Sort-Object)[0]
+  $script:notes += "step $($w0[0])'s window starts at $($s0.ToString('yyyy-MM-ddTHH:mm:ssZ')), when the $what that opened it started, not at its recorded startedAt ($($w0[1].ToString('HH:mm:ssZ'))) — the clock and the tokens begin together"
+  $script:wins[0] = @($w0[0], $s0, $w0[2])
+}
+function Transcript-Spans($fileList) {
+  $sep = [IO.Path]::DirectorySeparatorChar
+  $res = @(foreach ($f in $fileList) { if ($f.FullName -like "*${sep}subagents${sep}*") { continue }
+    $lo = $null; $hi = $null
+    foreach ($line in [System.IO.File]::ReadLines($f.FullName)) { $i = $line.IndexOf('"timestamp":"'); if ($i -lt 0) { continue }; $ts = Parse-Ts ($line.Substring($i + 13, [Math]::Min(24, $line.Length - $i - 13)).Split('"')[0]); if (-not $ts) { continue }; if ($null -eq $lo -or $ts -lt $lo) { $lo = $ts }; if ($null -eq $hi -or $ts -gt $hi) { $hi = $ts } }
+    if ($lo -and $hi) { ,@($lo, $hi) } })
+  return ,$res   # the leading comma keeps a single pair from unrolling into two datetimes on return
+}
 function N($v) { try { [long]($v ?? 0) } catch { 0 } }
 function Elapsed-For($sid) {
+  # every window of the step, from the (possibly anchored) windows; an open window runs to now
   $elapsed = $null
-  foreach ($s in ($usageDoc.steps ?? @())) { if ($s.step -eq $sid -and (Parse-Ts $s.startedAt)) { $start = Parse-Ts $s.startedAt; $end = $null; foreach ($w in $wins) { if ($w[0] -eq $sid -and $w[1] -eq $start) { $end = $w[2] } }; $end = $end ?? [datetime]::UtcNow; $elapsed = ($elapsed ?? 0) + [math]::Max(0, ($end - $start).TotalSeconds) } }
+  foreach ($w in $wins) { if ($w[0] -eq $sid) { $end = $w[2] ?? [datetime]::UtcNow; $elapsed = ($elapsed ?? 0) + [math]::Max(0, ($end - $w[1]).TotalSeconds) } }
   $elapsed
 }
 $out = @()
@@ -250,6 +334,7 @@ if ($isCopilot) {
       if ($kept.Count -ne $turnList.Count) { $notes += "$($turnList.Count - $kept.Count) legacy chat-session turn(s) overlap a journaled session and were not counted twice"; $turnList = $kept; if (-not $turnList.Count) { $overhead = 0.0 } }
     }
     $current = Snapshot $turnList $overhead; $current.source = $(if ($jSessions.Count) { "journal" } else { "sessions" })
+    Anchor-FirstWindow @(foreach ($x in $jSessions) { if ($x.start -and $x.last) { ,@($x.start, $x.last) } }) "Copilot session"
     if ($cpDirs) { $cpState["sessionDirs"] = $cpDirs }
     if ($jSessions.Count -and (@($cpState.journalDirs) -join '|') -ne ($jDirs -join '|')) { $cpState["journalDirs"] = $jDirs; $usageDoc | ConvertTo-Json -Depth 12 | Set-Content -Path $usagePath -Encoding utf8 }
   }
@@ -295,6 +380,7 @@ if ($isCopilot) {
       Credit-Step $(if ($openStep) { "$openStep (open)" } else { "Unattributed" }) $tail
     }
   }
+  Fetch-CopilotCredit
   $usdPerCredit = if ($pricingDoc.aiCredit -and $null -ne $pricingDoc.aiCredit.usd) { [double]$pricingDoc.aiCredit.usd } else { $null }
   foreach ($sid in $per.Keys) {
     $bare = $sid -replace ' \(open\)$', ''
@@ -345,6 +431,7 @@ $tdir = if ($Transcripts) { $Transcripts } elseif ($usageDoc.transcriptDir) { $u
 # a session is <id>.jsonl; its sub-agents (Agent tool) are journaled beside it in <id>/subagents/agent-*.jsonl
 $files = @(@(Get-ChildItem -Path $tdir -Filter *.jsonl -ErrorAction SilentlyContinue) + @(Get-ChildItem -Path $tdir -Directory -ErrorAction SilentlyContinue | ForEach-Object { Join-Path $_.FullName "subagents" } | Where-Object { Test-Path $_ } | ForEach-Object { Get-ChildItem -Path $_ -Filter *.jsonl -ErrorAction SilentlyContinue }) | Sort-Object FullName)
 if (-not $files) { Write-Error "no transcripts in $tdir — set transcriptDir in ocpfFramework/state/usage.json (ls ~/.claude/projects/)"; exit 1 }
+Anchor-FirstWindow (Transcript-Spans $files) "session"
 $seen = @{}; $rows = @(); $turns = @{}; $decisions = @{}; $agents = @{}; $web = @{}; $noRid = 0
 foreach ($f in $files) {
   foreach ($line in [System.IO.File]::ReadLines($f.FullName)) {
@@ -368,6 +455,8 @@ foreach ($f in $files) {
   }
 }
 if ($noRid) { $notes += "$noRid assistant line(s) had no requestId and were excluded" }
+Fetch-MissingRates @(@($rows | ForEach-Object { $_.model }) | Sort-Object -Unique)
+$rates = if ($pricingDoc.perMillionTokens) { $pricingDoc.perMillionTokens } else { @{} }
 $order = @($wins | ForEach-Object { $_[0] }) + "Unattributed"
 foreach ($sid in ($order | Select-Object -Unique)) {
   if ($Step -and $sid -ne $Step) { continue }

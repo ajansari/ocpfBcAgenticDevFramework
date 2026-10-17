@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 5 — Compile, Package, Test & Iterate
 
-**Runbook version:** 5.7.3.0 · Lite edition · Phase: BUILD
+**Runbook version:** 5.8.0.0 · Lite edition · Phase: BUILD
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -29,7 +29,25 @@ increments again. The test: if `outputAppPackage/` holds no package yet and `app
 `outputAppPackage/<Name>_<version>.app` already exists, increment again
 (`ocpfFramework/scripts/al-analyze.*` refuses to overwrite an existing output file — exit code 4,
 the message names the file). Major, Minor, and Build bumps are still proposed and approved (Rule
-6a). **After every build, say this, on its own lines:**
+6a). **Between the first clean compile and the first package: the pre-review** (Ops § Roles → *The
+pre-review*). The moment the extension first compiles with the analyzers at 0 / 0, and **before**
+the first package, delegate a read of every file under `src/` to the project-local
+**`ocpf-reviewer`** sub-agent the `roles` skill wrote at Step 1 — the Main model and effort, in
+the background, the model passed on the call; its report opens with the model it ran on, checked
+against `docs/1-define/ProjectParameters.md` before anything in it is used. Brief: the project
+root, `src/`, `docs/2-design/DesignDoc.md`, `docs/1-define/ProjectParameters.md`, the Standards
+Guide path with §1.1–§1.9, Part 2, §5.3–§5.4, Part 7, Part 11, §8.3, `ocpfFramework/patterns/`,
+the symbol source — nothing else. It returns findings in two tiers (what would break the first
+sandbox test or force a rebuild; what is worth fixing before the package), observations, and what
+it could not verify; it grades nothing. **Present every finding in one message** — file and line,
+root cause, proposed fix — and ask once (Rule 6a): **Apply all (recommended)** / **Apply
+selected** / **Discuss first**; a finding that would change the Design Doc gets its own box.
+Nothing is applied before the answer. Apply the approved fixes, recompile to 0 / 0, and record
+**each finding with its decision** — applied, declined and why, deferred to Step 6 — as an entry
+in `docs/0-project/ChangeLog.md` (source *Pre-review*), with the model that ran. Then the first
+package. Once per Step 5, not per round; Step 6's review is the full one.
+
+**After every build, say this, on its own lines:**
 
 ```
 Package built: outputAppPackage/<Name>_<version>.app (previous build <version-1>)
@@ -119,7 +137,7 @@ written with the first package and its §1 current; at least one package install
 and manually tested on a sandbox; `docs/0-project/ChangeLog.md` current (last installed version
 included); `docs/2-design/DesignDoc.md` updated for every rule change.
 
-**Exit gate:** Full extension compiles clean, with the analyzers and nothing suppressed (Ops § Analyzers); human confirms sandbox testing is clean; no known
+**Exit gate:** Full extension compiles clean, with the analyzers and nothing suppressed (Ops § Analyzers); the pre-review ran on the Main model before the first package and every finding was decided in the options box and recorded in the ChangeLog; human confirms sandbox testing is clean; no known
 systemic issue outstanding; no unit in a language required at first release is
 `needs-translation` or `needs-adaptation`, and translation checks are clean. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
 

@@ -20,7 +20,11 @@ letter, `07a` / `STEP-5a`, with a `title`. The ritual is the same at every row's
 the window may carry a `title` the dashboard shows, which this skill ignores.
 
 - **Step start:** append `{ "step", "startedAt" }` to `ocpfFramework/state/usage.json` and set the
-  step's `ProjectProgress.md` row to `In Progress` — same moment, same message.
+  step's `ProjectProgress.md` row to `In Progress` — same moment, same message. **The first window
+  of a project is opened as the routine's very first act**, before the working-language question
+  (PRE-01, Lite Step 1, Build-a-Feature's `F00`, the `analyze` skill's `AN0`); the script also
+  moves that window's start back to the first event of the session that opened it, so the tokens
+  and the clock begin together, and says so in a note (Ops § Usage & Cost → 8).
 - **Step close, before the closing message (summary, then the pasted rows, then the Rule 6c box as its last thing):** set `completedAt`, run the
   measurement (Step 3 below), and write the step's rows into the usage table. **One row per model
   that ran in the step** — the Main model and every sub-agent model — never one row for the step
@@ -69,8 +73,16 @@ and Lite keep the main role running the script itself.
 
 ## Step 2: Prices — `ocpfFramework/state/pricing.json`
 
-If the file is missing, or a model in the transcripts has no row: **fetch the publisher's pricing
-page now** and write the rates per million tokens with the source URL and today's date —
+**The script fetches the prices itself (v5.8.0.0).** At every measurement, a Claude model with no
+row in `pricing.json` is looked up on Anthropic's pricing page and written in with the source and
+the date; a Copilot project with no `aiCredit` gets the credit's USD value from GitHub's page; the
+printed notes say what was fetched, and a failed fetch is retried after an hour at most (Ops §
+Usage & Cost → 3). Why: on a real project nobody wrote `pricing.json` until after the last window
+closed, so every row of the build said *price unknown* and the dashboard read `$0` for Claude
+Sonnet 5.5. **You step in only when the notes say the script could not:** the machine is offline
+(fetch when online), the model is not on the page, or the publisher is one the script doesn't
+cover — then **fetch the publisher's pricing page yourself** and write the rates per million
+tokens with the source URL and today's date —
 Anthropic `https://platform.claude.com/docs/en/about-claude/pricing`; Ollama cloud models
 `https://ollama.com/pricing` (local Ollama models: `0`). **GitHub Copilot: the value of one AI
 credit**, from `https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing`,
@@ -91,6 +103,10 @@ pwsh   <this skill's folder>/scripts/ocpf-usage.ps1 -Project "<project root>" -S
 ```
 
 The same command measures a Copilot project — the script reads `aiTool` from `usage.json`.
+
+The `analyze` skill's run on an existing app is the window `AN0` (Ops § Existing Apps); it is
+measured like any step and its rows go in `ProjectProgress.md` when the project has one, else
+under `## Usage` in `requirements/existing/README.md`.
 
 Options: `--json` for machine output, `--step <id>` for one step (omit it for the whole table),
 `--transcripts <dir>` to point at the transcript folder, `--pricing <path>` and `--usage <path>` to

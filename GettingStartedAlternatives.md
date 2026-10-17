@@ -12,11 +12,13 @@ preferred path is in the [README](README.md#setup-plugin): install the
 - you run the agent somewhere else — github.com or the Claude apps;
 - you'd rather not use the plugin and want to set the framework up **by hand**.
 
-**Build-a-Feature** — the quick-mod journey (one object or a few, no steps, no documents) — has no
+**Build-a-Feature** — the quick-customization journey (minutes, no steps, six short documents written as the work happens) — has no
 runbook to copy: it lives in the plugin's `build-a-feature` skill and is reached through
 `/ocpf-bc:start`. Without the plugin, follow *Ops § Build-a-Feature* in the Operations Guide with
 the skill's reference files from `agentPlugin/ocpf-bc/skills/build-a-feature/references/` in this
-repository.
+repository. The same goes for `/ocpf-bc:analyze` (an existing app's documentation, *Ops § Existing
+Apps*) and `/ocpf-bc:app-icon` (*Ops § Intake → The app icon*): plugin skills, with their procedure
+written down in the Operations Guide for anyone working by hand.
 
 Whichever way you install, **Step 2 is the same**: open your AL project folder and run
 `/ocpf-bc:start` (or ask *"Start a Business Central project with the OCPF framework."*). The
@@ -108,20 +110,19 @@ Choose the setup that matches your development environment. Both paths use the s
 
 > 💡 **Don't copy the companion guides by hand.** PRE-01 — the very first step of the routine — fetches both from this repository into `ocpfFramework/standardsGuide/` and `ocpfFramework/opsGuide/` in your project, with the step files, templates, patterns, and scripts beside them, and places its changelog in `ocpfFramework/`. The fetched folders are gitignored, so they stay out of your project's remote.
 
-> ⚠️ **One edition per project.** A project follows either the full framework or Lite — not both at once. If this project is only ~5–10 AL files with one person and one AI model on it, [Lite](#lite-edition) covers the same ground in 7 steps and 4 documents.
+> ⚠️ **One edition per project.** A project follows either the full framework or Lite — not both at once. If this project is an update to an existing app, or a new app without a large footprint, [Lite](#lite-edition) covers the same ground in 7 steps and 4 documents on one model; Full is for a complete app or solution built end to end.
 
 <a id="lite-edition"></a>
-## C. Lite Edition, by hand — for small, fast-moving projects
+## C. Lite Edition, by hand — for updating an existing app, or a new app without a large footprint
 
-Not every extension needs the full 14-step routine. **Lite Edition** covers the same ground in **7 steps** and **4 documents**, for projects that need to move fast without giving up the discipline that keeps AI-generated AL correct.
+Not every extension needs the full 14-step routine. **Lite Edition** covers the same ground in **7 steps** and **4 documents**, on one model, for work that needs to move fast without giving up the discipline that keeps AI-generated AL correct.
 
 **Use Lite when:**
 
-- The extension is roughly **5–10 AL files** — a handful of API pages over standard tables, maybe a new table or two.
-- **One person** is driving it, and **one AI model** is doing the work.
-- You don't need separate Dev Manager / Technical Lead / Functional Consultant sign-off roles.
+- You are **updating an existing app**, or building a **new app without a large footprint**.
+- **One AI model** doing all the work, in fewer steps, with leaner documents (a Design Doc, Docs, a Test Script), is the right trade: still a reliable agentic engineering process with quality outcomes — faster, cheaper, and with less detail than Full. Builds take one to two hours depending on complexity.
 
-**Use the full framework when** any of those stops being true — the object count grows past ~10, multiple sign-off roles are involved, you want to split work across more than one AI model (Main / Light / Reasoning), or the extension is heading to AppSource, which tends to demand the fuller documentation trail.
+**Use the full framework when** the work is a **complete app or solution built end to end, or a major overhaul of a big existing app** — it needs the detailed requirements review, the FRD, TDD, and Sanity Check, full documentation, testing guides, and automated test scripts, on three models (Main / Reasoning / Light) for the highest-quality outcome, at least three to four hours end to end — or when the extension is heading to AppSource. **Use Build-a-Feature** (through `/ocpf-bc:start`, plugin only) for a quick, tactical customization in minutes: it is not vibe-coding, but it is lean on documentation and builds what you ask for rather than a holistic solution.
 
 **What Lite trims — and what it doesn't.** Lite reduces *process*, never the AL rules: it merges the FRD, TDD and Sanity Check into a single `docs/2-design/DesignDoc.md`, folds the Testing Feedback Log and Roadmap into `docs/0-project/ChangeLog.md`, and drops the multi-model role split (it still asks which one model, at what thinking effort, does the work). It keeps the same `ProjectProgress.md` as Full, so a Lite project is tracked and measured the same way. Both editions fetch and apply the **same** OCPF AL Development Standards Guide — the same rules apply to a 5-file extension as to a 50-file one. Nothing is lost by switching later: `DesignDoc.md` maps directly onto the full framework's TDD, and `ChangeLog.md` carries straight over.
 
@@ -146,7 +147,7 @@ Same pattern as the full framework — only the source file changes.
 4. Copilot Chat will automatically pick up `copilot-instructions.md` for the workspace.
 
 **Getting started prompt (Lite):**
-> This AL project (10 files or fewer) will follow the Lite Agentic Development Framework outlined in `LITE_BC_App_Build_Routine_Agent.md` (may also be referred to as `CLAUDE.md` or `.github/copilot-instructions.md`). The project layout — `src/`, `docs/` by phase, and one `ocpfFramework/` folder for everything the framework fetches or keeps — is in the runbook. Please review this file and let's get started.
+> This AL project will follow the Lite Agentic Development Framework outlined in `LITE_BC_App_Build_Routine_Agent.md` (may also be referred to as `CLAUDE.md` or `.github/copilot-instructions.md`). The project layout — `src/`, `docs/` by phase, and one `ocpfFramework/` folder for everything the framework fetches or keeps — is in the runbook. Please review this file and let's get started.
 
 > 💡 **Don't copy the companion guides by hand.** Step 1 — the very first step of the Lite routine — fetches both from this repository into `ocpfFramework/standardsGuide/` and `ocpfFramework/opsGuide/` in your project, with the step files, templates, patterns, and scripts beside them, and places its changelog in `ocpfFramework/`. The fetched folders are gitignored, so they stay out of your project's remote.
 

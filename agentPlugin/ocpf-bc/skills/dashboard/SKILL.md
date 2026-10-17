@@ -165,13 +165,31 @@ three-line exit gate. Nothing to do here: the renderers read it from the window 
 On a marker with `"edition": "feature"` (Ops § Build-a-Feature) there are no steps: the renderers
 build the rows from the usage windows and the feature table in `ProjectProgress.md` — one row per
 object (`F01`, `F02`, …), plus `F00` intake, `FPK` package, `FRV` review — under the phases
-*Intake · Build · Review · Package*, each row with its stage, object ID, time, and cost; the
+*Intake · Build · Review · Package*, each row with its stage (*Asked → Confirmed → Built →
+Compiled → Documented → Reviewed → Packaged*), object ID, time, and cost; the
 estimate tile becomes *Objects built*; the exit-gate card shows the row's stage ladder; the roles
 card shows Main alone. The data gains `phases` and, per row, `stage`, `kind`, `objectId`, and
 `shippedIn`. First creation is the same (the `build-a-feature` skill calls this skill the moment
 `app.json` exists, adding one sentence to the explanation question); hooks and refresh are the
 same. Renderers and templates older than plugin 5.5.0 show a feature project as an empty Full
 map: refresh `ocpfFramework/scripts/` (`update-framework`).
+
+## 3c. Time and cost — what the figures mean (v5.8.0.0)
+
+- **Elapsed** is the union of every step window, from the first window's start to now (or to the
+  last close) — a reopened step or a remediation open beside another step counts once. **The first
+  window begins where its session began:** the renderer finds the Claude Code transcript (or the
+  Copilot journaled session) whose span contains the recorded `startedAt` and moves the start back
+  to that session's first event, so the clock starts with the first prompt even when the agent
+  wrote `startedAt` minutes later; a note says so. Before 5.8.0.0 the clock started late and the
+  tokens didn't — the two never matched.
+- **Agent / You / Waiting add up to Elapsed exactly.** Waiting is the time an options box was
+  open (its answer arrives as a tool result, which earlier versions counted as agent time); a
+  window with no transcript event is the human's time. Ops § Usage & Cost → 8 has the table.
+- **Cost** sums the usage script's rows; a model with no rate in `pricing.json` shows as *+
+  unpriced* with the model named — never `$0` — and the notes say which model. The fix is the
+  `usage` skill's Step 2 (fetch the publisher's prices), not a typed figure. Work outside every
+  window (after the last close) is in the total and named in a note.
 
 ## 4. What the page can and cannot know
 

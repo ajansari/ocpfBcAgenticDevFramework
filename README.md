@@ -8,7 +8,7 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 *by AJ Ansari*
 
-*Last Updated: Sunday, September 27, 2026*
+*Last Updated: Friday, October 17, 2026*
 
 > ## 🌐 [Official Website](https://ajansari.github.io/ocpfBcAgenticDevFramework/)
 >
@@ -39,9 +39,15 @@ This Agentic Development Framework was created to help Business Central Function
 
 The framework incorporates the AL MCP Server, BC Base App and System App documentation from Microsoft Learn, Microsoft's AL Guidelines, and BCQuality, grounding the agent's guidance in official references and quality tooling rather than AI guesswork alone. Alongside the runbook sits my **OCPF AL Development Standards Guide** — the detailed AL rules the routine applies at each step — which the agent fetches into your project automatically.
 
-Both editions are multilanguage from the ground up. Captions and messages use XLIFF translation files, never `CaptionML`. Regional terminology comes from Microsoft's own Business Central translations. The agent drafts translations, a named human approves them, and UAT runs in every required language. You can also work with the agent in your own language. See [Multilanguage Support](translationAndMultiLanguage/MultilanguageSupportOverview.md).
+Full and Lite are multilanguage from the ground up. Captions and messages use XLIFF translation files, never `CaptionML`. Regional terminology comes from Microsoft's own Business Central translations. The agent drafts translations, a named human approves them, and UAT runs in every required language. Build-a-Feature writes source labels only and leaves the generated `.g.xlf` for whoever adds languages later. In every journey you can work with the agent in your own language. See [Multilanguage Support](translationAndMultiLanguage/MultilanguageSupportOverview.md).
 
-It comes in two editions: the **full framework** (14 steps) for substantial projects, and **[Lite](GettingStartedAlternatives.md#lite-edition)** (7 steps) for smaller ones that need to move fast. Both apply the same AL standards. A third journey, **Build-a-Feature**, is for the quick mod that is not a project at all — a table and its pages, a field on the Customer Card, a report, an API page, an enum, a permission set — in a new or existing extension, with no steps and only four quick documents at the close, to the same standards; `/ocpf-bc:start` offers all three.
+**Three journeys, one standard.** The choice is about the kind of work, not a file count:
+
+- **Full** (14 steps) — a complete app or solution built end to end, or a major overhaul of a big existing app. It reviews the requirements in detail and produces an FRD, a TDD and Sanity Check, a build plan, a graded code review, full documentation, a user guide, testing guides, and automated test scripts. It runs on three models — Main, Reasoning, and Light — for the highest-quality outcome, which also makes it the slowest: at least three to four hours end to end, longer for an extensive app, plus your own review time — still far less than a development team needs for an app of the same size.
+- **[Lite](GettingStartedAlternatives.md#lite-edition)** (7 steps) — updating an existing app, or a new app without a large footprint. One Main model does everything in fewer steps with leaner documents (a Design Doc, Docs, a Test Script). It still follows a reliable agentic engineering process with quality outcomes — faster, cheaper, and with less detail. One to two hours depending on complexity.
+- **Build-a-Feature** — quick, tactical customizations when time is of the essence: extend a table or a page, a processing report, a table and its pages, an API, a role center, an enum, a permission set. **It is not vibe-coding** — the same Standards Guide, patterns library, and analyzers govern every file — but it is lean on documentation: no design documents or test scripts, six short documents in a flat `docs/` folder written as the work happens. It builds what you ask for, not a holistic solution, which makes it ideal for a PoC app for a demo or a prototype; the foundation is sound enough that an agent or a developer can later turn it into a full solution. Minutes — usually 10 to 20 — at very low token consumption: at published API rates most builds cost $1 to $5.
+
+All three apply the same AL standards; `/ocpf-bc:start` offers all three. **The more well-formed and documented your idea, the faster you get past the first stage:** put your requirements in a `requirements/` folder (`.md` files are recommended; Word, PDF, and images work too) and an app icon in `images/`. Starting from an existing app nobody can explain? `/ocpf-bc:analyze` reads it and documents it first — a presumed FRD and TDD, an object register, documentation with the schema and flows — into `requirements/existing/`, for you to review before any journey extends it.
 
 </details>
 
@@ -92,14 +98,16 @@ turns on Remote Control; the framework explains what that stores before turning 
 how many requests an agent turn may make before Copilot pauses (the default is low enough that a
 design step hits *"Copilot has been working on this problem for a while…"* — 150 is recommended), and
 how tool approvals should work (ask each time, allow the framework's own commands, or allow
-everything, with its warning). It writes your answers to the workspace's `.vscode/settings.json`.
+everything, with its warning). The request limit goes to the workspace's `.vscode/settings.json`;
+the approvals go to your own user settings unless you explicitly choose to share them with the team.
 
 **What it costs, and what it saves.** Every step is measured: tokens by type per model in
-Claude Code, AI credits per model in GitHub Copilot, priced from the publisher's
-published rates, next to an estimate of the hours an experienced senior AL developer would bill for
-the same step, and next to the AI effort estimate made before BUILD began. The table lives in
-`ProjectProgress.md` in both editions, with one row per step and model, written at every step
-boundary.
+Claude Code, AI credits per step in GitHub Copilot, priced at the publisher's published rates —
+which the framework's script fetches itself the first time a model appears — next to an estimate
+of the hours an experienced senior AL developer would bill for the same step, and next to the AI
+effort estimate made before BUILD began. The table lives in `ProjectProgress.md` in every journey,
+with one row per step and model (one row per object on Build-a-Feature), written at every step
+boundary, and the live dashboard shows the same figures as they happen.
 
 </details>
 
@@ -114,10 +122,11 @@ boundary.
 > | **1. Install the Visual Studio Code extension** | Once per machine. One install brings everything. |
 > | **2. Start your project** | Open your AL folder and run `/ocpf-bc:start`. |
 
-That's it. From there the plugin **helps you choose Full, Lite, or Build-a-Feature**, **installs
-the latest runbook** (Full and Lite), **connects Microsoft's AL tools** with nothing to install,
-**adds sub-agents** for the Reasoning, Light, and Generator roles, and **checks for updates** each
-session before changing anything.
+That's it. From there the plugin **helps you choose Full, Lite, or Build-a-Feature** (or offers to
+**analyze and document an existing app first**), **installs the latest runbook** (Full and Lite),
+**connects Microsoft's AL tools** with nothing to install, **adds sub-agents** for the Reasoning,
+Light, Generator, and Reviewer roles, and **checks for updates** each session before changing
+anything.
 
 ## Step 1 — Install the Visual Studio Code extension
 
@@ -135,9 +144,11 @@ ext install ajansari.ocpf-bc-dev-setup
 
 **One install brings:** the AL toolchain (the AL Language extension and its companions), the agent
 extension you choose (Claude Code or GitHub Copilot Chat), the framework's plugin marketplace wired
-into that agent, the `ocpf-bc` plugin itself, a Git check, five **OCPF BC** Command Palette commands
+into that agent, the `ocpf-bc` plugin itself, a Git check, six **OCPF BC** Command Palette commands
 (*New AL Project + Framework*, *Kickstart Framework Here*, *Set Up Claude Code*, *Set Up GitHub
-Copilot*, *Check Git Installation*), and a first-run walkthrough that ends at `/ocpf-bc:start`.
+Copilot*, *Update the ocpf-bc Plugin*, *Check Git Installation*), and a first-run walkthrough that
+ends at `/ocpf-bc:start`. The extension also keeps the plugin current: it turns on Claude Code's
+auto-update for the framework's marketplace and offers *Update now* when a newer plugin exists.
 The extension's own documentation is on its Marketplace page. Requirements: Visual Studio Code
 1.96 or later, Git, and a Claude or GitHub Copilot subscription.
 
@@ -165,21 +176,27 @@ In GitHub Copilot, the commands are identical.
 
 | | What happens | What you do |
 |---|---|---|
-| **1** | **Full, Lite, or Build-a-Feature.** It asks about the project — object count, people and sign-off roles, whether it's heading to AppSource — and recommends a journey with its reasoning. **Build-a-Feature** is for one object or a few, in a new or existing extension, with no steps and no documents: it asks what you want to build, confirms the fields in one box, writes and compiles, offers the next object, then a `.app` and a review — and skips rows 2 and 4 below. On an existing extension it is recommended first. | Confirm or override. You can switch later without losing work. |
+| **1** | **Full, Lite, or Build-a-Feature.** It asks about the work — a complete solution, an update or a modest new app, or a quick customization — and recommends a journey with its reasoning, in the terms of the *Background* section above. **Build-a-Feature** asks what you want to build, writes the proposed design to `docs/` before confirming the fields in one box, writes and compiles, documents each object as it compiles, offers the next object, then a review and a `.app` — and skips rows 2 and 4 below. On an existing extension it is recommended first; on an existing extension nobody can explain, `/ocpf-bc:analyze` is offered before the choice. | Confirm or override. You can switch later without losing work. |
 | **2** | **Where the runbook goes.** It places the latest runbook as `CLAUDE.md`, `.github/copilot-instructions.md`, or both for mixed teams. | Nothing, unless a file already exists — then it asks. **It never overwrites.** |
 | **3** | **AL tools, nothing to install.** It connects Microsoft's AL tools using the AL Language extension you already have. | In Copilot Chat, nothing — they're built in. In Claude Code, approve the connection once. |
-| **4** | **The routine begins.** | Tell it your working language, how you want to be notified, which models do the work, and — with Copilot — the request limit and approval mode — Full asks for a Main, Light, and Reasoning model with a thinking effort each (recommended **Sonnet Medium / Haiku Medium / Opus High** in Claude Code, **Gemini 3.8 Flash Medium / Auto Balanced / Claude Opus 5.5 High** in Copilot); Lite asks for one (Sonnet Medium or Gemini 3.8 Flash Medium). It warns first that a High thinking effort makes every task slower, and recommends High only where judgment matters most. The Full framework then runs its Reasoning, Light, and Generator sub-agents — Lite its Generator — on exactly the models you chose, and every document lands in its phase folder — `docs/0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` — with the usage table in `ProjectProgress.md` for both editions. |
+| **4** | **The routine begins.** | Tell it your working language, how you want to be notified, which models do the work, and — with Copilot — the request limit and approval mode — Full asks for a Main, Light, and Reasoning model with a thinking effort each (recommended **Sonnet Medium / Haiku Medium / Opus High** in Claude Code, **Gemini 3.8 Flash Medium / Auto Balanced / Claude Opus 5.5 High** in Copilot); Lite asks for one (Sonnet Medium or Gemini 3.8 Flash Medium). It warns first that a High thinking effort makes every task slower, and recommends High only where judgment matters most. The Full framework then runs its Reasoning, Light, Generator, and Reviewer sub-agents — Lite its Generator and Reviewer — on exactly the models you chose, and every document lands in its phase folder — `docs/0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` — with the usage table in `ProjectProgress.md` for both editions. |
 
 **Other commands, for later:**
 
 | Command | What it does |
 |---|---|
 | `/ocpf-bc:start` on a project already on the framework | Offers *Status*, *Check for a framework update*, or *Build a feature in this project* — the quick-mod journey on top of a Full or Lite project, leaving its steps and documents alone |
-| `/ocpf-bc:status` | Shows where the project stands |
-| `/ocpf-bc:update-framework` | Checks for a newer runbook |
-| `/ocpf-bc:al-mcp-setup` | Connects the AL tools, if you skipped it at start |
+| `/ocpf-bc:analyze` | Analyzes and documents an existing extension that is not well documented — written by a person, vibe-coded, or built by an agent that doesn't document. Asks what you know and which documents you can add, which model (a reasoning model or a daily driver) and which effort should do the analysis, then writes a presumed FRD and TDD, an Object Register, Documentation with the schema and flows, and a Project Parameters sheet into `requirements/existing/` for your review. Run it first; then put new requirements in `requirements/` and start a journey |
+| `/ocpf-bc:build-a-feature` | The quick-customization journey directly (`start` offers it too): one question, the design on disk, confirm, build, compile, document, next object |
+| `/ocpf-bc:app-icon` | Draws the app icon when you have none — also the *Create one for me* option of every journey's identity box. Asks style (flat 2D or isometric 3D), colors (one, two, or a gradient), content (image only or a word mark), and a description; the Main model draws it to the standard — square, rounded corners, transparent background — renders it with nothing installed, shows it, and asks you to accept or make another; the accepted icon lives in `images/` and becomes `app.json`'s logo |
+| `/ocpf-bc:status` | Shows where the project stands — phase and step (or object), exit gate, what is waiting on you, models, tooling; reads the project's files, so it is right in a fresh session |
+| `/ocpf-bc:dashboard` | Creates, refreshes, or opens the live dashboard, `ProjectDashboard.html` at the project root; the routine creates it at the first step and hooks keep it fresh at zero token cost |
+| `/ocpf-bc:update-framework` | Checks for a newer runbook, shows what changed, and updates the project's copy only when you say so |
+| `/ocpf-bc:al-mcp-setup` | Connects the AL tools (build, compile, symbols, diagnostics), if you skipped it at start — the framework packages the app; you upload it |
+| `/ocpf-bc:al-standards` | Loads the OCPF AL Development Standards Guide for an ad-hoc review of AL code; the routine applies it by itself |
+| `/ocpf-bc:copilot-blueprint` | Fires by itself when you ask for a Business Central Copilot feature and builds it from the verified OnlyBCFans BC Copilot Blueprint, never from memory |
 | `/ocpf-bc:notifications` | Turns on "your turn" notifications in an older project |
-| `/ocpf-bc:roles` | Asks which models do the work (Full: Main, Light, Reasoning, each with a thinking effort; Lite: one) and makes the answer take effect by writing the project's three sub-agent copies — the runbook runs it at its first step; run it by hand to change or repair the assignment |
+| `/ocpf-bc:roles` | Asks which models do the work (Full: Main, Light, Reasoning, each with a thinking effort; Lite: one) and makes the answer take effect by writing the project's sub-agent copies — reasoning, light, generator, and the reviewer that pre-reviews the code before the first package — the runbook runs it at its first step; run it by hand to change or repair the assignment |
 | `/ocpf-bc:documents <name>` | Writes any project document from its template into its phase folder under `docs/` — FRD, TDD, Sanity Check, Human and AI Effort Estimates, Build Plan, Code Review, User Guide, Acknowledgements, and the rest — with only the inputs its step names |
 | `/ocpf-bc:usage --step <id>` | Run at every step boundary: measures tokens and cost per step and model (Claude Code) or AI credits and cost per step and model (GitHub Copilot in VS Code), fetches published prices, and writes one row per model into the usage table in `ProjectProgress.md` (both editions); at project close it exports the calibration file for the AI effort estimator |
 
@@ -239,6 +256,7 @@ you can run `/ocpf-bc:update-framework` in them anytime.
 - ~~Per-step runbook files, document templates, a human effort estimate, and per-step token and cost tracking~~ ✅ Completed — Full v4.0.0.0 / Lite v3.0.0.0, September 2026
 - ~~Token usage **estimator** — predicted tokens per model, by input, output, and cached, before a step runs~~ ✅ Completed — the AI Effort Estimate, Full v5.0.0.0 / Lite v5.0.0.0, September 2026; calibrates itself from measured projects
 - **Being considered**
+  - Multi-developer teams on one repository: one-step setup of a clone, a shared usage record, and ID sub-ranges per branch (today: one driver per journey, Build-a-Feature on branches)
   - Answer the dashboard's open question from the dashboard page itself (today the page shows it and says where to answer)
   - A live dashboard for GitHub Copilot CLI, with the agent / you time split Claude Code has
   - More dashboard themes beside OnlyBCFans and F1
@@ -254,13 +272,13 @@ you can run `/ocpf-bc:update-framework` in them anytime.
 
 | File | Purpose |
 |---|---|
-| `fullVersion/` | The **Full Framework** — the complete 14-step routine. See [Full Framework, by hand](GettingStartedAlternatives.md#setup-full). |
-| `standardsGuide/README.md` | The **prelude** to the companion **OCPF AL Development Standards Guide** — the guide itself now lives standalone at [ajansari/ocpfBCALStandards](https://github.com/ajansari/ocpfBCALStandards) (MIT) and is fetched at the release tag this file pins (`v1.12.0.0`) into each project's `ocpfFramework/standardsGuide/`. The prelude holds the framework's own framing: purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the map of what is deliberately not in the guide. |
-| `opsGuide/ocpfOperationsGuide.md` | The companion **OCPF Operations Guide** — the procedures both editions share, cited as **Ops §** (how the agent asks and gets approval, intake, roles, project setup, the AL tools, analyzers, symbols, editor sync, notifications, packaging, repository hygiene, translations, automated tests, fetched companions, reference sources, and the plugin). Fetched into each project's `ocpfFramework/opsGuide/` alongside the Standards Guide. |
-| `liteVersion/` | The **Lite Edition** — a 7-step version of the framework for small, fast-moving projects. See [Lite Edition, by hand](GettingStartedAlternatives.md#lite-edition). |
-| `documentTemplates/` | One template per document the framework produces (FRD, TDD, Sanity Check, Human Effort Estimate and its baselines, AI Effort Estimate, Build Plan, ChangeLog, Gap Analysis, Code Review, Documentation, User Guide, test scripts, Deployment, Release Test Results, Acknowledgements, Project Progress with its usage table for both editions, and Lite's Design Doc, Docs, and Test Script). Fetched into each project's `ocpfFramework/documentTemplates/` with the step files; shared by both editions. |
+| `fullVersion/` | The **Full Framework** — the complete 14-step routine for a complete app or solution end to end, or a major overhaul of a big existing app, on three models. See [Full Framework, by hand](GettingStartedAlternatives.md#setup-full). |
+| `standardsGuide/README.md` | The **prelude** to the companion **OCPF AL Development Standards Guide** — the guide itself now lives standalone at [ajansari/ocpfBCALStandards](https://github.com/ajansari/ocpfBCALStandards) (MIT) and is fetched at the release tag this file pins (`v1.12.1.0`) into each project's `ocpfFramework/standardsGuide/`. The prelude holds the framework's own framing: purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the map of what is deliberately not in the guide. |
+| `opsGuide/ocpfOperationsGuide.md` | The companion **OCPF Operations Guide** — the procedures every journey shares, cited as **Ops §** (how the agent asks and gets approval, intake, roles and the pre-review, project setup, the AL tools, analyzers, symbols, editor sync, notifications, the dashboard, packaging, repository hygiene, translations, automated tests, fetched companions, documents, usage and cost, the three journeys, Build-a-Feature, existing apps, reference sources, and the plugin). Fetched into each project's `ocpfFramework/opsGuide/` alongside the Standards Guide. |
+| `liteVersion/` | The **Lite Edition** — the 7-step version of the framework for updating an existing app or building a new one without a large footprint, on one model. See [Lite Edition, by hand](GettingStartedAlternatives.md#lite-edition). |
+| `documentTemplates/` | One template per document the framework produces (FRD, TDD, Sanity Check, Human Effort Estimate and its baselines, AI Effort Estimate, Build Plan, ChangeLog, Gap Analysis, Code Review, Documentation, User Guide, test scripts, Deployment, Release Test Results, Acknowledgements, Project Progress with its usage table for both editions, Lite's Design Doc, Docs, and Test Script, and Build-a-Feature's Feature Register, Data Model, and Documentation). Fetched into each project's `ocpfFramework/documentTemplates/` with the step files; shared by every journey. |
 | `translationAndMultiLanguage/MultilanguageSupportOverview.md` | How the framework handles multilanguage — captions and XLIFF translation files, regional terminology (GST vs. VAT, CR/Adj Note vs. Credit Memo in Australia), agent-drafted translations with a human review gate, and language-aware UAT. Shared by both editions. |
-| `agentPlugin/` | The optional **agent plugin**, `ocpf-bc`, for Claude Code, GitHub Copilot, and other tools. See [GET STARTED: Agent Plugin](#setup-plugin). This repository is also its plugin marketplace (`.claude-plugin/marketplace.json`). |
+| `agentPlugin/` | The optional **agent plugin**, `ocpf-bc`, for Claude Code, GitHub Copilot, and other tools: fourteen skills (the `/ocpf-bc:` commands), five sub-agents, the dashboard and usage scripts, and an offline copy of the framework. See [GET STARTED: Agent Plugin](#setup-plugin). This repository is also its plugin marketplace (`.claude-plugin/marketplace.json`). |
 | `THIRD_PARTY_NOTICES.md` | Credits and licenses for every third-party resource the framework references, fetches, or recommends — BCQuality, AL Guidelines, Microsoft Learn, and others. |
 | `FrameworkUserGuide.md` | The **User Guide** — everything the person driving a project needs: install, the Command Palette commands, the plugin commands, where every file lives, model recommendations, versioning, and updating. |
 | `GettingStartedAlternatives.md` | Every other way to get started: installing the plugin from the Claude Code CLI, the GitHub Copilot CLI, or inside Visual Studio Code without the setup extension; running the agent on github.com, in the Claude apps, or in Copilot Cowork; and the manual, no-plugin setup for Full and Lite. |
@@ -322,6 +340,30 @@ Each month's release notes in brief. The complete, versioned record is in
 [fullVersion/RunbookChangelog.md](fullVersion/RunbookChangelog.md),
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
+
+## October 16, 2026 — Full v5.8.0.0 · Lite v5.8.0.0 · Operations Guide v5.8.0.0 · Plugin v5.8.0
+
+**The journeys, redefined; an existing app gets documented first; the code gets a pre-review.** The
+three journeys are now described by the kind of work, not a file count: Full for a complete app or
+solution end to end on three models, Lite for updating an existing app or a new one without a large
+footprint on one model, Build-a-Feature for quick customizations in minutes — not vibe-coding, but
+lean on documentation. A new `/ocpf-bc:analyze` reads an undocumented existing extension and writes a
+presumed FRD and TDD, an object register, documentation with the schema and flows, and a parameters
+sheet into `requirements/existing/`, on a model and effort you choose; `start`, PRE-01, Lite Step 1,
+and Build-a-Feature offer it. Full Step 07 and Lite Step 5 gain a **pre-review**: a new
+`ocpf-reviewer` sub-agent on the Main model reads every file between the first clean compile and
+the first package, and its findings are decided in one options box and recorded in the ChangeLog.
+Build-a-Feature writes six short documents into a flat `docs/` **as the work happens** — the data
+model is on disk before you are asked to confirm a design — and records the publisher and the ID
+range with the box you answered, so neither is ever inferred from an email domain or a scaffold
+again; a role center joins its catalogue. The dashboard's clock now starts with the session's first
+prompt, waiting on an options box counts as waiting, agent + you + waiting equals elapsed, and a
+usage script fetches Anthropic's published prices itself the first time a model appears, so a
+build is priced from its first measurement without anyone asking. Have no icon? Every journey's
+identity box now offers **Create one for me**: the new `/ocpf-bc:app-icon` asks style, colors,
+content, and a description, draws the icon to the standard — square, rounded corners, transparent
+background — shows it, and uses it once you accept. Put requirements in `requirements/` and an icon
+in `images/`; every journey reads them.
 
 ## October 15, 2026 — Full v5.7.3.0 · Lite v5.7.3.0 · Operations Guide v5.7.3.0 · Plugin v5.7.3
 

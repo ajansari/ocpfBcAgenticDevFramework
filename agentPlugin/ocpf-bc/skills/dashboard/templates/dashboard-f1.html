@@ -251,7 +251,7 @@ gen=D.generatedAt?new Date(D.generatedAt):null;
 const stepT=cur.totals||{};const tk=T.tokens||{};
 $('lower').innerHTML=[
   `<span class="lt" style="--c:var(--ferrari)">${copilot?'Fuel':'Fuel'}<b>${copilot?fmtN(T.credits)+' cr':fmtTok(tk.total)}</b></span>`,
-  `<span class="lt" style="--c:var(--good)">Budget<b>${usd(T.costUsd)}</b></span>`,
+  `<span class="lt" style="--c:var(--good)">Budget<b>${usd(T.costUsd)}${T.costUnpriced&&T.costUnpriced.length?' + unpriced':''}</b></span>`,
   `<span class="lt" style="--c:var(--flag)">Race time<b>${hm(T.elapsedSeconds)}</b></span>`,
   `<span class="lt" style="--c:var(--merc-a)">Pit stops<b>${fmtN(T.decisions)}</b></span>`,
   `<span class="lt" style="--c:var(--purple)">Lap<b>${Math.min(doneN+(nowI>=0?1:0),steps.length)}/${steps.length}</b></span>`].join('');

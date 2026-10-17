@@ -33,7 +33,8 @@ $PHASES = @("DEFINE","DESIGN","BUILD","PROVE")
 $FEATURE_PHASES = @("INTAKE","BUILD","REVIEW","PACKAGE")  # the review is offered before the package
 $FEATURE_GATES = @{
   "INTAKE" = @("The one intake question answered and the plan said back, object by object.", "The F00 window closed with its usage rows.")
-  "BUILD" = @("Asked: what the object is and what it holds.", "Confirmed: fields, types, and the key confirmed in one box.", "Built: the file written whole from the Standards Guide and the patterns library.", "Compiled: 0 errors / 0 warnings with the analyzers.", "Closed: usage rows written and pasted; the companion box answered.")
+  "BUILD" = @("Asked: what the object is and what it holds.", "Confirmed: fields, types, and the key confirmed in one box.", "Built: the file written whole from the Standards Guide and the patterns library.", "Compiled: 0 errors / 0 warnings with the analyzers.",
+             "Documented: its section in docs/Documentation.md, its row in docs/FeatureRegister.md and docs/DataModel.md, its ChangeLog line.", "Closed: usage rows written and pasted; the companion box answered.")
   "PACKAGE" = @("Version moved per Ops § Packaging → Version numbers; the package in outputAppPackage/; Shipped in filled on every row it holds.")
   "REVIEW" = @("Standards Guide, BCQuality, and the AL Guidelines read against this session's files; findings presented once; approved fixes compiled clean.") }
 function Feature-Phase($sid) { if ($sid -eq "F00") { "INTAKE" } elseif ($sid -eq "FPK") { "PACKAGE" } elseif ($sid -eq "FRV") { "REVIEW" } else { "BUILD" } }
@@ -61,7 +62,6 @@ if ($Live -or $Theme) { $dj = Load-Json (Join-Path $stateDir "dashboard.json") @
 # ---- facts ----
 $fw = Load-Json (Join-Path $root "ocpfFramework/framework.json") @{}
 $usage = Load-Json (Join-Path $stateDir "usage.json") @{}
-$pricing = Load-Json (Join-Path $stateDir "pricing.json") @{}
 $tool = if ($usage.aiTool) { $usage.aiTool } elseif ("$($fw.placedAs)" -like "*copilot-instructions*") { "copilot-chat" } else { "claude-code" }
 $copilot = $tool -like "copilot*"
 $edition = if ($fw.edition) { "$($fw.edition)".ToLower() } elseif (Test-Path (Join-Path $root "ocpfFramework/runbookSteps/STEP-1.md")) { "lite" } else { "full" }
@@ -73,6 +73,31 @@ $appFacts = [ordered]@{ name = $app.name; publisher = $app.publisher; version = 
 
 $wins = @(); foreach ($s in @($usage.steps)) { $a = Parse-Ts $s.startedAt; if ($a -and $s.step) { $wins += ,@($s.step, $a, (Parse-Ts $s.completedAt)) } }
 $wins = @($wins | Sort-Object { $_[1] }); for ($i = 0; $i -lt $wins.Count; $i++) { if ($null -eq $wins[$i][2] -and $i + 1 -lt $wins.Count) { $wins[$i][2] = $wins[$i + 1][1] } }
+# ---- usage rows via the usage script ----
+$notes = @(); $uj = $null
+if ($wins.Count) {
+  $script = Join-Path $here "ocpf-usage.ps1"
+  if (-not (Test-Path $script)) { foreach ($c in @((Join-Path $root "ocpfFramework/scripts/ocpf-usage.ps1"), (Join-Path $here "../../usage/scripts/ocpf-usage.ps1"))) { if (Test-Path $c) { $script = $c; break } } }
+  if (Test-Path $script) { try { $out = & pwsh -NoProfile -File $script -Project $root -Json 2>&1; $uj = ($out | Out-String) | ConvertFrom-Json -AsHashtable } catch { $notes += "usage: $_" } } else { $notes += "usage script not found beside the dashboard script" }
+} else { $notes += "usage: no step windows yet" }
+$rows = @(if ($uj -and $uj.rows) { $uj.rows })
+$pricing = Load-Json (Join-Path $stateDir "pricing.json") @{}   # the usage script may just have fetched the prices (v5.8.0.0)
+function Rows-For($sid) { @($rows | Where-Object { ("$($_.step)" -replace ' \(open\)$', '') -eq $sid }) }
+function Sum($arr, $k) { $t = 0.0; foreach ($r in $arr) { $t += [double]($r[$k] ?? 0) }; $t }
+
+# The first window begins where its session began — Claude Code: the transcript file that holds the recorded startedAt;
+# Copilot: the journaled session the usage script summarises — otherwise the tokens start before the clock (v5.8.0.0).
+# Only a session whose span contains the recorded startedAt counts; an earlier, separate chat in the folder never does.
+if ($wins.Count) {
+  $spans = @()
+  if ($copilot) { foreach ($x in @($uj.sessions)) { $sa = Parse-Ts $x.start; if ($sa) { ,@($sa, ((Parse-Ts $x.lastKnownAt) ?? (NowUtc))) | ForEach-Object { $spans += ,$_ } } } }
+  else { $tdir0 = if ($usage.transcriptDir) { $usage.transcriptDir -replace '^~', $HOME } else { Join-Path $HOME ".claude/projects/$(($root -replace '[\\/:]', '-'))" }
+    foreach ($f in @(Get-ChildItem -Path $tdir0 -Filter *.jsonl -ErrorAction SilentlyContinue)) { $lo = $null; $hi = $null
+      foreach ($line in [IO.File]::ReadLines($f.FullName)) { $i = $line.IndexOf('"timestamp":"'); if ($i -lt 0) { continue }; $ts = Parse-Ts ($line.Substring($i + 13, [Math]::Min(24, $line.Length - $i - 13)).Split('"')[0]); if (-not $ts) { continue }; if ($null -eq $lo -or $ts -lt $lo) { $lo = $ts }; if ($null -eq $hi -or $ts -gt $hi) { $hi = $ts } }
+      if ($lo -and $hi) { $spans += ,@($lo, $hi) } } }
+  $w0 = $wins[0]; $hits = @(foreach ($sp in $spans) { if ($sp[0] -le $w0[1] -and $w0[1] -le $sp[1] -and $sp[0] -lt $w0[1]) { $sp[0] } })
+  if ($hits.Count) { $s0 = ($hits | Sort-Object)[0]; $wins[0] = @($w0[0], $s0, $w0[2]); $notes += "$($w0[0]) starts at the session's first event ($($s0.ToLocalTime().ToString('HH:mm'))), before its recorded startedAt" }
+}
 $phases = $PHASES; $status = @{}
 if ($edition -eq "feature") {
   $phases = $FEATURE_PHASES
@@ -111,18 +136,12 @@ if ($edition -ne "feature") {
     $catalog = @($catalog[0..$anchor]) + @($row) + @(if ($anchor + 1 -lt $catalog.Count) { $catalog[($anchor + 1)..($catalog.Count - 1)] }) }
 }
 $el = @{}; foreach ($w in $wins) { $end = $w[2] ?? (NowUtc); $el[$w[0]] = ($el[$w[0]] ?? 0) + [Math]::Max(0, ($end - $w[1]).TotalSeconds) }
+# the project's elapsed time is the union of the windows, so two windows open at once count once (v5.8.0.0)
+$unionSec = 0.0; $ca = $null; $cb = $null
+foreach ($iv in @($wins | ForEach-Object { ,@($_[1], ($_[2] ?? (NowUtc))) } | Sort-Object { $_[0] })) { if ($null -eq $cb -or $iv[0] -gt $cb) { if ($null -ne $cb) { $unionSec += ($cb - $ca).TotalSeconds }; $ca = $iv[0]; $cb = $iv[1] } elseif ($iv[1] -gt $cb) { $cb = $iv[1] } }
+if ($null -ne $cb) { $unionSec += ($cb - $ca).TotalSeconds }
 function Step-Of($ts) { $hit = $null; foreach ($w in $wins) { if ($ts -ge $w[1] -and ($null -eq $w[2] -or $ts -le $w[2])) { $hit = $w[0] } }; $hit }
 
-# ---- usage rows via the usage script ----
-$notes = @(); $uj = $null
-if ($wins.Count) {
-  $script = Join-Path $here "ocpf-usage.ps1"
-  if (-not (Test-Path $script)) { foreach ($c in @((Join-Path $root "ocpfFramework/scripts/ocpf-usage.ps1"), (Join-Path $here "../../usage/scripts/ocpf-usage.ps1"))) { if (Test-Path $c) { $script = $c; break } } }
-  if (Test-Path $script) { try { $out = & pwsh -NoProfile -File $script -Project $root -Json 2>&1; $uj = ($out | Out-String) | ConvertFrom-Json -AsHashtable } catch { $notes += "usage: $_" } } else { $notes += "usage script not found beside the dashboard script" }
-} else { $notes += "usage: no step windows yet" }
-$rows = @(if ($uj -and $uj.rows) { $uj.rows })
-function Rows-For($sid) { @($rows | Where-Object { ("$($_.step)" -replace ' \(open\)$', '') -eq $sid }) }
-function Sum($arr, $k) { $t = 0.0; foreach ($r in $arr) { $t += [double]($r[$k] ?? 0) }; $t }
 
 # ---- Claude Code transcript: time split + live state ----
 $liveState = $null
@@ -143,6 +162,7 @@ if (-not $copilot -and $wins.Count) {
       function AddT($sid, $k, $v) { $key = $sid ?? "Unattributed"; if (-not $script:per.ContainsKey($key)) { $script:per[$key] = @{ agent = 0.0; human = 0.0; waiting = 0.0 } }; $script:per[$key][$k] += $v }
       foreach ($e in $ev) { if ($prev) { $gap = ($e.ts - $prev.ts).TotalSeconds; $sid = (Step-Of $prev.ts) ?? (Step-Of $e.ts)
           if ($e.k -eq "prompt") { AddT $sid $(if ($pending -and $prev.k -ne "prompt") { "waiting" } else { "human" }) $gap }
+          elseif ($prev.k -eq "ask") { AddT $sid "waiting" $gap; $pending = $false }   # an options box was open; its answer comes back as a tool result, not a prompt (v5.8.0.0)
           else { if ($prev.k -eq "prompt") { AddT $sid "agent" $gap } else { AddT $sid "agent" ([Math]::Min($gap, $gapCap)); AddT $sid "human" ([Math]::Max(0, $gap - $gapCap)) } } }
         if ($e.k -eq "ask") { $pending = $true }; if ($e.k -eq "prompt") { $pending = $false }; $prev = $e }
       $last = $ev[-1]; $age = ((NowUtc) - $last.ts).TotalSeconds
@@ -157,7 +177,8 @@ if (-not $copilot -and $wins.Count) {
 # the agent / you / waiting split of each step is scaled to its window, so the three add up to Elapsed exactly (v5.6.0.0)
 if ($liveState) { $per = @{}; foreach ($sid in $el.Keys) { $sec = [double]$el[$sid]; $v = $liveState.perStep[$sid]; if (-not $v) { $v = @{ agent = 0.0; human = 0.0; waiting = 0.0 } }
     $tot = [double]$v.agent + [double]$v.human + [double]$v.waiting
-    if ($tot -gt 0) { $per[$sid] = @{ agent = [double]$v.agent * $sec / $tot; human = [double]$v.human * $sec / $tot; waiting = [double]$v.waiting * $sec / $tot } } }  # no transcript events: unmeasured, left out
+    if ($tot -gt 0) { $per[$sid] = @{ agent = [double]$v.agent * $sec / $tot; human = [double]$v.human * $sec / $tot; waiting = [double]$v.waiting * $sec / $tot } }
+    else { $per[$sid] = @{ agent = 0.0; human = $sec; waiting = 0.0 } } }  # a window with no transcript event: nobody was in the chat — the human's time (v5.8.0.0)
   $liveState.perStep = $per }
 
 # ---- steps ----
@@ -173,12 +194,18 @@ $steps = @(foreach ($c in $catalog) { $sid = $c.id; $rs = Rows-For $sid
 $cur = $steps | Where-Object { $_.status -eq "now" } | Select-Object -First 1
 
 # ---- totals ----
-$tot = [ordered]@{ costUsd = $(if ($rows.Count) { Sum $rows "costUsd" } else { $null }); elapsedSeconds = $(if ($el.Count) { ($el.Values | Measure-Object -Sum).Sum } else { $null }) }
+$tot = [ordered]@{ costUsd = $(if ($rows.Count) { Sum $rows "costUsd" } else { $null }); elapsedSeconds = $(if ($el.Count) { $unionSec } else { $null }) }
+# a row the usage script could not price (no rate for its model in pricing.json) must never read as $0
+$unpriced = @($rows | Where-Object { $null -eq $_.costUsd -and ([double]($_.input ?? 0) + [double]($_.output ?? 0) + [double]($_.aiCredits ?? 0)) -gt 0 } | ForEach-Object { $_.model ?? "unknown" } | Sort-Object -Unique)
+$outside = @($rows | Where-Object { "$($_.step)" -like "Unattributed*" }); $oc = $(if ($outside.Count) { Sum $outside "costUsd" } else { 0.0 }); if ($outside.Count -and $oc -gt 0) { $notes += ('$' + $oc.ToString("0.00") + " of the cost fell outside every step window — before the first window's session or after the last window closed — and is in the total but on no row") }
+if ($unpriced.Count) { $tot.costUnpriced = $unpriced; $notes += ("price unknown for " + ($unpriced -join ", ") + " — the usage script fetches Anthropic's published rates itself at each measurement; if this stays, the machine is offline or the model's publisher is not covered (Ops § Usage & Cost → 3)") }
 $seen = @{}; $d = 0; $t = 0; foreach ($r in $rows) { if ($seen.ContainsKey("$($r.step)")) { continue }; $seen["$($r.step)"] = 1; $d += [int]($r.decisions ?? 0); $t += [int]($r.turns ?? 0) }
 $tot.decisions = $d; $tot.turns = $t
 if ($copilot) { $tot.credits = $(if ($rows.Count) { [Math]::Round((Sum $rows "aiCredits"), 1) } else { $null }); $tot.creditsOpen = [bool](@($uj.sessions | Where-Object { -not $_.closed }).Count) }
 else { $tk = [ordered]@{}; foreach ($k in "input","output","cacheWrite","cacheRead") { $tk[$k] = Sum $rows $k }; $tk.total = ($tk.input + $tk.output + $tk.cacheWrite + $tk.cacheRead); $tot.tokens = $(if ($rows.Count) { $tk } else { $null }) }
-if ($liveState) { $ag = 0.0; $hu = 0.0; $wa = 0.0; foreach ($v in $liveState.perStep.Values) { $ag += $v.agent; $hu += $v.human; $wa += $v.waiting }; $tot.agentSeconds = $ag; $tot.humanSeconds = $hu; $tot.waitingSeconds = $wa }
+if ($liveState) { $ag = 0.0; $hu = 0.0; $wa = 0.0; foreach ($v in $liveState.perStep.Values) { $ag += $v.agent; $hu += $v.human; $wa += $v.waiting }
+  $ssum = $ag + $hu + $wa; $kf = $(if ($ssum -gt 0 -and $tot.elapsedSeconds) { $tot.elapsedSeconds / $ssum } else { 1.0 })  # scaled once more to the union, so the three add up to Elapsed exactly
+  $tot.agentSeconds = $ag * $kf; $tot.humanSeconds = $hu * $kf; $tot.waitingSeconds = $wa * $kf }
 $current = [ordered]@{}
 if ($cur) { $ps = if ($liveState -and $liveState.perStep.ContainsKey($cur.id)) { $liveState.perStep[$cur.id] } else { $null }; $gateC = ($catalog | Where-Object { $_.id -eq $cur.id } | Select-Object -First 1).exitGate
   $current = [ordered]@{ id = $cur.id; title = $cur.title; phase = $cur.phase; exitGate = @($gateC); stage = $(if ($cur.Contains("stage")) { $cur.stage } else { $null }); totals = [ordered]@{ costUsd = $cur.costUsd; elapsedSeconds = $cur.elapsedSeconds; agentSeconds = $(if ($ps) { $ps.agent }); humanSeconds = $(if ($ps) { $ps.human }); waitingSeconds = $(if ($ps) { $ps.waiting }); tokens = $cur.tokens; credits = $cur.credits } } }

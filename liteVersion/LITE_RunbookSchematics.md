@@ -199,7 +199,7 @@ flowchart TD
     Gate2 --> S5
     subgraph S5["STEP 5 — Compile, Package, Test & Iterate"]
         direction LR
-        Compile["FIRST: increment the Revision<br/>in app.json, then compile the whole<br/>extension once with the analyzers,<br/>then package it — the one<br/>mandatory compile-and-package<br/>(Op. Rule 4); fixed 'Package built'<br/>message with Schema Sync Mode"] --> Deploy["Human installs the package<br/>in a BC sandbox from<br/>docs/4-prove/SandboxInstall.md<br/>(§1 rewritten every build) —<br/>never the agent, unprompted"]
+        Compile["FIRST: increment the Revision<br/>in app.json, then compile the whole<br/>extension once with the analyzers,<br/>then package it — the one<br/>mandatory compile-and-package<br/>(Op. Rule 4)"] --> PreReview["Pre-review, before the first package:<br/>ocpf-reviewer (Main model, background)<br/>reads every file against the Design Doc,<br/>the Standards Guide, and plain logic;<br/>findings decided in one box,<br/>each logged in ChangeLog.md;<br/>then the fixed 'Package built'<br/>message with Schema Sync Mode"] --> Deploy["Human installs the package<br/>in a BC sandbox from<br/>docs/4-prove/SandboxInstall.md<br/>(§1 rewritten every build) —<br/>never the agent, unprompted"]
         Deploy --> Test["Human tests by hand:<br/>the BC client, Postman, Power<br/>Automate, Power Apps, or<br/>Copilot Studio"]
         Test --> Q{"Errors, warnings,<br/>or issues found?"}
         Q -- "Yes" --> Diag["Check ocpfFramework/patterns/ first, then:<br/>one-off or pattern? where<br/>from? what rule missed it?"]
@@ -219,7 +219,7 @@ flowchart TD
     classDef endpoint fill:#f2f2f2,stroke:#888,stroke-width:1px;
     classDef decision fill:#fde2e2,stroke:#c0504d,stroke-width:1px;
     class In1,Out1 io;
-    class Act1,B1,Par,PreGen,Gen,PostGen,PermVerify,Fix,Compile,Deploy,Test,Repackage,Diag act;
+    class Act1,B1,Par,PreGen,Gen,PostGen,PermVerify,Fix,Compile,Deploy,Test,Repackage,Diag,PreReview act;
     class Gate1,Gate2,Gate3,Approve gate;
     class Start,Next,Clean endpoint;
     class Mode,MoreObjects,Q decision;
@@ -323,7 +323,7 @@ flowchart LR
 
 ---
 
-*Generated from `LITE_BC_App_Build_Routine_Agent.md` v5.6.0.0 (October 11, 2026: the Build-a-Feature journey is added beside Full and Lite, reached through the plugin's `start` skill and described in Ops § Build-a-Feature; v5.4.2.0, October 10, 2026: the dashboard page is `ProjectDashboard.html` at the project root, tracked; the usage rules now read the Copilot session journals; otherwise as October 1, 2026: the Rule 6c options-box check-in is mandatory at every step close, Steps 1–7, not only Step 5 onward; September 27, 2026: `ProjectProgress.md`, the `ocpfFramework/` and `docs/` layouts, the parallel-batch branch in Step 4, the Revision increment and fixed build message in Step 5, the scorecard, Acknowledgements, and release-candidate question in Step 6, and Step 7's "ships as it is" gate); all 7 diagrams re-rendered clean with `@mermaid-js/mermaid-cli` 12.0.0 on September 27, 2026.
+*Generated from `LITE_BC_App_Build_Routine_Agent.md` v5.8.0.0 (October 16, 2026: Step 5 gains the pre-review node — the `ocpf-reviewer` sub-agent reads every file between the first clean compile and the first package; the diagram text was updated by hand and not re-rendered; v5.6.0.0, October 11, 2026: the Build-a-Feature journey is added beside Full and Lite, reached through the plugin's `start` skill and described in Ops § Build-a-Feature; v5.4.2.0, October 10, 2026: the dashboard page is `ProjectDashboard.html` at the project root, tracked; the usage rules now read the Copilot session journals; otherwise as October 1, 2026: the Rule 6c options-box check-in is mandatory at every step close, Steps 1–7, not only Step 5 onward; September 27, 2026: `ProjectProgress.md`, the `ocpfFramework/` and `docs/` layouts, the parallel-batch branch in Step 4, the Revision increment and fixed build message in Step 5, the scorecard, Acknowledgements, and release-candidate question in Step 6, and Step 7's "ships as it is" gate); all 7 diagrams re-rendered clean with `@mermaid-js/mermaid-cli` 12.0.0 on September 27, 2026.
 Version history is in `LITE_RunbookChangeLog.md`. If the Lite runbook changes in a way that
 affects the phase/step structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*

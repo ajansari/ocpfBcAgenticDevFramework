@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.7.3.0
-**Last Updated:** October 13, 2026
+**Version:** 5.8.0.0
+**Last Updated:** October 16, 2026
 
 > Version history for this framework lives in `ocpfFramework/RunbookChangelog.md`, tracked
 > independently of any one project built with it — check there for what changed between the version
@@ -18,7 +18,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.12.1.0): the AL *rules* this sequence applies (Parts 1–11, Appendices A–E), cited below as
 >   **Standards §**.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.7.3.0): the *procedures*
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.8.0.0): the *procedures*
 >   this sequence uses — asking, intake, project setup, the AL tools, tooling checks, analyzers,
 >   symbols, editor sync, notifications, packaging, repository hygiene, translations, fetched
 >   companions, documents, usage and cost, and the plugin — cited below as **Ops §**. Both editions
@@ -49,7 +49,7 @@
 >
 > **Prime directive for the agent:** An ambiguous input produces ambiguous code. If a step's inputs are incomplete or contradictory, stop and ask the human — do not invent rules to fill the gap.
 >
-> **Installed by the OCPF plugin?** If this project has an `ocpfFramework/framework.json` file, it was set up by the OnlyCopilotFans agent plugin. Read ALL ALONG → OCPF Plugin before anything else in this session: it adds a once-per-session framework update check, a Standards Guide fallback, one-step AL tool setup, ready-made sub-agents (light, reasoning, generator), and the `documents` and `usage` skills. Without that file, ignore that section. Everything else here works the same either way.
+> **Installed by the OCPF plugin?** If this project has an `ocpfFramework/framework.json` file, it was set up by the OnlyCopilotFans agent plugin. Read ALL ALONG → OCPF Plugin before anything else in this session: it adds a once-per-session framework update check, a Standards Guide fallback, one-step AL tool setup, ready-made sub-agents (light, reasoning, generator, reviewer), the `analyze` skill for an undocumented existing app, and the `documents` and `usage` skills. Without that file, ignore that section. Everything else here works the same either way.
 
 ---
 
@@ -198,16 +198,19 @@
     delegated to a sub-agent running the model and thinking effort recorded in §1.7, *never* left
     to the harness's default, which silently inherits the main session's model. **Full procedure
     and the per-harness mechanics: Ops § Roles → *Enforcement*.** The non-negotiables, in order:
-    - **Materialize.** The assignment is asked at PRE-01 and written at once as three project-local
+    - **Materialize.** The assignment is asked at PRE-01 and written at once as four project-local
       sub-agent definitions carrying the chosen model and effort — light, reasoning, and the
-      generator on the Main model (in a plugin project, the `roles` skill does it).
+      generator and the reviewer on the Main model (in a plugin project, the `roles` skill does it).
+      The reviewer runs the **pre-review** at Step 07 — one read of every file between the first
+      clean compile and the first package, findings decided in one options box and recorded in the
+      ChangeLog (Ops § Roles → *The pre-review*); Step 09 remains the Code Review.
     - **Delegate to that definition, pass the model, and run it in the background.** Every
       delegation names the project-local sub-agent. In Claude Code, the Agent tool's `model`
       parameter also carries the recorded model on every single call — including the first-session
       fallback, when Claude Code hasn't loaded the new `.claude/agents/` folder yet and the plugin's
       own agent is used instead. In Copilot, the definition's `model:` line is the mechanism (VS
       Code); in Copilot CLI that line isn't documented, so say so and rely on the next bullet. None
-      of the three roles asks the human, so every delegation runs as a background sub-agent —
+      of the four roles asks the human, so every delegation runs as a background sub-agent —
       that's what makes parallel batches and overlapping pre-flight possible; foreground only when
       the very next action needs the result and nothing else can proceed (an FRD draft). In Claude
       Code a background sub-agent's permission prompts still surface in the main session.
@@ -263,14 +266,14 @@ opening questions and the capture rules.
 
 **In one line:** ask the working language, fetch both companion guides and the step files into
 `ocpfFramework/`, ask how to be notified, ask which models do the work (six questions with the
-per-harness recommendations — `roles` skill in a plugin project; three project-local sub-agents
+per-harness recommendations — `roles` skill in a plugin project; four project-local sub-agents
 written), ask the Copilot session settings if Copilot is in use, ask who approves, capture raw
 requirements verbatim, create `docs/` with its phase subfolders, `ProjectProgress.md`, and
 `ocpfFramework/state/usage.json`, then write `docs/1-define/ProblemStatement.md`.
 
-**Outputs:** `ocpfFramework/` with its six-line `README.md`, `standardsGuide/`, `opsGuide/`, `runbookSteps/`, `documentTemplates/`, and `RunbookChangelog.md` (all fetched, the folder gitignored per Ops § Repository Hygiene), `app.json` (first write: name, publisher, logo, version `0.0.0.1`, id) and `src/` with `src/logo/AppLogo.png` when an icon was given, `ProjectDashboard.html` (project root, tracked; rendered, opened, explained — hooks installed, `ocpfFramework/state/dashboard.json`), `ocpfFramework/state/usage.json` (PRE-01's `startedAt`, and its rows at the close), `ocpfFramework/state/copilot.json` and the Copilot keys in `.vscode/settings.json` (when Copilot is in use), `requirements/` (seeded, if any raw input was provided), `ProjectProgress.md` (seeded from its template, Full step table, project root), `docs/` with `0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` (created), the model and effort assignment recorded in `docs/0-project/ProjectMemory.md` and materialized as three project-local sub-agent definitions — light, reasoning, generator (Ops § Roles), `docs/1-define/ProblemStatement.md` — purpose, scope, out-of-scope, target consumers, initial entity list, open questions.
+**Outputs:** `ocpfFramework/` with its six-line `README.md`, `standardsGuide/`, `opsGuide/`, `runbookSteps/`, `documentTemplates/`, and `RunbookChangelog.md` (all fetched, the folder gitignored per Ops § Repository Hygiene), `app.json` (first write: name, publisher, logo, version `0.0.0.1`, id) and `src/` with `src/logo/AppLogo.png` when an icon was given, `ProjectDashboard.html` (project root, tracked; rendered, opened, explained — hooks installed, `ocpfFramework/state/dashboard.json`), `ocpfFramework/state/usage.json` (PRE-01's `startedAt`, and its rows at the close), `ocpfFramework/state/copilot.json` and the Copilot keys in `.vscode/settings.json` (when Copilot is in use), `requirements/` (seeded, if any raw input was provided), `ProjectProgress.md` (seeded from its template, Full step table, project root), `docs/` with `0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` (created), the model and effort assignment recorded in `docs/0-project/ProjectMemory.md` and materialized as four project-local sub-agent definitions — light, reasoning, generator, reviewer (Ops § Roles), `requirements/existing/` (when the analysis ran), `docs/1-define/ProblemStatement.md` — purpose, scope, out-of-scope, target consumers, initial entity list, open questions.
 
-**Exit gate:** `app.json` exists with the human's extension name and publisher (and `logo` when an icon was given — the file at `src/logo/AppLogo.png`), asked in this step's first box after notifications; the dashboard `ProjectDashboard.html` was rendered from it at the project root (not ignored: `git check-ignore ProjectDashboard.html` prints nothing), opened in the browser, its hooks installed for this AI tool, and the one explanation question answered (ALL ALONG → Dashboard). Both companion guides are present, in `ocpfFramework/standardsGuide/` and `ocpfFramework/opsGuide/`, the step files in `ocpfFramework/runbookSteps/`, the templates in `ocpfFramework/documentTemplates/`, the changelog at `ocpfFramework/RunbookChangelog.md`, the `README.md` written, all gitignored. The Copilot session settings are written and recorded when Copilot is in use. `ocpfFramework/state/usage.json` holds PRE-01's `startedAt` and, at the close, its `completedAt`, and PRE-01's usage rows — one per model in Claude Code, one per step in Copilot — are in `ProjectProgress.md` and pasted into the closing message (Operating Rule 11). The notification choice is recorded in `ocpfFramework/state/notifications.json`, applied, and tested (ALL ALONG → Notifications). The effort warning was said before the model questions, all six model and effort answers are recorded, the Main model and effort match what this session is actually running on, and the Light, Reasoning, and Generator sub-agent definitions exist in the project with the chosen model and effort set (Operating Rule 10). `docs/1-define/ProblemStatement.md` is in `docs/1-define/`, not the root or a flat `docs/` (Operating Rule 9). Functional Consultant signs off on the problem statement and initial entity list (Stage↔Step Map, Stage 1) — or, when **Approvers** is one person, this sign-off moves to the end of PRE-02 and is given together with that step's, on the problem statement and expanded list at once.
+**Exit gate:** `app.json` exists with the human's extension name and publisher (and `logo` when an icon was given — the file at `src/logo/AppLogo.png`), asked in this step's first box after notifications; the dashboard `ProjectDashboard.html` was rendered from it at the project root (not ignored: `git check-ignore ProjectDashboard.html` prints nothing), opened in the browser, its hooks installed for this AI tool, and the one explanation question answered (ALL ALONG → Dashboard). Both companion guides are present, in `ocpfFramework/standardsGuide/` and `ocpfFramework/opsGuide/`, the step files in `ocpfFramework/runbookSteps/`, the templates in `ocpfFramework/documentTemplates/`, the changelog at `ocpfFramework/RunbookChangelog.md`, the `README.md` written, all gitignored. The Copilot session settings are written and recorded when Copilot is in use. `ocpfFramework/state/usage.json` holds PRE-01's `startedAt` and, at the close, its `completedAt`, and PRE-01's usage rows — one per model in Claude Code, one per step in Copilot — are in `ProjectProgress.md` and pasted into the closing message (Operating Rule 11). The notification choice is recorded in `ocpfFramework/state/notifications.json`, applied, and tested (ALL ALONG → Notifications). The effort warning was said before the model questions, all six model and effort answers are recorded, the Main model and effort match what this session is actually running on, and the Light, Reasoning, Generator, and Reviewer sub-agent definitions exist in the project with the chosen model and effort set (Operating Rule 10); the publisher's source is recorded in `docs/0-project/ProjectMemory.md` and names a box the human answered (Ops § Intake → *Forbidden sources*); on an existing app the analysis offer was made and answered. `docs/1-define/ProblemStatement.md` is in `docs/1-define/`, not the root or a flat `docs/` (Operating Rule 9). Functional Consultant signs off on the problem statement and initial entity list (Stage↔Step Map, Stage 1) — or, when **Approvers** is one person, this sign-off moves to the end of PRE-02 and is given together with that step's, on the problem statement and expanded list at once.
 
 ## PRE-02 — Structured Gap Analysis
 
@@ -298,7 +301,7 @@ tools, symbols, editor sync (§1.10, Ops § Project Setup).
 
 **Outputs:** `docs/1-define/ProjectParameters.md` — the completed Project Parameters block (above, all placeholders replaced), persisted as its own tracked document so every later step, and every role under §1.7, reads it from disk rather than depending on conversation history; an empty **Object Register** (`docs/1-define/ObjectRegister.md`) seeded with the allocated ID ranges; the project's `.gitignore` populated per this section and per ALL ALONG → Repository Hygiene, and verified with `git check-ignore`; **`docs/1-define/TranslationGlossary.md`**, created with the regional terms PRE-02 listed (ALL ALONG → Translations & Terminology) — unless the project chose *US wording, no translation files*; `app.json` (with `version` from **Starting Version** and, when an icon was given, `logo`), `src/` (and `src/logo/AppLogo.png`, resized and committed, when an icon was given), and `.alpackages/` per §1.10.
 
-**Exit gate:** Every question in this step was asked through the options mechanism (Ops § Intake), the app icon question included. `app.json` matches the sheet — `version` is `0.0.0.1` for a new app or the installed version for an existing one — and symbols for the target version are in `.alpackages/` (§1.10, Ops § Project Setup). `src/` exists, and `src/logo/AppLogo.png` is square, 300 px on a side unless the source was smaller, and named in `app.json`'s `logo` when the icon answer was *Yes*. No placeholder remains. **Approvers** is recorded (asked at PRE-01). Deployment Target is one allowed value. Namespace matches between 1.1 and 1.3, or both are correctly N/A if Use Namespace = `No`. Localization is set. If Permission Sets required = `Yes`, ≥ 2 IDs are reserved in the primary range. §1.6's three questions are each answered `Yes`/`No` with specifics recorded for any `Yes`. §1.7 carries the PRE-01 answers: every one of the three roles has a model, its harness identifier, and a thinking effort recorded — not model alone — and the Light, Reasoning, and Generator sub-agent definitions exist in the project with those values (Operating Rule 10). §1.8 is answered (or defaults to `Yes`), every entry from the Ops § Repository Hygiene block is in `.gitignore`, and `git check-ignore` confirms each existing framework file — `ocpfFramework/` and the sub-agent definitions included — is ignored. `docs/1-define/ProjectParameters.md` and `docs/1-define/ObjectRegister.md` are in `docs/1-define/`, and nothing from Operating Rule 9's list is in the project root or a flat `docs/`. §1.9: every target language is classified against Microsoft's live page and — unless source wording is *US wording, no translation files* — has a required-at-release answer and a named reviewer; source language and wording are recorded; any mismatch with `Localization` is resolved. Human confirms the sheet. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 11).
+**Exit gate:** Every question in this step was asked through the options mechanism (Ops § Intake), the app icon question included. `app.json` matches the sheet — `version` is `0.0.0.1` for a new app or the installed version for an existing one — and symbols for the target version are in `.alpackages/` (§1.10, Ops § Project Setup). `src/` exists, and `src/logo/AppLogo.png` is square, 300 px on a side unless the source was smaller, and named in `app.json`'s `logo` when the icon answer was *Yes*. No placeholder remains. **Approvers** is recorded (asked at PRE-01). Deployment Target is one allowed value. Namespace matches between 1.1 and 1.3, or both are correctly N/A if Use Namespace = `No`. Localization is set. If Permission Sets required = `Yes`, ≥ 2 IDs are reserved in the primary range. §1.6's three questions are each answered `Yes`/`No` with specifics recorded for any `Yes`. §1.7 carries the PRE-01 answers: every one of the three roles has a model, its harness identifier, and a thinking effort recorded — not model alone — and the Light, Reasoning, Generator, and Reviewer sub-agent definitions exist in the project with those values (Operating Rule 10). The object ID range(s) in §1.2 were chosen or typed by the human in the range question, recorded with that source — never kept from a scaffold's `app.json` (Ops § Intake → *Forbidden sources*). §1.8 is answered (or defaults to `Yes`), every entry from the Ops § Repository Hygiene block is in `.gitignore`, and `git check-ignore` confirms each existing framework file — `ocpfFramework/` and the sub-agent definitions included — is ignored. `docs/1-define/ProjectParameters.md` and `docs/1-define/ObjectRegister.md` are in `docs/1-define/`, and nothing from Operating Rule 9's list is in the project root or a flat `docs/`. §1.9: every target language is classified against Microsoft's live page and — unless source wording is *US wording, no translation files* — has a required-at-release answer and a named reviewer; source language and wording are recorded; any mismatch with `Localization` is resolved. Human confirms the sheet. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 11).
 
 ---
 
@@ -401,7 +404,9 @@ increment the Revision, compile, package, say "Package built:", the human instal
 5); root-cause fixes approved together per round (Operating Rule 6); translations drafted and
 reviewed inside this cycle (Ops § Translations).
 
-**Role:** root-cause diagnosis (the three questions below)
+**Role:** the **pre-review**, right after the first clean compile and before the first package, is
+done by the **reviewer sub-agent** — the project-local `ocpf-reviewer`, on the Main model and effort,
+in the background (Operating Rule 10; Ops § Roles → *The pre-review*); root-cause diagnosis (the three questions below)
 is done by the **reasoning role** (Operating Rule 10); the main role applies the resulting fix and does the
 ChangeLog/TDD bookkeeping, and is also the one who compiles, packages, keeps
 `docs/4-prove/SandboxInstall.md` current, and waits for the human to install each build. Same division for any bug surfaced later during PROVE-phase
@@ -410,7 +415,7 @@ main role's.
 
 **Outputs:** All batches compiling and packaging with **0 errors, 0 warnings**; one package per build in `outputAppPackage/`, each at its own Revision, each announced with the "Package built:" block; `docs/4-prove/SandboxInstall.md` written with the first package and its §1 current; at least one package installed by the human and manually tested on a sandbox, with "last installed version" recorded; ChangeLog current; TDD updated for every rule change; every target translation file synced, drafted, and passing technical checks, with the glossary current.
 
-**Exit gate:** Full extension compiles clean, with the analyzers and nothing suppressed (Ops § Analyzers); the human confirms sandbox testing is clean; no known systemic issue outstanding; `app.json`'s version equals the last package built and no two packages in `outputAppPackage/` share a version; ChangeLog and TDD reconciled (Operating Rule 5); no translation unit in any language required at first release is in `needs-translation` or `needs-adaptation`, and the technical translation checks are clean. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 11).
+**Exit gate:** Full extension compiles clean, with the analyzers and nothing suppressed (Ops § Analyzers); the pre-review ran on the Main model before the first package (its report's `Model:` line checked), every finding was decided in the options box and recorded in the ChangeLog with its decision; the human confirms sandbox testing is clean; no known systemic issue outstanding; `app.json`'s version equals the last package built and no two packages in `outputAppPackage/` share a version; ChangeLog and TDD reconciled (Operating Rule 5); no translation unit in any language required at first release is in `needs-translation` or `needs-adaptation`, and the technical translation checks are clean. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 11).
 
 ---
 
@@ -778,7 +783,7 @@ lives outside the project root entirely, so there's nothing to ignore.
 the whole `ocpfFramework/` folder (which now holds the changelog, the schematics, and the runbook
 when `CLAUDE.md` already existed), this runbook under whatever name it was placed (`CLAUDE.md`,
 `.github/copilot-instructions.md`, `.github/instructions/ocpf-framework.instructions.md`), and the
-three project-local sub-agent definitions (`.claude/agents/ocpf-light.md`, `ocpf-reasoning.md`,
+four project-local sub-agent definitions (`.claude/agents/ocpf-light.md`, `ocpf-reasoning.md`, `ocpf-reviewer.md`,
 `ocpf-generator.md`; `.github/agents/ocpf-*.agent.md`). With the intake answer *No, track them*,
 only group one is written. **Verify with `git check-ignore -v` on each file that exists** — an
 entry that isn't there, or doesn't match, is found by that command, not by re-reading `.gitignore`.
@@ -997,23 +1002,29 @@ Tooling Checks). Without that file, skip it entirely.
   without an explicit yes. On a project set up before 5.0.0.0, the `update-framework` skill also
   moves the files into the `ocpfFramework/` and `docs/<n>-<phase>/` layout and logs every move.
 - **What the plugin adds:** offline copies of the runbooks and both companions, one-step AL tool
-  setup, notification setup, the `ocpf-light`, `ocpf-reasoning`, and `ocpf-generator` sub-agents
-  as the templates for §1.7's project-local definitions (the plugin's own copies carry **no
-  model** — they'd inherit the session's; Ops § Roles → *Enforcement* says how the project's
-  copies get one; the generator runs on the Main model and effort, no extra question), and the
-  `status`, `al-standards`, `notifications`, `roles`, `documents` (writes any project document
-  from its template, both effort estimates and the Acknowledgements included), and `usage`
-  (measures tokens and cost per step and model, refreshes the usage table, and exports the
-  calibration file at close) skills.
+  setup, notification setup, the `ocpf-light`, `ocpf-reasoning`, `ocpf-generator`, and
+  `ocpf-reviewer` sub-agents as the templates for §1.7's project-local definitions (the plugin's
+  own copies carry **no model** — they'd inherit the session's; Ops § Roles → *Enforcement* says
+  how the project's copies get one; the generator and the reviewer run on the Main model and
+  effort, no extra question), the `analyze` skill (`/ocpf-bc:analyze` — documents an undocumented
+  existing app into `requirements/existing/` on a model the human chooses, offered at PRE-01 when
+  the app exists; Ops § Existing Apps), the `app-icon` skill (draws the app icon when the human
+  has none — *Create one for me* in PRE-01's identity box; Ops § Intake → *The app icon*), and the
+  `status`, `al-standards`, `notifications`,
+  `roles`, `documents` (writes any project document from its template, both effort estimates and
+  the Acknowledgements included), and `usage` (measures tokens and cost per step and model,
+  refreshes the usage table, and exports the calibration file at close) skills.
 - **Optional github.com reviewer:** offer `ocpf-code-reviewer` once at Step 09 if the project is on
   GitHub and the team uses Copilot; its report is a Step 09 input like any other.
 - **Build-a-Feature on this project (Ops § Build-a-Feature):** the plugin's third journey builds
-  one object or a few — a table and its pages, a field on a standard page, a report, an API page,
-  an enum, a permission set — with no steps and no documents, on the Main model alone. The
-  `start` skill offers it as *Build a feature in this project*; it leaves this runbook, the step
-  table, and every document alone, appends its own feature table to `ProjectProgress.md` (one row
-  per object, with usage rows under `F` ids), and adds one ChangeLog line per object. It is for a
-  quick mod between or after the routine's steps, never a substitute for a step.
+  quick customizations — a table and its pages, a field on a standard page, a processing report,
+  an API page, an enum, a permission set, a role center — with no steps and no design documents
+  (six short documents, written as the work happens), on the Main model alone. The `start` skill
+  offers it as *Build a feature in this project*; it leaves this runbook, the step table, and
+  every document alone, appends its own feature table to `ProjectProgress.md` (one row per
+  object, with usage rows under `F` ids), writes its documents beside this project's own in the
+  phase folders, and adds one ChangeLog line per object. It is for a quick mod between or after
+  the routine's steps, never a substitute for a step.
 
 ## Stage ↔ Step Map
 

@@ -241,7 +241,7 @@ flowchart TD
     Gate2 --> S07
     subgraph S07["07 — Compile and Package,<br/>Troubleshoot, Iterate"]
         direction LR
-        Compile["FIRST: increment the Revision in<br/>app.json, compile the whole<br/>extension once with the analyzers,<br/>then package it — the one<br/>mandatory compile-and-package<br/>(Op. Rule 4) — and end with the<br/>'Package built:' block"] --> Deploy["Human installs the package<br/>in a BC sandbox from<br/>docs/4-prove/SandboxInstall.md<br/>(§1 rewritten every build) —<br/>never the agent, unprompted"]
+        Compile["FIRST: increment the Revision in<br/>app.json, compile the whole<br/>extension once with the analyzers,<br/>then package it — the one<br/>mandatory compile-and-package<br/>(Op. Rule 4)"] --> PreReview["Pre-review, before the first package:<br/>ocpf-reviewer (Main model, background)<br/>reads every file against the TDD,<br/>the Standards Guide, and plain logic;<br/>findings decided in one box,<br/>each logged in the ChangeLog;<br/>then the 'Package built:' block"] --> Deploy["Human installs the package<br/>in a BC sandbox from<br/>docs/4-prove/SandboxInstall.md<br/>(§1 rewritten every build) —<br/>never the agent, unprompted"]
         Deploy --> Test["Human tests by hand:<br/>the BC client, Postman, Power<br/>Automate, Power Apps, or<br/>Copilot Studio"]
         Test --> Q{"Errors, warnings,<br/>or issues found?"}
         Q -- "Yes" --> Diag["Check ocpfFramework/patterns/ first, then<br/>reasoning role diagnoses:<br/>one-off or pattern? where<br/>from? what rule missed it?"]
@@ -267,6 +267,7 @@ flowchart TD
     classDef decision fill:#fde2e2,stroke:#c0504d,stroke-width:1px;
     class In1,Out1 io;
     class Act1,B1,Fix,Compile,Deploy,Test,Repackage,AskHuman act;
+    class PreReview act;
     class Gen generator;
     class PostGen light;
     class PreGen act;
@@ -473,7 +474,7 @@ flowchart TD
 
 ---
 
-*Generated from `BC_App_Build_Routine_Agent.md` v5.6.0.0 (October 11, 2026: the Build-a-Feature journey is added beside Full and Lite, reached through the plugin's `start` skill and described in Ops § Build-a-Feature; v5.4.2.0, October 10, 2026: the dashboard page is `ProjectDashboard.html` at the project root, tracked; the usage rules now read the Copilot session journals; otherwise as v5.1.0.0 made the Rule 6c options-box check-in mandatory at every step close, PRE-01 through Step 12, not only PROVE; v4.0.0.0 moved the step text into `steps/` and added the usage table and effort estimate; v5.0.0.0 added the batch-mode choice and generator lane in BUILD, the scorecard, the fifth Step 11 document and release-candidate question, the new project paths, and the Usage and Tooling Checks disciplines — the step order and gates are otherwise as drawn); all 8 diagrams re-rendered clean with `@mermaid-js/mermaid-cli` 12.0.0 on September 27, 2026. Version
+*Generated from `BC_App_Build_Routine_Agent.md` v5.8.0.0 (October 16, 2026: Step 07 gains the pre-review node — the `ocpf-reviewer` sub-agent reads every file between the first clean compile and the first package; the diagram text was updated by hand and not re-rendered; v5.6.0.0, October 11, 2026: the Build-a-Feature journey is added beside Full and Lite, reached through the plugin's `start` skill and described in Ops § Build-a-Feature; v5.4.2.0, October 10, 2026: the dashboard page is `ProjectDashboard.html` at the project root, tracked; the usage rules now read the Copilot session journals; otherwise as v5.1.0.0 made the Rule 6c options-box check-in mandatory at every step close, PRE-01 through Step 12, not only PROVE; v4.0.0.0 moved the step text into `steps/` and added the usage table and effort estimate; v5.0.0.0 added the batch-mode choice and generator lane in BUILD, the scorecard, the fifth Step 11 document and release-candidate question, the new project paths, and the Usage and Tooling Checks disciplines — the step order and gates are otherwise as drawn); all 8 diagrams re-rendered clean with `@mermaid-js/mermaid-cli` 12.0.0 on September 27, 2026. Version
 history is in `RunbookChangelog.md` (a project's copy: `ocpfFramework/RunbookChangelog.md`). If the runbook changes in a way that affects the
 phase/step/role structure, regenerate the affected diagram(s) here and re-render before
 committing — don't hand-edit a diagram without checking it still parses.*

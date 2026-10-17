@@ -125,16 +125,20 @@ Guide versions it expects. If a local copy's major version differs, say so: the 
    repository at the tag the new framework pins** — read the pin from the framework's
    `standardsGuide/README.md` (fetch that prelude into `ocpfFramework/standardsGuide/README.md` too):
    `https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfALDevStandardsGuide.md`
-   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v5.7.3.0 the pin is
+   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v5.8.0.0 the pin is
    `v1.12.1.0`). Update each folder's `SNAPSHOT.json` (`repo`, `ref`, `sha`, `fetchedAt`). A project that
    began before v5.2.0.0 needs **no file move**: the on-disk path and filename are unchanged; the
    refresh only changes the source recorded in `SNAPSHOT.json`. A runbook and a companion from
    different majors don't go together: the runbook cites **Ops §** and **Standards §** by number.
 3c. **Sub-agent definitions:** if the project has no `ocpf-generator` definition
-   (`.claude/agents/ocpf-generator.md` / `.github/agents/ocpf-generator.agent.md`), run the
-   `roles` skill's Step 3 for it with the Main model and effort already recorded — both editions.
-   Rewrite the existing `ocpf-light` and `ocpf-reasoning` copies from the new bundled bodies,
-   keeping their `model:` / `effort:` lines.
+   (`.claude/agents/ocpf-generator.md` / `.github/agents/ocpf-generator.agent.md`), or — from
+   5.8.0.0 — no `ocpf-reviewer` definition (`.claude/agents/ocpf-reviewer.md` /
+   `.github/agents/ocpf-reviewer.agent.md`; both editions, the pre-review at Full Step 07 / Lite
+   Step 5), run the `roles` skill's Step 3 for the missing one with the Main model and effort
+   already recorded — both editions. Rewrite the existing `ocpf-light`, `ocpf-reasoning`,
+   `ocpf-generator`, and `ocpf-reviewer` copies from the new bundled bodies, keeping their
+   `model:` / `effort:` lines. Add the reviewer (and analyst) entries to the `.gitignore` block when
+   the project keeps framework files out of git (Ops § Repository Hygiene).
 4. **Update `ocpfFramework/framework.json`:** set `runbookVersion`, `source`, `commitSha`, and `fetchedAt`,
    set `"layout": "ocpfFramework-1"` and add `"tooling": {}` if missing, and clear
    `declinedUpdateVersion`.
