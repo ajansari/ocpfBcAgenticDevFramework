@@ -52,3 +52,5 @@ BuildMapDashboard/
 BuildAFeatureJourney/
 #Distributed-development guide (written for a Microsoft question) — local only, never pushed to the remote
 distributedDevelopment/
+#Custom Skills design notes — local only until the feature is built
+CustomSkillsRoadmap/
