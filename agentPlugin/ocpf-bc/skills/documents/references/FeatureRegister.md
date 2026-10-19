@@ -22,7 +22,7 @@ Written at the intake close; every value is one the human chose or typed in a bo
 | New or existing app | <New app — started at 0.0.0.1 / Existing app — installed version <v>> | <intake 4b> |
 
 ## 2. Objects
-One row per object this journey built, in build order; `Row` is the feature table's id in `ProjectProgress.md`. A row is written when the object's design is **proposed** (status *proposed*), updated to *confirmed* when the human accepts the design, and completed with the file when it compiles. **Base object:** for an extension, the standard object it extends. **Relates to:** the tables, pages, APIs, and permission sets this object links to or is used by.
+One row per object this journey built, in build order; `Row` is the feature table's id in `ProjectProgress.md`. A row is written when the object's design is **proposed** (status *proposed*), updated to *confirmed* when the human accepts the design, and completed with the file when it compiles. **Base object:** for an extension, the standard object it extends. **Relates to:** the tables, pages, APIs, and permission sets this object links to or is used by. **ID** is unique within its type only: the first object of each type takes the range's first ID (Ops § Object IDs).
 | Row | Type | ID | Name | File | Base object | Relates to | Status | Session |
 |---|---|---|---|---|---|---|---|---|
 | F01 | Table | 50100 | <PFX Rental Unit> | src/<…>.Table.al | — | Customer (Customer No.); pages F02, F03; API F04 | confirmed · compiled | <date> |

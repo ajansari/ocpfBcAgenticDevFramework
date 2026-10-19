@@ -304,9 +304,12 @@ For each object in the plan, in order. Each object is one row and one usage wind
    `ocpfFramework/state/feature.json` (case A: `docs/1-define/ProjectParameters.md` §1.2): the
    range must carry `idRangesSource` naming a box the human answered; if it is missing, or says
    the range was read from a file, **stop and ask the range question of Part 2 step 9 now**, then
-   continue. The next free ID in that range — the AL tools' next-object-ID tool where the session
-   has it (`al_getnextobjectid` in Copilot Chat), otherwise the highest ID of that type in `src/`
-   plus one, checked against every range. Never a number a symbol already uses. File name per
+   continue. The next free ID **of that object type** in that range (Ops § Object IDs — an ID is
+   unique per type; Table 50100 and Page 50100 coexist, so a page never skips a number because a
+   table holds it): the AL tools' next-object-ID tool for that type where the session has it
+   (`al_getnextobjectid` in Copilot Chat), otherwise the highest ID of that type in `src/` plus
+   one, or the range's first ID when the type has none — never the highest number across types —
+   checked against every range. Never a number a symbol of the same type already uses. File name per
    Standards §1.8, under `src/` (a subfolder per feature is fine). Say the ID and the file name
    in the message that writes the file.
 5. **Write the file, whole, once.** From the reference file's skeleton and the Standards sections

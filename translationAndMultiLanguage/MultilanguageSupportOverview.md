@@ -338,7 +338,7 @@ Translation isn't a phase tacked on at the end. From the first full build onward
 runs the cheap, mechanical part: **build → sync translation files → technical checks.** Once the
 source text is stable — the first build the tester confirms clean on the sandbox, again before the
 compile-and-test step closes, and again after any later fix that changes source text — the agent
-**drafts, packages, and tests in the sandbox with the user's language switched.**
+**drafts and packages, and the tester checks it in the sandbox with the user's language switched.**
 
 - **Source text is finished before translation starts.** The agent doesn't translate batch by
   batch while code is still being generated — `.g.xlf` only exists after a build, and translating

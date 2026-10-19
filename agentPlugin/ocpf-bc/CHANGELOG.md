@@ -4,6 +4,24 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.8.1 — October 19, 2026
+
+**Bundles:** full runbook v5.8.1.0, Lite v5.8.1.0, **Standards Guide v1.13.0.0** (pin moved — new §5.0, object IDs per type),
+Operations Guide v5.8.1.0. The `al-mcp-setup` skill text, two document templates, both manifests'
+version.
+
+- **The human runs the automated tests.** The agent does not call `al_run_tests` or publish the test
+  app, even on request: on real projects in October 2026 it could not get either to work through
+  the AL MCP Server. This replaces 5.7.1's "'Run the tests' works the same way". `al-mcp-setup`'s
+  sign-in note, the `AutomatedTestGuide.md` opening, and the Acknowledgements AL tools row are
+  worded to match. Agent-run tests are on the framework's roadmap (Ops § Automated Tests).
+- **Object IDs are allocated per object type.** `build-a-feature`'s ID gate (Part 4 step 4) now
+  takes the next free ID *of that object type* — `al_getnextobjectid` per type, else the highest of
+  that type in `src/` plus one, or the range's first ID when the type has none — never the highest
+  number across types, and "never a number a symbol already uses" became "a symbol of the same
+  type". The Feature Register template says the same beside its ID column. The rule itself is the
+  bundled Ops § Object IDs (new); the TDD, Design Doc, and Build Plan templates carry its check.
+
 ## 5.8.0 — October 16, 2026
 
 **Bundles:** full runbook v5.8.0.0, Lite v5.8.0.0, Standards Guide v1.12.1.0 (unchanged),

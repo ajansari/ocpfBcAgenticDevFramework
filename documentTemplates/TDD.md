@@ -20,8 +20,8 @@ All from `docs/1-define/ProjectParameters.md` — copied, never retyped from mem
 | Permission Set App Code / names | <…> |
 
 ## 2. Module grouping and ID allocation
-Standards §5.1–§5.2: contiguous sub-block per module, ≥ 20 % growth buffer, tail block for cross-module additions.
-| Module | ID sub-block | Allocated | Buffer | Objects |
+Standards §5.1–§5.2: contiguous sub-block per module, ≥ 20 % growth buffer, tail block for cross-module additions. **IDs are unique per object type** (Ops § Object IDs): every type starts at the sub-block's first ID; *Allocated* and *Buffer* are counted for the type with the most objects.
+| Module | ID sub-block | Allocated (per type, max) | Buffer (per type, min) | Objects |
 |---|---|---|---|---|
 
 ## 3. Batch / phase plan
@@ -86,13 +86,14 @@ Singletons, header/line pairs, high-volume tables, naming conflicts.
 - <note>
 
 ## 12. Object Register
-Also maintained standalone as `docs/1-define/ObjectRegister.md`.
-| ID | Type | Name | Module | Source table | R / RW | Batch |
+Also maintained standalone as `docs/1-define/ObjectRegister.md`. Sorted by type, then ID; an ID is unique within its type only, so the same number appears once per type that uses it (Ops § Object IDs).
+| Type | ID | Name | Module | Source table | R / RW | Batch |
 |---|---|---|---|---|---|---|
 
 ## Self-sufficiency check
 - [ ] Every FRD entity maps to at least one object in §4.
 - [ ] Every ID is inside an allocated range with its buffer intact.
+- [ ] Per-type ID check (Ops § Object IDs): for every object type in every block, the IDs used are exactly the block's first *n* — lowest = block start, no gaps; no number skipped because another type holds it.
 - [ ] Every source table number and `using` namespace comes from the symbol file.
 - [ ] Every field decision (include / exclude / rename / FlowField) is written, not defaulted.
 - [ ] No new `Option` anywhere; every enum has its `Extensible` answer and reason recorded, and the value is written explicitly in the object (Standards §1.9).

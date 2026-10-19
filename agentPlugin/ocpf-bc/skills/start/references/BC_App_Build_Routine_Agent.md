@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.8.0.0
+**Version:** 5.8.1.0
 **Last Updated:** October 16, 2026
 
 > Version history for this framework lives in `ocpfFramework/RunbookChangelog.md`, tracked
@@ -16,9 +16,9 @@
 >
 > **Companion documents, both fetched at PRE-01 and kept for the life of the project:**
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
->   (v1.12.1.0): the AL *rules* this sequence applies (Parts 1–11, Appendices A–E), cited below as
+>   (v1.13.0.0): the AL *rules* this sequence applies (Parts 1–11, Appendices A–E), cited below as
 >   **Standards §**.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.8.0.0): the *procedures*
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.8.1.0): the *procedures*
 >   this sequence uses — asking, intake, project setup, the AL tools, tooling checks, analyzers,
 >   symbols, editor sync, notifications, packaging, repository hygiene, translations, fetched
 >   companions, documents, usage and cost, and the plugin — cited below as **Ops §**. Both editions
@@ -335,7 +335,7 @@ human for sign-off, same as Step 02.
 `docs/2-design/HumanEffortEstimate.md` (against the named baselines file);
 `docs/2-design/AiEffortEstimate.md` (tokens, cost, wall-clock from BUILD on, margin, calibration read).
 
-**Exit gate:** Technical Lead sign-off. Self-sufficiency check passes: no rule requires knowledge outside the document (Stage↔Step Map, Stage 5). `docs/2-design/HumanEffortEstimate.md` exists, covers every object in the register, names the baselines file it used, and states its assumptions. `docs/2-design/AiEffortEstimate.md` exists, covers every step from 05 to 12 per model and token type, prices from `ocpfFramework/state/pricing.json`, carries the 30-minute approval sentence, names its margin, and says what calibration it read. When **Approvers** is one person, the sign-off moves to Step 04 and is given once, on `docs/2-design/TDD.md` and `docs/2-design/SanityCheck.md` together — the self-sufficiency check still passes here first. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 11).
+**Exit gate:** Technical Lead sign-off. Self-sufficiency check passes: no rule requires knowledge outside the document (Stage↔Step Map, Stage 5). The Object Register passes the per-type ID check (Ops § Object IDs): every type in every block starts at the block's first ID with no gaps. `docs/2-design/HumanEffortEstimate.md` exists, covers every object in the register, names the baselines file it used, and states its assumptions. `docs/2-design/AiEffortEstimate.md` exists, covers every step from 05 to 12 per model and token type, prices from `ocpfFramework/state/pricing.json`, carries the 30-minute approval sentence, names its margin, and says what calibration it read. When **Approvers** is one person, the sign-off moves to Step 04 and is given once, on `docs/2-design/TDD.md` and `docs/2-design/SanityCheck.md` together — the self-sufficiency check still passes here first. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 11).
 
 ## 04 — Sanity Check and Validation
 
@@ -515,7 +515,7 @@ procedure.** Read the named **Ops §** section at the step that needs it.
   is written in the same pass by the main role: tokens per step, model, and token type, cost at
   the fetched prices, and a wall-clock estimate from BUILD on that counts every approval at 30
   minutes; its margin is ±30 % until three measured projects sit in `~/.ocpf/calibration/`.
-- Maintain the **Object Register** as a standalone artifact, `docs/1-define/ObjectRegister.md` — every object, its ID, module, source table, and R/W status — updated as objects are planned and built. Never use an object ID outside the ranges allocated at Parameter 1.2; the allocation strategy the register records is Standards Part 5.
+- Maintain the **Object Register** as a standalone artifact, `docs/1-define/ObjectRegister.md` — every object, its ID, module, source table, and R/W status — updated as objects are planned and built. Never use an object ID outside the ranges allocated at Parameter 1.2; the allocation strategy the register records is Standards Part 5. **An ID is unique per object type, not across the app** — Table 50100, Page 50100, and Codeunit 50100 coexist; every type starts at the bottom of its block and no number is skipped because another type holds it (**Ops § Object IDs**, with the per-type check the design and build gates run).
 
 ## Track Changes — the ChangeLog
 
@@ -725,6 +725,7 @@ translation files*, except Operating Rule 8 and Standards §1.7.
   the agent first confirms through the options box as *a DEV extension, to the named sandbox*, then
   does with the AL tools, sandbox only, result reported verbatim and logged as human-ordered (Ops §
   Packaging → *Publishing on explicit request*); it is never offered and never becomes the routine.
+  It covers the extension only, never the test app.
   The production deploy at Step 12 is the human's, from `docs/4-prove/Deployment.md`, always.
 - **Version numbers.** A **new app** starts at `0.0.0.1` (the Step 01 parameter default). An
   **existing app** starts from the version installed in the target environment (asked at intake,
@@ -805,8 +806,10 @@ stay on disk) — and check for a remote first, since collaborators will see the
 - Prefer the MCP build/symbol tools over ad hoc terminal calls — except the analysis compile (ALL
   ALONG → Analyzers). `al_publish` and `al_run_tests` are never offered and never run unprompted — uploading
   and testing are the human's (ALL ALONG → Packaging & Versioning; Ops § Automated Tests). A
-  developer who explicitly asks gets it: a publish only after confirming it means a DEV extension to
-  a named sandbox, a test run only against a sandbox; results verbatim, never production.
+  developer who explicitly asks for a publish gets it, only after confirming it means a DEV
+  extension to a named sandbox, results verbatim, never production. **The test app is never
+  published and `al_run_tests` is never called, even on request** — the human installs the test app
+  and runs the tests from `docs/4-prove/AutomatedTestGuide.md` (Ops § Automated Tests).
 
 ## Analyzers
 
@@ -885,7 +888,7 @@ change.
 
 ## OCPF AL Development Standards Guide
 
-The companion rules document — `ocpfALDevStandardsGuide.md`, v1.12.1.0 — holds the AL rules this
+The companion rules document — `ocpfALDevStandardsGuide.md`, v1.13.0.0 — holds the AL rules this
 runbook cites as **Standards §**, from PRE-02 onward. Its sibling, the **Operations Guide**
 (`ocpfOperationsGuide.md`, v5.1.0.0), holds the procedures, cited as **Ops §**.
 

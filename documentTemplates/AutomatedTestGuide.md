@@ -8,7 +8,7 @@
 
 # Running the automated tests for <Extension Name>
 
-**The agent does not upload or run anything in Business Central unless a developer explicitly asks it to.** It writes the tests and this guide; a
+**You install the test app and run the tests; the agent writes them.** It writes the tests, builds the test app, and writes this guide; a
 person installs the test app and runs the tests in a sandbox, then reports what the page showed. Plan on
 twenty minutes the first time (installing the test framework is most of it) and five minutes after that.
 

@@ -20,7 +20,9 @@
 
 # Part B — How
 ## B1. System identity (copied from `docs/1-define/ProjectParameters.md`)
-## B2. ID allocation (sequential, buffer left at the end — Standards §5.2)
+## B2. ID allocation (per object type from the range's first ID — Ops § Object IDs; buffer left at the top, per type — Standards §5.2)
+| Type | First ID | Count | Highest used | Left in range |
+|---|---|---|---|---|
 ## B3. Per-object specification
 ### B3.<n> <Type> <ID> "<Name>"
 | Property | Value |
@@ -47,12 +49,14 @@
 | BC concept | W1 term | <language> | Source | Status |
 |---|---|---|---|---|
 ## B11. Object Register
-| ID | Type | Name | Source table | R / RW | Enum: Extensible (true / false — why) |
+Sorted by type, then ID; an ID is unique within its type only, so the same number appears once per type that uses it (Ops § Object IDs).
+| Type | ID | Name | Source table | R / RW | Enum: Extensible (true / false — why) |
 |---|---|---|---|---|---|
 
 ## Self-check
 - [ ] Every Step 1 entity maps to at least one object, or is explicitly deferred.
 - [ ] Every ID is inside the allocated range; buffer left.
+- [ ] Per-type ID check (Ops § Object IDs): every object type starts at the range's first ID with no gaps; no number skipped because another type holds it.
 - [ ] Every source table number and `using` namespace comes from the symbol file.
 - [ ] Every field complies with Localization; obsolete fields excluded.
 - [ ] All names ≤ 30 characters; R / RW matches mutability.

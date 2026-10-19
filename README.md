@@ -256,6 +256,7 @@ you can run `/ocpf-bc:update-framework` in them anytime.
 - ~~Per-step runbook files, document templates, a human effort estimate, and per-step token and cost tracking~~ ✅ Completed — Full v4.0.0.0 / Lite v3.0.0.0, September 2026
 - ~~Token usage **estimator** — predicted tokens per model, by input, output, and cached, before a step runs~~ ✅ Completed — the AI Effort Estimate, Full v5.0.0.0 / Lite v5.0.0.0, September 2026; calibrates itself from measured projects
 - **Planned — Custom Skills.** Third-party skills for the framework: a `/ocpf-bc:` command that turns something you built or a reference you use (your own patterns guide, an extra review check, a custom step) into a skill that declares the framework version and journeys it was made for, its author, date, and version; a command to update it; a command to load one or more skills into a new or existing project from a folder, a GitHub repository, or a `skillslocation.md` list — with compatibility checks against the framework version, the journey, and the other skills loaded, and a project that will not run while an incompatible skill is loaded. Design in progress, October 2026.
+- **Planned — Agent-run automated tests.** The framework already writes your AL test codeunits and an `AutomatedTestGuide.md` that walks you through running them on the AL Test Tool page. In the future, the agent will be able to run that suite for you through the AL MCP Server, against your sandbox and only when you ask, then reads each result back into the Release Test Results and diagnoses any failure. The goal is to go from writing a test to seeing it pass without leaving the chat.
 - **Being considered**
   - Multi-developer teams on one repository: one-step setup of a clone, a shared usage record, and ID sub-ranges per branch (today: one driver per journey, Build-a-Feature on branches)
   - Answer the dashboard's open question from the dashboard page itself (today the page shows it and says where to answer)
@@ -342,6 +343,25 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 19, 2026 — Full v5.8.1.0 · Lite v5.8.1.0 · Operations Guide v5.8.1.0 · Plugin v5.8.1
+
+**Automated tests: you run them, the agent writes them.** The framework writes your AL test
+codeunits, builds the test app, and writes `docs/4-prove/AutomatedTestGuide.md` to walk you through
+installing it and running each test on the AL Test Tool page. You install the test app and run the
+tests from that guide, then send the agent the results. It diagnoses each failure, fixes it, and
+rebuilds. Having the agent publish the test app and run the suite through the AL MCP Server is now
+on the [Roadmap](#roadmap). Until then, if you ask it to run the tests, it points you to the guide.
+
+**Object IDs are allocated per object type.** Business Central keeps a separate ID space for every
+object type, so Table 50100, Page 50100, and Codeunit 50100 coexist — a range of five IDs holds five
+tables *and* five pages *and* five codeunits. The framework was treating the range as one counter
+across types and spending an ID in every type for each object it planned. A new **Ops § Object IDs**
+sets the rule — every type starts at the bottom of its block, no number is ever skipped because
+another type holds it — and a per-type check now runs at every design and build gate (Full Steps
+03 / 04 / 05, Lite Steps 2 / 3, Build-a-Feature's ID gate) and in the TDD, Design Doc, Build Plan,
+and Feature Register templates; a misallocation is renumbered before the approval is asked. The
+Standards Guide pin moves to **v1.13.0.0**, whose new §5.0 states the rule with the AL shape.
+
 ## October 16, 2026 — Full v5.8.0.0 · Lite v5.8.0.0 · Operations Guide v5.8.0.0 · Plugin v5.8.0
 
 **The journeys, redefined; an existing app gets documented first; the code gets a pre-review.** The
@@ -391,7 +411,7 @@ considered.
 **"Publish it" works when you say it.** The agent still never offers to publish and never does it
 by default, but a developer who asks is asked back, once, whether they mean a DEV-extension publish
 to a named sandbox — and on yes it happens through the AL tools, sandbox only, logged as
-human-ordered. "Run the tests" works the same way. A second-set-of-eyes review of v5.7.0.0 is
+human-ordered. A second-set-of-eyes review of v5.7.0.0 is
 applied: the automated-test guide's marketplace steps now match Microsoft's pages, and every
 "redeploy" became "the human installs".
 
@@ -534,7 +554,7 @@ carries the property explicitly either way.
 **The Standards Guide is now its own repository.** The *OCPF AL Development Standards Guide* has
 moved to [ajansari/ocpfBCALStandards](https://github.com/ajansari/ocpfBCALStandards), MIT, with its
 own README, CONTRIBUTING, CHANGELOG, and release tags, so the Business Central AL community can
-use it under any build process. This framework is one consumer: it pins a release tag (`v1.12.1.0`,
+use it under any build process. This framework is one consumer: it pins a release tag (`v1.13.0.0`,
 named in `standardsGuide/README.md`), fetches the guide at that tag into each project's
 `ocpfFramework/standardsGuide/` — same path, same filename as before, so no project file moves —
 and bundles the same release in the plugin for offline use. The guide's own text lost every

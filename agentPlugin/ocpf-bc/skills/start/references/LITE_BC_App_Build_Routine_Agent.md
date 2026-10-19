@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 5.8.0.0 (Lite, derived from the full framework v5.8.0.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
+**Version:** 5.8.1.0 (Lite, derived from the full framework v5.8.1.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
 **Last Updated:** October 16, 2026
 
 > Version history for this edition lives in `ocpfFramework/LITE_RunbookChangeLog.md`, tracked
@@ -19,9 +19,9 @@
 
 > **Companion documents, both fetched at Step 1 and shared unchanged with the full framework:**
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
->   (v1.12.1.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
+>   (v1.13.0.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.8.0.0), cited as
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.8.1.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
 >   tooling checks, analyzers, symbols, editor sync, notifications, packaging, repository hygiene,
 >   translations, fetched companions, documents, usage and cost, and the plugin.
@@ -320,10 +320,11 @@ Part B how, glossary included — using the `documents` template; produce
 pass (ALL ALONG → Usage & Cost Tracking); then run the self-check.
 
 **Outputs:** `docs/2-design/DesignDoc.md`; an **Object Register** table (inside `docs/2-design/DesignDoc.md` is fine at this
-scale — every planned object with its ID, source table, and R/W status); `docs/2-design/HumanEffortEstimate.md`;
+scale — every planned object with its ID, source table, and R/W status; IDs per type, from the range's first ID); `docs/2-design/HumanEffortEstimate.md`;
 `docs/2-design/AiEffortEstimate.md`.
 
-**Exit gate:** Human sign-off. Self-check passes with 0 blocking issues. No rule requires
+**Exit gate:** Human sign-off. Self-check passes with 0 blocking issues — including the per-type ID check
+(Ops § Object IDs): every object type starts at the range's first ID with no gaps. No rule requires
 knowledge outside the document. `docs/2-design/HumanEffortEstimate.md` exists, covers every object, names
 its baselines source, and states its assumptions. `docs/2-design/AiEffortEstimate.md` exists, covers every step
 from Step 3 on, states its margin and the 30-minute approval assumption. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
@@ -587,7 +588,7 @@ first package and before Step 6's release-candidate question. The non-negotiable
   request** — "publish it" — which the agent first confirms through the options box as *a DEV
   extension, to the named sandbox*, then does with the AL tools, sandbox only, result reported
   verbatim and logged as human-ordered (Ops § Packaging → *Publishing on explicit request*); never
-  offered, never the routine. The production deploy at Step 7 is the human's, always.
+  offered, never the routine, and never the test app. The production deploy at Step 7 is the human's, always.
 - **Never delete or overwrite any package.** Every build has its own version, so every build has
   its own file; nothing is ever tidied.
 - **Major, Minor, and Build bumps are proposed and approved** (Rule 6a), never a silent `app.json`
@@ -598,7 +599,7 @@ first package and before Step 6's release-candidate question. The non-negotiable
 ## OCPF AL Development Standards Guide
 
 Two companions are fetched at Step 1 and kept for the life of the project: the **Standards Guide**
-(`ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md`, v1.12.1.0), cited as **Standards §**, and the
+(`ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md`, v1.13.0.0), cited as **Standards §**, and the
 **Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v5.1.0.0), cited as **Ops §** and shared
 unchanged with the full framework.
 
@@ -661,8 +662,10 @@ for a remote first, since collaborators will see the files as deleted.
 - A server registered mid-session appears only next session; until then use the one-shot helper.
 - `al_publish` and `al_run_tests` are never offered and never run unprompted — uploading and
   testing are the human's (Packaging & Versioning; Ops § Automated Tests). A developer who explicitly
-  asks gets it: a publish only after confirming it means a DEV extension to a named sandbox, a test
-  run only against a sandbox; results verbatim, never production.
+  asks for a publish gets it, only after confirming it means a DEV extension to a named sandbox;
+  results verbatim, never production. **The test app is never published and `al_run_tests` is never
+  called, even on request** — the human installs the test app and runs the tests from
+  `docs/4-prove/AutomatedTestGuide.md` (Ops § Automated Tests).
 
 ## Analyzers
 
@@ -866,7 +869,7 @@ done silently.
 | Step 7 — Release for Testing | Step 12 |
 
 **Shared with the full framework, not reduced:** the OCPF AL Development Standards Guide. Both
-editions fetch the same v1.12.1.0 file and apply the same AL rules — Lite differs only in process.
+editions fetch the same v1.13.0.0 file and apply the same AL rules — Lite differs only in process.
 
 **Document count:** 4 maintained documents (`docs/2-design/DesignDoc.md`, `docs/0-project/ChangeLog.md`, `docs/4-prove/Docs.md`,
 `docs/4-prove/TestScript.md`), plus `ProjectProgress.md` (project root, both tables), Step 1's two

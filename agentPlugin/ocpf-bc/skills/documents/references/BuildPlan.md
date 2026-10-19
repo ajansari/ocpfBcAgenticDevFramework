@@ -34,5 +34,6 @@ Anything already known to differ from the TDD, with its ChangeLog issue.
 
 ## Before calling this done
 - [ ] Every Object Register entry is in exactly one batch.
+- [ ] Per-type ID check passed (Ops § Object IDs): every type starts at its block's first ID with no gaps — a table and a page that could share a number do.
 - [ ] Every table's `tabledata` grant ships in the batch that introduces the table.
 - [ ] The approval is recorded by name and date.

@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 3 — Plan & Scaffold
 
-**Runbook version:** 5.8.0.0 · Lite edition · Phase: BUILD
+**Runbook version:** 5.8.1.0 · Lite edition · Phase: BUILD
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -17,7 +17,9 @@
 - Confirm the batch plan from Operating Rule 3 (one batch, or two on a natural split) and object
   order within it (lookups before the things that reference them). **Every object's ID and file
   name is fixed in the plan (the Object Register) before anything is generated** — that's what
-  makes two batches disjoint. **This is the one approval to generate code** (Rule 6). With two
+  makes two batches disjoint. Run the per-type ID check once more here (Ops § Object IDs): a
+  table and a page that could share 50100 and don't is a wasted ID; renumber before the approval
+  and say so. **This is the one approval to generate code** (Rule 6). With two
   batches, ask once (Rule 6a; Ops § Roles → *Parallel batches*): **Generate both batches in
   parallel — one generator per batch, all at once (recommended when the tool runs sub-agents)** /
   **One batch at a time** / **Ask me before each batch**. Either run-through still stops by itself

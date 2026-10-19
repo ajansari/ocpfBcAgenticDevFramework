@@ -5,8 +5,8 @@
 *by AJ Ansari*
 
 **Last Updated:** Friday, October 17, 2026
-**Covers:** Full runbook v5.8.0.0 · Lite v5.8.0.0 · Standards Guide v1.12.1.0 · Operations Guide
-v5.8.0.0 · `ocpf-bc` agent plugin v5.8.0 · Visual Studio Code setup extension v0.0.17
+**Covers:** Full runbook v5.8.1.0 · Lite v5.8.1.0 · Standards Guide v1.13.0.0 · Operations Guide
+v5.8.1.0 · `ocpf-bc` agent plugin v5.8.1 · Visual Studio Code setup extension v0.0.17
 
 > This guide is for the person driving a project with the framework: a Business Central
 > functional consultant or an AL developer working in Visual Studio Code with Claude Code or GitHub Copilot.
@@ -497,9 +497,11 @@ with that build's file, version, and Schema Sync Mode. Tell the agent the versio
 installed; nothing counts as "on the sandbox" until you do. When the project has AL test codeunits,
 `docs/4-prove/AutomatedTestGuide.md` does the same for the test app: which Microsoft test apps to
 install once, and how to run each test one at a time on the AL Test Tool page and what to report.
-If you are a developer and you *tell* the agent to publish or to run the tests, it will — a publish
-only after it confirms you mean a DEV extension to a named sandbox, a test run only against a
-sandbox, never production. It never offers either, and neither becomes the routine.
+If you are a developer and you *tell* the agent to publish, it will — only after it confirms you
+mean a DEV extension to a named sandbox, never production. It never offers to, and it never becomes
+the routine. The test app and the test run stay with you: the agent writes the tests, the test app,
+and the guide, and you install and run them. Having the agent run them through the AL MCP Server is
+on the roadmap.
 
 **Extension Management refuses the upload: the same version cannot be uploaded twice.** A version
 already installed in a tenant can never be uploaded again, which is why the framework never builds

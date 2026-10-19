@@ -125,8 +125,8 @@ Guide versions it expects. If a local copy's major version differs, say so: the 
    repository at the tag the new framework pins** — read the pin from the framework's
    `standardsGuide/README.md` (fetch that prelude into `ocpfFramework/standardsGuide/README.md` too):
    `https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfALDevStandardsGuide.md`
-   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v5.8.0.0 the pin is
-   `v1.12.1.0`). Update each folder's `SNAPSHOT.json` (`repo`, `ref`, `sha`, `fetchedAt`). A project that
+   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v5.8.1.0 the pin is
+   `v1.13.0.0`). Update each folder's `SNAPSHOT.json` (`repo`, `ref`, `sha`, `fetchedAt`). A project that
    began before v5.2.0.0 needs **no file move**: the on-disk path and filename are unchanged; the
    refresh only changes the source recorded in `SNAPSHOT.json`. A runbook and a companion from
    different majors don't go together: the runbook cites **Ops §** and **Standards §** by number.

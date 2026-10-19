@@ -14,7 +14,7 @@ One row per resource actually used. The rows below are pre-filled with everythin
 | OCPF BC Agentic Development Framework <edition, version> | AJ Ansari, OnlyCopilotFans | MIT | The runbook, Standards Guide, Operations Guide, and document templates that drove every step |
 | BCQuality | Microsoft | MIT | Knowledge base and review checks applied at code generation and code review |
 | OCPF BC AL Patterns Library | AJ Ansari | MIT | Patterns applied: <which> |
-| AL Language extension and AL MCP Server | Microsoft | Microsoft license terms | Compile, package, symbols, diagnostics, and tests through the AL tools |
+| AL Language extension and AL MCP Server | Microsoft | Microsoft license terms | Compile, package, symbols, and diagnostics through the AL tools |
 | XLIFF Sync (module and extension) — if used | Rob van Bekkum | MIT | Translation file sync for <languages> |
 | NAB AL Tools — if used | Johannes Wikman | MIT | Translation file sync for <languages> |
 | mermaid-cli | Tyler Long and contributors | MIT | Rendered the diagrams in `docs/4-prove/Documentation.md` / `docs/4-prove/Docs.md` |

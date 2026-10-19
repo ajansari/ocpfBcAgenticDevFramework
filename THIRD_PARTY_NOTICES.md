@@ -48,7 +48,7 @@ September 14, 2026 (Node.js and PowerShell 7 on September 27, 2026). The upstrea
 - **License:** MIT — AJ Ansari (same author as this framework)
 - **Used for:** the verified reference design, templates, API reference, and false-assumptions
   table the runbooks follow when a project builds a Business Central Copilot feature. Fetched at a
-  pinned tag (`v1.0.0.0` for runbook v5.8.0.0), only on projects with such a feature, into a sibling
+  pinned tag (`v1.0.0.0` for runbook v5.8.1.0), only on projects with such a feature, into a sibling
   folder outside the project root; the snapshot keeps its `LICENSE` file. Nothing from it is
   copied into this repository or the plugin.
 
@@ -57,7 +57,7 @@ September 14, 2026 (Node.js and PowerShell 7 on September 27, 2026). The upstrea
 - **License:** MIT — AJ Ansari (same author as this framework)
 - **Used for:** the AL rules the runbooks cite as **Standards §**. Standalone since Full/Lite
   v5.2.0.0 (it was part of this repository through its version 1.11.0.0); fetched at the pinned
-  release tag (`v1.12.1.0`, named in `standardsGuide/README.md`) into each project's
+  release tag (`v1.13.0.0`, named in `standardsGuide/README.md`) into each project's
   `ocpfFramework/standardsGuide/`, and bundled at that tag in the `ocpf-bc` plugin's `al-standards`
   skill as the offline copy.
 

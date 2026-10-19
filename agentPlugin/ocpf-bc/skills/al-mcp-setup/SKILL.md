@@ -185,6 +185,7 @@ It needs a .NET 8+ SDK from Microsoft's standard installer, which also puts the 
 
 Tools that reach a live Business Central environment (downloading non-global symbols) open an
 interactive Microsoft sign-in the first time they're used in a session. That's expected. The
-framework calls `al_publish` and `al_run_tests` only when the human explicitly asks — a publish
-confirmed as a DEV extension to a sandbox, a test run against a sandbox (Ops § Packaging, Ops §
-Automated Tests) — so a sign-in for those is the human's doing.
+framework calls `al_publish` only when the human explicitly asks — a publish of the extension,
+confirmed as a DEV extension to a sandbox (Ops § Packaging) — so a sign-in for it is the human's
+doing. It does not call `al_run_tests` or publish the test app at all; the human runs the tests
+(Ops § Automated Tests).

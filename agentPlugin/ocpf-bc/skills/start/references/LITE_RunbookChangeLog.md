@@ -16,6 +16,28 @@ framework.
 
 ---
 
+## v5.8.1.0 — October 19, 2026
+
+Derived from the full framework **v5.8.1.0**; Operations Guide **v5.8.1.0**; Standards Guide **v1.13.0.0** (pin moved — new §5.0, object IDs per type); plugin **5.8.1**.
+
+- **The human runs the automated tests; agent-run tests move to the roadmap.** From AJ's testing on
+  real projects, October 2026: the agent could not get the test app published to a sandbox or its
+  tests run through `al_run_tests`. Step 6 and Rules → AL Tools now say `al_run_tests` is never
+  called, even on request, and the agent never publishes the test app. A developer who asks is
+  pointed to `AutomatedTestGuide.md` §6 (Ops § Automated Tests). This replaces v5.7.1.0's "'run the
+  tests' is honored on an explicit request".
+- **"Publish it" covers the extension only**, never the test app (Packaging & Versioning).
+- **Object IDs are allocated per object type (Ops § Object IDs).** Step 2's Part B replaces "assign
+  IDs sequentially" with the rule: the first table, the first page, the first codeunit, and the
+  first enum all take the range's first ID and each type counts up from there — never one counter
+  across types, never a number skipped because another type holds it; the buffer is left at the top,
+  per type. The Step 2 exit gate and Step 3's batch plan run the per-type check (every type starts
+  at the range's first ID with no gaps) and renumber before the approval; the Design Doc template's
+  B2 is a per-type table, B11 is **Type, then ID**, and the self-check carries the item. From AJ's
+  real runs, October 2026, where a five-ID range was treated as room for five objects.
+
+---
+
 ## v5.8.0.0 — October 16, 2026
 
 Derived from the full framework **v5.8.0.0**; Operations Guide **v5.8.0.0**; plugin **5.8.0**.

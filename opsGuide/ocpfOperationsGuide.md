@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.8.0.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
+**Version:** 5.8.1.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
 **Last Updated:** October 16, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
@@ -51,25 +51,26 @@
 2. [Intake](#ops--intake)
 3. [Roles](#ops--roles-full-only) *(the Main model in both editions; Light and Reasoning are Full only)*
 4. [Project Setup](#ops--project-setup)
-5. [AL Tools](#ops--al-tools)
-6. [Tooling Checks](#ops--tooling-checks) *(mermaid and PowerShell 7 — the same zero-install ladder)*
-7. [Analyzers](#ops--analyzers)
-8. [Symbols](#ops--symbols)
-9. [Editor Sync](#ops--editor-sync)
-10. [Notifications](#ops--notifications)
-11. [Packaging](#ops--packaging)
-12. [Repository Hygiene](#ops--repository-hygiene)
-13. [Translations](#ops--translations)
-14. [Automated Tests](#ops--automated-tests) *(the Scripts offer is Full only; running AL tests is both)*
-15. [Fetched Companions](#ops--fetched-companions)
-16. [Documents](#ops--documents)
-17. [Usage & Cost](#ops--usage--cost)
-18. [Dashboard](#ops--dashboard)
-19. [Journeys](#ops--journeys) *(Full, Lite, or Build-a-Feature — which one, and why; what to put in `requirements/` and `images/`)*
-20. [Build-a-Feature](#ops--build-a-feature) *(the quick-mod journey: no steps, six short documents in a flat `docs/`, written as the work happens)*
-21. [Existing Apps](#ops--existing-apps) *(an undocumented app is analyzed and documented into `requirements/existing/` before any journey extends it)*
-22. [Reference Sources](#ops--reference-sources)
-23. [Plugin](#ops--plugin)
+5. [Object IDs](#ops--object-ids) *(unique per object type — a table, a page, and a codeunit may all be 50100; every type starts at the bottom of the block)*
+6. [AL Tools](#ops--al-tools)
+7. [Tooling Checks](#ops--tooling-checks) *(mermaid and PowerShell 7 — the same zero-install ladder)*
+8. [Analyzers](#ops--analyzers)
+9. [Symbols](#ops--symbols)
+10. [Editor Sync](#ops--editor-sync)
+11. [Notifications](#ops--notifications)
+12. [Packaging](#ops--packaging)
+13. [Repository Hygiene](#ops--repository-hygiene)
+14. [Translations](#ops--translations)
+15. [Automated Tests](#ops--automated-tests) *(the Scripts offer is Full only; the human runs the AL tests in both)*
+16. [Fetched Companions](#ops--fetched-companions)
+17. [Documents](#ops--documents)
+18. [Usage & Cost](#ops--usage--cost)
+19. [Dashboard](#ops--dashboard)
+20. [Journeys](#ops--journeys) *(Full, Lite, or Build-a-Feature — which one, and why; what to put in `requirements/` and `images/`)*
+21. [Build-a-Feature](#ops--build-a-feature) *(the quick-mod journey: no steps, six short documents in a flat `docs/`, written as the work happens)*
+22. [Existing Apps](#ops--existing-apps) *(an undocumented app is analyzed and documented into `requirements/existing/` before any journey extends it)*
+23. [Reference Sources](#ops--reference-sources)
+24. [Plugin](#ops--plugin)
 
 ---
 
@@ -967,6 +968,53 @@ Then, in order:
 
 ---
 
+## Ops § Object IDs
+
+**An object ID is unique per object type, never across the extension.** Business Central keeps a
+separate ID space for every object type: a table, a page, a report, a codeunit, a query, an
+XMLport, an enum, an interface, a permission set, and each kind of extension object (table
+extension, page extension, report extension, enum extension, permission set extension) can all
+carry the same number at once. A range of five IDs, `50001–50005`, holds five tables **and** five
+pages **and** five reports **and** five codeunits — not five objects. Spending `50001` on a table
+and starting the first page at `50002` throws away one ID in every other type, and on real
+projects in October 2026 it emptied a range that had room for the whole app several times over.
+Standards **§5.0** states this rule with the AL shape; Part 5's "contiguous, sequential" blocks are
+blocks **per type**.
+
+**The allocation rule — every type starts at the bottom of its block.** Within a block (the
+primary range of Parameter §1.2, or a module's sub-block under Standards §5.1), the first object of
+each type takes the block's first ID, the second object of that type the next, and so on, in design
+order. Table 50100, Page 50100, Codeunit 50100, Enum 50100, and Report 50100 coexist in one app.
+**A number is never skipped for any reason** — not because another type already uses it, not to
+line a page up with its table, not to leave room "in case". The buffer Standards §5.2 asks for is
+whatever is left at the **top** of the block, counted per type: a block of 50 that holds ten tables
+and seventeen pages has forty table IDs and thirty-three page IDs in reserve.
+
+**The check — run it before every sign-off and before every generator starts.** Sort the Object
+Register by type, then by ID. For each type in each block, the IDs used must be exactly the first
+*n* IDs of that block, where *n* is how many objects of that type the block holds: the lowest
+equals the block's first ID, the highest equals the first ID plus *n* − 1, and there are no gaps
+between them. Any type whose lowest ID sits above the block's first ID, or whose IDs have a hole,
+is a misallocation: **renumber before asking for the approval, and say in the message what was
+renumbered and why** — never carry it forward as "already assigned". The TDD, the Design Doc, and
+the Build Plan carry this check in their closing lists; Full Step 03 / Step 05 and Lite Step 2 /
+Step 3 refuse to close on a failed one; Build-a-Feature applies it to the single ID it allocates.
+
+**The AL tools already think this way.** `al_getnextobjectid` takes an object *type* and returns
+the next free ID for that type within `app.json`'s ranges; it never answers "the next ID" for the
+extension as a whole. When the session has it, ask it per type. When it does not, the next ID of a
+type is the highest ID **of that type** in `src/` plus one (or the block's first ID when none
+exists), checked against the ranges — never the highest number in `src/` regardless of type.
+Symbols are read the same way: a number a *table* in the symbol file uses is unavailable to a new
+*table* only.
+
+**Permission sets cost nothing elsewhere.** The read-only and read/write permission sets
+(Standards §5.3) are objects with their own ID space, so they take the block's first two permission
+set IDs and leave every table, page, and codeunit number untouched. Nothing is "reserved" for them
+in any other type.
+
+---
+
 ## Ops § AL Tools
 
 The AL Language extension ships a standalone MCP server (`altool launchmcpserver`) exposing AL
@@ -975,10 +1023,11 @@ agent can drive them directly instead of shelling out to the compiler. Nothing r
 host spawns it, and it exits when the host tears it down. **Two of its tools no step of the
 routine calls, and the agent never offers: `al_publish` and `al_run_tests`.** Uploading a package
 is the human's, by `docs/4-prove/SandboxInstall.md`, and running tests is the human's, by
-`docs/4-prove/AutomatedTestGuide.md`. A developer who explicitly asks for either in the session
-gets it — a publish only after confirming it means a DEV extension to a named sandbox (Ops §
-Packaging → *Publishing on explicit request*), a test run only against a sandbox (Ops § Automated
-Tests); never production, never as a default, never as an offered choice. The rest — build, compile, symbols, diagnostics, object
+`docs/4-prove/AutomatedTestGuide.md`. A developer who explicitly asks for a publish in the session
+gets it — only after confirming it means a DEV extension to a named sandbox (Ops § Packaging →
+*Publishing on explicit request*); never production, never as a default, never as an offered
+choice. **`al_run_tests` is not used at all, even on request, and the test app is never published
+by the agent** (Ops § Automated Tests). The rest — build, compile, symbols, diagnostics, object
 IDs, translations — is what the agent uses them for.
 
 **When they're needed:** from the end of intake (Full §1.10 / Lite Step 1), which downloads symbols
@@ -1732,7 +1781,9 @@ not**. Report the tool's result verbatim and note in the ChangeLog that the publ
 with the version and sandbox. **It is not the "last installed version"**: that record, and the
 schema line judged against it, follow the per-tenant install the human reports from
 `SandboxInstall.md`, because the testers' sandbox may still hold an older PTE while the developer's
-DEV publish sits in another — keep the two apart in `ProjectMemory.md` (Lite: the ChangeLog). The next build goes back to the "Package built:" block and the guide;
+DEV publish sits in another — keep the two apart in `ProjectMemory.md` (Lite: the ChangeLog). **The
+request covers the extension only, never the test app** (`<Name>_Tests_<version>.app`), which the
+human installs from `AutomatedTestGuide.md` (Ops § Automated Tests). The next build goes back to the "Package built:" block and the guide;
 the request does not become the routine, and the agent does not ask "shall I publish this one
 too?". A DEV-extension publish is a developer's convenience, not a tester's install: testers and
 administrators still follow `SandboxInstall.md`, and a package that passes release testing still
@@ -2077,22 +2128,16 @@ Register.
 
 ### Running AL test codeunits — the human, from the guide
 
-**The agent never runs tests in Business Central on its own initiative**, for the same reason it
-never uploads a package unprompted: what runs on a tenant is the human's call. The AL MCP Server's
-`al_run_tests` is never offered and never part of any step's routine. **The one exception is an
-explicit instruction**: a developer who says, in this session, "run the test codeunits on the
-sandbox" gets exactly that — `codeunitId` per codeunit, `projectPath` and `environmentName` /
-`environmentType: Sandbox` named out loud before the call (never production, never from a default),
-the page's results reported verbatim, and the ChangeLog noting that the run was human-ordered. The
-run executes what is already installed: the test app must be in that sandbox at the version in
-hand — installed by the human (`AutomatedTestGuide.md` §4) or published on an explicit, confirmed
-request (Ops § Packaging) — because `al_run_tests` runs tests, it does not publish them. (The tool
-and its arguments — `codeunitId`, `testMethods`, `projectPath`, `environmentName`,
-`environmentType` — were verified in the AL MCP Server shipped with AL Language extension
-18.1.2842859 on October 15, 2026; Microsoft's *AL MCP Server* reference page does not list it, so
-re-verify with the server's own tool list on a newer release. GitHub Copilot Chat's built-in AL
-tools don't include it either — bootstrap the server, Ops § AL Tools.) It does not become the
-routine for the next round; the next round is the guide's again. When
+**The agent does not publish the test app or run tests in Business Central — not on its own
+initiative and not on request.** The AL MCP Server ships an `al_run_tests` tool (`codeunitId`,
+`testMethods`, `projectPath`, `environmentName`, `environmentType`; seen in AL Language extension
+18.1.2842859 on October 15, 2026, and not on Microsoft's *AL MCP Server* reference page), but on
+real projects in October 2026 the agent could not get the test app published to a sandbox or its
+tests run through the AL tools. So `al_run_tests` is never called, and a "publish it" request
+(Ops § Packaging) never covers the test app. **A developer who asks the agent to run the tests**
+is told plainly that running them is the human's, from `AutomatedTestGuide.md` §6, and that
+agent-run tests are on the framework's roadmap; the agent then waits for the reported results. It
+never reports a pass nobody ran. When
 AL test codeunits exist, the agent writes `docs/4-prove/AutomatedTestGuide.md` (above), builds the
 test app, and hands both over. The human installs the test framework apps once, installs the
 extension and the test app (`docs/4-prove/SandboxInstall.md`), opens the **AL Test Tool** page, and
@@ -2139,7 +2184,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v5.8.0.0 the pin is `v1.12.1.0`** (Standards Guide 1.12.1.0).
+folder as `README.md`. For runbook **v5.8.1.0 the pin is `v1.13.0.0`** (Standards Guide 1.13.0.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2316,7 +2361,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.8.0.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.8.1.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
@@ -2902,8 +2947,10 @@ language questions. AppSource is not a Build-a-Feature target; the journey says 
    `docs/FeatureRegister.md`, marked *proposed* — **then infer-and-confirm** (below) in a box whose
    text names the file — stage *Confirmed*; **allocate the ID only through the gate** — the range
    in `feature.json` (or the Full / Lite sheet) must carry a source naming the box the human
-   answered, else the range question is asked now — the AL tools' next-object-ID where the session
-   has it, else the highest in `src/` plus one; write the file whole, once, from the skeleton and
+   answered, else the range question is asked now — the next free ID **of that object type** (Ops §
+   Object IDs): the AL tools' next-object-ID for that type where the session has it, else the
+   highest ID of that type in `src/` plus one, or the range's first ID when the type has none;
+   never the highest number across types; write the file whole, once, from the skeleton and
    the Standards Guide — stage *Built*; compile with the analyzers to 0 errors / 0 warnings,
    patterns library first on any failure — stage *Compiled*; **document it now** — its section in
    `docs/Documentation.md`, its register row and data-model section completed, its ChangeLog line

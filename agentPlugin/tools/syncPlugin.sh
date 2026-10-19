@@ -19,7 +19,7 @@ plugin="$repo_root/agentPlugin/ocpf-bc"
 # tag equal to the pin named in standardsGuide/README.md. If the tag isn't reachable (offline, or not
 # pushed yet) and the sibling checkout exists, its working copy is used and a warning is printed.
 STANDARDS_REPO="ajansari/ocpfBCALStandards"
-STANDARDS_TAG="v1.12.1.0"
+STANDARDS_TAG="v1.13.0.0"
 STANDARDS_FILE="ocpfALDevStandardsGuide.md"
 standards_dst="$plugin/skills/al-standards/references/$STANDARDS_FILE"
 standards_sibling="$repo_root/../ocpfBCALStandards/$STANDARDS_FILE"

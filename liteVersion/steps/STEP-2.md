@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 2 — Write the Design Doc & Self-Check
 
-**Runbook version:** 5.8.0.0 · Lite edition · Phase: DESIGN
+**Runbook version:** 5.8.1.0 · Lite edition · Phase: DESIGN
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -35,9 +35,14 @@ be able to produce every object correctly from this document alone. Two halves, 
 **Part B — How (technical):**
 - System identity: Publisher, namespace, prefix, APIPublisher/APIGroup/APIVersion, AL runtime, BC
   minimum, object ID range(s) — all copied from the Step 1 Parameters, not restated by memory.
-  Assign IDs sequentially and **leave a handful unallocated at the end of the range** rather than
-  spending it all — those are what gap-fill work at Step 6 draws on (**Standards §5.2**; Lite
-  skips the full framework's module sub-blocks, but not the buffer).
+  **IDs are unique per object type** (**Ops § Object IDs**): the first table, the first page, the
+  first codeunit, and the first enum all take the range's first ID, and each type counts up from
+  there in design order — never one counter across types, never a number skipped because another
+  type holds it. A range of five IDs holds five tables *and* five pages *and* five codeunits.
+  **Leave a handful unallocated at the top of the range, per type**, rather than spending it all —
+  those are what gap-fill work at Step 6 draws on (**Standards §5.2**; Lite skips the full
+  framework's module sub-blocks, but not the buffer). Before the sign-off, run the per-type check:
+  for every type, the IDs used are exactly the range's first *n*; renumber and say so if not.
 - **Per-object spec** — for every object: ID, type, source table name *and* verified source table
   number, `PageType`, `APIGroup`, `EntityName`, `EntitySetName`, `ODataKeyFields = SystemId`,
   `DelayedInsert = true` on every API page, and — on a read-only page — `Editable = false` with
@@ -153,10 +158,11 @@ templates; Ops § Documents):
   in `ProjectProgress.md`'s usage table, step by step, next to this estimate.
 
 **Outputs:** `docs/2-design/DesignDoc.md`; an **Object Register** table (inside `docs/2-design/DesignDoc.md` is fine at this
-scale — every planned object with its ID, source table, and R/W status); `docs/2-design/HumanEffortEstimate.md`;
+scale — every planned object with its ID, source table, and R/W status; IDs per type, from the range's first ID); `docs/2-design/HumanEffortEstimate.md`;
 `docs/2-design/AiEffortEstimate.md`.
 
-**Exit gate:** Human sign-off. Self-check passes with 0 blocking issues. No rule requires
+**Exit gate:** Human sign-off. Self-check passes with 0 blocking issues — including the per-type ID check
+(Ops § Object IDs): every object type starts at the range's first ID with no gaps. No rule requires
 knowledge outside the document. `docs/2-design/HumanEffortEstimate.md` exists, covers every object, names
 its baselines source, and states its assumptions. `docs/2-design/AiEffortEstimate.md` exists, covers every step
 from Step 3 on, states its margin and the 30-minute approval assumption. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).

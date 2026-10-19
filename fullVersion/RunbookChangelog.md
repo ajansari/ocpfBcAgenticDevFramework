@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.8.0.0**, the Standards Guide is at **v1.12.1.0**, the Operations Guide at **v5.8.0.0**, and Lite at **v5.8.0.0** — but
+**v5.8.1.0**, the Standards Guide is at **v1.13.0.0**, the Operations Guide at **v5.8.1.0**, and Lite at **v5.8.1.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -21,6 +21,52 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v5.8.1.0 — October 19, 2026
+
+**The human runs the automated tests; agent-run tests move to the roadmap. Object IDs are
+allocated per object type.** Lite **v5.8.1.0**, Operations Guide **v5.8.1.0**, Standards Guide
+**v1.13.0.0** (pin moved — new §5.0), plugin **5.8.1**. From AJ's testing on real projects, October 2026: the
+agent writes the AL test codeunits, the test app, and `AutomatedTestGuide.md` reliably, but it
+could not get the test app published to a sandbox or its tests run through the AL MCP Server's
+`al_run_tests`; and it was spending object IDs as if a number used by a table were unavailable to a
+page — one counter across types — emptying a range that had room for the whole app several times
+over.
+
+- **Standards Guide pin moved to `v1.13.0.0`** — new **§5.0 An Object ID Is Unique Per Object Type**, with the AL shape, the sort-by-type check, and the per-type `al_getnextobjectid` rule; §5.1–§5.3 say "per type". Ops § Object IDs cites it.
+- **Ops § Object IDs (new) — an ID is unique per object type, never across the extension.** Table
+  50100, Page 50100, Codeunit 50100, Enum 50100, and Report 50100 coexist; a range of five IDs
+  holds five tables *and* five pages *and* five codeunits. Every type starts at the bottom of its
+  block (the primary range, or a module sub-block under Standards §5.1) and counts up in design
+  order; a number is never skipped because another type holds it, nor to line a page up with its
+  table; the §5.2 buffer is what is left at the top, counted per type. **The check:** sort the
+  register by type then ID — for every type in every block the IDs used are exactly the block's
+  first *n* (lowest = block start, no gaps); a miss is renumbered before the approval is asked, and
+  said out loud. `al_getnextobjectid` is asked per type; without it, the next ID of a type is the
+  highest of that type in `src/` plus one, never the highest across types. Permission sets have
+  their own ID space and reserve nothing elsewhere.
+- **Where the check runs:** Step 03's module grouping and exit gate, Step 04's checklist, Step 05's
+  Build Plan (once more, before the generators write the numbers), and the TDD, Build Plan, and
+  Object Register templates — the register and the TDD §12 are now **Type, then ID**, sorted that
+  way, with the note that a number appears once per type that uses it. Step 01 §1.2's rule says it,
+  and the permission-set row no longer "reserves ≥ 2 IDs inside the primary range". ALL ALONG →
+  Document says it beside the register.
+
+- **Ops § Automated Tests — `al_run_tests` is never called, even on request, and the agent never
+  publishes the test app.** This replaces v5.7.1.0's "'Run the tests' works the same way". A
+  developer who asks for a run is told plainly that running the tests is the human's, from the
+  guide's §6, and that agent-run tests are on the roadmap. The agent then waits for the reported
+  results and never reports a pass nobody ran. Step 11, ALL ALONG → AL Tools, and Ops § AL Tools
+  say the same.
+- **Ops § Packaging → *Publishing on explicit request* covers the extension only**, never
+  `<Name>_Tests_<version>.app`. Same in ALL ALONG → Packaging & Versioning.
+- **`AutomatedTestGuide.md` template** opens with "You install the test app and run the tests; the
+  agent writes them." The **Acknowledgements** template's AL tools row no longer lists tests.
+- **README:** the Roadmap gains *Planned — Agent-run automated tests*; the v5.7.1.0 release note no
+  longer says the agent runs the tests. The user guide, the site, and the multilanguage overview
+  are worded to match.
 
 ---
 

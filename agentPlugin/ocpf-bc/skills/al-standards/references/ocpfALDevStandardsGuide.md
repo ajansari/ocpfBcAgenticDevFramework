@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans — Business Central AL Development Standards
 
-**Version:** 1.12.1.0
-**Last Updated:** October 15, 2026
+**Version:** 1.13.0.0
+**Last Updated:** October 19, 2026
 
 > **Audience:** Human developers and agentic (AI) developers building Business Central AL
 > extensions — **Per-Tenant Extensions (PTEs) and AppSource apps alike**. Every Part applies to
@@ -627,17 +627,51 @@ name or a clarifying noun. Never use the bare keyword.
 
 ## Part 5 — Module & ID Allocation Strategy
 
+### 5.0 An Object ID Is Unique Per Object Type
+
+Business Central keeps a separate ID space for every object type. A table, a page, a report, a
+codeunit, a query, an XMLport, an enum, an interface, a permission set, and each kind of extension
+object (table extension, page extension, report extension, enum extension, permission set
+extension) can all carry the same number in one extension:
+
+```al
+table 50100 "OCPF Vehicle" { }
+page 50100 "OCPF Vehicle List" { }
+page 50101 "OCPF Vehicle Card" { }
+codeunit 50100 "OCPF Vehicle Mgt." { }
+enum 50100 "OCPF Vehicle Status" { }
+permissionset 50100 "OCPF VEH, READ" { }
+```
+
+A range of five IDs, `50001–50005`, therefore holds five tables **and** five pages **and** five
+codeunits — not five objects. Treating the range as one counter across types (table 50001, first
+page 50002, first report 50004) throws away an ID in every other type for each object planned.
+
+**Allocate per type, from the bottom of the block.** Within a block (the extension's range, or a
+module sub-block under §5.1), the first object of each type takes the block's first ID, the second
+object of that type the next, and so on, in design order. A number is never skipped because another
+type already uses it, and never to line a page up with its table.
+
+**Check before sign-off.** Sort the Object Register by type, then ID. For each type in each block,
+the IDs used must be exactly the block's first *n* — the lowest equals the block's first ID, with
+no gaps. Anything else is a misallocation: renumber before the design is approved.
+
+**Tooling.** The AL Language extension's *next object ID* tool (`al_getnextobjectid`) takes an
+object type; ask it per type. Without it, the next ID of a type is the highest ID of that type in
+`src/` plus one (or the block's first ID when the type has none) — never the highest number in
+`src/` across types.
+
 ### 5.1 Group Objects into Logical Modules Before Allocation
 
 Before assigning any object IDs:
 
 1. List all planned objects.
 2. Group them into functional modules (e.g., CoreFinancial, MasterData, Sales, Purchasing).
-3. Assign contiguous ID blocks to each module.
+3. Assign contiguous ID blocks to each module; inside a block every object type counts from the block's first ID (§5.0).
 4. Reserve growth buffers (minimum 20% of each block unallocated).
 5. Reserve a tail block at the end of the overall range for cross-module additions.
 
-**Never scatter IDs randomly.** Grouped, sequential IDs keep the Object Register readable and
+**Never scatter IDs randomly.** Grouped, sequential IDs **per type** keep the Object Register readable and
 growth predictable.
 
 ### 5.2 Growth Buffer Planning
@@ -648,7 +682,8 @@ growth predictable.
 | 50–150 objects | 25–30% buffer |
 | 150+ objects | 20–25% buffer + tail block |
 
-For each module block, leave at least 5–6 IDs unallocated at the end for additions within that
+For each module block, leave at least 5–6 IDs unallocated at the top **for the type with the most
+objects**; every other type has more headroom by construction (§5.0). They are for additions within that
 module. These reserved IDs are also what later gap-fill work draws on, so they are not decorative
 — spending them early leaves nothing for the fixes that follow.
 
@@ -660,6 +695,9 @@ data must deliver:
 - A **read-only** permission set granting `X` (Execute/Read) on all pages.
 - A **read/write** permission set that includes the read-only set, plus write permissions on all
   editable pages.
+
+Permission sets have their own ID space (§5.0): they take the block's first two permission set IDs
+and reserve nothing in any other type.
 
 Both must be assigned IDs from the allocated range before development begins, and named per
 §5.4.
