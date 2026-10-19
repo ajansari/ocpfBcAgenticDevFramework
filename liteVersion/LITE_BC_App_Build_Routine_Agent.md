@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 5.8.1.0 (Lite, derived from the full framework v5.8.1.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
-**Last Updated:** October 16, 2026
+**Version:** 5.8.2.0 (Lite, derived from the full framework v5.8.2.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
+**Last Updated:** October 19, 2026
 
 > Version history for this edition lives in `ocpfFramework/LITE_RunbookChangeLog.md`, tracked
 > independently of the full framework's own `fullVersion/RunbookChangelog.md` (though a change to
@@ -19,9 +19,9 @@
 
 > **Companion documents, both fetched at Step 1 and shared unchanged with the full framework:**
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
->   (v1.13.0.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
+>   (v1.13.1.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.8.1.0), cited as
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.8.2.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
 >   tooling checks, analyzers, symbols, editor sync, notifications, packaging, repository hygiene,
 >   translations, fetched companions, documents, usage and cost, and the plugin.
@@ -348,7 +348,7 @@ ask before each), and get one approval for it.
 
 **Outputs:** Batch plan, project scaffold, the pre-flight checklist.
 
-**Exit gate:** Batch plan approved with every ID and file name fixed (and, with two batches, the
+**Exit gate:** Batch plan approved with every ID and file name fixed and the per-type ID check passed (Ops § Object IDs) (and, with two batches, the
 generation mode recorded);
 scaffold structurally complete, analyzer settings and (for AppSource) `AppSourceCop.json` in place per Ops § Analyzers
 (not compiled — Operating Rule 4); pre-flight checklist ready. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
@@ -599,8 +599,8 @@ first package and before Step 6's release-candidate question. The non-negotiable
 ## OCPF AL Development Standards Guide
 
 Two companions are fetched at Step 1 and kept for the life of the project: the **Standards Guide**
-(`ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md`, v1.13.0.0), cited as **Standards §**, and the
-**Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v5.1.0.0), cited as **Ops §** and shared
+(`ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md`, v1.13.1.0), cited as **Standards §**, and the
+**Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v5.8.2.0), cited as **Ops §** and shared
 unchanged with the full framework.
 
 **Full procedure: Ops § Fetched Companions** — fetching, refreshing, the plugin's offline copies,
@@ -869,7 +869,7 @@ done silently.
 | Step 7 — Release for Testing | Step 12 |
 
 **Shared with the full framework, not reduced:** the OCPF AL Development Standards Guide. Both
-editions fetch the same v1.13.0.0 file and apply the same AL rules — Lite differs only in process.
+editions fetch the same v1.13.1.0 file and apply the same AL rules — Lite differs only in process.
 
 **Document count:** 4 maintained documents (`docs/2-design/DesignDoc.md`, `docs/0-project/ChangeLog.md`, `docs/4-prove/Docs.md`,
 `docs/4-prove/TestScript.md`), plus `ProjectProgress.md` (project root, both tables), Step 1's two

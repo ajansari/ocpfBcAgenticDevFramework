@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.8.1.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
-**Last Updated:** October 16, 2026
+**Version:** 5.8.2.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
+**Last Updated:** October 19, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
 > `fullVersion/BC_App_Build_Routine_Agent.md` and `liteVersion/LITE_BC_App_Build_Routine_Agent.md`.
@@ -972,7 +972,7 @@ Then, in order:
 
 **An object ID is unique per object type, never across the extension.** Business Central keeps a
 separate ID space for every object type: a table, a page, a report, a codeunit, a query, an
-XMLport, an enum, an interface, a permission set, and each kind of extension object (table
+XMLport, an enum, a permission set, and each kind of extension object (table
 extension, page extension, report extension, enum extension, permission set extension) can all
 carry the same number at once. A range of five IDs, `50001–50005`, holds five tables **and** five
 pages **and** five reports **and** five codeunits — not five objects. Spending `50001` on a table
@@ -998,7 +998,7 @@ between them. Any type whose lowest ID sits above the block's first ID, or whose
 is a misallocation: **renumber before asking for the approval, and say in the message what was
 renumbered and why** — never carry it forward as "already assigned". The TDD, the Design Doc, and
 the Build Plan carry this check in their closing lists; Full Step 03 / Step 05 and Lite Step 2 /
-Step 3 refuse to close on a failed one; Build-a-Feature applies it to the single ID it allocates.
+Step 3 name it in their exit gates and refuse to close on a failed one; Build-a-Feature applies it to the single ID it allocates.
 
 **The AL tools already think this way.** `al_getnextobjectid` takes an object *type* and returns
 the next free ID for that type within `app.json`'s ranges; it never answers "the next ID" for the
@@ -2135,7 +2135,7 @@ initiative and not on request.** The AL MCP Server ships an `al_run_tests` tool 
 real projects in October 2026 the agent could not get the test app published to a sandbox or its
 tests run through the AL tools. So `al_run_tests` is never called, and a "publish it" request
 (Ops § Packaging) never covers the test app. **A developer who asks the agent to run the tests**
-is told plainly that running them is the human's, from `AutomatedTestGuide.md` §6, and that
+is told plainly that running them is the human's, from `AutomatedTestGuide.md` §7, and that
 agent-run tests are on the framework's roadmap; the agent then waits for the reported results. It
 never reports a pass nobody ran. When
 AL test codeunits exist, the agent writes `docs/4-prove/AutomatedTestGuide.md` (above), builds the
@@ -2144,7 +2144,7 @@ extension and the test app (`docs/4-prove/SandboxInstall.md`), opens the **AL Te
 runs the rows of the guide's §6 one at a time — **Run Tests → Active Line** — reporting each row's
 **Result** and, on a Failure, the full **Error Message** text (message and call stack).
 
-**`environmentType` is never `Production`.** Tests write data; Microsoft refuses to run them in a
+**Tests never run in a production environment.** Tests write data; Microsoft refuses to run them in a
 production environment and the guide says so. The guide also carries Microsoft's sandbox limits:
 no test method over fifteen minutes, and not more than an hour or two of test runs a day.
 
@@ -2184,7 +2184,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v5.8.1.0 the pin is `v1.13.0.0`** (Standards Guide 1.13.0.0).
+folder as `README.md`. For runbook **v5.8.2.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2361,7 +2361,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.8.1.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.8.2.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**

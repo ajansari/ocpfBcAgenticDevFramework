@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans — Business Central AL Development Standards
 
-**Version:** 1.13.0.0
+**Version:** 1.13.1.0
 **Last Updated:** October 19, 2026
 
 > **Audience:** Human developers and agentic (AI) developers building Business Central AL
@@ -630,7 +630,7 @@ name or a clarifying noun. Never use the bare keyword.
 ### 5.0 An Object ID Is Unique Per Object Type
 
 Business Central keeps a separate ID space for every object type. A table, a page, a report, a
-codeunit, a query, an XMLport, an enum, an interface, a permission set, and each kind of extension
+codeunit, a query, an XMLport, an enum, a permission set, and each kind of extension
 object (table extension, page extension, report extension, enum extension, permission set
 extension) can all carry the same number in one extension:
 
@@ -640,7 +640,7 @@ page 50100 "OCPF Vehicle List" { }
 page 50101 "OCPF Vehicle Card" { }
 codeunit 50100 "OCPF Vehicle Mgt." { }
 enum 50100 "OCPF Vehicle Status" { }
-permissionset 50100 "OCPF VEH, READ" { }
+permissionset 50100 "OCPF VEH, VIEW" { }
 ```
 
 A range of five IDs, `50001–50005`, therefore holds five tables **and** five pages **and** five

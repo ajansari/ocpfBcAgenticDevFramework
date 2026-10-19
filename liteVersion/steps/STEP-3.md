@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 3 — Plan & Scaffold
 
-**Runbook version:** 5.8.1.0 · Lite edition · Phase: BUILD
+**Runbook version:** 5.8.2.0 · Lite edition · Phase: BUILD
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -74,7 +74,7 @@
 
 **Outputs:** Batch plan, project scaffold, the pre-flight checklist.
 
-**Exit gate:** Batch plan approved with every ID and file name fixed (and, with two batches, the
+**Exit gate:** Batch plan approved with every ID and file name fixed and the per-type ID check passed (Ops § Object IDs) (and, with two batches, the
 generation mode recorded);
 scaffold structurally complete, analyzer settings and (for AppSource) `AppSourceCop.json` in place per Ops § Analyzers
 (not compiled — Operating Rule 4); pre-flight checklist ready. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).

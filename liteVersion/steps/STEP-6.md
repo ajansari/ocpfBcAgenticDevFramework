@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 6 — Review, Gap-Check & Finalize Docs
 
-**Runbook version:** 5.8.1.0 · Lite edition · Phase: PROVE
+**Runbook version:** 5.8.2.0 · Lite edition · Phase: PROVE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -100,7 +100,7 @@
   and run §6's rows one at a time with **Run Tests → Active Line**, reporting each **Result** and
   the full **Error Message** on a Failure. It assumes the reader has never seen the page. **The
   agent does not publish the test app or run the tests, even on request** — `al_run_tests` is never
-  called; a developer who asks is pointed to the guide's §6 (Ops § Automated Tests) — and never
+  called; a developer who asks is pointed to the guide's §7 (Ops § Automated Tests) — and never
   reports a pass nobody ran: a reported Failure fails this step like a compiler error — diagnose, fix, rebuild both
   packages at the next version, revise the guide, and the human runs again.
 - **Write `docs/0-project/Acknowledgements.md`** from its template — one row per resource actually

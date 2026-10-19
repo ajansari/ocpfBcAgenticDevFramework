@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.8.1.0**, the Standards Guide is at **v1.13.0.0**, the Operations Guide at **v5.8.1.0**, and Lite at **v5.8.1.0** — but
+**v5.8.2.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v5.8.2.0**, and Lite at **v5.8.2.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -24,7 +24,26 @@ specifically to keep a superseded decision on record — see the runbook's ALL A
 
 ---
 
-## v5.8.1.0 — October 19, 2026
+## v5.8.2.0 — October 19, 2026
+
+**Same-day review pass on 5.8.1.0.** Lite **v5.8.2.0**, Operations Guide **v5.8.2.0**, Standards
+Guide **v1.13.1.0** (pin moved), plugin **5.8.2**. A second-set-of-eyes review of 5.8.1.0, applied:
+
+- **Standards Guide pin moved to `v1.13.1.0`** — §5.0 no longer lists `interface` among the types
+  with an ID space (an AL interface is declared by name only), and its example permission set is
+  `"OCPF VEH, VIEW"`, the §5.4 name shape. Ops § Object IDs drops `interface` the same way.
+- **Full Step 05's and Lite Step 3's exit gates name the per-type ID check**, as Ops § Object IDs
+  said they did; the Ops sentence now says "name it in their exit gates".
+- **"Run the tests" requests point at `AutomatedTestGuide.md` §7**, the one-at-a-time procedure,
+  not §6, the table of tests (Step 11, Lite Step 6, Ops § Automated Tests). Ops' "`environmentType`
+  is never `Production`" — an argument of a tool the agent no longer calls — is now "Tests never run
+  in a production environment".
+- Version and date stamps brought current: both runbooks' Standards section cited the Operations
+  Guide as v5.1.0.0; the user guide's components table and the README's `standardsGuide/README.md`
+  row carried the previous versions; *Last Updated* lines said October 16 / 17.
+
+---
+
 
 **The human runs the automated tests; agent-run tests move to the roadmap. Object IDs are
 allocated per object type.** Lite **v5.8.1.0**, Operations Guide **v5.8.1.0**, Standards Guide

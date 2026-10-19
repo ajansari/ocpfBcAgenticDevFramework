@@ -4,7 +4,13 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
-## 5.8.1 — October 19, 2026
+## 5.8.2 — October 19, 2026
+
+**Bundles:** full runbook v5.8.2.0, Lite v5.8.2.0, **Standards Guide v1.13.1.0** (pin moved — §5.0
+corrections: no `interface` in the ID-space list, example permission set named per §5.4),
+Operations Guide v5.8.2.0. Same-day review pass on 5.8.1; the `al-standards` and `update-framework`
+skill text carry the new pin; both manifests' version.
+
 
 **Bundles:** full runbook v5.8.1.0, Lite v5.8.1.0, **Standards Guide v1.13.0.0** (pin moved — new §5.0, object IDs per type),
 Operations Guide v5.8.1.0. The `al-mcp-setup` skill text, two document templates, both manifests'

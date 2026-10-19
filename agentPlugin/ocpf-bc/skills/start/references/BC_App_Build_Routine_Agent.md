@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.8.1.0
-**Last Updated:** October 16, 2026
+**Version:** 5.8.2.0
+**Last Updated:** October 19, 2026
 
 > Version history for this framework lives in `ocpfFramework/RunbookChangelog.md`, tracked
 > independently of any one project built with it — check there for what changed between the version
@@ -16,9 +16,9 @@
 >
 > **Companion documents, both fetched at PRE-01 and kept for the life of the project:**
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
->   (v1.13.0.0): the AL *rules* this sequence applies (Parts 1–11, Appendices A–E), cited below as
+>   (v1.13.1.0): the AL *rules* this sequence applies (Parts 1–11, Appendices A–E), cited below as
 >   **Standards §**.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.8.1.0): the *procedures*
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.8.2.0): the *procedures*
 >   this sequence uses — asking, intake, project setup, the AL tools, tooling checks, analyzers,
 >   symbols, editor sync, notifications, packaging, repository hygiene, translations, fetched
 >   companions, documents, usage and cost, and the plugin — cited below as **Ops §**. Both editions
@@ -370,7 +370,7 @@ the batches run (all in parallel — recommended — / one at a time / ask befor
 
 **Outputs:** `docs/3-build/BuildPlan.md` — the ordered batch plan, written from `ocpfFramework/documentTemplates/BuildPlan.md` (batches, the objects in each with their fixed IDs and `src/` file paths, their order and why, the batch mode chosen, the approval recorded by name); project scaffold with `src/`; pre-flight validation script/checklist (both passes); `tooling.pwsh` recorded in `ocpfFramework/framework.json` when translation tooling was agreed.
 
-**Exit gate:** Batch order and the batch mode (parallel / one at a time / ask per batch) agreed with the human; every object in the plan has its ID and its `src/` file path, and no two batches share either; scaffold is structurally complete (`app.json` fields populated, dependencies declared, `src/` and its module folders created, analyzer settings and — for AppSource — `AppSourceCop.json` in place per Ops § Analyzers — not compiled, per Operating Rule 4); pre-flight checks ready; this step's usage rows written (Operating Rule 11).
+**Exit gate:** Batch order and the batch mode (parallel / one at a time / ask per batch) agreed with the human; every object in the plan has its ID and its `src/` file path, the per-type ID check passed (Ops § Object IDs), and no two batches share either; scaffold is structurally complete (`app.json` fields populated, dependencies declared, `src/` and its module folders created, analyzer settings and — for AppSource — `AppSourceCop.json` in place per Ops § Analyzers — not compiled, per Operating Rule 4); pre-flight checks ready; this step's usage rows written (Operating Rule 11).
 
 ## 06 — Code Generation
 
@@ -888,9 +888,9 @@ change.
 
 ## OCPF AL Development Standards Guide
 
-The companion rules document — `ocpfALDevStandardsGuide.md`, v1.13.0.0 — holds the AL rules this
+The companion rules document — `ocpfALDevStandardsGuide.md`, v1.13.1.0 — holds the AL rules this
 runbook cites as **Standards §**, from PRE-02 onward. Its sibling, the **Operations Guide**
-(`ocpfOperationsGuide.md`, v5.1.0.0), holds the procedures, cited as **Ops §**.
+(`ocpfOperationsGuide.md`, v5.8.2.0), holds the procedures, cited as **Ops §**.
 
 **Fetch both at PRE-01, before anything else needs them** — `ocpfFramework/standardsGuide/` and `ocpfFramework/opsGuide/` in
 this project's root, both always gitignored — **and, in the same fetch, this runbook's step files

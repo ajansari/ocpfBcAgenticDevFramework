@@ -16,7 +16,16 @@ framework.
 
 ---
 
-## v5.8.1.0 — October 19, 2026
+## v5.8.2.0 — October 19, 2026
+
+Derived from the full framework **v5.8.2.0**; Operations Guide **v5.8.2.0**; Standards Guide
+**v1.13.1.0** (pin moved — §5.0 corrections); plugin **5.8.2**. Same-day review pass on 5.8.1.0:
+Step 3's exit gate names the per-type ID check; Step 6 points a "run the tests" request at the
+guide's §7 (the procedure), not §6; the core's Standards section cited the Operations Guide as
+v5.1.0.0 and now says v5.8.2.0; date stamps current.
+
+---
+
 
 Derived from the full framework **v5.8.1.0**; Operations Guide **v5.8.1.0**; Standards Guide **v1.13.0.0** (pin moved — new §5.0, object IDs per type); plugin **5.8.1**.
 
