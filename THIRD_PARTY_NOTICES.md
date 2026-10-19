@@ -48,7 +48,7 @@ September 14, 2026 (Node.js and PowerShell 7 on September 27, 2026). The upstrea
 - **License:** MIT — AJ Ansari (same author as this framework)
 - **Used for:** the verified reference design, templates, API reference, and false-assumptions
   table the runbooks follow when a project builds a Business Central Copilot feature. Fetched at a
-  pinned tag (`v1.0.0.0` for runbook v5.8.2.0), only on projects with such a feature, into a sibling
+  pinned tag (`v1.0.0.0` for runbook v5.9.0.0), only on projects with such a feature, into a sibling
   folder outside the project root; the snapshot keeps its `LICENSE` file. Nothing from it is
   copied into this repository or the plugin.
 
@@ -271,6 +271,14 @@ only to identify the tool the project runs in; the framework is free and sells n
 - **Used for:** rendering Mermaid diagrams to prove they parse (runbook Step 11 / Lite Step 6, and
   this repository's schematics), run via `npx @mermaid-js/mermaid-cli`.
 
+### marked
+- **Source:** <https://github.com/markedjs/marked>
+- **License:** MIT — Copyright (c) 2018+, MarkedJS; Copyright (c) 2011-2018, Christopher Jeffrey
+- **Used for:** converting a project's Markdown documents to HTML when the help site is built
+  (Ops § Help Site; the `html-docs` skill's `build.py` runs `npx --yes marked@12.0.2`, with
+  nothing installed on `PATH`). The Python `markdown` package (BSD-3-Clause, Manfred Stienstra,
+  Yuri Takhteyev, Waylan Limberg) is the fallback when it happens to be importable.
+
 ### AZ AL Dev Tools / AL Code Outline
 - **Source:** <https://github.com/anzwdev/al-code-outline>
 - **License:** MIT — Copyright (c) 2017 Andrzej Zwierzchowski
@@ -315,6 +323,33 @@ only to identify the tool the project runs in; the framework is free and sells n
   under your own Microsoft license. This repository contains none of them.
 
 ---
+
+## Loaded by a project's help site from public CDNs (never redistributed here)
+
+The help site the `html-docs` skill builds (`docs/index.html` in *your* project; Ops § Help Site)
+loads these at view time from their publishers' CDNs. Nothing is copied into this repository or
+into the built page; each project's page references them by URL.
+
+### Mermaid
+- **Source:** <https://github.com/mermaid-js/mermaid>
+- **License:** MIT — Copyright (c) 2014-2022 Knut Sveidqvist
+- **Used for:** drawing the schema diagram in the browser, loaded from cdnjs
+  (`mermaid/11.4.0/mermaid.min.js`) by the page template.
+
+### Inter, Archivo, and JetBrains Mono (Google Fonts)
+- **Source:** <https://fonts.google.com/specimen/Inter> (Rasmus Andersson),
+  <https://fonts.google.com/specimen/Archivo> (Omnibus-Type),
+  <https://fonts.google.com/specimen/JetBrains+Mono> (JetBrains)
+- **License:** SIL Open Font License 1.1, each
+- **Used for:** the page's text, display, and code faces, loaded from `fonts.googleapis.com` by
+  the page template; the system font stack takes over when the CDN is unreachable.
+
+### GitHub mark (Octicons)
+- **Source:** <https://github.com/primer/octicons> — the `mark-github` icon
+- **License:** MIT — Copyright (c) GitHub Inc.
+- **Used for:** the *View on GitHub* button of the help site template, embedded as an inline SVG
+  path in `agentPlugin/ocpf-bc/skills/html-docs/templates/template.html`; GitHub's logo usage
+  guidelines govern the mark itself.
 
 ## Trademarks
 

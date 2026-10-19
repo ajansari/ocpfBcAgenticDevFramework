@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.8.2.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v5.8.2.0**, and Lite at **v5.8.2.0** — but
+**v5.9.0.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v5.9.0.0**, and Lite at **v5.9.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -21,6 +21,61 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v5.9.0.0 — October 19, 2026
+
+**The help site.** Lite **v5.9.0.0**, Operations Guide **v5.9.0.0**, Standards Guide **v1.13.1.0**
+(unchanged), plugin **5.9.0**. From AJ's work on the OnlyBCFans Google Address Validator (October
+2026), whose hand-built help page became the template:
+
+- **Step 11 offers the help site** — a polished HTML documentation and support page built from the
+  step's own documents — once the five documents exist and before the release-candidate question:
+  *Build the help site now (recommended)* / *Not now — ask me again at the hand-off* / *No help site
+  for this project*, the answer recorded in the ChangeLog either way. One file, `docs/index.html`,
+  with tabs for the User Guide, the Documentation, an **FAQ**, the Deployment guide, and any other
+  guide; the app icon, a download button for the package, *Get support* and *View on GitHub* links,
+  an optional banner and publisher logo, the Mermaid schema diagram drawn in the browser, and the
+  human's screenshots. Deep links, print, no server. The Markdown stays the record; the site is
+  rebuilt (`python3 docs/build.py`) whenever a source document changes — a Step 12 fix included —
+  before that step closes. Outputs and exit gate name it. New **Ops § Help Site** holds the
+  procedure, the file table, and the rules; the plugin's new `html-docs` skill
+  (`/ocpf-bc:html-docs`) carries the page template, the build script, the screenshot procedure, and
+  the GitHub Pages steps. On a project without the plugin the same files are copied from
+  `agentPlugin/ocpf-bc/skills/html-docs/templates/`.
+- **New document: `FAQ.md`** (template in `documentTemplates/`, written to `docs/4-prove/FAQ.md`
+  when the FAQ tab is chosen, or on request): one `##` per topic, one `###` per question, answered
+  only from the User Guide, the Documentation, the Deployment guide, the test script's red-team
+  cases, the ChangeLog's findings, and the questions the human has actually heard. Nothing invented.
+  On the site each question is a collapsible entry.
+- **Screenshots, asked for and renamed.** The skill asks early whether the human will provide
+  screenshots, says where (`docs/screenshots/`, any file name) and what (one per thing the User
+  Guide tells the reader to open, click, or look at), looks at every file, proposes a name in the
+  shape `<page-or-object>-<what-is-happening>.png`, renames after one approval of the whole list, and
+  places each in the Markdown where the guide talks about it.
+- **The one exception to Rule 9's "nothing loose in `docs/`":** the site's files (`index.html`,
+  `site.json`, `template.html`, `build.py`, `.nojekyll`, `assets/`, `screenshots/`) sit at `docs/`'
+  root because GitHub Pages' *Deploy from a branch* publishes only the root or `/docs` — the
+  reference project's ChangeLog records trying `docs/help/` and a root `help/` first. Ops § Documents and Ops § Repository Hygiene
+  say so; all of it is tracked.
+- **GitHub Pages and the Help link.** The closing message gives the human the Pages steps (Settings
+  → Pages → Deploy from a branch → `main` / `/docs`, the URL, the private-repository plan caveat), and
+  the agent offers to set `app.json` → `help` to the site's URL — Business Central's Extension
+  Management shows it as the extension's Help; a package change, so the next build's Revision and
+  its ChangeLog entry name it. The agent never changes a repository setting or pushes.
+- **The build reviews itself.** `build.py` prints every repository path, internal review code
+  (`OQ-`, `GA-`, `CR-`, `FR-`), design-document reference, build-status remark, unbalanced HTML
+  panel, and missing image the page would carry, and the agent acts on each — fixing the Markdown
+  when the sentence is wrong for any reader, a `substitutions` pair in `site.json` only when the
+  repository must keep the text. Two lessons from the reference build are built in: marked's piped
+  output is cut at 64 KB (the script goes through files), and an unclosed tag in one tab blanks
+  every tab after it (the balance check).
+- **Build-a-Feature never offers it** (Ops § Build-a-Feature's never-list; the skill's too); a
+  human who asks on a feature project gets it on request.
+- Both cores name the skill among the plugin's; the `documents` skill writes the FAQ; the plugin
+  manifests' description says so; `THIRD_PARTY_NOTICES.md` credits marked, Mermaid, and the Google
+  Fonts the page loads.
 
 ---
 

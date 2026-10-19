@@ -4,6 +4,38 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.9.0 — October 19, 2026
+
+**Bundles:** full runbook v5.9.0.0, Lite v5.9.0.0, Standards Guide v1.13.1.0 (unchanged),
+Operations Guide v5.9.0.0. One new skill, `html-docs`; one new document template, `FAQ.md`; Full
+Step 11 and Lite Step 6; the `build-a-feature` and `documents` skill text; both manifests' version
+and description; the marketplace entry.
+
+- **New `html-docs` skill (`/ocpf-bc:html-docs`) — the help site.** Builds a polished HTML
+  documentation and support page, `docs/index.html`, from the project's own Markdown documents:
+  tabs for the User Guide, the Documentation, an FAQ (collapsible questions), the Deployment guide,
+  and any other guide; the app icon, a download button for the package, *Get support* and *View on
+  GitHub* links, an optional banner and publisher logo, the Mermaid diagram drawn in the browser,
+  and the human's screenshots. Asks in boxes: which tabs (a missing document — the FAQ, a User Guide
+  on a feature project — is written first through `documents`), whether the human will provide
+  screenshots and where to put them (`docs/screenshots/`; each file looked at, renamed to say what
+  it shows after one approval of the list, placed in the Markdown where the guide talks about it),
+  identity and links (repository, download, support, banner, logo, tagline — nothing fetched from
+  the web). `templates/build.py` (copied into `docs/`, never edited per project) converts through
+  `npx marked` or Python `markdown` with nothing installed, cleans each document for the page, and
+  prints what to review — repository paths, internal codes, design references, build-status
+  remarks, unbalanced HTML, missing images — which the agent acts on; `templates/template.html` is
+  the page shell with CSS tokens for the accent colors; `templates/site.json` the configuration
+  shape. The agent looks at every tab (headless Chrome or Edge where available) before the human
+  does, then gives the GitHub Pages steps (`references/github-pages.md`: Settings → Pages → Deploy
+  from a branch → `main` / `/docs`; the private-repository caveat) and offers to set `app.json` →
+  `help`. Offered by Full Step 11 and Lite Step 6; never by Build-a-Feature; on request on any
+  project. Procedure in the bundled Ops § Help Site.
+- **`FAQ.md` template** in the `documents` skill's references; the `documents` skill lists it.
+- **`build-a-feature`'s never-list** names the help-site offer; on request only.
+- `THIRD_PARTY_NOTICES.md` credits marked, Mermaid, and the Google Fonts (Inter, Archivo, JetBrains
+  Mono) the generated page loads from their CDNs; nothing is bundled.
+
 ## 5.8.2 — October 19, 2026
 
 **Bundles:** full runbook v5.8.2.0, Lite v5.8.2.0, **Standards Guide v1.13.1.0** (pin moved — §5.0

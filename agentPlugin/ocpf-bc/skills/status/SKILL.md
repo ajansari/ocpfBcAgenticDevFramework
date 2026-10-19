@@ -80,6 +80,10 @@ Keep it to a compact block:
 - **AL MCP Server:** connected, not connected, or deferred, from `alMcp` and whether the session
   has the `al` server's tools. If it isn't connected and BUILD has started or is next, suggest the
   `al-mcp-setup` skill.
+- **Help site:** when `docs/site.json` exists (Ops § Help Site), whether `docs/index.html` exists and
+  is newer than every source document `site.json`'s `tabs` name and every file in `docs/screenshots/`;
+  older or missing is a one-line blocker — *rebuild the help site: `python3 docs/build.py`* — because
+  GitHub Pages serves whatever was last pushed.
 - **Tooling:** `tooling` from `ocpfFramework/framework.json` — `mermaid` (npx-cached, installed,
   unavailable) and `pwsh` (5.1, 7.x, unavailable); "not checked yet" when the object is empty or
   missing.

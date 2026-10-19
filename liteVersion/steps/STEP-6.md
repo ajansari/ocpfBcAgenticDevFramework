@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 6 — Review, Gap-Check & Finalize Docs
 
-**Runbook version:** 5.8.2.0 · Lite edition · Phase: PROVE
+**Runbook version:** 5.9.0.0 · Lite edition · Phase: PROVE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -111,6 +111,24 @@
   `.app`. Always committed.
 - **Translated documents aren't produced here.** Step 7 produces them once its functional test
   pass is green, so a fix found in testing doesn't make every translated copy stale too.
+- **Offer the help site — the polished HTML documentation and support page** (Ops § Help Site; in a
+  plugin project the `html-docs` skill, `/ocpf-bc:html-docs`), once `docs/4-prove/Docs.md`,
+  `TestScript.md`, and the Acknowledgements exist and before the release-candidate question. One box
+  (Rule 6a): **Build the help site now (recommended)** / *Not now — ask me again at the hand-off* /
+  *No help site for this project*. On yes the skill asks which tabs — `Docs.md`'s user-guide and
+  deployment sections as tabs of their own, the rest as *Documentation*, and an **FAQ** written now
+  from `ocpfFramework/documentTemplates/FAQ.md` into `docs/4-prove/FAQ.md` (from Docs, the test
+  script's red-team cases, and the ChangeLog's findings; never invented) — asks whether the human will
+  provide **screenshots** and where to put them (`docs/screenshots/`, any name; the agent looks at
+  each, proposes a name that says what it shows, renames after one approval, and places each in the
+  Markdown where the guide talks about it), builds `docs/index.html` from `docs/site.json`,
+  `docs/template.html`, and `docs/build.py` — the one exception to the header note's "nothing loose
+  in `docs/`", because GitHub Pages serves `/docs` — looks at every tab before the human does, and
+  closes with the **GitHub Pages** steps (Settings → Pages → Deploy from a branch → `main` / `/docs`)
+  and the offer to set `app.json` → `help` to the site's URL (a package change: the next build's
+  Revision, with its ChangeLog entry). Record the answer in the ChangeLog either way. **From then on
+  every change to a source document — a Step 7 fix included — reruns `python3 docs/build.py`
+  before that step closes.**
 - **Last, before the hand-off message** (Step 7's note), ask (Rule 6a): **Build the release
   candidate v1.0.0.0 now? (recommended)** / **Keep testing on 0.x builds**. Yes: set `1.0.0.0`
   in `app.json`, compile and package (the fixed *Package built* message, Step 5), and log a
@@ -118,7 +136,7 @@
   version, proposed. Fixes during release testing continue `1.0.0.1`, `1.0.0.2` …, and the package
   that passes ships as it is (ALL ALONG → Packaging & Versioning).
 
-**Outputs:** `docs/2-design/DesignDoc.md` (updated in place, glossary included), `docs/4-prove/Docs.md`, and `docs/4-prove/TestScript.md`.
+**Outputs:** `docs/2-design/DesignDoc.md` (updated in place, glossary included), `docs/4-prove/Docs.md`, and `docs/4-prove/TestScript.md`. When the human chose the help site: `docs/index.html` with `docs/site.json`, `docs/template.html`, `docs/build.py`, `docs/.nojekyll`, `docs/assets/`, `docs/screenshots/`, and `docs/4-prove/FAQ.md` when the FAQ tab was chosen (Ops § Help Site).
 Together with `docs/0-project/ChangeLog.md` from Step 1 onward, that's Lite's four maintained documents; translated
 documents follow at Step 7. Also: the code-review scorecard in this step's ChangeLog entry,
 `docs/0-project/Acknowledgements.md`, and — if the human said yes — the release candidate
@@ -130,6 +148,6 @@ documents follow at Step 7. Also: the code-review scorecard in this step's Chang
 `docs/4-prove/TestScript.md` is executable by a non-developer; translation checks clean; any AL test codeunits
 have been run by the human from `docs/4-prove/AutomatedTestGuide.md` with every row reported Success, or it's recorded why they couldn't be; the eight-dimension scorecard is in
 the ChangeLog entry; `docs/0-project/Acknowledgements.md` exists with one row per resource used;
-the release-candidate question is answered and, on yes, `1.0.0.0` is built. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
+the help site was offered and the answer recorded — built, every tab seen to render, the GitHub Pages steps given, or declined (Ops § Help Site); the release-candidate question is answered and, on yes, `1.0.0.0` is built. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
 
 **Step close (Rule 6c) — mandatory, never a prose prompt:** once the exit gate is met and the usage rows are pasted, this boundary closes with **Step 7's hand-off box** (the note at the top of `STEP-7.md`: "Perfect, I understand!" / "I have some questions."), which replaces the generic Proceed / Stop box here. Send that box, not both, and nothing of Step 7 starts until the human answers it.

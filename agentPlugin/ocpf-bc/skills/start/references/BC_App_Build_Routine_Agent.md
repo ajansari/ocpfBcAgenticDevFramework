@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.8.2.0
+**Version:** 5.9.0.0
 **Last Updated:** October 19, 2026
 
 > Version history for this framework lives in `ocpfFramework/RunbookChangelog.md`, tracked
@@ -18,7 +18,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.13.1.0): the AL *rules* this sequence applies (Parts 1–11, Appendices A–E), cited below as
 >   **Standards §**.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.8.2.0): the *procedures*
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.9.0.0): the *procedures*
 >   this sequence uses — asking, intake, project setup, the AL tools, tooling checks, analyzers,
 >   symbols, editor sync, notifications, packaging, repository hygiene, translations, fetched
 >   companions, documents, usage and cost, and the plugin — cited below as **Ops §**. Both editions
@@ -472,9 +472,9 @@ if AL test codeunits are created, write `docs/4-prove/AutomatedTestGuide.md` for
 runs them; never ship a diagram you haven't seen render; then ask whether to build the release
 candidate v1.0.0.0 before handing off.
 
-**Outputs:** `docs/4-prove/Documentation.md` (consumer/API reference, includes the Mermaid schema diagram), `docs/4-prove/HumanUnitTestScript.md`, **`docs/4-prove/UserGuide.md`** (end-user, Markdown), `docs/4-prove/Deployment.md`, `docs/0-project/Acknowledgements.md`, and — only if the human opted in above — `docs/4-prove/AutomatedTestScripts.md` with, when AL test codeunits were created, `docs/4-prove/AutomatedTestGuide.md` and the test app `outputAppPackage/<Name>_Tests_<version>.app`. Five mandatory documents — check all five exist before claiming the step is complete; the others are conditional. The release-candidate answer recorded, and — on yes — `outputAppPackage/<Name>_1.0.0.0.app` built and announced, with its ChangeLog entry; `tooling.mermaid` recorded in `ocpfFramework/framework.json`.
+**Outputs:** `docs/4-prove/Documentation.md` (consumer/API reference, includes the Mermaid schema diagram), `docs/4-prove/HumanUnitTestScript.md`, **`docs/4-prove/UserGuide.md`** (end-user, Markdown), `docs/4-prove/Deployment.md`, `docs/0-project/Acknowledgements.md`, and — only if the human opted in above — `docs/4-prove/AutomatedTestScripts.md` with, when AL test codeunits were created, `docs/4-prove/AutomatedTestGuide.md` and the test app `outputAppPackage/<Name>_Tests_<version>.app`. When the human chose the help site: `docs/index.html` with `docs/site.json`, `docs/template.html`, `docs/build.py`, `docs/.nojekyll`, `docs/assets/`, `docs/screenshots/`, and `docs/4-prove/FAQ.md` when the FAQ tab was chosen (Ops § Help Site). Five mandatory documents — check all five exist before claiming the step is complete; the others are conditional. The release-candidate answer recorded, and — on yes — `outputAppPackage/<Name>_1.0.0.0.app` built and announced, with its ChangeLog entry; `tooling.mermaid` recorded in `ocpfFramework/framework.json`.
 
-**Exit gate:** Reference is generated from actual code and current, and its diagram was seen to render (or the document says it could not be checked); test script executable by a non-developer; the human has been asked about Automated Test Scripts (Ops § Automated Tests; answer recorded either way); any AL test codeunits have been run by the human from `docs/4-prove/AutomatedTestGuide.md` with every row reported Success, or it's recorded why they couldn't be run; `docs/0-project/Acknowledgements.md` lists every resource the project used and nothing it didn't; the release-candidate question was asked and answered, and on yes the `1.0.0.0` package exists in `outputAppPackage/`; app ready to hand to Step 12 for release testing. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 11).
+**Exit gate:** Reference is generated from actual code and current, and its diagram was seen to render (or the document says it could not be checked); test script executable by a non-developer; the human has been asked about Automated Test Scripts (Ops § Automated Tests; answer recorded either way); any AL test codeunits have been run by the human from `docs/4-prove/AutomatedTestGuide.md` with every row reported Success, or it's recorded why they couldn't be run; `docs/0-project/Acknowledgements.md` lists every resource the project used and nothing it didn't; the help site was offered and the answer recorded — built, every tab seen to render, the GitHub Pages steps given, or declined (Ops § Help Site); the release-candidate question was asked and answered, and on yes the `1.0.0.0` package exists in `outputAppPackage/`; app ready to hand to Step 12 for release testing. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 11).
 
 ## 12 — Release to Users for Testing
 
@@ -890,7 +890,7 @@ change.
 
 The companion rules document — `ocpfALDevStandardsGuide.md`, v1.13.1.0 — holds the AL rules this
 runbook cites as **Standards §**, from PRE-02 onward. Its sibling, the **Operations Guide**
-(`ocpfOperationsGuide.md`, v5.8.2.0), holds the procedures, cited as **Ops §**.
+(`ocpfOperationsGuide.md`, v5.9.0.0), holds the procedures, cited as **Ops §**.
 
 **Fetch both at PRE-01, before anything else needs them** — `ocpfFramework/standardsGuide/` and `ocpfFramework/opsGuide/` in
 this project's root, both always gitignored — **and, in the same fetch, this runbook's step files
@@ -1012,7 +1012,9 @@ Tooling Checks). Without that file, skip it entirely.
   effort, no extra question), the `analyze` skill (`/ocpf-bc:analyze` — documents an undocumented
   existing app into `requirements/existing/` on a model the human chooses, offered at PRE-01 when
   the app exists; Ops § Existing Apps), the `app-icon` skill (draws the app icon when the human
-  has none — *Create one for me* in PRE-01's identity box; Ops § Intake → *The app icon*), and the
+  has none — *Create one for me* in PRE-01's identity box; Ops § Intake → *The app icon*), the
+  `html-docs` skill (builds the help site — the polished HTML documentation and support page with an
+  FAQ, screenshots, and the GitHub Pages steps — offered at Step 11; Ops § Help Site), and the
   `status`, `al-standards`, `notifications`,
   `roles`, `documents` (writes any project document from its template, both effort estimates and
   the Acknowledgements included), and `usage` (measures tokens and cost per step and model,

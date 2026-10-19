@@ -453,7 +453,10 @@ No FRD, TDD, Design Doc, Sanity Check, estimates, test script, user guide, or ac
 file (the six documents above are the whole record); no translation files (source labels only;
 `TranslationFile` stays on so the `.g.xlf` is generated for whoever adds languages later); no
 publish to a sandbox or a tenant; no AppSource target; no sub-agents; no usage calibration export
-unless asked; no publisher or ID range from anywhere but a box the human answered. If the intake
+unless asked; no publisher or ID range from anywhere but a box the human answered. **No help-site offer** — the polished HTML documentation site is Full Step 11's and
+Lite Step 6's offer (the `html-docs` skill), never a quick mod's; a human who asks for one on a
+feature project gets it on request (`/ocpf-bc:html-docs`, which asks which tabs —
+`docs/Documentation.md`, a User Guide and an FAQ written then — and about screenshots). If the intake
 turns into a whole process — posting, documents, a wizard, a solution with several modules — say
 so in one sentence and offer Lite (an existing app without a large footprint) or Full (a complete
 solution): the work so far is kept, and both read `app.json`, `src/`, and `docs/` as an existing

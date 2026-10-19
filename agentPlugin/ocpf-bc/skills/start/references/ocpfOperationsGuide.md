@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.8.2.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
+**Version:** 5.9.0.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
 **Last Updated:** October 19, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
@@ -64,13 +64,14 @@
 15. [Automated Tests](#ops--automated-tests) *(the Scripts offer is Full only; the human runs the AL tests in both)*
 16. [Fetched Companions](#ops--fetched-companions)
 17. [Documents](#ops--documents)
-18. [Usage & Cost](#ops--usage--cost)
-19. [Dashboard](#ops--dashboard)
-20. [Journeys](#ops--journeys) *(Full, Lite, or Build-a-Feature — which one, and why; what to put in `requirements/` and `images/`)*
-21. [Build-a-Feature](#ops--build-a-feature) *(the quick-mod journey: no steps, six short documents in a flat `docs/`, written as the work happens)*
-22. [Existing Apps](#ops--existing-apps) *(an undocumented app is analyzed and documented into `requirements/existing/` before any journey extends it)*
-23. [Reference Sources](#ops--reference-sources)
-24. [Plugin](#ops--plugin)
+18. [Help Site](#ops--help-site) *(the polished HTML documentation and support page built from the documents — offered at Full Step 11 / Lite Step 6, never by Build-a-Feature; GitHub Pages serves `docs/`)*
+19. [Usage & Cost](#ops--usage--cost)
+20. [Dashboard](#ops--dashboard)
+21. [Journeys](#ops--journeys) *(Full, Lite, or Build-a-Feature — which one, and why; what to put in `requirements/` and `images/`)*
+22. [Build-a-Feature](#ops--build-a-feature) *(the quick-mod journey: no steps, six short documents in a flat `docs/`, written as the work happens)*
+23. [Existing Apps](#ops--existing-apps) *(an undocumented app is analyzed and documented into `requirements/existing/` before any journey extends it)*
+24. [Reference Sources](#ops--reference-sources)
+25. [Plugin](#ops--plugin)
 
 ---
 
@@ -1955,7 +1956,7 @@ ProjectDashboard-f1.html ProjectProgress.md`: it must print **nothing** (exit 1)
 the human's dashboard would vanish from every clone. A `.gitignore` that was "written per the runbook"
 but never checked is how the changelog reached a client's remote on a real project.
 
-**Always tracked:** the project's own documents — all of them under `docs/`, in their phase folders
+**Always tracked:** the project's own documents — all of them under `docs/`, in their phase folders, and the help site at `docs/`' root when one was built (`index.html`, `site.json`, `template.html`, `build.py`, `.nojekyll`, `assets/`, `screenshots/` — Ops § Help Site; GitHub Pages publishes the tracked folder, so an ignored screenshot is a broken image on the live site)
 `docs/0-project`, `docs/1-define`, `docs/2-design`, `docs/3-build`, and `docs/4-prove` (the
 runbook's rule: Full Operating Rule 9, Lite's header note; the map is in Ops § Documents), with
 `ProjectProgress.md` the one document at the root in **both** editions, and the dashboard pages
@@ -2184,7 +2185,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v5.8.2.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
+folder as `README.md`. For runbook **v5.9.0.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2361,7 +2362,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.8.2.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.9.0.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
@@ -2424,7 +2425,10 @@ docs/
 `ProjectProgress.md` is the one document outside `docs/`: in the project root, both editions.
 `ProjectDashboard.html` sits beside it — not a document but the rendered view of this one (Ops §
 Dashboard), tracked the same way.
-Nothing is written loose in `docs/` **on Full or Lite**.
+Nothing is written loose in `docs/` **on Full or Lite** — with one exception, the **help site** (Ops § Help
+Site): `docs/index.html`, `docs/site.json`, `docs/template.html`, `docs/build.py`, `docs/.nojekyll`,
+`docs/assets/`, and `docs/screenshots/` sit at `docs/`' root because GitHub Pages serves that folder as
+the site, and nothing else may.
 
 **Build-a-Feature is the exception, by design: its `docs/` is flat.** A feature project writes six
 short documents and no more, and numbered phase folders that skip numbers hid them (AJ, October
@@ -2460,6 +2464,7 @@ the project's phase folders stay and the same files go into them (`1-define/Feat
 | `Acknowledgements.md` | `docs/0-project/Acknowledgements.md` — one row per resource actually used (author, license, how it was used), always committed | Full Step 11 / Lite Step 6 |
 | `ReleaseTestResults.md` | `docs/4-prove/ReleaseTestResults.md` | Full Step 12 |
 | `ProjectProgress.md` | `ProjectProgress.md` (root) — the step table for the project's edition (the template carries both; delete the other) and the usage table, **both editions** | Full PRE-01 / Lite Step 1, then every step start and close |
+| `FAQ.md` | `docs/4-prove/FAQ.md` (`docs/FAQ.md` on a feature project) — one `###` per question, answered from the User Guide, the Documentation, the Deployment guide, the test script's red-team cases, and the ChangeLog's findings; nothing invented; the help site's FAQ tab, each question collapsible | Full Step 11 / Lite Step 6 when the help site's FAQ tab is chosen (Ops § Help Site), or on request |
 | `DesignDoc.md`, `Docs.md`, `TestScript.md` | `docs/2-design/DesignDoc.md`; `docs/4-prove/Docs.md` and `docs/4-prove/TestScript.md` | Lite Steps 2 and 6 |
 | `FeatureRegister.md`, `FeatureDataModel.md`, `FeatureDocumentation.md` | `docs/FeatureRegister.md`, `docs/DataModel.md`, `docs/Documentation.md` on a feature project (phase folders on a Full or Lite project) — with `ChangeLog.md` and `SandboxInstall.md` from the templates above and a `ProblemStatement.md` in Lite Step 1's shape | Build-a-Feature, as the work happens: register §1 and the problem statement at the intake close; a register row and a data-model section before each confirmation box; a documentation section and a ChangeLog line at each compile; the parts that span objects at the close |
 
@@ -2492,6 +2497,109 @@ most of the tokens went into re-deciding structure, re-reading guides that weren
 document at hand, and re-stating what an upstream document already said. The template removes the
 first, the brief removes the second, and the rule that the TDD cites the FRD rather than restating
 it removes the third.
+
+---
+
+## Ops § Help Site
+
+**What it is.** A polished HTML documentation and support page for the extension — one file,
+`docs/index.html`, built from the project's own Markdown documents: the app icon and name, a
+tagline and the version, a download button for the package, *Get support* and *View on GitHub*
+links, an optional banner and publisher logo, and a sticky tab bar — **User Guide**,
+**Documentation**, **FAQ** (each question collapsible), **Deployment**, and any other guide the
+project wrote — with headings, tables, code, the Mermaid schema diagram drawn in the browser,
+and the human's screenshots. Deep links work, it prints, it needs no server, and GitHub Pages
+serves it from `docs/`. The Markdown stays the record; the page is **built from it and rebuilt
+whenever it changes**, never written by hand and never a second copy to keep current. The
+reference build is the OnlyBCFans Google Address Validator's help site (October 2026), whose
+template and build script the plugin's `html-docs` skill carries.
+
+**When.** Full Step 11 and Lite Step 6 offer it in a box once the step's documents exist and
+before the release-candidate question — *Build the help site now (recommended)* / *Not now — ask
+me again at the hand-off* / *No help site for this project* — and record the answer in the
+ChangeLog either way. **Build-a-Feature never offers it**: a quick mod's close is two minutes.
+On request — "build the help site", "HTML documentation", `/ocpf-bc:html-docs` — it runs on any
+project with an `app.json` and a `docs/`, a feature project included, and asks everything itself:
+which tabs, screenshots, identity and links. In a project without the plugin the procedure is the
+same, with the template and script copied from the plugin's `skills/html-docs/templates/`.
+
+**The files — all under `docs/`, all tracked** (Ops § Repository Hygiene), the one exception to
+Ops § Documents' "nothing loose in `docs/`": GitHub Pages' *Deploy from a branch* publishes only
+the root or `/docs`; the reference project's ChangeLog records trying `docs/help/` and a root
+`help/` (which made the whole repository root the site) before settling on `docs/`.
+
+| File | What | Who writes it |
+|---|---|---|
+| `docs/index.html` | the site, one page | the build; never edited by hand |
+| `docs/site.json` | the project's configuration: name, tagline, links, colors, the tabs in order (key, title, source document, optional `section` heading regex, `kind: faq`), `dropSections`, `substitutions` | the agent, from the human's answers |
+| `docs/template.html` | the page shell; CSS tokens (`--accent` …) are the only thing restyled per project | copied from the skill |
+| `docs/build.py` | converts each tab's Markdown (through `npx marked`, else Python `markdown`; nothing installed), strips the document's own title, meta lines, and closing checklist, escapes `<placeholders>`, rewrites `../screenshots/`, wraps tables, gives every heading a deep-link id, turns an FAQ's `###` into collapsible entries, fills the template, writes `.nojekyll`, and **prints what to review**: repository paths, internal review codes, design-document references, build-status remarks, unbalanced HTML, missing images | copied from the skill; never edited per project |
+| `docs/.nojekyll` | tells Pages to serve the files as they are | the build |
+| `docs/assets/` | `app-icon.png` (copied from `src/logo/AppLogo.png`), the banner and the publisher logo when the human has them | the agent; nothing fetched or drawn here |
+| `docs/screenshots/` | the human's screenshots, renamed by the agent | the human drops them in; the agent renames |
+| `docs/4-prove/FAQ.md` (`docs/FAQ.md` on a feature project) | the FAQ, from its template (Ops § Documents) | the `documents` skill, when the FAQ tab is chosen |
+
+**Tabs.** Full: `UserGuide.md`, `Documentation.md`, `FAQ.md`, `Deployment.md`, any other guide in
+`docs/4-prove/`. Lite: `Docs.md`'s user-guide and deployment sections as tabs of their own
+(`section` in `site.json`), the rest as *Documentation*, and `FAQ.md`. Feature project:
+`docs/Documentation.md`, an FAQ, and a User Guide written then if wanted. The human chooses in one
+multi-select box; a chosen document that doesn't exist is written first, from its template.
+
+**The FAQ** is written from `FAQ.md`'s template — one `##` per topic, one `###` per question —
+answered only from the User Guide, the Documentation, the Deployment guide, the test script's
+red-team cases (every refused action is a question), the ChangeLog's testing findings, and the
+questions the human has actually heard (asked, free text). Nothing invented; a question without a
+source is left out; fifteen to thirty questions is the target.
+
+**Screenshots** are the human's to take and the agent's to name. The agent asks early (*Yes — I'll
+add screenshots* / *No* / *Later*), says where — `docs/screenshots/`, any file name, PNG
+preferred — and what, as a list taken from the User Guide's task sections (one per thing the
+guide tells the reader to open, click, or look at; standard light theme; test data only), then
+waits. When they're in it **looks at every file**, says what each shows, proposes a name in the
+shape `<page-or-object>-<what-is-happening>.png` (lowercase, hyphens, ASCII: `setup-page.png`,
+`wizard-2-api-key.png`, `error-not-set-up.png`), shows the whole old → new list in one box, renames
+only after that answer (`git mv` when tracked), and places each in the Markdown where the guide
+talks about it — `![<what it shows>](../screenshots/<name>.png)` right after the sentence that
+tells the reader to open that thing, one per step at most. A file no document references is
+listed to the human; a reference without its file is a build warning fixed before the site is
+called done.
+
+**Build, review, look.** `python3 docs/build.py` from the project root. **Every `review [...]`
+line the build prints is acted on**: a repository path (`docs/4-prove/Deployment.md`), a review code
+(`OQ-12`, `GA-3`, `CR-2.1-4`), a design reference (`TDD §14`), or a build-status remark (*not yet
+tested*) is wrong for the extension's users — fix the Markdown when the sentence is wrong for any
+reader (a path to a document that is now a tab becomes *the Deployment tab*); add a
+`substitutions` pair or a `dropSections` heading in `site.json` only when the repository's readers
+must keep the text. An **UNBALANCED HTML** line names a panel with an unclosed tag — a stray
+`<placeholder>` or a literal tag in the Markdown — and a panel left unbalanced bleeds into every
+panel after it (a blank FAQ tab on the reference build); fix the source. Then the agent **looks at
+every tab before the human does**: open the page with the OS opener, and where Chrome or Edge can
+run headless (the `app-icon` skill's ladder) screenshot each tab and read the images — hero
+complete, every tab present, no `{{PLACEHOLDER}}`, tables framed, diagram drawn, screenshots shown.
+One box to accept or change; a restyle touches `template.html`'s CSS tokens only.
+
+**Publishing — GitHub Pages, the Help link, the record.** The closing message gives the human the
+steps as a numbered list with the real owner, repository, and URL: push; *Settings → Pages* →
+*Build and deployment* → *Deploy from a branch* → the default branch, folder **`/docs`** → Save;
+wait a minute or two; the site is at `https://<owner>.github.io/<repo>/`; open it and click every
+tab. Say plainly that a private repository needs GitHub Pro, Team, or Enterprise Cloud for Pages,
+and that the site is public either way unless the organisation has access-controlled Pages. The
+agent never changes a repository setting, never pushes. Then it writes the URL into `site.json` →
+`helpUrl` (the page's canonical link) and rebuilds once; **offers** to set `app.json` → `help` to
+it — Business Central shows it as the extension's **Help** in Extension Management, AppSource
+requires it, and it is a change to the package: the next build increments the Revision and its
+ChangeLog entry names the help link (Ops § Packaging; a package already uploaded is never rebuilt
+at the same version); puts a link under the README's title; writes the ChangeLog entry (tabs,
+FAQ, screenshots renamed old → new, `.nojekyll`, the Pages setting and URL, the `help` decision);
+and stages everything with `git add`. **From then on every change to a source document — a Step
+12 / Step 7 fix, a new FAQ question, a new screenshot — reruns the build before that step
+closes**, and `status` reports a `docs/index.html` older than its sources.
+
+**Never:** an install (the converter ladder stops and asks, as Ops § Tooling Checks does for
+Node); a repository setting changed, a push, a publish; the site anywhere but `docs/`; the page
+edited by hand; `build.py` edited per project; an invented FAQ answer or screenshot; a logo,
+banner, or color fetched from the web (Ops § Intake → *Forbidden sources*); `app.json` → `help`
+set before the human said yes; the offer on Build-a-Feature; a question in prose.
 
 ---
 
@@ -3057,7 +3165,8 @@ sentence and offers Lite or Full; the work so far is an existing app to their fi
 ### What the journey never does
 
 No FRD, TDD, Design Doc, Sanity Check, estimates, test script, user guide, or acknowledgements
-(the six documents above are the whole record); no translation files (`TranslationFile` stays on so the `.g.xlf` exists for
+(the six documents above are the whole record); no help-site offer (Ops § Help Site — on request
+only, `/ocpf-bc:html-docs`); no translation files (`TranslationFile` stays on so the `.g.xlf` exists for
 whoever adds languages later; labels are the source text, Standards §1.7 and §8.3 apply in full);
 no publish to a sandbox or a tenant; no AppSource target; no sub-agents; no calibration export
 unless asked; no second launch command; no publisher or ID range from anywhere but a box the human
@@ -3256,7 +3365,10 @@ started with until the human chooses otherwise.
   row for a closed step as a blocker, and `tooling`); `al-standards` answers ad hoc AL questions
   from the Standards Guide; `app-icon` draws the app icon when the human has none — the *Create one
   for me* option of every identity box (Ops § Intake → *The app icon → Creating one*);
-  `copilot-blueprint` fires on any ask for a BC Copilot feature in any
+  `html-docs` builds the help site — the polished HTML documentation and support page from the
+  documents, with an FAQ, the human's screenshots renamed and placed, and the GitHub Pages steps —
+  offered at Full Step 11 / Lite Step 6, never by Build-a-Feature, and on request on any project
+  (`/ocpf-bc:html-docs`; Ops § Help Site); `copilot-blueprint` fires on any ask for a BC Copilot feature in any
   journey or none, fetches the Blueprint (Ops § Fetched Companions), and builds from it — so the
   Blueprint rule holds in Build-a-Feature and in plain chat, where no intake asks the question.
 - **Build-a-Feature:** the `start` skill is the one launching point for every journey — it offers

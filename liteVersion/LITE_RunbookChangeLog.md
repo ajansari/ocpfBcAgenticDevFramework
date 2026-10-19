@@ -16,6 +16,31 @@ framework.
 
 ---
 
+## v5.9.0.0 — October 19, 2026
+
+Derived from the full framework **v5.9.0.0**; Operations Guide **v5.9.0.0**; Standards Guide
+**v1.13.1.0** (unchanged); plugin **5.9.0**.
+
+- **Step 6 offers the help site** — the polished HTML documentation and support page built from
+  `Docs.md` (its user-guide and deployment sections as tabs of their own, the rest as
+  *Documentation*), a new **FAQ** (`docs/4-prove/FAQ.md`, from `documentTemplates/FAQ.md`; answered
+  from Docs, the test script's red-team cases, and the ChangeLog's findings, never invented), and the
+  human's screenshots (asked for early; `docs/screenshots/`; renamed by the agent to say what they
+  show, after one approval; placed where the guide talks about them) — once Docs, the Test Script,
+  and the Acknowledgements exist and before the release-candidate question: *Build the help site now
+  (recommended)* / *Not now* / *No help site*. One file, `docs/index.html`, with the app icon, a
+  download button, support and GitHub links, the diagram drawn in the browser; rebuilt
+  (`python3 docs/build.py`) whenever a source document changes, a Step 7 fix included. The closing
+  message gives the GitHub Pages steps (`main` / `/docs`) and the agent offers to set `app.json` →
+  `help` (a package change: the next build's Revision). Outputs and exit gate name it. The procedure
+  is the new **Ops § Help Site**; the plugin's new `html-docs` skill carries the template and the
+  build script. The site's files at `docs/`' root are the one exception to the header note's
+  "nothing loose in `docs/`" (GitHub Pages serves `/docs`); all tracked. Build-a-Feature never offers
+  it; `/ocpf-bc:html-docs` builds it on request anywhere.
+- The core names the skill among the plugin's.
+
+---
+
 ## v5.8.2.0 — October 19, 2026
 
 Derived from the full framework **v5.8.2.0**; Operations Guide **v5.8.2.0**; Standards Guide

@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 5 — Compile, Package, Test & Iterate
 
-**Runbook version:** 5.8.2.0 · Lite edition · Phase: BUILD
+**Runbook version:** 5.9.0.0 · Lite edition · Phase: BUILD
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook

@@ -17,8 +17,9 @@ runbook to copy: it lives in the plugin's `build-a-feature` skill and is reached
 `/ocpf-bc:start`. Without the plugin, follow *Ops § Build-a-Feature* in the Operations Guide with
 the skill's reference files from `agentPlugin/ocpf-bc/skills/build-a-feature/references/` in this
 repository. The same goes for `/ocpf-bc:analyze` (an existing app's documentation, *Ops § Existing
-Apps*) and `/ocpf-bc:app-icon` (*Ops § Intake → The app icon*): plugin skills, with their procedure
-written down in the Operations Guide for anyone working by hand.
+Apps*), `/ocpf-bc:app-icon` (*Ops § Intake → The app icon*), and `/ocpf-bc:html-docs` (the help site, *Ops §
+Help Site*, with the page template and build script in `agentPlugin/ocpf-bc/skills/html-docs/templates/`):
+plugin skills, with their procedure written down in the Operations Guide for anyone working by hand.
 
 Whichever way you install, **Step 2 is the same**: open your AL project folder and run
 `/ocpf-bc:start` (or ask *"Start a Business Central project with the OCPF framework."*). The

@@ -1,0 +1,29 @@
+{
+  "appName": "",
+  "tagline": "Setup, configuration and use for the Business Central extension.",
+  "description": "User guide, documentation and FAQ for the <App Name> extension for Microsoft Dynamics 365 Business Central.",
+  "publisher": "",
+  "publisherUrl": "",
+  "publisherLogo": "",
+  "icon": "assets/app-icon.png",
+  "banner": "",
+  "bannerAlt": "",
+  "repoUrl": "",
+  "branch": "main",
+  "downloadUrl": "auto",
+  "installNote": "Install it in a sandbox first: the Deployment tab has the steps.",
+  "supportUrl": "",
+  "supportLabel": "Get support",
+  "helpUrl": "",
+  "footerCredit": "",
+  "colors": { "accent": "#0f7f80", "accent_bg": "#d6efee", "accent_2": "#1a5fd0", "accent_3": "#7a4fc0", "accent_4": "#c2187a" },
+  "defaultTab": "user-guide",
+  "tabs": [
+    { "key": "user-guide", "title": "User Guide", "source": "docs/4-prove/UserGuide.md" },
+    { "key": "documentation", "title": "Documentation", "source": "docs/4-prove/Documentation.md" },
+    { "key": "faq", "title": "FAQ", "source": "docs/4-prove/FAQ.md", "kind": "faq" },
+    { "key": "deployment", "title": "Deployment", "source": "docs/4-prove/Deployment.md" }
+  ],
+  "dropSections": [],
+  "substitutions": []
+}

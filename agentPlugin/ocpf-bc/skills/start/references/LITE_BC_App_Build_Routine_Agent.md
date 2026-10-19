@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 5.8.2.0 (Lite, derived from the full framework v5.8.2.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
+**Version:** 5.9.0.0 (Lite, derived from the full framework v5.9.0.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
 **Last Updated:** October 19, 2026
 
 > Version history for this edition lives in `ocpfFramework/LITE_RunbookChangeLog.md`, tracked
@@ -21,7 +21,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.13.1.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.8.2.0), cited as
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.9.0.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
 >   tooling checks, analyzers, symbols, editor sync, notifications, packaging, repository hygiene,
 >   translations, fetched companions, documents, usage and cost, and the plugin.
@@ -407,7 +407,7 @@ ChangeLog, apply the fixes through the compile cycle, bring the Design Doc to as
 (`documents` templates) — plus `docs/4-prove/AutomatedTestGuide.md` when the project has AL test
 codeunits, for the human who runs them — then ask whether to build the release candidate v1.0.0.0 now.
 
-**Outputs:** `docs/2-design/DesignDoc.md` (updated in place, glossary included), `docs/4-prove/Docs.md`, and `docs/4-prove/TestScript.md`.
+**Outputs:** `docs/2-design/DesignDoc.md` (updated in place, glossary included), `docs/4-prove/Docs.md`, and `docs/4-prove/TestScript.md`. When the human chose the help site: `docs/index.html` with `docs/site.json`, `docs/template.html`, `docs/build.py`, `docs/.nojekyll`, `docs/assets/`, `docs/screenshots/`, and `docs/4-prove/FAQ.md` when the FAQ tab was chosen (Ops § Help Site).
 Together with `docs/0-project/ChangeLog.md` from Step 1 onward, that's Lite's four maintained documents; translated
 documents follow at Step 7. Also: the code-review scorecard in this step's ChangeLog entry,
 `docs/0-project/Acknowledgements.md`, and — if the human said yes — the release candidate
@@ -419,7 +419,7 @@ documents follow at Step 7. Also: the code-review scorecard in this step's Chang
 `docs/4-prove/TestScript.md` is executable by a non-developer; translation checks clean; any AL test codeunits
 have been run by the human from `docs/4-prove/AutomatedTestGuide.md` with every row reported Success, or it's recorded why they couldn't be; the eight-dimension scorecard is in
 the ChangeLog entry; `docs/0-project/Acknowledgements.md` exists with one row per resource used;
-the release-candidate question is answered and, on yes, `1.0.0.0` is built. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
+the help site was offered and the answer recorded — built, every tab seen to render, the GitHub Pages steps given, or declined (Ops § Help Site); the release-candidate question is answered and, on yes, `1.0.0.0` is built. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 9).
 
 ## STEP 7 — Release for Testing
 
@@ -600,7 +600,7 @@ first package and before Step 6's release-candidate question. The non-negotiable
 
 Two companions are fetched at Step 1 and kept for the life of the project: the **Standards Guide**
 (`ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md`, v1.13.1.0), cited as **Standards §**, and the
-**Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v5.8.2.0), cited as **Ops §** and shared
+**Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v5.9.0.0), cited as **Ops §** and shared
 unchanged with the full framework.
 
 **Full procedure: Ops § Fetched Companions** — fetching, refreshing, the plugin's offline copies,
@@ -831,7 +831,9 @@ skill creates (with `"layout"` and `"tooling"` fields). Without that file, skip 
   `analyze` skill (`/ocpf-bc:analyze` — documents an undocumented existing app into
   `requirements/existing/` on a model the human chooses, offered at Step 1 when the app exists;
   Ops § Existing Apps); the `app-icon` skill (draws the app icon when the human has none — *Create
-  one for me* in Step 1's identity box; Ops § Intake → *The app icon*); and the `status` (reads
+  one for me* in Step 1's identity box; Ops § Intake → *The app icon*); the `html-docs` skill (builds
+  the help site — the polished HTML documentation and support page with an FAQ, screenshots, and
+  the GitHub Pages steps — offered at Step 6; Ops § Help Site); and the `status` (reads
   `ProjectProgress.md`), `al-standards`,
   `notifications`, `roles` (asks Lite's two model questions), `documents` (writes any document from
   its template), and `usage` (`--step <id>` at every boundary; the calibration export at Step 7)

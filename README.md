@@ -189,6 +189,7 @@ In GitHub Copilot, the commands are identical.
 | `/ocpf-bc:analyze` | Analyzes and documents an existing extension that is not well documented — written by a person, vibe-coded, or built by an agent that doesn't document. Asks what you know and which documents you can add, which model (a reasoning model or a daily driver) and which effort should do the analysis, then writes a presumed FRD and TDD, an Object Register, Documentation with the schema and flows, and a Project Parameters sheet into `requirements/existing/` for your review. Run it first; then put new requirements in `requirements/` and start a journey |
 | `/ocpf-bc:build-a-feature` | The quick-customization journey directly (`start` offers it too): one question, the design on disk, confirm, build, compile, document, next object |
 | `/ocpf-bc:app-icon` | Draws the app icon when you have none — also the *Create one for me* option of every journey's identity box. Asks style (flat 2D or isometric 3D), colors (one, two, or a gradient), content (image only or a word mark), and a description; the Main model draws it to the standard — square, rounded corners, transparent background — renders it with nothing installed, shows it, and asks you to accept or make another; the accepted icon lives in `images/` and becomes `app.json`'s logo |
+| `/ocpf-bc:html-docs` | Builds the help site — a polished HTML documentation and support page, `docs/index.html`, from the project's own documents: User Guide, Documentation, FAQ (collapsible questions, written from the documents and the test script's red-team cases), Deployment, any other guide; the app icon, a download button, support and GitHub links, the schema diagram drawn in the browser, and your screenshots — you drop them in `docs/screenshots/`, the agent looks at each, renames it to say what it shows, and places it where the guide talks about it. Full Step 11 and Lite Step 6 offer it; Build-a-Feature never does, but it runs on request on any project. Closes with the GitHub Pages steps (Settings → Pages → `main` / `/docs`) and offers to set `app.json`'s `help` to the site's URL |
 | `/ocpf-bc:status` | Shows where the project stands — phase and step (or object), exit gate, what is waiting on you, models, tooling; reads the project's files, so it is right in a fresh session |
 | `/ocpf-bc:dashboard` | Creates, refreshes, or opens the live dashboard, `ProjectDashboard.html` at the project root; the routine creates it at the first step and hooks keep it fresh at zero token cost |
 | `/ocpf-bc:update-framework` | Checks for a newer runbook, shows what changed, and updates the project's copy only when you say so |
@@ -280,7 +281,7 @@ you can run `/ocpf-bc:update-framework` in them anytime.
 | `liteVersion/` | The **Lite Edition** — the 7-step version of the framework for updating an existing app or building a new one without a large footprint, on one model. See [Lite Edition, by hand](GettingStartedAlternatives.md#lite-edition). |
 | `documentTemplates/` | One template per document the framework produces (FRD, TDD, Sanity Check, Human Effort Estimate and its baselines, AI Effort Estimate, Build Plan, ChangeLog, Gap Analysis, Code Review, Documentation, User Guide, test scripts, Deployment, Release Test Results, Acknowledgements, Project Progress with its usage table for both editions, Lite's Design Doc, Docs, and Test Script, and Build-a-Feature's Feature Register, Data Model, and Documentation). Fetched into each project's `ocpfFramework/documentTemplates/` with the step files; shared by every journey. |
 | `translationAndMultiLanguage/MultilanguageSupportOverview.md` | How the framework handles multilanguage — captions and XLIFF translation files, regional terminology (GST vs. VAT, CR/Adj Note vs. Credit Memo in Australia), agent-drafted translations with a human review gate, and language-aware UAT. Shared by both editions. |
-| `agentPlugin/` | The optional **agent plugin**, `ocpf-bc`, for Claude Code, GitHub Copilot, and other tools: fourteen skills (the `/ocpf-bc:` commands), five sub-agents, the dashboard and usage scripts, and an offline copy of the framework. See [GET STARTED: Agent Plugin](#setup-plugin). This repository is also its plugin marketplace (`.claude-plugin/marketplace.json`). |
+| `agentPlugin/` | The optional **agent plugin**, `ocpf-bc`, for Claude Code, GitHub Copilot, and other tools: fifteen skills (the `/ocpf-bc:` commands), five sub-agents, the dashboard and usage scripts, and an offline copy of the framework. See [GET STARTED: Agent Plugin](#setup-plugin). This repository is also its plugin marketplace (`.claude-plugin/marketplace.json`). |
 | `THIRD_PARTY_NOTICES.md` | Credits and licenses for every third-party resource the framework references, fetches, or recommends — BCQuality, AL Guidelines, Microsoft Learn, and others. |
 | `FrameworkUserGuide.md` | The **User Guide** — everything the person driving a project needs: install, the Command Palette commands, the plugin commands, where every file lives, model recommendations, versioning, and updating. |
 | `GettingStartedAlternatives.md` | Every other way to get started: installing the plugin from the Claude Code CLI, the GitHub Copilot CLI, or inside Visual Studio Code without the setup extension; running the agent on github.com, in the Claude apps, or in Copilot Cowork; and the manual, no-plugin setup for Full and Lite. |
@@ -342,6 +343,24 @@ Each month's release notes in brief. The complete, versioned record is in
 [fullVersion/RunbookChangelog.md](fullVersion/RunbookChangelog.md),
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
+
+## October 19, 2026 — Full v5.9.0.0 · Lite v5.9.0.0 · Operations Guide v5.9.0.0 · Plugin v5.9.0
+
+**A help site for your extension.** Once Full Step 11 or Lite Step 6 has written the Markdown
+documents, the agent offers to build a polished HTML documentation and support page from them —
+one file, `docs/index.html`, with tabs for the User Guide, the Documentation, an **FAQ** (new
+document, `FAQ.md`, written from the documents and the test script's red-team cases, never
+invented), the Deployment guide, and any other guide; the app icon, a download button for the
+package, *Get support* and *View on GitHub* links, the schema diagram drawn in the browser, and
+**your screenshots**: it asks for them early, tells you where to put them (`docs/screenshots/`),
+looks at each one, renames it to say what it shows, and places it where the guide talks about it.
+It looks at every tab itself before showing you, then gives you the GitHub Pages steps (Settings →
+Pages → `main` / `/docs`) and offers to set `app.json`'s `help` link to the site's URL, so Business
+Central's Extension Management opens it. The site is rebuilt whenever a document changes; the
+Markdown stays the record. Build-a-Feature never offers it; `/ocpf-bc:html-docs` builds it on
+request on any project. New **Ops § Help Site**; new `html-docs` skill with the page template and
+the build script (from the OnlyBCFans Google Address Validator's help site); the `documents` skill
+writes the FAQ.
 
 ## October 19, 2026 — Full v5.8.2.0 · Lite v5.8.2.0 · Operations Guide v5.8.2.0 · Plugin v5.8.2
 
