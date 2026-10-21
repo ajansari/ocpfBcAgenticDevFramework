@@ -16,6 +16,13 @@ framework.
 
 ---
 
+## v5.9.3.0 — October 21, 2026
+
+Derived from the full framework **v5.9.3.0**; Operations Guide **v5.9.3.0**; Standards Guide
+**v1.13.1.0** (unchanged); plugin **5.9.3**. No Lite text changed; the version moves with the plugin's
+`dashboard` skill, whose F1 page now carries AJ's four car renders, with the track, pit building, pit crew, and
+pit wall redrawn to match.
+
 ## v5.9.2.0 — October 20, 2026
 
 Derived from the full framework **v5.9.2.0**; Operations Guide **v5.9.2.0**; Standards Guide

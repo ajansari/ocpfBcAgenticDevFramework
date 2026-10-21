@@ -344,6 +344,13 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 21, 2026 — Full v5.9.3.0 · Lite v5.9.3.0 · Operations Guide v5.9.3.0 · Plugin v5.9.3
+
+**The F1 dashboard looks like a launch render.** The pit lane cam now shows real launch renders of the
+cars (Ferrari #44, Mercedes #12, McLaren #81, Red Bull #3), with the track, pit building, pit crew,
+and pit wall redrawn to match in a dark studio, each car under a halo in its team colour, and a pit
+wall gantry whose screens turn amber while a question waits on you. Ask for it with *"use the F1 theme"*.
+
 ## October 20, 2026 — Full v5.9.2.0 · Lite v5.9.2.0 · Operations Guide v5.9.2.0 · Plugin v5.9.2
 
 **Full is the recommended journey.** `/ocpf-bc:start` now lists the journeys in one fixed order,

@@ -4,6 +4,27 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.9.3 — October 21, 2026
+
+**Bundles:** full runbook v5.9.3.0, Lite v5.9.3.0, Standards Guide v1.13.1.0 (unchanged),
+Operations Guide v5.9.3.0. The F1 dashboard template only; both manifests' version.
+
+- **`dashboard` skill: `templates/dashboard-f1.html` redrawn.** The pit lane cam now reads like a
+  launch render (AJ's four reference images, October 21, 2026): a dark studio instead of a sky, each
+  car under a halo in its team colour with a faded reflection on the floor, polished asphalt on the
+  far straight and the pit lane. The cars **are** AJ's four renders — Ferrari #44 (Main),
+  Mercedes #12 (Reasoning), McLaren #81 (Light), Red Bull #3 (Generator) — cut out of their
+  backgrounds (a region grow from the border, tolerance 2, in a headless browser canvas), scaled to
+  720 px wide, and embedded in the template as PNG data URIs so the page stays one file (it is now
+  about 1.4 MB). The SVG car drawings are gone; the speed lines, heat haze, halo, and shadow are
+  drawn around the image. Numbers were #16, #44, #4, #1. The garages are dark glass
+  with a lit team banner, gantry lights, tyre stacks, and a glowing box line; the crew are drawn at human
+  scale beside the car, in team overalls and helmets, and move the way people do — standing with a
+  slight sway, now and then a few steps, a pause, a turn and back; kneeling at the wheels with the
+  guns and holding the lollipop only while the car is in the box — on SMIL cycles staggered per figure; a new **pit wall** gantry at the right end of the wall shows the human's three stations,
+  whose screens turn amber while a question waits. Same data contract, motion, Day/Night, and
+  in-place refresh; nothing in the renderers changed.
+
 ## 5.9.2 — October 20, 2026
 
 **Bundles:** full runbook v5.9.2.0, Lite v5.9.2.0, Standards Guide v1.13.1.0 (unchanged),
