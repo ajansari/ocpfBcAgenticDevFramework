@@ -161,6 +161,15 @@ if [[ -n "$manifest_drift" ]]; then
 fi
 echo "manifests agree"
 
+# The website's hero strip (index.html) names the released plugin version. A release that leaves it
+# behind ships a stale site, which happened at 5.9.2; so the strip must carry the current version.
+if ! grep -q "v${version} ·" "$repo_root/index.html"; then
+  echo "index.html hero strip does not name v${version}: update the site's version strip before releasing." >&2
+  if [[ "$mode" == "check" ]]; then stale=1; else exit 1; fi
+else
+  echo "site hero strip: v${version}"
+fi
+
 if [[ "$mode" == "check" && "$stale" -ne 0 ]]; then
   echo "Bundled copies are stale. Run agentPlugin/tools/syncPlugin.sh, bump the plugin version, and commit." >&2
   exit 1
