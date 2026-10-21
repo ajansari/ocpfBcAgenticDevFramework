@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 1 — Define the Problem & Lock Parameters
 
-**Runbook version:** 5.9.0.0 · Lite edition · Phase: DEFINE
+**Runbook version:** 5.9.1.0 · Lite edition · Phase: DEFINE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -37,8 +37,10 @@
   intake procedures are Ops §, so neither can wait for Step 3 the way the other fetched libraries
   do. Tell the human you're doing it.
 - **Ask how to be notified, right after the working language** (Ops § Notifications — read it now): Claude app, sound,
-  desktop notification, any combination, or none. Record it in `ocpfFramework/state/notifications.json` and
-  apply it, so every later question reaches the human even when they've stepped away.
+  desktop notification, any combination, or none. In Claude Code the *Claude app* option is offered unless a
+  disqualifier is positively found — never dropped for a sign-in that can't be checked, a fresh install, an
+  unpaired phone, or Windows. Record it in `ocpfFramework/state/notifications.json`, apply it, and test it with
+  each hook's exact command, so every later question reaches the human even when they've stepped away.
 - **Ask the three identity questions next — extension name, publisher, app icon — and write
   `app.json` at once** (Rule 6a; **Ops § Intake → *Box 0 — Identity first***): one box, three
   questions — **Extension name?** (suggestions from the human's own wording + *I'll type it*),
@@ -61,7 +63,9 @@
   renderer and template into `ocpfFramework/scripts/`, render `ProjectDashboard.html` at the
   project root (beside `ProjectProgress.md`; tracked — `git check-ignore` must not name it), open
   it (`--open`), install the refresh hooks for this AI tool (Claude Code and Copilot CLI:
-  every turn; Copilot Chat: every step boundary), then ask the one explanation question — **I
+  every turn; Copilot Chat: every step boundary) with the interpreter the runner ladder found,
+  **prove them** — the Stop hook's exact command run once, the sidecar newer and carrying the
+  app's name and the edition (Ops § Dashboard → 3) — then ask the one explanation question — **I
   understand** / *Other* — with Ops § Dashboard's text (what, why, how, the file and where it is,
   and reopening with right-click → **Open Externally** or *Reveal* + double-click).
 - **Ask which model does the work, right after the dashboard** (Rule 6a; **Ops § Roles — read
@@ -69,8 +73,9 @@
   model thinks longer before each answer, and a step can take noticeably more time. The framework
   recommends High only where judgment matters most."* Two questions in one box, the recommended
   pair first and free-text entry for anything else: **Main model** and **Main thinking effort** —
-  in Claude Code *Sonnet, Medium — recommended*; in GitHub Copilot *Gemini 3.8 Flash, Medium —
-  recommended* (the picker's names; if a name isn't in the picker on the day, offer the nearest and
+  in Claude Code *Sonnet, Medium — recommended*; in GitHub Copilot *Claude Sonnet 5.5, Medium —
+  recommended* and *GPT-6.1 Sol, Medium — recommended*, two options at the same Copilot price, the
+  Claude model first (the picker's names; if a name isn't in the picker on the day, offer the nearest and
   say so) — then *High* and *Low*. Say which model this session is running on before asking: in Lite the one
   model *is* this session, and only the human can change it (`/model` and `/effort` in Claude Code;
   the model picker in Copilot). If they choose something other than what's running, ask them to
@@ -167,7 +172,7 @@ Packaging & Versioning). Mention it once, plainly, now.
 | **Business Central Copilot feature** | `Yes` / `No` | A feature in Business Central's own Copilot UI (a `Copilot Capability`, a `PromptDialog` page, a *Suggest with Copilot* action, Azure OpenAI through System.AI). **`Yes` is valid for a PTE**; Microsoft-billed needs no Azure subscription. If `Yes`: the host page(s), what the AI suggests, and the billing path — *Microsoft-billed* (default) / *Partner-billed* / *both*. Triggers the OnlyBCFans BC Copilot Blueprint fetch at Step 3 (ALL ALONG → *Business Central Copilot Features*). |
 | **Framework files in `.gitignore`?** | `Yes` (default) | Box 5, asked as: *"`.gitignore` lists files Git leaves out of commits and pushes — they stay on disk and work normally. Should this framework's own files be left out of this project's repository?"* With `Yes`, the second block of Ops § Repository Hygiene goes into `.gitignore` — by name, every one, not "the framework files" in the agent's head: `ocpfFramework/` as a whole (it holds `LITE_RunbookChangeLog.md`, `LITE_RunbookSchematics.md`, `framework.json`, and the runbook itself when `CLAUDE.md` already existed), the runbook under whatever name it was given (`CLAUDE.md`, `.github/copilot-instructions.md`, `.github/instructions/ocpf-framework.instructions.md` — only the ones that exist), and the project-local sub-agent definitions (`.claude/agents/ocpf-light.md`, `ocpf-reasoning.md`, `ocpf-generator.md`, `ocpf-reviewer.md`, `ocpf-analyst.md`; `.github/agents/ocpf-light.agent.md`, `ocpf-reasoning.agent.md`, `ocpf-generator.agent.md`). The first block — `.claude/settings.local.json`, `ocpfFramework/state/`, `ocpfFramework/standardsGuide/`, `opsGuide/`, `runbookSteps/`, `documentTemplates/`, `patterns/`, `scripts/`, `.alpackages/`, `*.g.xlf` — is written whatever the answer. **Then prove it:** `git check-ignore -v <file>` on each file that exists, and `git status --porcelain` on the root; a framework file still showing means the entry is wrong. On a real project the changelog was left out and shipped to the client's remote. **Never `docs/`, `requirements/`, `src/`, `ProjectProgress.md`, `outputAppPackage/`, `*.app`, or `Translations/*.xlf`** — `docs/0-project/ChangeLog.md` is always committed. The full block is Ops § Repository Hygiene. |
 | **Working language** | — | From the first question of this step. |
-| **Main model & thinking effort** | `<MainModel>` / `<MainEffort>` | Asked right after notifications (Ops § Roles): the model this one agent runs on and its thinking effort — recommended **Sonnet, Medium** in Claude Code, **Gemini 3.8 Flash, Medium** in GitHub Copilot; High only where judgment matters most. Recorded as the human named them, plus the harness's own identifier (e.g. `sonnet`). Must match what the session is actually running — the human switches the session, not the agent. The generator sub-agent Step 4 may use inherits this pair. Lite has no Light or Reasoning rows. |
+| **Main model & thinking effort** | `<MainModel>` / `<MainEffort>` | Asked right after notifications (Ops § Roles): the model this one agent runs on and its thinking effort — recommended **Sonnet, Medium** in Claude Code, **Claude Sonnet 5.5 or GPT-6.1 Sol, Medium** in GitHub Copilot; High only where judgment matters most. Recorded as the human named them, plus the harness's own identifier (e.g. `sonnet`). Must match what the session is actually running — the human switches the session, not the agent. The generator sub-agent Step 4 may use inherits this pair. Lite has no Light or Reasoning rows. |
 | **Target languages** | table | Box 5, for the countries from Box 1 — Lite groups the setup and language questions together (Ops § Intake) — never asked again (rules: **Standards §8.8**). Classify each chosen language as Microsoft-translated, partner-translated (ask which partner app, in the next box — it's the terminology source), or not supported by BC (every right-to-left language included). Don't offer an unsupported language; if typed, offer the country's English instead, and only record it if the human insists. Then, unless source wording is *US wording, no translation files*, per language, two questions: *Required at first release* / *Can follow later*; and who reviews it — names the human mentioned, or *I'll type it*; a named fluent person, never the agent. Flag any mismatch with **Localization**. |
 | **Source language** | `en-US` (default) | Offer `en-US` first, labelled recommended, with the one-line reasons in **Standards §8.1**. If the human chooses another, state the consequences before recording it. |
 | **Source wording** | `W1` | Microsoft's W1 English wording in source, with one translation file per target language (`en-US` included). Only when `en-US` is the **sole** target **and Deployment Target isn't `AppSource`** (AppSource requires translation files — **Standards §8.10**), also offer *US wording in source, no translation files* — simpler now, but another market later means changing source strings. |

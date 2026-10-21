@@ -2,7 +2,7 @@
 #
 # An AI tool's hook runs it when the agent finishes a turn, asks a question, or waits for an
 # approval, with the kinds the developer chose at intake (ALL ALONG -> Notifications). Nothing is
-# installed. Untested on Windows.
+# installed. Runs on Windows PowerShell 5.1; the notifications skill's test (Ops § Notifications → 5) proves it on each machine.
 #
 # Usage: powershell -NoProfile -ExecutionPolicy Bypass -File ocpfFramework\scripts\ocpf-notify.ps1 [-Sound] [-Desktop] [-Message <text>]
 #   -Sound    a short Windows system sound

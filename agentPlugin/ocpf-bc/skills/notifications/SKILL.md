@@ -20,9 +20,12 @@ In short:
 1. **Ask one multi-select question** through the options mechanism: *"Would you like to be notified
    at the end of every turn and whenever a question or approval is waiting? Choose any."* Offer only
    what can work, per `Ops § Notifications`, step 1:
-   - *Claude app* — Claude Code signed in through a claude.ai subscription, with Remote Control
-     available (no API key, Bedrock, Google Cloud, Foundry, gateway, or the environment variables
-     the runbook lists).
+   - *Claude app* — **in Claude Code, always, unless a disqualifier is positively found**: an API
+     key, Bedrock, Google Cloud, Foundry, a gateway, or one of the environment variables Ops lists.
+     A sign-in that can't be checked is offered anyway, with the claude.ai-subscription caveat in
+     the option's description. A fresh install, a new machine, an unpaired phone, or Windows is
+     never a reason to drop it — the pairing happens afterwards in the Claude app. (On a real
+     Windows project the option was silently dropped and the human never asked.)
    - *Sound* — always.
    - *Desktop notification* — Copilot Chat or Copilot CLI; Claude Code on Windows or Linux, or in
      iTerm2, WezTerm, Ghostty, Warp, or Kitty. Not Claude Code's VS Code extension or VS Code's
@@ -37,7 +40,7 @@ In short:
    every-session Remote Control); VS Code user settings for Copilot Chat's own sounds and
    notifications; user-level `~/.copilot/hooks/` for Copilot CLI sound. Before writing a user-level
    file, say it applies to every project on this machine. Add `ocpfFramework/scripts/` to `.gitignore`, then copy
-   `ocpf-notify.sh` or `ocpf-notify.ps1` (untested on Windows) from this skill's `scripts/` folder
+   `ocpf-notify.sh` or `ocpf-notify.ps1` (Windows PowerShell 5.1; step 5 proves it) from this skill's `scripts/` folder
    into the project's `ocpfFramework/scripts/` folder, exactly, when a hook needs it. A hook's
    command names the script through the project root:
    `${CLAUDE_PROJECT_DIR}/ocpfFramework/scripts/ocpf-notify.sh sound desktop` (Windows:
@@ -45,8 +48,10 @@ In short:
    A project set up before Full v5.0.0.0 / Lite v5.0.0.0 has the script under `scripts/` and the
    record at `.ocpf/notifications.json`; the `update-framework` skill's migration moves both and
    rewrites the hook path — don't patch it here.
-5. **Test once** and ask whether each chosen kind arrived and whether clicking a notification
-   opened the session.
+5. **Test once, with each hook's exact command** — the same interpreter, arguments, and script
+   path the hook names, run from the shell — and ask whether each chosen kind arrived and whether
+   clicking a notification opened the session. A hook is proven by running it, never by having
+   written it: a missing interpreter exits silently (Ops § Notifications → 5).
 
 Never raise an operating-system banner from a script on macOS: clicking one opens Script Editor
 instead of the session. Never ask the human to edit settings files or shell profiles by hand.

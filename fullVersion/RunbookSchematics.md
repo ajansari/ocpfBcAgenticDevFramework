@@ -412,8 +412,9 @@ page where the harness allows six) — and is **always** filled in: the "No" bra
 means a harness that cannot run sub-agents at all. Each role's box carries both halves — model
 **and** thinking effort. Since v5.0.0.0 the effort warning is said first (High makes every task
 slower), and **the recommended pair is offered first per AI tool**: Claude Code — Main Sonnet
-Medium, Light Haiku Medium, Reasoning Opus High; GitHub Copilot — Main Gemini 3.8 Flash Medium,
-Light Auto Balanced, Reasoning Claude Opus 5.5 High. A fourth definition, the **generator**, is
+Medium, Light Haiku Medium, Reasoning Opus High; GitHub Copilot — Main Claude Sonnet 5.5 or GPT-6.1 Sol Medium,
+Light Claude Haiku 5.5 or GPT-6 Luna Medium, Reasoning Claude Opus 5.5 or GPT-6.1 Sol High (two
+options per role at the same Copilot price, the Claude model first). A fourth definition, the **generator**, is
 written with the other two and inherits the Main model and effort — not asked. **Enforcement**
 (Operating Rule 10, Ops § Roles): the answer is materialized as project-local sub-agent definitions
 carrying `model:` and `effort:`, every delegation passes the model where the harness allows it and
@@ -433,12 +434,12 @@ flowchart TD
 
     subgraph Main["MAIN ROLE — runs in the primary agent session"]
         direction TB
-        MainWork["BUILD code generation in sequential<br/>mode; all actual code edits<br/>(incl. applying what Light/<br/>Reasoning/Generator report)<br/>End-to-end ownership of:<br/>ChangeLog, Object Register,<br/>ProjectMemory, TestingFeedback.md,<br/>the AI Effort Estimate<br/>Recommended: Sonnet, Medium (Claude Code) /<br/>Gemini 3.8 Flash, Medium (Copilot)"]
+        MainWork["BUILD code generation in sequential<br/>mode; all actual code edits<br/>(incl. applying what Light/<br/>Reasoning/Generator report)<br/>End-to-end ownership of:<br/>ChangeLog, Object Register,<br/>ProjectMemory, TestingFeedback.md,<br/>the AI Effort Estimate<br/>Recommended: Sonnet, Medium (Claude Code) /<br/>Claude Sonnet 5.5 or GPT-6.1 Sol, Medium (Copilot)"]
     end
 
     subgraph Light["LIGHT ROLE — runs in a background subagent"]
         direction TB
-        LightWork["Step 05 post-generation<br/>pre-flight pass only —<br/>required props, Rec.-qualification,<br/>dead code, indentation,<br/>permission-set coverage,<br/>symbol verification (once per batch)<br/>Reports findings; never edits code<br/>Recommended: Haiku, Medium (Claude Code) /<br/>Auto, Balanced (Copilot)"]
+        LightWork["Step 05 post-generation<br/>pre-flight pass only —<br/>required props, Rec.-qualification,<br/>dead code, indentation,<br/>permission-set coverage,<br/>symbol verification (once per batch)<br/>Reports findings; never edits code<br/>Recommended: Haiku, Medium (Claude Code) /<br/>Claude Haiku 5.5 or GPT-6 Luna, Medium (Copilot)"]
     end
 
     subgraph Reasoning["REASONING ROLE — runs in a background subagent"]

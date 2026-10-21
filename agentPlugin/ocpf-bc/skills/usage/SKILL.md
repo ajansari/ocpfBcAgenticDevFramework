@@ -32,11 +32,15 @@ the window may carry a `title` the dashboard shows, which this skill ignores.
   opening the file.
 - **The exit gate is not met until the rows exist.** The next step does not start on a missing row;
   the `status` skill reports a missing row as a blocker.
-- **Copilot Chat in VS Code: the step close refreshes the dashboard**, since Copilot Chat has no
-  hooks (Ops § Dashboard → 3). In Full the Reasoning role's measurement brief ends with the render
-  command (below), so nothing more is needed; in Lite run
-  `python3 ocpfFramework/scripts/ocpf-dashboard.py --project "<root>" --quiet` (or the `.ps1`) after
-  the rows. Claude Code and the Copilot CLI refresh by hook.
+- **The step close ends by refreshing the dashboard — every tool, every journey** (Ops § Usage &
+  Cost → 5; Ops § Dashboard → 3). After the rows, run the renderer once with the `runner`
+  recorded in `ocpfFramework/state/dashboard.json`:
+  `python3 ocpfFramework/scripts/ocpf-dashboard.py --project "<root>" --quiet` (or `pwsh` with
+  the `.ps1`, or `python` / `py -3` with the `.py` on Windows). In Full on Copilot Chat the
+  Reasoning role's measurement brief ends with the render command (below), so nothing more is
+  needed. On Build-a-Feature an `F` row's close is a step close. Hooks do the same between closes
+  in Claude Code and the Copilot CLI; when they don't (a missing interpreter), this is the only
+  refresh, and the page is never more than one close stale.
 - **Never hand-write a row, in either tool.** The script reads Claude Code's transcripts or the
   Copilot session journals and already aggregates per step (one row per model in Claude Code, one
   row per step in Copilot); a hand-written row is how a real project got one model for everything.

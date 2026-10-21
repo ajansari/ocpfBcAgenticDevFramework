@@ -16,6 +16,26 @@ framework.
 
 ---
 
+## v5.9.1.0 — October 20, 2026
+
+Derived from the full framework **v5.9.1.0**; Operations Guide **v5.9.1.0**; Standards Guide
+**v1.13.1.0** (unchanged); plugin **5.9.1**. The same fixes as Full, from a Build-a-Feature run on
+a new Windows machine:
+
+- **Step 1's dashboard hooks** are written with the interpreter the runner ladder found (never an
+  assumed `pwsh`) and **proven** before the explanation question — the Stop hook's exact command
+  run once, the sidecar newer and carrying the app's name and the edition — with `runner` and
+  `hooksVerified` recorded; every step close ends with one render by the agent on every tool (Ops
+  § Dashboard → 3; Ops § Usage & Cost → 5; ALL ALONG → Dashboard).
+- **Step 1's notifications** offer *Claude app* in Claude Code unless a disqualifier is positively
+  found, and test each hook with its exact command (Ops § Notifications → 1, → 5).
+- **The repository exists before the first ignore check** at Step 1 (`git init -b main` when
+  there is none, never nested inside a larger one — Ops § Repository Hygiene; ALL ALONG →
+  Repository Hygiene).
+- **Step 1's Copilot Main recommendation** is **Claude Sonnet 5.5 or GPT-6.1 Sol, Medium** — two
+  options at the same Copilot price, the Claude model first; Gemini 3.8 Flash is withdrawn as the
+  default (Ops § Roles has the prices and the reason).
+
 ## v5.9.0.0 — October 19, 2026
 
 Derived from the full framework **v5.9.0.0**; Operations Guide **v5.9.0.0**; Standards Guide

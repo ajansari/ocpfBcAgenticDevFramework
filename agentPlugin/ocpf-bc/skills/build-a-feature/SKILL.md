@@ -132,7 +132,10 @@ Do it in this order; skip what the case already has.
    since 5.5.0.0 — so `update-framework` can compare it. **Case A keeps its
    marker untouched** — the project stays Full or Lite; the feature table in
    `ProjectProgress.md` is what says Build-a-Feature ran on it.
-4. **Notifications** (B, C, D): the `notifications` skill, right after the language.
+4. **Notifications** (B, C, D): the `notifications` skill, right after the language. In Claude
+   Code the *Claude app* option is offered unless a disqualifier is positively found — never
+   dropped for a sign-in that can't be checked, a fresh install, or Windows — and each hook is
+   tested with its exact command.
 5. **Identity (D — an empty folder or a scaffold)**, one box, three questions (Ops § Intake →
    *Box 0*): extension name (suggestions from the human's wording + *I'll type it*; a scaffold's
    `ALProject1` is never offered), publisher (**only a name they wrote in this session, quoted
@@ -167,7 +170,13 @@ Do it in this order; skip what the case already has.
    Ops § Dashboard's text, adding one sentence: *On this journey the Build Map shows one row per
    object you ask for, with its stage, its time, and its cost, instead of the framework's steps.*
    Open and name `ProjectDashboard.html` (OnlyBCFans); never the F1 page unless the human asks
-   for F1 by name (Ops § Dashboard → 4).
+   for F1 by name (Ops § Dashboard → 4). The hooks name the interpreter the runner ladder found
+   and are **proven before the explanation question** — the Stop hook's exact command run once,
+   the sidecar newer, its `app.name` the app's and its `framework.edition` `feature` (the
+   `dashboard` skill's section 2a). Why: on a real Windows project the hooks were written for
+   `pwsh` on a machine without it, exited silently all build long, and the page read *Untitled
+   extension* and *Full* until the closing render. Every `F` row's close ends with one render by
+   the agent (section 2b), so the page is never more than one object stale.
 7. **Main model and effort** (B, C, D; A has them recorded): the `roles` skill, Lite's two
    questions (Main model, Main thinking effort), after its one-sentence High-effort warning. On
    edition `feature` the `roles` skill writes **no** sub-agent copy — this journey delegates to
@@ -201,7 +210,11 @@ Do it in this order; skip what the case already has.
     `platform`, `application`, `runtime` (read from Microsoft Learn's runtime table, never from
     memory), `features` `["NoImplicitWith", "TranslationFile"]` (Standards §8.2), `target`. Keep
     `id`, `name`, `publisher`, `logo`, `version` as they are.
-11. **Folders and ignore list** (C, D): `outputAppPackage/`, `docs/` (flat — no phase folders on
+11. **Repository, folders, and ignore list** (C, D): **the repository first** —
+    `git rev-parse --is-inside-work-tree`; not a repository → `git init -b main`, said in one
+    line, nothing asked; inside a larger repository → use it and say so, never a nested one (Ops §
+    Repository Hygiene; on a real project no journey had ever initialized one, and every ignore
+    check and `git add` ran against nothing). Then `outputAppPackage/`, `docs/` (flat — no phase folders on
     this journey, Part 7); the always-ignored block of Ops § Repository Hygiene in `.gitignore`
     (the framework-files block too, with the *Yes* default — ask only if the human objects);
     `.vscode/settings.json` with the analyzers for the Deployment Target (Ops § Analyzers);

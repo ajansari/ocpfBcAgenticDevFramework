@@ -48,7 +48,7 @@ September 14, 2026 (Node.js and PowerShell 7 on September 27, 2026). The upstrea
 - **License:** MIT — AJ Ansari (same author as this framework)
 - **Used for:** the verified reference design, templates, API reference, and false-assumptions
   table the runbooks follow when a project builds a Business Central Copilot feature. Fetched at a
-  pinned tag (`v1.0.0.0` for runbook v5.9.0.0), only on projects with such a feature, into a sibling
+  pinned tag (`v1.0.0.0` for runbook v5.9.1.0), only on projects with such a feature, into a sibling
   folder outside the project root; the snapshot keeps its `LICENSE` file. Nothing from it is
   copied into this repository or the plugin.
 

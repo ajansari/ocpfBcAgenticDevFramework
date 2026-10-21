@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.9.0.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
-**Last Updated:** October 19, 2026
+**Version:** 5.9.1.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
+**Last Updated:** October 20, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
 > `fullVersion/BC_App_Build_Routine_Agent.md` and `liteVersion/LITE_BC_App_Build_Routine_Agent.md`.
@@ -572,9 +572,21 @@ is never asked about.
 | Edition · tool | Main | Light | Reasoning |
 |---|---|---|---|
 | Full · Claude Code | **Sonnet, Medium** | **Haiku, Medium** | **Opus, High** |
-| Full · GitHub Copilot | **Gemini 3.8 Flash, Medium** | **Auto, Balanced** | **Claude Opus 5.5, High** |
+| Full · GitHub Copilot | **Claude Sonnet 5.5 or GPT-6.1 Sol, Medium** | **Claude Haiku 5.5 or GPT-6 Luna, Medium (Balanced)** | **Claude Opus 5.5 or GPT-6.1 Sol, High** |
 | Lite · Claude Code | **Sonnet, Medium** | — | — |
-| Lite · GitHub Copilot | **Gemini 3.8 Flash, Medium** | — | — |
+| Lite · GitHub Copilot | **Claude Sonnet 5.5 or GPT-6.1 Sol, Medium** | — | — |
+
+In Copilot each role names **two** recommended models, a Claude model and its OpenAI peer at the
+same published price (Copilot's models-and-pricing page, read October 20, 2026: Sonnet 5.5 and
+GPT-6.1 Sol at $2 / $0.10 / $10 per million input, cached, and output tokens; Haiku 5.5 and GPT-6
+Luna at $0.10 / $0.01 / $0.50; Opus 5.5 at $4 / $0.20 / $20). Offer both as options, the Claude
+model first, and let the human pick either; a flash-class model as Main is a legitimate budget
+override, said with the warning that step discipline may slip — the Main role's work is mostly
+rule-following over a long runbook, which is where small models fall short (an earlier
+recommendation of Gemini 3.8 Flash as Main was withdrawn in 5.9.1.0 for that reason). The
+cached-input rate matters most on this framework, since every turn re-reads the runbook and the
+guides from cache — which is why a model with a higher cached rate (Grok 4.7 at $0.50) costs more
+here despite its cheaper output.
 
 Why these: Main does the volume — generation, edits, bookkeeping — where a fast, capable model at
 Medium is quicker and cheaper with no loss the analyzers and the light pass wouldn't catch; Light
@@ -608,8 +620,8 @@ Copilot, the picker's names from the table above):
   here, and record `N/A — no sub-agents in this harness` for them.
 
 **Lite — two questions, one box:** the Main model (*Sonnet (recommended)* / *Opus* / *Haiku*; in
-Copilot, *Gemini 3.8 Flash (recommended)* first) and its thinking effort (*Medium (recommended)* /
-*High* / *Low*).
+Copilot, *Claude Sonnet 5.5 (recommended)* and *GPT-6.1 Sol (recommended)* first) and its thinking
+effort (*Medium (recommended)* / *High* / *Low*).
 
 **Say what's running before asking.** The Main model *is* the session's model. State it — and the
 session's effort, where the harness shows it — in the question's own text, and offer the current
@@ -961,7 +973,9 @@ Then, in order:
 7. **Check the layout and the ignore list before design begins.** The root holds only what the
    layout above lists; `docs/` holds every document written so far, each in its phase folder
    (nothing from the runbook's document list loose in `docs/` or in the root, `ProjectProgress.md`
-   and the dashboard pages `ProjectDashboard.html` / `ProjectDashboard-f1.html` excepted); `.gitignore` carries the full block from Ops § Repository
+   and the dashboard pages `ProjectDashboard.html` / `ProjectDashboard-f1.html` excepted); the
+   repository exists (`git rev-parse --is-inside-work-tree`, else `git init -b main` — Ops §
+   Repository Hygiene); `.gitignore` carries the full block from Ops § Repository
    Hygiene; `git check-ignore -v` names each framework file that exists **and does not name**
    `ProjectDashboard.html`, `ProjectDashboard-f1.html`, or `ProjectProgress.md`; and `git status --porcelain` lists
    both dashboard pages as untracked or modified, never as nothing (stage it). A miss here is
@@ -1148,12 +1162,15 @@ for mermaid) instead of repeating the check. **Record every outcome in `ocpfFram
 **PowerShell 7 (`pwsh`)**:
 
 - **Who needs it:** the XLIFF Sync module (`Sync-XliffTranslations`, `Test-XliffTranslations` —
-  Ops § Translations) and the `.ps1` port of the usage script (Ops § Usage & Cost). BCQuality
+  Ops § Translations), the `.ps1` port of the usage script (Ops § Usage & Cost), and the `.ps1`
+  twin of the dashboard renderer — which is why the dashboard's hook runner is chosen by a ladder
+  and proven, never assumed to be `pwsh` on Windows (Ops § Dashboard → 3). BCQuality
   *recommends* it, not requires it: its README says PowerShell 7 is recommended for fast knowledge
   discovery and that without it the review still discovers knowledge by reading the folders
   (<https://github.com/microsoft/BCQuality>, read September 27, 2026). The framework's own `.ps1`
   helpers — the AL MCP launcher, the notification script — run on **Windows PowerShell 5.1**, which
-  every Windows machine has, so a Windows project without `pwsh` loses nothing until translation.
+  every Windows machine has, so a Windows project without `pwsh` loses nothing until translation,
+  provided the dashboard hooks were written for Python rather than `pwsh` (the ladder).
 - **Check:** `pwsh --version`. Record `7.x` with the version it prints; on Windows without it,
   `5.1` (`powershell -NoProfile -Command $PSVersionTable.PSVersion` confirms); otherwise
   `unavailable`.
@@ -1332,7 +1349,7 @@ first:
 
 | Option | Offer it when |
 |---|---|
-| *Claude app* — a push to your phone | Claude Code signed in through a claude.ai Pro, Max, Team, or Enterprise account, with none of `ANTHROPIC_BASE_URL` (pointing anywhere but `api.anthropic.com`), `DISABLE_TELEMETRY`, `DO_NOT_TRACK`, `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC`, or `DISABLE_GROWTHBOOK` set. Not with an API key, Amazon Bedrock, Google Cloud's Agent Platform, Microsoft Foundry, or a Claude apps gateway. If the sign-in can't be checked, say in the option that it needs a claude.ai subscription, and that on Team or Enterprise an Owner must have enabled Remote Control. |
+| *Claude app* — a push to your phone | **In Claude Code, always — unless a disqualifier is positively found.** The disqualifiers: an API key sign-in, Amazon Bedrock, Google Cloud's Agent Platform, Microsoft Foundry, or a Claude apps gateway; or any of `ANTHROPIC_BASE_URL` (pointing anywhere but `api.anthropic.com`), `DISABLE_TELEMETRY`, `DO_NOT_TRACK`, `CLAUDE_CODE_DISABLE_NONESSENTIAL_TRAFFIC`, or `DISABLE_GROWTHBOOK` set in the environment. A claude.ai Pro, Max, Team, or Enterprise sign-in is what it needs; when the sign-in can't be checked, **offer it anyway** and say in the option's description that it needs a claude.ai subscription, and that on Team or Enterprise an Owner must have enabled Remote Control. **Never drop the option** because the sign-in is fresh, the machine is new, the phone isn't paired yet, or the operating system is Windows or Linux: none of those is a disqualifier — the pairing happens afterwards, in the Claude app, and the push settings are what this step turns on. Not offered in GitHub Copilot. Why the inversion: on a real Windows project (October 2026, a new machine, a fresh claude.ai sign-in, nothing disqualifying) the agent could not confirm the sign-in and silently dropped the option, so the human was never asked. |
 | *Sound* — a short sound on this computer | Always. On Linux it needs `paplay` or `canberra-gtk-play`; without them it falls back to the terminal bell, which Claude Code's VS Code extension can't ring. |
 | *Desktop notification* | GitHub Copilot Chat in VS Code or GitHub Copilot CLI (their own notifications). Claude Code on Windows or Linux, or in iTerm2, WezTerm, Ghostty, Warp, or Kitty on any OS — the terminal's own notification, found from `TERM_PROGRAM`, `KITTY_WINDOW_ID`, or `TERM`, and only when `CLAUDE_CODE_ENTRYPOINT` is `cli`, since the VS Code extension can inherit `TERM_PROGRAM` from the terminal that opened VS Code. Inside tmux the terminal isn't detected. **Not for Claude Code's VS Code extension or VS Code's terminal on macOS:** there's no suitable notification there, and a banner raised from a script opens Script Editor when clicked. |
 | *No notifications* | Always. If it's chosen alongside anything else, ask again. |
@@ -1395,7 +1412,8 @@ or `linux`.
   comment. Claude Code honors `remoteControlAtStartup` only from user settings, never from a
   project.
 - **The script.** Add `ocpfFramework/scripts/` to `.gitignore` if it isn't there, then copy `ocpf-notify.sh`
-  (macOS/Linux) or `ocpf-notify.ps1` (Windows, untested on Windows) into it — from the plugin's
+  (macOS/Linux) or `ocpf-notify.ps1` (Windows; it runs on Windows PowerShell 5.1, and the test
+  in step 5 is what proves it on this machine) into it — from the plugin's
   `notifications` skill, or byte for byte from
   `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/notifications/scripts/<file>`.
   It takes `sound`, `desktop`, or both (`-Sound`, `-Desktop` on Windows), returns the terminal's own
@@ -1467,12 +1485,17 @@ remembering, so suggest pairing *Claude app* with *Sound*. Questions and approva
 themselves, and Claude Code skips pushes while the human is focused on the session. With *Only when
 I turn it on*, remind the human to connect Remote Control before stepping away. Tell them to install
 the Claude app, sign in with the same account, and allow its notifications; the phone is theirs to
-set up.
+set up. On a new machine or a fresh sign-in that is the whole pairing — nothing on this computer
+needs the phone first, and nothing on the phone needs to exist before the option is chosen.
 
-### 5. Test once
+### 5. Test once, with the hook's own command
 
-Trigger each chosen kind and ask: *Did each one arrive, and did clicking a notification take you to
-the session?* Fix or drop whatever didn't, and update the record.
+Run each installed hook's exact command once from the shell — the same interpreter, the same
+arguments, the same script path the hook names — and ask the human in one box whether each chosen
+kind arrived and whether clicking a notification opened the session. A kind that did not arrive is
+fixed or dropped now, and the record rewritten. Never conclude a hook works because the file was
+written: a hook whose interpreter is missing exits silently, which is how a real Windows project
+ran a whole build without a single refresh (Ops § Dashboard → 3).
 
 **Verified September 2026:** in Claude Code 2.1.272 the `Stop` hook and a `PreToolUse` hook on
 `AskUserQuestion` both fired, and the exec-form hooks block ran the script with
@@ -1480,8 +1503,10 @@ the session?* Fix or drop whatever didn't, and update the record.
 `terminalSequence` output, push settings, and Remote Control requirements (Anthropic); the VS Code
 settings and sounds (Microsoft's documentation and VS Code's source); the Copilot CLI's notifications
 and hooks (GitHub's documentation and changelog). Claude Code's VS Code extension has no
-notifications of its own (anthropics/claude-code issues #57230 and #29928). Windows and Linux weren't
-tested. Tools with neither notifications nor hooks (Claude Chat) can't
+notifications of its own (anthropics/claude-code issues #57230 and #29928). Linux wasn't tested. On
+Windows (October 20, 2026, a new machine) a Build-a-Feature run chose desktop notifications and the
+hooks were written; whether the desktop kind arrived was not recorded, which is exactly why step 5
+now runs each hook's exact command and asks. Tools with neither notifications nor hooks (Claude Chat) can't
 notify: say so and record `"channels": []`.
 
 ---
@@ -1535,7 +1560,7 @@ working language:
 > Externally** *(when that entry isn't offered: **Reveal in Finder** / **Reveal in File Explorer**
 > and double-click the file)*, or ask me to "open the dashboard" and I will.
 >
-> *(Copilot Chat in VS Code only:)* Copilot Chat has no hooks, so this page refreshes at every step
+> *(Copilot Chat in VS Code, or when no interpreter for the hooks was found on this machine:)* There are no working hooks here, so this page refreshes at every step
 > boundary rather than every turn; the header says *Refreshed* and when.
 
 Record the answer in `docs/0-project/ProjectMemory.md`; act on a free-text answer before continuing.
@@ -1574,11 +1599,50 @@ a model with no rate in `pricing.json` makes the cost tile read *+ unpriced* wit
 | **Claude Code** | every turn, every sub-agent return, every question opened and answered, and at least every 45 seconds inside a long turn | `Stop`, `SubagentStop`, `PreToolUse` and `PostToolUse` (matcher `AskUserQuestion`) hooks in `.claude/settings.local.json`, merged beside the notification hooks, each running the renderer with `--quiet --live` (the PreToolUse hook adds `--waiting-json` from stdin, the PostToolUse hook `--clear-waiting`); plus one `PostToolUse` hook with no matcher — every tool call, the sub-agents' included — running the renderer with `--quiet --live --throttle 45`, which returns at once when the page is younger than 45 seconds |
 | **GitHub Copilot CLI** | the same moments | the same five hooks in `.github/hooks/ocpf-dashboard.json` (project level, gitignored) with the CLI's event names and `ask_user` as the tool; the unmatched `postToolUse` hook carries `--throttle 45` |
 | **GitHub Copilot Chat in VS Code** | every step boundary | no hooks exist; the usage ritual's step close (Ops § Usage & Cost → 5) ends by running the renderer, and the Reasoning role's measurement brief (Full) includes it. The header reads *Refreshed · time · at step close*. Offer a refresh whenever the human asks where things stand. |
+| **Every tool, every journey** | every step close (Full, Lite) or object close (Build-a-Feature) | the close render below — the agent runs the renderer once at the end of the step-close ritual, whether or not hooks exist, so a dead hook costs at most one close of staleness |
 
-On Windows the hooks run the PowerShell twin under **`pwsh` (PowerShell 7)**, never Windows
-PowerShell 5.1, which cannot parse it; where `pwsh` is absent and Python 3 is present, run the
-`.py` instead (Ops § Tooling Checks records both). A hook run costs no tokens: the script reads files and writes one file. `--quiet` makes every
-failure silent with exit 0 — a dashboard that cannot render must never interrupt the agent. The
+**The runner — chosen by a ladder, never assumed.** The hooks name one interpreter, and it has to
+be one that exists on this machine. Probe, in this order, and take the first whose version
+command answers: `python3 --version` (macOS and Linux first choice; the `.py`), then
+`pwsh -NoProfile -Command $PSVersionTable.PSVersion.Major` answering `7` (**PowerShell 7** — the
+`.ps1` twin uses `??` and `ConvertFrom-Json -AsHashtable`, which Windows PowerShell 5.1 cannot
+parse; the Windows first choice when it exists), then `python --version` and `py -3 --version`
+(the Windows launcher), each running the `.py`. On Windows the order is `pwsh`, `python`, `py -3`,
+`python3`. A probe that answers with a Microsoft Store prompt or nothing has failed. Record the winner as `runner` in `ocpfFramework/state/dashboard.json`
+(`pwsh`, `python3`, `python`, `py`, or `none`) and write every hook with that interpreter. The
+Python hooks keep the exec form with `sh -c` on macOS and Linux; on Windows they name the
+interpreter directly (`"command": "python"`, `"args": ["<root>\\ocpfFramework\\scripts\\ocpf-dashboard.py", "--project", "<root>", "--quiet", "--live"]`,
+the root written out — Claude Code expands `${CLAUDE_PROJECT_DIR}` in `args` on every OS, so that
+form works too). `pwsh` is **not** on every Windows machine (Ops § Tooling Checks records whether
+it is), and `python3` is usually not the name on Windows: a hook written to either without the
+ladder exits silently for the whole build.
+
+**Prove the hooks before the explanation question is asked.** After the hooks are written: read
+the sidecar's modification time (`ocpfFramework/state/dashboard-data.js`), run the `Stop` hook's
+**exact command** once from the shell, then read the sidecar again. It passes only when the file
+is newer **and** its `app.name` equals `app.json`'s `name` **and** its `framework.edition` equals
+the marker's `edition` (`full`, `lite`, or `feature`). A page that says *Untitled extension* or
+shows the Full map on a feature project after that run has failed the proof. On failure: run the
+same command without `--quiet` / `-Quiet` to see the error, step down the ladder, rewrite the
+hooks, and prove again. When nothing on the ladder runs, record `hooks: false` and `runner: none`,
+say so in one sentence, and rely on the close render (next paragraph); the explanation question
+then says the page refreshes at every step close, not every turn. Record `hooksVerified` (ISO
+timestamp) in `dashboard.json` when the proof passes; the `status` skill reports a project whose
+hooks were never proven. Why: on a real Windows Build-a-Feature project (October 2026) the hooks
+were written for `pwsh` on a machine without it; `--quiet` made every run exit 0 and silent, and
+the page read *Untitled extension* and *Full* from the first render until the agent's own render
+at the journey's close — the only render that ever happened.
+
+**The close render — every tool, hooks or not.** The step-close ritual (Ops § Usage & Cost → 5)
+ends by running the renderer once, on every AI tool and every journey — a step close in Full and
+Lite, an object's close (`F` row) in Build-a-Feature. In Claude Code and the Copilot CLI it is
+redundant while the hooks work and the only refresh when they don't; in Copilot Chat it is the
+refresh. One render costs well under a second and no tokens, so the page is never more than one
+close stale whatever the hooks did.
+
+A hook run costs no tokens: the script reads files and writes one file. `--quiet` makes every
+failure silent with exit 0 — a dashboard that cannot render must never interrupt the agent, which
+is exactly why the proof above runs once without it. The
 page pulls fresh data every 30 seconds while open and repaints in place (the header counts down to
 the next pull), so a hook's render appears without a keypress and without the page flashing: the
 renderer writes the same data a second time as `ocpfFramework/state/dashboard-data.js`, which
@@ -1590,8 +1654,8 @@ showing the previous step as current and the sub-agent idle — because nothing 
 turn began; reloading the page only reloads the same file. With the throttled hook every tool call
 (Main's and the sub-agents') is a chance to re-render, at most once per 45 seconds, and a render
 costs well under a second of file reading and no tokens.
-`ocpfFramework/state/dashboard.json` records `hooks`, `theme`, and `tool`; the `status` skill
-reports a project whose hooks are missing.
+`ocpfFramework/state/dashboard.json` records `hooks`, `theme`, `tool`, `runner`, and
+`hooksVerified`; the `status` skill reports a project whose hooks are missing or were never proven.
 
 **On a Build-a-Feature project** (`"edition": "feature"` in the marker, Ops § Build-a-Feature) the
 page has no steps to show: the renderer builds its rows from the usage windows and the feature
@@ -1649,7 +1713,11 @@ newest message without reloading anything.
 "switch to OnlyBCFans" → render with `--theme f1` / `--theme brand` (section 4). "Where is it?" →
 the path and the right-click route. A page that stopped refreshing: check the hooks still name the
 scripts and `ocpfFramework/scripts/` still holds them, then run the renderer by hand and read its
-notes. The page uses no network; it is self-contained for its first paint and loads one local
+notes. **A page that reads *Untitled extension*, or shows the Full map on a feature project, while
+`app.json` and the marker are complete:** the hooks never ran — their interpreter is missing
+(`pwsh` on a Windows machine without PowerShell 7, `python3` on Windows) — so run the ladder and
+the proof in section 3, rewrite the hooks with the runner that works, and record `runner` and
+`hooksVerified`. The page uses no network; it is self-contained for its first paint and loads one local
 file, `ocpfFramework/state/dashboard-data.js`, for the in-place refresh — so a blank page means
 the file was not re-rendered, and a page that paints but never updates means the sidecar is
 missing (a renderer older than v5.3.5.0): refresh `ocpfFramework/scripts/`.
@@ -1862,6 +1930,17 @@ Admin Center choice, so don't conflate the two when explaining this to the human
 
 Some things a project needs locally are not the client's deliverable and should never reach the
 project's own git remote, even though they sit in the working directory like any other file.
+
+**The repository exists before the first ignore check — on every journey.** Everything below, and
+every `git check-ignore` and `git add` the routine runs, assumes a repository. So the first time a
+journey writes `.gitignore` (Full PRE-01, Lite Step 1, Build-a-Feature's folders-and-ignore-list
+step), run `git rev-parse --is-inside-work-tree` first. Not a repository: run `git init -b main`
+and say so in one line — it is local, reversible, and asks for nothing; the human decides later
+whether and where to push. Already inside a work tree (the project is a folder of a larger
+repository): use that repository, say so, and write the ignore entries relative to the project
+folder. Never create a nested repository inside an existing one. Why: on a real Build-a-Feature
+project (October 2026) no journey had ever said `git init`, every ignore check and `git add` ran
+against nothing, and the human found an untracked folder at the end of the build.
 
 **Always kept out of git tracking — not a choice, not asked about per project:**
 - **`.claude/settings.local.json`** — each developer's own Claude Code settings, including the
@@ -2185,7 +2264,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v5.9.0.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
+folder as `README.md`. For runbook **v5.9.1.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2362,7 +2441,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.9.0.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.9.1.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
@@ -2863,12 +2942,17 @@ the end of the project, not "when there's time". Both editions, the same words (
   popover figure at every step close; the measurement is a procedure with no judgment in it,
   which the Reasoning role follows exactly, for a handful of requests' worth of credits. Claude
   Code projects, the Copilot CLI, and Lite (no Reasoning role) keep the main role running it.
-- **Copilot Chat in VS Code: the step close also refreshes the dashboard.** Copilot Chat has no
-  hooks, so the page is rendered at the step close (Ops § Dashboard → 3): in Full the Reasoning
-  role's brief ends with the render command, so the page is refreshed when the measurement returns;
-  in Lite the main role runs it after writing the rows
-  (`python3 ocpfFramework/scripts/ocpf-dashboard.py --project "<root>" --quiet`, or the `.ps1`). In
-  Claude Code and the Copilot CLI the hooks already do this.
+- **The step close ends by refreshing the dashboard — on every tool, every journey.** After the
+  rows are written and pasted, run the renderer once with the recorded `runner`
+  (`python3 ocpfFramework/scripts/ocpf-dashboard.py --project "<root>" --quiet`, or the `.ps1`
+  under `pwsh`, or `python` / `py -3` on Windows — `ocpfFramework/state/dashboard.json` says
+  which). In Full on Copilot Chat the Reasoning role's brief ends with the render command, so the
+  page is refreshed when the measurement returns; everywhere else the main role runs it. On
+  Build-a-Feature the close of every `F` row is a step close for this purpose. In Claude Code and
+  the Copilot CLI the hooks do the same between closes; when they don't (an interpreter the hooks
+  name is missing — Ops § Dashboard → 3), this render is the only one, and the page is never more
+  than one close stale. Why: on a real Windows project the hooks exited silently for the whole
+  build and the page showed *Untitled extension* until the journey's closing render.
 - **Copilot: the figure refines when the chat ends.** The journal's cumulative credits are exact at
   a checkpoint, which the SDK writes when the chat ends; a step closed mid-chat gets its share by
   request count, and the next measurement after the chat ends settles it. Say *as of* in the

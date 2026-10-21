@@ -8,7 +8,7 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 *by AJ Ansari*
 
-*Last Updated: Monday, October 19, 2026*
+*Last Updated: Tuesday, October 20, 2026*
 
 > ## 🌐 [Official Website](https://ajansari.github.io/ocpfBcAgenticDevFramework/)
 >
@@ -179,7 +179,7 @@ In GitHub Copilot, the commands are identical.
 | **1** | **Full, Lite, or Build-a-Feature.** It asks about the work — a complete solution, an update or a modest new app, or a quick customization — and recommends a journey with its reasoning, in the terms of the *Background* section above. **Build-a-Feature** asks what you want to build, writes the proposed design to `docs/` before confirming the fields in one box, writes and compiles, documents each object as it compiles, offers the next object, then a review and a `.app` — and skips rows 2 and 4 below. On an existing extension it is recommended first; on an existing extension nobody can explain, `/ocpf-bc:analyze` is offered before the choice. | Confirm or override. You can switch later without losing work. |
 | **2** | **Where the runbook goes.** It places the latest runbook as `CLAUDE.md`, `.github/copilot-instructions.md`, or both for mixed teams. | Nothing, unless a file already exists — then it asks. **It never overwrites.** |
 | **3** | **AL tools, nothing to install.** It connects Microsoft's AL tools using the AL Language extension you already have. | In Copilot Chat, nothing — they're built in. In Claude Code, approve the connection once. |
-| **4** | **The routine begins.** | Tell it your working language, how you want to be notified, which models do the work, and — with Copilot — the request limit and approval mode — Full asks for a Main, Light, and Reasoning model with a thinking effort each (recommended **Sonnet Medium / Haiku Medium / Opus High** in Claude Code, **Gemini 3.8 Flash Medium / Auto Balanced / Claude Opus 5.5 High** in Copilot); Lite asks for one (Sonnet Medium or Gemini 3.8 Flash Medium). It warns first that a High thinking effort makes every task slower, and recommends High only where judgment matters most. The Full framework then runs its Reasoning, Light, Generator, and Reviewer sub-agents — Lite its Generator and Reviewer — on exactly the models you chose, and every document lands in its phase folder — `docs/0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` — with the usage table in `ProjectProgress.md` for both editions. |
+| **4** | **The routine begins.** | Tell it your working language, how you want to be notified, which models do the work, and — with Copilot — the request limit and approval mode — Full asks for a Main, Light, and Reasoning model with a thinking effort each (recommended **Sonnet Medium / Haiku Medium / Opus High** in Claude Code, **Claude Sonnet 5.5 or GPT-6.1 Sol Medium / Claude Haiku 5.5 or GPT-6 Luna Medium / Claude Opus 5.5 or GPT-6.1 Sol High** in Copilot, two options per role at the same price); Lite asks for one (Sonnet Medium; in Copilot Claude Sonnet 5.5 or GPT-6.1 Sol Medium). It warns first that a High thinking effort makes every task slower, and recommends High only where judgment matters most. The Full framework then runs its Reasoning, Light, Generator, and Reviewer sub-agents — Lite its Generator and Reviewer — on exactly the models you chose, and every document lands in its phase folder — `docs/0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` — with the usage table in `ProjectProgress.md` for both editions. |
 
 **Other commands, for later:**
 
@@ -343,6 +343,25 @@ Each month's release notes in brief. The complete, versioned record is in
 [fullVersion/RunbookChangelog.md](fullVersion/RunbookChangelog.md),
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
+
+## October 20, 2026 — Full v5.9.1.0 · Lite v5.9.1.0 · Operations Guide v5.9.1.0 · Plugin v5.9.1
+
+**Fixes from a Build-a-Feature run on a new Windows machine.** The dashboard's refresh hooks are
+now written with an interpreter a ladder actually found on the machine (`pwsh` is not on every
+Windows machine, and `python3` is rarely its name there) and **proven once by running the hook's
+exact command** before the page is explained — a page that still says *Untitled extension* fails
+the proof — and every step or object close ends with one render by the agent on every tool, so a
+dead hook costs at most one close of staleness. The *Claude app* push option is **always offered in
+Claude Code unless a disqualifier is positively found**: a sign-in the agent can't check, a fresh
+install, an unpaired phone, or Windows is never a reason to drop it. Every journey now makes sure
+a git repository exists before the first ignore check (`git init -b main` when there is none,
+never nested inside a larger one) — no journey had ever said so. And `/ocpf-bc:documents` with no
+name asks a multi-select box that ends with the help site, handing off to `/ocpf-bc:html-docs`.
+The GitHub Copilot model recommendations are redone from Copilot's current price list: two options
+per role at the same price, a Claude model and its OpenAI peer — Main Claude Sonnet 5.5 or GPT-6.1
+Sol Medium, Light Claude Haiku 5.5 or GPT-6 Luna Medium, Reasoning Claude Opus 5.5 or GPT-6.1 Sol
+High; Gemini 3.8 Flash as Main is withdrawn, since the Main role's work is rule-following over a
+long runbook, where flash-class models fall short.
 
 ## October 19, 2026 — Full v5.9.0.0 · Lite v5.9.0.0 · Operations Guide v5.9.0.0 · Plugin v5.9.0
 

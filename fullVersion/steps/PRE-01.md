@@ -1,6 +1,6 @@
 # BC App Build Routine — PRE-01 — State the Problem
 
-**Runbook version:** 5.9.0.0 · Full edition · Phase: DEFINE
+**Runbook version:** 5.9.1.0 · Full edition · Phase: DEFINE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -46,7 +46,7 @@
   Say so plainly rather than fetching silently. **Full procedure, including the plugin's offline
   copies and what to do when GitHub is unreachable: ALL ALONG → OCPF AL Development Standards
   Guide.**
-- **Ask how to be notified, right after the working language** (Ops § Notifications — read it now): Claude app, sound, desktop notification, any combination, or none. Record the answer in `ocpfFramework/state/notifications.json` and apply it now, so every question from here on — the approvers question included — reaches the human even when they've stepped away.
+- **Ask how to be notified, right after the working language** (Ops § Notifications — read it now): Claude app, sound, desktop notification, any combination, or none. In Claude Code the *Claude app* option is offered unless a disqualifier is positively found — never dropped for a sign-in that can't be checked, a fresh install, an unpaired phone, or Windows. Record the answer in `ocpfFramework/state/notifications.json`, apply it now, and test it with each hook's exact command, so every question from here on — the approvers question included — reaches the human even when they've stepped away.
 - **Ask the three identity questions next — extension name, publisher, app icon — and write
   `app.json` at once** (Rule 6a; **Ops § Intake → *Box 0 — Identity first***). One box, three
   questions, in this order, before the model questions: **1. Extension name?** (up to three
@@ -74,7 +74,9 @@
   the renderer and its template into `ocpfFramework/scripts/`, render `ProjectDashboard.html` at
   the project root (beside `ProjectProgress.md`; it is tracked — `git check-ignore` must not name
   it), open it in the default browser (`--open`), install the refresh hooks for this AI tool (Claude
-  Code and Copilot CLI: every turn; Copilot Chat: every step boundary), then ask the one
+  Code and Copilot CLI: every turn; Copilot Chat: every step boundary) with the interpreter the
+  runner ladder found, **prove them** — the Stop hook's exact command run once, the sidecar newer
+  and carrying the app's name and the edition (Ops § Dashboard → 3) — then ask the one
   explanation question through the options mechanism — **I understand** / *Other* — with the text
   Ops § Dashboard fixes: what the page is, why it exists, how to read it, the file's name and place,
   and that a closed tab reopens with a right-click on the file → **Open Externally** (or *Reveal in
@@ -86,9 +88,10 @@
   most."* Six questions, each with the recommended pair offered first and free-text entry for
   anything else — the recommendation depends on the AI tool:
   - **Claude Code:** Main **Sonnet, Medium**; Light **Haiku, Medium**; Reasoning **Opus, High**.
-  - **GitHub Copilot:** Main **Gemini 3.8 Flash, Medium**; Light **Auto, Balanced**; Reasoning
-    **Claude Opus 5.5, High**. Copilot names are the picker's names on the day; if one isn't in
-    the picker, offer the nearest and say so.
+  - **GitHub Copilot:** Main **Claude Sonnet 5.5 or GPT-6.1 Sol, Medium**; Light **Claude Haiku 5.5 or GPT-6 Luna, Medium (Balanced)**; Reasoning **Claude Opus 5.5 or GPT-6.1 Sol, High** — two options
+    per role, the Claude model and its OpenAI peer at the same Copilot price, the Claude model
+    first (Ops § Roles). Copilot names are the picker's names on the day; if one isn't in the
+    picker, offer the nearest and say so.
 
   The questions: **Main model**, **Main thinking effort** (*High* / *Medium* / *Low*), **Light
   model**, **Light thinking effort**, **Reasoning model**, **Reasoning thinking effort**. Ask them

@@ -36,9 +36,13 @@ depends on the edition and the tool:
 | Edition · tool | Main | Light | Reasoning |
 |---|---|---|---|
 | Full · Claude Code | **Sonnet, Medium** | **Haiku, Medium** | **Opus, High** |
-| Full · GitHub Copilot | **Gemini 3.8 Flash, Medium** | **Auto, Balanced** | **Claude Opus 5.5, High** |
+| Full · GitHub Copilot | **Claude Sonnet 5.5 or GPT-6.1 Sol, Medium** | **Claude Haiku 5.5 or GPT-6 Luna, Medium (Balanced)** | **Claude Opus 5.5 or GPT-6.1 Sol, High** |
 | Lite · Claude Code | **Sonnet, Medium** | — | — |
-| Lite · GitHub Copilot | **Gemini 3.8 Flash, Medium** | — | — |
+| Lite · GitHub Copilot | **Claude Sonnet 5.5 or GPT-6.1 Sol, Medium** | — | — |
+
+In Copilot every role carries two recommended models — a Claude model and its OpenAI peer at the
+same Copilot price — offered as two options, the Claude model first; either is the recommendation
+(Ops § Roles has the prices and the reason a flash-class Main is a budget override, not a default).
 
 The **Generator role** (the `ocpf-generator` sub-agent, one per batch at Full Step 06 / Lite Step 4)
 and the **Reviewer** (the `ocpf-reviewer` sub-agent — the pre-review between the first clean compile
@@ -60,7 +64,7 @@ picker on the day, offer the nearest and say so.
 - **Claude Code (VS Code or CLI):** `AskUserQuestion` takes four questions per box — ask 1–4, then
   5–6, back to back.
 - **GitHub Copilot Chat in VS Code:** `askQuestions`, all six in one carousel. Offer the models by
-  the names the model picker shows (for example *Gemini 3.8 Flash*, *Auto*, *Claude Opus 5.5*),
+  the names the model picker shows (for example *Claude Sonnet 5.5*, *GPT-6.1 Sol*, *Claude Haiku 5.5*),
   because that string is what a `.agent.md` file's `model:` takes. *Balanced* is the picker's word
   for a medium effort.
 - **GitHub Copilot CLI:** `ask_user`, one question at a time in this order, with *I'll type it* on

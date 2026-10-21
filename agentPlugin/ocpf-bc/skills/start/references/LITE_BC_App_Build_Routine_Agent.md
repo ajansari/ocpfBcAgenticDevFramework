@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 5.9.0.0 (Lite, derived from the full framework v5.9.0.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
-**Last Updated:** October 19, 2026
+**Version:** 5.9.1.0 (Lite, derived from the full framework v5.9.1.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
+**Last Updated:** October 20, 2026
 
 > Version history for this edition lives in `ocpfFramework/LITE_RunbookChangeLog.md`, tracked
 > independently of the full framework's own `fullVersion/RunbookChangelog.md` (though a change to
@@ -21,7 +21,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.13.1.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.9.0.0), cited as
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.9.1.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
 >   tooling checks, analyzers, symbols, editor sync, notifications, packaging, repository hygiene,
 >   translations, fetched companions, documents, usage and cost, and the plugin.
@@ -600,7 +600,7 @@ first package and before Step 6's release-candidate question. The non-negotiable
 
 Two companions are fetched at Step 1 and kept for the life of the project: the **Standards Guide**
 (`ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md`, v1.13.1.0), cited as **Standards §**, and the
-**Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v5.9.0.0), cited as **Ops §** and shared
+**Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v5.9.1.0), cited as **Ops §** and shared
 unchanged with the full framework.
 
 **Full procedure: Ops § Fetched Companions** — fetching, refreshing, the plugin's offline copies,
@@ -618,6 +618,10 @@ and what to do when GitHub is unreachable.
 ## Repository Hygiene
 
 **Full procedure: Ops § Repository Hygiene.** Read it at Step 1 and Step 3.
+
+**The repository exists before the first ignore check:** `git rev-parse --is-inside-work-tree` at
+Step 1, else `git init -b main` (local, reversible, said in one line, nothing asked); inside a
+larger repository, use it and never nest one. Every `git check-ignore` and `git add` below assumes it.
 
 **Always gitignored, not a per-project choice (the first block in Ops § Repository Hygiene):**
 `.claude/settings.local.json`, `ocpfFramework/state/` (each developer's `usage.json`,
@@ -708,8 +712,12 @@ for a remote first, since collaborators will see the files as deleted.
   Repository Hygiene) — created at Step 1 the moment `app.json` exists (the three identity questions come first for that reason),
   opened once in the default browser, explained once through the options mechanism (**I
   understand** / *Other*), and kept fresh by hooks at zero token cost — every turn in Claude Code
-  and the Copilot CLI, every step boundary in Copilot Chat. **Full procedure: Ops § Dashboard**; in
-  a plugin project the `dashboard` skill (`/ocpf-bc:dashboard`) does it.
+  and the Copilot CLI, every step boundary in Copilot Chat. **The hooks name an interpreter the
+  ladder found on this machine and are proven once before the explanation question** — the Stop
+  hook's exact command run from the shell, the sidecar newer and carrying the app's name and the
+  edition — and **every step close ends with one render by the agent, on every tool**, so a dead
+  hook costs at most one close of staleness (Ops § Dashboard → 3). **Full procedure: Ops §
+  Dashboard**; in a plugin project the `dashboard` skill (`/ocpf-bc:dashboard`) does it.
 - It shows the app's name and icon, phase and step, tokens or AI credits and cost, the agent / you
   / waiting time split, who is working, the current step's exit gate, and the open question with
   where to answer it. It is a view over `ProjectProgress.md`, `usage.json`, `app.json`, the step
@@ -726,10 +734,13 @@ for a remote first, since collaborators will see the files as deleted.
 
 - **Ask once, as one multi-select question:** *Claude app*, *Sound*, *Desktop notification*, any
   combination, or *No notifications* — offering only what works for this tool, OS, and sign-in.
+  **In Claude Code, *Claude app* is always offered unless a disqualifier is positively found**; a
+  sign-in that can't be checked, a fresh install, an unpaired phone, or Windows is never a reason
+  to drop it (Ops § Notifications → 1).
 - **Record it in `ocpfFramework/state/notifications.json`** (per developer, always gitignored) and read it at the
   start of every session; ask again when it's missing.
 - **Apply it** through each tool's own notifications and hooks — never a script-raised banner on
-  macOS — and test it once.
+  macOS — and test it once with each hook's exact command (Ops § Notifications → 5).
 
 ## Reference Sources — Microsoft Learn and AL Guidelines
 

@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.9.0.0
-**Last Updated:** October 19, 2026
+**Version:** 5.9.1.0
+**Last Updated:** October 20, 2026
 
 > Version history for this framework lives in `ocpfFramework/RunbookChangelog.md`, tracked
 > independently of any one project built with it — check there for what changed between the version
@@ -18,7 +18,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.13.1.0): the AL *rules* this sequence applies (Parts 1–11, Appendices A–E), cited below as
 >   **Standards §**.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.9.0.0): the *procedures*
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.9.1.0): the *procedures*
 >   this sequence uses — asking, intake, project setup, the AL tools, tooling checks, analyzers,
 >   symbols, editor sync, notifications, packaging, repository hygiene, translations, fetched
 >   companions, documents, usage and cost, and the plugin — cited below as **Ops §**. Both editions
@@ -768,6 +768,10 @@ translation files*, except Operating Rule 8 and Standards §1.7.
 
 **Full procedure: Ops § Repository Hygiene.** Read it at §1.8, at §1.10, and at Step 05's scaffold.
 
+**The repository exists before the first ignore check:** `git rev-parse --is-inside-work-tree` at
+PRE-01, else `git init -b main` (local, reversible, said in one line, nothing asked); inside a
+larger repository, use it and never nest one. Every `git check-ignore` and `git add` below assumes it.
+
 **The `.gitignore` block is two groups, and Ops § Repository Hygiene has the exact text to paste.**
 
 **Group one — always kept out of git tracking, not a per-project choice:** `.claude/settings.local.json`,
@@ -860,8 +864,12 @@ change.
   Repository Hygiene) — created at PRE-01 the moment `app.json` exists (the three identity questions come first for that reason),
   opened once in the default browser, explained once through the options mechanism (**I
   understand** / *Other*), and kept fresh by hooks at zero token cost — every turn in Claude Code
-  and the Copilot CLI, every step boundary in Copilot Chat. **Full procedure: Ops § Dashboard**; in
-  a plugin project the `dashboard` skill (`/ocpf-bc:dashboard`) does it.
+  and the Copilot CLI, every step boundary in Copilot Chat. **The hooks name an interpreter the
+  ladder found on this machine and are proven once before the explanation question** — the Stop
+  hook's exact command run from the shell, the sidecar newer and carrying the app's name and the
+  edition — and **every step close ends with one render by the agent, on every tool**, so a dead
+  hook costs at most one close of staleness (Ops § Dashboard → 3). **Full procedure: Ops §
+  Dashboard**; in a plugin project the `dashboard` skill (`/ocpf-bc:dashboard`) does it.
 - It shows the app's name and icon, phase and step, tokens or AI credits and cost, the agent / you
   / waiting time split, who is working, the current step's exit gate, and the open question with
   where to answer it. It is a view over `ProjectProgress.md`, `usage.json`, `app.json`, the step
@@ -878,19 +886,23 @@ change.
 
 - **Ask once, as one multi-select question:** *Claude app*, *Sound*, *Desktop notification*, any
   combination, or *No notifications* — offering only what works for this AI tool, operating system,
-  and sign-in.
+  and sign-in. **In Claude Code, *Claude app* is always offered unless a disqualifier is positively
+  found** (an API key, Bedrock, Foundry, a gateway, or a listed environment variable); a sign-in
+  that can't be checked, a fresh install, an unpaired phone, or Windows is never a reason to drop
+  it (Ops § Notifications → 1).
 - **Record the answer in `ocpfFramework/state/notifications.json`** — per developer, always gitignored — and read
   it at the start of every session. Ask again when it's missing.
 - **Apply it** through each tool's own notifications and hooks, never a script-raised banner on
   macOS. With *Claude app*, explain Remote Control and what it stores before turning it on, and end
   every turn that hands the ball back with a short push.
-- **Test once**, and fix or drop whatever didn't arrive.
+- **Test once, with each hook's exact command**, and fix or drop whatever didn't arrive — a hook
+  whose interpreter is missing exits silently (Ops § Notifications → 5).
 
 ## OCPF AL Development Standards Guide
 
 The companion rules document — `ocpfALDevStandardsGuide.md`, v1.13.1.0 — holds the AL rules this
 runbook cites as **Standards §**, from PRE-02 onward. Its sibling, the **Operations Guide**
-(`ocpfOperationsGuide.md`, v5.9.0.0), holds the procedures, cited as **Ops §**.
+(`ocpfOperationsGuide.md`, v5.9.1.0), holds the procedures, cited as **Ops §**.
 
 **Fetch both at PRE-01, before anything else needs them** — `ocpfFramework/standardsGuide/` and `ocpfFramework/opsGuide/` in
 this project's root, both always gitignored — **and, in the same fetch, this runbook's step files
@@ -932,9 +944,10 @@ at Step 11 (the mermaid renderer), and whenever a script needs `pwsh`.
 - **Mermaid:** `node --version`, then `npx --yes @mermaid-js/mermaid-cli --version` — never
   `which mmdc`; an npx-cached package is never on `PATH`, which is the false "not installed" a real
   project hit.
-- **PowerShell 7 (`pwsh`):** needed by the XLIFF Sync module and the usage script's `.ps1` port;
-  recommended, not required, by BCQuality. The framework's own `.ps1` helpers run on Windows
-  PowerShell 5.1.
+- **PowerShell 7 (`pwsh`):** needed by the XLIFF Sync module, the usage script's `.ps1` port, and
+  the dashboard renderer's `.ps1` twin; recommended, not required, by BCQuality. The framework's
+  other `.ps1` helpers run on Windows PowerShell 5.1. The dashboard hooks never assume `pwsh`:
+  the runner is chosen by a ladder and proven (Ops § Dashboard → 3).
 - **Record the outcome** in `ocpfFramework/framework.json` → `"tooling"` (`mermaid`, `pwsh`), so
   the check isn't repeated every session and the `status` skill can report it.
 

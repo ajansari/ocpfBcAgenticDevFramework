@@ -4,6 +4,41 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.9.1 — October 20, 2026
+
+**Bundles:** full runbook v5.9.1.0, Lite v5.9.1.0, Standards Guide v1.13.1.0 (unchanged),
+Operations Guide v5.9.1.0. The `dashboard`, `notifications`, `build-a-feature`, `usage`, `status`,
+`documents`, and `roles` skill text; the pin wording in `al-standards` and `update-framework`; both
+manifests' version; one header comment in each of `ocpf-notify.ps1` and `ocpf-dashboard.ps1` (no
+code changes). From a Build-a-Feature run
+on a new Windows machine without PowerShell 7:
+
+- **`dashboard`: the hooks' interpreter comes from a ladder and the hooks are proven** (new
+  sections 2a and 2b). Probe `python3`, `pwsh` (must answer PowerShell 7), `python`, `py -3` —
+  Windows order `pwsh`, `python`, `py -3`, `python3` — record the winner as `runner` in
+  `ocpfFramework/state/dashboard.json`, write the hooks with it (a direct `python` / `py` exec
+  form on Windows, with `--waiting-json -` so the script reads stdin itself), then run the Stop
+  hook's exact command once and require the sidecar to be newer with `app.name` and
+  `framework.edition` right; record `hooksVerified`; step down the ladder on a fail; `runner:
+  none` and the close render when nothing runs. Repair names the symptom: *Untitled extension*,
+  or the Full map on a feature project, with `app.json` complete.
+- **`usage`: the step close ends with a render on every tool**, not only Copilot Chat; an `F` row's
+  close counts.
+- **`notifications`: *Claude app* is offered unless a disqualifier is positively found**; the test
+  runs each hook's exact command; the Windows script note no longer says "untested".
+- **`build-a-feature`**: the repository is initialized at the folders-and-ignore-list step when
+  there is none (never nested); the dashboard proof and the per-object close render; the
+  notifications wording.
+- **`status`** reports hooks written but never proven (`hooks: true`, no `hooksVerified`).
+- **`documents` with no name asks a multi-select box**, never single-choice, listing this edition's
+  documents whose inputs exist and ending with *The help site* — which hands off to `html-docs`
+  after the chosen documents are written. On a real project the box was single-choice and the
+  human could not find the site under the command they expected.
+- **`roles`: the Copilot recommendations are two options per role at the same Copilot price** —
+  Main Claude Sonnet 5.5 or GPT-6.1 Sol Medium, Light Claude Haiku 5.5 or GPT-6 Luna Medium,
+  Reasoning Claude Opus 5.5 or GPT-6.1 Sol High — offered as two options, the Claude model first;
+  Gemini 3.8 Flash and Auto withdrawn.
+
 ## 5.9.0 — October 19, 2026
 
 **Bundles:** full runbook v5.9.0.0, Lite v5.9.0.0, Standards Guide v1.13.1.0 (unchanged),

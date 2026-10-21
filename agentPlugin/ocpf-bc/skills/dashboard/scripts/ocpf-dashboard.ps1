@@ -4,7 +4,7 @@
 # (app.json, framework.json, usage.json, ProjectProgress.md — the step table, or Build-a-Feature's feature table — the step files, pricing.json, waiting.json,
 # the sub-agent definitions, the usage script's -Json output, and — in Claude Code — the transcripts).
 # Mirrors ocpf-dashboard.py (the Python script is the reference implementation); exercised on PowerShell 7
-# on macOS, untested on Windows. Internal variables avoid the parameter names (names are case-insensitive).
+# on macOS; needs PowerShell 7 (pwsh) on every OS, and the dashboard skill's hook proof (Ops § Dashboard → 3) is what proves it on each machine. Internal variables avoid the parameter names (names are case-insensitive).
 #   pwsh ocpf-dashboard.ps1 -Project <root> [-Open] [-Quiet] [-Refresh 30] [-Toast "text"] [-Live]
 #   pwsh ocpf-dashboard.ps1 -Project <root> -WaitingJson '<hook input>'    # a question opened
 #   pwsh ocpf-dashboard.ps1 -Project <root> -ClearWaiting                   # it was answered

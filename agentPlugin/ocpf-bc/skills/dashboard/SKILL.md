@@ -36,8 +36,10 @@ moment the page has a name and an icon to show; earlier it would be an empty she
    ```
    `--open` uses the operating system's default opener (`open`, `start`, `xdg-open`) — the page
    appears in the default browser once, now. Nothing else ever opens it unasked.
-3. **Install the hooks** (section 2) so the page refreshes by itself, then re-render with `--live`
-   so the header reads *Live* instead of *Refreshed*. Prove the page is tracked:
+3. **Install the hooks** (section 2) with the interpreter the runner ladder found, then **prove
+   them** (section 2a) — the Stop hook's exact command run once, the sidecar newer and carrying
+   the app's name and the edition — so the header reads *Live* instead of *Refreshed* and the
+   page shows this app, not *Untitled extension*. Prove the page is tracked:
    `git check-ignore -v ProjectDashboard.html ProjectDashboard-f1.html` must print nothing; if it prints a rule, fix
    `.gitignore` (Ops § Repository Hygiene) before going on, then `git add ProjectDashboard.html ProjectDashboard-f1.html`.
 4. **Explain it, once, through the options mechanism** (Rule 6a) — the next thing after the page
@@ -61,7 +63,7 @@ moment the page has a name and an icon to show; earlier it would be an empty she
    > Externally** *(when that entry isn't offered, **Reveal in Finder** / **Reveal in File
    > Explorer** and double-click the file)*, or ask me to "open the dashboard" and I will.
    >
-   > *(Copilot Chat in VS Code only:)* Copilot Chat has no hooks, so this page refreshes at every
+   > *(Copilot Chat in VS Code, or when no interpreter for the hooks was found on this machine:)* There are no working hooks here, so this page refreshes at every
    > step boundary rather than every turn; the header says *Refreshed* and when.
 
    Record the answer in `docs/0-project/ProjectMemory.md` (one line: dashboard explained, date). If
@@ -69,7 +71,9 @@ moment the page has a name and an icon to show; earlier it would be an empty she
 
 The frontloaded identity answers and `app.json` write are the runbook's (PRE-01 / Lite Step 1); this
 skill assumes `app.json` exists and renders what it finds. If it is called before `app.json` exists,
-render anyway — the page says *Untitled extension* and corrects itself at the next refresh.
+render anyway — the page says *Untitled extension* and corrects itself at the next refresh, **which
+the proof in section 2a is there to guarantee**: on a real Windows project that "next refresh"
+never came, because the hooks named an interpreter the machine lacked.
 
 ## 2. Hooks — zero-token refresh
 
@@ -89,13 +93,27 @@ the notifications skill uses; keep every existing hook):
   }
 }
 ```
-Windows: `"command": "pwsh"` (**PowerShell 7** — the twin uses `??` and `ConvertFrom-Json
--AsHashtable`, which Windows PowerShell 5.1 cannot parse; Ops § Tooling Checks records whether
-`pwsh` is on the machine, and without it Python 3 runs the `.py`), `"args": ["-NoProfile", "-File",
+**The runner is chosen by a ladder, never assumed** (Ops § Dashboard → 3). Probe, in order, and
+take the first whose version command answers: macOS and Linux `python3 --version`, then
+`pwsh -NoProfile -Command $PSVersionTable.PSVersion.Major` (must answer `7`); **Windows** `pwsh`
+first, then `python --version`, then `py -3 --version`, then `python3 --version` (a Microsoft
+Store prompt or silence is a failure). Record the winner as `runner` in
+`ocpfFramework/state/dashboard.json` (`python3` | `pwsh` | `python` | `py` | `none`) and write
+every hook with it. Windows with `pwsh`: `"command": "pwsh"` (**PowerShell 7** — the twin uses
+`??` and `ConvertFrom-Json -AsHashtable`, which Windows PowerShell 5.1 cannot parse),
+`"args": ["-NoProfile", "-File",
 "${CLAUDE_PROJECT_DIR}\\ocpfFramework\\scripts\\ocpf-dashboard.ps1", "-Project",
 "${CLAUDE_PROJECT_DIR}", "-Quiet", "-Live"]`; the PreToolUse hook adds `"-WaitingJson", "-"` (a
 lone `-` tells the script to read the hook's JSON from stdin) and the PostToolUse hook adds
-`"-ClearWaiting"`; the unmatched PostToolUse hook adds `"-Throttle", "45"`. `--quiet` makes every
+`"-ClearWaiting"`; the unmatched PostToolUse hook adds `"-Throttle", "45"`. Windows without
+`pwsh`: `"command": "python"` (or `"py"` with `"-3"` first in `args`), `"args":
+["${CLAUDE_PROJECT_DIR}\\ocpfFramework\\scripts\\ocpf-dashboard.py", "--project",
+"${CLAUDE_PROJECT_DIR}", "--quiet", "--live"]`, the same per-hook extras as the `sh -c` form; the
+PreToolUse hook passes `"--waiting-json", "-"` so the script reads stdin itself (no `$(cat)`
+without a shell). `pwsh` is not on every Windows machine and `python3` is usually not the
+command there: a hook written to either without the ladder exits silently for the whole build.
+
+`--quiet` makes every
 failure silent and exit 0: a dashboard that can't render must never interrupt the agent. The
 *Stop* hook re-renders after every turn; the **unmatched `PostToolUse` hook** (no `matcher`: every
 tool call, including the sub-agents' own) re-renders *inside* a turn, at most once per 45 seconds
@@ -103,6 +121,36 @@ tool call, including the sub-agents' own) re-renders *inside* a turn, at most on
 waiting minutes on the Reasoning sub-agent — leaves the page frozen at the turn's start, which is
 what happened on the first v5.2.0.0 project. Both read the transcripts for who is working and the
 time split, and cost no tokens.
+
+### 2a. Prove the hooks — before the explanation question
+
+After the hooks are written, and again on every repair:
+
+1. Note the sidecar's modification time: `ocpfFramework/state/dashboard-data.js`.
+2. Run the **Stop hook's exact command** once from the shell — same interpreter, same arguments,
+   `${CLAUDE_PROJECT_DIR}` replaced by the project root.
+3. Read the sidecar again. The proof passes only when the file is newer **and** its `app.name`
+   equals `app.json`'s `name` **and** its `framework.edition` equals the marker's `edition`
+   (`full`, `lite`, or `feature`). *Untitled extension*, or the Full step map on a feature
+   project, is a fail.
+4. On a fail: run the same command without `--quiet` / `-Quiet` and read the error, step down the
+   ladder, rewrite the hooks, and prove again. When nothing on the ladder runs: record
+   `hooks: false` and `runner: none` in `dashboard.json`, say so in one sentence, and the
+   explanation question's last paragraph says the page refreshes at every step close rather than
+   every turn (the close render, section 2b).
+5. On a pass: record `hooksVerified` (ISO timestamp) and `runner` in `dashboard.json`.
+
+Why: on a real Windows Build-a-Feature project (October 2026) the hooks were written for `pwsh`
+on a machine without it; `--quiet` made every run silent, and the page read *Untitled extension*
+and *Full* from the first render until the journey's closing render — the only render that ever
+happened. A hook is proven by running it, never by having written it.
+
+### 2b. The close render — every tool, hooks or not
+
+The step-close ritual (the `usage` skill, Ops § Usage & Cost → 5) ends by running the renderer
+once with the recorded `runner`, on every AI tool and every journey — a step close in Full and
+Lite, an `F` row's close in Build-a-Feature. Redundant while hooks work, the only refresh when they
+don't, and the refresh in Copilot Chat: the page is never more than one close stale.
 
 **GitHub Copilot CLI.** The same five moments in `.github/hooks/ocpf-dashboard.json` (project
 level, gitignored) with the CLI's event names — `agentStop`, `subagentStop` where available,
@@ -116,7 +164,8 @@ the header then says *Refreshed · <time> · at step close*, which is the truth.
 refresh whenever they ask where things stand.
 
 Record what was installed in `ocpfFramework/state/dashboard.json` (`hooks: true/false`, `theme`,
-`tool`); the `status` skill reads it.
+`tool`, `runner`, `hooksVerified`); the `status` skill reads it and reports hooks that were
+never proven.
 
 ## 3. On request
 
@@ -148,7 +197,11 @@ Record what was installed in `ocpfFramework/state/dashboard.json` (`hooks: true/
   and read only the top-level session files, not `<session>/subagents/agent-*.jsonl` — refresh
   `ocpfFramework/scripts/` (`update-framework`). A page that no longer refreshes: check the hooks file still names the scripts, that
   `ocpfFramework/scripts/` still holds them (the `update-framework` skill refreshes them with the
-  rest), and run the renderer once by hand to see its notes. A page that opens blank: the browser
+  rest), and run the renderer once by hand to see its notes. **A page that reads *Untitled
+  extension*, or shows the Full map on a feature project, while `app.json` and the marker are
+  complete:** the hooks never ran — their interpreter is missing (`pwsh` on a Windows machine
+  without PowerShell 7; `python3` on Windows) — so run the ladder and the proof (section 2a),
+  rewrite the hooks with the runner that works, and record `runner` and `hooksVerified`. A page that opens blank: the browser
   blocked a `file://` script — none is needed for the first paint — so re-render and reopen. A
   page that paints but never updates: the renderer did not write
   `ocpfFramework/state/dashboard-data.js` (older than v5.3.5.0) — refresh `ocpfFramework/scripts/`.
@@ -170,8 +223,8 @@ Compiled → Documented → Reviewed → Packaged*), object ID, time, and cost; 
 estimate tile becomes *Objects built*; the exit-gate card shows the row's stage ladder; the roles
 card shows Main alone. The data gains `phases` and, per row, `stage`, `kind`, `objectId`, and
 `shippedIn`. First creation is the same (the `build-a-feature` skill calls this skill the moment
-`app.json` exists, adding one sentence to the explanation question); hooks and refresh are the
-same. Renderers and templates older than plugin 5.5.0 show a feature project as an empty Full
+`app.json` exists, adding one sentence to the explanation question); hooks, the ladder, the
+proof (section 2a), and the close render at every `F` row's close (section 2b) are the same. Renderers and templates older than plugin 5.5.0 show a feature project as an empty Full
 map: refresh `ocpfFramework/scripts/` (`update-framework`).
 
 ## 3c. Time and cost — what the figures mean (v5.8.0.0)

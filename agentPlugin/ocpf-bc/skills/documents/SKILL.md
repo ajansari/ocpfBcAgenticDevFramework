@@ -48,7 +48,18 @@ table is `ProjectProgress.md`'s second table in both editions (the `usage` skill
 
 Take the name from the invocation (`/ocpf-bc:documents TDD`) or from the step in progress
 (`ProjectProgress.md`, both editions). The table above and the one in Ops § Documents map every
-document to its template and its step. If the name is ambiguous, ask through the options mechanism.
+document to its template and its step.
+
+**No name, or an ambiguous one: ask one multi-select box** through the options mechanism — never
+a single-choice box, since the human usually wants more than one. List the documents that make
+sense here (this edition's, whose named inputs exist on disk; the step in progress first) and,
+always, one last option that is not a document: **The help site — the HTML documentation and
+support site, built from these documents (`html-docs`)**. Choosing it hands off to the `html-docs`
+skill (`/ocpf-bc:html-docs`) after any documents chosen beside it are written — the site is built
+from them, so they come first. On a Build-a-Feature project the entry is still listed: the journey
+never offers the site on its own, and choosing it here is the request that `html-docs` runs on. Several documents chosen → written in step order, each from its own
+template, one closing box at the end. Why: on a real project the box was single-choice and had no
+help-site entry, so the human could not find the site from the command they expected it under.
 
 ## Step 2: Read only what the step names
 

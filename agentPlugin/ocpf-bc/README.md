@@ -32,7 +32,7 @@ The `start` skill:
 On a project that already follows the framework, `start` offers *Status*, *Check for a framework
 update*, or *Build a feature in this project*.
 
-**Project layout (since plugin 5.0.0, Full 5.0.0.0 / Lite 5.0.0.0; current 5.9.0 / 5.9.0.0):** everything the framework fetches
+**Project layout (since plugin 5.0.0, Full 5.0.0.0 / Lite 5.0.0.0; current 5.9.1 / 5.9.1.0):** everything the framework fetches
 or keeps lives under one folder, `ocpfFramework/` (step files, templates, guides, patterns,
 scripts, the marker, and per-developer `state/`); project documents go in `docs/` by phase
 (`0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/`; Build-a-Feature keeps its six
@@ -42,9 +42,10 @@ moved to this layout by `update-framework`'s migration.
 
 **Model recommendations** (the `roles` skill offers these first; High effort only where judgment
 matters most, because it makes every task slower): Full on Claude Code — Main Sonnet Medium,
-Light Haiku Medium, Reasoning Opus High; Full on GitHub Copilot — Gemini 3.8 Flash Medium, Auto
-Balanced, Claude Opus 5.5 High; Lite and Build-a-Feature — Sonnet Medium (Copilot: Gemini 3.8
-Flash Medium). The generator and reviewer sub-agents run on the Main model; Build-a-Feature uses no
+Light Haiku Medium, Reasoning Opus High; Full on GitHub Copilot — two options per role at the same
+Copilot price, Claude Sonnet 5.5 or GPT-6.1 Sol Medium, Claude Haiku 5.5 or GPT-6 Luna Medium,
+Claude Opus 5.5 or GPT-6.1 Sol High; Lite and Build-a-Feature — Sonnet Medium (Copilot: Claude
+Sonnet 5.5 or GPT-6.1 Sol Medium). The generator and reviewer sub-agents run on the Main model; Build-a-Feature uses no
 sub-agent; the `analyze` skill's analyst runs on the model you choose for the analysis.
 
 ## What's included

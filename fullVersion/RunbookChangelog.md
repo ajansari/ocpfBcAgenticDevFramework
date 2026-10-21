@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.9.0.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v5.9.0.0**, and Lite at **v5.9.0.0** — but
+**v5.9.1.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v5.9.1.0**, and Lite at **v5.9.1.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -23,6 +23,50 @@ change-worthy. (This is a different convention from a project's own ChangeLog, w
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
 
 ---
+
+## v5.9.1.0 — October 20, 2026
+
+**Windows run fixes.** Lite **v5.9.1.0**, Operations Guide **v5.9.1.0**, Standards Guide
+**v1.13.1.0** (unchanged), plugin **5.9.1**. From AJ's Build-a-Feature run on a new Windows
+machine (October 20, 2026), where the dashboard showed *Untitled extension* and the Full map for
+the whole build, the *Claude app* push option was never offered, and no git repository was ever
+initialized:
+
+- **Dashboard hooks: a runner ladder and a proof** (Ops § Dashboard → 3; ALL ALONG → Dashboard;
+  PRE-01). The hooks name an interpreter a ladder found on the machine — `python3`, then `pwsh`
+  answering PowerShell 7, then `python`, then `py -3` (Windows order: `pwsh`, `python`, `py -3`,
+  `python3`) — recorded as `runner` in `ocpfFramework/state/dashboard.json`, never assumed to be
+  `pwsh` on Windows. Before the explanation question the Stop hook's **exact command** is run
+  once and the sidecar must be newer and carry `app.json`'s name and the marker's edition; a page
+  that still says *Untitled extension* fails, the ladder steps down, the hooks are rewritten and
+  proven again; `hooksVerified` records the pass and the `status` skill reports hooks never
+  proven. Why: `pwsh` was absent, `--quiet` made every hook exit silently, and the page was
+  rendered exactly once — at the journey's close.
+- **The close render on every tool** (Ops § Usage & Cost → 5; Ops § Dashboard → 3): the
+  step-close ritual ends by running the renderer, in Claude Code and the Copilot CLI too, so a
+  dead hook costs at most one close of staleness; on Build-a-Feature every `F` row's close.
+- **Notifications: *Claude app* is offered unless a disqualifier is positively found** (Ops §
+  Notifications → 1; ALL ALONG → Notifications; PRE-01). A sign-in the agent can't check is offered
+  with the subscription caveat; a fresh install, a new machine, an unpaired phone, or Windows is
+  never a reason to drop it — the pairing happens afterwards in the Claude app (→ 4). The test
+  (new → 5) runs each hook's exact command; the notification script's "untested on Windows" note
+  is replaced by that test.
+- **Tooling Checks** names the dashboard renderer's `.ps1` twin among what needs PowerShell 7.
+- **The repository exists before the first ignore check** (Ops § Repository Hygiene; ALL ALONG →
+  Repository Hygiene; Ops § Project Setup → 7): `git rev-parse --is-inside-work-tree`, else
+  `git init -b main`, said in one line and asked about nothing; inside a larger repository, that
+  one is used and never nested. No journey had ever initialized a repository, so every ignore
+  check and `git add` ran against nothing.
+- **GitHub Copilot model recommendations redone** (Ops § Roles; PRE-01; Step 01's table;
+  schematics) from Copilot's models-and-pricing page (read October 20, 2026): two options per
+  role at the same Copilot price, a Claude model and its OpenAI peer, the Claude model first —
+  Main **Claude Sonnet 5.5 or GPT-6.1 Sol, Medium**; Light **Claude Haiku 5.5 or GPT-6 Luna,
+  Medium**; Reasoning **Claude Opus 5.5 or GPT-6.1 Sol, High**. Gemini 3.8 Flash as Main and Auto
+  as Light are withdrawn: the Main role's work is rule-following over a long runbook, where
+  flash-class models fall short; a flash Main is a budget override said with that warning. Ops
+  § Roles records the prices and why the cached-input rate decides on this framework.
+- Plugin only: `/ocpf-bc:documents` with no name asks a multi-select box that ends with the help
+  site and hands off to `html-docs` (plugin changelog).
 
 ## v5.9.0.0 — October 19, 2026
 
