@@ -510,6 +510,16 @@ function Get-ObjectCounts($root, $edition) {
 }
 
 if ($Calibrate) {
+  # Project close (v5.9.5.0): stamp projectClosedAt and close any window still open, so the dashboard shows the project completed —
+  # not on a Full or Lite project with a step still In Progress: a -Calibrate run mid-project must not read as the close.
+  $openRows = @(); $pp = Join-Path $root "ProjectProgress.md"
+  if ("$((Load-Json (Join-Path $root 'ocpfFramework/framework.json') @{}).edition)".ToLower() -ne "feature" -and (Test-Path $pp)) {
+    foreach ($line in ((Get-Content $pp -Raw) -split "`n")) { if ($line -match '^\|\s*(DEFINE|DESIGN|BUILD|PROVE)\s*\|\s*([A-Za-z0-9-]+)\s*[—-]\s*[^|]*\|\s*([^|]*)\|' -and $Matches[3] -like "*In Progress*") { $openRows += $Matches[2] } } }
+  if ($openRows.Count) { $script:notes += "projectClosedAt not stamped — $($openRows -join ', ') still In Progress in ProjectProgress.md; close the step first, then the dashboard reads Completed" }
+  else {
+    if (-not $usageDoc.projectClosedAt) { $usageDoc["projectClosedAt"] = (Get-Date).ToUniversalTime().ToString("yyyy-MM-ddTHH:mm:ssZ") }
+    foreach ($s in @($usageDoc.steps)) { if ($s.startedAt -and -not $s.completedAt) { $s["completedAt"] = $usageDoc.projectClosedAt } }
+    $usageDoc | ConvertTo-Json -Depth 8 | Set-Content -Path $usagePath -Encoding utf8 }
   $marker = Load-Json (Join-Path $root "ocpfFramework/framework.json") @{}
   $app = Load-Json (Join-Path $root "app.json") @{}
   $name = if ($app.name) { $app.name } else { Split-Path -Leaf $root }
@@ -543,7 +553,7 @@ if ($Calibrate) {
   $slug = (($name -replace '[^A-Za-z0-9._-]+', '-').Trim('-')); if (-not $slug) { $slug = "project" }
   $path = Join-Path $folder ("{0}-{1}.json" -f $slug, [datetime]::UtcNow.ToString("yyyy-MM-dd"))
   $data | ConvertTo-Json -Depth 6 | Set-Content -Path $path -Encoding utf8
-  $path; exit 0
+  $path; foreach ($n in $notes) { "*Note: $n*" }; exit 0  # the notes follow the path: a refused close must reach the agent
 }
 function HM($sec) { if ($null -eq $sec) { "n/a — no timestamps" } else { "{0}h {1:00}m" -f [int][math]::Floor($sec/3600), [int][math]::Floor(([int]$sec % 3600)/60) } }
 if ($isCopilot) {

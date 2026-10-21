@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.9.4.0
-**Last Updated:** October 20, 2026
+**Version:** 5.9.5.0
+**Last Updated:** October 21, 2026
 
 > Version history for this framework lives in `ocpfFramework/RunbookChangelog.md`, tracked
 > independently of any one project built with it — check there for what changed between the version
@@ -18,7 +18,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.13.1.0): the AL *rules* this sequence applies (Parts 1–11, Appendices A–E), cited below as
 >   **Standards §**.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.9.4.0): the *procedures*
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.9.5.0): the *procedures*
 >   this sequence uses — asking, intake, project setup, the AL tools, tooling checks, analyzers,
 >   symbols, editor sync, notifications, packaging, repository hygiene, translations, fetched
 >   companions, documents, usage and cost, and the plugin — cited below as **Ops §**. Both editions
@@ -301,7 +301,7 @@ tools, symbols, editor sync (§1.10, Ops § Project Setup).
 
 **Outputs:** `docs/1-define/ProjectParameters.md` — the completed Project Parameters block (above, all placeholders replaced), persisted as its own tracked document so every later step, and every role under §1.7, reads it from disk rather than depending on conversation history; an empty **Object Register** (`docs/1-define/ObjectRegister.md`) seeded with the allocated ID ranges; the project's `.gitignore` populated per this section and per ALL ALONG → Repository Hygiene, and verified with `git check-ignore`; **`docs/1-define/TranslationGlossary.md`**, created with the regional terms PRE-02 listed (ALL ALONG → Translations & Terminology) — unless the project chose *US wording, no translation files*; `app.json` (with `version` from **Starting Version** and, when an icon was given, `logo`), `src/` (and `src/logo/AppLogo.png`, resized and committed, when an icon was given), and `.alpackages/` per §1.10.
 
-**Exit gate:** Every question in this step was asked through the options mechanism (Ops § Intake), the app icon question included. `app.json` matches the sheet — `version` is `0.0.0.1` for a new app or the installed version for an existing one — and symbols for the target version are in `.alpackages/` (§1.10, Ops § Project Setup). `src/` exists, and `src/logo/AppLogo.png` is square, 300 px on a side unless the source was smaller, and named in `app.json`'s `logo` when the icon answer was *Yes*. No placeholder remains. **Approvers** is recorded (asked at PRE-01). Deployment Target is one allowed value. Namespace matches between 1.1 and 1.3, or both are correctly N/A if Use Namespace = `No`. Localization is set. If Permission Sets required = `Yes`, ≥ 2 IDs are reserved in the primary range. §1.6's three questions are each answered `Yes`/`No` with specifics recorded for any `Yes`. §1.7 carries the PRE-01 answers: every one of the three roles has a model, its harness identifier, and a thinking effort recorded — not model alone — and the Light, Reasoning, Generator, and Reviewer sub-agent definitions exist in the project with those values (Operating Rule 10). The object ID range(s) in §1.2 were chosen or typed by the human in the range question, recorded with that source — never kept from a scaffold's `app.json` (Ops § Intake → *Forbidden sources*). §1.8 is answered (or defaults to `Yes`), every entry from the Ops § Repository Hygiene block is in `.gitignore`, and `git check-ignore` confirms each existing framework file — `ocpfFramework/` and the sub-agent definitions included — is ignored. `docs/1-define/ProjectParameters.md` and `docs/1-define/ObjectRegister.md` are in `docs/1-define/`, and nothing from Operating Rule 9's list is in the project root or a flat `docs/`. §1.9: every target language is classified against Microsoft's live page and — unless source wording is *US wording, no translation files* — has a required-at-release answer and a named reviewer; source language and wording are recorded; any mismatch with `Localization` is resolved. Human confirms the sheet. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 11).
+**Exit gate:** Every question in this step was asked through the options mechanism (Ops § Intake), the app icon question included, and the short description, long description, and help URL each in a box of its own with the agent's own suggestion as the first option (Ops § Intake → *The description and help questions*), their answers recorded with their sources. `app.json` matches the sheet — `version` is `0.0.0.1` for a new app or the installed version for an existing one — and symbols for the target version are in `.alpackages/` (§1.10, Ops § Project Setup). `src/` exists, and `src/logo/AppLogo.png` is square, 300 px on a side unless the source was smaller, and named in `app.json`'s `logo` when the icon answer was *Yes*. No placeholder remains. **Approvers** is recorded (asked at PRE-01). Deployment Target is one allowed value. Namespace matches between 1.1 and 1.3, or both are correctly N/A if Use Namespace = `No`. Localization is set. If Permission Sets required = `Yes`, ≥ 2 IDs are reserved in the primary range. §1.6's three questions are each answered `Yes`/`No` with specifics recorded for any `Yes`. §1.7 carries the PRE-01 answers: every one of the three roles has a model, its harness identifier, and a thinking effort recorded — not model alone — and the Light, Reasoning, Generator, and Reviewer sub-agent definitions exist in the project with those values (Operating Rule 10). The object ID range(s) in §1.2 were chosen or typed by the human in the range question, recorded with that source — never kept from a scaffold's `app.json` (Ops § Intake → *Forbidden sources*). §1.8 is answered (or defaults to `Yes`), every entry from the Ops § Repository Hygiene block is in `.gitignore`, and `git check-ignore` confirms each existing framework file — `ocpfFramework/` and the sub-agent definitions included — is ignored. `docs/1-define/ProjectParameters.md` and `docs/1-define/ObjectRegister.md` are in `docs/1-define/`, and nothing from Operating Rule 9's list is in the project root or a flat `docs/`. §1.9: every target language is classified against Microsoft's live page and — unless source wording is *US wording, no translation files* — has a required-at-release answer and a named reviewer; source language and wording are recorded; any mismatch with `Localization` is resolved. Human confirms the sheet. This step's usage rows — one per model in Claude Code, one per step in Copilot — are written before this message (Operating Rule 11).
 
 ---
 
@@ -902,7 +902,7 @@ change.
 
 The companion rules document — `ocpfALDevStandardsGuide.md`, v1.13.1.0 — holds the AL rules this
 runbook cites as **Standards §**, from PRE-02 onward. Its sibling, the **Operations Guide**
-(`ocpfOperationsGuide.md`, v5.9.4.0), holds the procedures, cited as **Ops §**.
+(`ocpfOperationsGuide.md`, v5.9.5.0), holds the procedures, cited as **Ops §**.
 
 **Fetch both at PRE-01, before anything else needs them** — `ocpfFramework/standardsGuide/` and `ocpfFramework/opsGuide/` in
 this project's root, both always gitignored — **and, in the same fetch, this runbook's step files

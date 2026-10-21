@@ -767,7 +767,8 @@ def copilot_main(a, root, usage, usage_path, pricing, pricing_path):
     if usd is None:
         notes.append("pricing.json has no \"aiCredit\" entry — fetch https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing and write { \"aiCredit\": { \"usd\": <value>, \"source\": <url> } }")
     if a.calibrate:
-        print(calibrate(root, usage, pricing, {}, out, notes)); return
+        mark_closed(root, usage, usage_path, notes)
+        print(calibrate(root, usage, pricing, {}, out, notes)); [print(f"*Note: {n}*") for n in notes]; return  # the notes follow the path: a refused close must reach the agent
     src = (pricing.get("aiCredit") or {}).get("source") or "none fetched"
     recon = None
     if a.reconcile:
@@ -923,7 +924,8 @@ def main():
     if a.step and not out:
         notes.append(f"no transcript lines fall inside step {a.step}'s window — check its startedAt/completedAt in {os.path.join(STATE, 'usage.json')}")
     if a.calibrate:
-        print(calibrate(root, usage, pricing, rates, out, notes)); return
+        mark_closed(root, usage, usage_path, notes)
+        print(calibrate(root, usage, pricing, rates, out, notes)); [print(f"*Note: {n}*") for n in notes]; return  # the notes follow the path: a refused close must reach the agent
     if a.json:
         print(json.dumps({"transcriptDir": tdir, "files": len(files), "pricingSource": pricing.get("fetchedAt"),
                           "rows": out, "notes": notes}, indent=2, default=str)); return
@@ -946,6 +948,22 @@ def main():
     src = ", ".join(sorted({v.get('source','') for v in rates.values() if v.get('source')})) or "none fetched"
     print(f"\n*Prices: {src}, read {pricing.get('fetchedAt', 'n/a')}. Transcripts: {tdir} ({len(files)} files).*")
     for note_ in notes: print(f"*Note: {note_}*")
+
+def mark_closed(root, usage, usage_path, notes):
+    """Project close (v5.9.5.0): stamp projectClosedAt and close any window still open, so the dashboard shows the project
+    completed and its clocks stop — the renderer's --close-project does the same for Build-a-Feature's *Done*.
+    Not on a Full or Lite project with a step still In Progress: a --calibrate run mid-project must not read as the close."""
+    if (load_json(os.path.join(root, "ocpfFramework", "framework.json"), {}).get("edition") or "").lower() != "feature":
+        try:
+            with open(os.path.join(root, "ProjectProgress.md"), encoding="utf-8") as f: txt = f.read()
+        except OSError: txt = ""
+        open_rows = [m.group(1) for m in re.finditer(r"^\|\s*(?:DEFINE|DESIGN|BUILD|PROVE)\s*\|\s*([A-Za-z0-9-]+)\s*[—-]\s*[^|]*\|\s*([^|]*)\|", txt, re.M) if "in progress" in m.group(2).lower()]
+        if open_rows:
+            notes.append(f"projectClosedAt not stamped — {', '.join(open_rows)} still In Progress in ProjectProgress.md; close the step first, then the dashboard reads Completed"); return
+    if not usage.get("projectClosedAt"): usage["projectClosedAt"] = datetime.now(timezone.utc).strftime("%Y-%m-%dT%H:%M:%SZ")
+    for s in usage.get("steps", []):
+        if s.get("startedAt") and not s.get("completedAt"): s["completedAt"] = usage["projectClosedAt"]
+    with open(usage_path, "w", encoding="utf-8") as f: json.dump(usage, f, indent=2, ensure_ascii=False); f.write("\n")
 
 def calibrate(root, usage, pricing, rates, out, notes):
     """Write ~/.ocpf/calibration/<project>-<date>.json from the measured rows; return its path."""

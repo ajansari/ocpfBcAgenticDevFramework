@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 1 — Define the Problem & Lock Parameters
 
-**Runbook version:** 5.9.4.0 · Lite edition · Phase: DEFINE
+**Runbook version:** 5.9.5.0 · Lite edition · Phase: DEFINE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -134,8 +134,9 @@
 **Ask first, don't infer — and ask interactively** (Rule 6a). **How to ask — the boxes, what to
 offer for each question, and the language questions — is Ops § Intake. Read it before the first
 box.** In short: every question goes through the options mechanism, grouped into as few boxes as the
-questions allow (identity, naming, permission sets and IDs, onboarding, setup and languages, then
-the translation questions); countries are asked once; a suggestion is a candidate the human picks,
+questions allow (identity, naming, permission sets and IDs, onboarding, then the description and
+help questions one at a time, each with the agent's own suggestion ready — Ops § Intake → *The
+description and help questions* — then setup and languages, then the translation questions); countries are asked once; a suggestion is a candidate the human picks,
 never an answer recorded for them; and the whole sheet is confirmed once at the end. Box 1a carries
 question **4a. App icon?** only when it was not already answered in this step's identity box (it normally was — the *App icon* row below records it). Lite asks only the Main model and effort —
 already asked above, right after notifications — not the full framework's Light and Reasoning
@@ -155,7 +156,10 @@ Packaging & Versioning). Mention it once, plainly, now.
 | **Extension Name** | `<ExtensionName>` | No AL quotes. → `app.json "name"`. |
 | **Publisher** | `<Publisher>` | No AL quotes. → `app.json "publisher"`. |
 | **Deployment Target** | `<DeploymentTarget>` | One of: `AppSource`, `SaaS PTE`, `OnPrem PTE`. **`AppSource` adds a block of mandatory `app.json` parameters and narrows the ID range** — read **Ops § Intake → *The AppSource questions*** before Box 3, and **Standards Appendix E**. |
-| **AppSource manifest set** *(only if Deployment Target = `AppSource`)* | — | `brief`, `description`, `url`, `logo`, `privacyStatement`, `EULA`, `help`, `contextSensitiveHelpUrl`, and `applicationInsightsConnectionString` where given. Each is **mandatory for submission** — a missing one is a rejected submission, not a warning. `name`, `publisher`, and `version` must match the Partner Center offer exactly. Anything deferred is recorded as a release blocker. |
+| **Short description** | `<Brief>` | Box 4D, question D1 → `app.json "brief"`. **Every Deployment Target.** One line, about 100 characters at most: what the app does, for whom. The agent writes its own candidate from the problem statement **before the box opens** and offers it as the first option, quoted in full; a change is typed in the free-text entry (Ops § Intake → *The description and help questions*). `AppSource`: mandatory, must match the Partner Center offer word for word. PTE: *Left out* is a valid record — then `app.json` has no `brief`. Recorded with its source. |
+| **Long description** | `<Description>` | Box 4D, question D2 → `app.json "description"`. One short paragraph, three to five sentences — outcome, users, the main objects it adds, integrations — written before the box opens, offered first. Same rules. |
+| **Help URL** | `<HelpUrl>` | Box 4D, question D3 → `app.json "help"` — the **Help** link on Extension Management. Only a URL from the human's own material, labelled with its source, or typed; never inferred. *Set it when the help site is built (recommended)* defers it to Step 6, which builds `docs/index.html` and offers `help` then (Ops § Help Site); for `AppSource` that deferral is a release blocker until Step 6 sets it. |
+| **AppSource manifest set** *(only if Deployment Target = `AppSource`)* | — | `brief`, `description`, and `help` from the three rows above (not asked again); `url`, `logo`, `privacyStatement`, `EULA`, `contextSensitiveHelpUrl`, and `applicationInsightsConnectionString` where given. Each is **mandatory for submission** — a missing one is a rejected submission, not a warning. `name`, `publisher`, and `version` must match the Partner Center offer exactly. Anything deferred is recorded as a release blocker. |
 | **Version** | `<Version>` | → `app.json "version"`. New app: **`0.0.0.1`** (default, offered first). Existing app: the version installed in the target environment — asked here, confirmed by the human on the Extension Management page — and continued from. A new app's first build goes out at `0.0.0.1` as written, an existing app's first build increments from the installed version, and every build after the first increments the Revision mechanically; Major, Minor, and Build bumps are proposed and approved; the release candidate `1.0.0.0` is asked at the end of Step 6 (ALL ALONG → Packaging & Versioning). |
 | **Use Namespace (y/n)** | `<UseNamespace>` | Default `Yes`. If `No`, no generated file gets a `namespace` line. |
 | **Namespace** | `<Publisher>.<ExtensionShort>` | N/A if Use Namespace = `No`. PascalCase, no spaces. |
@@ -224,6 +228,9 @@ sheet (version `0.0.0.1` for a new app, the installed version for an existing on
 `ocpfFramework/state/notifications.json`, applied, and tested. `docs/1-define/ProjectParameters.md` exists, in `docs/`, with no placeholder remaining, and the Main model and effort recorded there match what this session is running on. Every `.gitignore` entry from the framework-files row is present and `git check-ignore` confirms each existing framework file — `ocpfFramework/LITE_RunbookChangeLog.md` included — is ignored. Nothing from the `docs/` list is in the project root; `ProjectProgress.md` is, with only the Lite step table and the Step 1 row `In Progress`. Deployment Target
 is one allowed value. Namespace is consistent or correctly N/A. If
 Permission Sets required = `Yes`, ≥ 2 IDs are reserved. Onboarding questions are each answered.
+The short description, long description, and help URL were each asked in a box of its own with the
+agent's own suggestion as the first option, and recorded with their sources — *left out* counts
+for a PTE, never for AppSource.
 Every target language is classified against Microsoft's live page and, unless source wording is
 *US wording, no translation files*, has a required-at-release answer and a named reviewer; source
 language and wording are recorded. Human confirms the sheet.

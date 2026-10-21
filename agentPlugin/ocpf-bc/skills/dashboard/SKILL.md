@@ -188,6 +188,24 @@ never proven.
   (`-Theme f1 -Open`): it opens the F1 page on that call and records the preference in
   `ocpfFramework/state/dashboard.json` for the record. Every later open without `--theme` is the
   OnlyBCFans page again; say so. Both templates live in `ocpfFramework/scripts/`. Ops § Dashboard → 4.
+- **Completed, and waiting on your test (v5.9.5.0; Ops § Dashboard → 6).** The data carries a
+  `project.state`: `completed`, `testing`, `waiting`, `working`, or `idle`. **Build-a-Feature's
+  *Done*** → run the renderer once more with `--close-project` (`-CloseProject`): it stamps
+  `projectClosedAt` in `ocpfFramework/state/usage.json`, closes any open window there (the clocks
+  stop), logs it in the feed, and renders — the page reads **Completed**, Main **finished**, every
+  row closed, and the F1 page shows the chequered flag, the Ferrari on the finish line under
+  confetti, and the trophy on the podium. A later object reopens the project by itself. **Full and
+  Lite** close when the last step's row is `Completed` or when the usage script's `--calibrate`
+  runs (it stamps the same marker). **During Step 12 / Step 7**, with no question open and Main
+  idle, the page reads **Waiting on you · release testing** — derived by the page itself on its
+  in-place refresh, since the last render usually happens while Main still counts as working.
+  Both pages age *working* out 180 s after Main's last transcript event (`lastAt`), so a session
+  that simply ended never stays green. `--close-project` is a no-op on a Full or Lite project
+  (a Build-a-Feature run inside one never closes the host).
+  The F1 page then shows AJ's render of the driver with the trophy and the chequered flag as the
+  first panel of the right column, above the telemetry (`VICTORY_SRC` in `dashboard-f1.html`), and
+  his trophy render stands on the podium in the cam (`TROPHY_SRC`, background removed); the agent
+  never draws or replaces either.
 - **Repair.** A project from v5.2.0.0 still has `ocpfFramework/state/dashboard.html`: render once
   (the page lands at the root), delete the old file, `git add ProjectDashboard.html`. A project
   whose hooks predate v5.3.2.0 lacks the unmatched `PostToolUse` hook: merge it (section 2) — its

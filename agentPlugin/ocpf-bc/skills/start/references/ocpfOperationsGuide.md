@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.9.4.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
-**Last Updated:** October 20, 2026
+**Version:** 5.9.5.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
+**Last Updated:** October 21, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
 > `fullVersion/BC_App_Build_Routine_Agent.md` and `liteVersion/LITE_BC_App_Build_Routine_Agent.md`.
@@ -354,6 +354,9 @@ stays where it is below, because it depends on answers the business questions pr
 | | 12. Another Object ID range? | *No* / *Yes*. Each *Yes* opens a box with questions 11 and 12 again. |
 | **4 — Onboarding** | 13–15. Assisted Setup Wizard? Role Center Activity Cues? Departments / "My Business Central" placement? | *No* / *Yes* each, with the runbook's one-line description of what each is. A follow-up box then asks the specifics of every *Yes*, offering choices drawn from the problem statement. |
 | | 16. Permission Sets required? *(only if the entity list has no new table)* | *No — the extension adds no tables* / *Yes*. Not asked once the extension owns a table: then it's `Yes` (**Standards §5.3**). |
+| **4D — Description & help** *(after Box 4: by now the problem statement, the Deployment Target, and the onboarding answers are known — enough to describe the app)* | D1. Short description (`brief`)? | **The agent's own one-line suggestion, written before the box opens**, as the first option; *Propose another*; and, for a PTE only, *Leave it out for now*. A change is typed in the free-text entry. One question per box — three boxes in a row. The procedure is *The description and help questions* below. |
+| | D2. Long description (`description`)? | The same shape: the agent's own paragraph, ready before the box opens, as the first option. |
+| | D3. Help URL (`help`)? | *Set it when the help site is built (recommended)* — Full Step 11 / Lite Step 6 offers it (Ops § Help Site); a URL only from the human's own material, if there is one; *I'll type it*; and, for a PTE only, *Leave it out for now*. Both editions, every Deployment Target; for `AppSource` these three are the old A1, A2, and A7 and are not asked again. |
 | **5 — Working setup** | 17. *(Moved.)* Which models do the work — and at what thinking effort — is asked at the routine's first step, right after notifications, not here (Ops § Roles). Box 5 only confirms the recorded answer is on the sheet. | — |
 | | 18. Leave the framework's own files out of the project's repository? | *Yes (recommended)* — the framework is distributed from its own repository, and its methodology isn't part of what the client receives / *No, track them* — a teammate cloning the project sees exactly how it was built. Explain `.gitignore` in the question itself: *"`.gitignore` lists files Git leaves out of commits and pushes — they stay on disk and work normally."* |
 | | 19. Which language is the AL source text written in? | *`en-US` (recommended)*, with **Standards §8.1**'s reason in one sentence, or another language typed in. |
@@ -365,8 +368,8 @@ with *I'll type it*, more than four candidates trimmed to the four most likely.
 
 **Lite differs only by what it doesn't have:** no Light or Reasoning roles (its Step 1 asks the Main
 model and effort only, Ops § Roles), and its Box 5 carries the `.gitignore` question, the source
-language, and the per-country language questions together. Questions 4a and 4b are asked in both
-editions.
+language, and the per-country language questions together. Questions 4a and 4b, and Box 4D's three
+description and help questions, are asked in both editions.
 
 ### The app icon
 
@@ -430,6 +433,68 @@ acceptance the PNG and its SVG stay in `images/`, the PNG is copied to `src/logo
 above, and `app.json` gets `"logo": "src/logo/AppLogo.png"` — never before the human accepted. The
 brief and the acceptance are recorded where the journey keeps its record.
 
+### The description and help questions
+
+**Box 4D (D for description — the letter avoids a clash with Box 1a's questions 4a and 4b) — asked on every project, both editions, whatever the Deployment Target** (since
+v5.9.5.0; before that `brief` and `description` were asked for AppSource only, and `help` was first
+raised when the help site was built). Three properties of `app.json` describe the app to the people
+who install it: `brief` and `description` show on the **Extension Management** page and in the
+extension's details, and `help` is the **Help** link there. They are cheap to set at intake, when
+the agent has just read the requirements and written the problem statement, and tedious to chase
+at release — so they are asked here, after Box 4, once the problem statement, the Deployment Target,
+and the onboarding answers are known. Not earlier: a description written before the scope is
+settled is rewritten.
+
+**Have the answers ready before asking.** Before the first of the three boxes opens, the agent
+writes its own candidate for each from what it knows of the project — the problem statement, the
+entity list, the consumers, the countries — in the working language, in the voice of the app's
+listing, not the project's. **`brief`**: one line, about 100 characters at most, what the app does
+for whom (*"Approval routing for purchase orders with Teams notifications, for US and Canadian
+companies"*). **`description`**: one short paragraph, three to five sentences — the business outcome,
+who uses it, the main objects or pages it adds, and anything it integrates with; no marketing
+superlatives, no version numbers, no object IDs. **`help`**: never written by the agent — a URL
+only from the human's own material (a support page or documentation link named in
+`requirements/`, or the product website answered in the AppSource boxes); the *Forbidden sources*
+rule applies in full, so an email domain, a company name, or a guessed GitHub Pages address is
+never offered.
+
+**Three boxes, one question each, in this order — never one box with three questions, and never
+prose.** The human reads one proposal at a time and answers it before the next appears:
+
+1. **Short description (`brief`)?** Options: **the suggestion itself, quoted in full, labelled
+   *Use this (suggested)*** / *Propose another* (the agent writes a different one and asks again) /
+   *Leave it out for now* — the last offered only when the Deployment Target is a PTE. **A change
+   is the free-text entry:** the question's text says *"Choose Other to type your own wording or
+   to edit mine"*, so a human who wants a different sentence types it rather than describing it.
+2. **Long description (`description`)?** The same shape, the paragraph quoted in full in the
+   option's text (a harness that truncates long labels puts the full text in the question and a
+   first line in the label).
+3. **Help URL (`help`)?** Options, recommended first (Ops § Asking): **Set it when the help site
+   is built (recommended)** — Full Step 11 / Lite Step 6 builds `docs/index.html`, gives the GitHub
+   Pages URL, and offers `help` then (Ops § Help Site) / the URL from the human's material when
+   there is one, quoted, labelled with its source (*"from requirements/Support.md"*) / *I'll type
+   it* / *Leave it out for now* (PTE only). A typed URL is checked for shape only (`https://`, a
+   host) — never fetched.
+
+**AppSource.** When the Deployment Target is `AppSource`, these three are the marketplace
+questions A1, A2, and A7 — asked here, once, and not again in Box 3a / 3b. The difference is said
+in the question: each is **mandatory for submission** (Standards Appendix E), so *Leave it out for
+now* is not offered, and `brief` and `description` **must match the Partner Center offer
+listing word for word** — if the offer already exists, the human pastes its text and the
+suggestion is only a draft for an offer not yet written. A `help` deferred to the help-site step
+is recorded as a release blocker until that step sets it.
+
+**What is recorded and written.** Each answer goes on the parameter sheet — Full §1.1's **Short
+Description**, **Long Description**, and **Help URL** rows; Lite's rows of the same names — with
+its source (*suggested, accepted*; *typed*; *from requirements/…*; *deferred to the help site*;
+*left out*). Ops § Project Setup step 1 writes the three into `app.json` for every Deployment
+Target: a value the human chose or typed is written as given; *Set it when the help site is built*
+and *Left out* write nothing — **never an empty string**, which AppSourceCop flags and which shows
+as a blank line in Extension Management. The help-site step later offers to set `help` or, when
+intake recorded a URL, to replace it, naming the current value in its question. Changing any of
+the three after the first package is a package change: the next build's Revision, with its
+ChangeLog entry (Ops § Packaging).
+
 ### The AppSource questions
 
 **Asked only when the answer to question 3 is `AppSource`**, and asked during intake — not
@@ -455,14 +520,14 @@ each one is mandatory for submission:
 
 | Box | Questions | Options to offer |
 |---|---|---|
-| **3a — Marketplace listing** | A1. Short description (`brief`)? | One line drawn from the problem statement, labelled a suggestion, plus *I'll type it*. It must match the offer listing in Partner Center. |
-| | A2. Long description (`description`)? | A paragraph drawn from the problem statement, labelled a suggestion, plus *I'll type it*. |
+| **3a — Marketplace listing** | A1. Short description (`brief`)? — **not asked here**: it is Box 4D's question D1, asked on every project (*The description and help questions* above). For AppSource that box says it is mandatory and must match the offer listing in Partner Center word for word. | — |
+| | A2. Long description (`description`)? — **not asked here**: Box 4D's question D2, with the same AppSource conditions. | — |
 | | A3. Product or support website (`url`)? | The publisher's domain if the human has given one, plus *I'll type it*. Say what it's for: it shows as **Website** on the **Extension Management** page. |
 | | A4. Logo file? — **not asked here**: it is question 4a in Box 1a, already answered. For AppSource a *Later* there is a release blocker; `logo` is written from it. | — |
 | **3b — Legal and support URLs** | A5. Privacy statement URL (`privacyStatement`)? | *I'll type it*, or the publisher's domain with a suggested path. |
 | | A6. License terms URL (`EULA`)? | Same. |
-| | A7. Help and troubleshooting URL (`help`)? | Same, plus *Same as the context-sensitive help URL*. |
-| | A8. Context-sensitive help URL (`contextSensitiveHelpUrl`)? | Same, plus *Same as the help URL*. If the app won't cover every BC locale, say so and record `/{0}/` in the URL with the locales in `supportedLocales`. |
+| | A7. Help and troubleshooting URL (`help`)? — **not asked here**: Box 4D's question D3. A `help` deferred there to the help-site step is a release blocker until that step sets it. | — |
+| | A8. Context-sensitive help URL (`contextSensitiveHelpUrl`)? | Same, plus *Same as the help URL* when Box 4D recorded one. If the app won't cover every BC locale, say so and record `/{0}/` in the URL with the locales in `supportedLocales`. |
 | | A9. Application Insights connection string? | *I'll paste it* / *Not yet*. Microsoft calls it recommended rather than mandatory, so *Not yet* is accepted — but say what it costs: Microsoft writes the detailed validation-failure telemetry there, so without it a rejected submission can't be diagnosed. |
 
 **One more thing to say out loud, once, in Box 3a:** for AppSource, `name`, `publisher`, and
@@ -942,13 +1007,17 @@ Then, in order:
    version, every ID range, `platform`, `application`, `runtime`, and the `features` the scaffold step lists —
    including `"NoImplicitWith"` and `"TranslationFile"` (**Standards §8.2**). **`version` is
    `0.0.0.1` for a new app**, or the installed version the human gave at intake question 4b for an
-   existing one (Ops § Packaging → *Version numbers*). If `app.json` already exists (for example the
+   existing one (Ops § Packaging → *Version numbers*). **`brief`, `description`, and `help` come
+   from Box 4D for every Deployment Target** (Ops § Intake → *The description and help questions*):
+   a value the human chose or typed is written as given; an answer of *Set it when the help site
+   is built* or *Leave it out for now* writes nothing — never an empty string. If `app.json`
+   already exists (for example the
    human ran **AL: Go!**), keep its `id` GUID and replace the rest. Don't change `idRanges`,
    `platform`, `application`, `runtime`, or `dependencies` again without re-running step 5.
    - **Deployment Target `AppSource` adds mandatory properties:** `brief`, `description`, `url`,
      `privacyStatement`, `EULA`, `help`, `contextSensitiveHelpUrl`, `logo`, `application`, and
-     `applicationInsightsConnectionString` where the human gave one — all from the intake's
-     AppSource boxes (**Ops § Intake**), written now rather than at release, because a missing one
+     `applicationInsightsConnectionString` where the human gave one — from the intake's
+     AppSource boxes and Box 4D (**Ops § Intake**), written now rather than at release, because a missing one
      is a rejected submission, not a warning (**Standards Appendix E**). Any the human deferred
      stay recorded as release blockers.
 2. **Place the app icon**, when intake question 4a was *Yes*: copy or resize the human's image to
@@ -1722,6 +1791,54 @@ file, `ocpfFramework/state/dashboard-data.js`, for the in-place refresh — so a
 the file was not re-rendered, and a page that paints but never updates means the sidecar is
 missing (a renderer older than v5.3.5.0): refresh `ocpfFramework/scripts/`.
 
+
+### 6. Completed, and waiting on your test
+
+**A finished project reads *Completed*, and nobody is lit** (v5.9.5.0). Before this, a project
+that was done-done still showed Main *working* and the elapsed clock running: the last hook had
+rendered the page inside the 180-second "working" window and nothing ever rendered it again, and
+the Build-a-Feature *Done* answer left the last window open, so Elapsed grew on every refresh.
+The renderer now carries a **project state** — `completed`, `waiting`, `testing`, `working`, or
+`idle` — and both pages draw it:
+
+| State | When | What the page shows |
+|---|---|---|
+| **completed** | `usage.json` carries `projectClosedAt` and no window opened after it; or, in Full and Lite, the last step's row (Step 12 / Step 7 — a remediation row opened from the release test, `07a` / `STEP-5a`, doesn't count) is `Completed`; the renderer stamps `projectClosedAt` on first sight, so the clocks stop there | A green **Completed** pill with the close time in the header; a *Project completed* card where the question card sits, with the final Elapsed and cost and the line *Nothing is waiting on you*; **Who is working** shows Main **finished** and every sub-agent idle, no breathing dot; every row of the journey closed; the F1 page's pit lane cam shows the chequered flag out, the Ferrari stopped on the finish line under confetti, and the trophy on the podium, with *Race won* on the cam tag, the pit wall, and the drivers list |
+| **testing** | Full and Lite only: the last step is in progress, no question is open, and Main is not working (its last transcript event is older than 180 seconds). Both pages derive it themselves on every in-place refresh, because the last render usually happened while Main still counted as working and nothing renders again while the human tests | An amber **Waiting on you · release testing** pill; a *Waiting on you* card saying the release test is in the human's hands; Main **waiting on you**; the F1 Ferrari in the box with the pit wall screens amber and *In the box · waiting on your release test* |
+| **waiting** | `waiting.json` holds an open question | Unchanged: the question card, Main *waiting on you*, BOX BOX on the F1 page |
+| **working** / **idle** | From the transcript, as before | Unchanged |
+
+**What closes a project.** Three things, each enough on its own:
+
+- **Build-a-Feature's *Done*** (Ops § Build-a-Feature → step 5): the agent runs the renderer once
+  more with **`--close-project`** (`-CloseProject`) — it stamps `projectClosedAt` in
+  `ocpfFramework/state/usage.json`, sets `completedAt` on any window still open (the clocks stop
+  there), logs *closed the project* in the feed, and renders. A later object reopens the project by
+  itself: a window that starts after `projectClosedAt` cancels it, so *Build another object* in a
+  new session needs nothing undone.
+- **The usage script's `--calibrate`** (Full Step 12 / Lite Step 7, the project close — Ops § Usage
+  & Cost → 6) stamps the same marker before it writes the calibration file.
+- **The last step's row set to `Completed`** in `ProjectProgress.md`, for a project closed by hand —
+  the renderer stamps `projectClosedAt` the first time it sees it, so the clock stops there and not
+  at the next render. `--calibrate` refuses to stamp while a step is still `In Progress`, so a
+  mid-project cost export never reads as the close. The intended route is the first one: the
+  human comes back and says *I'm done with Step 12* (Lite: *Step 7*), and the agent closes the
+  row, refreshes the usage table, exports the calibration file, and stops the clocks in one go —
+  Step 12 and Lite Step 7 say so in their hand-off notes.
+
+**A stale render can't keep the light green.** Main's row now carries `lastAt`, the time of its
+last transcript event, and both pages age *working* out 180 seconds after it on every in-place
+refresh, hooks or not — so a session that simply ended shows Main idle within three minutes.
+
+**The victory scene.** The pit lane cam draws the podium and stands AJ's trophy render on its P1
+block (background removed, `TROPHY_SRC` in `dashboard-f1.html`); the cam is 330 units tall, too
+short for the whole figure.
+So the first panel of the right column, above the telemetry and in view without scrolling, is a
+victory panel with his render of the Ferrari driver holding the trophy and the chequered flag
+(`VICTORY_SRC`, resized to 720 px and embedded as WebP), with *P1 · Race won*, the app's name, the
+close time, and the race time. Like the cars and the crew, the render is his and only cut, resized,
+and embedded — never redrawn by the agent (Ops § Dashboard → 4).
+
 ---
 
 ## Ops § Packaging
@@ -2264,7 +2381,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v5.9.4.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
+folder as `README.md`. For runbook **v5.9.5.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2441,7 +2558,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.9.4.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.9.5.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
@@ -2665,7 +2782,8 @@ tab. Say plainly that a private repository needs GitHub Pro, Team, or Enterprise
 and that the site is public either way unless the organisation has access-controlled Pages. The
 agent never changes a repository setting, never pushes. Then it writes the URL into `site.json` →
 `helpUrl` (the page's canonical link) and rebuilds once; **offers** to set `app.json` → `help` to
-it — Business Central shows it as the extension's **Help** in Extension Management, AppSource
+it — or, when intake's Box 4D recorded a URL, to replace that one, named in the question — Business
+Central shows it as the extension's **Help** in Extension Management, AppSource
 requires it, and it is a change to the package: the next build increments the Revision and its
 ChangeLog entry names the help link (Ops § Packaging; a package already uploaded is never rebuilt
 at the same version); puts a link under the README's title; writes the ChangeLog entry (tabs,
@@ -2708,6 +2826,12 @@ ritual*). Per developer, always gitignored.
   ]
 }
 ```
+
+At project close one more field appears, **`"projectClosedAt"`** (ISO 8601, UTC): stamped by the
+usage script's `--calibrate` (Full Step 12 / Lite Step 7) or by the renderer's `--close-project`
+(Build-a-Feature's *Done*), with any window still open given that `completedAt`. The dashboard reads
+it as *Completed* and stops its clocks there; a window that starts later cancels it (Ops § Dashboard
+→ 6).
 
 `aiTool` is `claude-code`, `copilot-chat`, or `copilot-cli`. **`step` is the step file's name without
 `.md`, and nothing else:** `PRE-01`, `PRE-02`, `01` … `12` in Full; `STEP-1` … `STEP-7` in Lite;
@@ -2972,7 +3096,9 @@ and not in `docs/`. The AI Effort Estimate (Ops § Documents) reads every file t
 project, derives per-object and per-step averages when they exist, and says so in its margin
 section — ±30 % until three or more measured projects are in the store, then the framework's ±10 %
 target. A project with no store is estimated from the template's baselines and says that instead.
-Tell the human once, when the first file is written, where it is and what reads it.
+Tell the human once, when the first file is written, where it is and what reads it. The export
+also stamps `projectClosedAt` in `usage.json` and closes any window still open (→ 1), so the
+dashboard reads *Completed* (Ops § Dashboard → 6).
 
 ### 7. Remediation — `07a`, `07b`, `STEP-5a` …
 
@@ -3180,7 +3306,11 @@ language questions. AppSource is not a Build-a-Feature target; the journey says 
    documentation that span objects, the register current), then the list of what was built, the
    documents by path, the package, the session's usage rows, the dashboard path, and the last
    box: *Done / Build another object / Open the dashboard*. Every row `Completed` with its rows
-   present; `ProjectProgress.md`, `docs/`, and the dashboard pages staged.
+   present; `ProjectProgress.md`, `docs/`, and the dashboard pages staged. **On *Done*, one more
+   render with `--close-project`** (`-CloseProject`): on a feature project the dashboard then reads
+   *Completed*, Main *finished*, and the clocks stop (Ops § Dashboard → 6); a later object reopens it
+   by itself. Inside a Full or Lite project (Case A) the renderer skips the close by itself — the
+   host project stays open.
 
 ### Infer, then confirm
 

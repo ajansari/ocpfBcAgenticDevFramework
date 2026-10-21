@@ -445,7 +445,11 @@ documents, by path, with one sentence on what to read first (`docs/Documentation
 package path and version if one was built; the usage rows of the session (run `/ocpf-bc:usage`
 without `--step` once so every `F` row is current; paste the session's rows); the dashboard path;
 and the last box: **Done** / *Build another object* (back to Part 3's question) / *Open the
-dashboard*. The exit condition of the journey is that every `F` row is `Completed` with its usage
+dashboard*. **On *Done*, one more render with `--close-project`** (`-CloseProject`; the renderer
+in `ocpfFramework/scripts/`): on a feature project it stamps `projectClosedAt`, closes any open
+window so the clocks stop, and the page reads *Completed* with Main *finished* (Ops § Dashboard →
+6); a later object reopens the project by itself. On a Full or Lite project (Part 0's Case A) the
+renderer skips the close on its own — the host project stays open. The exit condition of the journey is that every `F` row is `Completed` with its usage
 rows present, every object has its section in `docs/Documentation.md` and `docs/DataModel.md`,
 `ProjectProgress.md`, `docs/`, and both dashboard pages are staged, and nothing is left `In
 Progress` — except, on a Full or Lite project whose step was `In Progress` when the journey

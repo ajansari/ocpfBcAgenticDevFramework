@@ -189,7 +189,12 @@ outside every project, per developer — with, per step and per model, tokens by
 turns, decisions, sub-agent calls, and the object counts by type read from
 `docs/1-define/ObjectRegister.md` (Full) or the object table in `docs/2-design/DesignDoc.md` (Lite),
 plus the measured output-token throughput. It prints the path; put that path in the closing
-message and the ChangeLog entry. The next project's AI Effort Estimate (`documents` skill, Full
+message and the ChangeLog entry. The export also stamps `projectClosedAt` in `usage.json` and
+closes any window still open, so the dashboard reads *Completed* and its clocks stop (Ops §
+Dashboard → 6) — not while a Full or Lite step is still `In Progress` in `ProjectProgress.md`:
+then the script leaves the marker alone and prints a `*Note: projectClosedAt not stamped …*`
+line after the path, so a mid-project export never reads as the close. Relay any such line to
+the human; the path alone means the close happened. The next project's AI Effort Estimate (`documents` skill, Full
 Step 03 / Lite Step 2) reads every file in that folder and derives its per-object and per-step
 averages from them; three or more files move the estimate's margin from ±30 % to ±10 %. A
 Copilot project's file carries AI credits per step (`aiCredits`, `role`) with the token fields

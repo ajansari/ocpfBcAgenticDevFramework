@@ -8,10 +8,11 @@
 #   pwsh ocpf-dashboard.ps1 -Project <root> [-Open] [-Quiet] [-Refresh 30] [-Toast "text"] [-Live]
 #   pwsh ocpf-dashboard.ps1 -Project <root> -WaitingJson '<hook input>'    # a question opened
 #   pwsh ocpf-dashboard.ps1 -Project <root> -ClearWaiting                   # it was answered
+#   pwsh ocpf-dashboard.ps1 -Project <root> -CloseProject                   # the human said Done: completed state, clocks stopped
 #   pwsh ocpf-dashboard.ps1 -Project <root> -Event who,text                 # append a feed event
 param(
   [string]$Project = ".", [switch]$Open, [switch]$Quiet, [int]$Refresh = 30, [string]$Toast, [switch]$Live,
-  [string]$WaitingJson, [switch]$ClearWaiting, [string[]]$Event, [int]$Throttle = 0, [string]$Theme
+  [string]$WaitingJson, [switch]$ClearWaiting, [switch]$CloseProject, [string[]]$Event, [int]$Throttle = 0, [string]$Theme
 )
 $ErrorActionPreference = "Stop"
 try {
@@ -19,7 +20,7 @@ $root = (Resolve-Path $Project).Path
 $stateDir = Join-Path $root "ocpfFramework/state"
 if (-not (Test-Path (Join-Path $root "ocpfFramework"))) { if ($Quiet) { exit 0 }; Write-Error "$root has no ocpfFramework/ folder — not an OCPF project"; exit 1 }
 New-Item -ItemType Directory -Force -Path $stateDir | Out-Null
-if ($Throttle -gt 0 -and -not ($WaitingJson -or $ClearWaiting -or $Event -or $Open)) { $pg = Join-Path $root "ProjectDashboard.html"; if ((Test-Path $pg) -and (((Get-Date) - (Get-Item $pg).LastWriteTime).TotalSeconds -lt $Throttle)) { exit 0 }; if ((Test-Path "$pg.tmp") -and (((Get-Date) - (Get-Item "$pg.tmp").LastWriteTime).TotalSeconds -lt 120)) { exit 0 } }
+if ($Throttle -gt 0 -and -not ($WaitingJson -or $ClearWaiting -or $Event -or $Open -or $CloseProject)) { $pg = Join-Path $root "ProjectDashboard.html"; if ((Test-Path $pg) -and (((Get-Date) - (Get-Item $pg).LastWriteTime).TotalSeconds -lt $Throttle)) { exit 0 }; if ((Test-Path "$pg.tmp") -and (((Get-Date) - (Get-Item "$pg.tmp").LastWriteTime).TotalSeconds -lt 120)) { exit 0 } }
 $here = Split-Path -Parent $MyInvocation.MyCommand.Path
 function Load-Json($p, $d) { if (Test-Path $p) { try { Get-Content $p -Raw | ConvertFrom-Json -AsHashtable } catch { $d } } else { $d } }
 function Read-Text($p) { if (Test-Path $p) { Get-Content $p -Raw } else { "" } }
@@ -57,6 +58,12 @@ if ($WaitingJson) {
 }
 if ($ClearWaiting) { $wp = Join-Path $stateDir "waiting.json"; if (Test-Path $wp) { $w = Load-Json $wp @{}; $w["clearedAt"] = Iso (NowUtc); $w | ConvertTo-Json -Depth 5 | Set-Content -Path $wp -Encoding utf8; Add-Event "You" "answered" } }
 if ($Event -and $Event.Count -ge 2) { Add-Event $Event[0] $Event[1] }
+# The human said the project is done (v5.9.5.0): stamp projectClosedAt, close every open window there, log it.
+$mk0 = Load-Json (Join-Path $root "ocpfFramework/framework.json") @{}
+if ($CloseProject -and "$($mk0.edition)".ToLower() -ne "feature") { Add-Event "Agent" "-CloseProject ignored — a Full or Lite project closes at its last step (Ops § Dashboard → 6)"; $CloseProject = $false }  # a Build-a-Feature run inside a Full or Lite project never closes the host
+if ($CloseProject) { $up = Join-Path $stateDir "usage.json"; $u = Load-Json $up @{}; if (-not $u.projectClosedAt) { $u["projectClosedAt"] = Iso (NowUtc) }
+  foreach ($s in @($u.steps)) { if ($s.startedAt -and -not $s.completedAt) { $s["completedAt"] = $u.projectClosedAt } }
+  $u | ConvertTo-Json -Depth 8 | Set-Content -Path $up -Encoding utf8; Add-Event "You" "closed the project — completed" }
 if ($Live -or $Theme) { $dj = Load-Json (Join-Path $stateDir "dashboard.json") @{}; if ($Live) { $dj["hooks"] = $true }; if ($Theme) { $dj["theme"] = $Theme.ToLower() }; if (-not $dj.theme) { $dj["theme"] = "brand" }; $dj | ConvertTo-Json | Set-Content -Path (Join-Path $stateDir "dashboard.json") -Encoding utf8 }
 
 # ---- facts ----
@@ -71,8 +78,24 @@ if ($app.logo -and (Test-Path (Join-Path $root $app.logo))) { $bytes = [IO.File]
 $bc = $null; foreach ($k in "application","platform") { $v = $app[$k]; if ($v -is [string] -and $v -match '^(\d+)\.') { $bc = $Matches[1]; break } }
 $appFacts = [ordered]@{ name = $app.name; publisher = $app.publisher; version = $app.version; bc = $bc; iconDataUri = $icon; target = $app.target }
 
-$wins = @(); foreach ($s in @($usage.steps)) { $a = Parse-Ts $s.startedAt; if ($a -and $s.step) { $wins += ,@($s.step, $a, (Parse-Ts $s.completedAt)) } }
+$closedAt = Parse-Ts $usage.projectClosedAt  # the project was closed (v5.9.5.0): a window still open then ends there, so the clock stops
+$wins = @(); foreach ($s in @($usage.steps)) { $a = Parse-Ts $s.startedAt; if ($a -and $s.step) { $b = Parse-Ts $s.completedAt; if ($null -eq $b -and $closedAt -and $a -le $closedAt) { $b = $closedAt }; $wins += ,@($s.step, $a, $b) } }
 $wins = @($wins | Sort-Object { $_[1] }); for ($i = 0; $i -lt $wins.Count; $i++) { if ($null -eq $wins[$i][2] -and $i + 1 -lt $wins.Count) { $wins[$i][2] = $wins[$i + 1][1] } }
+# A project closed by hand — the last step's row Completed, no -CloseProject / -Calibrate behind it: stamp projectClosedAt on first
+# sight, before the usage script measures, so the clock stops here instead of running on in the last step's open window (v5.9.5.0;
+# Ops § Dashboard → 6). Not while a feature session's window is open in this host (Case A): not closed, and never cut short.
+if ($edition -ne "feature" -and -not $closedAt) {
+  $baseIds = @($(if ($edition -eq "lite") { $LITE } else { $FULL }) | ForEach-Object { $_[0] }); $lastBase = $baseIds[-1]; $lastSt = ""
+  foreach ($line in (Read-Text (Join-Path $root "ProjectProgress.md")) -split "`n") { if ($line -match '^\|\s*(DEFINE|DESIGN|BUILD|PROVE)\s*\|\s*([A-Za-z0-9-]+)\s*[—-]\s*[^|]*\|\s*([^|]*)\|' -and $Matches[2] -eq $lastBase) { $lastSt = $Matches[3].Trim().ToLower() } }
+  $foreignOpen = @($wins | Where-Object { $null -eq $_[2] -and $_[0] -notin $baseIds }).Count
+  if (($lastSt -like "complet*" -or $lastSt -like "done*") -and -not $foreignOpen) {
+    $usage["projectClosedAt"] = Iso (NowUtc); $closedAt = Parse-Ts $usage.projectClosedAt
+    foreach ($s in @($usage.steps)) { if ($s.startedAt -and -not $s.completedAt) { $s["completedAt"] = $usage.projectClosedAt } }
+    $usage | ConvertTo-Json -Depth 8 | Set-Content -Path (Join-Path $stateDir "usage.json") -Encoding utf8
+    foreach ($w in $wins) { if ($null -eq $w[2]) { $w[2] = $closedAt } }
+    Add-Event "Agent" "$lastBase is Completed in ProjectProgress.md — project closed, clocks stopped"
+  }
+}
 # ---- usage rows via the usage script ----
 $notes = @(); $uj = $null
 if ($wins.Count) {
@@ -171,7 +194,7 @@ if (-not $copilot -and $wins.Count) {
       $subsRaw = @(foreach ($aid in $side.Keys) { $s = $side[$aid]; @{ agentId = $aid; model = $s.model; running = (((NowUtc) - $s.last).TotalSeconds -lt 120); seconds = ($s.last - $s.first).TotalSeconds; last = $s.last } })
       if ($mainState -eq "idle" -and @($subsRaw | Where-Object { $_.running }).Count -gt 0) { $mainState = "working" }  # Main is waiting on its sub-agent, not idle
       $subs = @($subsRaw | Sort-Object { $_.last } -Descending)
-      $liveState = @{ perStep = $per; main = @{ state = $mainState; model = $lastModel; text = $lastTxt }; subs = $subs } } }
+      $liveState = @{ perStep = $per; main = @{ state = $mainState; model = $lastModel; text = $lastTxt; lastAt = $last.ts.ToString("o") }; subs = $subs } } }
 }
 
 # the agent / you / waiting split of each step is scaled to its window, so the three add up to Elapsed exactly (v5.6.0.0)
@@ -237,6 +260,22 @@ if ($edition -eq "feature") { $rl = @($rl | Where-Object { $_.role -eq "Main" })
 $waiting = Load-Json (Join-Path $stateDir "waiting.json") $null
 if ($waiting -and $waiting.clearedAt) { $waiting = $null }
 if ($waiting) { $main.status = "waiting on you"; $main.detail = "$($waiting.question)".Substring(0, [Math]::Min(90, "$($waiting.question)".Length)) }
+# The project's state (v5.9.5.0): completed / waiting / testing / working / idle — a finished project no longer shows Main working forever.
+if ($liveState -and $liveState.main.lastAt) { $main.lastAt = $liveState.main.lastAt }
+$starts = @(foreach ($s in @($usage.steps)) { $t = Parse-Ts $s.startedAt; if ($t) { $t } })
+if ($closedAt -and @($starts | Where-Object { $_ -gt $closedAt }).Count) { $closedAt = $null }  # a window opened after the close: back in work
+$catIds = @($catalog | ForEach-Object { $_.id })
+$reopened = (($null -ne (Parse-Ts $usage.projectClosedAt)) -and ($null -eq $closedAt)) -or (@($wins | Where-Object { $null -eq $_[2] -and $_[0] -notin $catIds }).Count -gt 0)  # …or a feature session's window open in a finished host (Case A): the last row stays Completed, the project is still back in work
+$base = @($catalog | Where-Object { -not $_.remediation })  # a remediation row (07a, STEP-5a) opened from the release test must not displace the last step
+$lastId = $(if ($base.Count -and $edition -ne "feature") { $base[-1].id } else { $null })
+$lastDone = $false; if ($lastId -and -not $reopened) { $ls = $steps | Where-Object { $_.id -eq $lastId } | Select-Object -First 1; $lastDone = ($ls -and $ls.status -eq "done") }
+$pSince = $null; $pState = "idle"
+if ($closedAt -or $lastDone) { $pState = "completed"; $pSince = $closedAt; foreach ($s in $steps) { if ($s.status -eq "now") { $s.status = "done" } }; $cur = $null; $current = [ordered]@{}; if (-not $pSince) { $ends = @($wins | Where-Object { $_[2] } | ForEach-Object { $_[2] }); if ($ends.Count) { $pSince = ($ends | Measure-Object -Maximum).Maximum } }
+  foreach ($r in $rl) { $r.status = $(if ($r.role -eq "Main") { "finished" } else { "idle" }); foreach ($k in @("runningCount","runningSeconds","lastDetail","detail","lastAt")) { $r.Remove($k) } } }
+elseif ($waiting) { $pState = "waiting"; $pSince = Parse-Ts $waiting.since }
+elseif ($cur -and $lastId -and $cur.id -eq $lastId -and $main.status -ne "working") { $pState = "testing"; $ws = @($wins | Where-Object { $_[0] -eq $cur.id } | ForEach-Object { $_[1] }); if ($ws.Count) { $pSince = ($ws | Measure-Object -Maximum).Maximum }; $main.status = "waiting on you"; $main.detail = "release testing — tell the agent how it went" }
+elseif ($main.status -eq "working") { $pState = "working" }
+$projState = [ordered]@{ state = $pState; since = $(if ($pSince) { $pSince.ToString("o") } else { $null }); closedAt = $(if ($closedAt) { $closedAt.ToString("o") } else { $null }); lastStep = $lastId }
 
 # ---- estimate ----
 $est = $null
@@ -254,7 +293,7 @@ $dj0 = Load-Json (Join-Path $stateDir "dashboard.json") @{}
 $isLive = $false; if ($Live.IsPresent) { $isLive = $true } elseif ($dj0.hooks -eq $true) { $isLive = $true }
 $data = [ordered]@{ generatedAt = (NowUtc).ToString("o"); refreshSeconds = $Refresh; tool = $tool; live = $isLive
   renderer = "ocpf-dashboard.ps1"; app = $appFacts; framework = [ordered]@{ edition = $edition; version = $fw.runbookVersion; alMcp = $(if ($fw.alMcp) { "connected" } else { "unknown" }) }
-  phases = $phases; steps = $steps; current = $current; totals = $tot; estimate = $est; models = $models; roles = $rl; waiting = $waiting; events = $events
+  phases = $phases; steps = $steps; current = $current; totals = $tot; estimate = $est; models = $models; roles = $rl; waiting = $waiting; project = $projState; events = $events
   pricing = [ordered]@{ source = $priceSrc; fetchedAt = $pricing.fetchedAt; usdPerCredit = $pricing.aiCredit.usd }; notes = $notes; toast = $Toast }
 
 # ---- render ----

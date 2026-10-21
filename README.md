@@ -8,7 +8,7 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 *by AJ Ansari*
 
-*Last Updated: Tuesday, October 20, 2026*
+*Last Updated: Wednesday, October 21, 2026*
 
 > ## 🌐 [Official Website](https://ajansari.github.io/ocpfBcAgenticDevFramework/)
 >
@@ -343,6 +343,19 @@ Each month's release notes in brief. The complete, versioned record is in
 [fullVersion/RunbookChangelog.md](fullVersion/RunbookChangelog.md),
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
+
+## October 21, 2026 — Full v5.9.5.0 · Lite v5.9.5.0 · Operations Guide v5.9.5.0 · Plugin v5.9.5
+
+**Your app now gets a description at intake.** Once the agent knows what the app is for, it proposes
+a one-line short description and a short paragraph for `app.json` — one at a time, each already
+written, accept it or type your own — and asks where the Help link should point (a page you name,
+or the help site it builds later). On every project, not just AppSource, so Extension Management
+never shows a blank description again.
+
+**And the dashboard knows when you're done.** A finished project now reads *Completed* — Main
+*finished*, clocks stopped, every row closed — instead of showing the agent working forever; on
+the F1 page the chequered flag is out, the Ferrari sits on the finish line under confetti, the
+trophy stands on the podium, and the winning driver lifts the trophy beside the drivers list. While you release-test a Full or Lite build, it reads *Waiting on you*.
 
 ## October 21, 2026 — Full v5.9.4.0 · Lite v5.9.4.0 · Operations Guide v5.9.4.0 · Plugin v5.9.4
 

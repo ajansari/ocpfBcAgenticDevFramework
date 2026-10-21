@@ -202,6 +202,10 @@
   .chip{display:inline-block;padding:1px 7px;border-radius:999px;font-size:11px;font-weight:600;background:var(--surface-2);border:1px solid var(--border);color:var(--text-2);margin-left:6px}
   .chip.on{background:var(--on-bg);color:var(--on-t);border-color:var(--on-bg)}
   .chip.on::before{content:"";display:inline-block;width:6px;height:6px;border-radius:50%;background:var(--good);margin-right:5px;vertical-align:1px;animation:breathe 1.2s ease-in-out infinite}
+  .chip.fin{background:var(--good);color:#fff;border-color:var(--good)}
+  .pill.state b{font-weight:700}.pill.state.done{border-color:var(--good);color:var(--good)}.pill.state.done b{color:var(--good)}
+  .pill.state.test{border-color:var(--wait-amber);color:var(--wait-amber)}.pill.state.test b{color:var(--wait-amber)}
+  .card.done h3{color:var(--good)}.card.done .q{font-size:15px;line-height:1.5}
   .typing::after{content:"";display:inline-block;width:7px;height:12px;background:var(--main);vertical-align:-2px;margin-left:2px;animation:caret 1s steps(1) infinite}
   @keyframes caret{50%{opacity:0}}
 
@@ -436,6 +440,8 @@
   /* repaint in place: entrance animations play once, later data pulls only swap content */
   body.painted .in,body.painted .agent{animation:none;opacity:1;transform:none}
   body.painted .ask{animation:waitGlow 2.6s ease-in-out infinite}
+  .ask.done{animation:in .6s cubic-bezier(.2,.8,.2,1) forwards}  /* a completed project is not a question: it enters, then keeps the green frame with no amber pulse (v5.9.5.0) */
+  body.painted .ask.done{animation:none}
   body.painted .wait{opacity:1;animation:waitGlow 2.4s ease-in-out infinite}
   body.painted .spur{animation:none;transform:scaleY(1)}
   body.painted .spark path.l{animation:none;stroke-dashoffset:0}
@@ -607,6 +613,13 @@ window.__paintTheme();
 // ---- tiles ----
 const stepT=cur.totals||{};
 const waiting=D.waiting||null;
+const P=D.project||{};const finished=P.state==='completed';  // v5.9.5.0
+// 'testing' is derived here too: the last render usually happened while Main still counted as working, and nothing renders again while the human tests
+const mainR_=(D.roles||[]).find(r=>r.role==='Main');const mainIdle_=!mainR_||mainR_.status!=='working'||!!(mainR_.lastAt&&Date.now()-new Date(mainR_.lastAt).getTime()>180000);
+const testing=P.state==='testing'||(!finished&&!waiting&&!!P.lastStep&&cur.id===P.lastStep&&mainIdle_&&(P.state==='working'||P.state==='idle'));
+const whenP=P.since?new Date(P.since):null;const whenTxt=whenP?whenP.toLocaleDateString([],{month:'short',day:'numeric'})+' '+whenP.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):'';
+const statePill=finished?`<span class="pill state done">✓ <b>Completed</b>${whenTxt?' · '+whenTxt:''}</span>`:testing?`<span class="pill state test">⏳ <b>Waiting on you</b> · release testing</span>`:'';
+if(statePill){const pr=document.querySelector('#pills .pillrow');if(pr)pr.insertAdjacentHTML('afterbegin',statePill);}
 const tiles=[];
 if(copilot){tiles.push(`<div class="tile in" style="--d:.1s"><div class="k">AI credits so far</div><div class="v">${fmtN(T.credits)} <small>cr</small></div><div class="m">${T.creditsOpen?'as of the last journaled checkpoint':'all sessions'}${T.creditsMain!=null?` · main ${fmtN(T.creditsMain)} · sub-agents ${fmtN(T.creditsSub)}`:''}</div></div>`);}
 else{const tk=T.tokens||{};tiles.push(`<div class="tile in" style="--d:.1s"><div class="k">Tokens so far</div><div class="v">${fmtTok(tk.total)}</div><div class="m">in ${fmtTok(tk.input)} · out ${fmtTok(tk.output)} · cache ${fmtTok((tk.cacheRead||0)+(tk.cacheWrite||0))}</div></div>`);}
@@ -638,7 +651,7 @@ const byPh=PH.map((p,i)=>{const ss=steps.filter(s=>s.phase===p);const done=ss.fi
 $('phases').style.gridTemplateColumns=byPh.map(x=>`minmax(196px,${Math.max(1,x.ss.length)}fr)`).join(' ');  // a one-row phase still gets room for its number, name, and summary
 $('phases').innerHTML=byPh.map(x=>x.html).join('');
 const n=steps.length,doneN=steps.filter(s=>s.status==='done').length,nowI=steps.findIndex(s=>s.status==='now');
-$('journeySub').textContent=feature?`${n} row${n===1?'':'s'} · ${doneN} closed · ${nowI>=0?'1 in progress':'none in progress'} · one row per object`:`${n} stations · ${doneN} reached · ${nowI>=0?'1 in progress':'none in progress'}`;
+$('journeySub').textContent=finished?(feature?`${n} row${n===1?'':'s'} · all closed · project completed`:`${n} stations · all reached · project completed`):feature?`${n} row${n===1?'':'s'} · ${doneN} closed · ${nowI>=0?'1 in progress':'none in progress'} · one row per object`:`${n} stations · ${doneN} reached · ${nowI>=0?'1 in progress':'none in progress'}`;
 (function(){const line=$('line');const W=line.clientWidth||1360;const pad=60;const gap=n>1?(W-2*pad)/(n-1):0;const progPct=n>1?((nowI>=0?nowI:doneN-0.5)/(n-1))*100:0;
   let h=`<div class="rail" style="left:${pad}px;right:${pad}px"><div class="prog" style="animation:none;width:${Math.max(0,progPct)}%"></div>${nowI>=0?`<div class="comet" style="animation:none;left:${progPct}%"></div><div class="pulse" style="left:${progPct}%"></div>`:''}</div>`;
   steps.forEach((s,i)=>{const x=pad+i*gap;const stg=s.stage?esc(s.stage)+(s.objectId?' · '+esc(s.objectId):''):'';const meta=s.status==='done'?`${stg?stg+' · ':''}${hm(s.elapsedSeconds)} · ${usd(s.costUsd)}`:s.status==='now'?`${stg?stg+' · ':''}${hm(s.elapsedSeconds)} · ${usd(s.costUsd)}${s.note?' · '+esc(s.note):''}`:(stg||'');
@@ -653,12 +666,19 @@ $('journeySub').textContent=feature?`${n} row${n===1?'':'s'} · ${doneN} closed 
 
 // ---- waiting on you ----
 const WHERE={'claude-code':'Reply in <b>Visual Studio Code</b> (the Claude Code panel or terminal) or on your <b>mobile device</b> via Claude Code Remote Control. This page only shows the question.','copilot-chat':'Reply in <b>Visual Studio Code</b> (GitHub Copilot Chat). This page only shows the question.','copilot-cli':'Reply in the <b>Copilot CLI</b> terminal. This page only shows the question.'};
-$('grid').classList.toggle('asking',!!waiting);if(!waiting)$('askCard').innerHTML='';if(waiting){const since=waiting.since?new Date(waiting.since):null;
+$('grid').classList.toggle('asking',!!waiting||finished||testing);if(!waiting)$('askCard').innerHTML='';
+if(!waiting&&finished){$('askCard').classList.add('done');$('askCard').innerHTML=`<h3>Project completed <span class="sub">${whenTxt?'closed '+whenTxt:''}</span></h3><div class="q">${feature?'Every object is built, reviewed, and packaged.':'The last step is closed and the release has shipped.'} The clocks have stopped: ${hm(T.elapsedSeconds)} elapsed${T.costUsd!=null?', '+usd(T.costUsd)+' at list price':''}${T.decisions?', '+fmtN(T.decisions)+' decisions asked':''}.</div><div class="where"><span class="w"></span><b>Nothing is waiting on you.</b> Bring the agent back to build another feature or start the next project; this page then picks up where it left off.</div>`;}
+else if(!waiting&&testing){$('askCard').classList.remove('done');$('askCard').innerHTML=`<h3>Waiting on you <span class="sub">${whenTxt?'since '+whenTxt:''}</span></h3><div class="q">The release test is in your hands: install the package, run the test script, and tell the agent how it went.</div><div class="where"><span class="w"></span><b>The agent is idle until you report.</b> ${WHERE[D.tool]||WHERE['claude-code']}</div>`;}
+else $('askCard').classList.remove('done');
+if(waiting){const since=waiting.since?new Date(waiting.since):null;
   $('askCard').innerHTML=`<h3>Waiting on you <span class="sub">${since?'since '+since.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):''}</span></h3><div class="q">${esc(waiting.question||'A question or approval is open.')}</div><div class="opts">${(waiting.options||[]).map((o,i)=>`<div class="opt ${o.recommended||/recommended/i.test(o.label||'')?'rec':''}"><b>${esc(o.label)}</b><span>${esc(o.description||'')}</span></div>`).join('')}</div><div class="where"><span class="w"></span><b>Waiting on your answer${since?' since '+since.toLocaleTimeString([],{hour:'2-digit',minute:'2-digit'}):''}.</b> ${WHERE[D.tool]||WHERE['claude-code']}</div>`;}
 
 // ---- roles ----
 const RC={Main:'main',Reasoning:'reas',Light:'light',Generator:''};
-$('roles').innerHTML=(D.roles||[]).map((r,i)=>{const cls=RC[r.role]||'';const st=r.status||'idle';const chip=st==='working'||st==='running'?`<span class="chip on">${st}${r.runningSeconds?' '+hm(r.runningSeconds):''}</span>${r.runningCount?`<span class="rcount" title="${r.runningCount} sub-agent${r.runningCount>1?'s':''} running on this model right now">${r.runningCount}</span>`:''}`:`<span class="chip">${esc(st)}</span>`;
+$('roles').innerHTML=(D.roles||[]).map((r,i)=>{const cls=RC[r.role]||'';let st=r.status||'idle';
+  if(st==='working'&&r.lastAt&&Date.now()-new Date(r.lastAt).getTime()>180000)st='idle';  // a stale render can't keep the light green (v5.9.5.0)
+  if(testing&&r.role==='Main'&&st!=='working')st='waiting on you';
+  const chip=st==='finished'?'<span class="chip fin">✓ finished</span>':st==='working'||st==='running'?`<span class="chip on">${st}${r.runningSeconds?' '+hm(r.runningSeconds):''}</span>${r.runningCount?`<span class="rcount" title="${r.runningCount} sub-agent${r.runningCount>1?'s':''} running on this model right now">${r.runningCount}</span>`:''}`:`<span class="chip">${esc(st)}</span>`;
   const right=copilot?`<b>${r.credits!=null?fmtN(r.credits)+' cr':'—'}</b>${r.stepCredits!=null?'this step '+fmtN(r.stepCredits):''}`:`<b>${r.tokens!=null?fmtTok(r.tokens):'—'}</b>${r.stepTokens!=null?'this step '+fmtTok(r.stepTokens):''}`;
   return `<div class="agent" style="--d:${1.2+i*0.2}s${st==='not started'?';opacity:.6':''}"><div class="av ${cls}" ${cls?'':'style="background:var(--text-3)"'}>${esc(r.role[0])}${cls?`<span class="live ${st==='working'||st==='running'?'':'idle'}"></span>`:''}</div><div><div class="n">${esc(r.role)}${r.role!=='Main'&&r.role!=='Generator'?' sub-agent':''} ${chip}</div><div class="d">${esc([r.model,r.effort?'effort '+r.effort:null,r.detail].filter(Boolean).join(' · '))}${st==='working'?'<span class="typing"></span>':''}</div></div><div class="r">${right}</div></div>`;}).join('')||'<div class="empty">No role assignment recorded yet (asked at PRE-01 / Step 1 / Build-a-Feature setup).</div>';
 
@@ -673,7 +693,7 @@ $('modelsCard').innerHTML=mh;
 
 // ---- exit gate ----
 const g=cur.exitGate||[];
-$('gateCard').innerHTML=`<h3>${cur.id?(feature?esc(cur.title||cur.id)+' · to close':'Step '+esc(cur.id)+' exit gate'):'Exit gate'} <span class="sub">${cur.id?(feature?(cur.stage?'stage: '+esc(cur.stage):esc(cur.id)):'from runbookSteps/'+esc(cur.id)+'.md'):''}</span></h3>${g.length?'<ul>'+g.map((t,i)=>`<li style="--i:${i}"><span class="ck n">·</span><span class="txt">${esc(t)}</span></li>`).join('')+'</ul>':`<div class="empty">${feature?'No object in progress.':'No step in progress.'}</div>`}<div class="note-line">${feature?'The row closes when the agent says so in the closing message; this ladder is Ops § Build-a-Feature\'s wording.':'The gate is met when the agent says so in the closing message; this list is the step file\'s wording.'}</div>`;
+$('gateCard').innerHTML=`<h3>${cur.id?(feature?esc(cur.title||cur.id)+' · to close':'Step '+esc(cur.id)+' exit gate'):'Exit gate'} <span class="sub">${cur.id?(feature?(cur.stage?'stage: '+esc(cur.stage):esc(cur.id)):'from runbookSteps/'+esc(cur.id)+'.md'):''}</span></h3>${g.length?'<ul>'+g.map((t,i)=>`<li style="--i:${i}"><span class="ck n">·</span><span class="txt">${esc(t)}</span></li>`).join('')+'</ul>':`<div class="empty">${finished?'Project completed — nothing left to close.':feature?'No object in progress.':'No step in progress.'}</div>`}<div class="note-line">${feature?'The row closes when the agent says so in the closing message; this ladder is Ops § Build-a-Feature\'s wording.':'The gate is met when the agent says so in the closing message; this list is the step file\'s wording.'}</div>`;
 
 // ---- feed ----
 const ev=D.events||[];const fh=ev.map(e=>`<span><i>${esc(e.time)}</i><b>${esc(e.who)}</b> ${esc(e.text)}</span>`).join('')||'<span><i>—</i>No events yet</span>';
@@ -692,10 +712,14 @@ function tick(){const n=$('next');if(n){const left=Math.max(0,Math.ceil((nextAt-
 // Pull the renderer's sidecar (ocpfFramework/state/dashboard-data.js) through a <script> tag — the one load that works
 // on file:// in every browser — and repaint only when the data changed. No sidecar (older renderer): fall back to a reload.
 function pull(){if(!D.refreshSeconds)return;pulling=true;tick();const sc=document.createElement('script');sc.src=(D.dataUrl||'ocpfFramework/state/dashboard-data.js')+'?t='+Date.now();
-  sc.onload=()=>{sc.remove();const n=window.__ocpfData;window.__ocpfData=null;if(n&&n.generatedAt&&n.generatedAt!==D.generatedAt){D=n;paint(D);fresh();document.body.classList.remove('updated');void document.body.offsetWidth;document.body.classList.add('updated');}done();};
+  sc.onload=()=>{sc.remove();const n=window.__ocpfData;window.__ocpfData=null;if(n&&n.generatedAt&&n.generatedAt!==D.generatedAt){D=n;agedOut=false;paint(D);fresh();document.body.classList.remove('updated');void document.body.offsetWidth;document.body.classList.add('updated');}done();};
   sc.onerror=()=>{sc.remove();if(!D.dataUrl){location.reload();return;}done();};
   function done(){pulling=false;nextAt=Date.now()+(D.refreshSeconds||30)*1000;tick();}
   document.head.appendChild(sc);}
+// 'working' ages out and 'testing' is derived inside paint() — but a pull repaints only when the data changed, and nothing renders
+// while the human tests. So repaint once, by the clock, as Main crosses 180 s after its last transcript event (v5.9.5.0).
+let agedOut=false;
+function ageOut(){const m=(D.roles||[]).find(r=>r.role==='Main');if(agedOut||!m||m.status!=='working'||!m.lastAt||Date.now()-new Date(m.lastAt).getTime()<=180000)return;agedOut=true;paint(D);}
 applyCollapse();
 // ---- ticker controls: pause / resume, and restart from the newest message (no page reload) ----
 var ICO_PAUSE='<svg viewBox="0 0 16 16" aria-hidden="true"><rect x="3" y="2.5" width="3.6" height="11" rx="1"/><rect x="9.4" y="2.5" width="3.6" height="11" rx="1"/></svg>',ICO_PLAY='<svg viewBox="0 0 16 16" aria-hidden="true"><path d="M4 2.5v11l9-5.5z"/></svg>',feedPaused=false;  // var: hoisted, so paint() may call feedApply() before this line runs
@@ -703,7 +727,7 @@ function feedApply(){const it=$('feed');if(it)it.style.animationPlayState=feedPa
 $('feedPause').addEventListener('click',()=>{feedPaused=!feedPaused;feedApply();});
 $('feedReset').addEventListener('click',()=>{const it=$('feed');if(!it)return;it.style.animation='none';void it.offsetWidth;it.style.animation='';feedPaused=false;feedApply();});
 feedApply();
-fresh();tick();setInterval(fresh,15000);setInterval(tick,1000);
+fresh();tick();setInterval(fresh,15000);setInterval(tick,1000);setInterval(ageOut,15000);
 // theme selector: the renderer chooses the template from ocpfFramework/state/dashboard.json → "theme"; the page can only ask
 // theme selector: every theme is rendered on every run, so switching is just opening the other page
 $('themeSel').value='brand';$('themeSel').addEventListener('change',e=>{const v=e.target.value;if(v!=='brand')location.href=v==='f1'?'ProjectDashboard-f1.html':'ProjectDashboard.html';});

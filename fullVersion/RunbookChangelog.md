@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.9.4.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v5.9.4.0**, and Lite at **v5.9.4.0** — but
+**v5.9.5.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v5.9.5.0**, and Lite at **v5.9.5.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -23,6 +23,59 @@ change-worthy. (This is a different convention from a project's own ChangeLog, w
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
 
 ---
+
+## v5.9.5.0 — October 21, 2026
+
+**The app's short description, long description, and Help link are asked at intake, on every
+project.** Lite **v5.9.5.0**, Operations Guide **v5.9.5.0**, Standards Guide **v1.13.1.0**
+(unchanged), plugin **5.9.5**.
+
+- **Ops § Intake — new Box 4D *Description & help*, and the procedure *The description and help
+  questions*.** Until now `app.json`'s `brief` and `description` were asked only for AppSource (Box
+  3a), and `help` was first raised when the help site was built. From this version all three are
+  asked for every Deployment Target, in both editions, **after Box 4** — once the problem statement,
+  the Deployment Target, and the onboarding answers are known, so the description isn't written
+  before the scope is settled. **The agent has its answers ready before asking:** it writes its own
+  one-line `brief` (about 100 characters) and its own three-to-five-sentence `description` from the
+  problem statement, entity list, and consumers, then asks **three boxes with one question each**,
+  the suggestion quoted in full as the first option (*Use this (suggested)*), *Propose another*, and
+  — for a PTE only — *Leave it out for now*; a change is typed in the free-text entry, and the
+  question says so. `help` is never written by the agent: the options are **Set it when the help
+  site is built (recommended)** — Step 11 offers it — a URL from the human's own material (labelled
+  with its source), *I'll type it*, and *Leave it out for now* (PTE only). *Forbidden sources*
+  applies in full. Why: a real project reached release testing with an app whose Extension Management entry
+  showed no description and no Help link, because nothing asked for them on a PTE.
+- **AppSource questions A1, A2, and A7 moved into Box 4D** and are not asked again in Boxes 3a / 3b;
+  the box says they are mandatory and that `brief` and `description` must match the Partner Center
+  offer word for word. A8 offers *Same as the help URL* only when Box 4D recorded one.
+- **Step 01 §1.1 — three new rows:** **Short Description**, **Long Description**, and **Help URL**,
+  each recorded with its source; §1.1a's `brief`, `description`, and `help` rows now point at them;
+  the worked example shows all three; §1.10 writes them to `app.json` for every Deployment Target
+  — a chosen or typed value as given, *deferred* or *left out* writes nothing, **never an empty
+  string**; the exit gate checks the three were asked one at a time with a suggestion first.
+- **Ops § Project Setup step 1** writes the three from Box 4D for every target, with the same
+  never-an-empty-string rule. **Ops § Help Site** and **Step 11**: the `help` offer now also
+  replaces a URL intake recorded, naming the current value in its question.
+- **Dashboard — a finished project reads *Completed*, and nobody is lit** (Ops § Dashboard → new
+  § 6). On real runs a done-done project still showed Main *working* and the elapsed clock running:
+  the last hook had rendered inside the 180-second "working" window and nothing rendered again, and
+  Build-a-Feature's *Done* left the last window open. The renderer (Python and PowerShell) now
+  carries a project state — `completed`, `testing`, `waiting`, `working`, `idle`. *Completed*: a
+  green pill with the close time, a *Project completed* card in place of the question card with the
+  final Elapsed and cost, Main **finished** with no breathing dot, every row closed; the F1 page
+  shows the chequered flag, the Ferrari stopped on the finish line under confetti, and the trophy on
+  the podium — AJ's trophy render, background removed — and, first in the right column above the
+  telemetry, a victory panel with his render of the driver holding the trophy and the chequered flag. *Testing* (Full and Lite, the last step open, no question, Main idle): an amber
+  *Waiting on you · release testing* pill and card, Main *waiting on you*, the F1 Ferrari in the box
+  with the pit wall amber. What closes a project: Build-a-Feature's *Done* now ends with one more
+  render, `--close-project` / `-CloseProject` (stamps `projectClosedAt` in `usage.json`, closes any
+  open window so the clocks stop, logs it); the usage script's `--calibrate` stamps the same marker
+  at Full Step 12 / Lite Step 7 (never while a step is still `In Progress`); or the last step's
+  row set to `Completed`, which the renderer stamps on first sight so the clock stops there. A
+  window that starts after the close reopens the project by itself. Both pages also age *working*
+  out 180 seconds after Main's last transcript event (`lastAt` on its row) and repaint once by the
+  clock as it crosses — a pull alone repaints only on new data — so a session that simply ended
+  never stays green. Step 12 and Lite Step 7 name the two states in their hand-off notes.
 
 ## v5.9.4.0 — October 21, 2026
 

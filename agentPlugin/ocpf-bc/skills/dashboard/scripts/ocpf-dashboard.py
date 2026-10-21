@@ -6,7 +6,7 @@ for one project from state the framework already keeps:
 
   app.json                               name, publisher, version, BC version, logo (embedded as a data URI)
   ocpfFramework/framework.json           edition, runbook version, AL MCP state
-  ocpfFramework/state/usage.json         aiTool, step windows (startedAt / completedAt)
+  ocpfFramework/state/usage.json         aiTool, step windows (startedAt / completedAt), projectClosedAt once the project is closed
   ProjectProgress.md                     the step table (status per step); Build-a-Feature: the feature table (one row per object)
   ocpfFramework/runbookSteps/<step>.md   the current step's Exit gate text, each step's phase and title (Full, Lite)
   ocpfFramework/state/pricing.json       price source and date, credit price
@@ -22,6 +22,7 @@ Nothing here is estimated by the model: the page shows what is on disk and says 
     python3 ocpf-dashboard.py --project <root> [--open] [--quiet] [--refresh 30] [--toast "text"]
     python3 ocpf-dashboard.py --project <root> --waiting-json '<AskUserQuestion tool input>'   # hook: a question opened
     python3 ocpf-dashboard.py --project <root> --clear-waiting                                  # hook: it was answered
+    python3 ocpf-dashboard.py --project <root> --close-project                                  # the human said Done: completed state, clocks stopped
     python3 ocpf-dashboard.py --project <root> --event "who" "text"                             # append a feed event
 """
 import argparse, time, base64, glob, json, os, re, subprocess, sys
@@ -172,9 +173,13 @@ def progress_status(root, catalog):
 
 def windows(usage):
     wins = []
+    closed = parse_ts(usage.get("projectClosedAt"))  # the project was closed (v5.9.5.0): a window still open then ends there, so the clock stops
     for s in usage.get("steps", []):
         a = parse_ts(s.get("startedAt"))
-        if a and s.get("step"): wins.append([s["step"], a, parse_ts(s.get("completedAt"))])
+        if a and s.get("step"):
+            b = parse_ts(s.get("completedAt"))
+            if b is None and closed and a <= closed: b = closed
+            wins.append([s["step"], a, b])
     wins.sort(key=lambda w: w[1])
     for i, w in enumerate(wins):
         if w[2] is None and i + 1 < len(wins): w[2] = wins[i + 1][1]
@@ -354,6 +359,34 @@ def estimate_for(root, sid, copilot):
 
 # ---------------------------------------------------------------- events
 def events_path(root): return os.path.join(root, STATE, "dashboard-events.jsonl")
+def close_project(root):
+    """The human said the project is done (Build-a-Feature's *Done*; Full Step 12 / Lite Step 7 at project close, where the
+    usage script's --calibrate does the same): stamp projectClosedAt, close every open window there, and log it (v5.9.5.0)."""
+    fw = load_json(os.path.join(root, "ocpfFramework", "framework.json"), {})
+    if (fw.get("edition") or "").lower() != "feature":
+        append_event(root, "Agent", "--close-project ignored — a Full or Lite project closes at its last step (Ops § Dashboard → 6)"); return  # a Build-a-Feature run inside a Full or Lite project never closes the host (Ops § Build-a-Feature → Where it runs)
+    p = os.path.join(root, STATE, "usage.json"); u = load_json(p, {})
+    if not u.get("projectClosedAt"): u["projectClosedAt"] = now_utc().strftime("%Y-%m-%dT%H:%M:%SZ")
+    for s in u.get("steps", []):
+        if s.get("startedAt") and not s.get("completedAt"): s["completedAt"] = u["projectClosedAt"]
+    with open(p, "w", encoding="utf-8") as f: json.dump(u, f, indent=2, ensure_ascii=False)
+    append_event(root, "You", "closed the project — completed")
+
+def hand_closed(root, usage, edition):
+    """A Full or Lite project closed by hand — the last step's row set to Completed in ProjectProgress.md with no
+    --close-project / --calibrate behind it: stamp projectClosedAt on first sight, so the clock stops there instead
+    of running on in the last step's open window (v5.9.5.0; Ops § Dashboard → 6)."""
+    if edition == "feature" or usage.get("projectClosedAt"): return
+    cat = step_catalog(root, edition)
+    if not cat or progress_status(root, cat).get(cat[-1]["id"]) != "done": return
+    ids = {c["id"] for c in cat}
+    if any(s.get("startedAt") and not s.get("completedAt") and s.get("step") not in ids for s in usage.get("steps", [])): return  # a feature session's window is open in this host (Case A): not closed, and never cut short
+    usage["projectClosedAt"] = now_utc().strftime("%Y-%m-%dT%H:%M:%SZ")
+    for s in usage.get("steps", []):
+        if s.get("startedAt") and not s.get("completedAt"): s["completedAt"] = usage["projectClosedAt"]
+    with open(os.path.join(root, STATE, "usage.json"), "w", encoding="utf-8") as f: json.dump(usage, f, indent=2, ensure_ascii=False)
+    append_event(root, "Agent", f"{cat[-1]['id']} is Completed in ProjectProgress.md — project closed, clocks stopped")
+
 def append_event(root, who, text):
     os.makedirs(os.path.join(root, STATE), exist_ok=True)
     with open(events_path(root), "a", encoding="utf-8") as f:
@@ -375,6 +408,7 @@ def build(root, a):
     copilot = tool.startswith("copilot")
     edition = (fw.get("edition") or ("lite" if os.path.isfile(os.path.join(root, "ocpfFramework", "runbookSteps", "STEP-1.md")) else "full")).lower()
     notes = []
+    hand_closed(root, usage, edition)  # the last step's row Completed with nothing stamped: close it now, before the windows are read
     wins = windows(usage)
     uj, err = usage_rows(root, tool) if wins else (None, "no step windows yet")
     if err: notes.append(f"usage: {err}")
@@ -503,13 +537,44 @@ def build(root, a):
     if waiting and waiting.get("clearedAt"): waiting = None
     if waiting:
         m_ = next(r for r in rl if r["role"] == "Main"); m_["status"] = "waiting on you"; m_["detail"] = (waiting.get("question") or "")[:90]
+    # The project's state (v5.9.5.0): completed / waiting / testing / working / idle. Before this, a finished project showed
+    # Main "working" forever — the last hook rendered the page inside the 180 s window and nothing rendered it again — and
+    # the Build-a-Feature "Done" answer left every window open, so Elapsed kept growing. The page also ages "working" itself
+    # from Main's lastAt, so a stale render can't keep the light green.
+    main_ = next((r for r in rl if r["role"] == "Main"), None) or {"status": "idle"}  # Main may have been filtered out before any window
+    if live: main_["lastAt"] = live["main"]["lastAt"]
+    closed_at = parse_ts(usage.get("projectClosedAt"))
+    starts = [parse_ts(s.get("startedAt")) for s in usage.get("steps", []) if parse_ts(s.get("startedAt"))]
+    if closed_at and any(t > closed_at for t in starts): closed_at = None  # a window opened after the close: the project is back in work
+    cat_ids = {c["id"] for c in catalog}
+    reopened = (usage.get("projectClosedAt") and closed_at is None) or any(w[2] is None and w[0] not in cat_ids for w in wins)  # …or a feature session's window open in a finished host (Case A): the last row stays Completed, the project is still back in work
+    base = [c["id"] for c in catalog if not c.get("remediation")]  # a remediation row (07a, STEP-5a) opened from the release test must not displace the last step
+    last_id = base[-1] if (base and edition != "feature") else None
+    last_done = bool(last_id) and not reopened and next((s["status"] for s in steps if s["id"] == last_id), None) == "done"
+    since = None
+    if closed_at or last_done:
+        state = "completed"; since = closed_at or max((w[2] for w in wins if w[2]), default=None)
+        for s in steps:
+            if s["status"] == "now": s["status"] = "done"  # a row the tracker still calls In Progress was closed by the close itself
+        cur = None; current = {}
+        for r in rl:
+            r["status"] = "finished" if r["role"] == "Main" else "idle"
+            for k in ("runningCount", "runningSeconds", "lastDetail", "detail", "lastAt"): r.pop(k, None)
+    elif waiting:
+        state = "waiting"; since = parse_ts(waiting.get("since"))
+    elif cur and last_id and cur["id"] == last_id and main_["status"] != "working":
+        state = "testing"; since = max((w[1] for w in wins if w[0] == cur["id"]), default=None)
+        main_["status"] = "waiting on you"; main_["detail"] = "release testing — tell the agent how it went"
+    elif main_["status"] == "working": state = "working"
+    else: state = "idle"
+    project = {"state": state, "since": since.isoformat() if since else None, "closedAt": closed_at.isoformat() if closed_at else None, "lastStep": last_id}
     est = estimate_for(root, cur["id"], copilot) if (cur and edition != "feature") else None
     if est and est.get("estimated") is not None and cur:
         est["used"] = (cur["credits"] if copilot else cur["tokens"]) or 0
     data = {"generatedAt": now_utc().isoformat(), "refreshSeconds": a.refresh, "tool": tool, "live": bool(a.live or load_json(os.path.join(root, STATE, "dashboard.json"), {}).get("hooks")),
             "renderer": "ocpf-dashboard.py", "app": app_facts(root),
             "framework": {"edition": edition, "version": fw.get("runbookVersion"), "alMcp": "connected" if fw.get("alMcp") else "unknown"},
-            "phases": phases, "steps": steps, "current": current, "totals": tot, "estimate": est, "models": models, "roles": rl, "waiting": waiting,
+            "phases": phases, "steps": steps, "current": current, "totals": tot, "estimate": est, "models": models, "roles": rl, "waiting": waiting, "project": project,
             "events": recent_events(root), "pricing": {"source": (pricing.get("aiCredit") or {}).get("source") if copilot else ", ".join(sorted({v.get("source", "") for v in (pricing.get("perMillionTokens") or {}).values() if v.get("source")})),
                         "fetchedAt": pricing.get("fetchedAt"), "usdPerCredit": (pricing.get("aiCredit") or {}).get("usd")},
             "notes": notes, "toast": a.toast}
@@ -558,6 +623,7 @@ def main():
     ap.add_argument("--live", action="store_true", help="mark the page as hook-refreshed (the dashboard skill sets this once hooks are installed)")
     ap.add_argument("--waiting-json", help="hook input of an AskUserQuestion / ask_user call: record the open question and render")
     ap.add_argument("--clear-waiting", action="store_true", help="hook: the question was answered")
+    ap.add_argument("--close-project", action="store_true", help="the human said the project is done: stamp projectClosedAt in usage.json, close any open window, and render the completed state")
     ap.add_argument("--event", nargs=2, metavar=("WHO", "TEXT"), help="append a feed event and render")
     ap.add_argument("--theme", choices=sorted(THEMES), help="open this theme's page on THIS call only (--open), and record it as the human's stated preference in ocpfFramework/state/dashboard.json; without it --open always opens the OnlyBCFans page; every theme is rendered on every run")
     ap.add_argument("--throttle", type=int, default=0, metavar="SECONDS", help="hook on every tool call: skip the render when the page is younger than this (unless a question, answer, or event is being recorded)")
@@ -567,7 +633,7 @@ def main():
         if a.quiet: return
         sys.exit(f"error: {root} has no ocpfFramework/ folder — not an OCPF project")
     os.makedirs(os.path.join(root, STATE), exist_ok=True)
-    if a.throttle and not (a.waiting_json or a.clear_waiting or a.event or a.open):
+    if a.throttle and not (a.waiting_json or a.clear_waiting or a.event or a.open or a.close_project):
         out_ = os.path.join(root, "ProjectDashboard.html")
         try:
             if os.path.isfile(out_) and (time.time() - os.path.getmtime(out_)) < a.throttle: return
@@ -594,6 +660,7 @@ def main():
             with open(p, "w", encoding="utf-8") as f: json.dump(w, f, indent=2, ensure_ascii=False)
             append_event(root, "You", "answered")
     if a.event: append_event(root, a.event[0], a.event[1])
+    if a.close_project: close_project(root)
     dj = load_json(os.path.join(root, STATE, "dashboard.json"), {})
     if a.live or a.theme:
         if a.live: dj["hooks"] = True

@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 6 — Review, Gap-Check & Finalize Docs
 
-**Runbook version:** 5.9.4.0 · Lite edition · Phase: PROVE
+**Runbook version:** 5.9.5.0 · Lite edition · Phase: PROVE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -125,7 +125,8 @@
   `docs/template.html`, and `docs/build.py` — the one exception to the header note's "nothing loose
   in `docs/`", because GitHub Pages serves `/docs` — looks at every tab before the human does, and
   closes with the **GitHub Pages** steps (Settings → Pages → Deploy from a branch → `main` / `/docs`)
-  and the offer to set `app.json` → `help` to the site's URL (a package change: the next build's
+  and the offer to set `app.json` → `help` to the site's URL — or to replace the URL intake's
+  Box 4D recorded, named in the question (a package change: the next build's
   Revision, with its ChangeLog entry). Record the answer in the ChangeLog either way. **From then on
   every change to a source document — a Step 7 fix included — reruns `python3 docs/build.py`
   before that step closes.**

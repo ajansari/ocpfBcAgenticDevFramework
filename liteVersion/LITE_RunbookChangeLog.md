@@ -16,6 +16,28 @@ framework.
 
 ---
 
+## v5.9.5.0 — October 21, 2026
+
+Derived from the full framework **v5.9.5.0**; Operations Guide **v5.9.5.0**; Standards Guide
+**v1.13.1.0** (unchanged); plugin **5.9.5**.
+
+- **Step 1 — the short description, long description, and Help URL are asked at intake, on every
+  project.** Three new Project Parameters rows — **Short description**, **Long description**, and
+  **Help URL** — filled from Ops § Intake's new **Box 4D**, asked after the onboarding box, one
+  question per box, with the agent's own suggestion (written from the problem statement before the
+  box opens) as the first option, *Propose another*, and — for a PTE only — *Leave it out for now*;
+  a change is typed in the free-text entry. `help` is never written by the agent: **Set it when the
+  help site is built (recommended)** — Step 6 offers it — a URL from the human's material, *I'll
+  type it*, or *Leave it out for now* (PTE only). The AppSource manifest-set row now takes these
+  three from the rows above instead of asking them again; the "in short" box list and the exit gate
+  (here and in the runbook's Step 1 stub) name the three questions. Project setup writes them to
+  `app.json` for every Deployment Target — never an empty string for a deferred or left-out answer.
+- **Step 6** — the help-site `help` offer also replaces a URL intake recorded, named in the question.
+- **Dashboard — a finished project reads *Completed*** (Ops § Dashboard → 6). Step 7's close note
+  says the calibration export now marks the project closed — the page reads *Completed*, Main
+  *finished*, clocks stopped — and that while the human release-tests with no question open it reads
+  *Waiting on you · release testing*. The full changelog has the detail.
+
 ## v5.9.4.0 — October 21, 2026
 
 Derived from the full framework **v5.9.4.0**; Operations Guide **v5.9.4.0**; Standards Guide

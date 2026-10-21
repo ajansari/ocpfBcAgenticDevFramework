@@ -181,7 +181,10 @@ public either way unless the organisation has access-controlled Pages. Then:
 
 - Write the URL into `docs/site.json` → `helpUrl` and rebuild once more (the page's canonical link).
 - **Offer the Help link:** **Set `app.json` → `help` to the site's URL now (recommended)** / *Not
-  now*. Business Central shows it as the extension's **Help** in Extension Management; AppSource
+  now*. When `app.json` already carries a `help` (intake's Box 4D recorded a URL from the human's
+  material), the question names that value and the first option reads **Replace it with the
+  site's URL (recommended)** — never overwritten silently, never skipped because one is set.
+  Business Central shows it as the extension's **Help** in Extension Management; AppSource
   requires it. It is a change to the package (ALL ALONG → Packaging & Versioning): the next build
   increments the Revision and its ChangeLog entry names the help link; a package already uploaded
   is never rebuilt at the same version. `"url"` is set to the repository when blank. Nothing else

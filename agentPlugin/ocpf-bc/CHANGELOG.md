@@ -4,6 +4,46 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.9.5 — October 21, 2026
+
+**Bundles:** full runbook v5.9.5.0, Lite v5.9.5.0, Standards Guide v1.13.1.0 (unchanged),
+Operations Guide v5.9.5.0. Bundled references refreshed by `syncPlugin.sh`. Skills changed:
+`dashboard` (scripts, both templates, SKILL.md), `usage` (both scripts, SKILL.md),
+`build-a-feature` (the close render on *Done*), `html-docs` (the Help-link offer on a recorded
+`help`); version pins in `al-standards` and `update-framework`.
+
+- **Intake asks for `brief`, `description`, and `help` on every project** (Ops § Intake → Box 4D,
+  *The description and help questions*; Full Step 01 §1.1; Lite Step 1). Three boxes, one question
+  each, after the onboarding box; the agent's own suggestion written beforehand is the first option,
+  a change is typed as *Other*; `help` comes only from the human's material or the help-site step.
+  AppSource's A1, A2, and A7 are these three and aren't asked twice.
+- **`dashboard` skill — completed and waiting-on-your-test states.** `ocpf-dashboard.py` /
+  `.ps1`: a `project` block in the data (`state`, `since`, `closedAt`, `lastStep`); Main's row
+  carries `lastAt`; a new **`--close-project`** / **`-CloseProject`** flag for Build-a-Feature's
+  *Done* (stamps `projectClosedAt` in `usage.json`, closes open windows, logs the event, renders);
+  a window still open at the close ends there, so Elapsed stops; a closed project with a row the
+  tracker still calls In Progress shows it closed. Both templates: a Completed / Waiting-on-you
+  header pill, the *Project completed* and *release testing* cards, Main **finished**, and
+  *working* aged out 180 s after `lastAt` on every in-place refresh. `dashboard-f1.html`: the
+  victory scene — chequered flag, the Ferrari parked on the finish line under confetti, podium and
+  the trophy on it AJ's own render (`TROPHY_SRC`, background removed by a region grow from the
+  border, 220 px tall, about 12 KB); a victory panel first in the right column, above the telemetry, shows his render of the
+  driver holding the trophy and the chequered flag (October 21, 2026; resized to 720 px, embedded
+  as WebP in `VICTORY_SRC`, about 53 KB). `ocpf-usage.py` /
+  `.ps1`: `--calibrate` stamps the same marker — not while a step is still `In Progress` on a Full
+  or Lite project, so a mid-project cost export never reads as the close. A project closed by hand
+  (the last step's row `Completed`, nothing stamped) is stamped by the renderer on first sight, so
+  its clock stops there. `--close-project` is a no-op on a Full or Lite project (a feature run
+  inside one never closes the host); the last step is taken from the base step list, so a
+  remediation row (`07a`, `STEP-5a`) can't displace it. *Testing* and the 180 s age-out are
+  derived by the page: both templates repaint once, by the clock, as Main crosses 180 s — a pull
+  alone repaints only on new data, and nothing renders while the human tests. The brand page's
+  *Project completed* card keeps the green frame without the amber "question open" pulse.
+  `html-docs`: the Help-link offer names a `help` intake already recorded and offers to replace
+  it. Reviewed twice by a Fable 5.1 sub-agent (medium effort, `/fw-review`) before staging. The
+  PowerShell renderer's new variable is `$projState` — `$project` would be cast to the
+  string-typed `$Project` parameter.
+
 ## 5.9.4 — October 21, 2026
 
 **Bundles:** full runbook v5.9.4.0, Lite v5.9.4.0, Standards Guide v1.13.1.0 (unchanged),

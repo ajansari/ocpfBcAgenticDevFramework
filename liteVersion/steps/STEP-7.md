@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 7 — Release for Testing
 
-**Runbook version:** 5.9.4.0 · Lite edition · Phase: PROVE
+**Runbook version:** 5.9.5.0 · Lite edition · Phase: PROVE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -30,11 +30,15 @@
 > `In Progress`, and that when the release test is done and the package has shipped, the row must
 > be set to `Completed`, the ChangeLog given a closing entry naming the shipped package, the usage
 > table its final refresh — one row per model — and the calibration file exported to
-> `~/.ocpf/calibration/` (Operating Rule 9; ALL ALONG → Usage & Cost Tracking), so that the next
+> `~/.ocpf/calibration/` (Operating Rule 9; ALL ALONG → Usage & Cost Tracking) — the export also
+> marks the project closed, so the dashboard reads *Completed* with its clocks stopped; until then,
+> with no question open, it reads *Waiting on you · release testing* three minutes after the agent's
+> last turn, worked out by the page itself (Ops § Dashboard → 6) — so that the next
 > developer or AI tool that opens this project reads the true state rather than a step that looks
-> unfinished. Say the agent will do it if brought back in for the release, and how to do it by
-> hand if not (edit the row; ask the `usage` skill or the Ops § Usage & Cost procedure for the
-> table). Ordinary conversation, not a decision — not wrapped in the options mechanism, and not
+> unfinished. Say the agent will do it if brought back in for the release — **the simplest route:
+> come back and say *I'm done with Step 7***, and the agent closes the row, refreshes the table,
+> exports the calibration file, and stops the clocks in one go — and how to do it by hand if not
+> (edit the row; ask the `usage` skill or the Ops § Usage & Cost procedure for the table). Ordinary conversation, not a decision — not wrapped in the options mechanism, and not
 > folded into the hand-off box above, whose two options must stay the only thing that message asks.
 >
 > Everything below this note is what happens *after* that hand-off — the human's test run, and
