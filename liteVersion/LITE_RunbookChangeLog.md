@@ -16,6 +16,13 @@ framework.
 
 ---
 
+## v5.9.4.0 — October 21, 2026
+
+Derived from the full framework **v5.9.4.0**; Operations Guide **v5.9.4.0**; Standards Guide
+**v1.13.1.0** (unchanged); plugin **5.9.4**. No Lite text changed; the version moves with the plugin's
+`dashboard` skill, whose F1 page now carries AJ's pit crew figures and pit wall stands, cut out and
+embedded, in place of the hand-drawn crew and gantry.
+
 ## v5.9.3.0 — October 21, 2026
 
 Derived from the full framework **v5.9.3.0**; Operations Guide **v5.9.3.0**; Standards Guide

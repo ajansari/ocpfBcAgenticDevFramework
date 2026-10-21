@@ -344,6 +344,13 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 21, 2026 — Full v5.9.4.0 · Lite v5.9.4.0 · Operations Guide v5.9.4.0 · Plugin v5.9.4
+
+**The F1 pit crew are real.** The pit lane cam's crew and pit walls are now renders too: a crew per
+team that stands, walks, holds the lollipop and the pit board, and (Ferrari) crouches and kneels at
+the wheels while the car is in the box; the human's pit wall stand with two engineers at the screens,
+amber while a question waits; and each team's pit wall inside its garage.
+
 ## October 21, 2026 — Full v5.9.3.0 · Lite v5.9.3.0 · Operations Guide v5.9.3.0 · Plugin v5.9.3
 
 **The F1 dashboard looks like a launch render.** The pit lane cam now shows real launch renders of the

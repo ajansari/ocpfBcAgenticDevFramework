@@ -4,6 +4,27 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.9.4 — October 21, 2026
+
+**Bundles:** full runbook v5.9.4.0, Lite v5.9.4.0, Standards Guide v1.13.1.0 (unchanged),
+Operations Guide v5.9.4.0. The F1 dashboard template only; both manifests' version.
+
+- **`dashboard` skill: `templates/dashboard-f1.html` — the pit crew and the pit walls are AJ's
+  renders.** Six sheets (October 21, 2026): front, back, side, and walking figures for each team,
+  the lollipop up, the pit board held up, Ferrari crouching and kneeling, and a pit wall stand per
+  team. Each figure is cut out of its sheet (background removed by a region grow from the border,
+  tolerance 3, in a headless browser canvas; blobs assigned to grid cells by centroid, touching
+  figures split along the least-occupied line), scaled to 240 px tall (320 px for the stands),
+  and embedded as WebP data URIs (the page grows from about 1.4 MB to about 2.1 MB). The hand-drawn
+  SVG crew are gone; the motion is the same — an idle side figure sways, now and then walks a few
+  steps and back (its side and walking frames alternate while it moves, and it turns to come back),
+  the box has Ferrari crouching and kneeling at the wheels, one watching, and the lollipop up, and
+  a car on track leaves one crew idle and one holding the pit board up to the track. The human's
+  pit wall gantry is now the Ferrari stand, seen from behind, facing the track, with an amber wash
+  over its screens while a question waits and the `PIT WALL · YOU` plate above it; each garage
+  shows its team's pit wall behind the glass, the role plate moved up and the gantry lights to the
+  left. Same data contract, Day/Night, and in-place refresh; nothing in the renderers changed.
+
 ## 5.9.3 — October 21, 2026
 
 **Bundles:** full runbook v5.9.3.0, Lite v5.9.3.0, Standards Guide v1.13.1.0 (unchanged),

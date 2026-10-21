@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.9.3.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v5.9.3.0**, and Lite at **v5.9.3.0** — but
+**v5.9.4.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v5.9.4.0**, and Lite at **v5.9.4.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -23,6 +23,17 @@ change-worthy. (This is a different convention from a project's own ChangeLog, w
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
 
 ---
+
+## v5.9.4.0 — October 21, 2026
+
+**The F1 dashboard's pit crew and pit walls are AJ's renders.** Lite **v5.9.4.0**, Operations Guide
+**v5.9.4.0**, Standards Guide **v1.13.1.0** (unchanged), plugin **5.9.4**. No runbook or Ops text
+changed; the version moves with the plugin's `dashboard` skill: the `f1` theme's pit crew are now
+AJ's figures (October 21, 2026) — one set per team, standing, walking, with the lollipop, with the
+pit board, and Ferrari's crouching and kneeling at the wheels — cut out of their sheets and embedded;
+the hand-drawn crew are gone. The human's pit wall at the right end of the wall is AJ's Ferrari pit
+wall stand (two engineers at the screens, seen from behind, facing the track), its screens amber
+while a question waits; each garage shows its own team's pit wall behind the glass.
 
 ## v5.9.3.0 — October 21, 2026
 
