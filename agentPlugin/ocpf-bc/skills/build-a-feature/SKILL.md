@@ -22,8 +22,8 @@ holistic solution, which is exactly what makes it right for a PoC app for a demo
 the foundation is strong enough that a Full or Lite project, or a developer, can take it over
 later. Minutes, usually 10–20; at published API rates most builds cost $1–5.
 
-**Where it is reached.** The `start` skill offers it as the third journey beside Full and Lite,
-recommends it first on an existing extension that never used the framework, and offers *Build a
+**Where it is reached.** The `start` skill lists it first in its journey question (Build-a-Feature,
+Full — the recommended journey — Lite, always in that order), and offers *Build a
 feature in this project* on a project that already follows the framework.
 
 **One model.** The Main model does everything here: asks, writes, compiles and fixes, documents,

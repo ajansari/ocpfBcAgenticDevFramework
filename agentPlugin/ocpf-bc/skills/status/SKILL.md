@@ -68,7 +68,7 @@ in `docs/UsageReport.md`; report from the ChangeLog and offer `update-framework`
 
 Keep it to a compact block:
 
-- **Project:** extension name, framework edition (Full, Lite, or Build-a-Feature), and runbook
+- **Project:** extension name, framework edition (Build-a-Feature, Full, or Lite), and runbook
   version (Build-a-Feature: the framework version the companions came from).
 - **Now:** phase and step (for example "DESIGN, Step 03: Craft the TDD"), and what's done within it.
   Build-a-Feature: the row in progress — "F03 Rental Unit Card (Page), stage Built" — and the

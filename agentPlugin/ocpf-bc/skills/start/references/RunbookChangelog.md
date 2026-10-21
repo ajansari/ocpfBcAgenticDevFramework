@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.9.1.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v5.9.1.0**, and Lite at **v5.9.1.0** — but
+**v5.9.2.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v5.9.2.0**, and Lite at **v5.9.2.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -23,6 +23,21 @@ change-worthy. (This is a different convention from a project's own ChangeLog, w
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
 
 ---
+
+## v5.9.2.0 — October 20, 2026
+
+**Full is the recommended journey; the journeys are always listed Build-a-Feature, Full, Lite.**
+Lite **v5.9.2.0**, Operations Guide **v5.9.2.0**, Standards Guide **v1.13.1.0** (unchanged), plugin
+**5.9.2**. AJ's decision, October 20, 2026:
+
+- **Ops § Journeys** states it: Full is the recommended journey; Build-a-Feature and Lite are the
+  offers for smaller work, taken when the human says so, never pushed. The `start` skill's journey
+  question lists the three in one fixed order — Build-a-Feature, Full (recommended), Lite — an
+  explicit exception to the recommended-first rule of Ops § Asking and Approvals, and every list
+  of the journeys in every document and on the website keeps that order. The paragraphs in Ops §
+  Journeys, the Ops contents line, and Ops § Plugin follow it. "Build-a-Feature recommended first
+  on an existing extension" is withdrawn everywhere (the `start` skill's Step 2a and Step 3, the
+  `build-a-feature` skill, both READMEs, the user guide, the plugin manifests' description).
 
 ## v5.9.1.0 — October 20, 2026
 

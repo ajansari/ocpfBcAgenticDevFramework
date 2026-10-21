@@ -4,6 +4,19 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.9.2 — October 20, 2026
+
+**Bundles:** full runbook v5.9.2.0, Lite v5.9.2.0, Standards Guide v1.13.1.0 (unchanged),
+Operations Guide v5.9.2.0. The `start` and `build-a-feature` skill text; both manifests' version
+and description; the marketplace entry.
+
+- **`start`: Full is the recommended journey**, marked *(recommended)*; the journey question lists
+  the three in one fixed order — Build-a-Feature, Full, Lite — an explicit exception to
+  recommended-first (Ops § Journeys). "Build-a-Feature recommended first on an existing extension"
+  is withdrawn from Step 2a and Step 3; the skill's description and the manifests' description
+  name the journeys in the new order.
+- **`build-a-feature`**: the "where it is reached" paragraph follows.
+
 ## 5.9.1 — October 20, 2026
 
 **Bundles:** full runbook v5.9.1.0, Lite v5.9.1.0, Standards Guide v1.13.1.0 (unchanged),

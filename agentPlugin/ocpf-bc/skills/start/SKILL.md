@@ -1,6 +1,6 @@
 ---
 name: start
-description: Start a Microsoft Dynamics 365 Business Central AL extension project with the OnlyCopilotFans (OCPF) BC Agentic Development Framework - the one launching point for every journey. Guides the choice between Full (a complete app or solution end to end, three models, the full document and testing trail), Lite (updating an existing app or a new app without a large footprint, one model, fewer steps), and Build-a-Feature (quick customizations in minutes, no steps, six short documents), offers to analyze and document an undocumented existing app first, installs the latest runbook into the project (Full and Lite), connects Microsoft's AL tools with nothing to install, then begins the routine. On a project that already follows the framework it offers status, an update check, or building a feature in that project. Use when the user asks to "start a Business Central project", "start a BC extension", "use the OCPF framework", "set up the agentic development framework", "kick off an AL project", "add a table to my extension", "build a feature", or runs /ocpf-bc:start (optionally with "full", "lite", or "feature").
+description: Start a Microsoft Dynamics 365 Business Central AL extension project with the OnlyCopilotFans (OCPF) BC Agentic Development Framework - the one launching point for every journey. Guides the choice between Build-a-Feature (quick customizations in minutes, no steps, six short documents), Full (a complete app or solution end to end, three models, the full document and testing trail - the recommended journey), and Lite (updating an existing app or a new app without a large footprint, one model, fewer steps), always in that order, offers to analyze and document an undocumented existing app first, installs the latest runbook into the project (Full and Lite), connects Microsoft's AL tools with nothing to install, then begins the routine. On a project that already follows the framework it offers status, an update check, or building a feature in that project. Use when the user asks to "start a Business Central project", "start a BC extension", "use the OCPF framework", "set up the agentic development framework", "kick off an AL project", "add a table to my extension", "build a feature", or runs /ocpf-bc:start (optionally with "full", "lite", or "feature").
 ---
 
 # Start an OCPF BC Agentic Development Framework project
@@ -9,7 +9,7 @@ This skill is the **one launching point** for every journey the framework offers
 the framework's manual setup: download the runbook, rename it to `CLAUDE.md` or
 `.github/copilot-instructions.md`, put everything else the framework keeps under
 `ocpfFramework/`, and begin. It adds three things on top:
-- it helps choose **Full, Lite, or Build-a-Feature** (Ops § Journeys),
+- it helps choose **Build-a-Feature, Full, or Lite** — Full recommended, always listed in that order (Ops § Journeys),
 - it offers to **analyze and document an existing, undocumented app first** (the `analyze` skill),
 - it always installs the **latest** published runbook (Full and Lite; Build-a-Feature has none),
 - it connects the AL tools with nothing to install.
@@ -61,19 +61,21 @@ without a connected project folder. Skip to
    documentation, ask first, one box** (Ops § Existing Apps): **Analyze and document the app first
    (recommended — one run, 10 to 30 minutes, into `requirements/existing/`)** / *Skip — I know this
    app, choose a journey*. On the first, invoke the `analyze` skill and stop here; it hands back to
-   this skill when the human is ready. Otherwise go to Step 3 with **Build-a-Feature recommended
-   first**: on an existing app the human almost always wants one more object or a quick change,
-   not a complete new solution. **Do not call the file's version "installed":** an AL: Go!
+   this skill when the human is ready. Otherwise go to Step 3, where Full is the recommended journey as always; the human takes
+   Build-a-Feature when they want one more object or a quick change. **Do not call the file's version "installed":** an AL: Go!
    scaffold says `1.0.0.0` with only `HelloWorld.al` and no package, and every journey treats
    that as a *new* app that starts at `0.0.0.1` — the new-or-existing question (intake 4b) is
    asked by the journey, never answered from the file. Full and Lite stay available.
 
 ## Step 3: Choose the journey
 
-Ask the human to choose, recommending based on what they've told you — **the choice is about the
-kind of work, not a file count** (Ops § Journeys). If you don't know enough, ask about the work
-first: a complete solution, an update or a modest new app, or a quick customization. One question,
-three options, the recommended one first, each described in these terms:
+Ask the human to choose. **Full is the recommended journey** and is marked *(recommended)*; the
+human takes Build-a-Feature or Lite when the work is a quick customization or a modest update —
+**the choice is about the kind of work, not a file count** (Ops § Journeys). If you don't know
+enough, ask about the work first: a complete solution, an update or a modest new app, or a quick
+customization. One question, three options **in this fixed order — Build-a-Feature, Full
+(recommended), Lite** — an explicit exception to the recommended-first rule, each described in
+these terms:
 
 - **Build-a-Feature — quick customizations, in minutes.** Extend a table or a page, a processing
   report, a table and its pages, an API page or query, a role center, an enum, a codeunit, a
@@ -83,13 +85,9 @@ three options, the recommended one first, each described in these terms:
   documents in a flat `docs/`, written as the work happens. It builds what is asked for, not a
   holistic solution, which makes it right for a PoC for a demo or a prototype that a Full or Lite
   project can later turn into a solution. Usually 10–20 minutes; at published API rates most builds
-  cost $1–5. One model does everything; the dashboard shows one row per object. Recommended first
-  on an existing extension (Step 2a), and whenever the request names one object or a few.
-- **Lite — updating an existing app, or a new app without a large footprint.** One Main model does
-  everything, in 7 steps, with leaner documents (a Design Doc, Docs, a Test Script). Still a
-  reliable agentic engineering process with quality outcomes — faster, cheaper, and with less detail
-  than Full. One to two hours depending on complexity.
-- **Full — a complete app or solution end to end, or a major overhaul of a big existing app.** A
+  cost $1–5. One model does everything; the dashboard shows one row per object. The one to take
+  whenever the request names one object or a few.
+- **Full (recommended) — a complete app or solution end to end, or a major overhaul of a big existing app.** A
   detailed review of the requirements, an FRD, a TDD and a Sanity Check, a build plan, a gap-fit
   test, a graded code review, full documentation, a user guide, testing guides, and automated test
   scripts, in 14 steps. Three models — Main, Reasoning, and Light (the plugin's `ocpf-reasoning` and
@@ -98,6 +96,10 @@ three options, the recommended one first, each described in these terms:
   time — and still far less than a development team needs. Also the journey for AppSource. Both
   editions generate code with the `ocpf-generator` sub-agent, one per batch, in parallel, and run
   the `ocpf-reviewer` pre-review before the first package.
+- **Lite — updating an existing app, or a new app without a large footprint.** One Main model does
+  everything, in 7 steps, with leaner documents (a Design Doc, Docs, a Test Script). Still a
+  reliable agentic engineering process with quality outcomes — faster, cheaper, and with less detail
+  than Full. One to two hours depending on complexity.
 
 Say once, when `requirements/` is empty: *the more well-formed and documented your idea, the faster
 the first stage goes — put requirements in `requirements/` (`.md` recommended; Word, PDF, and

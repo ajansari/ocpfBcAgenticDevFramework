@@ -43,11 +43,11 @@ Full and Lite are multilanguage from the ground up. Captions and messages use XL
 
 **Three journeys, one standard.** The choice is about the kind of work, not a file count:
 
-- **Full** (14 steps) — a complete app or solution built end to end, or a major overhaul of a big existing app. It reviews the requirements in detail and produces an FRD, a TDD and Sanity Check, a build plan, a graded code review, full documentation, a user guide, testing guides, and automated test scripts. It runs on three models — Main, Reasoning, and Light — for the highest-quality outcome, which also makes it the slowest: at least three to four hours end to end, longer for an extensive app, plus your own review time — still far less than a development team needs for an app of the same size.
-- **[Lite](GettingStartedAlternatives.md#lite-edition)** (7 steps) — updating an existing app, or a new app without a large footprint. One Main model does everything in fewer steps with leaner documents (a Design Doc, Docs, a Test Script). It still follows a reliable agentic engineering process with quality outcomes — faster, cheaper, and with less detail. One to two hours depending on complexity.
 - **Build-a-Feature** — quick, tactical customizations when time is of the essence: extend a table or a page, a processing report, a table and its pages, an API, a role center, an enum, a permission set. **It is not vibe-coding** — the same Standards Guide, patterns library, and analyzers govern every file — but it is lean on documentation: no design documents or test scripts, six short documents in a flat `docs/` folder written as the work happens. It builds what you ask for, not a holistic solution, which makes it ideal for a PoC app for a demo or a prototype; the foundation is sound enough that an agent or a developer can later turn it into a full solution. Minutes — usually 10 to 20 — at very low token consumption: at published API rates most builds cost $1 to $5.
+- **Full** (14 steps; the recommended journey) — a complete app or solution built end to end, or a major overhaul of a big existing app. It reviews the requirements in detail and produces an FRD, a TDD and Sanity Check, a build plan, a graded code review, full documentation, a user guide, testing guides, and automated test scripts. It runs on three models — Main, Reasoning, and Light — for the highest-quality outcome, which also makes it the slowest: at least three to four hours end to end, longer for an extensive app, plus your own review time — still far less than a development team needs for an app of the same size.
+- **[Lite](GettingStartedAlternatives.md#lite-edition)** (7 steps) — updating an existing app, or a new app without a large footprint. One Main model does everything in fewer steps with leaner documents (a Design Doc, Docs, a Test Script). It still follows a reliable agentic engineering process with quality outcomes — faster, cheaper, and with less detail. One to two hours depending on complexity.
 
-All three apply the same AL standards; `/ocpf-bc:start` offers all three. **The more well-formed and documented your idea, the faster you get past the first stage:** put your requirements in a `requirements/` folder (`.md` files are recommended; Word, PDF, and images work too) and an app icon in `images/`. Starting from an existing app nobody can explain? `/ocpf-bc:analyze` reads it and documents it first — a presumed FRD and TDD, an object register, documentation with the schema and flows — into `requirements/existing/`, for you to review before any journey extends it.
+All three apply the same AL standards; `/ocpf-bc:start` offers all three in that order, Full recommended. **The more well-formed and documented your idea, the faster you get past the first stage:** put your requirements in a `requirements/` folder (`.md` files are recommended; Word, PDF, and images work too) and an app icon in `images/`. Starting from an existing app nobody can explain? `/ocpf-bc:analyze` reads it and documents it first — a presumed FRD and TDD, an object register, documentation with the schema and flows — into `requirements/existing/`, for you to review before any journey extends it.
 
 </details>
 
@@ -122,7 +122,7 @@ boundary, and the live dashboard shows the same figures as they happen.
 > | **1. Install the Visual Studio Code extension** | Once per machine. One install brings everything. |
 > | **2. Start your project** | Open your AL folder and run `/ocpf-bc:start`. |
 
-That's it. From there the plugin **helps you choose Full, Lite, or Build-a-Feature** (or offers to
+That's it. From there the plugin **helps you choose Build-a-Feature, Full (recommended), or Lite** (or offers to
 **analyze and document an existing app first**), **installs the latest runbook** (Full and Lite),
 **connects Microsoft's AL tools** with nothing to install, **adds sub-agents** for the Reasoning,
 Light, Generator, and Reviewer roles, and **checks for updates** each session before changing
@@ -176,7 +176,7 @@ In GitHub Copilot, the commands are identical.
 
 | | What happens | What you do |
 |---|---|---|
-| **1** | **Full, Lite, or Build-a-Feature.** It asks about the work — a complete solution, an update or a modest new app, or a quick customization — and recommends a journey with its reasoning, in the terms of the *Background* section above. **Build-a-Feature** asks what you want to build, writes the proposed design to `docs/` before confirming the fields in one box, writes and compiles, documents each object as it compiles, offers the next object, then a review and a `.app` — and skips rows 2 and 4 below. On an existing extension it is recommended first; on an existing extension nobody can explain, `/ocpf-bc:analyze` is offered before the choice. | Confirm or override. You can switch later without losing work. |
+| **1** | **Build-a-Feature, Full, or Lite.** It asks about the work — a complete solution, an update or a modest new app, or a quick customization — and recommends Full unless you say the work is smaller, with its reasoning, in the terms of the *Background* section above. **Build-a-Feature** asks what you want to build, writes the proposed design to `docs/` before confirming the fields in one box, writes and compiles, documents each object as it compiles, offers the next object, then a review and a `.app` — and skips rows 2 and 4 below. On an existing extension nobody can explain, `/ocpf-bc:analyze` is offered before the choice. | Confirm or override. You can switch later without losing work. |
 | **2** | **Where the runbook goes.** It places the latest runbook as `CLAUDE.md`, `.github/copilot-instructions.md`, or both for mixed teams. | Nothing, unless a file already exists — then it asks. **It never overwrites.** |
 | **3** | **AL tools, nothing to install.** It connects Microsoft's AL tools using the AL Language extension you already have. | In Copilot Chat, nothing — they're built in. In Claude Code, approve the connection once. |
 | **4** | **The routine begins.** | Tell it your working language, how you want to be notified, which models do the work, and — with Copilot — the request limit and approval mode — Full asks for a Main, Light, and Reasoning model with a thinking effort each (recommended **Sonnet Medium / Haiku Medium / Opus High** in Claude Code, **Claude Sonnet 5.5 or GPT-6.1 Sol Medium / Claude Haiku 5.5 or GPT-6 Luna Medium / Claude Opus 5.5 or GPT-6.1 Sol High** in Copilot, two options per role at the same price); Lite asks for one (Sonnet Medium; in Copilot Claude Sonnet 5.5 or GPT-6.1 Sol Medium). It warns first that a High thinking effort makes every task slower, and recommends High only where judgment matters most. The Full framework then runs its Reasoning, Light, Generator, and Reviewer sub-agents — Lite its Generator and Reviewer — on exactly the models you chose, and every document lands in its phase folder — `docs/0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` — with the usage table in `ProjectProgress.md` for both editions. |
@@ -343,6 +343,13 @@ Each month's release notes in brief. The complete, versioned record is in
 [fullVersion/RunbookChangelog.md](fullVersion/RunbookChangelog.md),
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
+
+## October 20, 2026 — Full v5.9.2.0 · Lite v5.9.2.0 · Operations Guide v5.9.2.0 · Plugin v5.9.2
+
+**Full is the recommended journey.** `/ocpf-bc:start` now lists the journeys in one fixed order,
+Build-a-Feature, Full (recommended), Lite, and recommends Full unless you say the work is a quick
+customization or a modest update. Every list of the journeys, here and on the website, keeps that
+order.
 
 ## October 20, 2026 — Full v5.9.1.0 · Lite v5.9.1.0 · Operations Guide v5.9.1.0 · Plugin v5.9.1
 

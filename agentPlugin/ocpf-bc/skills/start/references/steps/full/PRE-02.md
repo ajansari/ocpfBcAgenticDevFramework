@@ -1,6 +1,6 @@
 # BC App Build Routine — PRE-02 — Structured Gap Analysis
 
-**Runbook version:** 5.9.1.0 · Full edition · Phase: DEFINE
+**Runbook version:** 5.9.2.0 · Full edition · Phase: DEFINE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook

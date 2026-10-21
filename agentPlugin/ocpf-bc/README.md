@@ -32,7 +32,7 @@ The `start` skill:
 On a project that already follows the framework, `start` offers *Status*, *Check for a framework
 update*, or *Build a feature in this project*.
 
-**Project layout (since plugin 5.0.0, Full 5.0.0.0 / Lite 5.0.0.0; current 5.9.1 / 5.9.1.0):** everything the framework fetches
+**Project layout (since plugin 5.0.0, Full 5.0.0.0 / Lite 5.0.0.0; current 5.9.2 / 5.9.2.0):** everything the framework fetches
 or keeps lives under one folder, `ocpfFramework/` (step files, templates, guides, patterns,
 scripts, the marker, and per-developer `state/`); project documents go in `docs/` by phase
 (`0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/`; Build-a-Feature keeps its six
@@ -52,7 +52,7 @@ sub-agent; the `analyze` skill's analyst runs on the model you choose for the an
 
 | Component | What it does |
 |---|---|
-| `start` skill | The one launching point: chooses Full, Lite, or Build-a-Feature by the kind of work, offers the `analyze` skill on an undocumented existing app, sets up the project, and begins; on an existing framework project offers status, an update check, or a feature build. |
+| `start` skill | The one launching point: chooses Build-a-Feature, Full (recommended), or Lite by the kind of work, offers the `analyze` skill on an undocumented existing app, sets up the project, and begins; on an existing framework project offers status, an update check, or a feature build. |
 | `analyze` skill | Documents an existing extension that is not well documented — a presumed FRD and TDD, an Object Register, Documentation with the app's flows and a schema of its tables and fields, and a Project Parameters sheet — into `requirements/existing/`, on a model (reasoning or daily driver) and effort the human chooses, through the `ocpf-analyst` sub-agent. Run first; every journey then reads the folder. |
 | `build-a-feature` skill | The quick-customization journey: a table and its pages, a table / page / report extension, a processing report, an API page or query, a query, an enum or enum extension, a codeunit, a permission set, a role center — asked in one question, the proposed design written to `docs/DataModel.md` before the one confirmation box, written from the Standards Guide and the patterns library, compiled clean, documented as it compiles, the next object offered at every close, then an optional review on the Main model and a `.app`. Six short documents in a flat `docs/`; the publisher and ID range only ever from a box the human answered. Keeps the feature table in `ProjectProgress.md`, usage per object, and the dashboard. Reached through `start`. |
 | `status` skill | Reports where a project stands: current step, exit gate, what's waiting on you. |

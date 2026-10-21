@@ -16,6 +16,13 @@ framework.
 
 ---
 
+## v5.9.2.0 — October 20, 2026
+
+Derived from the full framework **v5.9.2.0**; Operations Guide **v5.9.2.0**; Standards Guide
+**v1.13.1.0** (unchanged); plugin **5.9.2**. No Lite text changed; the version moves with Ops §
+Journeys: Full is the recommended journey, and the journeys are always listed Build-a-Feature,
+Full, Lite (the `start` skill's fixed order).
+
 ## v5.9.1.0 — October 20, 2026
 
 Derived from the full framework **v5.9.1.0**; Operations Guide **v5.9.1.0**; Standards Guide

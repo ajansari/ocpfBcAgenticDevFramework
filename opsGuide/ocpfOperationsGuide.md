@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.9.1.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
+**Version:** 5.9.2.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
 **Last Updated:** October 20, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
@@ -67,7 +67,7 @@
 18. [Help Site](#ops--help-site) *(the polished HTML documentation and support page built from the documents — offered at Full Step 11 / Lite Step 6, never by Build-a-Feature; GitHub Pages serves `docs/`)*
 19. [Usage & Cost](#ops--usage--cost)
 20. [Dashboard](#ops--dashboard)
-21. [Journeys](#ops--journeys) *(Full, Lite, or Build-a-Feature — which one, and why; what to put in `requirements/` and `images/`)*
+21. [Journeys](#ops--journeys) *(Build-a-Feature, Full, or Lite — which one, and why; Full recommended; what to put in `requirements/` and `images/`)*
 22. [Build-a-Feature](#ops--build-a-feature) *(the quick-mod journey: no steps, six short documents in a flat `docs/`, written as the work happens)*
 23. [Existing Apps](#ops--existing-apps) *(an undocumented app is analyzed and documented into `requirements/existing/` before any journey extends it)*
 24. [Reference Sources](#ops--reference-sources)
@@ -583,7 +583,7 @@ Luna at $0.10 / $0.01 / $0.50; Opus 5.5 at $4 / $0.20 / $20). Offer both as opti
 model first, and let the human pick either; a flash-class model as Main is a legitimate budget
 override, said with the warning that step discipline may slip — the Main role's work is mostly
 rule-following over a long runbook, which is where small models fall short (an earlier
-recommendation of Gemini 3.8 Flash as Main was withdrawn in 5.9.1.0 for that reason). The
+recommendation of Gemini 3.8 Flash as Main was withdrawn in 5.9.2.0 for that reason). The
 cached-input rate matters most on this framework, since every turn re-reads the runbook and the
 guides from cache — which is why a model with a higher cached rate (Grok 4.7 at $0.50) costs more
 here despite its cheaper output.
@@ -2264,7 +2264,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v5.9.1.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
+folder as `README.md`. For runbook **v5.9.2.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2441,7 +2441,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.9.1.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.9.2.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
@@ -3043,8 +3043,23 @@ time only and says so.
 **Three journeys, one standard.** Every journey fetches and applies the same Standards Guide and
 patterns library, compiles with the same analyzers, keeps `ProjectProgress.md` and the dashboard,
 measures usage at every boundary, and closes every step through the options box. What differs is
-how much of the engineering *process* the work needs — not how many files it has. The `start`
-skill asks about the work and recommends one, in these words:
+how much of the engineering *process* the work needs — not how many files it has. **Full is the
+recommended journey.** Build-a-Feature and Lite are the offers for smaller work, taken when the
+human says the work is a quick customization or a modest update — never pushed. The `start`
+skill's journey question lists the three in **one fixed order — Build-a-Feature, Full
+(recommended), Lite** — an explicit exception to the recommended-first rule of Ops § Asking and
+Approvals, so the human sees the smallest journey first and the recommended one marked. Every
+list of the journeys, in every document and on the website, keeps that order. The words:
+
+**Build-a-Feature — quick customizations, when time is of the essence.** Extend a table or a page,
+a processing report, a table and its pages, an API, a role center, an enum, a permission set: a
+tactical change, not a holistic solution. **It is not vibe-coding** — the Standards Guide, the
+patterns library, and the analyzers govern every file, the record is kept, the dashboard is live —
+but it is lean on documentation: no design documents, no test scripts; six short documents in a
+flat `docs/`, written as the work happens. That makes it right for a PoC app for a demo or a
+prototype, and because the foundation is sound, an agent or a developer can later take it into a
+Full or Lite project and turn it into a solution. Minutes — usually 10 to 20 — at very low token
+consumption: at published API rates most builds cost $1 to $5.
 
 **Full — a complete app or solution, end to end, or a major overhaul of a big existing app.** The
 work needs a detailed review of the requirements, an FRD, a TDD and a Sanity Check, a build plan, a
@@ -3058,16 +3073,6 @@ far less than a development team needs for an app of the same size.
 everything, in fewer steps, with leaner documents (a Design Doc, Docs, a Test Script). It still
 follows a reliable agentic engineering process and produces quality outcomes — faster, cheaper,
 and with less detail than Full. One to two hours depending on complexity.
-
-**Build-a-Feature — quick customizations, when time is of the essence.** Extend a table or a page,
-a processing report, a table and its pages, an API, a role center, an enum, a permission set: a
-tactical change, not a holistic solution. **It is not vibe-coding** — the Standards Guide, the
-patterns library, and the analyzers govern every file, the record is kept, the dashboard is live —
-but it is lean on documentation: no design documents, no test scripts; six short documents in a
-flat `docs/`, written as the work happens. That makes it right for a PoC app for a demo or a
-prototype, and because the foundation is sound, an agent or a developer can later take it into a
-Full or Lite project and turn it into a solution. Minutes — usually 10 to 20 — at very low token
-consumption: at published API rates most builds cost $1 to $5.
 
 **What the human can prepare.** The more well-formed and documented the idea, the faster the
 first stage goes. Requirements go in `requirements/` (`.md` recommended; Word, PDF, and images are
@@ -3456,9 +3461,9 @@ started with until the human chooses otherwise.
   journey or none, fetches the Blueprint (Ops § Fetched Companions), and builds from it — so the
   Blueprint rule holds in Build-a-Feature and in plain chat, where no intake asks the question.
 - **Build-a-Feature:** the `start` skill is the one launching point for every journey — it offers
-  **Full, Lite, or Build-a-Feature** in the words of Ops § Journeys (recommending Build-a-Feature
-  first on an existing extension that never used the framework, and the `analyze` skill before
-  the choice when that extension is undocumented), and on a project that already follows the framework it offers
+  **Build-a-Feature, Full, or Lite** in the words of Ops § Journeys (that fixed order, Full
+  recommended, and the `analyze` skill before the choice when an existing extension is
+  undocumented), and on a project that already follows the framework it offers
   *Status / Check for a framework update / Build a feature in this project*. The third choice
   invokes the `build-a-feature` skill (Ops § Build-a-Feature); a direct `/ocpf-bc:build-a-feature`
   runs the same checks and is not a different journey. On a Full or Lite project (a quick mod
