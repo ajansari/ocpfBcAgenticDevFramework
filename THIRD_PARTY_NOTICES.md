@@ -348,8 +348,9 @@ into the built page; each project's page references them by URL.
 - **Source:** <https://github.com/primer/octicons> — the `mark-github` icon
 - **License:** MIT — Copyright (c) GitHub Inc.
 - **Used for:** the *View on GitHub* button of the help site template, embedded as an inline SVG
-  path in `agentPlugin/ocpf-bc/skills/html-docs/templates/template.html`; GitHub's logo usage
-  guidelines govern the mark itself.
+  path in `agentPlugin/ocpf-bc/skills/html-docs/templates/template.html`, and the two *Take me to
+  the repo* buttons on the framework's website (`index.html`); GitHub's logo usage guidelines
+  govern the mark itself.
 
 ## Trademarks
 
