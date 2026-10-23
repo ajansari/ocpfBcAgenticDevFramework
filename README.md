@@ -10,12 +10,18 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 *Last Updated: Wednesday, October 21, 2026*
 
-> ## 🌐 [Official Website](https://ajansari.github.io/ocpfBcAgenticDevFramework/)
+> ## 🌐 [Official Website](https://bcdev.ai)
 >
-> **<https://ajansari.github.io/ocpfBcAgenticDevFramework/>**
+> **<https://bcdev.ai>**
 >
 > What the framework is, how it works, and what it produces. **Start here if you're new** — then
 > come back for setup.
+
+### ▶️ Getting Started in 5 Minutes (video)
+
+[![Getting Started: install the VS Code extension and configure Claude Code and GitHub Copilot](images/gettingStartedVideo.jpg)](https://www.youtube.com/watch?v=UvpLaPTld0I)
+
+Install the Visual Studio Code extension, then configure Claude Code and GitHub Copilot — **[watch on YouTube](https://www.youtube.com/watch?v=UvpLaPTld0I)**.
 
 ## Table of Contents
 
