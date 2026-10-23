@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 1 — Define the Problem & Lock Parameters
 
-**Runbook version:** 5.9.5.0 · Lite edition · Phase: DEFINE
+**Runbook version:** 5.9.6.0 · Lite edition · Phase: DEFINE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -170,7 +170,7 @@ Packaging & Versioning). Mention it once, plainly, now.
 | **Permission Set Names** | `<PREFIX> <APPCODE>, VIEW` / `<PREFIX> <APPCODE>, EDIT` | Derived: `<PREFIX>` is the AL Object Prefix in uppercase. Each ≤ 20 characters, e.g. `OCPF NAICS, VIEW`. |
 | **Object ID range(s)** | — | Primary + any Additional, from Box 3. **The range belongs to the Deployment Target** (**Standards §5.5**): PTE work uses 50,000–99,999; `AppSource` uses only a range Microsoft registered to this publisher (70,000,000–74,999,999 for a new publisher), never 50,000–99,999. |
 | **Permission Sets required?** | `Yes`/`No` | `No` only if the extension owns **zero new tables** (**Standards §5.3**); otherwise `Yes`, not asked. If `Yes`, the two permission sets take the primary range's first two *permission set* IDs — their own ID space; they cost no table, page, or codeunit number (Ops § Object IDs). |
-| **AL Runtime / BC Application Minimum / Symbol Source** | — | BC version from Box 2; runtime from Microsoft Learn. Symbol Source is filled in by the agent after downloading: version, W1 or localized, and where from. |
+| **AL Runtime / BC Application Minimum / Symbol Source** | — | BC version from Box 2; runtime from Microsoft Learn. Symbol Source is filled in by the agent after downloading: version, W1 or localized, where from, and — after a fallback — the route that failed and why (Ops § Symbols). |
 | **Onboarding extras** | `Yes`/`No` each | Assisted Setup Wizard? Role Center Activity Cues? Departments/"My Business Central" placement? Box 4; `No` to any is a final answer, not a placeholder — most small extensions answer `No` to all three, but ask anyway. |
 | **App icon** | `Use images/<file>` / `Yes — I'll provide an image` / `Create one for me` / `No icon` (`Later` typed) | Box 1a, question 4a (Ops § Intake); *Create one for me* is the plugin's `app-icon` skill (Ops § Intake → *The app icon → Creating one*). *Later* is a release blocker for AppSource — the old AppSource icon question is folded in here. On *Yes*, ask for the path as free text with the guidance *"PNG, square, 300 × 300 px is ideal — Microsoft accepts 216 to 350 px for the marketplace listing. Larger is fine; I'll resize it, keeping the proportions, never stretching."* The agent copies it to `src/logo/AppLogo.png`, resizing when larger with what the machine has — macOS `sips -Z 300 <in> --out src/logo/AppLogo.png`; Windows a PowerShell `System.Drawing` snippet (Ops § Intake gives it); Linux `convert <in> -resize 300x300 src/logo/AppLogo.png` if ImageMagick is present, else Python Pillow, else ask the human to resize. A non-square image gets its longer side resized to 300 and is padded to square with transparency, never cropped silently — say what was done. `app.json` gets `"logo": "src/logo/AppLogo.png"`; the file is committed. |
 | **Business Central Copilot feature** | `Yes` / `No` | A feature in Business Central's own Copilot UI (a `Copilot Capability`, a `PromptDialog` page, a *Suggest with Copilot* action, Azure OpenAI through System.AI). **`Yes` is valid for a PTE**; Microsoft-billed needs no Azure subscription. If `Yes`: the host page(s), what the AI suggests, and the billing path — *Microsoft-billed* (default) / *Partner-billed* / *both*. Triggers the OnlyBCFans BC Copilot Blueprint fetch at Step 3 (ALL ALONG → *Business Central Copilot Features*). |
@@ -212,7 +212,10 @@ the human's (Rule 6d). **Full procedure: Ops § Project Setup.**
    project root; the app icon, if any, at `src/logo/AppLogo.png`.
 3. **Connect the AL tools** if this session doesn't have them (ALL ALONG → AL MCP Server).
 4. **Download symbols**, record the Symbol Source, and gitignore `.alpackages/` (ALL ALONG →
-   Symbols).
+   Symbols). Global sources first unless the project depends on a non-AppSource app or is localized
+   outside Copilot Chat — then the environment in `launch.json`. **If the download fails, diagnose
+   and then offer the other route in an options box** (Ops § Symbols → *When a download fails*);
+   never switch routes unasked, never send the human to the Command Palette.
 5. **Keep the editor in sync** (ALL ALONG → Keeping the Editor in Sync).
 
 **Outputs:** `ocpfFramework/` with its six-line `README.md`; `ocpfFramework/standardsGuide/`, `ocpfFramework/opsGuide/`, `ocpfFramework/runbookSteps/`, and `ocpfFramework/documentTemplates/` (all fetched, gitignored); `app.json` (first write: name, publisher, logo, version, id) and `src/` early in the step, complete at project setup; `ProjectDashboard.html` (project root, tracked) rendered, opened, explained, with its hooks and `ocpfFramework/state/dashboard.json`; `ocpfFramework/state/usage.json` (Step 1's start timestamp) and `ProjectProgress.md` (seeded, project root, Lite step table only, Step 1 `In Progress`); `ocpfFramework/state/copilot.json` and the Copilot keys in `.vscode/settings.json` (when Copilot is in use); `requirements/` (if any raw input was

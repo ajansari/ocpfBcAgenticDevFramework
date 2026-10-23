@@ -4,6 +4,22 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.9.6 — October 21, 2026
+
+**Bundles:** full runbook v5.9.6.0, Lite v5.9.6.0, Standards Guide v1.13.1.0 (unchanged),
+Operations Guide v5.9.6.0. Bundled references refreshed by `syncPlugin.sh`. Skills changed:
+`build-a-feature` (the symbols step) and `al-mcp-setup` (the first download); version pins in
+`al-standards` and `update-framework`.
+
+- **Symbol downloads follow Ops § Symbols' new mechanism on every journey.** Global sources
+  (Microsoft's public NuGet feed, run by the agent through `al_downloadsymbols` — never the Command
+  Palette) first on a plain project; the environment in `launch.json` first when the app depends on
+  a non-AppSource app or is localized outside Copilot Chat. **On a failure the agent diagnoses,
+  then offers the other route in an options box** — *Fix `launch.json` or the environment and try
+  again* / *Try Microsoft's global sources instead* / *Something else* — and never switches unasked.
+  Build-a-Feature's step 12 records the Symbol Source line as `symbols` in `framework.json` next
+  to `alMcp`; `al-mcp-setup`'s first download follows the route Ops § Symbols puts first.
+
 ## 5.9.5 — October 21, 2026
 
 **Bundles:** full runbook v5.9.5.0, Lite v5.9.5.0, Standards Guide v1.13.1.0 (unchanged),

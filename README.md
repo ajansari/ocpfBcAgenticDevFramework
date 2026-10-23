@@ -344,6 +344,14 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## October 21, 2026 — Full v5.9.6.0 · Lite v5.9.6.0 · Operations Guide v5.9.6.0 · Plugin v5.9.6
+**When symbols won't download, the agent tells you why and asks what you'd like.** It reads the
+error, names the fault it sees — a wrong environment or tenant in `launch.json`, an expired sign-in,
+a server it can't reach — and offers a choice: fix the environment and try again, or take Microsoft's
+public symbol feed (the NuGet packages, no sign-in) instead, saying what, if anything, you'd be
+giving up. It never switches routes on its own and never sends you to the Command Palette. On every
+journey, cloud sandbox or on-premises.
+
 ## October 21, 2026 — Full v5.9.5.0 · Lite v5.9.5.0 · Operations Guide v5.9.5.0 · Plugin v5.9.5
 
 **Your app now gets a description at intake.** Once the agent knows what the app is for, it proposes

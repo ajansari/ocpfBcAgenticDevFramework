@@ -5,8 +5,8 @@
 *by AJ Ansari*
 
 **Last Updated:** Wednesday, October 21, 2026
-**Covers:** Full runbook v5.9.5.0 · Lite v5.9.5.0 · Standards Guide v1.13.1.0 · Operations Guide
-v5.9.5.0 · `ocpf-bc` agent plugin v5.9.5 · Visual Studio Code setup extension v0.0.17
+**Covers:** Full runbook v5.9.6.0 · Lite v5.9.6.0 · Standards Guide v1.13.1.0 · Operations Guide
+v5.9.6.0 · `ocpf-bc` agent plugin v5.9.6 · Visual Studio Code setup extension v0.0.17
 
 > This guide is for the person driving a project with the framework: a Business Central
 > functional consultant or an AL developer working in Visual Studio Code with Claude Code or GitHub Copilot.
@@ -36,8 +36,8 @@ know which one you are looking at.
 
 | Part | What it is | Where it lives | Version today |
 |---|---|---|---|
-| **The framework** | The runbook (Full or Lite), its step files, the document templates, the **Standards Guide**, and the **Operations Guide**. This is the content the AI agent follows. | The public GitHub repository, `ajansari/ocpfBcAgenticDevFramework`, on its `main` branch. | Full 5.9.5.0 · Lite 5.9.5.0 · Standards 1.13.1.0 · Ops 5.9.5.0 |
-| **The agent plugin** `ocpf-bc` | Fifteen skills (the `/ocpf-bc:` commands), five sub-agent definitions, the AL tooling helper scripts, the dashboard renderer, and an *offline fallback copy* of the framework. Installed once per machine into Claude Code or GitHub Copilot. | Same repository, folder `agentPlugin/ocpf-bc`, published as a plugin marketplace. | 5.9.5 |
+| **The framework** | The runbook (Full or Lite), its step files, the document templates, the **Standards Guide**, and the **Operations Guide**. This is the content the AI agent follows. | The public GitHub repository, `ajansari/ocpfBcAgenticDevFramework`, on its `main` branch. | Full 5.9.6.0 · Lite 5.9.6.0 · Standards 1.13.1.0 · Ops 5.9.6.0 |
+| **The agent plugin** `ocpf-bc` | Fifteen skills (the `/ocpf-bc:` commands), five sub-agent definitions, the AL tooling helper scripts, the dashboard renderer, and an *offline fallback copy* of the framework. Installed once per machine into Claude Code or GitHub Copilot. | Same repository, folder `agentPlugin/ocpf-bc`, published as a plugin marketplace. | 5.9.6 |
 | **The Visual Studio Code setup extension** | A bootstrapper and extension pack, published to the Visual Studio Marketplace and Open VSX. Installs the AL toolchain and the agent extensions, wires your agent to the plugin marketplace, and adds six Command Palette commands. It contains **no framework content**. | A separate repository, published as [`ajansari.ocpf-bc-dev-setup`](https://marketplace.visualstudio.com/items?itemName=ajansari.ocpf-bc-dev-setup) (also on [Open VSX](https://open-vsx.org/extension/ajansari/ocpf-bc-dev-setup)). | 0.0.17 |
 | **Your project's copy** | The runbook and companions fetched into one AL project, pinned at the version fetched. | Your AL project folder: `CLAUDE.md` or `.github/copilot-instructions.md`, plus one `ocpfFramework/` folder holding the step files, templates, both guides, patterns, scripts, the changelog, the plugin's marker, and each developer's state. | Whatever was current when you started, until you approve an update |
 

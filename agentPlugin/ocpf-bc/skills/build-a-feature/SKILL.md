@@ -123,7 +123,7 @@ Do it in this order; skip what the case already has.
      "ref": "main", "commitSha": "<sha or unknown>", "fetchedAt": "<ISO 8601>",
      "placedAs": [], "changelogFile": null,
      "pluginVersion": "<from ../../.claude-plugin/plugin.json>",
-     "declinedUpdateVersion": null, "alMcp": "not-checked",
+     "declinedUpdateVersion": null, "alMcp": "not-checked", "symbols": null,
      "layout": "ocpfFramework-1", "tooling": {}
    }
    ```
@@ -223,7 +223,12 @@ Do it in this order; skip what the case already has.
     and `docs/` must **not** be ignored.
 12. **AL tools** (every case where this session lacks them): the `al-mcp-setup` skill; record
     `alMcp`. **Symbols** (C, D): download them for the target version into `.alpackages/` (Ops §
-    Symbols); case A has them. Keep the editor in sync (Ops § Editor Sync).
+    Symbols — global sources first unless the app depends on a non-AppSource app or is localized
+    outside Copilot Chat; **on a failure, diagnose, then offer the other route in an options box**,
+    never switch unasked, never the Command Palette); record the Symbol Source line — version, W1 or
+    localized, where from, and after a fallback the route that failed and why — as `"symbols"` in
+    `ocpfFramework/framework.json`, next to `alMcp`; case A has them. Keep the editor in sync
+    (Ops § Editor Sync).
 13. **The record** — `ProjectProgress.md` at the project root:
     - **D, C, B (first time):** create it from `ocpfFramework/documentTemplates/ProjectProgress.md`
       (fetch that one template, or take it from the `documents` skill's `references/`), keep the

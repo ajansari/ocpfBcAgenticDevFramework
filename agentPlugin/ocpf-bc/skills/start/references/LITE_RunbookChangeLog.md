@@ -16,6 +16,27 @@ framework.
 
 ---
 
+## v5.9.6.0 — October 21, 2026
+
+Derived from the full framework **v5.9.6.0**; Operations Guide **v5.9.6.0**; Standards Guide
+**v1.13.1.0** (unchanged); plugin **5.9.6**.
+
+- **Step 1 — symbol download: the route the project needs goes first; a failure is diagnosed, then
+  the other route is offered in an options box, never taken unasked** (Ops § Symbols, rewritten).
+  Global sources (Microsoft's public NuGet feed, no sign-in) on every project except one that
+  depends on a non-AppSource app or is localized outside Copilot Chat, where the environment in
+  `launch.json` goes first. On a failure the agent names the cause it sees — a wrong environment,
+  tenant, server, or port in `launch.json`, an expired sign-in, an unreachable endpoint, a version
+  the environment doesn't have — and asks *Fix `launch.json` or the environment and try again* /
+  *Try Microsoft's global sources instead* (saying what the project would be missing) / *Something
+  else*; the fix option first when a fix was named, global sources first when none was. A second
+  failure brings the box again, the other route first. The agent never sends the human to the
+  Command Palette: the country prompt is `al.symbolsCountryRegion`, which it writes. When
+  `launch.json` is absent, one box asks for the environment values and the agent writes the file.
+  Symbol Source records the route that won and, after a fallback, the route that failed and why.
+
+---
+
 ## v5.9.5.0 — October 21, 2026
 
 Derived from the full framework **v5.9.5.0**; Operations Guide **v5.9.5.0**; Standards Guide

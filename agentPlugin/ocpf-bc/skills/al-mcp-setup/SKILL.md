@@ -130,8 +130,11 @@ end of Step 1), and connects them then.
    Arguments go in a third, JSON parameter, for example
    `sh ocpfFramework/scripts/al-mcp-call.sh . al_downloadsymbols '{"globalSourcesOnly":true}'`. Each call takes a
    few seconds. **If the project already has `app.json`,** run the first example now to confirm
-   the server answers, and if `.alpackages/` is missing, download symbols with the second: the
-   runbook needs them before DESIGN (ALL ALONG → Symbols). **In a new, empty folder,** the step 4
+   the server answers, and if `.alpackages/` is missing, download symbols by the route Ops §
+   Symbols puts first for this project — the second example is the global-sources call; without
+   `globalSourcesOnly` the tool uses the environment in `launch.json`. The runbook needs them before
+   DESIGN (ALL ALONG → Symbols); on a failure the agent diagnoses and then offers the other route in
+   an options box, never switching unasked. **In a new, empty folder,** the step 4
    check is enough for now. The runbook writes `app.json` and downloads symbols at the end of
    intake.
 6. **Tell the human what to expect, in one or two sentences:** approval clicks only.

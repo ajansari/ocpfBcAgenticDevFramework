@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 5.9.5.0 (Lite, derived from the full framework v5.9.5.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
+**Version:** 5.9.6.0 (Lite, derived from the full framework v5.9.6.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
 **Last Updated:** October 21, 2026
 
 > Version history for this edition lives in `ocpfFramework/LITE_RunbookChangeLog.md`, tracked
@@ -21,7 +21,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.13.1.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.9.5.0), cited as
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.9.6.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
 >   tooling checks, analyzers, symbols, editor sync, notifications, packaging, repository hygiene,
 >   translations, fetched companions, documents, usage and cost, and the plugin.
@@ -603,7 +603,7 @@ first package and before Step 6's release-candidate question. The non-negotiable
 
 Two companions are fetched at Step 1 and kept for the life of the project: the **Standards Guide**
 (`ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md`, v1.13.1.0), cited as **Standards §**, and the
-**Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v5.9.5.0), cited as **Ops §** and shared
+**Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v5.9.6.0), cited as **Ops §** and shared
 unchanged with the full framework.
 
 **Full procedure: Ops § Fetched Companions** — fetching, refreshing, the plugin's offline copies,
@@ -692,8 +692,10 @@ for a remote first, since collaborators will see the files as deleted.
 
 **Full procedure: Ops § Symbols.** Read it at the end of Step 1.
 
-- **The agent downloads symbols; the human never does.** Global sources need no sign-in; a sandbox
-  download (one browser sign-in) covers non-AppSource dependencies and localized projects.
+- **The agent downloads symbols; the human never does.** Two routes: global sources (Microsoft's
+  public feed, no sign-in) and the environment in `launch.json` (a sandbox with one browser sign-in,
+  or an on-premises server). Which goes first, and what happens on a failure — diagnose, then offer
+  the other route in a box, never switch unasked, never the Command Palette — is Ops § Symbols.
 - The AL MCP Server's global download is **W1 only**.
 - **Confirm symbols by using them**, never by unpacking `SymbolReference.json`. A sandbox download
   carries Microsoft's own source and translation files: read them, never commit them.

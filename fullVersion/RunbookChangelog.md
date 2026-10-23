@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.9.5.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v5.9.5.0**, and Lite at **v5.9.5.0** — but
+**v5.9.6.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v5.9.6.0**, and Lite at **v5.9.6.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -21,6 +21,44 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v5.9.6.0 — October 21, 2026
+
+**Symbol downloads: the route the project needs goes first, and a failure is diagnosed and then
+offered a way out — never switched silently.** Lite **v5.9.6.0**, Operations Guide **v5.9.6.0**,
+Standards Guide **v1.13.1.0** (unchanged), plugin **5.9.6**.
+
+- **Ops § Symbols rewritten as one mechanism for every journey.** Two routes: **global sources**
+  (Microsoft's public NuGet symbol feed — no connection, no sign-in, under 10 seconds; the AL
+  extension's or the AL MCP Server's `al_downloadsymbols` with `globalSourcesOnly: true`, the same
+  download as VS Code's *AL: Download Symbols from Global Sources*, which the agent runs through the
+  tool) and **the environment in `launch.json`** (a cloud sandbox with one browser sign-in, or an
+  on-premises server; the agent names the environment before the call). **Which goes first:**
+  `launch.json` when the project depends on a non-AppSource app or is localized outside Copilot Chat
+  (the AL MCP Server's global download is W1 only); global sources on every other project. When
+  `launch.json` is absent, the agent asks one box for the environment values (human-typed, never
+  inferred), writes the file, then downloads. Until now the guide listed the routes as a
+  stop-at-first ladder with no procedure for a failure and nothing that wrote `launch.json`.
+- **When a download fails — diagnose, then offer, never switch silently.** The agent reads the error
+  and names the cause when it can (a wrong `environmentName`, `tenant`, `server`, or `port` in
+  `launch.json`; an expired or cancelled sign-in; an unreachable endpoint or VPN; an `application`
+  version the environment doesn't have; no path to Microsoft's feed), then asks **one options box**:
+  *Fix `launch.json` or the environment and try again* / *Try Microsoft's global sources instead*
+  (always saying what this project would be missing by taking it — nothing, a non-AppSource
+  dependency's symbols, or the localized set) / *Something else*. The fix option is first when the
+  agent named a fix; global sources is first when it couldn't. After a global-sources failure the
+  same box offers the `launch.json` environment. A second failure brings the same box again, the
+  other route first. The human decides; the agent never takes the other route unasked and never
+  sends the human to the Command Palette — the country VS Code's command prompts for is
+  `al.symbolsCountryRegion` in `.vscode/settings.json`, which the agent writes. **Symbol Source**
+  records the route that won and, after a fallback, the route that failed and why; Build-a-Feature,
+  which has no sheet, keeps the same line in `framework.json` as `symbols`. Why: on a real
+  Build-a-Feature run in Copilot Chat the sandbox download failed and the model went to global
+  sources on its own — the right route, taken unasked, through the Command Palette.
+- **Step 01 §1.10 item 3**, **Ops § Project Setup step 5**, the Lite Step 1 setup list, the
+  Build-a-Feature journey's symbols step, and the `al-mcp-setup` skill now point at the mechanism.
 
 ---
 

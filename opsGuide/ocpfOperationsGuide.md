@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.9.5.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
+**Version:** 5.9.6.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
 **Last Updated:** October 21, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
@@ -1033,9 +1033,11 @@ Then, in order:
    carries `"layout": "ocpfFramework-1"` (so a later migration knows which layout it's reading)
    and `"tooling": {}` (filled by Ops § Tooling Checks as each check runs).
 4. **Connect the AL tools** if this session doesn't have them (Ops § AL Tools).
-5. **Download symbols** (Ops § Symbols). Confirm `.alpackages/` holds the Base Application and
-   System Application for the target version, and record where they came from as the sheet's Symbol
-   Source. Add `.alpackages/` to `.gitignore` now (Ops § Repository Hygiene).
+5. **Download symbols** (Ops § Symbols — the route the project needs goes first; on a failure,
+   diagnose, then offer the other route in an options box, never switch silently). Confirm
+   `.alpackages/` holds the Base Application and System Application for the target version, and
+   record where they came from — and, after a fallback, which route failed and why — as the sheet's
+   Symbol Source. Add `.alpackages/` to `.gitignore` now (Ops § Repository Hygiene).
 6. **Keep the editor in sync** (Ops § Editor Sync). If VS Code's AL extension loaded this project
    before the agent changed `app.json`, it still shows the old ID ranges and missing symbols as red
    errors. Refresh now, while no `.al` file exists yet.
@@ -1336,27 +1338,98 @@ unresolved one under the runbook's zero-warnings rule.
 
 ## Ops § Symbols
 
-**The agent downloads symbols; the human never does.** Stop at the first option that works:
+**The agent downloads symbols; the human never does.** There are two routes. Which one goes first is
+decided by what the project needs, not by habit — and when the first fails, the agent diagnoses, then
+**offers** the other, never switches silently and never sends the human to the Command Palette.
 
-1. **Copilot Chat in VS Code:** the AL extension's `al_downloadsymbols` with
-   `globalSourcesOnly: true`. It also reloads VS Code's AL workspace.
-2. **Any other agent:** the AL MCP Server's `al_downloadsymbols` with `globalSourcesOnly: true`,
-   through the one-shot helper if the server isn't in this session yet (Ops § AL Tools, step 4).
-3. **From the sandbox** (`launch.json`, one browser sign-in by the human): when the project depends
-   on a non-AppSource app, when the global download fails, or for a localized project outside
-   Copilot Chat.
+**The two routes.**
+- **Global sources** — Microsoft's public symbol feed (the NuGet packages). No connection, no
+  sign-in, and no proprietary content on disk. In **Copilot Chat in VS Code** it is the AL
+  extension's `al_downloadsymbols` with `globalSourcesOnly: true`, which also reloads VS Code's AL
+  workspace; in **any other agent** it is the AL MCP Server's `al_downloadsymbols` with
+  `globalSourcesOnly: true`, through the one-shot helper if the server isn't in this session yet
+  (Ops § AL Tools, step 4). VS Code's own **AL: Download Symbols from Global Sources** is the same
+  download — the agent runs it through the tool; the human never has to.
+- **The environment in `launch.json`** — a cloud sandbox (one browser sign-in by the human) or an
+  on-premises server. `al_downloadsymbols` without `globalSourcesOnly` reads the environment from
+  `launch.json`; the agent states which environment it is about to use (name, type) before the call.
+  **When `launch.json` is absent or has no usable configuration**, the agent asks one box for the
+  values first — a cloud sandbox: `environmentName` and `tenant`; on-premises: `server`,
+  `serverInstance`, and `port` — typed by the human, never inferred or defaulted (Ops § Intake →
+  *Forbidden sources*), writes `.vscode/launch.json` with them, and only then calls the tool. No
+  framework step writes `launch.json` on its own.
 
-Global sources need no connection or sign-in — verified September 15, 2026 on AL extension 18.0: a
-full BC 27 set (System, Application, System Application, Business Foundation, Base Application) in
-under 10 seconds. The download takes the newest build of `app.json`'s major version (`27.0.0.0` →
-27.5) unless `enforceMinorVersion: true` is set.
+**Which route first.**
+1. **`launch.json` first** when the project needs what only the environment has: a dependency on a
+   **non-AppSource app** (its symbols exist nowhere else), or a **localized project** (Localization
+   isn't `W1`) **outside Copilot Chat** — the AL MCP Server's global download is W1 only (below).
+2. **Global sources first** on every other project: it is the fastest route and asks nothing of the
+   human. Verified September 15, 2026 on AL extension 18.0: a full BC 27 set (System, Application,
+   System Application, Business Foundation, Base Application) in under 10 seconds. The download
+   takes the newest build of `app.json`'s major version (`27.0.0.0` → 27.5) unless
+   `enforceMinorVersion: true` is set.
+
+**When a download fails — diagnose, then offer, never switch silently.** The same procedure
+whichever route failed, in both editions and on Build-a-Feature:
+1. **Read the error** and name the cause when it can be told. The usual ones, in the order they are
+   worth checking:
+   Each cause ends with what the box in step 2 will *propose* — the agent proposes, it never acts
+   on a cause by itself:
+   - **No `launch.json`, or no configuration in it** → the file was never written. Proposal: ask for
+     the environment values (above) and write it.
+   - **Environment or tenant not found, 404, "could not resolve"** → `launch.json`: `environmentName`,
+     `tenant`, `environmentType` (cloud) or `server`, `serverInstance`, `port` (on-prem) — a typo, a
+     renamed sandbox, a deleted one. Proposal: name the field and its current value and ask for the
+     right one.
+   - **401 / 403, sign-in cancelled, wrong account, token expired** → authentication. Proposal: a
+     retry, with the human signing in again on an account that has access to that environment.
+   - **Timeout, connection refused, DNS failure** → reachability: VPN, firewall, an on-premises
+     developer endpoint (port 7049 by default) that isn't exposed. Proposal: say what couldn't be
+     reached; the human checks the network or the endpoint, then a retry.
+   - **A version mismatch, "no symbols for application X"** → `app.json`'s `application` or
+     `platform` is newer than the environment, or a dependency's version isn't there. Proposal:
+     lower it to the environment's version, or name another environment.
+   - **A feed error, a proxy, offline (global route)** → no path to Microsoft's feed, or the major in
+     `app.json` has no public build yet. Proposal: a retry first, the environment route second.
+   Keep the error text and the cause for step 4's record; never ask the human for a screenshot.
+2. **Ask through the options mechanism** (Ops § Asking and Approvals), in the working language, in
+   one box. After a **`launch.json` failure**:
+   > Symbols couldn't be downloaded from `<environment>` (`launch.json`). `<One sentence: the
+   > error, and the fix the agent sees — or "the error doesn't say why.">`
+   > **Fix `launch.json` or the environment and try again** · **Try Microsoft's global sources
+   > instead** (NuGet packages, no sign-in; `<what this project would be missing, if anything>`) ·
+   > **Something else** (say what)
+   When the agent named a fix, the fix option is first. When it couldn't, **global sources is
+   first** — but only on a project global sources can serve; on a `launch.json`-first project
+   (a non-AppSource dependency, or localized outside Copilot Chat) the retry stays first and global
+   sources is second, with what would be missing. The global option always says what the project would lose by taking it: nothing on a
+   plain project; the non-AppSource dependency's symbols, which have to come from the environment
+   before the first object that uses them; or localized symbols — DESIGN starts on W1 and the
+   localized set is downloaded before any country-specific table or field is verified.
+   After a **global-sources failure**: the same box with *Try again*, *Download from `<environment>`
+   in `launch.json` instead* (a browser sign-in), and *Something else*.
+3. **The retry fails too:** the same box again, the other route first this time, with the agent's
+   diagnosis updated or the plain statement that it can't tell why from the error. The human
+   decides; the agent never takes the other route unasked, and never answers the box itself.
+4. **Record which route won and why** — version, W1 or localized, where it came from, and, after a
+   fallback, the route that failed and the cause, in one line — in the sheet's **Symbol Source**
+   (Full §1.4 / Lite Step 1). On **Build-a-Feature**, which has no sheet, the same line goes to
+   `ocpfFramework/framework.json` as `"symbols"`, next to `alMcp`. A project that fell back to
+   global sources while it depends on a non-AppSource app carries an open item until that
+   dependency's symbols are on disk.
+
+Why: on a real Build-a-Feature run in Copilot Chat, the sandbox download failed and the model went to
+global sources on its own — the right route, but taken unasked, and through the Command Palette with
+the human typing the country in. The route is now offered, with a diagnosis first, and the agent runs it.
 
 **The AL MCP Server's global download is W1 only.** It ignores `al.symbolsCountryRegion`, which VS
 Code's own download honors. When Localization isn't `W1`: in Copilot Chat, set
-`"al.symbolsCountryRegion"` (for example `"us"`) in `.vscode/settings.json` first. Elsewhere, start
-DESIGN on W1 and download from the sandbox before verifying any country-specific table or field.
+`"al.symbolsCountryRegion"` (for example `"us"`) in `.vscode/settings.json` first — that is the
+country VS Code's command would otherwise prompt for. Elsewhere, `launch.json` goes first (above);
+after a fallback to global sources, start DESIGN on W1 and download from the environment before
+verifying any country-specific table or field.
 
-**What a sandbox download contains.** Full Microsoft packages, not just symbols: on BC 28.4, the
+**What an environment download contains.** Full Microsoft packages, not just symbols: on BC 28.4, the
 Base Application carried 8,579 Microsoft source files and the System Application carried translation
 files for 26 languages. That's Microsoft's proprietary content — read it where it is, never commit
 it (**Standards §8.5**, Ops § Repository Hygiene). Symbols from Microsoft's public feed carry no
@@ -2085,7 +2158,7 @@ against nothing, and the human found an untracked folder at the end of the build
 - **`*.g.xlf`** — regenerated on every build (**Standards §8.2**). The per-language target files in
   `Translations/` **are** deliverables and always tracked.
 - **`.alpackages/`** — downloaded dependency symbols, refetched in seconds (Ops § Symbols), so
-  there's no reproducibility reason to track them. A sandbox download also carries Microsoft's own
+  there's no reproducibility reason to track them. An environment download also carries Microsoft's own
   source and translation files, which must never be committed (**Standards §8.5**). Microsoft's
   AL-Go templates ignore it too.
 - **Microsoft's translation files**, read for terminology (**Standards Appendix D**): read them
@@ -2381,7 +2454,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v5.9.5.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
+folder as `README.md`. For runbook **v5.9.6.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2558,7 +2631,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.9.5.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.9.6.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
@@ -3502,7 +3575,8 @@ Claude apps, and GitHub Copilot (VS Code, Copilot CLI, github.com). It's
 inside the `ocpfFramework/` folder of the project root. The plugin's `start` skill creates it,
 recording the edition and runbook version, where the copies were placed (`placedAs`), the source
 and commit they came from, the plugin version, any version the human chose to skip
-(`declinedUpdateVersion`), the AL tools outcome (`alMcp`), the layout it wrote
+(`declinedUpdateVersion`), the AL tools outcome (`alMcp`), the Symbol Source line on a
+Build-a-Feature project (`symbols`, Ops § Symbols), the layout it wrote
 (`"layout": "ocpfFramework-1"`), and the tooling checks (`"tooling": {}` until Ops § Tooling Checks
 fills it). Without that file, skip this section entirely. The `ocpfFramework/` folder follows the
 intake answer about framework files, except `ocpfFramework/state/` and the fetched subfolders,
