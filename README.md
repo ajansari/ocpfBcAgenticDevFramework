@@ -30,7 +30,7 @@ Install the Visual Studio Code extension, then configure Claude Code and GitHub 
 - [What to Expect](#expect)
 - [GET STARTED: Visual Studio Code Extension (Recommended)](#setup-plugin)
 - [Staying Up to Date](#staying-up-to-date)
-- [Getting Started — Alternative Ways](GettingStartedAlternatives.md) (CLI tools, other hosts, manual setup)
+- [Getting Started — Alternative Ways](#no-extension) (CLI tools, other hosts, manual setup)
 - [Roadmap](#roadmap)
 - [Repo Contents](#contents)
 - [License](#license)
@@ -158,13 +158,20 @@ auto-update for the framework's marketplace and offers *Update now* when a newer
 The extension's own documentation is on its Marketplace page. Requirements: Visual Studio Code
 1.96 or later, Git, and a Claude or GitHub Copilot subscription.
 
-**Using VSCodium or another Open VSX client?** The same extension is on the
-[Open VSX Registry](https://open-vsx.org/extension/ajansari/ocpf-bc-dev-setup).
+<a id="vscodium"></a>
 
-**Extension not an option?** Working in the **Claude Code CLI** or the **GitHub Copilot CLI**,
-running the agent on github.com or in the Claude apps, or setting the framework
-up by hand without the plugin — every one of those is in
-**[Getting Started — Alternative Ways](GettingStartedAlternatives.md)**.
+> [!TIP]
+> ### Using VSCodium or another Open VSX client?
+> The same extension is on the
+> **[Open VSX Registry](https://open-vsx.org/extension/ajansari/ocpf-bc-dev-setup)** — `ajansari.ocpf-bc-dev-setup`.
+
+<a id="no-extension"></a>
+
+> [!IMPORTANT]
+> ### Extension not an option?
+> Working in the **Claude Code CLI** or the **GitHub Copilot CLI**, running the agent on github.com
+> or in the Claude apps, or setting the framework up by hand without the plugin — every one of those
+> is in **[Getting Started — Alternative Ways](GettingStartedAlternatives.md)**.
 
 ## Step 2 — Start a project
 
