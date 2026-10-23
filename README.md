@@ -10,9 +10,9 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 *Last Updated: Wednesday, October 21, 2026*
 
-> ## 🌐 [Official Website](https://bcdev.ai)
+> ## 🌐 [Official Website](https://ajansari.github.io/ocpfBcAgenticDevFramework/)
 >
-> **<https://bcdev.ai>**
+> **<https://ajansari.github.io/ocpfBcAgenticDevFramework/>**
 >
 > What the framework is, how it works, and what it produces. **Start here if you're new** — then
 > come back for setup.

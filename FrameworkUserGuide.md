@@ -11,7 +11,7 @@ v5.9.6.0 · `ocpf-bc` agent plugin v5.9.6 · Visual Studio Code setup extension 
 > This guide is for the person driving a project with the framework: a Business Central
 > functional consultant or an AL developer working in Visual Studio Code with Claude Code or GitHub Copilot.
 > It explains the moving parts, every command you can run, and how updates work. For what the
-> framework *is* and why, start at the [official website](https://bcdev.ai).
+> framework *is* and why, start at the [official website](https://ajansari.github.io/ocpfBcAgenticDevFramework/).
 > For install tables and release notes, see the [README](README.md).
 
 ## Table of Contents
@@ -521,7 +521,7 @@ message names the package, the previous build, and the Schema Sync Mode the uplo
 
 ## 10. Where to get help
 
-- **Official website:** <https://bcdev.ai>
+- **Official website:** <https://ajansari.github.io/ocpfBcAgenticDevFramework/>
 - **Repository and README:** <https://github.com/ajansari/ocpfBcAgenticDevFramework>
 - **Issues** (framework, plugin, and setup extension alike):
   <https://github.com/ajansari/ocpfBcAgenticDevFramework/issues>. Include what you ran and what you
