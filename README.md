@@ -19,7 +19,7 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 ### ▶️ Getting Started in 5 Minutes (video)
 
-[![Getting Started: install the VS Code extension and configure Claude Code and GitHub Copilot](images/gettingStartedVideo.jpg)](https://www.youtube.com/watch?v=UvpLaPTld0I)
+[![Getting Started: install the VS Code extension and configure Claude Code and GitHub Copilot](images/gettingStartedVideo.png)](https://www.youtube.com/watch?v=UvpLaPTld0I)
 
 Install the Visual Studio Code extension, then configure Claude Code and GitHub Copilot — **[watch on YouTube](https://www.youtube.com/watch?v=UvpLaPTld0I)**.
 
