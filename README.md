@@ -28,7 +28,7 @@ Install the Visual Studio Code extension, then configure Claude Code and GitHub 
 - [Background](#background)
 - [User Guide](FrameworkUserGuide.md) — the full guide for the person driving a project
 - [What to Expect](#expect)
-- [GET STARTED: Agent Plugin (Recommended)](#setup-plugin)
+- [GET STARTED: Visual Studio Code Extension (Recommended)](#setup-plugin)
 - [Staying Up to Date](#staying-up-to-date)
 - [Getting Started — Alternative Ways](GettingStartedAlternatives.md) (CLI tools, other hosts, manual setup)
 - [Roadmap](#roadmap)
@@ -119,7 +119,7 @@ boundary, and the live dashboard shows the same figures as they happen.
 
 <a id="setup-plugin"></a>
 <details open>
-<summary><h1>GET STARTED: Agent Plugin (Recommended)</h1></summary>
+<summary><h1>GET STARTED: Visual Studio Code Extension (Recommended)</h1></summary>
 
 > ### Two steps. Install once, then one command per project.
 >
@@ -259,7 +259,7 @@ you can run `/ocpf-bc:update-framework` in them anytime.
 - ~~Add support for AL MCP~~ ✅ Completed
 - ~~Add support for BCQuality~~ ✅ Completed
 - ~~Add support for multi language translations~~ ✅ Completed — see [Multilanguage Support](translationAndMultiLanguage/MultilanguageSupportOverview.md)
-- ~~Distribute as an agent plugin for Claude and GitHub Copilot~~ ✅ Completed — see [GET STARTED: Agent Plugin](#setup-plugin)
+- ~~Distribute as an agent plugin for Claude and GitHub Copilot~~ ✅ Completed — see [GET STARTED: Visual Studio Code Extension](#setup-plugin)
 - ~~Per-step runbook files, document templates, a human effort estimate, and per-step token and cost tracking~~ ✅ Completed — Full v4.0.0.0 / Lite v3.0.0.0, September 2026
 - ~~Token usage **estimator** — predicted tokens per model, by input, output, and cached, before a step runs~~ ✅ Completed — the AI Effort Estimate, Full v5.0.0.0 / Lite v5.0.0.0, September 2026; calibrates itself from measured projects
 - **Planned — Custom Skills.** Third-party skills for the framework: a `/ocpf-bc:` command that turns something you built or a reference you use (your own patterns guide, an extra review check, a custom step) into a skill that declares the framework version and journeys it was made for, its author, date, and version; a command to update it; a command to load one or more skills into a new or existing project from a folder, a GitHub repository, or a `skillslocation.md` list — with compatibility checks against the framework version, the journey, and the other skills loaded, and a project that will not run while an incompatible skill is loaded. Design in progress, October 2026.
@@ -287,7 +287,7 @@ you can run `/ocpf-bc:update-framework` in them anytime.
 | `liteVersion/` | The **Lite Edition** — the 7-step version of the framework for updating an existing app or building a new one without a large footprint, on one model. See [Lite Edition, by hand](GettingStartedAlternatives.md#lite-edition). |
 | `documentTemplates/` | One template per document the framework produces (FRD, TDD, Sanity Check, Human Effort Estimate and its baselines, AI Effort Estimate, Build Plan, ChangeLog, Gap Analysis, Code Review, Documentation, User Guide, test scripts, Deployment, Release Test Results, Acknowledgements, Project Progress with its usage table for both editions, Lite's Design Doc, Docs, and Test Script, and Build-a-Feature's Feature Register, Data Model, and Documentation). Fetched into each project's `ocpfFramework/documentTemplates/` with the step files; shared by every journey. |
 | `translationAndMultiLanguage/MultilanguageSupportOverview.md` | How the framework handles multilanguage — captions and XLIFF translation files, regional terminology (GST vs. VAT, CR/Adj Note vs. Credit Memo in Australia), agent-drafted translations with a human review gate, and language-aware UAT. Shared by both editions. |
-| `agentPlugin/` | The optional **agent plugin**, `ocpf-bc`, for Claude Code, GitHub Copilot, and other tools: fifteen skills (the `/ocpf-bc:` commands), five sub-agents, the dashboard and usage scripts, and an offline copy of the framework. See [GET STARTED: Agent Plugin](#setup-plugin). This repository is also its plugin marketplace (`.claude-plugin/marketplace.json`). |
+| `agentPlugin/` | The optional **agent plugin**, `ocpf-bc`, for Claude Code, GitHub Copilot, and other tools: fifteen skills (the `/ocpf-bc:` commands), five sub-agents, the dashboard and usage scripts, and an offline copy of the framework. See [GET STARTED: Visual Studio Code Extension](#setup-plugin). This repository is also its plugin marketplace (`.claude-plugin/marketplace.json`). |
 | `THIRD_PARTY_NOTICES.md` | Credits and licenses for every third-party resource the framework references, fetches, or recommends — BCQuality, AL Guidelines, Microsoft Learn, and others. |
 | `FrameworkUserGuide.md` | The **User Guide** — everything the person driving a project needs: install, the Command Palette commands, the plugin commands, where every file lives, model recommendations, versioning, and updating. |
 | `GettingStartedAlternatives.md` | Every other way to get started: installing the plugin from the Claude Code CLI, the GitHub Copilot CLI, or inside Visual Studio Code without the setup extension; running the agent on github.com, in the Claude apps, or in Copilot Cowork; and the manual, no-plugin setup for Full and Lite. |
