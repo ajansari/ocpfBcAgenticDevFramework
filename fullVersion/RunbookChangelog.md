@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.9.6.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v5.9.6.0**, and Lite at **v5.9.6.0** — but
+**v5.10.0.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v5.10.0.0**, and Lite at **v5.10.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -21,6 +21,51 @@ before the version that introduced it ever shipped, only the final, current form
 here as one entry; incremental churn within a single unreleased version isn't itself
 change-worthy. (This is a different convention from a project's own ChangeLog, which exists
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
+
+---
+
+## v5.10.0.0 — October 29, 2026
+
+**The kickoff: every setup question back to back, then the work.** Lite **v5.10.0.0**, Operations
+Guide **v5.10.0.0**, Standards Guide **v1.13.1.0** (unchanged), plugin **5.10.0**.
+
+- **New Operating Rule 6f, both editions and Build-a-Feature.** The first step opens with the
+  kickoff: every question whose answer the human already knows — nothing read from the requirements
+  decides it — is asked in consecutive boxes with nothing between one box and the next but writing
+  the answer down. No fetch, no render, no hook test, no sub-agent, no guide section read, no web
+  page between boxes; what a box needs is read once, before the first box, in one batch. All the
+  setup work runs after the last kickoff box, in one batch reported in one message, followed by one
+  setup-done box. The first question that needs the requirements comes after that read. Why: on real
+  projects PRE-01 asked three questions, worked for 30 to 45 seconds, asked three more, worked again
+  — a dozen interruptions before the problem was discussed. **Ops § Asking and Approvals → *The
+  kickoff*** has the rule; **Ops § Intake → *The kickoff boxes*** the boxes in order.
+- **PRE-01 rewritten in five movements:** the clock; the pre-read (companions, Microsoft's live
+  countries-and-languages page and runtime table, what is on disk); the kickoff — K1 language, K2
+  notifications with Remote Control in the same box, K3 identity and Deployment Target, K4 countries,
+  new-or-existing app, approvers, and a BC Copilot feature, K5–K6 the six model questions with the
+  Copilot session settings, K7 naming, K8 permission set code and ID ranges, K9 AppSource, K10–K12
+  languages, K13 `.gitignore` and the beyond-the-interface questions, K14 where the requirements are
+  and the existing-app analysis offer; the setup batch (repository, `app.json` **written complete in
+  one write**, icon, notifications applied and each hook's command run, four sub-agents, `docs/`,
+  `ProjectProgress.md`, `.gitignore` proven, the dashboard rendered, opened, hooks proven, the AL
+  tools, the symbols, the editor sync, raw requirements captured verbatim); the setup-done box
+  (dashboard explanation, did the notification arrive, accept a drawn icon, Main model switch
+  confirmed, are the requirements in); then the requirements and the problem statement. **Step 01**
+  records the kickoff answers from `docs/0-project/ProjectMemory.md` and asks only what needs the
+  problem statement — Box 4, question 16, Box 4D — and confirms the sheet; **§1.10 verifies** the
+  setup batch's work instead of doing it. Lite Step 1 follows the same shape (Lite changelog).
+- **Where are the requirements? is now a question.** When `requirements/` is empty and nothing was
+  pasted or attached, the kickoff's last box asks: *I'll put them in `requirements/` now
+  (recommended)* / *I'll paste them in chat* / *They're elsewhere — I'll type the path* / *I'll
+  describe the need when you ask*; the setup-done box asks whether they are in. The one-line
+  recommendation at the journey choice stays.
+- **Ops § Dashboard, § Notifications, § Roles, § Project Setup, § Existing Apps, and the
+  Build-a-Feature journey** moved their asking or their work to the kickoff, the batch, or the
+  setup-done box accordingly; the dashboard no longer appears mid-intake, and `app.json` is no longer
+  written twice. **Plugin skills** `roles`, `notifications`, `dashboard`, and `app-icon` gain an
+  apply-only mode for the batch; `start` fetches everything the first step reads in its one batch
+  and leaves the AL tools to that batch; `build-a-feature`'s Part 2 runs in the kickoff's order with
+  its one intake question as the last box.
 
 ---
 

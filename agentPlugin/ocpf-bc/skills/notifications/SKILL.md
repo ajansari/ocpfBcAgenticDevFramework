@@ -16,6 +16,17 @@ than Full v3.0.0.0 / Lite v2.0.0.0), use this plugin's bundled copy in the `star
 `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/opsGuide/ocpfOperationsGuide.md`.
 The procedure is the same for both editions.
 
+**Called from the kickoff (since 5.10.0.0 — Ops § Intake → *The kickoff boxes*, box K2):** the
+runbook's first step asks the notification question and the Remote Control question in one box,
+back to back with the other setup questions, and does nothing between boxes — so when this skill
+is invoked **with the answer already recorded** — in `docs/0-project/ProjectMemory.md` (Full),
+`docs/1-define/ProjectParameters.md` (Lite), or `ocpfFramework/state/feature.json`
+(Build-a-Feature); this skill then writes `ocpfFramework/state/notifications.json` from it — it
+skips steps 1 and 2 below and runs in
+**apply-only mode**: steps 3 to 5 in the setup batch after the last kickoff box, and the
+"did it arrive?" question of step 5 asked in the setup-done box, not on its own. Invoked on its own
+(`/ocpf-bc:notifications`, a repair), it asks as below.
+
 In short:
 1. **Ask one multi-select question** through the options mechanism: *"Would you like to be notified
    at the end of every turn and whenever a question or approval is waiting? Choose any."* Offer only

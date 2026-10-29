@@ -34,6 +34,12 @@ is offered by the identity box, not redrawn.
 
 ## Step 2: Ask, in one box (four questions)
 
+**In the kickoff** (since 5.10.0.0 — Ops § Intake → *The kickoff boxes*, K3a), this box is asked
+as the very next box after the identity box's *Create one for me*, with nothing in between; Steps 3
+and 4 — drawing and rendering — run in the setup batch after the last kickoff box, and Step 5's
+accept-or-make-another is a question of the setup-done box. A second attempt after *Make another*
+is drawn and asked on its own, right there.
+
 1. **Style?** — **Flat 2D (recommended — crisp at 32 px)** / *Isometric 3D* (a simple extruded
    shape with two shaded faces; no photorealism).
 2. **Colors?** — *One color* / **Two colors (recommended)** / *A two-color gradient*. In the

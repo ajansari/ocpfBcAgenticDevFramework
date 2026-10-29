@@ -17,7 +17,7 @@ any design work.*
 
 | Step | Role |
 |---|---|
-| **PRE-01** — State the Problem | Main Agent — asks the working language, notifications, the six model-and-effort questions (Main / Light / Reasoning, the recommended pair per tool offered first) and who approves; writes the three project-local sub-agents (light, reasoning, generator); creates `ocpfFramework/`, `docs/` with its phase folders, and `ProjectProgress.md` |
+| **PRE-01** — State the Problem | Main Agent — the kickoff (Rule 6f): the working language, notifications, identity and Deployment Target, countries and who approves, the six model-and-effort questions (Main / Light / Reasoning, the recommended pair per tool offered first), naming, ID ranges, languages, `.gitignore`, and where the requirements are, asked back to back; then one setup batch — `ocpfFramework/`, `app.json` complete, the four project-local sub-agents (light, reasoning, generator, reviewer), `docs/` with its phase folders, `ProjectProgress.md`, the dashboard, the AL tools, the symbols — the setup-done box, then the requirements and the problem statement |
 | **PRE-02** — Structured Gap Analysis | Main Agent |
 | **01** — Populate the Intake Sheet *(Project Parameters)* | Main Agent — including the app icon and the starting version (`0.0.0.1` for a new app); creates `src/` |
 

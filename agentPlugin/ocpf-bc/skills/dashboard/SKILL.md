@@ -18,11 +18,15 @@ bundled script from files the framework already writes — `app.json`, `framewor
 the usage script's JSON, and (in Claude Code) the transcripts. **The agent never writes the HTML and
 never fills a number in by hand.** `ProjectProgress.md` stays the record; the page is a view of it.
 
-## 1. First creation — the moment `app.json` exists
+## 1. First creation — in the setup batch, after the kickoff
 
-The runbook calls this skill from PRE-01 (Lite Step 1) **right after the three frontloaded identity
-answers — extension name, publisher, app icon — are written to `app.json`**. That is the first
-moment the page has a name and an icon to show; earlier it would be an empty shell.
+The runbook calls this skill from PRE-01 (Lite Step 1; Build-a-Feature's setup) **in the setup
+batch right after the kickoff's last box** (since 5.10.0.0 — Ops § Intake → *The kickoff boxes*),
+once `app.json` has been written complete there, so the page has its name and icon to show. Before
+5.10.0.0 it was created mid-intake, right after the identity box, which put a wait between two
+questions. Steps 1 to 3 below run in the batch with no question; step 4's explanation question is
+**the first question of the setup-done box**, which the runbook's step assembles — this skill
+supplies the text.
 
 1. **Place the scripts.** Copy `scripts/ocpf-dashboard.py` and `scripts/ocpf-dashboard.ps1`, the
    `usage` skill's `scripts/ocpf-usage.py` and `ocpf-usage.ps1` (the renderer calls it), and
@@ -42,8 +46,9 @@ moment the page has a name and an icon to show; earlier it would be an empty she
    page shows this app, not *Untitled extension*. Prove the page is tracked:
    `git check-ignore -v ProjectDashboard.html ProjectDashboard-f1.html` must print nothing; if it prints a rule, fix
    `.gitignore` (Ops § Repository Hygiene) before going on, then `git add ProjectDashboard.html ProjectDashboard-f1.html`.
-4. **Explain it, once, through the options mechanism** (Rule 6a) — the next thing after the page
-   opens, before any other question. One question, two options: **I understand** / *Other*
+4. **Explain it, once, through the options mechanism** (Rule 6a) — as the first question of the
+   setup-done box, with the notification check beside it (on request outside the kickoff, as its
+   own box). One question, two options: **I understand** / *Other*
    (free text, for a question or a request). The question's text, in the working language:
 
    > **Your project now has a live dashboard.** I just opened it in your browser. It shows this

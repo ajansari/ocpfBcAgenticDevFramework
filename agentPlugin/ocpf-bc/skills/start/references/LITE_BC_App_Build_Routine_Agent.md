@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 5.9.6.0 (Lite, derived from the full framework v5.9.6.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
-**Last Updated:** October 21, 2026
+**Version:** 5.10.0.0 (Lite, derived from the full framework v5.10.0.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
+**Last Updated:** October 29, 2026
 
 > Version history for this edition lives in `ocpfFramework/LITE_RunbookChangeLog.md`, tracked
 > independently of the full framework's own `fullVersion/RunbookChangelog.md` (though a change to
@@ -21,7 +21,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.13.1.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.9.6.0), cited as
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v5.10.0.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
 >   tooling checks, analyzers, symbols, editor sync, notifications, packaging, repository hygiene,
 >   translations, fetched companions, documents, usage and cost, and the plugin.
@@ -240,6 +240,18 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
        - **"Continue" is not a blanket approval** — it reopens the routine and answers no pending
          box; only a choice typed in the mechanism's free-text entry can do both.
        This rule is identical in the Full edition.
+   6f. **The kickoff: every setup question back to back, then the work.** Step 1 opens with the
+       kickoff — every question whose answer the human already knows, with nothing read from the
+       requirements deciding it, asked in consecutive boxes with nothing between one box and the
+       next but writing the answer down: no fetch, no render, no hook test, no guide section read,
+       no web page. What a box needs is read once, before the first box. All the setup work the
+       answers drive runs after the last kickoff box, in one batch, reported in one message,
+       followed by one setup-done box; the first question that needs the requirements read comes
+       after that read. **Full procedure: Ops § Asking and Approvals → *The kickoff*; the boxes, in
+       order, Ops § Intake → *The kickoff boxes*.** Why: on real projects the first step asked three
+       questions, worked for 30 to 45 seconds, asked three more, worked again — a dozen
+       interruptions before the problem was even discussed. This rule is identical in the Full
+       edition and on Build-a-Feature.
 7. **Log every deviation immediately.** Any departure from the Design Doc — human or agent — goes
    in `docs/0-project/ChangeLog.md` before the next batch starts.
 8. **Work in the human's chosen working language.** The first question of Step 1 asks which
@@ -278,25 +290,29 @@ design work.
 **Read `ocpfFramework/runbookSteps/STEP-1.md` in full before starting this step.** It carries the opening questions in
 order and the complete **Project Parameters** table.
 
-**In one line:** ask the working language, fetch both companion guides, the step files, and the
-templates into `ocpfFramework/`, ask how to be notified, ask the Main model and effort (`roles`
-skill in a plugin project), ask the Copilot session settings if Copilot is in use, create `docs/`
-and its phase folders and `ProjectProgress.md` (Step 1 row `In Progress`), capture raw
-requirements verbatim, write the problem statement and entity list with a quick gap check, then
-fill every parameter — the app icon included — through the options mechanism (Ops § Intake) and
-set up the AL project yourself (Ops § Project Setup), AL source under `src/`.
+**In one line:** open the clock; fetch the companions and read the guides and Microsoft's two live
+pages once; then **the kickoff** (Rule 6f) — the working language, notifications, identity and Deployment Target,
+countries, the Main model and effort (`roles` skill in a plugin project), the Copilot session
+settings if Copilot is in use, naming, permission set code and ID ranges, the AppSource URLs, the
+languages, `.gitignore`, and where the requirements are — back to back; then **the setup batch**
+in one go (`app.json` complete, icon, notifications applied and tested, the generator
+and reviewer sub-agents, `docs/` and its phase folders, `ProjectProgress.md` (Step 1 row `In
+Progress`), `.gitignore`, the dashboard, the AL tools, the symbols, raw requirements captured
+verbatim); the setup-done box; then read the requirements, write the problem statement and entity
+list with a quick gap check, ask the few sheet questions that need them (onboarding, descriptions),
+and confirm the sheet.
 
-**Outputs:** `ocpfFramework/` with its six-line `README.md`; `ocpfFramework/standardsGuide/`, `ocpfFramework/opsGuide/`, `ocpfFramework/runbookSteps/`, and `ocpfFramework/documentTemplates/` (all fetched, gitignored); `app.json` (first write: name, publisher, logo, version, id) and `src/` early in the step, complete at project setup; `ProjectDashboard.html` (project root, tracked) rendered, opened, explained, with its hooks and `ocpfFramework/state/dashboard.json`; `ocpfFramework/state/usage.json` (Step 1's start timestamp) and `ProjectProgress.md` (seeded, project root, Lite step table only, Step 1 `In Progress`); `ocpfFramework/state/copilot.json` and the Copilot keys in `.vscode/settings.json` (when Copilot is in use); `requirements/` (if any raw input was
+**Outputs:** `ocpfFramework/` with its six-line `README.md`; `ocpfFramework/standardsGuide/`, `ocpfFramework/opsGuide/`, `ocpfFramework/runbookSteps/`, and `ocpfFramework/documentTemplates/` (all fetched, gitignored); `app.json` written complete in the setup batch (name, publisher, logo, version, id, ID ranges, platform, application, runtime, features, target) and `src/`, the descriptions added at the sheet's confirmation; `ProjectDashboard.html` (project root, tracked) rendered, opened, explained, with its hooks proven and `ocpfFramework/state/dashboard.json`; the generator and reviewer sub-agent definitions on the Main model; the AL tools connected; `ocpfFramework/state/usage.json` (Step 1's start timestamp) and `ProjectProgress.md` (seeded, project root, Lite step table only, Step 1 `In Progress`); `ocpfFramework/state/copilot.json` and the Copilot keys in `.vscode/settings.json` (when Copilot is in use); `requirements/` (if any raw input was
 captured); `docs/` with `0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` (created before the first document); `docs/1-define/ProblemStatement.md` (purpose, scope, out-of-scope, entity list, open questions);
 `docs/1-define/ProjectParameters.md` (the completed Project Parameters block, all placeholders
 replaced, the Main model and effort, version, and app icon answer included);
 `.gitignore` populated per the table above and verified with `git check-ignore`; `app.json`; `src/`
 (with `src/logo/AppLogo.png` when an icon was given); and `.alpackages/`.
 
-**Exit gate:** Every question was asked through the options mechanism; the extension name, publisher, and app icon were asked first, after notifications, and `app.json` was written then and rewritten complete at project setup; the dashboard was rendered from it, opened, its hooks installed, and the explanation question answered (ALL ALONG → Dashboard). `app.json` matches the
+**Exit gate:** Every question was asked through the options mechanism; every kickoff box was asked back to back with no work between them (Rule 6f) and before any requirement was read; `app.json` was written complete in the setup batch from those answers; the dashboard was rendered from it, opened, its hooks installed and proven, and the explanation question answered in the setup-done box (ALL ALONG → Dashboard). The AL tools are connected. When `requirements/` was empty, the requirements question was asked and its answer acted on; on an existing app the analysis offer was made and answered. `app.json` matches the
 sheet (version `0.0.0.1` for a new app, the installed version for an existing one; `logo` set when an icon was given), `src/` exists, and the target version's symbols are in `.alpackages/` (Ops § Project Setup). Both companion guides are present, in `ocpfFramework/standardsGuide/` and
 `ocpfFramework/opsGuide/`, and gitignored. The notification choice is recorded in
-`ocpfFramework/state/notifications.json`, applied, and tested. `docs/1-define/ProjectParameters.md` exists, in `docs/`, with no placeholder remaining, and the Main model and effort recorded there match what this session is running on. Every `.gitignore` entry from the framework-files row is present and `git check-ignore` confirms each existing framework file — `ocpfFramework/LITE_RunbookChangeLog.md` included — is ignored. Nothing from the `docs/` list is in the project root; `ProjectProgress.md` is, with only the Lite step table and the Step 1 row `In Progress`. Deployment Target
+`ocpfFramework/state/notifications.json`, applied, and tested, the arrival confirmed in the setup-done box. `docs/1-define/ProjectParameters.md` exists, in `docs/`, with no placeholder remaining, and the Main model and effort recorded there match what this session is running on. Every `.gitignore` entry from the framework-files row is present and `git check-ignore` confirms each existing framework file — `ocpfFramework/LITE_RunbookChangeLog.md` included — is ignored. Nothing from the `docs/` list is in the project root; `ProjectProgress.md` is, with only the Lite step table and the Step 1 row `In Progress`. Deployment Target
 is one allowed value. Namespace is consistent or correctly N/A. If
 Permission Sets required = `Yes`, ≥ 2 IDs are reserved. Onboarding questions are each answered.
 The short description, long description, and help URL were each asked in a box of its own with the
@@ -603,7 +619,7 @@ first package and before Step 6's release-candidate question. The non-negotiable
 
 Two companions are fetched at Step 1 and kept for the life of the project: the **Standards Guide**
 (`ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md`, v1.13.1.0), cited as **Standards §**, and the
-**Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v5.9.6.0), cited as **Ops §** and shared
+**Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v5.10.0.0), cited as **Ops §** and shared
 unchanged with the full framework.
 
 **Full procedure: Ops § Fetched Companions** — fetching, refreshing, the plugin's offline copies,
@@ -714,9 +730,9 @@ for a remote first, since collaborators will see the files as deleted.
 
 - **Every project has a live HTML dashboard at `ProjectDashboard.html`** — at the project root
   beside `ProjectProgress.md`, tracked in git, never under `ocpfFramework/` and never ignored (Ops §
-  Repository Hygiene) — created at Step 1 the moment `app.json` exists (the three identity questions come first for that reason),
+  Repository Hygiene) — created at Step 1 in the setup batch right after the kickoff's last box, from the complete `app.json` written there (Rule 6f),
   opened once in the default browser, explained once through the options mechanism (**I
-  understand** / *Other*), and kept fresh by hooks at zero token cost — every turn in Claude Code
+  understand** / *Other*, the first question of the setup-done box), and kept fresh by hooks at zero token cost — every turn in Claude Code
   and the Copilot CLI, every step boundary in Copilot Chat. **The hooks name an interpreter the
   ladder found on this machine and are proven once before the explanation question** — the Stop
   hook's exact command run from the shell, the sidecar newer and carrying the app's name and the
@@ -735,7 +751,9 @@ for a remote first, since collaborators will see the files as deleted.
 
 ## Notifications
 
-**Full procedure: Ops § Notifications.** Read it at Step 1, right after the working language.
+**Full procedure: Ops § Notifications.** Read it at Step 1, before the first kickoff box; the
+question is the kickoff's second box, and the answer is applied and tested in the setup batch
+after the last one (Rule 6f).
 
 - **Ask once, as one multi-select question:** *Claude app*, *Sound*, *Desktop notification*, any
   combination, or *No notifications* — offering only what works for this tool, OS, and sign-in.

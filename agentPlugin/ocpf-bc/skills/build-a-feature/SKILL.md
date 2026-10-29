@@ -65,7 +65,7 @@ Decide which of these applies before asking anything. Read, don't ask.
 |---|---|---|
 | **A. Framework project** | `ocpfFramework/framework.json` exists with `edition` `full` or `lite` (or a `CLAUDE.md` / `.github/copilot-instructions.md` starting `# BC App Build Routine`) | The project's parameters, prefix, namespace, ID ranges, models, notifications, dashboard, and `ProjectProgress.md` already exist. Reuse all of it. Add nothing to the project's documents except one ChangeLog line per object and the journey's documents, written beside the project's own in its phase folders (Part 7), never replacing. |
 | **B. Feature project** | `ocpfFramework/framework.json` exists with `edition` `feature` | A previous Build-a-Feature session. Continue: ids continue from the highest `F` row in `ProjectProgress.md`; `ocpfFramework/state/feature.json` holds the parameters and their sources. |
-| **C. Existing extension, no framework** | `app.json` exists, no `ocpfFramework/`, **and the extension has been built or installed somewhere**: `outputAppPackage/` or a `*.app` holds a package, or `src/` has real objects beyond the AL template's `HelloWorld.al` | Read `app.json` and `src/` for everything that can be read (Part 2); **confirm** what was read; ask what cannot be read. Its version is **asked**, never assumed (Part 2 step 5). **If the app has no usable documentation** (no FRD, TDD, design doc, or README that explains it) and `requirements/existing/` is empty, offer the `analyze` skill first — *Analyze and document the app first (recommended — one run, 10–30 minutes)* / *Skip — I know this app* (Ops § Existing Apps). |
+| **C. Existing extension, no framework** | `app.json` exists, no `ocpfFramework/`, **and the extension has been built or installed somewhere**: `outputAppPackage/` or a `*.app` holds a package, or `src/` has real objects beyond the AL template's `HelloWorld.al` | Read `app.json` and `src/` for everything that can be read (Part 2); **confirm** what was read; ask what cannot be read. Its version is **asked**, never assumed (Part 2 step 5). **If the app has no usable documentation** (no FRD, TDD, design doc, or README that explains it) and `requirements/existing/` is empty, offer the `analyze` skill — *Analyze and document the app first (recommended — one run, 10–30 minutes)* / *Skip — I know this app* (Ops § Existing Apps) — **in the kickoff's last box, beside the intake question**, and run it after the setup batch, before Part 4, like Full's and Lite's K14. |
 | **D. Empty or new folder, or a fresh scaffold** | no `app.json`; **or** `app.json` from **AL: Go!** — version `1.0.0.0`, no package anywhere, `src/` empty or only `HelloWorld.al` | A new per-tenant extension. Keep the scaffold's `id` GUID and delete `HelloWorld.al`; Part 2 asks the identity and range questions, once, and writes **`version` `0.0.0.1`** (Ops § Packaging → *Version numbers*). AL: Go!'s `1.0.0.0` is the template's default, not a release, and is never kept. |
 
 **New app or existing app is a question, exactly as Full and Lite ask it (intake 4b), never an
@@ -97,12 +97,31 @@ If the folder is unclear, confirm the workspace root with the human first.
 ## Part 2: Setup, the minimum
 
 Nothing here needs the human beyond the questions named and the AI tool's own approval prompts.
-Do it in this order; skip what the case already has.
+Skip what the case already has. **Since 5.10.0.0 the order is the kickoff's** (runbook Rule 6f;
+Ops § Intake → *The kickoff boxes* → *Build-a-Feature's kickoff*): **first, before any box, one
+read and one fetch, said in one line** — item 2 (the companions: the Operations Guide and the
+Standards Guide have to be on disk before the boxes that cite them; when GitHub is slow, read the
+bundled copies in the `start` and `al-standards` skills' `references/` and fetch in the batch),
+then `app.json`, `src/`, `images/`, `requirements/` and `requirements/existing/` in full (Part 3
+step 1), Microsoft's runtime table, and the Ops sections the boxes cite; **then the questions back
+to back with nothing between them but recording the answer in `ocpfFramework/state/feature.json`**
+— item 1 (language), item 4 (notifications, the Remote Control question in the same box), item 5
+(identity, or case C's confirm box, with 4b), item 7 (the Main model and effort) with item 8 (the
+Copilot settings) in the same box, item 9 (naming and range), and **Part 3's one intake question as
+the last box, with case C's analysis offer beside it**; **then the setup batch, one message, no
+question** — items 3, 6 (render, open, hooks proven; the explanation question held), 10 (the one
+write of `app.json`), 11, 12, 13, the notifications applied and each hook's exact command run once,
+the icon placed or drawn; **then the setup-done box** — the dashboard explanation (*I understand* /
+*Other*, with the extra sentence of item 6), did each notification kind arrive, accept the drawn
+icon, the Main model switch confirmed — and then Part 4 (or the analysis first, when it was
+chosen). The items below keep their numbers; where an item's text says "now" or "at once", that
+means *in the batch* for a write and *in the setup-done box* for a question, as the item itself
+now says.
 
 1. **Working language** (cases B, C, D; A has it in `docs/1-define/ProjectParameters.md`): ask in
    English through the options mechanism, English first, free text for any other language.
    Continue in the language chosen.
-2. **Companions** (B, C, D; A already has them): create `ocpfFramework/` with its six-line
+2. **Companions — before the first box** (B, C, D; A already has them): create `ocpfFramework/` with its six-line
    `README.md` (Ops § Project Setup); fetch the Standards Guide into
    `ocpfFramework/standardsGuide/` (standalone repository at the pinned tag, Ops § Fetched
    Companions), the Operations Guide into `ocpfFramework/opsGuide/`, the patterns library into
@@ -132,22 +151,24 @@ Do it in this order; skip what the case already has.
    since 5.5.0.0 — so `update-framework` can compare it. **Case A keeps its
    marker untouched** — the project stays Full or Lite; the feature table in
    `ProjectProgress.md` is what says Build-a-Feature ran on it.
-4. **Notifications** (B, C, D): the `notifications` skill, right after the language. In Claude
-   Code the *Claude app* option is offered unless a disqualifier is positively found — never
-   dropped for a sign-in that can't be checked, a fresh install, or Windows — and each hook is
-   tested with its exact command.
+4. **Notifications** (B, C, D): the `notifications` skill's question, right after the language,
+   with Remote Control in the same box. In Claude Code the *Claude app* option is offered unless a
+   disqualifier is positively found — never dropped for a sign-in that can't be checked, a fresh
+   install, or Windows. The answer is recorded in `feature.json` as it arrives; the skill's
+   apply-only mode applies it in the batch and runs each hook's exact command there, and the
+   "did it arrive?" question is asked in the setup-done box.
 5. **Identity (D — an empty folder or a scaffold)**, one box, three questions (Ops § Intake →
    *Box 0*): extension name (suggestions from the human's wording + *I'll type it*; a scaffold's
    `ALProject1` is never offered), publisher (**only a name they wrote in this session, quoted
    with its source, else *I'll type it*** — never inferred from anything on the machine; `Default
    publisher` is a placeholder, not a publisher), app icon (**if `images/` holds an image, offer
    it first by file name**, then *Yes — I'll provide an image* / ***Create one for me*** — the
-   `app-icon` skill: style, colors, content, and description asked in one box, the icon drawn,
-   rendered, shown, and accepted before `app.json` names it (Ops § Intake → *The app icon →
-   Creating one*) / *No icon*; *Later* via free text). Write
-   `app.json` at once: `name`, `publisher`, `logo` when given, `version` `0.0.0.1`, the scaffold's
-   `id` or a new one, platform defaults; create `src/` (delete `HelloWorld.al`). Record
-   `publisher` and `publisherSource` in `ocpfFramework/state/feature.json`.
+   `app-icon` skill: style, colors, content, and description asked in one box as the very next
+   box; the icon is drawn and rendered in the batch and accepted in the setup-done box before
+   `app.json` names it (Ops § Intake → *The app icon → Creating one*) / *No icon*; *Later* via
+   free text). Record `name`, `publisher` with `publisherSource`, and the icon answer in
+   `ocpfFramework/state/feature.json` as they arrive; `app.json` is written once, complete, in the
+   batch (item 10), and `src/` created then (delete `HelloWorld.al`).
    **Identity (C — an existing extension):** keep `id`; show `name` and `publisher` as read and
    **confirm them in one box** (*That's right* / *Change the name* / *Change the publisher*) —
    a value that looks like a placeholder is asked outright, as above — and, in the same box, ask
@@ -164,14 +185,15 @@ Do it in this order; skip what the case already has.
    - *Existing app — installed in a target environment; `<version from app.json>` is the
      installed version* / *I'll type the installed version* — first only when a package or real
      objects exist, and confirmed on the **Extension Management** page as Ops § Packaging says.
-   Write the answer to `app.json` now. A new app is written `0.0.0.1` whatever the file said.
-6. **Dashboard, the moment `app.json` exists** (B, C, D; A already has it): the `dashboard` skill
-   — render, `--open`, hooks, and the one explanation question (*I understand* / *Other*) with
-   Ops § Dashboard's text, adding one sentence: *On this journey the Build Map shows one row per
+   Record the answer in `feature.json`; item 10 writes it. A new app is written `0.0.0.1` whatever the file said.
+6. **Dashboard, in the batch, once `app.json` is written** (B, C, D; A already has it): the `dashboard` skill
+   in apply-only mode — render, `--open`, hooks; the one explanation question (*I understand* /
+   *Other*) is the first question of the setup-done box, with Ops § Dashboard's text, adding one
+   sentence: *On this journey the Build Map shows one row per
    object you ask for, with its stage, its time, and its cost, instead of the framework's steps.*
    Open and name `ProjectDashboard.html` (OnlyBCFans); never the F1 page unless the human asks
    for F1 by name (Ops § Dashboard → 4). The hooks name the interpreter the runner ladder found
-   and are **proven before the explanation question** — the Stop hook's exact command run once,
+   and are **proven in the batch, before the setup-done box** — the Stop hook's exact command run once,
    the sidecar newer, its `app.name` the app's and its `framework.edition` `feature` (the
    `dashboard` skill's section 2a). Why: on a real Windows project the hooks were written for
    `pwsh` on a machine without it, exited silently all build long, and the page read *Untitled
@@ -182,7 +204,8 @@ Do it in this order; skip what the case already has.
    edition `feature` the `roles` skill writes **no** sub-agent copy — this journey delegates to
    none. Record the answer in `ocpfFramework/state/feature.json` (`mainModel`, `mainEffort`,
    `workingLanguage`) — there is no `ProjectParameters.md` here. Say which model the session
-   is running on and have the human switch before continuing if it differs.
+   is running on in the box's text; if the chosen one differs, the human switches during the
+   batch and confirms it in the setup-done box.
    **Prices:** the usage script fetches the Main model's published rate itself at the first
    measurement (Ops § Usage & Cost → 3) and the note in its output says so; read that note at the
    F00 close and record `pricingChecked` in `feature.json`. Only when the note says the fetch failed
@@ -206,10 +229,12 @@ Do it in this order; skip what the case already has.
    suggestions that fit `13 − prefix length`), only when a permission set is built or a table makes
    one necessary (Part 4). A scaffold's `50100–50149` is the template default, not an allocation
    (Standards §5.5).
-10. **Complete `app.json`** (C: only what is missing; D: all of it): `idRanges` from the answer,
-    `platform`, `application`, `runtime` (read from Microsoft Learn's runtime table, never from
-    memory), `features` `["NoImplicitWith", "TranslationFile"]` (Standards §8.2), `target`. Keep
-    `id`, `name`, `publisher`, `logo`, `version` as they are.
+10. **Write `app.json` — once, complete, in the batch** (C: only what is missing; D: all of it):
+    `name`, `publisher`, `logo` when an icon was given, `version` (`0.0.0.1` or the installed
+    version from 4b), the scaffold's `id` or a new one, `idRanges` from the answer, `platform`,
+    `application`, `runtime` (read from Microsoft Learn's runtime table, never from memory),
+    `features` `["NoImplicitWith", "TranslationFile"]` (Standards §8.2), `target`. In C, keep
+    `id` and every confirmed value as they are.
 11. **Repository, folders, and ignore list** (C, D): **the repository first** —
     `git rev-parse --is-inside-work-tree`; not a repository → `git init -b main`, said in one
     line, nothing asked; inside a larger repository → use it and say so, never a nested one (Ops §
@@ -224,7 +249,7 @@ Do it in this order; skip what the case already has.
 12. **AL tools** (every case where this session lacks them): the `al-mcp-setup` skill; record
     `alMcp`. **Symbols** (C, D): download them for the target version into `.alpackages/` (Ops §
     Symbols — global sources first unless the app depends on a non-AppSource app or is localized
-    outside Copilot Chat; **on a failure, diagnose, then offer the other route in an options box**,
+    outside Copilot Chat; **on a failure, diagnose, then offer the other route in an options box — right after the setup-done box, never mid-batch**,
     never switch unasked, never the Command Palette); record the Symbol Source line — version, W1 or
     localized, where from, and after a fallback the route that failed and why — as `"symbols"` in
     `ocpfFramework/framework.json`, next to `alMcp`; case A has them. Keep the editor in sync
@@ -246,13 +271,14 @@ problem statement beyond Part 3's short one, no estimates, no translation questi
 
 ## Part 3: Intake — "What do you want to build today?"
 
-1. **Look before asking.** If `requirements/` exists, or the human pointed at a file, a ticket, or
+1. **Look before asking — before the first kickoff box** (Part 2's read). If `requirements/` exists, or the human pointed at a file, a ticket, or
    a message, read it first (`.md`, Word, PDF, and images alike). `requirements/existing/`, when
    present, is what the app already is (the `analyze` skill's output) — read it too. If it fully
    describes the object(s), skip to the confirmation in Part 4 with everything pre-filled and say
    where each answer came from. If it is partial, pre-fill what it gives. The better formed the
    material, the faster this stage is — say so once if `requirements/` is empty.
-2. **One question, the only free-text one.** Through the options mechanism:
+2. **One question, the only free-text one — the last box of the kickoff**, asked right after the
+   naming-and-range box, before the setup batch runs. Through the options mechanism:
 
    > **What do you want to build today?**
    > - *A new table — with its list and card pages* (the most common quick mod)

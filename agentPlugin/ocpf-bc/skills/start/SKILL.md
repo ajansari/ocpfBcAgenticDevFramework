@@ -1,6 +1,6 @@
 ---
 name: start
-description: Start a Microsoft Dynamics 365 Business Central AL extension project with the OnlyCopilotFans (OCPF) BC Agentic Development Framework - the one launching point for every journey. Guides the choice between Build-a-Feature (quick customizations in minutes, no steps, six short documents), Full (a complete app or solution end to end, three models, the full document and testing trail - the recommended journey), and Lite (updating an existing app or a new app without a large footprint, one model, fewer steps), always in that order, offers to analyze and document an undocumented existing app first, installs the latest runbook into the project (Full and Lite), connects Microsoft's AL tools with nothing to install, then begins the routine. On a project that already follows the framework it offers status, an update check, or building a feature in that project. Use when the user asks to "start a Business Central project", "start a BC extension", "use the OCPF framework", "set up the agentic development framework", "kick off an AL project", "add a table to my extension", "build a feature", or runs /ocpf-bc:start (optionally with "full", "lite", or "feature").
+description: Start a Microsoft Dynamics 365 Business Central AL extension project with the OnlyCopilotFans (OCPF) BC Agentic Development Framework - the one launching point for every journey. Guides the choice between Build-a-Feature (quick customizations in minutes, no steps, six short documents), Full (a complete app or solution end to end, three models, the full document and testing trail - the recommended journey), and Lite (updating an existing app or a new app without a large footprint, one model, fewer steps), always in that order, offers to analyze and document an undocumented existing app first, installs the latest runbook into the project (Full and Lite) and begins the routine, whose first step asks every setup question back to back and then connects Microsoft's AL tools with nothing to install in its setup batch. On a project that already follows the framework it offers status, an update check, or building a feature in that project. Use when the user asks to "start a Business Central project", "start a BC extension", "use the OCPF framework", "set up the agentic development framework", "kick off an AL project", "add a table to my extension", "build a feature", or runs /ocpf-bc:start (optionally with "full", "lite", or "feature").
 ---
 
 # Start an OCPF BC Agentic Development Framework project
@@ -12,7 +12,7 @@ the framework's manual setup: download the runbook, rename it to `CLAUDE.md` or
 - it helps choose **Build-a-Feature, Full, or Lite** — Full recommended, always listed in that order (Ops § Journeys),
 - it offers to **analyze and document an existing, undocumented app first** (the `analyze` skill),
 - it always installs the **latest** published runbook (Full and Lite; Build-a-Feature has none),
-- it connects the AL tools with nothing to install.
+- the routine's first step connects the AL tools with nothing to install, in its setup batch.
 
 It never overwrites an existing file.
 
@@ -103,7 +103,9 @@ these terms:
 
 Say once, when `requirements/` is empty: *the more well-formed and documented your idea, the faster
 the first stage goes — put requirements in `requirements/` (`.md` recommended; Word, PDF, and
-images work too) and an app icon in `images/`; every journey reads them at its first step.*
+images work too) and an app icon in `images/`; every journey reads them at its first step.* The
+journey's kickoff asks the same thing as its last box when the folder is still empty (Ops § Intake
+→ *The kickoff boxes*, K14), so the human can act on it rather than scroll past it.
 
 Mention that nothing is lost by switching later: Lite's `DesignDoc.md` and `ChangeLog.md` carry
 straight over into the full framework, and a Build-a-Feature extension is an existing app to
@@ -153,7 +155,11 @@ Ask which AI tools will work on this project. Pre-select the one you're running 
 **Tell the human what you're doing.** Fetch from GitHub first; the copies bundled in this plugin
 are only a fallback.
 
-1. **Fetch the chosen edition and its changelog** from the default branch:
+1. **Fetch the chosen edition and its changelog** from the default branch — **and, in the same
+   batch, everything the runbook's first step reads before its first question** (Rule 6f; Ops §
+   Intake → *The kickoff boxes*): the step files, the document templates, both companion guides
+   (Step 6 item 2a names where each goes), so that the first step finds them on disk and asks
+   its kickoff without a fetch between questions:
 
    | Edition | Runbook | Changelog |
    |---|---|---|
@@ -252,17 +258,21 @@ Nothing else in the root.
    (Ops § Repository Hygiene has the block; `ocpfFramework/state/` and the fetched subfolders are
    always ignored whatever the answer).
 
-## Step 7: Connect the AL tools
+## Step 7: Connect the AL tools — in the first step's setup batch, not here
 
-Follow the `al-mcp-setup` skill. It connects Microsoft's AL tools **with nothing to install**,
+**Since 5.10.0.0 this does not run between the journey choice and the first question.** The
+runbook's first step connects the AL tools in its setup batch, after the kickoff's last box
+(Ops § Intake → *The kickoff boxes*), so the human answers every setup question in one run and
+waits once. Leave `alMcp` at `not-checked` for the runbook's step to fill; the rest of this
+section is what that batch does. Follow the `al-mcp-setup` skill. It connects Microsoft's AL tools **with nothing to install**,
 using the AL Language extension already on the machine:
 - **In GitHub Copilot Chat,** the extension's built-in tools are already there.
 - **Elsewhere,** it says what it's doing (no question — connecting the tools is the agent's job),
   then registers the extension's bundled AL MCP Server for the project.
 
-It records the outcome in `ocpfFramework/framework.json` (`alMcp`). If the human postpones it, or you
-skip the skill for any reason, set `"alMcp": "deferred"` yourself so the marker never stays at
-`not-checked`. Never install anything or ask the human to edit `PATH` or a shell profile here
+The batch records the outcome in `ocpfFramework/framework.json` (`alMcp`); if the human postpones it
+there, or the batch skips the skill for any reason, the batch sets `"alMcp": "deferred"` so the
+marker never stays at `not-checked`. Never install anything or ask the human to edit `PATH` or a shell profile here
 (runbook Operating Rule 6d).
 
 ## Step 8: Mention staying up to date
@@ -283,13 +293,15 @@ notification kind at the runbook's first step counts as asking, for the settings
 1. **Read the placed runbook in full now.** A `CLAUDE.md` or `copilot-instructions.md` written
    mid-session may not auto-load until the next session.
 2. **Follow it from the first step:** PRE-01 for Full, Step 1 for Lite. This is exactly what the
-   manual "Getting started prompt" does. The runbook's first question is the human's working
-   language. Right after it, the runbook asks how the human wants to be notified when it's their
-   turn (ALL ALONG → Notifications), using this plugin's `notifications` skill scripts — and then
-   which models do the work: Full asks six questions (Main, Light, and Reasoning model, each with
-   a thinking effort), Lite asks two (Main model and effort), after a one-sentence warning that a
-   High effort makes every task slower. Use this plugin's `roles` skill for that step: it asks, and
-   writes project-local copies of this plugin's sub-agents carrying the chosen model and
+   manual "Getting started prompt" does. **The first step opens with the kickoff** (runbook Rule
+   6f; Ops § Intake → *The kickoff boxes*): every setup question back to back — the working
+   language, how to be notified (this plugin's `notifications` skill applies the answer in the
+   batch), the identity and Deployment Target, countries and approvers, which models do the work
+   (Full six questions, Lite two, after the one-sentence High-effort warning), the Copilot session
+   settings, naming and ID ranges, languages, `.gitignore`, and where the requirements are — then
+   one setup batch with no question, then one setup-done box. Use this plugin's `roles` skill in
+   its apply-only mode in that batch: it writes project-local copies of this plugin's sub-agents
+   carrying the chosen model and
    effort — `ocpf-light` and `ocpf-reasoning` in Full, and `ocpf-generator` and `ocpf-reviewer` in
    both editions (both on the Main model; one generator per batch, in parallel, at Full Step 06 /
    Lite Step 4; the reviewer's pre-review before the first package at Full Step 07 / Lite Step 5) —
@@ -299,18 +311,19 @@ notification kind at the runbook's first step counts as asking, for the settings
    `ProjectProgress.md` in the root (Lite seeds it at Step 1, like Full at PRE-01) with the step
    table and the usage table, and record usage at every step boundary (`/ocpf-bc:usage --step <id>`).
 2a. **Set expectations, once, in two sentences** (the README's *What to expect* section says the same):
-   the first hour is interactive — the routine asks everything it needs up front, like a kickoff
-   meeting with a development team — and from the DESIGN phase on (Full Step 02, Lite Step 2) the
+   the first hour is interactive — the routine asks everything it needs up front, back to back,
+   like a kickoff meeting with a development team, then sets the project up in one go and only
+   then reads the requirements — and from the DESIGN phase on (Full Step 02, Lite Step 2) the
    human can step away and come back when notified to approve or answer. With Claude Code and the
    *Claude app* notification, they can answer from the phone.
 2b. **GitHub Copilot in use?** The runbook's first step also asks the two Copilot session-settings
    questions — the agent-mode request limit (150 / 100 / default) and tool approvals (ask each
    time / allow the framework's commands / allow everything) — and writes `.vscode/settings.json`
    (Ops § Asking and Approvals → *GitHub Copilot session settings*).
-2c. **Note the dashboard.** PRE-01 / Lite Step 1 creates `ProjectDashboard.html` (project root, tracked) the
-   moment `app.json` exists (right after the identity questions), opens it, installs its hooks, and
-   asks the one explanation question — the `dashboard` skill does it (`/ocpf-bc:dashboard`). Don't
-   create it here; the runbook's step owns the moment.
+2c. **Note the dashboard.** PRE-01 / Lite Step 1 creates `ProjectDashboard.html` (project root, tracked) in
+   its setup batch after the kickoff's last box, from the complete `app.json` written there, opens it,
+   installs its hooks, and asks the one explanation question in the setup-done box — the `dashboard`
+   skill does it (`/ocpf-bc:dashboard`). Don't create it here; the runbook's step owns the moment.
 3. **Note the two companion guides.** The runbook fetches both at that first step: the **Standards
    Guide** — standalone at `ajansari/ocpfBCALStandards`, at the pinned tag — into
    `ocpfFramework/standardsGuide/` with the framework's prelude `README.md` beside it, and the

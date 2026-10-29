@@ -5,7 +5,7 @@ description: Ask which AI models do the work on a Business Central project follo
 
 # OCPF model and effort assignment
 
-The runbook asks which models do the work at its first step, right after notifications (Full
+The runbook asks which models do the work at its first step, in the kickoff's model boxes (Full
 PRE-01, Lite Step 1). This skill does that step, and makes the answer *take effect*, which is the
 part that failed on a real project: the human chose Sonnet / Haiku / Opus, the sheet said so, and
 every delegated task still ran on the session's model because nothing carried the choice into the
@@ -23,6 +23,16 @@ it) and, in Claude Code, the session's effort if you know it. The **Main model i
 only the human can change it — `/model <sonnet|opus|haiku>` and `/effort <low|medium|high>` in
 Claude Code (VS Code extension and CLI alike), the model picker in Copilot Chat, `/model` in Copilot
 CLI. You have no tool that switches it.
+
+**Called from the kickoff (since 5.10.0.0 — Ops § Intake → *The kickoff boxes*, boxes K5 and K6):**
+the runbook's first step asks the model questions back to back with the other setup questions and
+writes nothing between boxes, so when this skill is invoked **with the answers already recorded**
+— in `docs/0-project/ProjectMemory.md` (Full), the row-by-row `docs/1-define/ProjectParameters.md`
+(Lite), or `ocpfFramework/state/feature.json` (Build-a-Feature) — it skips Steps 1 and 2 and runs
+in **apply-only mode** — Step 3 and Step 4 in the setup batch after
+the last kickoff box, and Step 5 from then on. A Main model or effort other than the session's is
+confirmed switched in the setup-done box, not before the next question. Invoked on its own
+(`/ocpf-bc:roles`, a repair), it asks as below.
 
 ## Step 2: Ask, through the options mechanism
 

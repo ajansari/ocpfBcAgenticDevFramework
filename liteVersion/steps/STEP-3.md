@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 3 — Plan & Scaffold
 
-**Runbook version:** 5.9.6.0 · Lite edition · Phase: BUILD
+**Runbook version:** 5.10.0.0 · Lite edition · Phase: BUILD
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -25,7 +25,7 @@
   **One batch at a time** / **Ask me before each batch**. Either run-through still stops by itself
   on any pre-flight failure or Design Doc deviation. Record the answer in
   `docs/0-project/ChangeLog.md`.
-- Prepare the scaffold: confirm `app.json` (written at the end of Step 1) still matches
+- Prepare the scaffold: confirm `app.json` (written in Step 1's setup batch) still matches
   `docs/1-define/ProjectParameters.md` — name, publisher, ID ranges, runtime, BC dependency,
   `"features": ["NoImplicitWith", "TranslationFile"]` (**Standards §8.2**) — then `launch.json`,
   the `src/` folder structure (subfolders per module if useful; nothing in the root), a

@@ -70,7 +70,7 @@ met").
 flowchart TD
     subgraph DEFINE["PHASE: DEFINE"]
         direction TB
-        PRE01["PRE-01<br/>State the Problem<br/>(asks: how to notify you?<br/>who approves?)"] --> G_PRE01{{"Functional Consultant<br/>signs off (one approver:<br/>together with PRE-02)"}}
+        PRE01["PRE-01<br/>State the Problem<br/>(the kickoff: every setup<br/>question back to back,<br/>then one setup batch)"] --> G_PRE01{{"Functional Consultant<br/>signs off (one approver:<br/>together with PRE-02)"}}
         G_PRE01 --> PRE02["PRE-02<br/>Structured Gap Analysis"]
         PRE02 --> G_PRE02{{"Technical Lead reviews,<br/>gaps closed/deferred"}}
         G_PRE02 --> S01["01 — Populate Intake Sheet<br/>(Project Parameters, incl. §1.6/§1.7)"]
@@ -406,7 +406,7 @@ flowchart LR
 
 ### 4.2 Model & Effort Assignment (§1.7)
 
-Since v3.4.0.0 the assignment is asked at **PRE-01**, right after notifications — six questions
+Since v3.4.0.0 the assignment is asked at **PRE-01** — since v5.10.0.0 in the kickoff's model boxes — six questions
 (model and thinking effort for each of Main, Light, and Reasoning; two boxes in Claude Code, one
 page where the harness allows six) — and is **always** filled in: the "No" branch below now only
 means a harness that cannot run sub-agents at all. Each role's box carries both halves — model

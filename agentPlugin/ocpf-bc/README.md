@@ -26,13 +26,12 @@ The `start` skill:
    `/ocpf-bc:analyze` first on an existing app nobody can explain,
 2. installs the **latest** runbook from GitHub as `CLAUDE.md` and/or
    `.github/copilot-instructions.md`, and never overwrites an existing file (Full and Lite),
-3. connects **Microsoft's AL tools**, with nothing to install, using the AL Language extension you already have,
-4. begins the routine — or, for Build-a-Feature, asks *What do you want to build today?*
+3. begins the routine — whose first step asks every setup question back to back and then connects **Microsoft's AL tools** in its setup batch, with nothing to install, using the AL Language extension you already have — or, for Build-a-Feature, asks *What do you want to build today?* as the last of those questions
 
 On a project that already follows the framework, `start` offers *Status*, *Check for a framework
 update*, or *Build a feature in this project*.
 
-**Project layout (since plugin 5.0.0, Full 5.0.0.0 / Lite 5.0.0.0; current 5.9.6 / 5.9.6.0):** everything the framework fetches
+**Project layout (since plugin 5.0.0, Full 5.0.0.0 / Lite 5.0.0.0; current 5.10.0 / 5.10.0.0):** everything the framework fetches
 or keeps lives under one folder, `ocpfFramework/` (step files, templates, guides, patterns,
 scripts, the marker, and per-developer `state/`); project documents go in `docs/` by phase
 (`0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/`; Build-a-Feature keeps its six

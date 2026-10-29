@@ -71,7 +71,9 @@ guess weeks later, in the wrong place, at the cost of a rewrite. The framework i
 In its first hour it asks for everything it needs before it designs anything: your working language,
 how to be notified, which models do the work, who signs off, the extension's name and publisher, ID
 ranges, countries and languages, and the problem itself — what the app is for, who it serves, and
-what is out of scope.
+what is out of scope. **The setup questions come back to back, in one run** — about fourteen option
+boxes answered in a few minutes, with no waiting between them; the agent then sets the project up in
+one go and only afterwards reads your requirements and asks what depends on them.
 
 Stay at the keyboard for it. Answer the option boxes, correct anything it suggests, and say more
 rather than less when it asks about the problem. Nothing reaches the parameter sheet until you pick
@@ -206,7 +208,7 @@ In GitHub Copilot, the commands are identical.
 | `/ocpf-bc:status` | Shows where the project stands — phase and step (or object), exit gate, what is waiting on you, models, tooling; reads the project's files, so it is right in a fresh session |
 | `/ocpf-bc:dashboard` | Creates, refreshes, or opens the live dashboard, `ProjectDashboard.html` at the project root; the routine creates it at the first step and hooks keep it fresh at zero token cost |
 | `/ocpf-bc:update-framework` | Checks for a newer runbook, shows what changed, and updates the project's copy only when you say so |
-| `/ocpf-bc:al-mcp-setup` | Connects the AL tools (build, compile, symbols, diagnostics), if you skipped it at start — the framework packages the app; you upload it |
+| `/ocpf-bc:al-mcp-setup` | Connects the AL tools (build, compile, symbols, diagnostics), if the first step's setup batch skipped it — the framework packages the app; you upload it |
 | `/ocpf-bc:al-standards` | Loads the OCPF AL Development Standards Guide for an ad-hoc review of AL code; the routine applies it by itself |
 | `/ocpf-bc:copilot-blueprint` | Fires by itself when you ask for a Business Central Copilot feature and builds it from the verified OnlyBCFans BC Copilot Blueprint, never from memory |
 | `/ocpf-bc:notifications` | Turns on "your turn" notifications in an older project |
@@ -356,6 +358,17 @@ Each month's release notes in brief. The complete, versioned record is in
 [fullVersion/RunbookChangelog.md](fullVersion/RunbookChangelog.md),
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
+
+## October 29, 2026 — Full v5.10.0.0 · Lite v5.10.0.0 · Operations Guide v5.10.0.0 · Plugin v5.10.0
+**The setup questions come back to back — the kickoff.** The first step of every journey now asks
+everything you already know in one run of option boxes — language, notifications, name and
+publisher, Deployment Target, countries, who approves, which models, naming and ID ranges,
+languages, `.gitignore`, and where your requirements are — with nothing happening between the
+boxes. Then it sets the whole project up in one go (app.json, icon, notifications, sub-agents,
+dashboard, AL tools, symbols), asks one "setup done" box, and only then reads your requirements
+and asks what depends on them. No more three questions, a wait, three questions, a wait. When
+`requirements/` is empty, it asks where the requirements are instead of hoping you noticed the
+advice. The website's Pipeline section is now four columns that expand on demand.
 
 ## October 21, 2026 — Full v5.9.6.0 · Lite v5.9.6.0 · Operations Guide v5.9.6.0 · Plugin v5.9.6
 **When symbols won't download, the agent tells you why and asks what you'd like.** It reads the

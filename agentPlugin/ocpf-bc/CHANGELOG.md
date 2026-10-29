@@ -4,6 +4,28 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 5.10.0 — October 29, 2026
+
+**Bundles:** full runbook v5.10.0.0, Lite v5.10.0.0, Standards Guide v1.13.1.0 (unchanged),
+Operations Guide v5.10.0.0. Bundled references refreshed by `syncPlugin.sh`. Skills changed:
+`start`, `roles`, `notifications`, `dashboard`, `app-icon`, `build-a-feature`, `al-mcp-setup` (its description and timing); version pins in
+`al-standards` and `update-framework`.
+
+- **The kickoff (runbook Rule 6f).** The first step of every journey asks every setup question back
+  to back — language, notifications, identity and Deployment Target, countries, models, Copilot
+  settings, naming, ID ranges, languages, `.gitignore`, where the requirements are — with nothing
+  between boxes, runs all the setup in one batch after the last box, asks one setup-done box, and
+  only then reads the requirements. `roles`, `notifications`, `dashboard`, and `app-icon` gain an
+  **apply-only mode**: invoked from the kickoff with the answers already recorded, they skip their
+  own questions and do the work in the batch (the dashboard explanation, the "did it arrive?"
+  check, and the icon acceptance are questions of the setup-done box). `start` fetches the step
+  files, templates, and both guides in the same batch as the runbook and no longer connects the AL
+  tools between the journey choice and the first question — the first step's batch does.
+  `build-a-feature`'s Part 2 runs in the kickoff's order — the companions fetched before the first
+  box, every answer recorded in `feature.json` as it arrives, `app.json` written once in the batch,
+  its one intake question (with case C's analysis offer) the last box.
+- **Where are the requirements?** is a kickoff question when `requirements/` is empty.
+
 ## 5.9.6 — October 21, 2026
 
 **Bundles:** full runbook v5.9.6.0, Lite v5.9.6.0, Standards Guide v1.13.1.0 (unchanged),

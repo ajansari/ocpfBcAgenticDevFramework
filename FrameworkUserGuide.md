@@ -4,9 +4,9 @@
 
 *by AJ Ansari*
 
-**Last Updated:** Wednesday, October 21, 2026
-**Covers:** Full runbook v5.9.6.0 · Lite v5.9.6.0 · Standards Guide v1.13.1.0 · Operations Guide
-v5.9.6.0 · `ocpf-bc` agent plugin v5.9.6 · Visual Studio Code setup extension v0.0.17
+**Last Updated:** Thursday, October 29, 2026
+**Covers:** Full runbook v5.10.0.0 · Lite v5.10.0.0 · Standards Guide v1.13.1.0 · Operations Guide
+v5.10.0.0 · `ocpf-bc` agent plugin v5.10.0 · Visual Studio Code setup extension v0.0.17
 
 > This guide is for the person driving a project with the framework: a Business Central
 > functional consultant or an AL developer working in Visual Studio Code with Claude Code or GitHub Copilot.
@@ -36,8 +36,8 @@ know which one you are looking at.
 
 | Part | What it is | Where it lives | Version today |
 |---|---|---|---|
-| **The framework** | The runbook (Full or Lite), its step files, the document templates, the **Standards Guide**, and the **Operations Guide**. This is the content the AI agent follows. | The public GitHub repository, `ajansari/ocpfBcAgenticDevFramework`, on its `main` branch. | Full 5.9.6.0 · Lite 5.9.6.0 · Standards 1.13.1.0 · Ops 5.9.6.0 |
-| **The agent plugin** `ocpf-bc` | Fifteen skills (the `/ocpf-bc:` commands), five sub-agent definitions, the AL tooling helper scripts, the dashboard renderer, and an *offline fallback copy* of the framework. Installed once per machine into Claude Code or GitHub Copilot. | Same repository, folder `agentPlugin/ocpf-bc`, published as a plugin marketplace. | 5.9.6 |
+| **The framework** | The runbook (Full or Lite), its step files, the document templates, the **Standards Guide**, and the **Operations Guide**. This is the content the AI agent follows. | The public GitHub repository, `ajansari/ocpfBcAgenticDevFramework`, on its `main` branch. | Full 5.10.0.0 · Lite 5.10.0.0 · Standards 1.13.1.0 · Ops 5.10.0.0 |
+| **The agent plugin** `ocpf-bc` | Fifteen skills (the `/ocpf-bc:` commands), five sub-agent definitions, the AL tooling helper scripts, the dashboard renderer, and an *offline fallback copy* of the framework. Installed once per machine into Claude Code or GitHub Copilot. | Same repository, folder `agentPlugin/ocpf-bc`, published as a plugin marketplace. | 5.10.0 |
 | **The Visual Studio Code setup extension** | A bootstrapper and extension pack, published to the Visual Studio Marketplace and Open VSX. Installs the AL toolchain and the agent extensions, wires your agent to the plugin marketplace, and adds six Command Palette commands. It contains **no framework content**. | A separate repository, published as [`ajansari.ocpf-bc-dev-setup`](https://marketplace.visualstudio.com/items?itemName=ajansari.ocpf-bc-dev-setup) (also on [Open VSX](https://open-vsx.org/extension/ajansari/ocpf-bc-dev-setup)). | 0.0.17 |
 | **Your project's copy** | The runbook and companions fetched into one AL project, pinned at the version fetched. | Your AL project folder: `CLAUDE.md` or `.github/copilot-instructions.md`, plus one `ocpfFramework/` folder holding the step files, templates, both guides, patterns, scripts, the changelog, the plugin's marker, and each developer's state. | Whatever was current when you started, until you approve an update |
 
@@ -127,45 +127,59 @@ Add `full`, `lite`, or `feature` to skip the journey question.
 | **2** | **Build-a-Feature, Full, or Lite.** It asks about the kind of work — not a file count — and recommends Full unless you say the work is smaller; the box lists the three in that fixed order with Full marked. **Full:** a complete app or solution end to end, or a major overhaul of a big existing app; the full requirements, design, documentation, and testing trail on three models; at least three to four hours. **Lite:** updating an existing app, or a new app without a large footprint; one model, fewer steps, leaner documents; one to two hours. **Build-a-Feature:** quick, tactical customizations — a table and its pages, a field on a page, a processing report, an API, a role center — in minutes, not vibe-coding but lean on documentation (six short documents in a flat `docs/`); ideal for a PoC or prototype. | Confirm or override. Lite's documents carry straight over into Full if you switch later; a Build-a-Feature extension is an existing app to Lite or Full. |
 | **3** | **Where the runbook goes.** `CLAUDE.md` for Claude Code, `.github/copilot-instructions.md` for Copilot, or both for a mixed team. | Nothing, unless a file with that name already exists. Then it asks; it never overwrites. |
 | **4** | **Fetches the latest runbook** and its changelog from GitHub, byte for byte, and records the commit and version in `ocpfFramework/framework.json`. If GitHub is unreachable it uses the plugin's bundled copy and tells you so, naming the version. | Nothing. |
-| **5** | **Connects Microsoft's AL tools.** In Copilot Chat they are built into the AL Language extension. In Claude Code and Copilot CLI, it registers the extension's bundled AL MCP Server for the project. Nothing is installed; no PATH edits. | Approve the connection once when asked. |
-| **6** | **Begins the routine** at the first step: PRE-01 (Full) or Step 1 (Lite). | See the first hour, below. |
+| **5** | **Begins the routine** at the first step: PRE-01 (Full) or Step 1 (Lite). Its setup batch, after the kickoff questions, **connects Microsoft's AL tools**: in Copilot Chat they are built into the AL Language extension; in Claude Code and Copilot CLI it registers the extension's bundled AL MCP Server for the project. Nothing is installed; no PATH edits. | See the first hour, below; approve the connection once when asked. |
 
 ### The first hour is interactive. Stay for it.
 
 The first step asks for everything the design will depend on, the way a kickoff meeting with a
-newly hired developer would. In order:
+newly hired developer would — and since 5.10.0.0 it asks it **all in one run, box after box, with
+no work between the boxes** (the runbook calls this the kickoff). You answer about fourteen boxes
+in a few minutes; the agent then sets the whole project up in one go, asks one "setup done" box
+(the dashboard explained, did your notification arrive), and only then reads your requirements and
+comes back with the questions that depend on them. In order:
 
 1. **Your working language.** You can work with the agent in your own language.
 2. **How to be notified** when it is your turn: Claude app push, sound, desktop notification, or
    none. The agent sets this up itself and remembers it per project.
-3. **Which models do the work.** The agent first says, once: *a High thinking effort makes every
+3. **Name, publisher, icon, Deployment Target** — one box. Up to three name suggestions from your
+   own words, a publisher only you have written (never guessed from an email or a folder), the
+   icon — *Use `images/<file>`* when you put one in `images/`, *Yes — I'll provide an image*,
+   **Create one for me**, or *No icon* (type *Later* if you want; for AppSource it is a release
+   blocker) — and SaaS PTE, OnPrem PTE, or AppSource. On yes, give the path next: PNG, square,
+   300 × 300 px is ideal; the agent copies it to `src/logo/AppLogo.png`, resizing a larger image
+   with what the machine has and padding a non-square one rather than cropping it. On *Create one
+   for me* the `app-icon` command asks the style, colors, content, and description in the next
+   box, draws the icon during the setup, shows it, and uses it only once you accept it.
+4. **Countries, new or existing app, who signs off** (Full), and whether the app has a Business
+   Central Copilot feature.
+5. **Which models do the work.** The box's own text says, once: *a High thinking effort makes every
    task slower — the model thinks longer before each answer, and a step can take noticeably more
-   time; the framework recommends High only where judgment matters most.* Full then asks six
+   time; the framework recommends High only where judgment matters most.* Full asks six
    questions: Main, Light, and Reasoning model, each with a thinking effort. Recommended in Claude
    Code: **Sonnet Medium / Haiku Medium / Opus High**; in GitHub Copilot two options per role at
    the same Copilot price, a Claude model and its OpenAI peer: **Claude Sonnet 5.5 or GPT-6.1 Sol
    Medium / Claude Haiku 5.5 or GPT-6 Luna Medium / Claude Opus 5.5 or GPT-6.1 Sol High** (the
    picker's names; if one is not in the picker that day, the agent offers the nearest and says so).
    Lite asks two: recommended **Sonnet Medium**, or in Copilot **Claude Sonnet 5.5 or GPT-6.1 Sol
-   Medium**. The agent then writes project-local sub-agent definitions carrying
+   Medium**. During the setup the agent writes project-local sub-agent definitions carrying
    those choices — reasoning and light in Full, and in both editions the generator and the reviewer,
    which run on the Main model — so delegated work actually runs on the models you picked.
-4. **Copilot only:** the agent-mode request limit (150 recommended), written to the workspace's
-   `.vscode/settings.json`, and how tool approvals should work, written to your own user settings
-   unless you explicitly choose to share them with the team.
-5. **The fetched companions.** The Standards Guide, the Operations Guide, the step files, and the
-   document templates come into `ocpfFramework/`, all gitignored.
-6. **The problem itself:** purpose, scope, out of scope, who uses it, initial entities. Then, in
-   Full, the gap analysis and the Project Parameters sheet: publisher, prefix, namespace, ID
-   ranges, countries and languages, and the starting version (`0.0.0.1` for a new app; for an
-   existing app, the version installed in the target environment).
-7. **An app icon?** *Use `images/<file>`* when you put one in `images/`, *Yes — I'll provide an
-   image*, **Create one for me**, or *No icon* (type *Later* if you want; for AppSource it is a
-   release blocker). On yes, give the path: PNG, square, 300 × 300 px is ideal. The agent copies it
-   to `src/logo/AppLogo.png`, resizing a larger image with what the machine has and padding a
-   non-square one rather than cropping it, and sets `"logo"` in `app.json`. On *Create one for me*
-   the `app-icon` command asks the style, colors, content, and description, draws the icon to the
-   standard, shows it, and uses it only once you accept it.
+   **Copilot only:** the same box carries the agent-mode request limit (150 recommended), written
+   to the workspace's `.vscode/settings.json`, and how tool approvals should work.
+6. **The parameters you already know,** still in the same run: prefix, namespace, localization,
+   BC version, the permission set code, ID ranges, the AppSource URLs, the languages per country,
+   whether the framework's files are left out of your repository, and — when your
+   `requirements/` folder is empty — **where your requirements are** (put them in `requirements/`
+   now, paste them, point at a file, or describe them when asked). On an undocumented existing
+   app, whether to analyze and document it first.
+7. **The setup, then the problem itself.** The fetched companions (the Standards Guide, the
+   Operations Guide, the step files, the document templates — into `ocpfFramework/`, all
+   gitignored) come in before the first question; after the last one the agent sets everything
+   else up in one go — `app.json`, the icon, your notifications, the sub-agents, the dashboard,
+   the AL tools, the symbols — asks one "setup done" box, reads your requirements, and only then
+   asks about the problem: purpose, scope, out of scope, who uses it, initial entities, and the
+   few sheet questions that need that reading — the onboarding extras and the app's short and
+   long descriptions. Then, in Full, the gap analysis and the sheet's confirmation.
 
 AL source lives under `src/` (subfolders per module are fine); the app icon under `src/logo/`, with the
 image you brought, or the one the agent drew, kept in `images/`. Raw requirements go in `requirements/`.
@@ -248,7 +262,7 @@ recognises.
 | `/ocpf-bc:al-mcp-setup` | Connects the agent to Microsoft's AL tools (build, compile, symbols, diagnostics) using the AL Language extension already on the machine. Nothing installed, no PATH edits. In Copilot Chat there is nothing to do; in Claude Code and Copilot CLI it registers the bundled AL MCP Server. `start` normally does this for you. | "connect the AL tools", "why can't you compile" |
 | `/ocpf-bc:copilot-blueprint` | Fires by itself whenever you ask for a Business Central Copilot feature — a *Suggest with Copilot* action, a PromptDialog page, a capability registration, Azure OpenAI — in any journey, or with no project open: fetches the OnlyBCFans BC Copilot Blueprint into a sibling folder outside the project and builds the feature from its verified procedure and templates, never from memory. | "Add a Suggest with Copilot action to the Sales Order page", "build a Copilot feature" |
 | `/ocpf-bc:al-standards` | Loads the OCPF AL Development Standards Guide: naming and abbreviations, object ID allocation, API page design, field inclusion, anti-patterns, events, upgrade code, multilanguage and XLIFF rules, parent-child pages and number series. The routine applies it automatically; run it directly for an ad-hoc review. | "check this AL against OCPF standards" |
-| `/ocpf-bc:dashboard` | Creates, refreshes, or opens the project's live dashboard, `ProjectDashboard.html` at the project root (tracked in git, so it persists with the project) — the Build Map page with the app's name and icon, phase and step, tokens or AI credits and cost, the agent / you time split, who is working, the exit gate, and the open question. The runbook calls it at PRE-01 / Lite Step 1 the moment `app.json` exists; it opens the page once, installs the zero-token refresh hooks, and asks the one explanation question. Reopen a closed page with right-click → **Open Externally** in VS Code's Explorer, or ask for it. |
+| `/ocpf-bc:dashboard` | Creates, refreshes, or opens the project's live dashboard, `ProjectDashboard.html` at the project root (tracked in git, so it persists with the project) — the Build Map page with the app's name and icon, phase and step, tokens or AI credits and cost, the agent / you time split, who is working, the exit gate, and the open question. The runbook calls it in PRE-01's / Lite Step 1's setup batch, once `app.json` is written; it opens the page once, installs the zero-token refresh hooks, and asks the one explanation question. Reopen a closed page with right-click → **Open Externally** in VS Code's Explorer, or ask for it. |
 | `/ocpf-bc:update-framework` | Checks whether a newer runbook has been published, summarises every changelog entry between your version and the latest, says whether any touches a step you have already completed, and updates the project's copy only after you choose **Update now**. Backs up the old copy first. On a project from an older layout (Full before 5.0.0.0, Lite before 5.0.0.0) it also runs the migration: moves the framework files into `ocpfFramework/`, the documents into the `docs/` phase folders, rewrites the `.gitignore` block and the tool paths, creates Lite's `ProjectProgress.md` from the old usage report, and lists every move in the ChangeLog. | "is there a newer runbook", "update the framework" |
 
 Five sub-agents ship with the plugin: **ocpf-reasoning** (Full: FRD and TDD drafting, Sanity

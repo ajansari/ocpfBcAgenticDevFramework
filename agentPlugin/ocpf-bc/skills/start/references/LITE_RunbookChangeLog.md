@@ -16,6 +16,33 @@ framework.
 
 ---
 
+## v5.10.0.0 — October 29, 2026
+
+Derived from the full framework **v5.10.0.0**; Operations Guide **v5.10.0.0**; Standards Guide
+**v1.13.1.0** (unchanged); plugin **5.10.0**.
+
+- **New Operating Rule 6f — the kickoff.** Step 1 opens with every setup question asked back to
+  back, with nothing between boxes but writing the answer down; the setup work runs after the last
+  box in one batch; one setup-done box follows; the requirements are read only then (Ops § Asking
+  and Approvals → *The kickoff*; Ops § Intake → *The kickoff boxes*).
+- **Step 1 rewritten in five movements:** the clock; the pre-read (companions, Microsoft's live
+  pages, what is on disk); the kickoff — language, notifications with Remote Control, identity and
+  Deployment Target, countries and new-or-existing app, the Main model and effort with the Copilot
+  settings, naming, permission set code and ID ranges, AppSource, languages, `.gitignore`, where the
+  requirements are and the existing-app analysis offer; the setup batch (`app.json` written complete
+  in one write, icon, notifications applied and tested, the generator and reviewer sub-agents,
+  `docs/`, `ProjectProgress.md`, `.gitignore`, the dashboard, the AL tools, the symbols, raw
+  requirements captured verbatim); the setup-done box; then the requirements, the problem statement,
+  the few sheet questions that need it (onboarding, the descriptions), and the sheet's confirmation.
+  The project-setup list at the end of the step now **verifies** the batch's work.
+  Each kickoff answer is written as it arrives into `docs/1-define/ProjectParameters.md` — the
+  block grows row by row, with the publisher's and the ID range's source noted — so a resumed
+  intake and the skills' apply-only modes read it from disk, never from memory.
+- **Where are the requirements? is now a question** when `requirements/` is empty (the kickoff's
+  last box), with the setup-done box asking whether they are in.
+
+---
+
 ## v5.9.6.0 — October 21, 2026
 
 Derived from the full framework **v5.9.6.0**; Operations Guide **v5.9.6.0**; Standards Guide

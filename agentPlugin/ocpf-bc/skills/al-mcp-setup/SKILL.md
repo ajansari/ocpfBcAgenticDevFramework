@@ -1,6 +1,6 @@
 ---
 name: al-mcp-setup
-description: Connect the AI to Microsoft's AL tools (build, compile, symbols, diagnostics) for a Business Central AL project, with nothing to install, using the AL Language extension already on the machine. Use when the user asks to "set up the AL MCP server", "connect the AL tools", "check AL tooling", "why can't you compile", or when the OCPF start skill reaches its tooling step.
+description: Connect the AI to Microsoft's AL tools (build, compile, symbols, diagnostics) for a Business Central AL project, with nothing to install, using the AL Language extension already on the machine. Use when the user asks to "set up the AL MCP server", "connect the AL tools", "check AL tooling", "why can't you compile", or when the first step of an OCPF journey reaches its setup batch.
 ---
 
 # Connect the AL tools, zero-install
@@ -67,9 +67,9 @@ Connecting the AL tools is the agent's job, not a decision for the human (runboo
 extension already installed, nothing will be installed, and a few small scripts plus one MCP entry
 will be added to the project. Then continue.
 
-If the human says to hold off, record `"alMcp": "deferred"` and stop. The runbook needs these tools
-at the end of intake anyway, to download symbols before design (full framework Step 01 §1.10, Lite
-end of Step 1), and connects them then.
+If the human says to hold off, record `"alMcp": "deferred"` and stop. The first step's setup batch
+needs these tools to download symbols before design and connects them there (Ops § Intake → *The
+kickoff boxes*); a deferral is retried at Full Step 01 §1.10 / Lite Step 1's project-setup check.
 
 ## Step 4: Connect
 
@@ -135,8 +135,8 @@ end of Step 1), and connects them then.
    `globalSourcesOnly` the tool uses the environment in `launch.json`. The runbook needs them before
    DESIGN (ALL ALONG → Symbols); on a failure the agent diagnoses and then offers the other route in
    an options box, never switching unasked. **In a new, empty folder,** the step 4
-   check is enough for now. The runbook writes `app.json` and downloads symbols at the end of
-   intake.
+   check is enough for now. The runbook writes `app.json` and downloads symbols in the first
+   step's setup batch.
 6. **Tell the human what to expect, in one or two sentences:** approval clicks only.
    - **While you work:** the tool may ask permission before you edit `.mcp.json` (Claude Code
      treats it as a sensitive file) or run a script.

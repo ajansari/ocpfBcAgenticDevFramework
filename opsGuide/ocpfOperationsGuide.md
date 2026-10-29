@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 5.9.6.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
-**Last Updated:** October 21, 2026
+**Version:** 5.10.0.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
+**Last Updated:** October 29, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
 > `fullVersion/BC_App_Build_Routine_Agent.md` and `liteVersion/LITE_BC_App_Build_Routine_Agent.md`.
@@ -110,6 +110,52 @@ compile mid-round, a batch's pre-flight result, or a draft handed back part-way 
 conversation, not a decision — wrapping those makes the box noise. (Through v5.0.0.0 the rule
 applied only to the PROVE steps; a real run on v5.0.0.0 closed Steps 1–7 with a prose prompt and
 stalled, which is why the box is now mandatory at every step.)
+
+### The kickoff — every setup question back to back, the work after (runbook Rule 6f)
+
+**Since 5.10.0.0 the first step of every journey opens with the kickoff: every question whose
+answer the human already knows — nothing read from the requirements decides it — is asked in
+consecutive boxes, with nothing between one box and the next but writing the answer down.** The
+working language, how to be notified, the extension's name, publisher, and icon, the Deployment
+Target, the countries, who approves, which models do the work, the Copilot settings, the prefix,
+namespace, localization, and BC version, the permission set code and the ID ranges, the AppSource
+URLs, the languages, the `.gitignore` answer, and — when `requirements/` is empty — where the
+requirements are. The exact boxes, per journey, are **Ops § Intake → *The kickoff boxes***. All
+the setup work those answers drive — fetching, applying and testing the notifications, writing
+`app.json` complete, the dashboard, the sub-agent definitions, the AL tools, the symbols — runs
+**after the last kickoff box, in one batch, reported in one message**, and is followed by **one
+setup-done box** (the dashboard explained, did the notification arrive, a drawn icon accepted). The
+first question that needs the requirements read — the problem statement's clarifications, the
+onboarding extras, the descriptions, the sheet's confirmation — comes after that read. Why: on
+real projects the first step asked two or three questions, worked for 30 to 45 seconds, asked
+three more, worked again — a dozen interruptions before the problem was even discussed. Fourteen
+boxes answered in a row take a few minutes; the same fourteen spread over waits take half an hour
+of the human's attention.
+
+Three rules, both editions and Build-a-Feature alike:
+
+1. **Nothing the human waits for happens between two kickoff boxes.** No fetch, no render, no hook
+   test, no sub-agent, no reading of a guide section, no web page. Writing the answer to the
+   record is the one thing allowed. Everything a kickoff box needs — the Ops sections it cites,
+   Microsoft's live countries-and-languages and runtime pages, what is on disk (`app.json`,
+   `src/`, `images/`, whether `requirements/` is empty) — is read **once, before the first box**,
+   in one batch, said in one line (*"Reading the guides and two Microsoft pages, then I'll ask
+   everything I need in one go — about N boxes."*). The record each answer goes to is
+   `docs/0-project/ProjectMemory.md` in Full, `docs/1-define/ProjectParameters.md` written row by
+   row in Lite, and `ocpfFramework/state/feature.json` on Build-a-Feature; the skills' apply-only
+   modes read it.
+2. **A kickoff box's options are built from what is on disk and what the human has said** —
+   never from the requirements, which are not read yet. Name suggestions come from the human's
+   wording, countries from the human, the BC version from the page read before the first box.
+3. **A box whose answer opens a follow-up gets the follow-up as the very next box** — the icon's
+   path, the app-icon brief, another ID range, a partner localization app, a typed model — still
+   back to back. The follow-up's *work* (drawing the icon, validating a range against the
+   AppSource bands) waits for the batch unless it is a check that takes no time.
+
+A harness that carries several questions in one carousel (Copilot Chat) may merge consecutive
+boxes whose questions don't depend on one another; a harness that asks one question at a time
+(Copilot CLI) asks the same questions in the same order. The step files name the boxes; the sheet
+(Ops § Intake) says what each question offers.
 
 ### Interrupted and resumed — the box comes back (runbook Rule 6e)
 
@@ -285,9 +331,10 @@ as the questions allow:** up to four questions per box, sharing a box only when 
 another's answer. Where the harness asks one question at a time, ask the same questions in the same
 order.
 
-**Before the first box:** read the problem statement for suggestions, and read Microsoft's live
-*Country/Regional Availability and Supported Languages* page (Ops § Reference Sources) so every
-country and language offered is one Business Central supports.
+**Before the first box:** read Microsoft's live *Country/Regional Availability and Supported
+Languages* page (Ops § Reference Sources) so every country and language offered is one Business
+Central supports, and what is on disk. The kickoff reads nothing from the requirements (*The
+kickoff boxes* below); the problem statement informs only the boxes asked after it — Box 4, 4D.
 
 **A suggestion is a candidate the human picks, never an answer recorded on their behalf.** Nothing
 reaches the parameter sheet until the human selects or types it. Build suggestions only from what
@@ -315,15 +362,18 @@ files are recommended; Word, PDF, and images are read too — and an app icon in
 better formed and documented the material, the faster the first stage goes: a complete
 `requirements/` folder pre-fills the intake and the problem statement, and the icon question
 offers the file it finds. An existing app's reverse-engineered record lives in
-`requirements/existing/` (Ops § Existing Apps).
+`requirements/existing/` (Ops § Existing Apps). **When `requirements/` is empty and nothing was
+pasted or attached, the kickoff's last box asks where the requirements are** (*The kickoff boxes*
+below, K14) — so the recommendation is a question with an answer, not a line the human may have
+scrolled past.
 
 **Box 0 — Identity first, at the routine's first step.** Since v5.2.0.0 the three questions that
 name the app are asked at **PRE-01 / Lite Step 1, right after the notification question and before
-the model questions** — not in the intake sheet's Box 1 — and `app.json` is written the moment they
-are answered (a first write: `name`, `publisher`, `logo`, `version` `0.0.0.1`, `id`, platform
-defaults; Ops § Project Setup step 1 rewrites it complete after the sheet is confirmed, keeping
-those values). Why: the dashboard (Ops § Dashboard) is created right after and shows the app's name
-and icon from `app.json`. One box, three questions: **Extension name?** (up to three suggestions
+the model questions** — not in the intake sheet's Box 1; since 5.10.0.0 they are the kickoff's
+third box (*The kickoff boxes* below), and `app.json` is written **complete** in the setup batch
+after the last kickoff box, since by then every value it needs has been asked (Ops § Project
+Setup step 1; before 5.10.0.0 a first write happened between questions and the dashboard was
+rendered from it mid-intake). One box, these three questions, with the Deployment Target as the box's fourth (*The kickoff boxes*, K3): **Extension name?** (up to three suggestions
 from the human's own wording, each labelled a suggestion, plus *I'll type it*); **Publisher?** (only
 a name the human has already written or uploaded, quoted with its source; else *I'll type it* —
 never inferred from anything (*Forbidden sources*, above); an inferred publisher once forced a
@@ -336,13 +386,18 @@ human wants it, and for AppSource *No icon* is not offered and *Later* is a rele
 again. Everything else `app.json` needs — ID ranges, BC version, features, the AppSource block —
 stays where it is below, because it depends on answers the business questions produce first.
 
+**Which of the boxes below are kickoff boxes** (asked at the first step, before the requirements
+are read — *The kickoff boxes* below): Boxes 1, 1a, 2, 3, the AppSource boxes 3a and 3b, Box 5,
+and the language questions. **After the requirements are read:** Box 4 (onboarding), question 16,
+Box 4D (the descriptions, which need the problem statement), and the confirmation.
+
 | Box | Questions | Options to offer (free-text entry always available) |
 |---|---|---|
 | **1 — Identity** | 1. Extension Name? | *Recorded from Box 0* — not asked again. |
 | | 2. Publisher? | *Recorded from Box 0* — not asked again. |
-| | 3. Deployment Target? | *SaaS PTE* / *OnPrem PTE* / *AppSource*, the best fit for the problem statement first. |
-| | 4. Which countries will users work in? *(multi-select)* | The countries the problem statement names that BC is available in. **Countries are asked only here** — Localization and the language questions reuse the answer. |
-| **1a — App** *(after Box 1: the options depend on the Deployment Target)* | 4a. App icon? *(both editions)* | *Recorded from Box 0* — asked here only if Box 0 recorded *Later* and the target is now `AppSource` (then it is a release blocker to resolve). Formerly: *Yes — I'll provide an image* / *No icon* / *Later*. For `AppSource`, *No icon* isn't offered and *Later* is recorded as a release blocker — the old AppSource logo question (A4) is this one. On *Yes*, the next box asks for the path as free text with this guidance, verbatim: *"PNG, square, 300 × 300 px is ideal — Microsoft accepts 216 to 350 px for the marketplace listing. Larger is fine; I'll resize it, keeping the proportions, never stretching."* What happens next is under *The app icon* below. |
+| | 3. Deployment Target? | *SaaS PTE* / *OnPrem PTE* / *AppSource*, the best fit for what the human has said first (*SaaS PTE* when nothing points elsewhere). |
+| | 4. Which countries will users work in? *(multi-select)* | The countries the human has named, as BC supports them (the page read before the first box); the likeliest four when none were named. **Countries are asked only here** — Localization and the language questions reuse the answer. |
+| **1a — App** *(after Box 1: the options depend on the Deployment Target)* | 4a. App icon? *(both editions)* | *Recorded from Box 0* — re-asked as the very next box when K3 recorded *No icon* or *Later* and the Deployment Target in the same box is `AppSource` (K3 asks both at once, so the options cannot depend on the target; *Later* then stays a release blocker to resolve). Formerly: *Yes — I'll provide an image* / *No icon* / *Later*. For `AppSource`, *No icon* isn't offered and *Later* is recorded as a release blocker — the old AppSource logo question (A4) is this one. On *Yes*, the next box asks for the path as free text with this guidance, verbatim: *"PNG, square, 300 × 300 px is ideal — Microsoft accepts 216 to 350 px for the marketplace listing. Larger is fine; I'll resize it, keeping the proportions, never stretching."* What happens next is under *The app icon* below. |
 | | 4b. New app or existing app? | *New app — the version starts at `0.0.0.1` (recommended)* / *Existing app — I'll type the version installed in the target environment*. An existing app's version is confirmed on its **Extension Management** page and the project continues from it (Ops § Packaging → *Version numbers*). |
 | **2 — Naming** *(built from Box 1)* | 5. AL object prefix? | Two or three short lowercase prefixes built from the name and publisher. |
 | | 6. Which namespace? | `<Publisher>.<ExtensionShort>` built from Box 1 *(recommended)* / one alternative spelling / *No namespace* (only for a deliberate reason, such as a BC version predating namespaces). One answer records both **Use Namespace** and **Namespace**. |
@@ -357,7 +412,7 @@ stays where it is below, because it depends on answers the business questions pr
 | **4D — Description & help** *(after Box 4: by now the problem statement, the Deployment Target, and the onboarding answers are known — enough to describe the app)* | D1. Short description (`brief`)? | **The agent's own one-line suggestion, written before the box opens**, as the first option; *Propose another*; and, for a PTE only, *Leave it out for now*. A change is typed in the free-text entry. One question per box — three boxes in a row. The procedure is *The description and help questions* below. |
 | | D2. Long description (`description`)? | The same shape: the agent's own paragraph, ready before the box opens, as the first option. |
 | | D3. Help URL (`help`)? | *Set it when the help site is built (recommended)* — Full Step 11 / Lite Step 6 offers it (Ops § Help Site); a URL only from the human's own material, if there is one; *I'll type it*; and, for a PTE only, *Leave it out for now*. Both editions, every Deployment Target; for `AppSource` these three are the old A1, A2, and A7 and are not asked again. |
-| **5 — Working setup** | 17. *(Moved.)* Which models do the work — and at what thinking effort — is asked at the routine's first step, right after notifications, not here (Ops § Roles). Box 5 only confirms the recorded answer is on the sheet. | — |
+| **5 — Working setup** | 17. *(Moved.)* Which models do the work — and at what thinking effort — is asked at the routine's first step, in the kickoff's model boxes K5 and K6, not here (Ops § Roles). Box 5 only confirms the recorded answer is on the sheet. | — |
 | | 18. Leave the framework's own files out of the project's repository? | *Yes (recommended)* — the framework is distributed from its own repository, and its methodology isn't part of what the client receives / *No, track them* — a teammate cloning the project sees exactly how it was built. Explain `.gitignore` in the question itself: *"`.gitignore` lists files Git leaves out of commits and pushes — they stay on disk and work normally."* |
 | | 19. Which language is the AL source text written in? | *`en-US` (recommended)*, with **Standards §8.1**'s reason in one sentence, or another language typed in. |
 | **6 onward — Languages** | The per-country, per-language, and document questions below. | As below. |
@@ -370,6 +425,74 @@ with *I'll type it*, more than four candidates trimmed to the four most likely.
 model and effort only, Ops § Roles), and its Box 5 carries the `.gitignore` question, the source
 language, and the per-country language questions together. Questions 4a and 4b, and Box 4D's three
 description and help questions, are asked in both editions.
+
+### The kickoff boxes
+
+The order in which the first step asks, since 5.10.0.0 (Ops § Asking and Approvals → *The
+kickoff* has the rule and the reason). **Claude Code grouping** — up to four questions per box;
+Copilot Chat may merge consecutive boxes into one carousel; Copilot CLI asks one question at a
+time in the same order. Every box's options are what the sheet above says for that question. A
+box marked *as needed* is skipped when its condition isn't met, and nothing is asked twice: Case A
+of Build-a-Feature, a resumed intake (Rule 6e), and a project that already answered a question
+skip it.
+
+**Before the first box, once, in one batch, said in one line:** the companions when the project
+has none yet (the plugin's `start` skill fetched them; without the plugin, fetch them now — Ops §
+Fetched Companions); Microsoft's live *Country/Regional Availability and Supported Languages* page
+and the *Choose runtime version* table (Ops § Reference Sources); `app.json`, `src/`, `images/`,
+and whether `requirements/` holds anything (its *content* is read after the kickoff — on
+Build-a-Feature, whose one intake question is pre-filled from it, the content is read here too);
+and the Ops sections the boxes cite. Then the boxes:
+
+| # | Box | Questions | Asked |
+|---|---|---|---|
+| **K1** | Working language | one question, alone, in English, English first | always |
+| **K2** | Notifications | the channels (multi-select, Ops § Notifications → 1); **Remote Control** (*Only when I turn it on* / *Every session* — its explanation in the question's text, worded so it only matters when *Claude app* was chosen) | always; Remote Control in Claude Code only |
+| **K3** | Identity | extension name; publisher; app icon (Box 0); **Deployment Target** (question 3 — its AppSource consequences said in the box's text, since they change K8 and K11) | always |
+| K3a | Identity follow-ups | the icon's path, free text, on *Yes — I'll provide an image*; the `app-icon` skill's one box (style, colors, content, description) on *Create one for me* — the icon is drawn in the setup batch and accepted in the setup-done box | as needed |
+| **K4** | Countries & app | countries (question 4, multi-select); new or existing app (4b, when `app.json` existed); **Approvers** (Full); a Business Central Copilot feature? (the sheet's row — *No* / *Yes*, specifics as free text) | always; 4b and Approvers as marked |
+| **K5** | Models | Full: Main model, Main effort, Light model, Light effort; Lite and Build-a-Feature: Main model, Main effort, then the two Copilot session-settings questions when Copilot is in use (Ops § Roles; the effort warning and the session's model in the box's own text) | always |
+| **K6** | Models 2 | Full: Reasoning model, Reasoning effort, then the two Copilot questions when Copilot is in use | Full always |
+| **K7** | Naming | prefix; namespace; localization; BC version (Box 2) | always |
+| **K8** | Permission sets & IDs | Permission Set App Code; other extensions with this prefix; object ID range; another range? (Box 3; each *Yes* and each collision opens the follow-up as the next box) | always |
+| K9 | AppSource | `url`; `privacyStatement`; `EULA`; `contextSensitiveHelpUrl`, then `applicationInsightsConnectionString` (Boxes 3a and 3b) | AppSource only |
+| **K10** | Languages per country | one multi-select per country, up to four per box (*The language questions* 1) | always |
+| **K11** | Source | source language (19); source wording (2) | always |
+| K12 | Documents & per language | which documents are translated; a translated test script? (4); then required at first release; who reviews it (3) — two languages per box; a partner-translated language's app question joins it | only when a K10 target other than the K11 source exists — decided after K11 closes |
+| **K13** | Working setup | framework files in `.gitignore`? (18); customer-language documents? translatable data? (5) | always |
+| **K14** | Requirements & existing app | **Where are the requirements?** — *I'll put them in `requirements/` now (recommended — `.md` preferred; Word, PDF, and images are read too)* / *I'll paste them in chat* / *They're in a file or folder elsewhere — I'll type the path* / *I'll describe the need when you ask* — asked when `requirements/` is empty and nothing was pasted or attached; **run the in-depth analysis first?** (Ops § Existing Apps — when `src/` holds real objects and `requirements/existing/` is empty) | as needed; always the last box |
+
+**Build-a-Feature's kickoff** is shorter: K1, K2, K3 (its identity box, or the confirm box of case
+C, with 4b), K5 (Main model and effort, the Copilot questions), its naming-and-range box (Deployment
+Target, prefix, namespace, ID range — the `build-a-feature` skill's Part 2, item 9), and then **its one
+intake question, *What do you want to build today?*, as the last kickoff box**, pre-filled from
+`requirements/` read before the first box. No countries, languages, approvers, or `.gitignore`
+question.
+
+**After the last kickoff box — the setup batch, one message, no question.** In this order, each
+item from its own section: the repository (`git init -b main` when there is none — Ops §
+Repository Hygiene); `src/` and **`app.json` written complete** (Ops § Project Setup step 1 — every
+value is known); the icon placed, resized, or drawn (*The app icon*); the notifications applied
+and each hook's exact command run once (Ops § Notifications 3 and 5); the sub-agent definitions
+written (Ops § Roles → *Enforcement*; the plugin's `roles` skill in apply-only mode); the Copilot
+session settings written; `docs/` with its phase folders and `ProjectProgress.md`; the
+`.gitignore` blocks, proven with `git check-ignore`; the dashboard rendered, opened once, its hooks
+installed and proven (Ops § Dashboard); the AL tools connected (Ops § AL Tools; the plugin's
+`al-mcp-setup` skill); the symbols downloaded and the Symbol Source recorded (Ops § Symbols — a
+failure's options box is asked in the setup-done box, not mid-batch); the editor synced; and a
+pasted or pointed-at requirements capture saved verbatim into `requirements/` (the step's capture
+rule). The message that reports the batch also says, once, where the packages will land
+(`outputAppPackage/`) and that every build gets its own version.
+
+**The setup-done box** — one box, right after the batch: **the dashboard explanation** (*I
+understand* / *Other*, with Ops § Dashboard's text); **did each chosen notification kind arrive,
+and did clicking one open the session?** (Ops § Notifications 5); **accept this icon?** when one
+was drawn (*The app icon → Creating one*); **the Main model switch confirmed** when the human
+chose a Main model or effort other than the session's (Ops § Roles); and, when K14 was answered
+*I'll put them in `requirements/` now*, **are they in?** (*Yes — read them* / *Not yet — I'll say
+when*). On *I'll paste them in chat*, the turn ends asking for the paste and the batch starts when
+it arrives — or, when the human says to go on, runs at once and captures the paste when it comes. A symbol download that failed adds its options box next (Ops § Symbols). Then the
+requirements are read and the routine continues with the questions that need them.
 
 ### The app icon
 
@@ -427,7 +550,7 @@ is about*, that understanding stated, or *I'll describe it*). The model writes t
 to PNG with nothing installed (macOS Quick Look's `qlmanage`; a headless Chrome or Edge with a
 transparent default background on any OS; ImageMagick, librsvg, Inkscape, or cairosvg only when
 already present; last, a preview page with a *Save as PNG* button for the human), checks the file
-is 300 × 300 with an alpha channel, opens it, and asks: **Accept this icon** / *Make another — I'll
+is 300 × 300 with an alpha channel, opens it, and asks — in the setup-done box when the brief was taken in the kickoff (K3a), on its own box otherwise: **Accept this icon** / *Make another — I'll
 say what to change* / *Make another — your call*, keeping every attempt until one is accepted. On
 acceptance the PNG and its SVG stay in `images/`, the PNG is copied to `src/logo/AppLogo.png` as
 above, and `app.json` gets `"logo": "src/logo/AppLogo.png"` — never before the human accepted. The
@@ -616,12 +739,16 @@ mechanism, and it isn't tied to one harness. **What can go wrong is the delegati
 session's model by default** — which is exactly what happened on a real project, and why the
 *Enforcement* part below exists.
 
-### Asking — at the routine's first step, right after notifications
+### Asking — at the routine's first step, in the kickoff's model boxes
 
 Asked in the runbook's first step (Full PRE-01, Lite Step 1), **before any document is drafted**, so
 the answer exists before the first delegated task — not at the parameter sheet, where it used to sit
 behind a preset question and arrived after the sub-agent definitions had already been used with no
-model set.
+model set. Since 5.10.0.0 they are the kickoff's model boxes (Ops § Intake → *The kickoff boxes*,
+K5 and K6): the effort warning below goes in the first model box's own text, the sub-agent
+definitions are written in the setup batch after the last kickoff box — never between boxes — and
+a Main model or effort other than the session's is switched by the human and confirmed in the
+setup-done box, not before the next question.
 
 **Say this once, before the first model question, in both editions**, verbatim:
 
@@ -693,8 +820,9 @@ session's effort, where the harness shows it — in the question's own text, and
 value as the recommended one when it matches the framework's recommendation. Only the human can
 change either: `/model <sonnet|opus|haiku>` and `/effort <low|medium|high>` in Claude Code (which also accepts `xhigh` and `max`; the framework offers three — the
 agent has no tool that does this); the model picker in Copilot Chat. If the human picks a Main model
-or effort other than what's running, ask them to switch now, then confirm the session shows the new
-model before continuing. **Never record a Main model that isn't the one doing the work.**
+or effort other than what's running, ask them to switch during the setup batch and confirm in the
+setup-done box that the session shows the new model (Ops § Intake → *The kickoff boxes*). **Never
+record a Main model that isn't the one doing the work.**
 
 **Record everything, in one place:** the model as the human named it, the harness identifier it maps
 to (the Claude Code alias `sonnet` / `opus` / `haiku`, or the Copilot picker name), and the effort —
@@ -749,8 +877,8 @@ because the same file is read by Claude Code (which wants an alias like `opus`) 
 (which wants a picker name like `Claude Opus 5.5`) and the human's choice isn't known until intake.
 So the project has to supply it. Four steps, all the agent's, none optional:
 
-1. **Materialize the assignment as project-local sub-agent definitions, immediately after
-   the answer** — at PRE-01, before PRE-02 starts: four in Full (light, reasoning, generator,
+1. **Materialize the assignment as project-local sub-agent definitions in the setup batch after
+   the last kickoff box** — at PRE-01, before PRE-02 starts: four in Full (light, reasoning, generator,
    reviewer); two in Lite (generator and reviewer, both on the Main model and effort). Take the
    bundled definitions as the template: fetch `agentPlugin/ocpf-bc/agents/ocpf-light.agent.md`,
    `ocpf-reasoning.agent.md`, `ocpf-generator.agent.md`, and `ocpf-reviewer.agent.md` from
@@ -937,10 +1065,14 @@ pair of eyes between "it compiles" and "please install this".
 
 ## Ops § Project Setup
 
-Once the human confirms the parameter sheet, and before design begins, the agent sets the project
-up. Symbols have to be on disk before any design decision is verified against them, so this happens
-at the end of intake, not at the start of BUILD. Nothing here needs the human beyond the AI tool's
-own approval prompts.
+**Since 5.10.0.0 the agent sets the project up in the setup batch right after the kickoff's last
+box** (Ops § Intake → *The kickoff boxes*) — every value this section writes was asked there, so
+nothing waits for the sheet's confirmation; when the human later confirms the sheet (Full Step 01,
+Lite Step 1's close) the agent re-checks `app.json` against it and rewrites only what changed.
+Symbols have to be on disk before any design decision is verified against them, and the batch is
+where the human is already waiting once, so that is where they are downloaded. Nothing here needs
+the human beyond the AI tool's own approval prompts; a question the batch raises (a failed symbol
+download) is asked in the setup-done box, after the batch.
 
 **The root of an AL project holds only this — either edition, no exceptions:**
 
@@ -1001,9 +1133,10 @@ Framework repository: https://github.com/ajansari/ocpfBcAgenticDevFramework
 
 Then, in order:
 
-1. **Write `app.json` complete, from the confirmed sheet** — the second and last write; the first
-   happened at PRE-01 / Lite Step 1 with the identity answers (Ops § Intake → *Box 0*), so **keep
-   `id`, `name`, `publisher`, and `logo` exactly as that write left them** and fill in the rest:
+1. **Write `app.json` complete, from the kickoff answers** — one write, in the setup batch (before
+   5.10.0.0 a first write carried the identity answers mid-intake and this one completed it after
+   the sheet; an existing file's `id` is kept either way), with `name`, `publisher`, and `logo` from
+   Box 0 and the rest:
    version, every ID range, `platform`, `application`, `runtime`, and the `features` the scaffold step lists —
    including `"NoImplicitWith"` and `"TranslationFile"` (**Standards §8.2**). **`version` is
    `0.0.0.1` for a new app**, or the installed version the human gave at intake question 4b for an
@@ -1116,7 +1249,7 @@ choice. **`al_run_tests` is not used at all, even on request, and the test app i
 by the agent** (Ops § Automated Tests). The rest — build, compile, symbols, diagnostics, object
 IDs, translations — is what the agent uses them for.
 
-**When they're needed:** from the end of intake (Full §1.10 / Lite Step 1), which downloads symbols
+**When they're needed:** from the first step's setup batch (PRE-01 / Lite Step 1, Ops § Intake → *The kickoff boxes*), which downloads symbols
 before DESIGN — not at the start of BUILD.
 
 **Zero-install first** (runbook Operating Rule 6d). Everything here is already on the machine of
@@ -1485,6 +1618,11 @@ notifications aren't available and skip this.
 
 ### 1. Ask, right after the working language
 
+**The kickoff's second box** (Ops § Intake → *The kickoff boxes*, K2): asked right after the
+language, **applied and tested after the last kickoff box**, in the setup batch — never between
+two questions. The Remote Control question below is the same box's second question, worded so it
+only matters when *Claude app* was chosen.
+
 One multi-select question: *"Would you like to be notified at the end of every turn and whenever a
 question or approval is waiting? Choose any."* Offer only what can work here — check the environment
 first:
@@ -1633,8 +1771,9 @@ needs the phone first, and nothing on the phone needs to exist before the option
 ### 5. Test once, with the hook's own command
 
 Run each installed hook's exact command once from the shell — the same interpreter, the same
-arguments, the same script path the hook names — and ask the human in one box whether each chosen
-kind arrived and whether clicking a notification opened the session. A kind that did not arrive is
+arguments, the same script path the hook names — in the setup batch, and ask the human **in the
+setup-done box** (Ops § Intake → *The kickoff boxes*) whether each chosen kind arrived and whether
+clicking a notification opened the session. A kind that did not arrive is
 fixed or dropped now, and the record rewritten. Never conclude a hook works because the file was
 written: a hook whose interpreter is missing exits silently, which is how a real Windows project
 ran a whole build without a single refresh (Ops § Dashboard → 3).
@@ -1676,13 +1815,14 @@ every turn: that is expected — commit it with the rest of the project.
 
 ### 1. When it first appears
 
-**The moment `app.json` exists at PRE-01 / Lite Step 1** — right after the three identity
-questions (Ops § Intake → *Box 0*) are answered and written, before the model questions. That is
-the first moment the page has a name and an icon to show; earlier it would be an empty shell. The
+**In the setup batch, right after the kickoff's last box at PRE-01 / Lite Step 1** (Ops § Intake →
+*The kickoff boxes*; before 5.10.0.0 it appeared mid-intake, the moment a first `app.json` was
+written after the identity box — a wait between questions, which the kickoff removes). `app.json`
+is written complete at the start of the batch, so the page has its name and icon to show. The
 runbook renders it, **opens it once in the default browser** (`--open`: `open` on macOS, `start` on
 Windows, `xdg-open` on Linux — nothing installed, nothing else ever opens it unasked), installs the
-refresh hooks, and then **asks the one explanation question through the options mechanism**
-(Rule 6a) before anything else — **I understand** / *Other* (free text) — with this text, in the
+refresh hooks, and then **asks the one explanation question as the first question of the
+setup-done box** (Rule 6a) — **I understand** / *Other* (free text) — with this text, in the
 working language:
 
 > **Your project now has a live dashboard.** I just opened it in your browser. It shows this
@@ -1949,7 +2089,7 @@ decision.
 - **An existing app starts from the version installed in the target environment**, asked at intake
   (question 4b) and confirmed by the human on the **Extension Management** page before the first
   build; the project continues from it.
-- **The first build of a new app is `0.0.0.1` — the version Step 01 wrote, built as is.** Every
+- **The first build of a new app is `0.0.0.1` — the version PRE-01's setup batch wrote, built as is.** Every
   build after it increments first. **An existing app's first build increments from the installed
   version** (the installed version itself is never built again), and every build after it
   increments again. So the one test before any compile-and-package: *if `outputAppPackage/` holds
@@ -2454,7 +2594,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v5.9.6.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
+folder as `README.md`. For runbook **v5.10.0.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2631,7 +2771,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.9.6.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v5.10.0.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
@@ -3310,7 +3450,7 @@ Standards Guide, document it as it compiles, offer the natural next object, stop
 |---|---|---|
 | A Full or Lite project | the marker says `full` or `lite` | nothing new: the parameters, prefix, ranges, models, notifications, dashboard, and `ProjectProgress.md` are reused; the feature table is appended; one ChangeLog line per object; the journey's documents are written beside the project's own, in its phase folders, never replacing |
 | A feature project | the marker says `feature` | continue: the row ids carry on from the highest; `ocpfFramework/state/feature.json` holds the parameters and their sources |
-| An existing extension that never used the framework | `app.json`, no `ocpfFramework/`, and a package or real objects exist | read `app.json` and `src/` for the name, ranges, prefix, and namespace; **confirm** what was read in one box — the range is asked, never kept silently, and `50100–50149` is named as the template's default; **ask intake question 4b** (new app at `0.0.0.1` / existing app at the installed version, confirmed on Extension Management) — the version is never taken from the file unasked; **offer the `analyze` skill first when the app has no usable documentation** (Ops § Existing Apps); the companions, the marker (`"edition": "feature"`), notifications, the dashboard, the Main model and its price, the AL tools, the symbols |
+| An existing extension that never used the framework | `app.json`, no `ocpfFramework/`, and a package or real objects exist | read `app.json` and `src/` for the name, ranges, prefix, and namespace; **confirm** what was read in one box — the range is asked, never kept silently, and `50100–50149` is named as the template's default; **ask intake question 4b** (new app at `0.0.0.1` / existing app at the installed version, confirmed on Extension Management) — the version is never taken from the file unasked; **offer the `analyze` skill in the kickoff's last box, beside the intake question, and run it after the setup batch when the app has no usable documentation** (Ops § Existing Apps); the companions, the marker (`"edition": "feature"`), notifications, the dashboard, the Main model and its price, the AL tools, the symbols |
 | An empty folder, or an AL: Go! scaffold (`1.0.0.0`, no package, `HelloWorld.al` only) | nothing, or the template's `app.json` | the same, plus Box 0 (name, publisher, icon — the `images/` file first when there is one) and one naming-and-range box (Deployment Target — PTE only; prefix; namespace; ID range); the scaffold keeps its `id`, loses `HelloWorld.al`, and is written **`0.0.0.1`** — the template's `1.0.0.0` is never kept (Ops § Packaging → *Version numbers*); **its `ALProject1`, `Default publisher`, and `50100–50149` are placeholders, not answers** — Box 0 and the range question are asked exactly as for an empty folder, and the publisher and the range are recorded with their sources (Ops § Intake → *Forbidden sources*) |
 
 Nothing from PRE-01 / Lite Step 1 beyond that and the working-language question (asked first, so
@@ -3325,11 +3465,14 @@ language questions. AppSource is not a Build-a-Feature target; the journey says 
    *Unattributed*, and the dashboard's clock started minutes after the tokens. The renderers also
    stretch the first window back to the session's first event (Ops § Usage & Cost → 8); the rule
    stands anyway.
-1. **Intake — one question.** *What do you want to build today?* with four preset options (a new
+1. **Intake — one question, the last box of the kickoff.** *What do you want to build today?* with four preset options (a new
    table and its pages; extend a standard table or page; an API page or query; something else —
    a report, an enum, a query, a codeunit, a permission set, a role center) and free text — **the
    one place free text is expected**. `requirements/` (and `requirements/existing/`), or a file the
-   human points at, is read first and pre-fills the answer. The answer is parsed into a plan of
+   human points at, is read before the first kickoff box and pre-fills the answer. Since 5.10.0.0
+   the setup questions (language, notifications, identity, model, naming and range) are asked back
+   to back before it, the setup work runs after it in one batch, and the setup-done box follows
+   (Ops § Intake → *The kickoff boxes*; Ops § Asking and Approvals → *The kickoff*). The answer is parsed into a plan of
    objects in build order (enums before tables, tables before pages, a table extension before its
    page extension, a cue table before its activities part before the role center before its
    profile) and said back in one list. No approval box here; each object's confirmation is the
@@ -3515,9 +3658,9 @@ starts on the app:
 
 **Where the journeys offer it.** The `start` skill offers it on an existing extension that never
 used the framework, before the journey choice, when the app has no usable documentation. Full
-PRE-01 and Lite Step 1 offer it the moment they see real objects under `src/` (anything beyond the
-AL template's `HelloWorld.al`) and `requirements/existing/` is empty — before the problem
-statement, so before question 4b is asked — *Run the in-depth analysis and documentation first
+PRE-01 and Lite Step 1 offer it in the kickoff's last box (Ops § Intake → *The kickoff boxes*, K14)
+when they see real objects under `src/` (anything beyond the AL template's `HelloWorld.al`) and
+`requirements/existing/` is empty — before the problem statement — *Run the in-depth analysis and documentation first
 (recommended when the app has no FRD, TDD, or docs — 10 to 30 minutes)* / *Skip — the light read
 is enough* — and, on yes, run the skill before the problem statement; the step then reads
 `requirements/existing/` with the rest of `requirements/`. Build-a-Feature offers it in its case C.
