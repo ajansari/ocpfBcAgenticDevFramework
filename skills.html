@@ -1,0 +1,293 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Custom Skills · OCPF BC Agentic Dev Framework</title>
+<meta name="description" content="Custom Skills for the OCPF BC framework: the six extension points, how to create, load, and share a skill, public or private, and an example to download.">
+<link rel="icon" href="images/favicon/favicon.svg" type="image/svg+xml">
+<link rel="alternate icon" href="images/favicon/favicon-32.png">
+<link rel="apple-touch-icon" href="images/favicon/apple-touch-icon.png">
+<link rel="canonical" href="https://bcdev.ai/skills.html">
+<meta property="og:type" content="article">
+<meta property="og:site_name" content="OCPF BC Agentic Dev Framework">
+<meta property="og:locale" content="en_US">
+<meta property="og:title" content="Custom Skills · OCPF BC Agentic Dev Framework">
+<meta property="og:description" content="Custom Skills for the OCPF BC framework: the six extension points, how to create, load, and share a skill, public or private, and an example to download.">
+<meta property="og:url" content="https://bcdev.ai/skills.html">
+<meta property="og:image" content="https://bcdev.ai/images/ocpfBCAgenticDevFrameworkBanner.png">
+<meta property="og:image:width" content="2560">
+<meta property="og:image:height" content="1280">
+<meta property="og:image:alt" content="Banner: AI-built BC Apps. Done Right. The framework's live project dashboard, by OnlyCopilotFans and OnlyBCFans.">
+<meta name="twitter:card" content="summary_large_image">
+<meta name="twitter:image:alt" content="Banner: AI-built BC Apps. Done Right. The framework's live project dashboard, by OnlyCopilotFans and OnlyBCFans.">
+<script type="application/ld+json">
+{
+  "@context": "https://schema.org",
+  "@graph": [
+    {
+      "@type": "BreadcrumbList",
+      "itemListElement": [
+        { "@type": "ListItem", "position": 1, "name": "Home", "item": "https://bcdev.ai/" },
+        { "@type": "ListItem", "position": 2, "name": "Custom Skills", "item": "https://bcdev.ai/skills.html" }
+      ]
+    },
+    {
+      "@type": "TechArticle",
+      "headline": "Custom Skills",
+      "description": "Custom Skills for the OCPF BC framework: the six extension points, how to create, load, and share a skill, public or private, and an example to download.",
+      "url": "https://bcdev.ai/skills.html",
+      "inLanguage": "en",
+      "datePublished": "2026-10-31",
+      "dateModified": "2026-10-31",
+      "image": "https://bcdev.ai/images/skills/kickoff-skills-box.png",
+      "about": { "@type": "SoftwareApplication", "@id": "https://bcdev.ai/#framework", "name": "OCPF BC Agentic Development Framework" },
+      "author": { "@type": "Person", "@id": "https://bcdev.ai/#aj-ansari", "name": "AJ Ansari", "url": "https://ajansari.com/" },
+      "publisher": { "@type": "Organization", "@id": "https://bcdev.ai/#organization", "name": "OnlyCopilotFans", "logo": { "@type": "ImageObject", "url": "https://bcdev.ai/assets/logo-onlycopilotfans.png" } }
+    }
+  ]
+}
+</script>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Archivo:wght@400;500;600;700;800;900&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --ink:#201e1d; --paper:#f3f2f2; --mute:#b9b5b3; --grey:#605d5d; --text:#444141;
+    --blue:#0F6CBD; --teal:#0A7C85; --purple:#6B4FC4; --pink:#C10E72; --green:#2EE59D;
+    --line:rgba(32,30,29,0.3);
+  }
+  *{margin:0;padding:0;box-sizing:border-box}
+  html{scroll-behavior:smooth;scroll-padding-top:72px}
+  body{background:var(--paper);color:var(--ink);font-family:'Archivo',system-ui,sans-serif;-webkit-font-smoothing:antialiased;line-height:1.5}
+  a{color:inherit;text-decoration:none}
+  img{max-width:100%;height:auto;display:block}
+  .wrap{max-width:1200px;margin:0 auto;padding:0 32px}
+  @media (max-width:640px){.wrap{padding:0 16px}}
+  header{position:fixed;top:0;left:0;right:0;z-index:50;background:var(--ink);color:var(--paper);border-bottom:1px solid rgba(243,242,242,0.18)}
+  header .wrap{padding-top:14px;padding-bottom:14px;display:flex;align-items:center;justify-content:space-between;gap:24px}
+  .logos{display:flex;align-items:center;gap:18px;flex:none}
+  .logos img{height:28px;width:auto}
+  nav{display:flex;flex-wrap:wrap;gap:4px 26px;font-size:13px;font-weight:600;letter-spacing:0.1em;text-transform:uppercase;align-items:center}
+  nav a{color:var(--paper)} nav a:hover{color:var(--mute)}
+  nav a.on{display:inline-flex;align-items:center;gap:7px}
+  .new{font-size:9px;letter-spacing:0.08em;padding:2px 6px;border-radius:999px;background:var(--green);color:var(--ink);line-height:1.2;font-weight:700}
+  nav a.btn{display:inline-flex;align-items:center;gap:8px;color:var(--ink);background:var(--paper);padding:6px 12px;margin:-6px 0;border-radius:6px}
+  nav a.btn:hover{background:var(--mute);color:var(--ink)}
+  nav a.repo{display:inline-flex;align-items:center;gap:5px;font-size:9px;letter-spacing:0.08em;padding:2px 8px;margin:-2px 0;border:1px solid rgba(243,242,242,0.6);border-radius:999px}
+  nav a.repo:hover{background:rgba(243,242,242,0.12);color:var(--paper)}
+  @media (max-width:900px){nav{gap:4px 16px;font-size:12px} .logos img{height:22px}}
+  @media (max-width:640px){header .wrap{flex-direction:column;align-items:flex-start;gap:10px;padding-top:10px;padding-bottom:10px} nav{gap:6px 14px;font-size:11px;width:100%} nav a.btn{padding:5px 9px;margin:0} nav a.repo{display:none}}
+  code,pre{font-family:ui-monospace,Menlo,Consolas,monospace}
+  code{background:rgba(32,30,29,0.08);padding:2px 6px;border-radius:5px;font-size:0.9em}
+  pre{background:var(--ink);color:var(--paper);padding:14px 16px;border-radius:6px;font-size:13px;line-height:1.5;overflow:auto;margin:14px 0}
+  pre code{background:none;padding:0;color:inherit;font-size:inherit}
+  main{display:block}
+  .meta{font-size:13px;letter-spacing:0.08em;text-transform:uppercase;color:var(--grey);font-weight:600}
+  h1{font-size:34px;font-weight:800;letter-spacing:-0.02em;line-height:1.1;margin-top:8px}
+  .toc{display:flex;flex-wrap:wrap;gap:4px 18px;font-size:14px;margin:18px 0 8px;padding-bottom:18px;border-bottom:1px solid var(--line)}
+  .toc a{color:var(--blue);font-weight:600} .toc a:hover{text-decoration:underline}
+  h2{font-size:24px;font-weight:800;letter-spacing:-0.02em;line-height:1.15;margin-top:52px;padding-top:12px}
+  h3{font-size:17px;font-weight:700;margin-top:26px}
+  p,li{font-size:16px;line-height:1.55;color:var(--text)}
+  p{margin-top:12px} ul,ol{margin:10px 0 0 22px} li{margin-top:6px} li::marker{color:var(--grey)}
+  strong{color:var(--ink)}
+  table{width:100%;border-collapse:collapse;margin-top:14px;font-size:14.5px;line-height:1.45}
+  th,td{text-align:left;vertical-align:top;padding:9px 12px 9px 0;border-bottom:1px solid var(--line);color:var(--text)}
+  th{font-size:12px;letter-spacing:0.1em;text-transform:uppercase;color:var(--grey);font-weight:600;border-bottom:2px solid var(--ink)}
+  td:first-child{color:var(--ink);font-weight:600;white-space:nowrap}
+  @media (max-width:640px){td:first-child{white-space:normal} table{display:block;overflow-x:auto}}
+  .note{margin-top:14px;padding:12px 16px;border-left:3px solid var(--ink);background:#fff;font-size:15px;color:var(--text)}
+  figure{margin:18px 0 0} figure img{border-radius:8px;border:1px solid var(--line)} figcaption{font-size:13px;color:var(--grey);margin-top:8px}
+  .cols{display:grid;grid-template-columns:1fr 1fr;gap:28px;margin-top:6px}
+  @media (max-width:700px){.cols{grid-template-columns:1fr}}
+  .dl{display:inline-flex;align-items:center;gap:8px;margin:14px 12px 0 0;font-weight:700;font-size:15px;padding:9px 14px;border-radius:6px;background:var(--ink);color:var(--paper)}
+  .dl:hover{background:#3a3634} .dl.sec{background:transparent;color:var(--ink);border:1px solid var(--ink)} .dl.sec:hover{background:rgba(32,30,29,0.07)}
+  footer{background:var(--ink)}
+  footer .wrap{padding-top:28px;padding-bottom:28px;display:flex;flex-wrap:wrap;gap:10px 24px;justify-content:space-between;font-size:13px;color:var(--mute)}
+  footer a{color:var(--mute)} footer a:hover{color:var(--paper)}
+
+  .band{padding:44px 0 52px;border-top:1px solid var(--line)}
+  .band.intro{padding-top:96px;border-top:0}
+  .band{background:#fff}
+  .band.alt{background:var(--paper)}
+  .band.intro{background:var(--ink);color:var(--paper)}
+  .band.intro p{color:var(--mute)} .band.intro code{background:rgba(243,242,242,0.14);color:var(--paper)} .band.intro .meta{color:var(--mute)}
+  .band.intro .sticker{background:rgba(243,242,242,0.16);color:var(--paper)} .band.intro .sticker.green{background:var(--green);color:var(--ink)}
+  .band.intro .toc a{background:transparent;color:var(--paper);border-color:rgba(243,242,242,0.4)} .band.intro .toc a:hover{background:var(--paper);color:var(--ink);border-color:var(--paper)} .band.intro .toc a:last-child{border-color:var(--green);color:var(--green)}
+  .inner{max-width:860px;margin:0 auto;padding:0 32px}
+  @media (max-width:640px){.inner{padding:0 16px} .band.intro{padding-top:140px}}
+  h2{margin-top:0;padding-top:0}
+  .pill{display:inline-block;font-family:ui-monospace,Menlo,Consolas,monospace;font-size:12.5px;font-weight:600;padding:2px 9px;border-radius:999px;color:#fff;white-space:nowrap;vertical-align:middle}
+  .p-blue{background:var(--blue)} .p-teal{background:var(--teal)} .p-purple{background:var(--purple)} .p-pink{background:var(--pink)}
+  .sticker{display:inline-block;font-size:11px;font-weight:700;letter-spacing:0.08em;text-transform:uppercase;padding:3px 9px;border-radius:5px;background:var(--ink);color:var(--paper);vertical-align:middle;margin-left:4px}
+  .sticker.green{background:var(--green);color:var(--ink)} .sticker.blue{background:var(--blue)} .sticker.purple{background:var(--purple)} .sticker.grey{background:rgba(32,30,29,0.12);color:var(--ink);margin-left:0}
+  h2 .sticker{font-size:11px;position:relative;top:-3px}
+  pre{background:#2a2725;border:1px solid #3a3634;border-radius:10px;padding:16px 18px;box-shadow:0 2px 8px rgba(0,0,0,0.08)}
+  .toc a{padding:5px 12px;border:1px solid var(--line);border-radius:999px;background:var(--paper);font-weight:600;font-size:13px}
+  .toc{gap:8px;border-bottom:0;padding-bottom:0}
+  .toc a:hover{background:var(--ink);color:var(--paper);text-decoration:none;border-color:var(--ink)}
+  .toc a:last-child{border-color:var(--blue);color:var(--blue)}
+  ol.steps{list-style:none;margin-left:0;counter-reset:st}
+  ol.steps li{position:relative;padding-left:44px;counter-increment:st;margin-top:12px}
+  ol.steps li::before{content:counter(st);position:absolute;left:0;top:1px;width:28px;height:28px;border-radius:50%;background:var(--ink);color:var(--paper);font-weight:800;font-size:14px;display:flex;align-items:center;justify-content:center}
+  .note{border-radius:8px;border:1px solid var(--line);border-left:4px solid var(--purple);background:var(--paper)}
+  .band.alt .note{background:#fff} .band:not(.alt) .note{background:var(--paper)}
+  table{background:transparent}
+  .dl{border-radius:8px;box-shadow:0 2px 6px rgba(0,0,0,0.12)}
+  nav.crumbs{display:block;text-transform:none;letter-spacing:0;font-size:13px;font-weight:500;color:var(--grey);padding-top:16px}
+  nav.crumbs a{color:var(--blue)} nav.crumbs a:hover{color:var(--teal)}
+</style>
+</head>
+<body>
+
+<header>
+  <div class="wrap">
+    <a href="index.html" class="logos" aria-label="Home"><img src="assets/logo-onlycopilotfans.png" alt="OnlyCopilotFans" width="793" height="265"><img src="assets/logo-onlybcfans.png" alt="OnlyBCFans" width="500" height="131"></a>
+    <nav>
+      <a href="index.html#foundation">Framework</a>
+      <a href="index.html#editions">Journeys</a>
+      <a href="index.html#roles">Models</a>
+      <a href="skills.html" class="on" aria-current="page">Skills<span class="new">New</span></a>
+      <a href="install.html" class="btn"><svg aria-hidden="true" viewBox="0 0 24 24" width="1.2em" height="1.2em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M21 15v4a2 2 0 0 1-2 2H5a2 2 0 0 1-2-2v-4"/><polyline points="7 10 12 15 17 10"/><line x1="12" y1="15" x2="12" y2="3"/></svg>Install</a>
+      <a href="documentation.html" class="btn"><svg aria-hidden="true" viewBox="0 0 24 24" width="1.2em" height="1.2em" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"/><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"/></svg>Documentation</a>
+      <a href="https://github.com/ajansari/ocpfBcAgenticDevFramework" class="repo" target="_blank" rel="noopener"><svg aria-hidden="true" viewBox="0 0 16 16" width="1.3em" height="1.3em" fill="currentColor"><path d="M8 0C3.58 0 0 3.58 0 8c0 3.54 2.29 6.53 5.47 7.59.4.07.55-.17.55-.38 0-.19-.01-.82-.01-1.49-2.01.37-2.53-.49-2.69-.94-.09-.23-.48-.94-.82-1.13-.28-.15-.68-.52-.01-.53.63-.01 1.08.58 1.23.82.72 1.21 1.87.87 2.33.66.07-.52.28-.87.51-1.07-1.78-.2-3.64-.89-3.64-3.95 0-.87.31-1.59.82-2.15-.08-.2-.36-1.02.08-2.12 0 0 .67-.21 2.2.82.64-.18 1.32-.27 2-.27.68 0 1.36.09 2 .27 1.53-1.04 2.2-.82 2.2-.82.44 1.1.16 1.92.08 2.12.51.56.82 1.27.82 2.15 0 3.07-1.87 3.75-3.65 3.95.29.25.54.73.54 1.48 0 1.07-.01 1.93-.01 2.2 0 .21.15.46.55.38A8.013 8.013 0 0016 8c0-4.42-3.58-8-8-8z"/></svg>Repo</a>
+    </nav>
+  </div>
+</header>
+
+<main>
+<section class="band intro"><div class="inner">
+  <nav class="crumbs" aria-label="Breadcrumb"><a href="index.html">Home</a> / <span aria-current="page">Custom Skills</span></nav>
+  <div class="meta">Custom Skills <span class="sticker">Since 6.0.0.0</span> <span class="sticker green">New in v6</span></div>
+  <h1>Custom Skills</h1>
+  <p>A Custom Skill is a folder of Markdown and JSON that you make once and load into any Business Central project that follows the framework. The framework reads it at declared moments, lets it add rules but never relax one, and shows it to you before activating it. The three commands are <code>/ocpf-bc:skill-create</code>, <code>/ocpf-bc:skill-load</code>, and <code>/ocpf-bc:skill-update</code>.</p>
+  <nav class="toc" aria-label="On this page"><a href="#fit">How skills fit</a><a href="#kinds">What you can make</a><a href="#create">Create</a><a href="#load">Load</a><a href="#share">Public and private</a><a href="#example">Example skill</a><a href="https://github.com/ajansari/ocpfBcAgenticDevFramework/blob/main/CustomSkillsGuide.md" target="_blank" rel="noopener">Full guide</a></nav>
+
+  </div></section>
+<section class="band"><div class="inner"><h2 id="fit">How skills fit into the framework</h2>
+  <p>The framework runs the project: the steps, the exit gates, the documents, the reviews. A skill is consulted at six points along the way and nowhere else. It <strong>extends</strong> a point by adding material the agent reads, or <strong>overrides</strong> one of three allowlisted items.</p>
+  <table>
+    <tr><th>Extension point</th><th>What the skill supplies</th><th>Read at</th></tr>
+    <tr><td><span class="pill p-blue">referenceSources</span></td><td>Markdown the agent reads before writing code, beside the Standards Guide and the patterns library</td><td>Full Step 06, Lite Step 4, Build-a-Feature Part 4</td></tr>
+    <tr><td><span class="pill p-teal">preReviewChecks</span></td><td>A checklist the reviewer sub-agent runs after the first clean compile</td><td>Full Step 07, Lite Step 5</td></tr>
+    <tr><td><span class="pill p-teal">codeReviewChecks</span></td><td>A checklist the Code Review runs; additive, never relaxing a rule</td><td>Full Step 09, Lite Step 6, Build-a-Feature Part 5</td></tr>
+    <tr><td><span class="pill p-purple">documentTemplates</span></td><td>Your template replaces the framework's for a named document; headings may be added, never removed</td><td>The documents skill, when it opens a template</td></tr>
+    <tr><td><span class="pill p-purple">modelRecommendations</span></td><td>The model and effort per role offered first at the kickoff; the human still chooses</td><td>Kickoff boxes K5 and K6</td></tr>
+    <tr><td><span class="pill p-pink">companionOffers</span></td><td>What Build-a-Feature proposes when an object closes, per object type</td><td>Build-a-Feature Part 4 step 9</td></tr>
+  </table>
+  <p>Never overridable: the Operating Rules, every exit gate, every options box, the usage rows, the publish rule, the publisher and ID-range rules, the Standards Guide's rules, the dashboard, and the clock.</p>
+
+  </div></section>
+<section class="band alt"><div class="inner"><h2 id="kinds">What kind of skills can be created</h2>
+  <p>Anything that fits one of the six points above. In practice:</p>
+  <ul>
+    <li><strong>A patterns guide</strong> for your shop or a client: posting shapes, naming, API conventions, integration patterns. Read before code is written.</li>
+    <li><strong>A review checklist</strong> your clients or your industry require, run at the pre-review and the Code Review.</li>
+    <li><strong>A document template</strong> of your own, for example an FRD or a Deployment guide in your house format.</li>
+    <li><strong>A model preference</strong> for the three roles, offered first at the kickoff.</li>
+    <li><strong>Build-a-Feature offers</strong>, for example "add a permission set" after every table.</li>
+  </ul>
+  <p>A skill holds <code>.md</code>, <code>.txt</code>, <code>.json</code>, and image files. Scripts, hooks, servers, settings files, and sub-agents are refused at load with the file named. The agent reads a skill; nothing in it is ever executed. Four points are <span class="sticker grey">reserved</span> for a later version (extra documents, extra steps, extra intake questions, extra analyze outputs); a skill that names one is refused until that version ships.</p>
+
+  </div></section>
+<section class="band"><div class="inner"><h2 id="create">How to create one</h2>
+  <ol class="steps">
+    <li>In a project where the material already worked, run <code>/ocpf-bc:skill-create</code>. It proposes what it can see: a file you added to the patterns folder, a document the framework has no template for, a check you asked for more than once.</li>
+    <li>Answer the boxes: the slug, a display name, your name and organization (typed by you), the journeys it is for, and the extension points it plugs into.</li>
+    <li>The folder is written to <code>~/.ocpf/skills/&lt;slug&gt;/</code>, offered a GitHub repository of your own, and loaded into the current project. Later changes go through <code>/ocpf-bc:skill-update</code>, which shows the diff, asks patch, minor, or major, and writes the new version.</li>
+  </ol>
+  <p>You can also write one by hand. This is the whole shape:</p>
+<pre><code>&lt;slug&gt;/
+  SKILL.md            frontmatter name = the slug with _ replaced by -, then the procedure for the agent
+  ocpf-skill.json     the manifest
+  README.md           what it does and how to load it
+  CHANGELOG.md        one entry per version, newest first; 1.0.0.0 is the first
+  references/         the Markdown the extension points name
+  LICENSE             optional</code></pre>
+<pre><code>{
+  "ocpfCustomSkill": 1,
+  "slug": "posting_review_checklist",
+  "displayName": "Posting Review Checklist",
+  "version": "1.0.0.0",
+  "description": "One sentence.",
+  "author": { "name": "Your name", "organization": "Your organization", "url": "https://..." },
+  "framework": { "name": "OCPF BC Agentic Development Framework", "madeWith": "6.0.0.0", "minVersion": "6.0.0.0", "maxVersion": null },
+  "journeys": ["full", "lite", "feature"],
+  "harnesses": ["claude-code", "copilot"],
+  "extends": {
+    "referenceSources": ["references/PostingPatterns.md"],
+    "preReviewChecks": ["references/PostingReviewChecklist.md"],
+    "codeReviewChecks": ["references/PostingReviewChecklist.md"]
+  },
+  "overrides": { "documentTemplates": {}, "modelRecommendations": {}, "companionOffers": {} },
+  "renamedFrom": [], "conflictsWith": [], "requires": []
+}</code></pre>
+  <p><strong>The slug is the identity.</strong> Lowercase letters, digits, and underscores; starts with a letter; 3 to 40 characters; no double or trailing underscore; not <code>ocpf_</code>, <code>bcskills_</code>, <code>onlycopilotfans_</code>, or <code>obcf_</code>. Two skills with one slug and two authors is a collision the framework refuses. A renamed skill lists its old slugs in <code>renamedFrom</code>.</p>
+
+  </div></section>
+<section class="band alt"><div class="inner"><h2 id="load">How to load one into a project</h2>
+  <p>Run <code>/ocpf-bc:skill-load &lt;source&gt;</code> before <code>/ocpf-bc:start</code>, answer the kickoff's skills box, or load at any time after. Sources:</p>
+  <table>
+    <tr><th>Source</th><th>Example</th></tr>
+    <tr><td>Folder or zip</td><td><code>/ocpf-bc:skill-load ~/Downloads/posting_review_checklist.zip</code></td></tr>
+    <tr><td>GitHub repository</td><td><code>/ocpf-bc:skill-load https://github.com/&lt;owner&gt;/&lt;repo&gt;#v1.0.0.0</code> (public, or private through your own GitHub sign-in)</td></tr>
+    <tr><td>bcskills.ai slug</td><td><code>/ocpf-bc:skill-load posting_review_checklist</code>, resolved to the author's repository once the catalog opens</td></tr>
+    <tr><td>skillslocation.md</td><td>One source per line in the project root, tracked, so every clone loads the same set</td></tr>
+  </table>
+  <p>Whatever the source, the framework resolves it under <code>~/.ocpf/skills/</code>, inspects every file, checks the framework version, the journey, the extension points, and the other skills loaded, then shows you the manifest and file list and asks <strong>Activate?</strong> On yes it copies the skill to <code>.claude/skills/</code> and <code>.github/skills/</code>, records it in <code>ocpfFramework/customSkills.json</code> and the ChangeLog, and names the steps it will touch.</p>
+  <div class="cols">
+    <figure><img loading="lazy" decoding="async" src="images/skills/kickoff-skills-box.png" alt="The kickoff's skills box with the options Load these, Upload, GitHub repository, Skills site, and No" width="2000" height="880"><figcaption>The kickoff asks on every journey, before the requirements. Skills already in ~/.ocpf/skills/ are offered first.</figcaption></figure>
+    <figure><img loading="lazy" decoding="async" src="images/skills/activate-box.png" alt="The load's summary: skill, slug, hash, files, extension points, then the Activate box" width="2000" height="1120"><figcaption>Nothing is placed until you answer Activate.</figcaption></figure>
+  </div>
+  <div class="note"><strong>An incompatible skill stops the project.</strong> A version out of range, a reserved extension point, two skills overriding the same template, or two authors on one slug: the framework lists each issue with a recommended action and asks one box per issue. Disable or remove the skill and the journey continues. <code>/ocpf-bc:update-framework</code> warns before an update that would create such a block.</div>
+
+  </div></section>
+<section class="band"><div class="inner"><h2 id="share">Where to find and share skills: public and private</h2>
+  <div class="cols">
+    <div>
+      <h3><span class="sticker blue">Public</span> Share with anyone</h3>
+      <ul>
+        <li>Publish the skill in a public GitHub repository with the topic <code>ocpfbcskills</code>. Naming the repository after the slug is the convention.</li>
+        <li><strong>bcskills.ai</strong>, category <code>ocpf</code>, is the public catalog and the authority on slugs: one slug, one skill, first come, first served. It is being built. Until it answers, a typed slug falls back to the public topic search on GitHub.</li>
+        <li>The catalog stores links and a manifest hash, never your files. Your repository stays the home; anyone loads by URL now and by slug once the catalog opens.</li>
+      </ul>
+    </div>
+    <div>
+      <h3><span class="sticker purple">Private</span> Your team only</h3>
+      <ul>
+        <li>Put the skill in a private GitHub repository with the same topic, <code>ocpfbcskills</code>. GitHub shows a private repository only to people who have access, so the skill is findable by your team alone.</li>
+        <li>The framework uses the GitHub identity already on your machine, in this order: the <code>gh</code> CLI, a GitHub MCP server, a fine-grained token in your shell (<code>OCPF_GITHUB_TOKEN</code>, <code>GH_TOKEN</code>, or <code>GITHUB_TOKEN</code>), and last, with a yes from you each time, the credential your Git stores. It never asks for a token in chat and never writes one to a file.</li>
+        <li>The private search runs only when you choose it in <code>skill-load</code>. No kickoff searches your GitHub on its own.</li>
+        <li>For a team, list the sources in <code>skillslocation.md</code> in the project.</li>
+      </ul>
+    </div>
+  </div>
+
+  </div></section>
+<section class="band alt"><div class="inner"><h2 id="example">Example skill: Posting Review Checklist <span class="sticker green">1.0.0.0</span> <span class="sticker grey">MIT</span></h2>
+  <p>A small, complete skill. It gives the agent a one-page patterns note before it writes a posting codeunit (<span class="pill p-blue">referenceSources</span>) and a twelve-point checklist the pre-review and the Code Review run on every posting routine (<span class="pill p-teal">preReviewChecks</span> <span class="pill p-teal">codeReviewChecks</span>). It overrides nothing, works on all three journeys, requires framework 6.0.0.0 or later, and is MIT licensed, so you can copy it, change the slug and the author, and replace the two reference files with your own.</p>
+  <a class="dl" href="assets/skills/posting_review_checklist.zip" download>Download posting_review_checklist.zip</a>
+  <a class="dl sec" href="https://github.com/ajansari/ocpfBcAgenticDevFramework/tree/main/exampleSkills/posting_review_checklist" target="_blank" rel="noopener">Browse the files on GitHub</a>
+  <p>Load it:</p>
+<pre><code>/ocpf-bc:skill-load ~/Downloads/posting_review_checklist.zip</code></pre>
+  <p>The first five of the twelve checklist items, from <code>references/PostingReviewChecklist.md</code>:</p>
+  <ol>
+    <li>One entry point: <code>OnRun</code> calls one <code>Code()</code> procedure, and nothing else in the extension writes posted entries.</li>
+    <li>Preview posting runs the same codeunit as real posting.</li>
+    <li>Every <code>TestField</code> and <code>Error</code> runs before the first <code>Insert</code> or <code>Modify</code>.</li>
+    <li>No <code>Commit</code> in the posting codeunit or anything it calls.</li>
+    <li>The posted document number is taken once, from the <code>NoSeries</code> codeunit.</li>
+  </ol>
+  <p>Each failed item becomes a review finding that names the skill and the item number. The Standards Guide still wins on any conflict.</p>
+</div></section>
+</main>
+
+<footer>
+  <div class="wrap">
+    <span>Framework version 6.0.0.0 · October 31, 2026 · <a href="https://github.com/ajansari/ocpfBcAgenticDevFramework#whats-new" target="_blank" rel="noopener">What's New</a></span>
+    <span><a href="index.html">Framework home</a> · <a href="install.html">Install</a> · <a href="documentation.html">Documentation</a> · <a href="skills.html">Skills</a> · <a href="https://github.com/ajansari/ocpfBcAgenticDevFramework" target="_blank" rel="noopener">Repository</a> · <a href="llms.txt">For agents</a> · <a href="https://onlycopilotfans.com/privacy-policy" target="_blank" rel="noopener">Privacy</a> · <a href="https://onlycopilotfans.com/terms-of-service" target="_blank" rel="noopener">Terms</a> · © 2026 OnlyCopilotFans</span>
+  </div>
+</footer>
+</body>
+</html>

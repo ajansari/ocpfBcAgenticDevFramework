@@ -1,0 +1,8 @@
+# bcdev.ai crawler policy (rule AI-04), decided 2026-10-31:
+# all search engines and AI crawlers may read the public site.
+# /agentPlugin/ holds the plugin's HTML templates, which are not site pages.
+User-agent: *
+Allow: /
+Disallow: /agentPlugin/
+
+Sitemap: https://bcdev.ai/sitemap.xml

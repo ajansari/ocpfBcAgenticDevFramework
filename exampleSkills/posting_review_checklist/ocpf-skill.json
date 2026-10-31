@@ -1,0 +1,20 @@
+{
+  "ocpfCustomSkill": 1,
+  "slug": "posting_review_checklist",
+  "renamedFrom": [],
+  "displayName": "Posting Review Checklist",
+  "version": "1.0.0.0",
+  "description": "A posting-routine patterns note the agent reads before writing a posting codeunit, and a twelve-point checklist the pre-review and the Code Review run on every posting routine.",
+  "author": { "name": "AJ Ansari", "organization": "OnlyCopilotFans", "url": "https://bcdev.ai" },
+  "created": "2026-10-31", "updated": "2026-10-31",
+  "framework": { "name": "OCPF BC Agentic Development Framework", "madeWith": "6.0.0.0", "minVersion": "6.0.0.0", "maxVersion": null },
+  "journeys": ["full", "lite", "feature"],
+  "harnesses": ["claude-code", "copilot"],
+  "extends": {
+    "referenceSources": ["references/PostingPatterns.md"],
+    "preReviewChecks": ["references/PostingReviewChecklist.md"],
+    "codeReviewChecks": ["references/PostingReviewChecklist.md"]
+  },
+  "overrides": { "documentTemplates": {}, "modelRecommendations": {}, "companionOffers": {} },
+  "conflictsWith": [], "requires": []
+}

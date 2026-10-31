@@ -1,0 +1,33 @@
+# OCPF BC Agentic Development Framework
+
+> A framework for building Microsoft Dynamics 365 Business Central AL extensions with an AI agent (Claude Code or GitHub Copilot), with human approval gates, a documented trail, and a live project dashboard. Version 6.0.0.0 (October 31, 2026). Source-available under PolyForm Shield 1.0.0. Created by AJ Ansari, Microsoft MVP (OnlyCopilotFans and OnlyBCFans).
+
+Three journeys: Build-a-Feature (one object at a time, no steps), Full (14 steps, the recommended journey), and Lite (7 steps). Every journey starts with `/ocpf-bc:start`.
+
+The home page (https://bcdev.ai/) is rendered by JavaScript; without it, it shows only a short summary. Agents should read the pages and files below instead.
+
+## Pages (static HTML)
+
+- [Install](https://bcdev.ai/install.html): the Visual Studio Code extension, the agent plugin for Claude Code and GitHub Copilot, and the manual alternatives.
+- [Documentation](https://bcdev.ai/documentation.html): setup step by step, every /ocpf-bc command, and troubleshooting.
+- [Skills](https://bcdev.ai/skills.html): Custom Skills, what they are, the six extension points, how to create, load, find, and share one, public and private, with an example skill to download.
+
+## Install
+
+- Visual Studio Code: [OnlyCopilotFans Business Central Agentic Dev Framework - Setup](https://marketplace.visualstudio.com/items?itemName=ajansari.ocpf-bc-dev-setup), extension ID `ajansari.ocpf-bc-dev-setup`.
+- Claude Code: `/plugin marketplace add ajansari/ocpfBcAgenticDevFramework`, then `/plugin install ocpf-bc@onlycopilotfans`, then `/ocpf-bc:start`.
+- GitHub Copilot CLI: `copilot plugin marketplace add ajansari/ocpfBcAgenticDevFramework`, then `copilot plugin install ocpf-bc@onlycopilotfans`.
+
+## Source documents (Markdown)
+
+- [README](https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/README.md): overview, what's new, setup, roadmap.
+- [Framework User Guide](https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/FrameworkUserGuide.md): how to drive a project through the framework.
+- [Custom Skills Guide](https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/CustomSkillsGuide.md): for skill authors; the manifest, the slug, the extension points, compatibility.
+- [Getting Started Alternatives](https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/GettingStartedAlternatives.md): installing without the VS Code extension.
+- [Example skill](https://github.com/ajansari/ocpfBcAgenticDevFramework/tree/main/exampleSkills/posting_review_checklist): a complete Custom Skill; zip at https://bcdev.ai/assets/skills/posting_review_checklist.zip
+
+## Optional
+
+- [Operations Guide](https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/opsGuide/ocpfOperationsGuide.md): the full contract every runbook step follows (about 350 KB).
+- [Extension points](https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/opsGuide/extensionPoints.json): the machine-readable list of points a Custom Skill may name.
+- [Repository](https://github.com/ajansari/ocpfBcAgenticDevFramework)

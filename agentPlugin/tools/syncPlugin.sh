@@ -180,6 +180,14 @@ else
   echo "site hero version line: Framework version ${version}.0"
 fi
 
+# Every standalone website page carries the same version line in its footer.
+for page in skills.html install.html documentation.html; do
+  if [[ -f "$repo_root/$page" ]] && ! grep -q "Framework version ${version}.0 ·" "$repo_root/$page"; then
+    echo "$page version line does not say 'Framework version ${version}.0': update it before releasing." >&2
+    if [[ "$mode" == "check" ]]; then stale=1; else exit 1; fi
+  fi
+done
+
 if [[ "$mode" == "check" && "$stale" -ne 0 ]]; then
   echo "Bundled copies are stale. Run agentPlugin/tools/syncPlugin.sh, bump the plugin version, and commit." >&2
   exit 1
