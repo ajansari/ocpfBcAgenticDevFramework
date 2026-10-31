@@ -171,17 +171,17 @@ if [[ -n "$manifest_drift" ]]; then
 fi
 echo "manifests agree"
 
-# The website's hero strip (index.html) names the released plugin version. A release that leaves it
+# The website's hero strip (docs/index.html; the site is published from /docs) names the released plugin version. A release that leaves it
 # behind ships a stale site, which happened at 5.9.2; so the strip must carry the current version.
-if ! grep -q "Framework version ${version}.0 ·" "$repo_root/index.html"; then
-  echo "index.html hero version line does not say 'Framework version ${version}.0': update it before releasing." >&2
+if ! grep -q "Framework version ${version}.0 ·" "$repo_root/docs/index.html"; then
+  echo "docs/index.html hero version line does not say 'Framework version ${version}.0': update it before releasing." >&2
   if [[ "$mode" == "check" ]]; then stale=1; else exit 1; fi
 else
   echo "site hero version line: Framework version ${version}.0"
 fi
 
 # Every standalone website page carries the same version line in its footer.
-for page in skills.html install.html documentation.html; do
+for page in docs/skills.html docs/install.html docs/documentation.html; do
   if [[ -f "$repo_root/$page" ]] && ! grep -q "Framework version ${version}.0 ·" "$repo_root/$page"; then
     echo "$page version line does not say 'Framework version ${version}.0': update it before releasing." >&2
     if [[ "$mode" == "check" ]]; then stale=1; else exit 1; fi
