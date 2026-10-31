@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 1 — Define the Problem & Lock Parameters
 
-**Runbook version:** 5.10.0.0 · Lite edition · Phase: DEFINE
+**Runbook version:** 6.0.0.0 · Lite edition · Phase: DEFINE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -30,10 +30,12 @@ the session's first decisions and tokens outside every window on real projects.
 companions when the project has none yet — `ocpfFramework/` with its six-line `README.md` (Ops §
 Project Setup gives the text), the Standards Guide into `ocpfFramework/standardsGuide/`, the
 Operations Guide into `ocpfFramework/opsGuide/`, this runbook's step files (`liteVersion/steps/*.md`)
-into `ocpfFramework/runbookSteps/`, and the document templates into
-`ocpfFramework/documentTemplates/`, each from its raw URL
+into `ocpfFramework/runbookSteps/`, the document templates into
+`ocpfFramework/documentTemplates/`, and `opsGuide/extensionPoints.json` as `ocpfFramework/extensionPoints.json`
+(6.0.0.0), each from its raw URL
 `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/<folder>/<file>` (Ops §
-Fetched Companions; in a plugin project the `start` skill already fetched them — check, don't
+Fetched Companions; `main` is `OCPF_FRAMEWORK_REF`'s value when that variable is set — Ops §
+Plugin's pre-release channel; in a plugin project the `start` skill already fetched them — check, don't
 refetch; the always-ignored `.gitignore` group goes in now — see ALL ALONG → OCPF AL Development
 Standards Guide); Microsoft's live *Country/Regional Availability and Supported Languages* page and
 the *Choose runtime version* table (Ops § Reference Sources — every country, language, and BC
@@ -105,6 +107,14 @@ are skipped, never re-asked.
   per box, a partner-translated language's app question beside them.
 - **K13 — Working setup:** framework files in `.gitignore`? (the question's text explains
   `.gitignore`); customer-language documents? translatable data?
+- **K13a — Custom skills** (6.0.0.0; Ops § Custom Skills): **Do you have any skills you want to
+  load?** — multi-select: *Upload — a folder or a `.zip` on this machine (I'll type its path in
+  chat)* / *GitHub repository — I'll type the URL* / *Skills site —
+  a bcskills.ai slug, I'll type it* / *No*; when `~/.ocpf/skills/` holds skills or the project has a
+  `skillslocation.md` (read in movement 1), the first option is *Load these: <slugs> (recommended)*;
+  on the Copilot CLI yes / no lines in that order, *Load these?* first when it applies. Each yes gets its typed follow-up as the very next box. The
+  fetch, inspection, and dedupe run in the batch; each skill's *Activate* box is asked in the
+  setup-done box.
 - **K14 — Requirements and existing app, always the last box:** when `requirements/` is empty and
   the human pasted or attached nothing, **Where are the requirements?** — *I'll put them in
   `requirements/` now (recommended — `.md` preferred; Word, PDF, and images are read too)* / *I'll
@@ -135,7 +145,9 @@ nothing into `3-build/` — and **`ProjectProgress.md` in the project root**, ne
 kept, the *Full* one deleted, every row blank except this one, `In Progress`, the usage table
 beneath it empty (ALL ALONG → Project Progress Tracker); the `.gitignore` blocks from K13's answer,
 proven with `git check-ignore` (ALL ALONG → Repository Hygiene — `ProjectDashboard.html`,
-`requirements/`, and `docs/` must not be ignored); **the live dashboard** — the renderer and
+`requirements/`, `docs/`, and `ocpfFramework/customSkills.json` must not be ignored); **the Custom
+Skills K13a named fetched, inspected, and deduped** (Ops § Custom Skills → 3 — placed and registered
+after their *Activate* boxes in the setup-done box, where any issue's options box is asked too); **the live dashboard** — the renderer and
 template into `ocpfFramework/scripts/`, `ProjectDashboard.html` rendered at the project root,
 opened once (`--open`), the refresh hooks installed with the interpreter the runner ladder found
 and proven — the Stop hook's exact command run once, the sidecar newer and carrying the app's name
@@ -152,7 +164,9 @@ once, that packages land in `outputAppPackage/`, one file per build, each with i
 
 **4. The setup-done box** — one box: the dashboard explanation, **I understand** / *Other*, with
 Ops § Dashboard's text (what, why, how, the file and where it is, and reopening with right-click →
-**Open Externally** or *Reveal* + double-click); whether each chosen notification kind arrived and
+**Open Externally** or *Reveal* + double-click); **Activate <display name> <version>?** per Custom
+Skill K13a fetched (its `SKILL.md`, manifest, and files shown first; a fifth skill opens the next
+box) and any issue's options box (Ops § Custom Skills → 5); whether each chosen notification kind arrived and
 clicking one opened the session; **Accept this icon** / *Make another* when one was drawn; the Main
 model switch confirmed when it differs from the session's; and *Are the requirements in
 `requirements/` now?* when K14 said so. Act on a free-text answer before continuing. A failed
@@ -221,15 +235,16 @@ Packaging & Versioning). Mention it once, plainly, now.
 | **Object ID range(s)** | — | Primary + any Additional, from Box 3. **The range belongs to the Deployment Target** (**Standards §5.5**): PTE work uses 50,000–99,999; `AppSource` uses only a range Microsoft registered to this publisher (70,000,000–74,999,999 for a new publisher), never 50,000–99,999. |
 | **Permission Sets required?** | `Yes`/`No` | `No` only if the extension owns **zero new tables** (**Standards §5.3**); otherwise `Yes`, not asked. If `Yes`, the two permission sets take the primary range's first two *permission set* IDs — their own ID space; they cost no table, page, or codeunit number (Ops § Object IDs). |
 | **AL Runtime / BC Application Minimum / Symbol Source** | — | BC version from Box 2; runtime from Microsoft Learn. Symbol Source is filled in by the agent after downloading: version, W1 or localized, where from, and — after a fallback — the route that failed and why (Ops § Symbols). |
-| **Onboarding extras** | `Yes`/`No` each | Assisted Setup Wizard? Role Center Activity Cues? Departments/"My Business Central" placement? Box 4; `No` to any is a final answer, not a placeholder — most small extensions answer `No` to all three, but ask anyway. |
+| **Onboarding extras** | `Yes`/`No` each | Assisted Setup Wizard? Role Center Activity Cues? Departments/"My Business Central" placement? **Role Center?** (6.0.0.0, beside Activity Cues — the home page of a user profile: if `Yes`, which profile it serves, what its headline says, and which parts and actions it carries; the cues come from the Activity Cues answer; the four-object shape is the plugin's `build-a-feature/references/objects/role-center.md`). Box 4; `No` to any is a final answer, not a placeholder — most small extensions answer `No` to all four, but ask anyway. |
 | **App icon** | `Use images/<file>` / `Yes — I'll provide an image` / `Create one for me` / `No icon` (`Later` typed) | K3 — Box 0 (Ops § Intake); re-asked as the next box when *No icon* or *Later* met an AppSource target; *Create one for me* is the plugin's `app-icon` skill (Ops § Intake → *The app icon → Creating one*). *Later* is a release blocker for AppSource — the old AppSource icon question is folded in here. On *Yes*, ask for the path as free text with the guidance *"PNG, square, 300 × 300 px is ideal — Microsoft accepts 216 to 350 px for the marketplace listing. Larger is fine; I'll resize it, keeping the proportions, never stretching."* The agent copies it to `src/logo/AppLogo.png`, resizing when larger with what the machine has — macOS `sips -Z 300 <in> --out src/logo/AppLogo.png`; Windows a PowerShell `System.Drawing` snippet (Ops § Intake gives it); Linux `convert <in> -resize 300x300 src/logo/AppLogo.png` if ImageMagick is present, else Python Pillow, else ask the human to resize. A non-square image gets its longer side resized to 300 and is padded to square with transparency, never cropped silently — say what was done. `app.json` gets `"logo": "src/logo/AppLogo.png"`; the file is committed. |
 | **Business Central Copilot feature** | `Yes` / `No` | A feature in Business Central's own Copilot UI (a `Copilot Capability`, a `PromptDialog` page, a *Suggest with Copilot* action, Azure OpenAI through System.AI). **`Yes` is valid for a PTE**; Microsoft-billed needs no Azure subscription. If `Yes`: the host page(s), what the AI suggests, and the billing path — *Microsoft-billed* (default) / *Partner-billed* / *both*. Triggers the OnlyBCFans BC Copilot Blueprint fetch at Step 3 (ALL ALONG → *Business Central Copilot Features*). |
-| **Framework files in `.gitignore`?** | `Yes` (default) | Box 5, asked as: *"`.gitignore` lists files Git leaves out of commits and pushes — they stay on disk and work normally. Should this framework's own files be left out of this project's repository?"* With `Yes`, the second block of Ops § Repository Hygiene goes into `.gitignore` — by name, every one, not "the framework files" in the agent's head: `ocpfFramework/` as a whole (it holds `LITE_RunbookChangeLog.md`, `LITE_RunbookSchematics.md`, `framework.json`, and the runbook itself when `CLAUDE.md` already existed), the runbook under whatever name it was given (`CLAUDE.md`, `.github/copilot-instructions.md`, `.github/instructions/ocpf-framework.instructions.md` — only the ones that exist), and the project-local sub-agent definitions (`.claude/agents/ocpf-light.md`, `ocpf-reasoning.md`, `ocpf-generator.md`, `ocpf-reviewer.md`, `ocpf-analyst.md`; `.github/agents/ocpf-light.agent.md`, `ocpf-reasoning.agent.md`, `ocpf-generator.agent.md`). The first block — `.claude/settings.local.json`, `ocpfFramework/state/`, `ocpfFramework/standardsGuide/`, `opsGuide/`, `runbookSteps/`, `documentTemplates/`, `patterns/`, `scripts/`, `.alpackages/`, `*.g.xlf` — is written whatever the answer. **Then prove it:** `git check-ignore -v <file>` on each file that exists, and `git status --porcelain` on the root; a framework file still showing means the entry is wrong. On a real project the changelog was left out and shipped to the client's remote. **Never `docs/`, `requirements/`, `src/`, `ProjectProgress.md`, `outputAppPackage/`, `*.app`, or `Translations/*.xlf`** — `docs/0-project/ChangeLog.md` is always committed. The full block is Ops § Repository Hygiene. |
+| **Framework files in `.gitignore`?** | `Yes` (default) | Box 5, asked as: *"`.gitignore` lists files Git leaves out of commits and pushes — they stay on disk and work normally. Should this framework's own files be left out of this project's repository?"* With `Yes`, the second block of Ops § Repository Hygiene goes into `.gitignore` — by name, every one, not "the framework files" in the agent's head: `ocpfFramework/*` with `!ocpfFramework/customSkills.json` after it — the folder's children, the Custom Skills register re-included since it is always tracked (6.0.0.0) — (the folder holds `LITE_RunbookChangeLog.md`, `LITE_RunbookSchematics.md`, `framework.json`, and the runbook itself when `CLAUDE.md` already existed), the runbook under whatever name it was given (`CLAUDE.md`, `.github/copilot-instructions.md`, `.github/instructions/ocpf-framework.instructions.md` — only the ones that exist), and the project-local sub-agent definitions (`.claude/agents/ocpf-light.md`, `ocpf-reasoning.md`, `ocpf-generator.md`, `ocpf-reviewer.md`, `ocpf-analyst.md`; `.github/agents/ocpf-light.agent.md`, `ocpf-reasoning.agent.md`, `ocpf-generator.agent.md`). The first block — `.claude/settings.local.json`, `ocpfFramework/state/`, `ocpfFramework/standardsGuide/`, `opsGuide/`, `runbookSteps/`, `documentTemplates/`, `patterns/`, `scripts/`, `extensionPoints.json`, `.alpackages/`, `*.g.xlf` — is written whatever the answer. **Then prove it:** `git check-ignore -v <file>` on each file that exists, and `git status --porcelain` on the root; a framework file still showing means the entry is wrong. On a real project the changelog was left out and shipped to the client's remote. **Never `docs/`, `requirements/`, `src/`, `ProjectProgress.md`, `outputAppPackage/`, `*.app`, or `Translations/*.xlf`** — `docs/0-project/ChangeLog.md` is always committed. The full block is Ops § Repository Hygiene. |
 | **Notifications** | `<channels>` / `<remoteControl>` | K2: any of Claude app, sound, desktop notification, or none, and Remote Control (*only when I turn it on* / *every session*) — recorded here as the answer arrives; the `notifications` skill's apply-only mode applies it in the batch and writes `ocpfFramework/state/notifications.json` from it. |
 | **Countries** | `<Countries>` | K4, multi-select, from Microsoft's live page; the language rows reuse it — never asked again. |
 | **Copilot session settings** | `<RequestLimit>` / `<ToolApprovals>` | K5, only when GitHub Copilot is in use → `.vscode/settings.json` and `ocpfFramework/state/copilot.json` in the batch. |
 | **Requirements location** | — | K14, only when `requirements/` was empty: *put in `requirements/` now* / *pasted* / *path typed* / *described when asked*; the setup-done box asks whether they are in. |
 | **Working language** | — | From the first question of this step. |
+| **Custom skills** | *none* / one line per skill | 6.0.0.0 (Ops § Custom Skills): written from `ocpfFramework/customSkills.json` in the setup batch and rewritten at every load, disable, or removal — slug, version, author, source, enabled. Nothing is asked here; `/ocpf-bc:skill-load` loads a skill, and the register is the record the gate reads. |
 | **Main model & thinking effort** | `<MainModel>` / `<MainEffort>` | Asked in the kickoff's model box, K5 (Ops § Roles): the model this one agent runs on and its thinking effort — recommended **Sonnet, Medium** in Claude Code, **Claude Sonnet 5.5 or GPT-6.1 Sol, Medium** in GitHub Copilot; High only where judgment matters most. Recorded as the human named them, plus the harness's own identifier (e.g. `sonnet`). Must match what the session is actually running — the human switches the session, not the agent. The generator sub-agent Step 4 may use inherits this pair. Lite has no Light or Reasoning rows. |
 | **Target languages** | table | Box 5, for the countries from Box 1 — Lite groups the setup and language questions together (Ops § Intake) — never asked again (rules: **Standards §8.8**). Classify each chosen language as Microsoft-translated, partner-translated (ask which partner app, in the next box — it's the terminology source), or not supported by BC (every right-to-left language included). Don't offer an unsupported language; if typed, offer the country's English instead, and only record it if the human insists. Then, unless source wording is *US wording, no translation files*, per language, two questions: *Required at first release* / *Can follow later*; and who reviews it — names the human mentioned, or *I'll type it*; a named fluent person, never the agent. Flag any mismatch with **Localization**. |
 | **Source language** | `en-US` (default) | Offer `en-US` first, labelled recommended, with the one-line reasons in **Standards §8.1**. If the human chooses another, state the consequences before recording it. |

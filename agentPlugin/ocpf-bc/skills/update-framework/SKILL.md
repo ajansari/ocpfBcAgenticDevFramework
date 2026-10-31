@@ -11,6 +11,13 @@ runbook's own human-in-the-loop rules.
 
 Repository: `https://github.com/ajansari/ocpfBcAgenticDevFramework` (default branch `main`).
 
+**Framework ref.** Every URL below names the `main` branch. When the environment variable
+`OCPF_FRAMEWORK_REF` is set and not empty (the pre-release channel, Ops § Plugin), substitute its
+value for `main` in every `raw.githubusercontent.com` and `api.github.com` URL of this repository
+and in `git ls-remote … refs/heads/<ref>`, compare against that ref's version, and on *Update now*
+write the value as `ref` in the marker (Step 4.4); a marker whose `ref` is not `main` says which
+ref the project is on, so the report names it. Never ask the human to set the variable.
+
 ## Step 1: Read the project's setup
 
 1. **Read `ocpfFramework/framework.json`** for the edition, the runbook version, where copies were placed
@@ -67,8 +74,25 @@ Guide versions it expects. If a local copy's major version differs, say so: the 
    anything that would mean revisiting finished work, rather than burying it. If the project is on
    Full < 5.0.0.0 / Lite < 5.0.0.0, say that the update also **moves files** (the Migration below)
    and list the moves before asking.
+3a. **Custom Skills — the compatibility warning, before the box** (6.0.0.0; Ops § Custom Skills →
+   12). When `ocpfFramework/customSkills.json` exists: fetch the new version's
+   `opsGuide/extensionPoints.json` to `ocpfFramework/state/extensionPoints.next.json` (always
+   ignored; the same raw URL shape, `main` → `OCPF_FRAMEWORK_REF` when set) and run the helper's `--inspect` on every enabled skill's home
+   folder with `--framework-version <new version> --extension-points <that file>`
+   (`ocpfFramework/scripts/ocpf-skills.py`; pwsh `-Inspect … -FrameworkVersion … -ExtensionPoints …`).
+   A skill whose result has errors — `maxVersion` below the new version, a point the new version
+   renamed, removed, or reserved — **would block the project after the update**: name each such skill
+   and its rule in the box's own text, and shape the box as the next item says. Delete
+   `ocpfFramework/state/extensionPoints.next.json` afterwards. The once-per-session check (Ops §
+   Plugin) runs this item too before it offers the update.
 4. **Ask**, through the selectable options mechanism:
-   - **Update now:** replace the project's runbook copies with the new version.
+   - **Update now:** replace the project's runbook copies with the new version. **When 3a named a
+     skill**, this option splits in two: **Update now and disable <slug>** (the recommended one — the
+     skill is disabled through the `skill-load` skill's rules before the update, its harness folders
+     removed, a ChangeLog line written) / *Update now and keep the block — I'll fix the skill after*
+     (the update runs; Step 4.3b's check then **records** the block in the register, the message
+     says in one line that the framework will not run until `/ocpf-bc:skill-load` resolves it, and
+     the per-issue boxes wait for the human to come back to it — they chose that).
    - **Not now:** ask again next session.
    - **Skip this version:** don't ask again until something newer than this one is published.
 
@@ -125,8 +149,15 @@ Guide versions it expects. If a local copy's major version differs, say so: the 
    repository at the tag the new framework pins** — read the pin from the framework's
    `standardsGuide/README.md` (fetch that prelude into `ocpfFramework/standardsGuide/README.md` too):
    `https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfALDevStandardsGuide.md`
-   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v5.10.0.0 the pin is
-   `v1.13.1.0`). Update each folder's `SNAPSHOT.json` (`repo`, `ref`, `sha`, `fetchedAt`). A project that
+   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v6.0.0.0 the pin is
+   `v1.13.1.0`). Update each folder's `SNAPSHOT.json` (`repo`, `ref`, `sha`, `fetchedAt`). **Since
+   6.0.0.0 fetch `opsGuide/extensionPoints.json` → `ocpfFramework/extensionPoints.json` in the same
+   call** and, when `ocpfFramework/customSkills.json` exists, run `ocpf-skills --check --project
+   <root>` afterwards (the helper in `ocpfFramework/scripts/`, refreshed with the rest; Ops § Custom
+   Skills → 5 names the fallback): a skill the new version blocks is reported and resolved through the
+   `skill-load` skill's per-issue boxes before the project continues (Ops § Custom Skills → 5) —
+   unless the human chose *keep the block* in Step 4, when it is recorded and said, and resolved when
+   they come back to it. A project that
    began before v5.2.0.0 needs **no file move**: the on-disk path and filename are unchanged; the
    refresh only changes the source recorded in `SNAPSHOT.json`. A runbook and a companion from
    different majors don't go together: the runbook cites **Ops §** and **Standards §** by number.
@@ -139,7 +170,7 @@ Guide versions it expects. If a local copy's major version differs, say so: the 
    `ocpf-generator`, and `ocpf-reviewer` copies from the new bundled bodies, keeping their
    `model:` / `effort:` lines. Add the reviewer (and analyst) entries to the `.gitignore` block when
    the project keeps framework files out of git (Ops § Repository Hygiene).
-4. **Update `ocpfFramework/framework.json`:** set `runbookVersion`, `source`, `commitSha`, and `fetchedAt`,
+4. **Update `ocpfFramework/framework.json`:** set `runbookVersion`, `source`, `ref` (`main`, or `OCPF_FRAMEWORK_REF`'s value when it was set), `commitSha`, and `fetchedAt`,
    set `"layout": "ocpfFramework-1"` and add `"tooling": {}` if missing, and clear
    `declinedUpdateVersion`.
 5. **Record the change in the project's own continuity documents,** as the runbook asks for any
@@ -194,7 +225,7 @@ leaving the project half-moved.
    group is `.claude/settings.local.json`, `ocpfFramework/state/`, `ocpfFramework/standardsGuide/`,
    `ocpfFramework/opsGuide/`, `ocpfFramework/runbookSteps/`, `ocpfFramework/documentTemplates/`,
    `ocpfFramework/patterns/`, `ocpfFramework/scripts/`, `.alpackages/`, `*.g.xlf`; with the intake
-   answer *not tracked*, the second group is `ocpfFramework/`, `CLAUDE.md`,
+   answer *not tracked*, the second group is `ocpfFramework/*` with `!ocpfFramework/customSkills.json` after it (6.0.0.0), `CLAUDE.md`,
    `.github/copilot-instructions.md`, `.github/instructions/ocpf-framework.instructions.md`, and the
    six project-local agent files (`ocpf-light`, `ocpf-reasoning`, `ocpf-generator` under
    `.claude/agents/` and `.github/agents/`). Delete the old `.ocpf/`, `standardsGuide/`,

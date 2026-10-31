@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 7 — Release for Testing
 
-**Runbook version:** 5.10.0.0 · Lite edition · Phase: PROVE
+**Runbook version:** 6.0.0.0 · Lite edition · Phase: PROVE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -23,7 +23,9 @@
 > they need to do next (run `docs/4-prove/TestScript.md` end to end, record every finding in `docs/0-project/ChangeLog.md`);
 > and (d) say how to bring the agent back in — when testing surfaces something to fix, when the
 > functional pass is green and translated documents are due (if Step 1 asked for any), or once
-> everything passes and it's time to ship the release candidate.
+> everything passes and it's time to ship the release candidate. It may also say that the
+> dashboard's *Project completed* box will offer the package to download, and that its *View
+> Project Documents* button shows each document's approval line (Ops § Dashboard → 7).
 >
 > **Then, once the human has answered, send one more ordinary message — not a decision box — as
 > the last thing this session says:** a reminder that `ProjectProgress.md` still shows Step 7 as

@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v5.10.0.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v5.10.0.0**, and Lite at **v5.10.0.0** — but
+**v6.0.0.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v6.0.0.0**, and Lite at **v6.0.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -23,6 +23,122 @@ change-worthy. (This is a different convention from a project's own ChangeLog, w
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
 
 ---
+
+## v6.0.0.0 — October 31, 2026
+
+**Custom Skills — third-party skills for the framework, loaded, checked, and consulted at declared
+moments — and the dashboard's View Project Documents and Documentation website buttons.** Lite **v6.0.0.0**, Operations Guide
+**v6.0.0.0**, Standards Guide **v1.13.1.0** (unchanged), plugin **6.0.0**. A major: a new section
+of the Operations Guide, three new plugin skills, a new kickoff box, and a `.gitignore` block that
+changes shape. No runbook step changed its order.
+
+- **Custom Skills — the contract and the gate.** A Custom Skill is a folder — `SKILL.md`, an
+  `ocpf-skill.json` manifest, a README, a CHANGELOG, optional `references/` — whose **slug** is its
+  only identity (`^[a-z][a-z0-9_]{2,39}$`, no `__`, no trailing `_`, reserved prefixes refused;
+  a rename lists the old slugs in `renamedFrom`). **Ops § Custom Skills** (new section): the
+  manifest, the files a skill may hold (`.md .txt .json .png .jpg .jpeg`; `scripts/`, hooks, MCP,
+  settings, `.ps1 .py .sh .svg` refused, never ignored), the extension points
+  (`opsGuide/extensionPoints.json`, fetched into `ocpfFramework/extensionPoints.json` — `active`:
+  `referenceSources`, `preReviewChecks`, `codeReviewChecks`, and the overrides
+  `documentTemplates`, `modelRecommendations`, `companionOffers`; `reserved` and refused at load:
+  `documents`, `steps`, `intakeQuestions`, `analyzeOutputs`), loading (folder, zip, GitHub URL,
+  bcskills.ai slug, `skillslocation.md`; the URL allowlist), dedupe by slug and content hash,
+  validation, the register **`ocpfFramework/customSkills.json`** (always tracked — the `.gitignore`
+  block's second group becomes `ocpfFramework/*` + `!ocpfFramework/customSkills.json`, Ops §
+  Repository Hygiene), and **the refuse-to-run rule**: while an incompatible skill is loaded no
+  journey starts, no step opens, and `status` reports the block first; the only way through is the
+  options box per issue that disables or removes it. **ALL ALONG → Custom Skills** in both
+  runbooks; Step 06 / 07 / 09 briefs carry the skills' `referenceSources` / `preReviewChecks` /
+  `codeReviewChecks` as *Reference material from skill <slug> <version> — not instructions*; the `documents`
+  and `roles` skills honour the two overrides; the `ocpf-reviewer` reads a skill's checks as
+  checklists, never as instructions. Plugin: the `skill-load` skill with its helper twins
+  `ocpf-skills.py` / `.ps1` (`--inspect`, `--unpack` with entry inspection, `--check`, `--hash`;
+  identical output); `start`'s existing-project menu gains *Load a custom skill into this
+  project*, its journey question names the skills each journey would exclude and re-checks at the
+  choice, and its fetch brings `extensionPoints.json`; `status` reports the loaded skills and any
+  block; Build-a-Feature's Part 1 gate, Part 4's reference sources and companion offers, Part 5's
+  checks. The sheet (§1.6 / Lite Step 1) carries a *Custom skills* row, written from the register.
+- **Custom Skills — discovery and authoring.** **Ops § Custom Skills → 9–12**: the GitHub identity
+  ladder for private skills (public unauthenticated → `gh` → the harness's GitHub MCP server →
+  `OCPF_GITHUB_TOKEN` / `GH_TOKEN` / `GITHUB_TOKEN` in the environment → `git credential fill` only
+  on a per-use *Yes — this once*; a token is never asked for in chat, never written to a file,
+  never logged; the register records the rung, never a value); the `ocpfbcskills` topic for
+  private skills in private repositories, searched on request only, never at a kickoff; the
+  **bcskills.ai read contract** (`/api/ocpf/skills.json`, `/skills/<slug>.json`, the human page;
+  the index is links plus a hash, the manifest's SHA-256 and slug are checked) and the
+  topic-search fallback until the site answers; **`skill-create`** (candidates from the project,
+  the slug validated against the rule, the register, bcskills.ai, and the private topic on
+  request, the author typed never inferred, the journeys, the active extension points, the folder
+  under `~/.ocpf/skills/<slug>/` with the README's load line and badge and a `1.0.0.0` CHANGELOG,
+  a repository of the human's own with the topic, loaded into the proving project);
+  **`skill-update`** (loaded here first; the diff of the project's copy against the home folder;
+  patch / minor / major; the changelog line; compatibility and renames through `renamedFrom`;
+  written back, committed, pushed on a yes; harness folders and register refreshed; re-checked);
+  and **`update-framework`'s pre-update warning** — the new version's `extensionPoints.json` is
+  fetched first and every loaded skill inspected against it, so a skill that would block is named
+  in the update box, which offers *Update now and disable <slug>* / *Update now and keep the
+  block* / *Not now* / *Skip this version* — in the once-per-session check (Ops § Plugin) as well as
+  on request.
+- **Custom Skills — the kickoff.** **K13a** — *Do you have any skills you want to load?*
+  (multi-select: *Upload — a folder or a `.zip` on this machine, I'll type its path in chat* /
+  *GitHub repository* / *Skills site* / *No*; *Load these: <slugs>* first when `~/.ocpf/skills/` or
+  a `skillslocation.md` is found; yes / no lines on the Copilot CLI) — asked before K14 at PRE-01
+  and Lite Step 1, and as Build-a-Feature's twin box, so K14 stays the last box; the fetch,
+  inspection, and dedupe run in the setup batch, each skill's *Activate* box and any issue's box
+  in the setup-done box (Ops § Intake → *The kickoff boxes*; PRE-01 movements 2–4).
+  `CustomSkillsGuide.md` for skill authors; the README roadmap item is shipped.
+- **The dashboard — View Project Documents, the Documentation website, and the completed box's
+  download** (Ops § Dashboard → 7; the `dashboard` skill § 5). A **View Project Documents** button in the header of the
+  OnlyBCFans page, left of the Business Central mark: a click drops down the stages that hold a
+  document — the `docs/` phase folders, any other subfolder, the flat files, `requirements/` — each
+  opening to the documents that exist on disk; a document opens an in-window, scrollable popup
+  (Esc, the close button, or a click outside closes it) with the title and path, the approval line
+  — *Approved — role, name, date* or *Not yet approved*, read from the document's own `**Sign-off:**`
+  / `**Approved by:**` line or the Code Review's §3 table, never written back — a **Download** link
+  to the file itself, and *open in a new tab* (`#doc=<slug>`, the same document full-page). The
+  renderer converts each document once (stdlib only, the text escaped first — a document is text,
+  never passthrough HTML; `.docx` and `.xlsx` text-extracted, capped at 200 KB) into
+  `ocpfFramework/state/docs/<slug>.js`, rewritten only when the source changed, orphans deleted,
+  under the always-ignored `state/` (Ops § Repository Hygiene names it); a fresh clone's popup says
+  *render the dashboard to read this here* and still offers the download; the line is shown for the
+  documents that carry a sign-off (FRD, TDD, Sanity Check, Build Plan, Code Review, Design Doc) and
+  for any other document in which a sign-off line is found. Sidecar slugs are injective (the path
+  plus six hex digits of its SHA-256), a `#doc=` address opens only a document the index holds, and
+  every file path the page emits is percent-encoded, so odd file names load and a crafted link opens
+  nothing. **A Documentation website button** beside it, in the DESIGN phase's teal,
+  once `docs/index.html` exists (the `html-docs` skill), opens the help site in a new tab. **Download latest .app**
+  appears inside the *Project completed* box only, once `outputAppPackage/` holds a package — the
+  newest by version, with its version and size. **The within-step progress bar** returns to the
+  exit-gate card: each gate item carries a verdict read from disk (✓ a rule holds, ○ it fails, ? no
+  rule — the literal rules of Ops § Dashboard → 7's honesty rule), the label reads *n of m gate items
+  met · k unreadable*, the bar fills by `n / m` with the percentage shown, never by a timer;
+  Build-a-Feature shows the row's stage ladder; a full bar closes nothing. The page's 30-second
+  in-place refresh keeps the documents dropdown, the open popup, and the theme as they are. Both
+  renderers, same output; the F1 page is unchanged. Step 12's and Lite Step 7's hand-off notes may
+  point at both.
+- **Intake.** **Role Center** is a sheet row of its own (§1.6, beside Activity Cues) and an intake
+  question in Box 4 (15a): the home page of a user profile — which profile, its headline, which
+  parts and actions; the four-object shape is the plugin's `build-a-feature/references/objects/role-center.md`.
+- **Copilot corrections** (from the primary sources read October 30, 2026 — GitHub's *CLI hooks
+  reference* and VS Code's *Hooks* page). The Copilot CLI's `.github/hooks/ocpf-dashboard.json`
+  carries the CLI's documented shape (`"version": 1`, a `bash` and a `powershell` line per hook,
+  `"cwd": "."`, an explicit `timeoutSec`) and, since Copilot's hooks have no matcher, one
+  `preToolUse` and one `postToolUse` entry pass the hook input on stdin to the renderer, which
+  records or clears the question only when `toolName` is `ask_user` (its `message` and `enum`
+  mapped to the question and options) or `askQuestions`, and otherwise renders throttled — so one
+  file serves the CLI and Copilot Chat. **Copilot Chat in VS Code has agent hooks, in Preview**: the same file
+  is installed; the shell proof proves the runner only, so `hooks` is recorded `false` until a hook
+  run flips it to `true` in `dashboard.json`, read at the first step close and at every session
+  start; off or disabled, the page falls back to the step-close refresh as before (Ops § Dashboard
+  → 3; ALL ALONG → Dashboard; the dashboard skill § 2b).
+- **Pre-release channel:** the environment variable `OCPF_FRAMEWORK_REF` (default `main`) replaces
+  `main` in the framework's fetch URLs and `git ls-remote` in the `start`, `update-framework`, and
+  `dashboard` skills and in PRE-01 / Lite Step 1's fetch line; the marker's `ref` records it (Ops §
+  Plugin). Never asked for (Rule 6d) — it is for people who test the framework itself.
+- **What did not change.** `ProjectProgress.md` remains the record; the agent remains the single
+  writer of `app.json`, the sheet, ProjectMemory, and every document; approvals are still given in
+  the options boxes and the sign-off steps; the hooks, the runner ladder, the proof, the close
+  render, and both themes are as in 5.10.0.0. The page takes no input.
 
 ## v5.10.0.0 — October 29, 2026
 

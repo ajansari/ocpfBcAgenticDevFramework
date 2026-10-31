@@ -18,6 +18,13 @@ It never overwrites an existing file.
 
 Repository: `https://github.com/ajansari/ocpfBcAgenticDevFramework` (default branch `main`).
 
+**Framework ref.** Every URL below names the `main` branch. When the environment variable
+`OCPF_FRAMEWORK_REF` is set and not empty (the framework's pre-release channel, Ops § Plugin —
+for testing an unreleased branch or tag on a real project), substitute its value for `main` in
+every `raw.githubusercontent.com` and `api.github.com` URL of this repository and in `git
+ls-remote … refs/heads/<ref>` (`refs/tags/<ref>` for a tag), write that value as `ref` in the
+marker (Step 6), and say in one line which ref was fetched. Never ask the human to set it.
+
 Throughout, when you need the human to **decide** something, use the harness's selectable options
 mechanism, with the recommended option first and a short reason on each: `AskUserQuestion` in
 Claude Code, the `askQuestions` tool in GitHub Copilot Chat in VS Code, or `ask_user` in GitHub
@@ -43,14 +50,21 @@ without a connected project folder. Skip to
    or `ocpfFramework/LITE_BC_App_Build_Routine_Agent.md` (in the root on a pre-5.0.0.0 project)
    whose first lines contain `# BC App Build Routine`. If found, this project already follows the
    framework. **Don't start Full or Lite again.** Tell the human which edition and version it is
-   on, and ask, through the options mechanism, one question with three choices:
+   on — and, when `ocpfFramework/customSkills.json` exists, run the Custom Skills check first
+   (`ocpf-skills --check --project <root>` — the helper in `ocpfFramework/scripts/`, else this
+   plugin's `skills/skill-load/scripts/` copy placed there first; Ops § Custom Skills → 5): **a block is reported before
+   the menu and nothing below runs until it is resolved** through the `skill-load` skill's per-issue
+   boxes. Then ask, through the options mechanism, one question with four choices:
    - **Status** — where the project stands (the `status` skill);
    - **Check for a framework update** (the `update-framework` skill);
    - **Build a feature in this project** — one object or a few, now, without touching the
      project's steps or documents: invoke the `build-a-feature` skill, which reads the
      project's parameters and appends its own table to `ProjectProgress.md`. On a marker whose
      `edition` is already `feature`, this is the recommended first option and continues the
-     previous session.
+     previous session;
+   - **Load a custom skill into this project** — a third-party skill made for this framework, from
+     a folder, a zip, a GitHub repository, a bcskills.ai slug, or a `skillslocation.md` (the
+     `skill-load` skill; Ops § Custom Skills). Since 6.0.0.0.
    Nothing else; skip the rest of this skill.
 2a. **An existing extension that never used the framework?** `app.json` exists and there is no
    marker and no runbook. Say what you found (name, publisher, ID ranges from `app.json`; how
@@ -114,6 +128,14 @@ can run **on** a Full or Lite project later through Step 2's third choice.
 
 If the human invoked the skill with `full`, `lite`, or `feature`, confirm that choice instead of
 asking from scratch.
+
+**Custom Skills loaded before this point** (`ocpfFramework/customSkills.json` exists — the human ran
+`/ocpf-bc:skill-load` first, as the framework recommends): the journey question's text names, per
+option, any loaded skill that journey would exclude (*contoso_patterns is made for Full and Lite —
+Build-a-Feature would block on it*), and the moment the journey is chosen the agent writes
+`edition` to the marker and runs `ocpf-skills --check` again (Ops § Custom Skills → 5): a block is
+resolved through the `skill-load` skill's per-issue boxes **before** the runbook is placed or the
+Build-a-Feature skill is invoked. Nothing starts on a blocked set.
 
 **Build-a-Feature chosen → invoke the `build-a-feature` skill now and stop here.** Its Part 1
 and Part 2 do the whole setup that journey needs (companions, marker with `"edition":
@@ -213,6 +235,9 @@ Nothing else in the root.
    later, only when the intake records a Business Central Copilot feature, into a sibling folder
    outside the project root (Ops § Fetched Companions); it is not bundled here. If GitHub is unreachable then, the bundled copies are in this skill's
    `references/steps/full/` and `references/steps/lite/`, and in the `documents` skill's `references/`.
+   **Since 6.0.0.0 the same fetch brings `opsGuide/extensionPoints.json` → `ocpfFramework/extensionPoints.json`**
+   (gitignored with the guides; the bundled copy is the `skill-load` skill's `references/extensionPoints.json`)
+   — the machine-readable list of the moments a Custom Skill may plug into (Ops § Custom Skills → 2).
 2b. **`ocpfFramework/README.md`:** write these six lines, exactly, so anyone opening the folder
    knows what it is:
    ```
@@ -231,7 +256,7 @@ Nothing else in the root.
      "runbookVersion": "<from the **Version:** line>",
      "source": "github | plugin-bundle",
      "repository": "https://github.com/ajansari/ocpfBcAgenticDevFramework",
-     "ref": "main",
+     "ref": "main",                 // or the value of OCPF_FRAMEWORK_REF when it was set
      "commitSha": "<sha or unknown>",
      "fetchedAt": "<ISO 8601 timestamp>",
      "placedAs": ["CLAUDE.md", ".github/copilot-instructions.md"],

@@ -1,6 +1,6 @@
 ---
 name: dashboard
-description: Create, refresh, and open the live HTML dashboard of a Business Central project following the OCPF BC Agentic Development Framework - ProjectDashboard.html, the Build Map page that shows the app's name and icon, the phase and step the project is on, tokens or AI credits and cost so far, elapsed time split between agent and human, which models are working, the current step's exit gate, and the question waiting on the human. Renders from state the framework already keeps, costs no tokens per refresh once its hooks are installed, and opens in the default browser. Use when a project reaches the point in PRE-01 / Lite Step 1 where app.json exists, when the user asks to "open the dashboard", "refresh the dashboard", "show the build map", "where is the dashboard file", or runs /ocpf-bc:dashboard, and to repair a project whose page stopped refreshing.
+description: Create, refresh, and open the live HTML dashboard of a Business Central project following the OCPF BC Agentic Development Framework - ProjectDashboard.html, the Build Map page that shows the app's name and icon, the phase and step the project is on, tokens or AI credits and cost so far, elapsed time split between agent and human, which models are working, the current step's exit gate, the question waiting on the human, a View Project Documents button that lists every project document by stage and opens it in a popup with its approval line and a download, a Documentation website button once the help site exists, and a Download latest .app link once the project is completed. Renders from state the framework already keeps, costs no tokens per refresh once its hooks are installed, and opens in the default browser. Use when a project reaches the point in PRE-01 / Lite Step 1 where app.json exists, when the user asks to "open the dashboard", "refresh the dashboard", "show the build map", "where is the dashboard file", or runs /ocpf-bc:dashboard, and to repair a project whose page stopped refreshing.
 ---
 
 # OCPF project dashboard — the Build Map page
@@ -15,8 +15,11 @@ Repository Hygiene; v5.2.0.0 wrote it to the always-ignored `ocpfFramework/state
 persist with the project), rendered by the
 bundled script from files the framework already writes — `app.json`, `framework.json`,
 `state/usage.json`, `ProjectProgress.md`, the step files, `pricing.json`, the sub-agent definitions,
-the usage script's JSON, and (in Claude Code) the transcripts. **The agent never writes the HTML and
-never fills a number in by hand.** `ProjectProgress.md` stays the record; the page is a view of it.
+the usage script's JSON, (in Claude Code) the transcripts, and — since 6.0.0.0 (section 5) — every
+file under `docs/` and `requirements/`, the sign-off lines inside them, `docs/index.html`, and `outputAppPackage/`.
+**The agent never writes the HTML, never fills a number in by hand, and never writes an approval
+into a document for the page's sake.** `ProjectProgress.md` stays the record; the documents stay
+the record of their approvals; the page is a view of both.
 
 ## 1. First creation — in the setup batch, after the kickoff
 
@@ -32,7 +35,9 @@ supplies the text.
    `usage` skill's `scripts/ocpf-usage.py` and `ocpf-usage.ps1` (the renderer calls it), and
    every file in `templates/` (`dashboard.html`, `dashboard-f1.html`) into the project's `ocpfFramework/scripts/` (already gitignored —
    Ops § Repository Hygiene). Byte for byte, from this plugin or from
-   `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/dashboard/<path>`.
+   `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/dashboard/<path>`
+   (`main` is replaced by the environment variable `OCPF_FRAMEWORK_REF` when it is set — the
+   framework's pre-release channel, Ops § Plugin; record the ref used in the marker's `ref`).
 2. **Render once and open it:**
    ```
    python3 ocpfFramework/scripts/ocpf-dashboard.py --project "<root>" --open --toast "Your dashboard is live"
@@ -55,7 +60,11 @@ supplies the text.
    > extension's name and icon, which phase and step we're on, tokens *(Copilot: AI credits)* and
    > cost so far, how the elapsed time splits between my work and yours, which models are working,
    > the current step's exit gate, and — when I'm waiting on you — the open question and where to
-   > answer it. It exists so you can see where the build stands at a glance without asking me, which
+   > answer it. The **View Project Documents** button in the header lists every project document
+   > by stage — click one to read it right there, with whether and by whom it was approved, read
+   > from the document's own sign-off line, and a download; a **Documentation website** button
+   > opens the help site once it is built — and once the project is completed its box offers the
+   > latest package to download. It exists so you can see where the build stands at a glance without asking me, which
    > also costs nothing: the page re-renders itself from files the framework already keeps, by
    > hooks, with no model call. `ProjectProgress.md` remains the written record.
    >
@@ -68,8 +77,12 @@ supplies the text.
    > Externally** *(when that entry isn't offered, **Reveal in Finder** / **Reveal in File
    > Explorer** and double-click the file)*, or ask me to "open the dashboard" and I will.
    >
-   > *(Copilot Chat in VS Code, or when no interpreter for the hooks was found on this machine:)* There are no working hooks here, so this page refreshes at every
+   > *(Copilot Chat in VS Code with its agent hooks off, or when no interpreter for the hooks was found on this machine:)* There are no working hooks here, so this page refreshes at every
    > step boundary rather than every turn; the header says *Refreshed* and when.
+   >
+   > *(Copilot Chat in VS Code, until its agent hooks are proven:)* Your VS Code may keep this page live
+   > every turn through its agent hooks (a Preview feature); until they prove themselves at the first
+   > step close, the page refreshes at every step boundary. I'll say which it turned out to be.
 
    Record the answer in `docs/0-project/ProjectMemory.md` (one line: dashboard explained, date). If
    the answer is free text, act on it before continuing.
@@ -155,18 +168,73 @@ happened. A hook is proven by running it, never by having written it.
 The step-close ritual (the `usage` skill, Ops § Usage & Cost → 5) ends by running the renderer
 once with the recorded `runner`, on every AI tool and every journey — a step close in Full and
 Lite, an `F` row's close in Build-a-Feature. Redundant while hooks work, the only refresh when they
-don't, and the refresh in Copilot Chat: the page is never more than one close stale.
+don't (Copilot Chat with its hooks off or unproven included): the page is never more than one
+close stale.
 
-**GitHub Copilot CLI.** The same five moments in `.github/hooks/ocpf-dashboard.json` (project
-level, gitignored) with the CLI's event names — `agentStop`, `subagentStop` where available,
-`preToolUse` / `postToolUse` matched on `ask_user`, and an unmatched `postToolUse` with
-`--throttle 45` — each a `command` hook running the same script with `--quiet --live`.
+**GitHub Copilot CLI.** The same moments in `.github/hooks/ocpf-dashboard.json` (project level,
+gitignored; the CLI's reference: `.github/hooks/*.json`, JSON `"version": 1`, each hook a
+`command` with a `bash` and a `powershell` line and an optional `timeoutSec`) with the CLI's event
+names — `agentStop`, `subagentStop` where available, and **one** `preToolUse` and **one**
+`postToolUse` entry each. **Copilot's hooks have no matcher** (the reference lists
+`version` / `type` / `bash` / `powershell` / `cwd` / `timeoutSec` / `env` and nothing else; VS
+Code's page says its parser ignores a matcher), so every tool call reaches both entries, and
+**the renderer does the matching itself**: it reads the hook input on stdin — `toolName` and
+`toolArgs` — and records the question (`preToolUse`, `--waiting-json -`) or clears it
+(`postToolUse`, `--clear-waiting -`; pwsh `-ClearWaiting -HookJson -`) only when `toolName` is
+`ask_user` (the CLI; its `toolArgs` are `{"message", "requestedSchema": {"properties": {"<key>":
+{"title", "enum": [...]}}}}` — one question, the enum its options) or `askQuestions` (Copilot
+Chat; the `questions[]` shape). Any other tool is an ordinary render, and the same entry's
+`--throttle 45` returns at once when the page is younger than that — so a long turn still
+refreshes, and nothing renders twice per tool call. The filter reads Copilot's `toolName` only:
+Claude Code's hook input carries `tool_name` (`AskUserQuestion`), which the harness has already
+matched, and is never filtered. Each line runs the same script with `--quiet
+--live`. The CLI's default `timeoutSec` is 30, enough for a render; the shape (`agentStop` and
+`preToolUse` shown; `subagentStop` follows `agentStop`, `postToolUse` follows `preToolUse` with
+`--clear-waiting -` / `-ClearWaiting -HookJson -` in place of `--waiting-json -` / `-WaitingJson -`):
 
-**GitHub Copilot Chat in VS Code** has no hooks. The page refreshes **at every step boundary**: the
-`usage` skill's step-close ritual runs the renderer after it writes the rows (both editions), and
-the Reasoning role's measurement brief (Full) ends with the render command. Don't pass `--live`;
-the header then says *Refreshed · <time> · at step close*, which is the truth. Offer the human a
-refresh whenever they ask where things stand.
+```json
+{
+  "version": 1,
+  "hooks": {
+    "agentStop": [
+      { "type": "command", "timeoutSec": 30, "cwd": ".",
+        "bash": "python3 ocpfFramework/scripts/ocpf-dashboard.py --project . --quiet --live",
+        "powershell": "pwsh -NoProfile -File ocpfFramework/scripts/ocpf-dashboard.ps1 -Project . -Quiet -Live" }
+    ],
+    "preToolUse": [
+      { "type": "command", "timeoutSec": 30, "cwd": ".",
+        "bash": "python3 ocpfFramework/scripts/ocpf-dashboard.py --project . --quiet --live --waiting-json - --throttle 45",
+        "powershell": "pwsh -NoProfile -File ocpfFramework/scripts/ocpf-dashboard.ps1 -Project . -Quiet -Live -WaitingJson - -Throttle 45" }
+    ]
+  }
+}
+```
+
+`"cwd": "."` is the repository root (the reference: relative to the repository root or absolute),
+so the paths hold wherever the CLI was started. The harness picks the `bash` line on macOS and
+Linux and the `powershell` line on Windows by platform; the runner ladder decides which
+interpreter is written *inside* that line (a Mac without `python3` gets `pwsh -NoProfile -File
+… .ps1` in its `bash` line). The explanation question's last paragraph is the conditioned one
+(above, step 4).
+
+**GitHub Copilot Chat in VS Code has agent hooks, in Preview** (VS Code's *Hooks* page, read
+October 30, 2026): the same `.github/hooks/*.json` files, harness, and format as the Copilot CLI
+— the harness also reads `.claude/settings.json` — and an administrator can disable them. Install
+the same `.github/hooks/ocpf-dashboard.json` as for the CLI (the renderer's `toolName` check
+covers Chat's `askQuestions` as it covers the CLI's `ask_user`). **The shell proof of section 2a proves the runner only — never that
+VS Code fires hooks:** Preview off, or an administrator's policy, passes it every time. So on
+Copilot Chat the proof has two parts. First the shell proof: record `runner`, and **`hooks:
+false`**; write the hook file with `--live` anyway, and never pass `--live` on the agent's own
+renders. Then the live proof, which is a read: a hook run's `--live` flips `hooks` to `true` in
+`dashboard.json` by itself (the renderer does that at every `--live` run), so **at the first step
+close after the install — before the close render — and at every session start, read
+`dashboard.json`**: `hooks: true` means VS Code fired them — record `hooksVerified` now, the page
+is live every turn; still `false` means the hooks are off or disabled — say so in one sentence
+and stay on the fallback: the page refreshes **at every step boundary** — the `usage` skill's
+step-close ritual runs the renderer after it writes the rows (both editions), and the Reasoning
+role's measurement brief (Full) ends with the render command. Don't pass `--live` then; the header
+says *Refreshed · <time> · at step close*, which is the truth. Offer the human a refresh whenever
+they ask where things stand.
 
 Record what was installed in `ocpfFramework/state/dashboard.json` (`hooks: true/false`, `theme`,
 `tool`, `runner`, `hooksVerified`); the `status` skill reads it and reports hooks that were
@@ -228,6 +296,10 @@ never proven.
   blocked a `file://` script — none is needed for the first paint — so re-render and reopen. A
   page that paints but never updates: the renderer did not write
   `ocpfFramework/state/dashboard-data.js` (older than v5.3.5.0) — refresh `ocpfFramework/scripts/`.
+  A document that will not open in the popup (*render the dashboard to read this here*) while
+  `docs/` has the file: `ocpfFramework/state/docs/` is missing or stale (a renderer older than
+  plugin 6.0.0 never writes it; a deleted folder is simply gone) — run the renderer once by hand,
+  which recreates every sidecar; nothing else is needed, the folder is derived and ignored (section 5).
 
 ## 3b. Remediation rows
 
@@ -274,3 +346,76 @@ Step 2; *Agent / you split needs the Claude Code transcript* in Copilot; *as of 
 checkpoint* for an open Copilot session; *none in progress* between steps. The exit-gate card is the
 step file's wording — the gate is met when the agent says so in the closing message, never because
 the page listed it. The page never takes an answer: the *Waiting on you* card says where to reply.
+An approval shown in the documents popup is one that is already written in the document; the page
+never adds, edits, or infers one.
+
+## 5. View Project Documents, the Documentation website, and the completed box's download (6.0.0.0)
+
+Both renderers read the following and write it into `dashboard-data.js`; the page draws it. The
+agent does nothing here beyond rendering — there is no step, no question, and no file for it to
+write. Ops § Dashboard has the human-facing account.
+
+- **The button.** *View Project Documents*, in the header left of the Business Central mark, on
+  the OnlyBCFans page (the F1 page is unchanged — its header has no room for it without a
+  redesign). A click drops down the stages that hold a document: the `docs/` phase folders
+  `0-project` … `4-prove` (Project, Define, Design, Build, Prove) first, then any other subfolder,
+  then the flat files (Build-a-Feature's flat `docs/`), then `requirements/` (one level of
+  subfolders, `requirements/existing/` included) — for the extensions `.md`, `.txt`, `.docx`,
+  `.xlsx`, `.pdf`, `.png`, `.jpg`, `.svg`; the help site's own `index.html`, `build.py`,
+  `site.json`, `template.html` and the `images/`, `assets/`, `screenshots/` folders are skipped.
+  A stage opens to the documents that exist on disk; a document opens the popup. A project
+  without a document yet shows the button disabled with *No documents yet*.
+- **The Documentation website button**, beside it in the DESIGN phase's teal (`--b-teal`; *View
+  Project Documents* stays neutral), appears once
+  `docs/index.html` exists (the `html-docs` skill — Full Step 11, Lite Step 6, on request
+  anywhere; the renderer's `helpSite` reads it) and opens the help site in a new tab through a
+  relative link, which works on `file://`. Absent until then; nothing says when it comes.
+- **The popup.** In-window, scrollable, focus-trapped, closed by *Esc*, the close button, or a
+  click outside. Its header carries the title and path, the approval line — *Approved — <role>,
+  <name>, <date>* or *Not yet approved* — a **Download** link to the file itself (a relative
+  `download` link, which works on `file://`), and *open in a new tab*, which shows the same
+  document full-page through the route `ProjectDashboard.html#doc=<slug>[&h=<heading-id>]`.
+  Markdown is converted to HTML by the renderer itself (stdlib only, the whole text HTML-escaped
+  first — a document is text, never passthrough HTML): headings with ids, tables, lists with
+  checkboxes, fenced code (Mermaid shown as source), links — a link to another `docs/` or
+  `requirements/` document opens in the same popup. **A `#doc=` slug is honoured only when the
+  renderer's index holds it** — the page never builds a sidecar path from the hash or from a link
+  inside a document, so a crafted `[x](#doc=../../x)` opens nothing and says so; every file path
+  the page emits (sidecar, download, image, PDF, package, help site) is percent-encoded per
+  segment, so a name holding `#`, `%`, `?`, or a space still loads. `.docx` and `.xlsx` are text-extracted
+  (capped at 200 KB with a line saying so); `.txt` shows as is; an image shows inline; a PDF
+  offers the download. A document whose sidecar is missing (a fresh clone: the sidecars are per
+  machine) says *render the dashboard to read this here* and still offers the download.
+- **The sidecars.** Each converted document is written once to
+  `ocpfFramework/state/docs/<slug>.js` (`<slug>` is the path with every run of characters outside
+  `A-Za-z0-9_-` turned into one `-`, plus the first six hex digits of the path's SHA-256 — e.g.
+  `docs-2-design-FRD-md-fc5911` — so `a.b.md` and `a-b.md` never share a sidecar and the name is
+  safe in a URL and on every file system; two paths that still collided would be named in
+  `docs.note`), carrying `window.__ocpfDoc = {path, title, kind, html, …}`; the
+  page loads it through a `<script>` tag on demand — the one load that works on `file://` in
+  every browser. A sidecar is rewritten only when its source is newer or the converter version
+  (`CONV` in the scripts) changed, so a render stays well under a second with forty documents;
+  a sidecar whose source is gone is deleted on the next render (orphans never accumulate). The
+  folder is derived, recreatable, and under the always-ignored `ocpfFramework/state/` — never
+  stage it, never repair it by hand; a missing folder means *render once*.
+- **The approval line.** Read from the **first twelve lines** of the document: `**Sign-off:**
+  <role> — <name>, <date>` (the role optional; the header line of the FRD, TDD, Sanity Check, and
+  Lite Design Doc templates) and `**Approved by:** <name>, <date>` (the Build Plan's), plus the
+  rows of the Code Review's **§3 fix-batch table** (approver, date). A name or date still a
+  `<placeholder>`, empty, or containing *pending* reads *Not yet approved*; anything else reads
+  *Approved — role, name, date*. The line is shown for the documents that carry a sign-off (the
+  FRD, TDD, Sanity Check, Build Plan, Code Review, and Lite Design Doc) and for any other document
+  in which a line is found; a document nobody approves (the ChangeLog, the User Guide, a
+  requirement) shows none. Read only: the page never writes a sign-off, and an approval the
+  human gave in a box that no document records does not appear — the document is the record.
+- **Download latest .app.** Inside the *Project completed* box only, once `outputAppPackage/`
+  holds a `.app` (Ops § Packaging): the newest by the version in `<Name>_<a.b.c.d>.app` (file time
+  as the fallback; a `.app` loose at the root or one folder down counts only when
+  `outputAppPackage/` holds none), with version and size, as a direct `download` link that works
+  on `file://`. Absent when no package exists; absent while the project is open.
+- **The within-step progress bar** (the exit-gate card; the renderer's `progress`). Each gate item
+  of the current step carries a verdict read from disk — ✓ a rule exists and holds, ○ it exists
+  and fails, ? no rule — by the literal rules of Ops § Dashboard → 7 (*the honesty rule*); the
+  label reads *n of m gate items met · k unreadable*, the bar fills by `n / m` with the percentage
+  shown, never by a timer; Build-a-Feature shows the row's stage ladder (*n of 7 stages met*). A
+  full bar closes nothing — the gate is met when the agent says so in the closing message (Rule 6c).

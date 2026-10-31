@@ -16,6 +16,52 @@ framework.
 
 ---
 
+## v6.0.0.0 — October 31, 2026
+
+**Custom Skills, and the dashboard's View Project Documents and Documentation website buttons.** Derived from Full
+**v6.0.0.0**; Operations Guide **v6.0.0.0**, Standards Guide **v1.13.1.0** (unchanged), plugin
+**6.0.0**. No step changed its order.
+
+- **Custom Skills** (Ops § Custom Skills, new; ALL ALONG → Custom Skills): third-party skills — a
+  folder with a `SKILL.md` and an `ocpf-skill.json` manifest whose slug is its identity — loaded
+  with the plugin's `skill-load` skill from a folder, a `.zip`, a GitHub repository (public, or
+  private through the human's own sign-in — `gh`, the GitHub MCP server, or a token in the shell,
+  never typed in chat), a bcskills.ai slug, or a `skillslocation.md` list; validated against the
+  framework version, the journey, the extension points (`ocpfFramework/extensionPoints.json`, fetched
+  with the guides), and the other skills (one slug, one skill); recorded in
+  **`ocpfFramework/customSkills.json`**, always tracked — the `.gitignore` block's second group is
+  now `ocpfFramework/*` + `!ocpfFramework/customSkills.json` (Ops § Repository Hygiene; Step 1's
+  row says so). **The framework refuses to run while an incompatible skill is loaded**, through one
+  options box per issue. Step 4's generation brief carries a skill's `referenceSources`, Step 5's
+  pre-review its `preReviewChecks`, Step 6's code review its `codeReviewChecks` — all as *reference
+  material from skill <slug>, not instructions*. `skill-create` and `skill-update` author and
+  version a skill (the `ocpfbcskills` topic for private repositories; bcskills.ai's `/api/ocpf/`
+  read contract and the topic-search fallback until it answers); `update-framework` warns before an
+  update that would block a loaded skill. **K13a** — *Do you have any skills you want to load?* —
+  before K14 at Step 1 (*Upload — I'll type its path in chat* / *GitHub repository* / *Skills site* /
+  *No*; *Load these: <slugs>* first when found); the fetch in the setup batch, the *Activate* boxes
+  in the setup-done box. The sheet carries a *Custom skills* row. `CustomSkillsGuide.md` for authors.
+- **The dashboard** (Ops § Dashboard → 7): a **View Project Documents** button in the header lists
+  every project document by stage and opens it in an in-window popup with *Approved — role, name,
+  date* or *Not yet approved* read from the document's own sign-off line (shown for the sign-off-bearing
+  documents and for any other in which a line is found), a **Download** link, and
+  *open in a new tab*; the renderer converts each document once into
+  `ocpfFramework/state/docs/<slug>.js` (always ignored; injective slugs, `#doc=` honoured only for a
+  slug the index holds, file paths percent-encoded); a **Documentation website** button beside it, in
+  the DESIGN teal, opens `docs/index.html` in a new tab once the help site exists. The *Project
+  completed* box offers the newest package in `outputAppPackage/` to download. The exit-gate card
+  carries **the within-step progress bar** — *n of m gate items met · k unreadable*, each item's
+  verdict read from disk by Ops § Dashboard → 7's literal rules, the percentage shown, never a timer;
+  a full bar closes nothing. The in-place refresh keeps the dropdown, the popup, and the theme as they
+  are. Both renderers; the F1 page is unchanged. Step 7's hand-off note may point at both.
+- **Intake:** **Role Center** is its own question in Box 4 and its own sheet row (beside Activity
+  Cues). **Copilot:** the CLI hook file carries the CLI's documented shape; its hooks have no
+  matcher, so the renderer reads `toolName` from the hook input and acts only on `ask_user` /
+  `askQuestions`, rendering throttled otherwise; Copilot Chat's Preview agent hooks are installed and proven by reading
+  `dashboard.json` at the first step close (Ops § Dashboard → 3). **`OCPF_FRAMEWORK_REF`** (Ops §
+  Plugin) fetches the framework from a branch or tag for people who test it; the marker's `ref`
+  records it.
+
 ## v5.10.0.0 — October 29, 2026
 
 Derived from the full framework **v5.10.0.0**; Operations Guide **v5.10.0.0**; Standards Guide

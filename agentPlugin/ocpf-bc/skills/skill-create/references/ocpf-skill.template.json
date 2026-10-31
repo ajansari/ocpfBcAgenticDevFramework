@@ -1,0 +1,31 @@
+{
+  "ocpfCustomSkill": 1,
+  "slug": "<slug>",
+  "renamedFrom": [],
+  "displayName": "<display name>",
+  "version": "1.0.0.0",
+  "description": "<one sentence: what the skill supplies and when the framework reads it>",
+  "author": { "name": "<person, as typed>", "organization": "<organization, as typed>", "url": "<url or empty>" },
+  "created": "<YYYY-MM-DD>",
+  "updated": "<YYYY-MM-DD>",
+  "framework": {
+    "name": "OCPF BC Agentic Development Framework",
+    "madeWith": "<this project's runbookVersion>",
+    "minVersion": "<this project's runbookVersion>",
+    "maxVersion": null
+  },
+  "journeys": ["full", "lite", "feature"],
+  "harnesses": ["claude-code", "copilot"],
+  "extends": {
+    "referenceSources": [],
+    "preReviewChecks": [],
+    "codeReviewChecks": []
+  },
+  "overrides": {
+    "documentTemplates": {},
+    "modelRecommendations": {},
+    "companionOffers": {}
+  },
+  "conflictsWith": [],
+  "requires": []
+}

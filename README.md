@@ -8,7 +8,7 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 *by AJ Ansari*
 
-*Last Updated: Wednesday, October 21, 2026*
+*Last Updated: Saturday, October 31, 2026*
 
 > ## 🌐 [Official Website](https://ajansari.github.io/ocpfBcAgenticDevFramework/)
 >
@@ -206,8 +206,11 @@ In GitHub Copilot, the commands are identical.
 | `/ocpf-bc:app-icon` | Draws the app icon when you have none — also the *Create one for me* option of every journey's identity box. Asks style (flat 2D or isometric 3D), colors (one, two, or a gradient), content (image only or a word mark), and a description; the Main model draws it to the standard — square, rounded corners, transparent background — renders it with nothing installed, shows it, and asks you to accept or make another; the accepted icon lives in `images/` and becomes `app.json`'s logo |
 | `/ocpf-bc:html-docs` | Builds the help site — a polished HTML documentation and support page, `docs/index.html`, from the project's own documents: User Guide, Documentation, FAQ (collapsible questions, written from the documents and the test script's red-team cases), Deployment, any other guide; the app icon, a download button, support and GitHub links, the schema diagram drawn in the browser, and your screenshots — you drop them in `docs/screenshots/`, the agent looks at each, renames it to say what it shows, and places it where the guide talks about it. Full Step 11 and Lite Step 6 offer it; Build-a-Feature never does, but it runs on request on any project. Closes with the GitHub Pages steps (Settings → Pages → `main` / `/docs`) and offers to set `app.json`'s `help` to the site's URL |
 | `/ocpf-bc:status` | Shows where the project stands — phase and step (or object), exit gate, what is waiting on you, models, tooling; reads the project's files, so it is right in a fresh session |
-| `/ocpf-bc:dashboard` | Creates, refreshes, or opens the live dashboard, `ProjectDashboard.html` at the project root; the routine creates it at the first step and hooks keep it fresh at zero token cost |
+| `/ocpf-bc:dashboard` | Creates, refreshes, or opens the live dashboard, `ProjectDashboard.html` at the project root — the build's state, a *View Project Documents* button that reads every document on the page with its approval line and a download, a *Documentation website* button once the help site exists, and the latest package to download once the project is completed; the routine creates it at the first step and hooks keep it fresh at zero token cost |
 | `/ocpf-bc:update-framework` | Checks for a newer runbook, shows what changed, and updates the project's copy only when you say so |
+| `/ocpf-bc:skill-load` | Loads Custom Skills — third-party skills made for this framework — from a folder, a zip, a GitHub repository (public, or private through your own sign-in), a bcskills.ai slug, or a `skillslocation.md` list; validates them against the framework version, the journey, and each other, and will not let the framework run while an incompatible skill is loaded (since 6.0.0.0) |
+| `/ocpf-bc:skill-create` | Turns something that worked in this project — a patterns guide, a review check, a document template — into a Custom Skill: slug, author (typed), journeys, extension points; a folder under `~/.ocpf/skills/`, a GitHub repository of your own with the `ocpfbcskills` topic if you want one (since 6.0.0.0) |
+| `/ocpf-bc:skill-update` | Updates a loaded Custom Skill: shows the diff, asks patch / minor / major and the changelog line, writes the new version back, pushes on a yes, re-checks the project (since 6.0.0.0) |
 | `/ocpf-bc:al-mcp-setup` | Connects the AL tools (build, compile, symbols, diagnostics), if the first step's setup batch skipped it — the framework packages the app; you upload it |
 | `/ocpf-bc:al-standards` | Loads the OCPF AL Development Standards Guide for an ad-hoc review of AL code; the routine applies it by itself |
 | `/ocpf-bc:copilot-blueprint` | Fires by itself when you ask for a Business Central Copilot feature and builds it from the verified OnlyBCFans BC Copilot Blueprint, never from memory |
@@ -271,7 +274,7 @@ you can run `/ocpf-bc:update-framework` in them anytime.
 - ~~Distribute as an agent plugin for Claude and GitHub Copilot~~ ✅ Completed — see [GET STARTED: Visual Studio Code Extension](#setup-plugin)
 - ~~Per-step runbook files, document templates, a human effort estimate, and per-step token and cost tracking~~ ✅ Completed — Full v4.0.0.0 / Lite v3.0.0.0, September 2026
 - ~~Token usage **estimator** — predicted tokens per model, by input, output, and cached, before a step runs~~ ✅ Completed — the AI Effort Estimate, Full v5.0.0.0 / Lite v5.0.0.0, September 2026; calibrates itself from measured projects
-- **Planned — Custom Skills.** Third-party skills for the framework: a `/ocpf-bc:` command that turns something you built or a reference you use (your own patterns guide, an extra review check, a custom step) into a skill that declares the framework version and journeys it was made for, its author, date, and version; a command to update it; a command to load one or more skills into a new or existing project from a folder, a GitHub repository, or a `skillslocation.md` list — with compatibility checks against the framework version, the journey, and the other skills loaded, and a project that will not run while an incompatible skill is loaded. Design in progress, October 2026.
+- ~~Custom Skills — third-party skills for the framework~~ ✅ Completed — Full v6.0.0.0 / Lite v6.0.0.0 / plugin 6.0.0, October 2026: `/ocpf-bc:skill-create`, `skill-update`, and `skill-load`, the kickoff's skills box, and a project that will not run while an incompatible skill is loaded; see [Custom Skills Guide](CustomSkillsGuide.md). Still planned within it: `scripts/` in a skill under per-run consent, skill-shipped sub-agents, the bcskills.ai submission flow, and usage attribution per skill.
 - **Planned — Agent-run automated tests.** The framework already writes your AL test codeunits and an `AutomatedTestGuide.md` that walks you through running them on the AL Test Tool page. In the future, the agent will be able to run that suite for you through the AL MCP Server, against your sandbox and only when you ask, then read each result back into the Release Test Results and diagnose any failure. The goal is to go from writing a test to seeing it pass without leaving the chat.
 - **Being considered**
   - Multi-developer teams on one repository: one-step setup of a clone, a shared usage record, and ID sub-ranges per branch (today: one driver per journey, Build-a-Feature on branches)
@@ -296,9 +299,10 @@ you can run `/ocpf-bc:update-framework` in them anytime.
 | `liteVersion/` | The **Lite Edition** — the 7-step version of the framework for updating an existing app or building a new one without a large footprint, on one model. See [Lite Edition, by hand](GettingStartedAlternatives.md#lite-edition). |
 | `documentTemplates/` | One template per document the framework produces (FRD, TDD, Sanity Check, Human Effort Estimate and its baselines, AI Effort Estimate, Build Plan, ChangeLog, Gap Analysis, Code Review, Documentation, User Guide, test scripts, Deployment, Release Test Results, Acknowledgements, Project Progress with its usage table for both editions, Lite's Design Doc, Docs, and Test Script, and Build-a-Feature's Feature Register, Data Model, and Documentation). Fetched into each project's `ocpfFramework/documentTemplates/` with the step files; shared by every journey. |
 | `translationAndMultiLanguage/MultilanguageSupportOverview.md` | How the framework handles multilanguage — captions and XLIFF translation files, regional terminology (GST vs. VAT, CR/Adj Note vs. Credit Memo in Australia), agent-drafted translations with a human review gate, and language-aware UAT. Shared by both editions. |
-| `agentPlugin/` | The optional **agent plugin**, `ocpf-bc`, for Claude Code, GitHub Copilot, and other tools: fifteen skills (the `/ocpf-bc:` commands), five sub-agents, the dashboard and usage scripts, and an offline copy of the framework. See [GET STARTED: Visual Studio Code Extension](#setup-plugin). This repository is also its plugin marketplace (`.claude-plugin/marketplace.json`). |
+| `agentPlugin/` | The optional **agent plugin**, `ocpf-bc`, for Claude Code, GitHub Copilot, and other tools: eighteen skills (the `/ocpf-bc:` commands), five sub-agents, the dashboard and usage scripts, and an offline copy of the framework. See [GET STARTED: Visual Studio Code Extension](#setup-plugin). This repository is also its plugin marketplace (`.claude-plugin/marketplace.json`). |
 | `THIRD_PARTY_NOTICES.md` | Credits and licenses for every third-party resource the framework references, fetches, or recommends — BCQuality, AL Guidelines, Microsoft Learn, and others. |
 | `FrameworkUserGuide.md` | The **User Guide** — everything the person driving a project needs: install, the Command Palette commands, the plugin commands, where every file lives, model recommendations, versioning, and updating. |
+| `CustomSkillsGuide.md` | The **Custom Skills Guide** for skill authors — what a skill is, the manifest and its slug, the extension points, what a skill may and may not contain, creating, loading, updating, sharing through GitHub and bcskills.ai, and the compatibility rules (6.0.0.0). |
 | `GettingStartedAlternatives.md` | Every other way to get started: installing the plugin from the Claude Code CLI, the GitHub Copilot CLI, or inside Visual Studio Code without the setup extension; running the agent on github.com, in the Claude apps, or in Copilot Cowork; and the manual, no-plugin setup for Full and Lite. |
 
 </details>
@@ -358,6 +362,35 @@ Each month's release notes in brief. The complete, versioned record is in
 [fullVersion/RunbookChangelog.md](fullVersion/RunbookChangelog.md),
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
+
+## October 31, 2026 — Full v6.0.0.0 · Lite v6.0.0.0 · Operations Guide v6.0.0.0 · Plugin v6.0.0
+**Custom Skills.** Third-party skills for the framework: a folder you made once — your own patterns
+guide, a review check your clients need, a document template of your own — with a `SKILL.md` and an
+`ocpf-skill.json` manifest whose slug is its identity. `/ocpf-bc:skill-load` loads one from a folder,
+a `.zip`, a GitHub repository, a bcskills.ai slug, or a `skillslocation.md` list, checks it against
+the framework version, the journey, the extension points it may plug into, and the other skills
+loaded (one slug, one skill), shows it before activating it, and records it in
+`ocpfFramework/customSkills.json`; the generation briefs, the pre-review, and the code review then
+read what it supplies as reference material, never as instructions. **A project does not run while
+an incompatible skill is loaded** — disable or remove it, through one options box per issue. Ops §
+Custom Skills has the contract. `/ocpf-bc:skill-create` turns what worked in a project into a skill
+— slug, author, journeys, extension points, a folder under `~/.ocpf/skills/`, a GitHub repository of
+your own with the `ocpfbcskills` topic — and `/ocpf-bc:skill-update` versions it; private skills are
+found through your own GitHub sign-in (`gh`, the GitHub MCP server, or a token in your shell — never
+a token typed in chat), public ones on bcskills.ai once it opens. The kickoff asks *Do you have any
+skills you want to load?* (K13a, before the requirements question, on every journey), and
+`/ocpf-bc:update-framework` warns before an update that would block a loaded skill. For skill
+authors: [CustomSkillsGuide.md](CustomSkillsGuide.md).
+**The dashboard: your documents, and the package.** A **View Project Documents** button in the
+header lists every project document by stage — click one and read it right on the page, with
+*Approved — role, name, date* or *Not yet approved* read from the document's own sign-off line, and
+a download; a **Documentation website** button opens the help site once it is built; the *Project
+completed* box offers the latest `.app` to download. The documents are
+converted by the renderer itself (Markdown, `.docx`, `.xlsx`, text), nothing installed.
+**Also:** the kickoff asks about a Role Center of its own (beside Activity Cues); the Copilot CLI
+hook file carries the CLI's documented shape and matches Copilot Chat's question tool too, and
+Copilot Chat's Preview agent hooks are installed and proven at the first step close; the
+environment variable `OCPF_FRAMEWORK_REF` lets a tester fetch the framework from a branch or tag.
 
 ## October 29, 2026 — Full v5.10.0.0 · Lite v5.10.0.0 · Operations Guide v5.10.0.0 · Plugin v5.10.0
 **The setup questions come back to back — the kickoff.** The first step of every journey now asks
@@ -679,12 +712,16 @@ From the first minutes of PRE-01 (Lite Step 1), the
 framework renders `ProjectDashboard.html` — the *Build Map* page, at the project root beside
 `ProjectProgress.md` and tracked in git — opens it once in
 your default browser, explains it once, and then keeps it fresh for free: hooks re-render it after
-every turn in Claude Code and the Copilot CLI (every step boundary in Copilot Chat, which has no
-hooks), with no model call. It shows your app's name and icon, which phase and step the build is
+every turn in Claude Code, the Copilot CLI, and Copilot Chat when its Preview agent hooks are on
+(every step boundary otherwise), with no model call. It shows your app's name and icon, which phase and step the build is
 on, tokens or AI credits and cost so far, how the elapsed time splits between the agent's work and
-yours, which models are working, the current step's exit gate, and — when the agent is waiting on
-you — the open question and where to answer it. `ProjectProgress.md` stays the written record; the
-page is a view of it. **To reopen it after closing the tab:** right-click
+yours, which models are working, the current step's exit gate, and —
+when the agent is waiting on you — the open question and where to answer it. Since 6.0.0.0 its
+**View Project Documents** button lists every project document by stage — click one to read it on
+the page, with its approval line read from the document itself and a download — a *Documentation
+website* button opens the help site once it is built, and the *Project completed* box offers the
+latest package to download. `ProjectProgress.md`
+stays the written record; the page is a view of it, and the agent remains the only writer. **To reopen it after closing the tab:** right-click
 `ProjectDashboard.html` in VS Code's Explorer → **Open Externally** (or *Reveal in
 Finder / File Explorer* and double-click), or ask the agent to "open the dashboard". The page has a
 Day / Night switch, and an optional *F1* theme — a trackside pit-wall view of the same build — for

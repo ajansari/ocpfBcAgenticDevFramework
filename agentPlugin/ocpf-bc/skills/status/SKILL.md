@@ -36,7 +36,10 @@ conversation memory.
    has `ocpfFramework/state/dashboard.html` (v5.2.0.0) needs the `update-framework` skill; so does
    one whose hooks lack the unmatched `PostToolUse` entry (the page freezes for a whole turn) or
    whose usage rows name no sub-agent model (scripts before v5.3.2.0 never read
-   `<session>/subagents/`).
+   `<session>/subagents/`). A project whose `ocpfFramework/state/docs/` is missing, or older
+   than the newest file under `docs/`, has not been rendered since its documents changed (the
+   popup says *render the dashboard to read this here*): one line saying so, and that one render — the `dashboard`
+   skill, or the hooks once repaired — recreates the sidecars; never create or stage them by hand.
 3. **`ocpfFramework/framework.json`**, if present: edition, runbook version, `layout`, `alMcp`, and
    `tooling` (mermaid and pwsh, recorded by Ops § Tooling Checks). Also
    **`ocpfFramework/state/notifications.json`**, if present: the notification kinds this developer chose.
@@ -87,6 +90,12 @@ Keep it to a compact block:
   is newer than every source document `site.json`'s `tabs` name and every file in `docs/screenshots/`;
   older or missing is a one-line blocker — *rebuild the help site: `python3 docs/build.py`* — because
   GitHub Pages serves whatever was last pushed.
+- **Custom skills** (6.0.0.0; Ops § Custom Skills): when `ocpfFramework/customSkills.json` exists,
+  run `ocpfFramework/scripts/ocpf-skills.py --check --project <root>` (pwsh `-Check -Project`) and
+  report each loaded skill — slug, display name, version, author, enabled, status (*compatible* /
+  *blocked* / *disabled* / *missing*) — and, **first among the blockers**, any issue the check or the
+  register's `block` names: *the framework will not run until <slug> is disabled or removed — run
+  `/ocpf-bc:skill-load` to resolve it*. No register: *no custom skills loaded*.
 - **Tooling:** `tooling` from `ocpfFramework/framework.json` — `mermaid` (npx-cached, installed,
   unavailable) and `pwsh` (5.1, 7.x, unavailable); "not checked yet" when the object is empty or
   missing.

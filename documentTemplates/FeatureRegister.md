@@ -20,6 +20,7 @@ Written at the intake close; every value is one the human chose or typed in a bo
 | Main model / effort | <model> / <effort> | <roles question> |
 | Version now / packages | <app.json version> / <versions in outputAppPackage/, or none> | — |
 | New or existing app | <New app — started at 0.0.0.1 / Existing app — installed version <v>> | <intake 4b> |
+| Custom skills | <none / one line per skill: slug, version, author, source, enabled> | <ocpfFramework/customSkills.json — Ops § Custom Skills; rewritten at every load, disable, or removal> |
 
 ## 2. Objects
 One row per object this journey built, in build order; `Row` is the feature table's id in `ProjectProgress.md`. A row is written when the object's design is **proposed** (status *proposed*), updated to *confirmed* when the human accepts the design, and completed with the file when it compiles. **Base object:** for an extension, the standard object it extends. **Relates to:** the tables, pages, APIs, and permission sets this object links to or is used by. **ID** is unique within its type only: the first object of each type takes the range's first ID (Ops § Object IDs).

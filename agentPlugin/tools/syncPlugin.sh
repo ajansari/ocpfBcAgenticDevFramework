@@ -31,6 +31,7 @@ pairs=(
   "liteVersion/LITE_BC_App_Build_Routine_Agent.md|skills/start/references/LITE_BC_App_Build_Routine_Agent.md"
   "liteVersion/LITE_RunbookChangeLog.md|skills/start/references/LITE_RunbookChangeLog.md"
   "opsGuide/ocpfOperationsGuide.md|skills/start/references/ocpfOperationsGuide.md"
+  "opsGuide/extensionPoints.json|skills/skill-load/references/extensionPoints.json"
 )
 
 # canonical folder -> bundled folder (every *.md inside is copied; stale extras are removed)
@@ -137,6 +138,15 @@ fi
 if ! python3 "$repo_root/agentPlugin/tools/buildStubs.py" --check; then
   if [[ "$mode" == "check" ]]; then stale=1; else python3 "$repo_root/agentPlugin/tools/buildStubs.py"; fi
 fi
+
+# Every skill folder the plugin ships must carry a SKILL.md whose frontmatter name is the folder's name (the harnesses list skills by it).
+for skdir in "$plugin"/skills/*/; do
+  sk="$(basename "$skdir")"
+  if [[ ! -f "$skdir/SKILL.md" ]]; then echo "skill folder without SKILL.md: skills/$sk" >&2; exit 1; fi
+  skname="$(sed -n '2,6s/^name: *//p' "$skdir/SKILL.md" | head -1)"
+  if [[ "$skname" != "$sk" ]]; then echo "skills/$sk/SKILL.md frontmatter name is '$skname', not '$sk'" >&2; exit 1; fi
+done
+echo "skill folders: $(ls -d "$plugin"/skills/*/ | wc -l | tr -d ' ') with SKILL.md"
 
 version="$(sed -n 's/.*"version": *"\([^"]*\)".*/\1/p' "$plugin/.claude-plugin/plugin.json" | head -1)"
 echo "plugin version: $version"

@@ -4,9 +4,9 @@
 
 *by AJ Ansari*
 
-**Last Updated:** Thursday, October 29, 2026
-**Covers:** Full runbook v5.10.0.0 · Lite v5.10.0.0 · Standards Guide v1.13.1.0 · Operations Guide
-v5.10.0.0 · `ocpf-bc` agent plugin v5.10.0 · Visual Studio Code setup extension v0.0.17
+**Last Updated:** Saturday, October 31, 2026
+**Covers:** Full runbook v6.0.0.0 · Lite v6.0.0.0 · Standards Guide v1.13.1.0 · Operations Guide
+v6.0.0.0 · `ocpf-bc` agent plugin v6.0.0 · Visual Studio Code setup extension v0.0.17
 
 > This guide is for the person driving a project with the framework: a Business Central
 > functional consultant or an AL developer working in Visual Studio Code with Claude Code or GitHub Copilot.
@@ -36,8 +36,8 @@ know which one you are looking at.
 
 | Part | What it is | Where it lives | Version today |
 |---|---|---|---|
-| **The framework** | The runbook (Full or Lite), its step files, the document templates, the **Standards Guide**, and the **Operations Guide**. This is the content the AI agent follows. | The public GitHub repository, `ajansari/ocpfBcAgenticDevFramework`, on its `main` branch. | Full 5.10.0.0 · Lite 5.10.0.0 · Standards 1.13.1.0 · Ops 5.10.0.0 |
-| **The agent plugin** `ocpf-bc` | Fifteen skills (the `/ocpf-bc:` commands), five sub-agent definitions, the AL tooling helper scripts, the dashboard renderer, and an *offline fallback copy* of the framework. Installed once per machine into Claude Code or GitHub Copilot. | Same repository, folder `agentPlugin/ocpf-bc`, published as a plugin marketplace. | 5.10.0 |
+| **The framework** | The runbook (Full or Lite), its step files, the document templates, the **Standards Guide**, and the **Operations Guide**. This is the content the AI agent follows. | The public GitHub repository, `ajansari/ocpfBcAgenticDevFramework`, on its `main` branch. | Full 6.0.0.0 · Lite 6.0.0.0 · Standards 1.13.1.0 · Ops 6.0.0.0 |
+| **The agent plugin** `ocpf-bc` | Eighteen skills (the `/ocpf-bc:` commands), five sub-agent definitions, the AL tooling helper scripts, the dashboard renderer, the Custom Skills helper, and an *offline fallback copy* of the framework. Installed once per machine into Claude Code or GitHub Copilot. | Same repository, folder `agentPlugin/ocpf-bc`, published as a plugin marketplace. | 6.0.0 |
 | **The Visual Studio Code setup extension** | A bootstrapper and extension pack, published to the Visual Studio Marketplace and Open VSX. Installs the AL toolchain and the agent extensions, wires your agent to the plugin marketplace, and adds six Command Palette commands. It contains **no framework content**. | A separate repository, published as [`ajansari.ocpf-bc-dev-setup`](https://marketplace.visualstudio.com/items?itemName=ajansari.ocpf-bc-dev-setup) (also on [Open VSX](https://open-vsx.org/extension/ajansari/ocpf-bc-dev-setup)). | 0.0.17 |
 | **Your project's copy** | The runbook and companions fetched into one AL project, pinned at the version fetched. | Your AL project folder: `CLAUDE.md` or `.github/copilot-instructions.md`, plus one `ocpfFramework/` folder holding the step files, templates, both guides, patterns, scripts, the changelog, the plugin's marker, and each developer's state. | Whatever was current when you started, until you approve an update |
 
@@ -262,7 +262,10 @@ recognises.
 | `/ocpf-bc:al-mcp-setup` | Connects the agent to Microsoft's AL tools (build, compile, symbols, diagnostics) using the AL Language extension already on the machine. Nothing installed, no PATH edits. In Copilot Chat there is nothing to do; in Claude Code and Copilot CLI it registers the bundled AL MCP Server. `start` normally does this for you. | "connect the AL tools", "why can't you compile" |
 | `/ocpf-bc:copilot-blueprint` | Fires by itself whenever you ask for a Business Central Copilot feature — a *Suggest with Copilot* action, a PromptDialog page, a capability registration, Azure OpenAI — in any journey, or with no project open: fetches the OnlyBCFans BC Copilot Blueprint into a sibling folder outside the project and builds the feature from its verified procedure and templates, never from memory. | "Add a Suggest with Copilot action to the Sales Order page", "build a Copilot feature" |
 | `/ocpf-bc:al-standards` | Loads the OCPF AL Development Standards Guide: naming and abbreviations, object ID allocation, API page design, field inclusion, anti-patterns, events, upgrade code, multilanguage and XLIFF rules, parent-child pages and number series. The routine applies it automatically; run it directly for an ad-hoc review. | "check this AL against OCPF standards" |
-| `/ocpf-bc:dashboard` | Creates, refreshes, or opens the project's live dashboard, `ProjectDashboard.html` at the project root (tracked in git, so it persists with the project) — the Build Map page with the app's name and icon, phase and step, tokens or AI credits and cost, the agent / you time split, who is working, the exit gate, and the open question. The runbook calls it in PRE-01's / Lite Step 1's setup batch, once `app.json` is written; it opens the page once, installs the zero-token refresh hooks, and asks the one explanation question. Reopen a closed page with right-click → **Open Externally** in VS Code's Explorer, or ask for it. |
+| `/ocpf-bc:dashboard` | Creates, refreshes, or opens the project's live dashboard, `ProjectDashboard.html` at the project root (tracked in git, so it persists with the project) — the Build Map page with the app's name and icon, phase and step, tokens or AI credits and cost, the agent / you time split, who is working, the exit gate, the open question, a *View Project Documents* button that lists every project document by stage and opens it on the page with its approval line (read from the document's own sign-off line) and a download, a *Documentation website* button once the help site exists, and — once the project is completed — the latest package to download. The runbook calls it in PRE-01's / Lite Step 1's setup batch, once `app.json` is written; it opens the page once, installs the zero-token refresh hooks, and asks the one explanation question. Reopen a closed page with right-click → **Open Externally** in VS Code's Explorer, or ask for it. |
+| `/ocpf-bc:skill-load` | Loads one or more **Custom Skills** — third-party skills made for this framework (your own patterns guide, a review check your clients need, a document template of your own), each a folder with a `SKILL.md` and an `ocpf-skill.json` manifest whose slug is its identity — from a folder on your machine, a `.zip`, a GitHub repository URL (public, or private through your own GitHub sign-in), a bcskills.ai slug, or a `skillslocation.md` list in the project; checks each against the framework version, the journey, the extension points, and the other skills loaded (one slug, one skill — the same skill is never loaded twice however it arrives), shows it before activating it, places it for Claude Code and Copilot, records it in `ocpfFramework/customSkills.json` and the sheet, and **refuses to let the framework run while an incompatible skill is loaded** until you disable or remove it. With no source it lists the loaded skills. Since 6.0.0.0. | "load a skill", "add our patterns skill to this project", "which skills are loaded" |
+| `/ocpf-bc:skill-create` | Turns something that worked in this project into a Custom Skill other projects can load: asks what becomes the skill (your patterns file, a review check you asked for more than once, a document template, a model recommendation), the slug and its validation (the rule, the project's register, bcskills.ai, and your private GitHub skills on request), your name and organization (typed — never inferred), the journeys, and the extension points it plugs into; writes the folder to `~/.ocpf/skills/<slug>/` with a `SKILL.md`, the manifest, a README with the load line and badge, and a `1.0.0.0` changelog; offers to create a GitHub repository of your own for it with the `ocpfbcskills` topic (private: how your other projects find it; public: the feed bcskills.ai reads); then loads it into this project. | "make this a skill", "turn our patterns guide into a skill" |
+| `/ocpf-bc:skill-update` | Updates a Custom Skill that is loaded in this project: you change the project's copy, it shows the diff against the skill's home folder, asks patch / minor / major (four-part versions), the changelog line, and whether compatibility changed (journeys, minimum framework version, overrides, conflicts, or a rename), writes the new version back, commits and offers to push when the skill lives in a repository, refreshes the project's copies and the register, and re-checks the loaded set. | "bump our patterns skill", "publish the change to the skill" |
 | `/ocpf-bc:update-framework` | Checks whether a newer runbook has been published, summarises every changelog entry between your version and the latest, says whether any touches a step you have already completed, and updates the project's copy only after you choose **Update now**. Backs up the old copy first. On a project from an older layout (Full before 5.0.0.0, Lite before 5.0.0.0) it also runs the migration: moves the framework files into `ocpfFramework/`, the documents into the `docs/` phase folders, rewrites the `.gitignore` block and the tool paths, creates Lite's `ProjectProgress.md` from the old usage report, and lists every move in the ChangeLog. | "is there a newer runbook", "update the framework" |
 
 Five sub-agents ship with the plugin: **ocpf-reasoning** (Full: FRD and TDD drafting, Sanity
@@ -309,14 +312,17 @@ ocpfFramework/       everything the framework fetches or keeps (below)
 | `ocpfFramework/runbookSteps/` | One file per step: `PRE-01.md` … `12.md` (Full) or `STEP-1.md` … `STEP-7.md` (Lite). The step file is the step; the agent reads it in full when the step starts. | Never |
 | `ocpfFramework/documentTemplates/` | One template per project document. | Never |
 | `ocpfFramework/standardsGuide/`, `ocpfFramework/opsGuide/` | The two companion guides, each with a `SNAPSHOT.json` naming the commit fetched. The Standards Guide comes from its own repository, [ajansari/ocpfBCALStandards](https://github.com/ajansari/ocpfBCALStandards), at the tag the framework pins; the prelude `README.md` beside it says which. | Never |
-| `ocpfFramework/patterns/`, `ocpfFramework/scripts/` | The fetched patterns library and the AL tooling, notification, usage, and dashboard scripts with the dashboard templates. | Never |
-| `ocpfFramework/state/` | Each developer's own: `usage.json` (step timestamps), `pricing.json` (prices the usage script fetched), `notifications.json`, `copilot.json` (Copilot session settings), `dashboard.json` (hooks and theme), `feature.json` (Build-a-Feature's parameters with their sources), and `previous/` (backups of the runbook made before each approved update). | Never |
+| `ocpfFramework/patterns/`, `ocpfFramework/scripts/` | The fetched patterns library and the AL tooling, notification, usage, dashboard, and Custom Skills scripts with the dashboard templates. | Never |
+| `ocpfFramework/extensionPoints.json` | The fetched list of the moments a Custom Skill may plug into, for this framework version. | Never |
+| `ocpfFramework/customSkills.json` | The Custom Skills register: every third-party skill loaded into the project — slug, version, author, source, whether it is enabled, and any block (since 6.0.0.0). | **Always** |
+| `ocpfFramework/state/` | Each developer's own: `usage.json` (step timestamps), `pricing.json` (prices the usage script fetched), `notifications.json`, `copilot.json` (Copilot session settings), `dashboard.json` (hooks and theme), the dashboard's sidecars (`dashboard-data.js` and `docs/<slug>.js`, one converted copy per document for the page's documents popup, recreated by every render), `feature.json` (Build-a-Feature's parameters with their sources), and `previous/` (backups of the runbook made before each approved update). | Never |
 
 Outside that folder:
 
 | Path | What it is | In Git? |
 |---|---|---|
 | `CLAUDE.md` and/or `.github/copilot-instructions.md` | The runbook core: operating rules, a stub per step, the always-on disciplines. Loaded on every request. If the file already existed when you started, the runbook sits at `ocpfFramework/BC_App_Build_Routine_Agent.md` (or the Lite name) and `CLAUDE.md` holds one import line, or it is placed as `.github/instructions/ocpf-framework.instructions.md` for Copilot. | With the framework files |
+| `.claude/skills/<slug>/` and `.github/skills/<slug>/` | A loaded Custom Skill's copies for each harness (since 6.0.0.0; the [Custom Skills Guide](CustomSkillsGuide.md) explains skills); the register `ocpfFramework/customSkills.json` says which are loaded. | With the framework files |
 | `.claude/agents/ocpf-*.md` or `.github/agents/ocpf-*.agent.md` | The project-local sub-agent copies carrying your chosen models: `ocpf-reasoning`, `ocpf-light`, `ocpf-generator`, and `ocpf-reviewer` in Full; `ocpf-generator` and `ocpf-reviewer` in Lite (both on the Main model); `ocpf-analyst` when `/ocpf-bc:analyze` ran, on the model you chose for it. | With the framework files |
 | `.vscode/settings.json`, `.mcp.json` | The analyzers the framework turns on, the AL tools connection, and, with Copilot, the request limit (the approval keys go to your user settings unless you chose to share them). | Yes |
 | `.alpackages/`, `*.g.xlf` | Downloaded symbols and generated translation files. | Never |
@@ -325,8 +331,10 @@ Outside that folder:
 **The `.gitignore` defaults.** The first step writes two blocks. The first is always written: the
 fetched folders under `ocpfFramework/` (guides, steps, templates, patterns, scripts), `ocpfFramework/state/`,
 `.claude/settings.local.json`, `.alpackages/`, and `*.g.xlf`. The second is written unless you
-answer *No, track them* at the first step: the whole `ocpfFramework/` folder, the runbook copies,
-and the sub-agent files, so the framework stays out of your project's remote by default. The
+answer *No, track them* at the first step: everything in `ocpfFramework/` except the Custom Skills
+register `customSkills.json` (always tracked — it says which skills shaped the project), the
+runbook copies, the sub-agent files, and the harness folders of any loaded Custom Skill, so the
+framework stays out of your project's remote by default. The
 framework never ignores `docs/`, `requirements/`, `images/`, `outputAppPackage/`, `*.app`,
 `Translations/*.xlf`, `ProjectProgress.md`, or `src/`.
 
@@ -390,6 +398,15 @@ You can also ask at any time with `/ocpf-bc:update-framework`. The agent recomme
 unless you are mid-way through a step whose rules the new version changes; then it recommends
 finishing the step first. Nothing needs to be set up; it needs only internet access to
 `raw.githubusercontent.com`.
+
+**Testing an unreleased framework branch (a pre-release channel).** If you want to try a branch or
+tag of the framework repository before it is released — on a real project, with the real plugin —
+set the environment variable `OCPF_FRAMEWORK_REF` to that branch or tag name in the shell that
+starts your AI tool (for example `export OCPF_FRAMEWORK_REF=<branch-or-tag>` before `claude`).
+`/ocpf-bc:start`, `/ocpf-bc:update-framework`, and the dashboard skill then fetch from that ref
+instead of `main`, the marker `ocpfFramework/framework.json` records which ref the project is on,
+and the agent says so in one line. Unset it to go back to `main`. The Standards Guide stays at the
+tag the framework pins either way.
 
 ### 7c. The plugin updates through your tool's plugin mechanism
 

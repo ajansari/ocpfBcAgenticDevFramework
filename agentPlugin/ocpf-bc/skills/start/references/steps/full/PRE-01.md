@@ -1,6 +1,6 @@
 # BC App Build Routine — PRE-01 — State the Problem
 
-**Runbook version:** 5.10.0.0 · Full edition · Phase: DEFINE
+**Runbook version:** 6.0.0.0 · Full edition · Phase: DEFINE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -33,9 +33,11 @@ question: the companions when the project has none yet — `ocpfFramework/` with
 `ocpfFramework/standardsGuide/`, the Operations Guide into `ocpfFramework/opsGuide/`, this
 runbook's step files (`fullVersion/steps/*.md`) into `ocpfFramework/runbookSteps/`, the document
 templates (`documentTemplates/*.md`) into `ocpfFramework/documentTemplates/`, and this runbook's
-changelog as `ocpfFramework/RunbookChangelog.md`, each from its raw URL
+changelog as `ocpfFramework/RunbookChangelog.md`, and `opsGuide/extensionPoints.json` as
+`ocpfFramework/extensionPoints.json` (6.0.0.0), each from its raw URL
 `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/<folder>/<file>` (Ops §
-Fetched Companions has the list; in a plugin project the `start` skill already fetched them —
+Fetched Companions has the list; `main` is the environment variable `OCPF_FRAMEWORK_REF`'s value
+when it is set — Ops § Plugin's pre-release channel; in a plugin project the `start` skill already fetched them —
 check, don't refetch; the always-ignored `.gitignore` group goes in now, Ops § Repository Hygiene;
 check each step file's `**Runbook version:**` line against this runbook's version); Microsoft's
 live *Country/Regional Availability and Supported Languages* page and the *Choose runtime version*
@@ -112,6 +114,14 @@ Already-answered questions (a resumed intake, Rule 6e) are skipped, never re-ask
 - **K13 — Working setup:** framework files in `.gitignore`? (question 18, `.gitignore` explained in
   the question); customer-language documents? translatable data? (question 5 of the language
   questions).
+- **K13a — Custom skills** (6.0.0.0; Ops § Custom Skills): **Do you have any skills you want to
+  load?** — multi-select: *Upload — a folder or a `.zip` on this machine (I'll type its path in
+  chat)* / *GitHub repository — I'll type the URL* / *Skills site —
+  a bcskills.ai slug, I'll type it* / *No*; when `~/.ocpf/skills/` holds skills or the project has a
+  `skillslocation.md` (read in movement 1), the first option is *Load these: <slugs> (recommended)*;
+  on the Copilot CLI yes / no lines in that order, *Load these?* first when it applies. Each yes gets its typed follow-up as the very next box. The
+  fetch, inspection, and dedupe run in the batch; each skill's *Activate* box is asked in the
+  setup-done box.
 - **K14 — Requirements and existing app, always the last box:** when `requirements/` is empty and
   the human pasted or attached nothing, **Where are the requirements?** — *I'll put them in
   `requirements/` now (recommended — `.md` preferred; Word, PDF, and images are read too)* / *I'll
@@ -144,7 +154,9 @@ and all six answers with their harness identifiers recorded in `docs/0-project/P
 kept and the *Lite* one deleted, every row blank except this one, `In Progress`, the empty usage
 table beneath it (ALL ALONG → Project Progress Tracker); the `.gitignore` blocks from K13's answer,
 proven with `git check-ignore` (Ops § Repository Hygiene — `ProjectDashboard.html`,
-`requirements/`, and `docs/` must not be ignored); **the live dashboard** — the renderer and
+`requirements/`, `docs/`, and `ocpfFramework/customSkills.json` must not be ignored); **the Custom
+Skills K13a named fetched, inspected, and deduped** (Ops § Custom Skills → 3 — placed and registered
+after their *Activate* boxes in the setup-done box, where any issue's options box is asked too); **the live dashboard** — the renderer and
 template into `ocpfFramework/scripts/`, `ProjectDashboard.html` rendered at the project root,
 opened once (`--open`), the refresh hooks installed with the interpreter the runner ladder found
 and proven — the Stop hook's exact command run once, the sidecar newer and carrying the app's name
@@ -161,7 +173,9 @@ moment any later requirements or change-request input arrives. The batch's closi
 once, that packages land in `outputAppPackage/`, one file per build, each with its own version.
 
 **4. The setup-done box** — one box: the dashboard explanation, **I understand** / *Other*, with
-the text Ops § Dashboard fixes; whether each chosen notification kind arrived and clicking one
+the text Ops § Dashboard fixes; **Activate <display name> <version>?** per Custom Skill K13a fetched
+(its `SKILL.md`, manifest, and files shown first; a fifth skill opens the next box) and any issue's
+options box (Ops § Custom Skills → 5); whether each chosen notification kind arrived and clicking one
 opened the session; **Accept this icon** / *Make another* when one was drawn; the Main model switch
 confirmed when it differs from the session's; and *Are the requirements in `requirements/` now?*
 when K14 said so. Record the answers in `docs/0-project/ProjectMemory.md`; act on a free-text

@@ -38,7 +38,7 @@ A remediation (Ops § Usage & Cost → 7) is a row added directly under its base
 | PROVE | STEP-7 — Release for Testing | |
 
 ### Build-a-Feature
-One row per object asked for, in start order, plus the intake, the package, and the review (Ops § Build-a-Feature). `Row`: `F00` intake · `F01`, `F02`, … objects, continuing across sessions · `FPK` package · `FRV` review. `Stage`: Asked → Confirmed → Built → Compiled → Reviewed → Packaged. `Status`: `In Progress` while the row's usage window is open, `Completed` once its usage rows are written. `Shipped in`: the first package version that held the object.
+One row per object asked for, in start order, plus the intake, the package, and the review (Ops § Build-a-Feature). `Row`: `F00` intake · `F01`, `F02`, … objects, continuing across sessions · `FPK` package · `FRV` review. `Stage`: Asked → Confirmed → Built → Compiled → Documented → Reviewed → Packaged. `Status`: `In Progress` while the row's usage window is open, `Completed` once its usage rows are written. `Shipped in`: the first package version that held the object.
 
 | Row | Object | Type | ID | Stage | Status | Shipped in |
 |---|---|---|---|---|---|---|

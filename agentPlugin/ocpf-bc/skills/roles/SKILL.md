@@ -41,7 +41,10 @@ task slower: the model thinks longer before each answer, and a step can take not
 The framework recommends High only where judgment matters most."*
 
 Recommended answer first on every question, free-text entry always available. The recommendation
-depends on the edition and the tool:
+depends on the edition and the tool — **unless an enabled Custom Skill's `overrides.modelRecommendations`
+names a role** (`ocpfFramework/customSkills.json`; Ops § Custom Skills → 7): then that pair is offered
+first, labelled *recommended by skill <slug>*, and the framework's own pair second; the human still
+chooses, and the Main model is still the session's. Otherwise:
 
 | Edition · tool | Main | Light | Reasoning |
 |---|---|---|---|

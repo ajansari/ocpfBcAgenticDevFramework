@@ -4,6 +4,76 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 6.0.0 — October 31, 2026
+
+Full / Lite runbook and Operations Guide **6.0.0.0**. Custom Skills, the dashboard's View Project
+Documents and Documentation website buttons and completed-box download, the Role Center intake question, the Copilot hook
+corrections, and the `OCPF_FRAMEWORK_REF` pre-release channel.
+
+- **New skills — `skill-load`, `skill-create`, `skill-update`** (Ops § Custom Skills). `skill-load`
+  loads one or more Custom Skills from a folder, a `.zip`, a GitHub repository URL (public, or
+  private through the human's own sign-in — the identity ladder `gh` → GitHub MCP server → a token
+  in the environment → `git credential fill` on a per-use yes; no token is ever asked for or
+  written), a bcskills.ai slug, or a `skillslocation.md` list; its helper twins
+  `scripts/ocpf-skills.py` / `.ps1` (`--inspect`, `--unpack`, `--check`, `--hash`, identical
+  output) inspect the manifest and the files (`.DS_Store`, `Thumbs.db`, `desktop.ini` ignored and
+  never hashed), validate slug, version range, journeys, extension points, conflicts, requirements
+  (each under its own rule name), and overrides, dedupe by slug and content hash, and unpack a zip
+  only after inspecting every entry, removing a partial folder when extraction fails; each skill is
+  shown and activated through its own box, placed for Claude Code and Copilot, recorded in
+  `ocpfFramework/customSkills.json` and the sheet; **a block refuses to let the framework run**
+  until the per-issue box disables or removes the skill. `skill-create` turns what worked in the
+  project into a skill (slug validated against the register, bcskills.ai, and the private topic on
+  request; author typed; journeys; active extension points; templates in `references/`; a folder
+  under `~/.ocpf/skills/<slug>/`; a repository of the human's own with the `ocpfbcskills` topic;
+  loaded into the proving project). `skill-update` diffs, bumps patch / minor / major, writes the
+  changelog line, handles compatibility and renames, writes back, pushes on a yes, re-checks.
+- **`start`:** the fourth existing-project choice *Load a custom skill into this project*; the
+  journey question names the skills each journey would exclude; the fetch brings
+  `opsGuide/extensionPoints.json` → `ocpfFramework/extensionPoints.json`; `OCPF_FRAMEWORK_REF`
+  replaces `main` in every fetch URL when set, recorded as `ref` in the marker. **`status`:** the
+  loaded skills and any block, first; a project whose `ocpfFramework/state/docs/` is stale says so.
+  **`update-framework`:** Step 3a's compatibility warning before the update box (*Update now and
+  disable <slug>* / *Update now and keep the block* / *Not now* / *Skip this version*), run in the
+  once-per-session check too; the `.gitignore` migration to `ocpfFramework/*` +
+  `!ocpfFramework/customSkills.json`; `OCPF_FRAMEWORK_REF` honoured. **`documents`** honours a
+  skill's `documentTemplates` override (headings added, never removed); **`roles`** offers a
+  `modelRecommendations` override first; **`ocpf-reviewer`** reads a skill's checks as checklists;
+  **`build-a-feature`:** the Custom Skills gate, Part 2 item 14 (K13a's twin), Part 4's reference
+  sources and `companionOffers`, Part 5's `codeReviewChecks`. The Full and Lite sheets and the
+  FeatureRegister template carry a *Custom skills* row.
+- **`dashboard`:** a **View Project Documents** button in the OnlyBCFans page's header, left of the
+  Business Central mark — a dropdown by stage (the `docs/` phase folders, other subfolders, the
+  flat files, `requirements/`), each stage opening to the documents on disk; a document opens an
+  in-window, scrollable, focus-trapped popup (Esc closes) with its title and path, the approval
+  line — *Approved — role, name, date* or *Not yet approved*, read from the document's `**Sign-off:**`
+  / `**Approved by:**` line or the Code Review's §3 table — a **Download** link to the file, and
+  *open in a new tab* (`#doc=<slug>`). The renderer twins convert every document under `docs/` and
+  `requirements/` once (stdlib Markdown converter with escaping; `.docx` / `.xlsx` text extraction;
+  the 200 KB cap) into `ocpfFramework/state/docs/<slug>.js`, rewritten only when the source is
+  newer, orphans deleted; the data gains `docs`, `approvals`, `helpSite`, and `package`. **A
+  Documentation website button** beside it, once `docs/index.html` exists, opens the help site in a
+  new tab, in the DESIGN phase's teal. The approval line is shown for the sign-off-bearing documents
+  and for any other document in which a sign-off line is found. **Download latest .app** inside the
+  *Project completed* box, the newest package in `outputAppPackage/` by version. **The within-step
+  progress bar** in the exit-gate card (`progress` in the data): per-item verdicts read from disk by
+  the literal rules of Ops § Dashboard → 7 (✓ / ○ / ?), *n of m gate items met · k unreadable*, the
+  bar by `n / m` with the percentage, never a timer; the Build-a-Feature stage ladder. Sidecar slugs
+  are injective (path + six hex digits of its SHA-256; `CONV` 3), a `#doc=` address opens only a
+  slug the index holds, and every emitted file path is percent-encoded. The 30-second in-place
+  refresh keeps the dropdown (focus included), the popup, and the theme. The F1 page is unchanged.
+  **Hooks (§ 2b):** the Copilot CLI's `.github/hooks/ocpf-dashboard.json` in the CLI's documented
+  shape (`"version": 1`, `bash` and `powershell` lines, `"cwd": "."`, `timeoutSec`); Copilot's hooks
+  have no matcher, so one `preToolUse` and one `postToolUse` entry pass the hook input on stdin
+  (`--waiting-json - --throttle 45`, `--clear-waiting - --throttle 45`; pwsh `-ClearWaiting
+  -HookJson -`) and the renderer acts only when `toolName` is `ask_user` (its `message` and `enum`
+  mapped to the question and options) or `askQuestions`, rendering throttled otherwise; Copilot
+  Chat's Preview agent hooks installed with the same file and proven by reading `dashboard.json`
+  at the first step close; the explanation question's conditioned paragraphs. `OCPF_FRAMEWORK_REF`
+  in the script fetch line.
+- **`syncPlugin.sh`:** bundles `extensionPoints.json` into `skill-load/references/` and checks the
+  three skill folders. README: eighteen skills.
+
 ## 5.10.0 — October 29, 2026
 
 **Bundles:** full runbook v5.10.0.0, Lite v5.10.0.0, Standards Guide v1.13.1.0 (unchanged),

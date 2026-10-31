@@ -1,0 +1,63 @@
+{
+  "ocpfExtensionPoints": 1,
+  "frameworkVersion": "6.0.0.0",
+  "about": "The moments at which the OCPF BC Agentic Development Framework consults a loaded Custom Skill (Ops § Custom Skills). A skill's ocpf-skill.json may name only the keys below; 'active' points are consulted by this version at the places named, 'reserved' points are declared for a later version and a skill that names one is refused at load (it would otherwise silently not apply). Fetched into ocpfFramework/extensionPoints.json beside the Operations Guide; update-framework compares the new file with the loaded skills before it updates.",
+  "extends": {
+    "referenceSources": {
+      "status": "active",
+      "supplies": "Markdown files the agent reads before writing code, beside the Standards Guide and the patterns library",
+      "consultedAt": ["Full Step 06 generation briefs", "Lite Step 4 generation briefs", "Build-a-Feature Part 4 step 5", "copilot-blueprint"]
+    },
+    "preReviewChecks": {
+      "status": "active",
+      "supplies": "a checklist the ocpf-reviewer reads beside the Standards sections",
+      "consultedAt": ["Full Step 07 pre-review brief", "Lite Step 5 pre-review brief"]
+    },
+    "codeReviewChecks": {
+      "status": "active",
+      "supplies": "a checklist the Code Review reads; additive, never relaxing a Standards rule",
+      "consultedAt": ["Full Step 09", "Lite Step 6", "Build-a-Feature Part 5"]
+    },
+    "documents": {
+      "status": "reserved",
+      "supplies": "a document the framework does not have: a template plus the step that writes it",
+      "consultedAt": []
+    },
+    "steps": {
+      "status": "reserved",
+      "supplies": "a step inserted between two framework steps, with its own exit gate, usage window, and options box",
+      "consultedAt": []
+    },
+    "intakeQuestions": {
+      "status": "reserved",
+      "supplies": "extra questions in a named intake box",
+      "consultedAt": []
+    },
+    "analyzeOutputs": {
+      "status": "reserved",
+      "supplies": "an extra document the analyze skill writes into requirements/existing/",
+      "consultedAt": []
+    }
+  },
+  "overrides": {
+    "documentTemplates": {
+      "status": "active",
+      "supplies": "the skill's template replaces the framework's for a named document; headings may be added, never removed",
+      "consultedAt": ["the documents skill, when it reads a template"]
+    },
+    "modelRecommendations": {
+      "status": "active",
+      "supplies": "the recommended model and effort per role that the roles skill offers first; the human still chooses",
+      "consultedAt": ["the roles skill, kickoff boxes K5 and K6"]
+    },
+    "companionOffers": {
+      "status": "active",
+      "supplies": "Build-a-Feature's offer at an object's close, per object type",
+      "consultedAt": ["Build-a-Feature Part 4 step 9"]
+    }
+  },
+  "neverOverridable": [
+    "Operating Rules", "every exit gate", "the options box at every close", "usage rows at every boundary", "the publish rule",
+    "the publisher and ID-range rules", "the Standards Guide's rules (a skill may add rules, never relax one)", "the dashboard", "the clock"
+  ]
+}
