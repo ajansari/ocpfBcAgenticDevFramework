@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v6.0.0.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v6.0.0.0**, and Lite at **v6.0.0.0** — but
+**v6.1.0.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v6.1.0.0**, and Lite at **v6.1.0.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -23,6 +23,53 @@ change-worthy. (This is a different convention from a project's own ChangeLog, w
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
 
 ---
+
+## v6.1.0.0 — November 13, 2026
+
+**Requirements first: the folder prepared before the first question, the requirements box right
+after the journey question, and a Build-a-Feature that cannot skip `requirements/`.** Lite
+**v6.1.0.0**, Operations Guide **v6.1.0.0**, Standards Guide **v1.13.1.0** (unchanged), plugin
+**6.1.0**. No step changed its order; PRE-01's kickoff gains a box before K1 and loses a question
+from K14.
+
+- **The folder is prepared before anything is asked** (Ops § Intake → *The requirements box*, new
+  subsection; the `start` skill's Step 2 item 1a). The AL template's `HelloWorld.al` is deleted
+  when the project has one (in the root, where AL: Go! writes it, or under `src/`) — only when it
+  is still the template's file, one page extension of "Customer List" whose only code is the
+  *Hello world* message; a `HelloWorld.al` with any other content is somebody's code and stays — and
+  `requirements/` is created in the project root when it does not exist — before the journey
+  question, said in one line, nothing asked. An `app.json` at `1.0.0.0` with no package and no
+  objects is still recognised as an AL: Go! scaffold.
+- **The requirements box — the very next box after the journey question, on every journey, always**
+  (the `start` skill's Step 3a; **K0**, before the kickoff and not one of its back-to-back boxes): *Add your requirements documents* — put Word
+  documents, Markdown files, PDFs, images, spreadsheets, or notes in `requirements/`, then
+  *Continue — my documents are in `requirements/`* / *Continue — I have no documents; I'll describe
+  what I need* / *They're somewhere else — I'll paste them or type the path* (copied verbatim into
+  `requirements/` at once). The folder is listed again on the answer and its files named; an empty folder after
+  the first option is asked about once. Without the plugin, or when a journey is reached without
+  the journey question (a direct `/ocpf-bc:build-a-feature`, *Build a feature in this project*),
+  the journey's first step prepares the folder and asks the box as its first box. Asked once per
+  session and never once its answer is recorded as *Requirements location*. Rule 8 and both
+  outlines say the box may precede the working-language question.
+- **K14 no longer asks *Where are the requirements?*** and the setup-done box no longer asks whether
+  they are in: the requirements box settled both before the kickoff. K14 keeps the existing-app
+  analysis offer. PRE-01's movement 1, its K14 item, its setup-done box, and its exit gate say so;
+  the exit gate now requires that `requirements/` exists, `HelloWorld.al` is gone, and the box was
+  asked once and acted on. Why: the human learned about the folder from a line of prose or from the
+  fourteenth box, and the folder did not exist yet.
+- **Build-a-Feature always reads `requirements/`** (Ops § Build-a-Feature → *The journey*, item 0a;
+  the `build-a-feature` skill's new Part 1a). On real projects the journey built without opening
+  the folder and the human had to say "read the requirements folder" every time — the read was one
+  clause of the kickoff's "before the first box" sentence. Now, in every case (a Full or Lite
+  project included) and every session (a resumed one and *Build another object* included): the
+  requirements box; the folder listed recursively and every file read in full — all of them again
+  in a new session; **one line to the
+  human naming the files read**; `requirementsRead` (`at`, `files`) written to
+  `ocpfFramework/state/feature.json` and the files listed under *Sources read* in the problem
+  statement; the intake question's first option becomes *Build what `requirements/` describes
+  (recommended)* when the material names objects; and **no object's window opens unless the record
+  is later than the session's first usage window, lists exactly what the folder holds, and no file
+  there is newer than it**.
 
 ## v6.0.0.0 — October 31, 2026
 

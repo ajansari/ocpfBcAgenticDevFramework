@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 6.0.0.0 (Lite, derived from the full framework v6.0.0.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
-**Last Updated:** October 31, 2026
+**Version:** 6.1.0.0 (Lite, derived from the full framework v6.1.0.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
+**Last Updated:** November 13, 2026
 
 > Version history for this edition lives in `ocpfFramework/LITE_RunbookChangeLog.md`, tracked
 > independently of the full framework's own `fullVersion/RunbookChangelog.md` (though a change to
@@ -21,7 +21,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.13.1.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v6.0.0.0), cited as
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v6.1.0.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
 >   tooling checks, analyzers, symbols, editor sync, notifications, packaging, repository hygiene,
 >   translations, fetched companions, documents, usage and cost, and the plugin.
@@ -254,7 +254,7 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
        edition and on Build-a-Feature.
 7. **Log every deviation immediately.** Any departure from the Design Doc — human or agent — goes
    in `docs/0-project/ChangeLog.md` before the next batch starts.
-8. **Work in the human's chosen working language.** The first question of Step 1 asks which
+8. **Work in the human's chosen working language.** The first question of Step 1's kickoff (K1 — only the requirements box, in English, may come before it) asks which
    language the human wants to work in. Every later question, options box, and explanation is in
    that language. **Always in English, regardless:** this runbook, the Standards Guide, AL code
    and names, commit messages, `docs/2-design/DesignDoc.md`, and `docs/0-project/ChangeLog.md`. **Kept verbatim in their
@@ -290,11 +290,12 @@ design work.
 **Read `ocpfFramework/runbookSteps/STEP-1.md` in full before starting this step.** It carries the opening questions in
 order and the complete **Project Parameters** table.
 
-**In one line:** open the clock; fetch the companions and read the guides and Microsoft's two live
+**In one line:** open the clock; prepare the folder (`HelloWorld.al` deleted, `requirements/`
+created) and ask the requirements box when the `start` skill has not; fetch the companions and read the guides and Microsoft's two live
 pages once; then **the kickoff** (Rule 6f) — the working language, notifications, identity and Deployment Target,
 countries, the Main model and effort (`roles` skill in a plugin project), the Copilot session
 settings if Copilot is in use, naming, permission set code and ID ranges, the AppSource URLs, the
-languages, `.gitignore`, and where the requirements are — back to back; then **the setup batch**
+languages, and `.gitignore` — back to back; then **the setup batch**
 in one go (`app.json` complete, icon, notifications applied and tested, the generator
 and reviewer sub-agents, `docs/` and its phase folders, `ProjectProgress.md` (Step 1 row `In
 Progress`), `.gitignore`, the dashboard, the AL tools, the symbols, raw requirements captured
@@ -309,7 +310,7 @@ replaced, the Main model and effort, version, and app icon answer included);
 `.gitignore` populated per the table above and verified with `git check-ignore`; `app.json`; `src/`
 (with `src/logo/AppLogo.png` when an icon was given); and `.alpackages/`.
 
-**Exit gate:** Every question was asked through the options mechanism; every kickoff box was asked back to back with no work between them (Rule 6f) and before any requirement was read; `app.json` was written complete in the setup batch from those answers; the dashboard was rendered from it, opened, its hooks installed and proven, and the explanation question answered in the setup-done box (ALL ALONG → Dashboard). The AL tools are connected. When `requirements/` was empty, the requirements question was asked and its answer acted on; on an existing app the analysis offer was made and answered. `app.json` matches the
+**Exit gate:** Every question was asked through the options mechanism; every kickoff box was asked back to back with no work between them (Rule 6f) and before any requirement was read; `app.json` was written complete in the setup batch from those answers; the dashboard was rendered from it, opened, its hooks installed and proven, and the explanation question answered in the setup-done box (ALL ALONG → Dashboard). The AL tools are connected. `requirements/` exists, the AL template's `HelloWorld.al` is gone, and the requirements box was asked once — by the `start` skill right after the journey question, or as this step's first box — and its answer acted on before the requirements were read; on an existing app the analysis offer was made and answered. `app.json` matches the
 sheet (version `0.0.0.1` for a new app, the installed version for an existing one; `logo` set when an icon was given), `src/` exists, and the target version's symbols are in `.alpackages/` (Ops § Project Setup). Both companion guides are present, in `ocpfFramework/standardsGuide/` and
 `ocpfFramework/opsGuide/`, and gitignored. The notification choice is recorded in
 `ocpfFramework/state/notifications.json`, applied, and tested, the arrival confirmed in the setup-done box. `docs/1-define/ProjectParameters.md` exists, in `docs/`, with no placeholder remaining, and the Main model and effort recorded there match what this session is running on. Every `.gitignore` entry from the framework-files row is present and `git check-ignore` confirms each existing framework file — `ocpfFramework/LITE_RunbookChangeLog.md` included — is ignored. Nothing from the `docs/` list is in the project root; `ProjectProgress.md` is, with only the Lite step table and the Step 1 row `In Progress`. Deployment Target
@@ -619,7 +620,7 @@ first package and before Step 6's release-candidate question. The non-negotiable
 
 Two companions are fetched at Step 1 and kept for the life of the project: the **Standards Guide**
 (`ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md`, v1.13.1.0), cited as **Standards §**, and the
-**Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v6.0.0.0), cited as **Ops §** and shared
+**Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v6.1.0.0), cited as **Ops §** and shared
 unchanged with the full framework.
 
 **Full procedure: Ops § Fetched Companions** — fetching, refreshing, the plugin's offline copies,

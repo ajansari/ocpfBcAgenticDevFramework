@@ -1,6 +1,6 @@
 # BC App Build Routine — PRE-01 — State the Problem
 
-**Runbook version:** 6.0.0.0 · Full edition · Phase: DEFINE
+**Runbook version:** 6.1.0.0 · Full edition · Phase: DEFINE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -27,7 +27,22 @@ Ops § Usage & Cost → 1 and 8): create `ocpfFramework/state/` and `ocpfFramewo
 Why first: a window opened after the setup questions left the session's first decisions and tokens
 outside every window on real projects.
 
-**1. Before the first box — one read, one batch, one line said.** In a single batch, before any
+**1. Before the first box — one read, one batch, one line said.** **First, prepare the folder
+and ask the requirements box, when the plugin's `start` skill has not already done both in this
+session, and the box's answer is not already recorded** (since 6.1.0.0; Ops § Intake → *The
+requirements box*): delete `HelloWorld.al` when the project has one (root or `src/`) — only when
+it is still the AL template's file, one page extension of "Customer List" whose only code is
+`Message('App published: Hello world');`; any other content is somebody's code and stays — create `requirements/` in the project
+root when it does not exist, say so in one line, and ask **the requirements box (K0)** as the
+first box, before K1 and before the batch below — it precedes the kickoff and is not one of its
+back-to-back boxes (Rule 6f): *Add your requirements documents* — put Word documents, Markdown files,
+PDFs, images, spreadsheets, or notes in `requirements/` now, then *Continue — my documents are in
+`requirements/`* / *Continue — I have no documents; I'll describe what I need* / *They're somewhere
+else — I'll paste them or type the path* (then the paste or the files are copied verbatim into
+`requirements/` at once); list the folder again on the answer and say what is there. **Record the
+answer — whoever asked the box — as *Requirements location* in `docs/0-project/ProjectMemory.md`** once that file
+exists; it is asked once per session and never once recorded, and the
+files are read in movement 5, not now. Then, in a single batch, before any
 question: the companions when the project has none yet — `ocpfFramework/` with its six-line
 `README.md` (Ops § Project Setup gives the text), the Standards Guide into
 `ocpfFramework/standardsGuide/`, the Operations Guide into `ocpfFramework/opsGuide/`, this
@@ -43,7 +58,7 @@ check each step file's `**Runbook version:**` line against this runbook's versio
 live *Country/Regional Availability and Supported Languages* page and the *Choose runtime version*
 table (Ops § Reference Sources — every country, language, and BC version offered in the kickoff
 comes from them, never from memory); what is on disk — `app.json`, `src/`, `images/`, and whether
-`requirements/` holds anything (its content is read in movement 4, not now); and the Ops sections
+`requirements/` holds anything (its content is read in movement 5, not now); and the Ops sections
 the boxes cite: § Intake, § Notifications 1, § Roles → *Asking*, § Asking and Approvals. Then one
 line: *"Reading the guides and two Microsoft pages, then I'll ask everything I need in one go —
 about N boxes."* Say plainly what was fetched rather than fetching silently. **Full procedure,
@@ -122,16 +137,12 @@ Already-answered questions (a resumed intake, Rule 6e) are skipped, never re-ask
   on the Copilot CLI yes / no lines in that order, *Load these?* first when it applies. Each yes gets its typed follow-up as the very next box. The
   fetch, inspection, and dedupe run in the batch; each skill's *Activate* box is asked in the
   setup-done box.
-- **K14 — Requirements and existing app, always the last box:** when `requirements/` is empty and
-  the human pasted or attached nothing, **Where are the requirements?** — *I'll put them in
-  `requirements/` now (recommended — `.md` preferred; Word, PDF, and images are read too)* / *I'll
-  paste them in chat* / *They're in a file or folder elsewhere — I'll type the path* / *I'll
-  describe the need when you ask*; and, when `src/` already holds real objects (anything beyond the
-  AL template's `HelloWorld.al`) and `requirements/existing/` is empty, **Run the in-depth analysis
+- **K14 — Existing app, always the last box, asked only when it applies:** when the project
+  already holds real objects and `requirements/existing/` is empty, **Run the in-depth analysis
   and documentation first (recommended when the app has no FRD, TDD, or docs — 10 to 30 minutes)**
-  / *Skip — the light read is enough* (Ops § Existing Apps). On *I'll paste them in chat*, end the
-  turn asking for the paste; the batch starts when it arrives (or, when the human says to go on,
-  runs now and captures the paste when it comes).
+  / *Skip — the light read is enough* (Ops § Existing Apps). *Where are the requirements?* is no
+  longer asked here: the requirements box (K0) settled it before the kickoff. A paste or a
+  path given at the requirements box was captured into `requirements/` when the box was answered.
 
 **3. The setup batch — one message, no question** (Ops § Intake → *The kickoff boxes* → *After the
 last kickoff box*). In this order, each from its own section: the repository (`git rev-parse
@@ -176,9 +187,8 @@ once, that packages land in `outputAppPackage/`, one file per build, each with i
 the text Ops § Dashboard fixes; **Activate <display name> <version>?** per Custom Skill K13a fetched
 (its `SKILL.md`, manifest, and files shown first; a fifth skill opens the next box) and any issue's
 options box (Ops § Custom Skills → 5); whether each chosen notification kind arrived and clicking one
-opened the session; **Accept this icon** / *Make another* when one was drawn; the Main model switch
-confirmed when it differs from the session's; and *Are the requirements in `requirements/` now?*
-when K14 said so. Record the answers in `docs/0-project/ProjectMemory.md`; act on a free-text
+opened the session; **Accept this icon** / *Make another* when one was drawn; and the Main model switch
+confirmed when it differs from the session's. Record the answers in `docs/0-project/ProjectMemory.md`; act on a free-text
 answer before continuing. A failed symbol download's options box follows (Ops § Symbols).
 
 **5. Now the requirements.** On *Run the in-depth analysis*, run the plugin's `analyze` skill
@@ -196,6 +206,6 @@ here on may follow work — that is expected; the kickoff is over.
 
 **Outputs:** `ocpfFramework/` with its six-line `README.md`, `standardsGuide/`, `opsGuide/`, `runbookSteps/`, `documentTemplates/`, and `RunbookChangelog.md` (all fetched, the folder gitignored per Ops § Repository Hygiene), every kickoff answer recorded in `docs/0-project/ProjectMemory.md` with its source, `app.json` written complete in the setup batch (name, publisher, logo, version, id, ID ranges, platform, application, runtime, features, target, the AppSource block when asked) and `src/` with `src/logo/AppLogo.png` when an icon was given or drawn, `ProjectDashboard.html` (project root, tracked; rendered, opened, explained — hooks installed and proven, `ocpfFramework/state/dashboard.json`), `ocpfFramework/state/usage.json` (PRE-01's `startedAt`, and its rows at the close), `ocpfFramework/state/notifications.json` (applied and tested), `ocpfFramework/state/copilot.json` and the Copilot keys in `.vscode/settings.json` (when Copilot is in use), the model and effort assignment materialized as four project-local sub-agent definitions — light, reasoning, generator, reviewer (Ops § Roles), `.gitignore` written and proven, the AL tools connected and `.alpackages/` holding the target version's symbols (Symbol Source recorded), `requirements/` (seeded, if any raw input was provided), `ProjectProgress.md` (seeded from its template, Full step table, project root), `docs/` with `0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/` (created), `requirements/existing/` (when the analysis ran), `docs/1-define/ProblemStatement.md` — purpose, scope, out-of-scope, target consumers, initial entity list, open questions.
 
-**Exit gate:** Every kickoff box was asked back to back with no work between them (Rule 6f) and before any requirement was read; every answer is in `docs/0-project/ProjectMemory.md` with its source. `app.json` exists, written complete in the setup batch with the human's extension name and publisher (and `logo` when an icon was given — the file at `src/logo/AppLogo.png`), the publisher's source naming a box the human answered (Ops § Intake → *Forbidden sources*), and the ID range(s) chosen or typed in K8; the dashboard `ProjectDashboard.html` was rendered from it at the project root (not ignored: `git check-ignore ProjectDashboard.html` prints nothing), opened in the browser, its hooks installed and proven for this AI tool, and the explanation question answered in the setup-done box (ALL ALONG → Dashboard). Both companion guides are present, in `ocpfFramework/standardsGuide/` and `ocpfFramework/opsGuide/`, the step files in `ocpfFramework/runbookSteps/`, the templates in `ocpfFramework/documentTemplates/`, the changelog at `ocpfFramework/RunbookChangelog.md`, the `README.md` written, all gitignored. The Copilot session settings are written and recorded when Copilot is in use. `ocpfFramework/state/usage.json` holds PRE-01's `startedAt` and, at the close, its `completedAt`, and PRE-01's usage rows — one per model in Claude Code, one per step in Copilot — are in `ProjectProgress.md` and pasted into the closing message (Operating Rule 11). The notification choice is recorded in `ocpfFramework/state/notifications.json`, applied, and tested, the arrival confirmed in the setup-done box (ALL ALONG → Notifications). The effort warning was in the first model box's text, all six model and effort answers are recorded, the Main model and effort match what this session is actually running on, and the Light, Reasoning, Generator, and Reviewer sub-agent definitions exist in the project with the chosen model and effort set (Operating Rule 10). The AL tools are connected and the target version's symbols are in `.alpackages/` with the Symbol Source recorded. On an existing app the analysis offer was made and answered; when `requirements/` was empty, the requirements question was asked and its answer acted on. `docs/1-define/ProblemStatement.md` is in `docs/1-define/`, not the root or a flat `docs/` (Operating Rule 9). Functional Consultant signs off on the problem statement and initial entity list (Stage↔Step Map, Stage 1) — or, when **Approvers** is one person, this sign-off moves to the end of PRE-02 and is given together with that step's, on the problem statement and expanded list at once.
+**Exit gate:** Every kickoff box was asked back to back with no work between them (Rule 6f) and before any requirement was read; every answer is in `docs/0-project/ProjectMemory.md` with its source. `app.json` exists, written complete in the setup batch with the human's extension name and publisher (and `logo` when an icon was given — the file at `src/logo/AppLogo.png`), the publisher's source naming a box the human answered (Ops § Intake → *Forbidden sources*), and the ID range(s) chosen or typed in K8; the dashboard `ProjectDashboard.html` was rendered from it at the project root (not ignored: `git check-ignore ProjectDashboard.html` prints nothing), opened in the browser, its hooks installed and proven for this AI tool, and the explanation question answered in the setup-done box (ALL ALONG → Dashboard). Both companion guides are present, in `ocpfFramework/standardsGuide/` and `ocpfFramework/opsGuide/`, the step files in `ocpfFramework/runbookSteps/`, the templates in `ocpfFramework/documentTemplates/`, the changelog at `ocpfFramework/RunbookChangelog.md`, the `README.md` written, all gitignored. The Copilot session settings are written and recorded when Copilot is in use. `ocpfFramework/state/usage.json` holds PRE-01's `startedAt` and, at the close, its `completedAt`, and PRE-01's usage rows — one per model in Claude Code, one per step in Copilot — are in `ProjectProgress.md` and pasted into the closing message (Operating Rule 11). The notification choice is recorded in `ocpfFramework/state/notifications.json`, applied, and tested, the arrival confirmed in the setup-done box (ALL ALONG → Notifications). The effort warning was in the first model box's text, all six model and effort answers are recorded, the Main model and effort match what this session is actually running on, and the Light, Reasoning, Generator, and Reviewer sub-agent definitions exist in the project with the chosen model and effort set (Operating Rule 10). The AL tools are connected and the target version's symbols are in `.alpackages/` with the Symbol Source recorded. On an existing app the analysis offer was made and answered. `requirements/` exists, the AL template's `HelloWorld.al` is gone, and the requirements box was asked once — by the `start` skill right after the journey question, or as this step's first box — and its answer acted on before the requirements were read. `docs/1-define/ProblemStatement.md` is in `docs/1-define/`, not the root or a flat `docs/` (Operating Rule 9). Functional Consultant signs off on the problem statement and initial entity list (Stage↔Step Map, Stage 1) — or, when **Approvers** is one person, this sign-off moves to the end of PRE-02 and is given together with that step's, on the problem statement and expanded list at once.
 
 **Step close (Rule 6c) — mandatory, never a prose prompt:** once the exit gate is met and the usage rows are pasted, end the closing message with the options box: **Proceed into PRE-02 now (recommended)** / **Stop here** (say what there is to review and how to resume). Nothing of PRE-02 starts until the human answers.

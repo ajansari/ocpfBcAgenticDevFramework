@@ -35,7 +35,7 @@ recommended option first and a one-line reason on each, **two to four options pe
 (Ops § Asking and Approvals): `AskUserQuestion` in Claude Code, `askQuestions` in GitHub Copilot
 Chat, `ask_user` in the Copilot CLI (add *I'll type it* where a typed answer is possible). **Free
 text is expected in exactly two places: the working-language question and the intake question
-(Part 3).** Every later question is confirm-or-correct with preset options. Ordinary progress is
+(Part 3)** — plus the paste or path that follows the requirements box's third option (Part 1a). Every later question is confirm-or-correct with preset options. Ordinary progress is
 a plain message.
 
 `start` is the documented way in. Invoked directly as `/ocpf-bc:build-a-feature`, the skill runs
@@ -57,6 +57,13 @@ Full or Lite project with a step `In Progress`): opening `F00` closes that step'
 window ends where the next starts, Ops § Usage & Cost → 1); say so in one line, note the step id,
 and at Part 7 **reopen it**.
 
+**Then prepare the folder, when the `start` skill has not already done it in this session**
+(its Step 2, item 1a; since 6.1.0.0): delete `HelloWorld.al` when the project has
+one (in the root, where AL: Go! writes it, or under `src/`) — only when it is still the AL template's file — one page extension of "Customer List" (`pageextension 50100 CustomerListExt`) whose only code is the `OnOpenPage` trigger's `Message('App published: Hello world');`; a `HelloWorld.al` with any other content is
+somebody's code, left where it is, said in the line, and counted as a real object — and create `requirements/` in the
+project root when it does not exist — said in one line, nothing asked, an existing folder left as
+it is.
+
 ## Part 1: Where you are
 
 Decide which of these applies before asking anything. Read, don't ask.
@@ -65,8 +72,8 @@ Decide which of these applies before asking anything. Read, don't ask.
 |---|---|---|
 | **A. Framework project** | `ocpfFramework/framework.json` exists with `edition` `full` or `lite` (or a `CLAUDE.md` / `.github/copilot-instructions.md` starting `# BC App Build Routine`) | The project's parameters, prefix, namespace, ID ranges, models, notifications, dashboard, and `ProjectProgress.md` already exist. Reuse all of it. Add nothing to the project's documents except one ChangeLog line per object and the journey's documents, written beside the project's own in its phase folders (Part 7), never replacing. |
 | **B. Feature project** | `ocpfFramework/framework.json` exists with `edition` `feature` | A previous Build-a-Feature session. Continue: ids continue from the highest `F` row in `ProjectProgress.md`; `ocpfFramework/state/feature.json` holds the parameters and their sources. |
-| **C. Existing extension, no framework** | `app.json` exists, no `ocpfFramework/`, **and the extension has been built or installed somewhere**: `outputAppPackage/` or a `*.app` holds a package, or `src/` has real objects beyond the AL template's `HelloWorld.al` | Read `app.json` and `src/` for everything that can be read (Part 2); **confirm** what was read; ask what cannot be read. Its version is **asked**, never assumed (Part 2 step 5). **If the app has no usable documentation** (no FRD, TDD, design doc, or README that explains it) and `requirements/existing/` is empty, offer the `analyze` skill — *Analyze and document the app first (recommended — one run, 10–30 minutes)* / *Skip — I know this app* (Ops § Existing Apps) — **in the kickoff's last box, beside the intake question**, and run it after the setup batch, before Part 4, like Full's and Lite's K14. |
-| **D. Empty or new folder, or a fresh scaffold** | no `app.json`; **or** `app.json` from **AL: Go!** — version `1.0.0.0`, no package anywhere, `src/` empty or only `HelloWorld.al` | A new per-tenant extension. Keep the scaffold's `id` GUID and delete `HelloWorld.al`; Part 2 asks the identity and range questions, once, and writes **`version` `0.0.0.1`** (Ops § Packaging → *Version numbers*). AL: Go!'s `1.0.0.0` is the template's default, not a release, and is never kept. |
+| **C. Existing extension, no framework** | `app.json` exists, no `ocpfFramework/`, **and the extension has been built or installed somewhere**: `outputAppPackage/` or a `*.app` holds a package, or the project has real objects beyond the AL template's `HelloWorld.al` (deleted in Part 0 or by `start`) | Read `app.json` and `src/` for everything that can be read (Part 2); **confirm** what was read; ask what cannot be read. Its version is **asked**, never assumed (Part 2 step 5). **If the app has no usable documentation** (no FRD, TDD, design doc, or README that explains it) and `requirements/existing/` is empty, offer the `analyze` skill — *Analyze and document the app first (recommended — one run, 10–30 minutes)* / *Skip — I know this app* (Ops § Existing Apps) — **in the kickoff's last box, beside the intake question**, and run it after the setup batch, before Part 4, like Full's and Lite's K14. |
+| **D. Empty or new folder, or a fresh scaffold** | no `app.json`; **or** `app.json` from **AL: Go!** — version `1.0.0.0`, no package anywhere, no AL objects (the template's `HelloWorld.al` was deleted in Part 0 or by `start`) | A new per-tenant extension. Keep the scaffold's `id` GUID; Part 2 asks the identity and range questions, once, and writes **`version` `0.0.0.1`** (Ops § Packaging → *Version numbers*). AL: Go!'s `1.0.0.0` is the template's default, not a release, and is never kept. |
 
 **New app or existing app is a question, exactly as Full and Lite ask it (intake 4b), never an
 inference from `app.json`.** Whenever `app.json` exists and the project is not already a framework
@@ -104,16 +111,69 @@ recommended action and resolved through the `skill-load` skill's one box per iss
 asks anything and before any window opens**. Case A reuses the Full or Lite project's register as
 it is; nothing is asked about skills here. Skills loaded and compatible are named in one line.
 
+## Part 1a: The requirements box, the read, and the proof — every case, every session
+
+**Why this part exists (6.1.0.0):** on real projects this journey kept building without looking at
+`requirements/`, and the human had to say "read the requirements folder" every time. The read is
+now a step with a box before it, a line said after it, a record on disk, and a gate in Part 4 that
+will not open a window without that record. It applies to **every case — A, B, C, and D — and to
+every session**, a resumed one and *Build another object* included.
+
+1. **The requirements box** (Ops § Intake → *The requirements box*) — the first box of this skill,
+   before the working-language question. **Skip it only when the `start` skill asked it earlier in
+   this same session** (its Step 3a, right after the journey question); reached any other way — a
+   direct `/ocpf-bc:build-a-feature`, `start`'s *Build a feature in this project*, a plain-chat
+   request — ask it here:
+
+   > **Add your requirements documents.** `requirements/` is in the project root (when it holds
+   > files already: *it holds: <file names>*). Put any documents you have for this work in it now —
+   > Word documents, Markdown files, PDFs, images, spreadsheets, notes — then choose an option to
+   > continue.
+   > - *Continue — my documents are in `requirements/`*
+   > - *Continue — I have no documents; I'll describe what I need*
+   > - *They're somewhere else — I'll paste them or type the path*
+
+   Third option (or a free-text answer that pastes requirements or names a file or folder): end
+   the turn asking for the paste or the path, and when it arrives copy it verbatim into
+   `requirements/` now — pasted text as its own Markdown file, named files copied as they are —
+   then go on. First option chosen and the folder still empty: say so and ask once more, *They're
+   there now* / *Go on without documents*.
+2. **The read — right after the box, before the first kickoff box of Part 2.** List `requirements/`
+   recursively (`requirements/existing/` included) and **read every file in full**: `.md` and
+   `.txt` as text, Word, Excel, and PDF through the harness's file reading, images by looking at
+   them. **In a new session read every file in full again** — case A, case B, and a resumed session
+   included: nothing an earlier session read is in this one's context, whatever `feature.json`
+   says. Only within one session (*Build another object*) is it enough to read the files that are
+   new or whose modified time is later than `requirementsRead.at`. A file that
+   cannot be read is named, with the reason — never skipped silently. A file, ticket, or message
+   the human pointed at is read with them.
+3. **The proof line — said to the human, always.** *"Read from `requirements/`: RentalUnits.docx,
+   fields.png, notes.md (3 files)."* — or *"`requirements/` is empty; I'll ask what to build."* One
+   line, by file name, before the next box.
+4. **The record.** Write `requirementsRead` to `ocpfFramework/state/feature.json` — in every case,
+   case A included, where the file may hold nothing else (create `ocpfFramework/state/` if needed;
+   it is always gitignored):
+   `"requirementsRead": { "at": "<ISO 8601, now>", "files": ["requirements/RentalUnits.docx", "requirements/fields.png"] }`
+   (`"files": []` for an empty folder). `docs/ProblemStatement.md` lists the same files under
+   *Sources read* (Part 3 step 5).
+5. **The gate.** Part 4 step 1 opens an object's window only when three things hold:
+   `requirementsRead.at` is **later than the `startedAt` of the window Part 0 opened in this
+   session** (`usage.json` — that is what "from this session" means, checkable after a context
+   compaction too); `files` lists exactly the files `requirements/` holds now; and **no file under
+   `requirements/` has a modified time later than `at`**. Otherwise items 2 to 4 run first. *Build another object* (Part 7) and a resumed session come back through items 2 to 4
+   before Part 3's question is asked again — the human may have added a document in between.
+
 ## Part 2: Setup, the minimum
 
 Nothing here needs the human beyond the questions named and the AI tool's own approval prompts.
 Skip what the case already has. **Since 5.10.0.0 the order is the kickoff's** (runbook Rule 6f;
-Ops § Intake → *The kickoff boxes* → *Build-a-Feature's kickoff*): **first, before any box, one
+Ops § Intake → *The kickoff boxes* → *Build-a-Feature's kickoff*): **first, before any kickoff box (the requirements box of Part 1a is answered by then), one
 read and one fetch, said in one line** — item 2 (the companions: the Operations Guide and the
 Standards Guide have to be on disk before the boxes that cite them; when GitHub is slow, read the
 bundled copies in the `start` and `al-standards` skills' `references/` and fetch in the batch),
-then `app.json`, `src/`, `images/`, `requirements/` and `requirements/existing/` in full (Part 3
-step 1), Microsoft's runtime table, and the Ops sections the boxes cite; **then the questions back
+then `app.json`, `src/`, `images/` (**`requirements/` and `requirements/existing/` are already
+read in full by then — Part 1a, right after the requirements box, with its proof line and its
+`requirementsRead` record; if that record is missing, run Part 1a now**), Microsoft's runtime table, and the Ops sections the boxes cite; **then the questions back
 to back with nothing between them but recording the answer in `ocpfFramework/state/feature.json`**
 — item 1 (language), item 4 (notifications, the Remote Control question in the same box), item 5
 (identity, or case C's confirm box, with 4b), item 7 (the Main model and effort) with item 8 (the
@@ -133,7 +193,7 @@ now says.
 1. **Working language** (cases B, C, D; A has it in `docs/1-define/ProjectParameters.md`): ask in
    English through the options mechanism, English first, free text for any other language.
    Continue in the language chosen.
-2. **Companions — before the first box** (B, C, D; A already has them): create `ocpfFramework/` with its six-line
+2. **Companions — before the first kickoff box** (B, C, D; A already has them): create `ocpfFramework/` with its six-line
    `README.md` (Ops § Project Setup); fetch the Standards Guide into
    `ocpfFramework/standardsGuide/` (standalone repository at the pinned tag, Ops § Fetched
    Companions), the Operations Guide into `ocpfFramework/opsGuide/`, the patterns library into
@@ -180,7 +240,7 @@ now says.
    `app.json` names it (Ops § Intake → *The app icon → Creating one*) / *No icon*; *Later* via
    free text). Record `name`, `publisher` with `publisherSource`, and the icon answer in
    `ocpfFramework/state/feature.json` as they arrive; `app.json` is written once, complete, in the
-   batch (item 10), and `src/` created then (delete `HelloWorld.al`).
+   batch (item 10), and `src/` created then (`HelloWorld.al` is already gone — Part 0).
    **Identity (C — an existing extension):** keep `id`; show `name` and `publisher` as read and
    **confirm them in one box** (*That's right* / *Change the name* / *Change the publisher*) —
    a value that looks like a placeholder is asked outright, as above — and, in the same box, ask
@@ -192,7 +252,7 @@ now says.
    **`app.json` already exists (C, or a scaffold under D):** then ask the intake's question 4b,
    one box, two options, the one the evidence suggests first:
    - *New app — the version starts at `0.0.0.1`* — **recommended, and first, when no package
-     exists anywhere and `src/` is empty or only the template's `HelloWorld.al`** (an AL: Go!
+     exists anywhere and the project has no AL objects** (the template's `HelloWorld.al` is already deleted; an AL: Go!
      scaffold always says `1.0.0.0`; that is the template's default and is overwritten);
    - *Existing app — installed in a target environment; `<version from app.json>` is the
      installed version* / *I'll type the installed version* — first only when a package or real
@@ -294,12 +354,14 @@ problem statement beyond Part 3's short one, no estimates, no translation questi
 
 ## Part 3: Intake — "What do you want to build today?"
 
-1. **Look before asking — before the first kickoff box** (Part 2's read). If `requirements/` exists, or the human pointed at a file, a ticket, or
-   a message, read it first (`.md`, Word, PDF, and images alike). `requirements/existing/`, when
-   present, is what the app already is (the `analyze` skill's output) — read it too. If it fully
-   describes the object(s), skip to the confirmation in Part 4 with everything pre-filled and say
-   where each answer came from. If it is partial, pre-fill what it gives. The better formed the
-   material, the faster this stage is — say so once if `requirements/` is empty.
+1. **Look before asking — Part 1a's read, done before the first kickoff box, never skipped.**
+   `requirements/` was read in full there (`.md`, Word, PDF, and images alike), with anything the
+   human pointed at; `requirements/existing/`, when present, is what the app already is (the
+   `analyze` skill's output). **If `feature.json` has no `requirementsRead` from this session, stop
+   and run Part 1a items 2 to 4 now.** What the material describes pre-fills the intake: when it
+   names objects to build, the intake question below offers them as its first option, and Part 4's
+   confirmation says where each field and type came from (*"from requirements/RentalUnits.docx"*).
+   If it is partial, pre-fill what it gives.
 2. **One question, the only free-text one — the last box of the kickoff**, asked right after the
    Custom Skills box (item 14; after the naming-and-range box when item 14 does not apply), before
    the setup batch runs. Through the options mechanism:
@@ -314,6 +376,15 @@ problem statement beyond Part 3's short one, no estimates, no translation questi
    *"a new table Rental Unit with No., Description, Start Date, Amount, and a card page"*. In the
    Copilot CLI, where a typed answer needs its own option, drop the third preset (an API object
    is typed, or chosen under *Something else*) and make *I'll type it* the fourth.
+
+   **When `requirements/` describes something to build, the first option is that, recommended:**
+   *Build what `requirements/` describes — <the objects, in a few words, e.g. "a Rental Unit table
+   with its list and card pages"> (recommended)*, and the API preset is dropped to keep four
+   options (an API object is typed, or chosen under *Something else*; on the Copilot CLI the
+   *Extend a standard table or page* preset is dropped too, for *I'll type it*). The question's text names the files the
+   option comes from. This is how the human sees that the folder was read; an intake question
+   asked with files in `requirements/` and no such option, or no sentence saying why the files
+   describe nothing buildable, is a skipped read.
 3. **Parse the answer** into a plan of one or more objects, in build order (lookups and enums
    before the tables that use them; tables before their pages, API pages, and permission grants;
    a table extension before the page extension that shows its fields; a cue table before its
@@ -328,8 +399,9 @@ problem statement beyond Part 3's short one, no estimates, no translation questi
    Part 4 with the first object. No approval box here: the per-object confirmation in Part 4 is
    where the human says yes.
 5. **Write the first two documents now** (Part 7 has the table of all six): `docs/ProblemStatement.md`
-   — a dated section: the intake answer in the human's words, the plan, what was deliberately left
-   out — and `docs/FeatureRegister.md` §1 from `feature.json`, every parameter with its source.
+   — a dated section: the intake answer in the human's words, **Sources read** (the
+   `requirements/` files of `requirementsRead`, by name, or *none — `requirements/` was empty*),
+   the plan, what was deliberately left out — and `docs/FeatureRegister.md` §1 from `feature.json`, every parameter with its source.
    Case A: the problem-statement section is appended to the project's `docs/1-define/ProblemStatement.md`;
    the register goes to `docs/1-define/FeatureRegister.md`.
 
@@ -340,7 +412,9 @@ Close the intake window when the first object's window opens: set `F00`'s `compl
 
 For each object in the plan, in order. Each object is one row and one usage window.
 
-1. **Open the window.** Next id (`F01`, `F02`, … continuing from the highest existing row).
+1. **Open the window — through the requirements gate** (Part 1a item 5): `feature.json`'s
+   `requirementsRead.at` is later than this session's first window, its `files` are what
+   `requirements/` holds now, and no file there is newer than `at`; if not, read first (Part 1a items 2 to 4), then come back. Next id (`F01`, `F02`, … continuing from the highest existing row).
    Append `{ "step": "<id>", "title": "<Type> <Name>", "startedAt": "<now>" }` to `usage.json`;
    add the row to the feature table with stage **Asked**, status `In Progress`. The dashboard
    picks it up by hook (Copilot Chat: render once, `--quiet`). **One window per object, always**
@@ -508,7 +582,8 @@ The closing message, in this order: what was built (type, ID, name, file, one li
 documents, by path, with one sentence on what to read first (`docs/Documentation.md`); the
 package path and version if one was built; the usage rows of the session (run `/ocpf-bc:usage`
 without `--step` once so every `F` row is current; paste the session's rows); the dashboard path;
-and the last box: **Done** / *Build another object* (back to Part 3's question) / *Open the
+and the last box: **Done** / *Build another object* (back to Part 3's question, through Part 1a
+items 2 to 4 first — `requirements/` is listed again and anything new or changed is read) / *Open the
 dashboard*. **On *Done*, one more render with `--close-project`** (`-CloseProject`; the renderer
 in `ocpfFramework/scripts/`): on a feature project it stamps `projectClosedAt`, closes any open
 window so the clocks stop, and the page reads *Completed* with Main *finished* (Ops § Dashboard →
@@ -524,7 +599,8 @@ began (Part 0), that step's window reopened — append `{ "step": "<that step>",
 
 A new session on a feature project (case B) or a framework project with a feature table (case A)
 continues: the `start` skill's *Build a feature in this project* lands here; `status` reports the
-feature rows. A row left `In Progress` is re-asked through its last box (Ops § Asking and
+feature rows. **A resumed session reads `requirements/` again before anything else** (Part 1a:
+the box when `start` did not ask it this session, the read, the proof line, the record). A row left `In Progress` is re-asked through its last box (Ops § Asking and
 Approvals → *Interrupted and resumed*). New ids continue from the highest. `feature.json`'s
 sources are checked before the first allocation, as always.
 
@@ -534,7 +610,8 @@ No FRD, TDD, Design Doc, Sanity Check, estimates, test script, user guide, or ac
 file (the six documents above are the whole record); no translation files (source labels only;
 `TranslationFile` stays on so the `.g.xlf` is generated for whoever adds languages later); no
 publish to a sandbox or a tenant; no AppSource target; no sub-agents; no usage calibration export
-unless asked; no publisher or ID range from anywhere but a box the human answered. **No help-site offer** — the polished HTML documentation site is Full Step 11's and
+unless asked; no publisher or ID range from anywhere but a box the human answered; **no object
+built in a session that has not read `requirements/` and said so** (Part 1a). **No help-site offer** — the polished HTML documentation site is Full Step 11's and
 Lite Step 6's offer (the `html-docs` skill), never a quick mod's; a human who asks for one on a
 feature project gets it on request (`/ocpf-bc:html-docs`, which asks which tabs —
 `docs/Documentation.md`, a User Guide and an FAQ written then — and about screenshots). If the intake

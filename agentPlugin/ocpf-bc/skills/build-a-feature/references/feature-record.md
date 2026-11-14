@@ -80,7 +80,8 @@ run on a value nobody chose:
   "idRanges": [{ "from": 50100, "to": 50149 }],
   "idRangesSource": "chosen by the human, naming-and-range box, 2026-10-16 — the AL template's default, kept knowingly",
   "prefix": "CRU", "namespace": "Contoso.RentalUnits",
-  "pricingChecked": "2026-10-16"
+  "pricingChecked": "2026-10-16",
+  "requirementsRead": { "at": "2026-10-16T15:01:40Z", "files": ["requirements/RentalUnits.docx", "requirements/fields.png"] }
 }
 ```
 
@@ -89,13 +90,19 @@ a missing or template-derived source ("read from app.json") sends the loop back 
 question first. **The publisher gate:** `app.json`'s `publisher` is written **only** from a value
 whose `publisherSource` names a box or a message the human typed in — never git config, an email
 domain, a folder name, memory of another project, or the AL template (Ops § Intake). The `status`
-skill reports a feature project whose `feature.json` lacks either source.
+skill reports a feature project whose `feature.json` lacks either source. **The requirements
+gate (6.1.0.0):** Part 4 step 1 opens an object's window **only** when `requirementsRead.at` is
+later than the `startedAt` of the window Part 0 opened in the current session, `files` lists
+exactly what `requirements/` holds now (`[]` for an empty folder), and no file there has a
+modified time later than `at` — the skill's Part 1a reads the folder in full, says which files it read, and writes this
+key, in every case and every session; on a Full or Lite project (case A) the file may hold this
+key alone.
 
 ## The documents — flat `docs/`, written as the work happens
 
 | File | Template | Written | Holds |
 |---|---|---|---|
-| `docs/ProblemStatement.md` | none — Lite Step 1's shape: purpose, scope, out of scope | at the intake close (F00); a dated section per session | the intake answer in the human's words, the plan, what was deliberately left out |
+| `docs/ProblemStatement.md` | none — Lite Step 1's shape: purpose, scope, out of scope | at the intake close (F00); a dated section per session | the intake answer in the human's words, *Sources read* (the `requirements/` files of `requirementsRead`, or *none*), the plan, what was deliberately left out |
 | `docs/FeatureRegister.md` | `FeatureRegister.md` | §1 at the intake close; a §2 row when an object is **proposed**, updated when confirmed and when compiled; §4 at every decision | the parameters with their sources, the object register, where to look, decisions |
 | `docs/DataModel.md` | `FeatureDataModel.md` | a table / extension / enum section **before its confirmation box**, marked *proposed*; updated on confirm and on compile; §4–§6 as pages, APIs, and permission sets are built; diagram redrawn at the close | the schema: fields, types, keys, relations, enums, where the data is shown, who may read it |
 | `docs/Documentation.md` | `FeatureDocumentation.md` | a §3 section when the object **compiles**; §1, §2, §4–§7 at the close of the plan | the explanation for a consultant, tester, or next developer: what it does, how to use it, the objects, how they fit, API, permissions, limitations |

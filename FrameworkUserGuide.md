@@ -4,9 +4,9 @@
 
 *by AJ Ansari*
 
-**Last Updated:** Saturday, October 31, 2026
-**Covers:** Full runbook v6.0.0.0 · Lite v6.0.0.0 · Standards Guide v1.13.1.0 · Operations Guide
-v6.0.0.0 · `ocpf-bc` agent plugin v6.0.0 · Visual Studio Code setup extension v0.0.17
+**Last Updated:** Friday, November 13, 2026
+**Covers:** Full runbook v6.1.0.0 · Lite v6.1.0.0 · Standards Guide v1.13.1.0 · Operations Guide
+v6.1.0.0 · `ocpf-bc` agent plugin v6.1.0 · Visual Studio Code setup extension v0.0.18
 
 > This guide is for the person driving a project with the framework: a Business Central
 > functional consultant or an AL developer working in Visual Studio Code with Claude Code or GitHub Copilot.
@@ -36,8 +36,8 @@ know which one you are looking at.
 
 | Part | What it is | Where it lives | Version today |
 |---|---|---|---|
-| **The framework** | The runbook (Full or Lite), its step files, the document templates, the **Standards Guide**, and the **Operations Guide**. This is the content the AI agent follows. | The public GitHub repository, `ajansari/ocpfBcAgenticDevFramework`, on its `main` branch. | Full 6.0.0.0 · Lite 6.0.0.0 · Standards 1.13.1.0 · Ops 6.0.0.0 |
-| **The agent plugin** `ocpf-bc` | Eighteen skills (the `/ocpf-bc:` commands), five sub-agent definitions, the AL tooling helper scripts, the dashboard renderer, the Custom Skills helper, and an *offline fallback copy* of the framework. Installed once per machine into Claude Code or GitHub Copilot. | Same repository, folder `agentPlugin/ocpf-bc`, published as a plugin marketplace. | 6.0.0 |
+| **The framework** | The runbook (Full or Lite), its step files, the document templates, the **Standards Guide**, and the **Operations Guide**. This is the content the AI agent follows. | The public GitHub repository, `ajansari/ocpfBcAgenticDevFramework`, on its `main` branch. | Full 6.1.0.0 · Lite 6.1.0.0 · Standards 1.13.1.0 · Ops 6.1.0.0 |
+| **The agent plugin** `ocpf-bc` | Eighteen skills (the `/ocpf-bc:` commands), five sub-agent definitions, the AL tooling helper scripts, the dashboard renderer, the Custom Skills helper, and an *offline fallback copy* of the framework. Installed once per machine into Claude Code or GitHub Copilot. | Same repository, folder `agentPlugin/ocpf-bc`, published as a plugin marketplace. | 6.1.0 |
 | **The Visual Studio Code setup extension** | A bootstrapper and extension pack, published to the Visual Studio Marketplace and Open VSX. Installs the AL toolchain and the agent extensions, wires your agent to the plugin marketplace, and adds six Command Palette commands. It contains **no framework content**. | A separate repository, published as [`ajansari.ocpf-bc-dev-setup`](https://marketplace.visualstudio.com/items?itemName=ajansari.ocpf-bc-dev-setup) (also on [Open VSX](https://open-vsx.org/extension/ajansari/ocpf-bc-dev-setup)). | 0.0.17 |
 | **Your project's copy** | The runbook and companions fetched into one AL project, pinned at the version fetched. | Your AL project folder: `CLAUDE.md` or `.github/copilot-instructions.md`, plus one `ocpfFramework/` folder holding the step files, templates, both guides, patterns, scripts, the changelog, the plugin's marker, and each developer's state. | Whatever was current when you started, until you approve an update |
 
@@ -123,8 +123,10 @@ Add `full`, `lite`, or `feature` to skip the journey question.
 
 | | What happens | What you do |
 |---|---|---|
+| **0** | **Prepares the folder, before any question** (since 6.1.0.0). Deletes `HelloWorld.al` if the project has one and it is still the AL template's untouched sample (a file you changed is left alone), and creates a `requirements/` folder in the project root. | Nothing. |
 | **1** | **Checks the folder.** If the project already follows the framework, it offers `status`, `update-framework`, or *Build a feature in this project* instead. It never starts Full or Lite twice. An existing extension that never used the framework is recognised too — and if nobody can explain it (no FRD, TDD, design doc, or README), it offers to **analyze and document it first** (`/ocpf-bc:analyze`, below) before you choose a journey. | Nothing, or say yes to the analysis. |
 | **2** | **Build-a-Feature, Full, or Lite.** It asks about the kind of work — not a file count — and recommends Full unless you say the work is smaller; the box lists the three in that fixed order with Full marked. **Full:** a complete app or solution end to end, or a major overhaul of a big existing app; the full requirements, design, documentation, and testing trail on three models; at least three to four hours. **Lite:** updating an existing app, or a new app without a large footprint; one model, fewer steps, leaner documents; one to two hours. **Build-a-Feature:** quick, tactical customizations — a table and its pages, a field on a page, a processing report, an API, a role center — in minutes, not vibe-coding but lean on documentation (six short documents in a flat `docs/`); ideal for a PoC or prototype. | Confirm or override. Lite's documents carry straight over into Full if you switch later; a Build-a-Feature extension is an existing app to Lite or Full. |
+| **2a** | **Asks for your requirements documents, right after the journey question** (since 6.1.0.0). One box: put any documents you have (Word, Markdown, PDF, images, spreadsheets, notes) in `requirements/`, then choose *Continue — my documents are in `requirements/`*, *Continue — I have no documents; I'll describe what I need*, or *They're somewhere else — I'll paste them or type the path* (the agent copies them into the folder). Build-a-Feature reads the folder in full right away and tells you which files it read; Full and Lite read it after the setup questions. | Copy your documents into `requirements/`, then continue. |
 | **3** | **Where the runbook goes.** `CLAUDE.md` for Claude Code, `.github/copilot-instructions.md` for Copilot, or both for a mixed team. | Nothing, unless a file with that name already exists. Then it asks; it never overwrites. |
 | **4** | **Fetches the latest runbook** and its changelog from GitHub, byte for byte, and records the commit and version in `ocpfFramework/framework.json`. If GitHub is unreachable it uses the plugin's bundled copy and tells you so, naming the version. | Nothing. |
 | **5** | **Begins the routine** at the first step: PRE-01 (Full) or Step 1 (Lite). Its setup batch, after the kickoff questions, **connects Microsoft's AL tools**: in Copilot Chat they are built into the AL Language extension; in Claude Code and Copilot CLI it registers the extension's bundled AL MCP Server for the project. Nothing is installed; no PATH edits. | See the first hour, below; approve the connection once when asked. |
@@ -168,10 +170,10 @@ comes back with the questions that depend on them. In order:
    to the workspace's `.vscode/settings.json`, and how tool approvals should work.
 6. **The parameters you already know,** still in the same run: prefix, namespace, localization,
    BC version, the permission set code, ID ranges, the AppSource URLs, the languages per country,
-   whether the framework's files are left out of your repository, and — when your
-   `requirements/` folder is empty — **where your requirements are** (put them in `requirements/`
-   now, paste them, point at a file, or describe them when asked). On an undocumented existing
-   app, whether to analyze and document it first.
+   and whether the framework's files are left out of your repository. (Where your requirements
+   are was settled before these boxes: `/ocpf-bc:start` asked you to put them in `requirements/`
+   right after the journey question.) On an undocumented existing app, whether to analyze and
+   document it first.
 7. **The setup, then the problem itself.** The fetched companions (the Standards Guide, the
    Operations Guide, the step files, the document templates — into `ocpfFramework/`, all
    gitignored) come in before the first question; after the last one the agent sets everything

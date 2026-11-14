@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 6.0.0.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
-**Last Updated:** October 31, 2026
+**Version:** 6.1.0.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
+**Last Updated:** November 13, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
 > `fullVersion/BC_App_Build_Routine_Agent.md` and `liteVersion/LITE_BC_App_Build_Routine_Agent.md`.
@@ -120,8 +120,9 @@ consecutive boxes, with nothing between one box and the next but writing the ans
 working language, how to be notified, the extension's name, publisher, and icon, the Deployment
 Target, the countries, who approves, which models do the work, the Copilot settings, the prefix,
 namespace, localization, and BC version, the permission set code and the ID ranges, the AppSource
-URLs, the languages, the `.gitignore` answer, and — when `requirements/` is empty — where the
-requirements are. The exact boxes, per journey, are **Ops § Intake → *The kickoff boxes***. All
+URLs, the languages, and the `.gitignore` answer. **The requirements box comes before all of
+them** (Ops § Intake → *The requirements box*, since 6.1.0.0): the folder is prepared, the journey
+is chosen, and the very next box asks the human to put their documents in `requirements/`. The exact boxes, per journey, are **Ops § Intake → *The kickoff boxes***. All
 the setup work those answers drive — fetching, applying and testing the notifications, writing
 `app.json` complete, the dashboard, the sub-agent definitions, the AL tools, the symbols — runs
 **after the last kickoff box, in one batch, reported in one message**, and is followed by **one
@@ -357,16 +358,67 @@ same record). **No object ID is allocated until the range's source names a box**
 agent wrote a publisher it had seen in the human's email domain, and allocated IDs from the
 scaffold's default range — both had to be undone, and both were "obvious" to the agent.
 
-**What the human can prepare, and where it goes** (said once, in the first message of any
-journey, when the folders are empty): raw requirements belong in **`requirements/`** — `.md`
-files are recommended; Word, PDF, and images are read too — and an app icon in **`images/`**. The
-better formed and documented the material, the faster the first stage goes: a complete
-`requirements/` folder pre-fills the intake and the problem statement, and the icon question
-offers the file it finds. An existing app's reverse-engineered record lives in
-`requirements/existing/` (Ops § Existing Apps). **When `requirements/` is empty and nothing was
-pasted or attached, the kickoff's last box asks where the requirements are** (*The kickoff boxes*
-below, K14) — so the recommendation is a question with an answer, not a line the human may have
-scrolled past.
+### The requirements box — the folder prepared first, the documents asked for right after the journey
+
+**Since 6.1.0.0, every journey starts the same way, in this order, with nothing between:**
+
+1. **Prepare the folder — the first act, before any question, the journey question included.**
+   Delete **`HelloWorld.al`** when the project has one (in the root, where AL: Go! writes it, or
+   under `src/`) — **only when it is still the AL template's file — one page extension of "Customer List" (`pageextension 50100 CustomerListExt`) whose only code is the `OnOpenPage` trigger's `Message('App published: Hello world');`**; a `HelloWorld.al` with any other content
+   is somebody's code: it is left, said in the line, and counted as a real object (the delete runs
+   before anything is known about the project, possibly outside a Git repository) — and
+   **create `requirements/`** in the project root when it does not exist; an existing folder and its
+   content are left as they are. Said in one line, naming what was done; nothing is asked. An
+   `app.json` at `1.0.0.0` with no package and no objects is still an AL: Go! scaffold after the
+   file is gone.
+2. **The journey question** (Ops § Journeys) — or its confirmation when the human named the journey.
+3. **The requirements box — the very next box, always, whether the folder is empty or not.** A
+   notification the human answers by continuing, asked through the options mechanism so the
+   session waits for them:
+
+   > **Add your requirements documents.** I created a `requirements/` folder in the project root
+   > (when it holds files already: *`requirements/` holds: <file names>*). Put any documents you
+   > have for this work in it now — Word documents, Markdown files, PDFs, images, spreadsheets,
+   > notes — then choose an option to continue.
+   > - *Continue — my documents are in `requirements/`*
+   > - *Continue — I have no documents; I'll describe what I need*
+   > - *They're somewhere else — I'll paste them or type the path*
+
+   The box's text adds that an app icon, if there is one, goes in **`images/`**. **On the third
+   option** — or a free-text answer that pastes requirements or names a file or folder — the turn
+   ends asking for the paste or the path, and when it arrives the text or the files are copied
+   verbatim into `requirements/` **at once** (the first step's capture rule: pasted text as its
+   own Markdown file, named files as they are). On every answer the agent then **lists
+   `requirements/` again** and says in one line what is there, by file name. First option chosen
+   and the folder still empty: say so and ask once more — *They're there now* / *Go on without
+   documents*.
+
+**Who does it.** In a plugin project the `start` skill does all three (its Step 2 item 1a, Step 3,
+Step 3a), then hands over to the journey. Reached any other way — the runbook placed by hand
+without the plugin, a direct `/ocpf-bc:build-a-feature`, `start`'s *Build a feature in this
+project* — the journey's first step does item 1 before its first box and asks the requirements box
+**as its first box**, before the working-language question. **It is asked once per session**,
+never twice, **and never again once its answer is recorded**: the journey's first step writes it
+down as *Requirements location*, whoever asked it — `docs/0-project/ProjectMemory.md` in Full, the
+sheet's row in Lite, `requirementsRead` in `feature.json` on Build-a-Feature. **It precedes the
+kickoff and is not one of its back-to-back boxes** (Rule 6f): the kickoff's own pre-box batch —
+the fetch, the two Microsoft pages — runs between it and K1.
+
+**When the documents are read.** Not in the box. **Build-a-Feature reads `requirements/` in full
+right after it, before its first kickoff box, says which files it read, and records the read**
+(Ops § Build-a-Feature → *The journey*, item 0a). Full and Lite read the folder after the
+setup-done box (Rule 6f: no kickoff box is built from the requirements). The better formed and
+documented the material, the faster the first stage goes: a complete `requirements/` folder
+pre-fills the intake and the problem statement, and the icon question offers the file it finds in
+`images/`. An existing app's reverse-engineered record lives in `requirements/existing/` (Ops §
+Existing Apps).
+
+**It replaces the old *Where are the requirements?* question** (the kickoff's last box, K14, from
+5.10.0.0 to 6.0.0.0). The answer is recorded where K14's was — *Requirements location*: *in
+`requirements/`* / *described when asked* / *pasted* / *path typed*. K14 now carries only the
+existing-app analysis offer. Why: on real projects the human learned about the folder from a line
+of prose or from the fourteenth box, the folder did not exist yet, and on Build-a-Feature the
+agent built without reading it until told to.
 
 **Box 0 — Identity first, at the routine's first step.** Since v5.2.0.0 the three questions that
 name the app are asked at **PRE-01 / Lite Step 1, right after the notification question and before
@@ -437,18 +489,22 @@ box marked *as needed* is skipped when its condition isn't met, and nothing is a
 of Build-a-Feature, a resumed intake (Rule 6e), and a project that already answered a question
 skip it.
 
-**Before the first box, once, in one batch, said in one line:** the companions when the project
+**First, when the `start` skill has not done it:** the folder prepared (*The requirements box*
+above, item 1) and the requirements box asked, alone — it precedes the kickoff. **Then, before the
+first kickoff box, once, in one batch, said in one line:** the companions when the project
 has none yet (the plugin's `start` skill fetched them; without the plugin, fetch them now — Ops §
 Fetched Companions); Microsoft's live *Country/Regional Availability and Supported Languages* page
 and the *Choose runtime version* table (Ops § Reference Sources); `app.json`, `src/`, `images/`,
-and whether `requirements/` holds anything (its *content* is read after the kickoff — on
-Build-a-Feature, whose one intake question is pre-filled from it, the content is read here too);
+and what `requirements/` holds, by file name (its *content* is read after the kickoff — on
+Build-a-Feature, whose one intake question is pre-filled from it, the content is read here too, in
+full, right after the requirements box);
 whether `skillslocation.md` is in the project and whether `~/.ocpf/skills/` holds skills (K13a
 names them — 6.0.0.0); and the Ops sections the boxes cite. Then the boxes:
 
 | # | Box | Questions | Asked |
 |---|---|---|---|
-| **K1** | Working language | one question, alone, in English, English first | always |
+| K0 | The requirements box — before the kickoff, not one of its back-to-back boxes | *Add your requirements documents* — *Continue — my documents are in `requirements/`* / *Continue — I have no documents; I'll describe what I need* / *They're somewhere else — I'll paste them or type the path* (*The requirements box* above; 6.1.0.0) | once per session, and never once recorded: by the `start` skill right after the journey question; otherwise by the first step, before its pre-box batch |
+| **K1** | Working language | one question, alone, in English, English first — the kickoff's first box (the requirements box, in English too, comes before it) | always |
 | **K2** | Notifications | the channels (multi-select, Ops § Notifications → 1); **Remote Control** (*Only when I turn it on* / *Every session* — its explanation in the question's text, worded so it only matters when *Claude app* was chosen) | always; Remote Control in Claude Code only |
 | **K3** | Identity | extension name; publisher; app icon (Box 0); **Deployment Target** (question 3 — its AppSource consequences said in the box's text, since they change K8 and K11) | always |
 | K3a | Identity follow-ups | the icon's path, free text, on *Yes — I'll provide an image*; the `app-icon` skill's one box (style, colors, content, description) on *Create one for me* — the icon is drawn in the setup batch and accepted in the setup-done box | as needed |
@@ -463,15 +519,19 @@ names them — 6.0.0.0); and the Ops sections the boxes cite. Then the boxes:
 | K12 | Documents & per language | which documents are translated; a translated test script? (4); then required at first release; who reviews it (3) — two languages per box; a partner-translated language's app question joins it | only when a K10 target other than the K11 source exists — decided after K11 closes |
 | **K13** | Working setup | framework files in `.gitignore`? (18); customer-language documents? translatable data? (5) | always |
 | **K13a** | Custom skills | **Do you have any skills you want to load?** *(multi-select; 6.0.0.0 — Ops § Custom Skills)* — *Upload — a folder or a `.zip` on this machine (I'll type its path in chat)* / *GitHub repository — I'll type the URL (public, or private through your own sign-in)* / *Skills site — a bcskills.ai slug, I'll type it* / *No*. When `~/.ocpf/skills/` holds skills or the project has a `skillslocation.md` (both read before the first box), the first option becomes *Load these: <slugs> (recommended)*. On the Copilot CLI, where a box may not multi-select, the same as yes / no lines in that order — *Load these: <slugs>?* first when it applies, then the three. Each yes opens its typed follow-up as the very next box (Rule 6f); the fetch, inspection, and dedupe run in the setup batch, and each skill's *Activate* box — and any block's per-issue box — is asked in the setup-done box (Ops § Custom Skills → 3 and 5). | always; before K14 |
-| **K14** | Requirements & existing app | **Where are the requirements?** — *I'll put them in `requirements/` now (recommended — `.md` preferred; Word, PDF, and images are read too)* / *I'll paste them in chat* / *They're in a file or folder elsewhere — I'll type the path* / *I'll describe the need when you ask* — asked when `requirements/` is empty and nothing was pasted or attached; **run the in-depth analysis first?** (Ops § Existing Apps — when `src/` holds real objects and `requirements/existing/` is empty) | as needed; always the last box |
+| **K14** | Existing app | **Run the in-depth analysis first?** (Ops § Existing Apps — when the project holds real objects and `requirements/existing/` is empty). *Where are the requirements?* was asked here from 5.10.0.0 to 6.0.0.0; since 6.1.0.0 the requirements box, asked right after the journey question, replaces it (*The requirements box* above) | as needed; always the last box |
 
-**Build-a-Feature's kickoff** is shorter: K1, K2, K3 (its identity box, or the confirm box of case
+**Build-a-Feature's kickoff** is shorter: K0 (the requirements box, when `start` did not ask it —
+followed at once by the read of `requirements/` in full, the one read that precedes its other
+boxes), K1, K2, K3 (its identity box, or the confirm box of case
 C, with 4b), K5 (Main model and effort, the Copilot questions), its naming-and-range box (Deployment
 Target, prefix, namespace, ID range — the `build-a-feature` skill's Part 2, item 9), **the Custom Skills
 box** (K13a's twin — the same question and options; the skill's Part 2, item 14;
 not asked in case A, which reuses the project's register), and then **its one
 intake question, *What do you want to build today?*, as the last kickoff box**, pre-filled from
-`requirements/` read before the first box. No countries, languages, approvers, or `.gitignore`
+`requirements/` — read in full right after the requirements box, with the files named to the human
+and the read recorded (Ops § Build-a-Feature → *The journey*, item 0a); its first option is
+*Build what `requirements/` describes* when the material names objects. No countries, languages, approvers, or `.gitignore`
 question.
 
 **After the last kickoff box — the setup batch, one message, no question.** In this order, each
@@ -498,10 +558,9 @@ the next box), and, when the inspection found an issue, that issue's options box
 Skills → 5 — the batch never stops mid-way for it); **did each chosen notification kind arrive,
 and did clicking one open the session?** (Ops § Notifications 5); **accept this icon?** when one
 was drawn (*The app icon → Creating one*); **the Main model switch confirmed** when the human
-chose a Main model or effort other than the session's (Ops § Roles); and, when K14 was answered
-*I'll put them in `requirements/` now*, **are they in?** (*Yes — read them* / *Not yet — I'll say
-when*). On *I'll paste them in chat*, the turn ends asking for the paste and the batch starts when
-it arrives — or, when the human says to go on, runs at once and captures the paste when it comes. A symbol download that failed adds its options box next (Ops § Symbols). Then the
+chose a Main model or effort other than the session's (Ops § Roles). (The *are the requirements
+in?* question that followed K14 through 6.0.0.0 is gone: the requirements box settled it before the
+kickoff.) A symbol download that failed adds its options box next (Ops § Symbols). Then the
 requirements are read and the routine continues with the questions that need them.
 
 ### The app icon
@@ -2692,7 +2751,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v6.0.0.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
+folder as `README.md`. For runbook **v6.1.0.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2871,7 +2930,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v6.0.0.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v6.1.0.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
@@ -3517,7 +3576,9 @@ and with less detail than Full. One to two hours depending on complexity.
 first stage goes. Requirements go in `requirements/` (`.md` recommended; Word, PDF, and images are
 read too), an app icon in `images/`, and an existing app's reverse-engineered record — written by
 the `analyze` skill — in `requirements/existing/` (Ops § Existing Apps). Every journey reads them
-at its first step.
+at its first step — and since 6.1.0.0 every journey asks for them: `requirements/` is created
+before the journey question and the requirements box follows it directly (Ops § Intake → *The
+requirements box*).
 
 **Switching costs nothing.** Lite's Design Doc and ChangeLog carry into Full; a Build-a-Feature
 extension is an existing app to Lite's Step 1 or Full's PRE-01; Build-a-Feature can run on top of
@@ -3551,7 +3612,7 @@ Standards Guide, document it as it compiles, offer the natural next object, stop
 | A Full or Lite project | the marker says `full` or `lite` | nothing new: the parameters, prefix, ranges, models, notifications, dashboard, and `ProjectProgress.md` are reused; the feature table is appended; one ChangeLog line per object; the journey's documents are written beside the project's own, in its phase folders, never replacing |
 | A feature project | the marker says `feature` | continue: the row ids carry on from the highest; `ocpfFramework/state/feature.json` holds the parameters and their sources |
 | An existing extension that never used the framework | `app.json`, no `ocpfFramework/`, and a package or real objects exist | read `app.json` and `src/` for the name, ranges, prefix, and namespace; **confirm** what was read in one box — the range is asked, never kept silently, and `50100–50149` is named as the template's default; **ask intake question 4b** (new app at `0.0.0.1` / existing app at the installed version, confirmed on Extension Management) — the version is never taken from the file unasked; **offer the `analyze` skill in the kickoff's last box, beside the intake question, and run it after the setup batch when the app has no usable documentation** (Ops § Existing Apps); the companions, the marker (`"edition": "feature"`), notifications, the dashboard, the Main model and its price, the AL tools, the symbols |
-| An empty folder, or an AL: Go! scaffold (`1.0.0.0`, no package, `HelloWorld.al` only) | nothing, or the template's `app.json` | the same, plus Box 0 (name, publisher, icon — the `images/` file first when there is one) and one naming-and-range box (Deployment Target — PTE only; prefix; namespace; ID range); the scaffold keeps its `id`, loses `HelloWorld.al`, and is written **`0.0.0.1`** — the template's `1.0.0.0` is never kept (Ops § Packaging → *Version numbers*); **its `ALProject1`, `Default publisher`, and `50100–50149` are placeholders, not answers** — Box 0 and the range question are asked exactly as for an empty folder, and the publisher and the range are recorded with their sources (Ops § Intake → *Forbidden sources*) |
+| An empty folder, or an AL: Go! scaffold (`1.0.0.0`, no package, no objects once the template's `HelloWorld.al` is deleted — the first act of every journey) | nothing, or the template's `app.json` | the same, plus Box 0 (name, publisher, icon — the `images/` file first when there is one) and one naming-and-range box (Deployment Target — PTE only; prefix; namespace; ID range); the scaffold keeps its `id` and is written **`0.0.0.1`** — the template's `1.0.0.0` is never kept (Ops § Packaging → *Version numbers*); **its `ALProject1`, `Default publisher`, and `50100–50149` are placeholders, not answers** — Box 0 and the range question are asked exactly as for an empty folder, and the publisher and the range are recorded with their sources (Ops § Intake → *Forbidden sources*) |
 
 Nothing from PRE-01 / Lite Step 1 beyond that and the working-language question (asked first, so
 every later box is in the human's language): no parameter sheet, no estimates, no per-country
@@ -3565,11 +3626,29 @@ language questions. AppSource is not a Build-a-Feature target; the journey says 
    *Unattributed*, and the dashboard's clock started minutes after the tokens. The renderers also
    stretch the first window back to the session's first event (Ops § Usage & Cost → 8); the rule
    stands anyway.
+0a. **The requirements read — a box, a read, a proof line, a record, and a gate (6.1.0.0).** In
+   every case and every session — a Full or Lite project, a resumed feature project, and *Build
+   another object* included: (1) the requirements box (Ops § Intake → *The requirements box*), by
+   the `start` skill or as this journey's first box; (2) `requirements/` listed recursively and
+   **every file read in full** (`.md`, text, Word, Excel, PDF, images) — **in a new session all of
+   them again**, since nothing an earlier session read is in context; only within one session is
+   it enough to read the files new or modified since the last read — a file that cannot be read is named with the
+   reason; (3) **one line said to the human naming the files read**, or that the folder is empty;
+   (4) `"requirementsRead": { "at": "<ISO 8601>", "files": [...] }` written to
+   `ocpfFramework/state/feature.json` (created for this key alone on a Full or Lite project), and
+   the same files listed under *Sources read* in the problem statement; (5) **no object's window
+   opens unless that record's `at` is later than the session's first usage window, its `files`
+   are exactly what the folder holds now, and no file there is newer than `at`.** Why: on
+   real projects the journey built without opening `requirements/` — the read was one clause in
+   the kickoff's "before the first box" sentence — and the human had to say "read the requirements
+   folder" every time. A read nobody can see is a read nobody can check.
 1. **Intake — one question, the last box of the kickoff.** *What do you want to build today?* with four preset options (a new
    table and its pages; extend a standard table or page; an API page or query; something else —
    a report, an enum, a query, a codeunit, a permission set, a role center) and free text — **the
    one place free text is expected**. `requirements/` (and `requirements/existing/`), or a file the
-   human points at, is read before the first kickoff box and pre-fills the answer. Since 5.10.0.0
+   human points at, is read in full before the first kickoff box — *The requirements read*, item 0a —
+   and pre-fills the answer: when it names objects, the first option is *Build what `requirements/`
+   describes (recommended)*. Since 5.10.0.0
    the setup questions (language, notifications, identity, model, naming and range) are asked back
    to back before it, the setup work runs after it in one batch, and the setup-done box follows
    (Ops § Intake → *The kickoff boxes*; Ops § Asking and Approvals → *The kickoff*). The answer is parsed into a plan of
@@ -3759,7 +3838,7 @@ starts on the app:
 **Where the journeys offer it.** The `start` skill offers it on an existing extension that never
 used the framework, before the journey choice, when the app has no usable documentation. Full
 PRE-01 and Lite Step 1 offer it in the kickoff's last box (Ops § Intake → *The kickoff boxes*, K14)
-when they see real objects under `src/` (anything beyond the AL template's `HelloWorld.al`) and
+when they see real objects in the project (the AL template's `HelloWorld.al` is deleted before the first question) and
 `requirements/existing/` is empty — before the problem statement — *Run the in-depth analysis and documentation first
 (recommended when the app has no FRD, TDD, or docs — 10 to 30 minutes)* / *Skip — the light read
 is enough* — and, on yes, run the skill before the problem statement; the step then reads

@@ -27,7 +27,8 @@ none is asked in prose.
 ## Step 1: Check the folder
 
 The workspace root must hold `app.json` and AL objects under `src/` (or wherever the project keeps
-them — say where you found them). An AL: Go! scaffold with only `HelloWorld.al` has nothing to
+them — say where you found them). An AL: Go! scaffold — only the template's `HelloWorld.al`, or no objects at all once the `start`
+skill deleted it — has nothing to
 analyze: say so and offer `/ocpf-bc:start` instead. If `ocpfFramework/framework.json` exists, this
 is a framework project: the analysis still runs, but say that its documents already exist under
 `docs/` and that this analysis is for the parts the framework did not build.

@@ -16,6 +16,28 @@ framework.
 
 ---
 
+## v6.1.0.0 — November 13, 2026
+
+**Requirements first.** Derived from Full **v6.1.0.0**; Operations Guide **v6.1.0.0**, Standards
+Guide **v1.13.1.0** (unchanged), plugin **6.1.0**. No step changed its order; Step 1's kickoff
+gains a box before K1 and loses a question from K14.
+
+- **The folder is prepared before anything is asked** (Ops § Intake → *The requirements box*): the
+  AL template's `HelloWorld.al` is deleted (only while it is still the template's untouched file) and `requirements/` is created in the project root,
+  before the journey question — by the plugin's `start` skill, or by Step 1's movement 1 without it.
+- **The requirements box (K0)**, the very next box after the journey question, or Step 1's first
+  box without the plugin: *Add your requirements documents* — *Continue — my documents are in
+  `requirements/`* / *Continue — I have no documents; I'll describe what I need* / *They're somewhere
+  else — I'll paste them or type the path*. It precedes the kickoff, is asked once per session, and
+  never again once recorded; the files are read in movement 5, after the setup-done box, as before.
+- **K14 no longer asks *Where are the requirements?*** and the setup-done box no longer asks whether
+  they are in; K14 keeps the existing-app analysis offer. The sheet's *Requirements location* row
+  is filled from the requirements box. The exit gate requires that `requirements/` exists,
+  `HelloWorld.al` is gone, and the box was asked once and acted on.
+- **Build-a-Feature always reads `requirements/`** — a box, a full read, a line naming the files, a
+  `requirementsRead` record, and a gate before the first object (Ops § Build-a-Feature → *The
+  journey*, item 0a). See the Full changelog's entry.
+
 ## v6.0.0.0 — October 31, 2026
 
 **Custom Skills, and the dashboard's View Project Documents and Documentation website buttons.** Derived from Full

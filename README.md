@@ -8,7 +8,7 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 *by AJ Ansari*
 
-*Last Updated: Saturday, October 31, 2026*
+*Last Updated: Friday, November 13, 2026*
 
 > ## 🌐 [Official Website](https://ajansari.github.io/ocpfBcAgenticDevFramework/)
 >
@@ -363,6 +363,17 @@ Each month's release notes in brief. The complete, versioned record is in
 [fullVersion/RunbookChangelog.md](fullVersion/RunbookChangelog.md),
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
+
+## November 13, 2026 — Full v6.1.0.0 · Lite v6.1.0.0 · Operations Guide v6.1.0.0 · Plugin v6.1.0
+**Requirements first.** `/ocpf-bc:start` now prepares the folder before it asks anything: the AL
+template's untouched `HelloWorld.al` is deleted (one you changed is left alone) and a `requirements/` folder is created in the project root.
+Right after the journey question, one box asks you to put your documents in that folder (Word,
+Markdown, PDF, images, spreadsheets, notes) and continue, or to paste them or name where they
+are so the agent copies them in. It replaces the *Where are the
+requirements?* question that used to close the kickoff. **Build-a-Feature now always reads
+`requirements/`:** in full, right after that box, in every session; it tells you which files it
+read, offers *Build what `requirements/` describes* as the first answer to *What do you want to
+build today?*, records the read, and will not start an object without it.
 
 ## October 31, 2026 — Full v6.0.0.0 · Lite v6.0.0.0 · Operations Guide v6.0.0.0 · Plugin v6.0.0
 **Custom Skills.** Third-party skills for the framework: a folder you made once — your own patterns

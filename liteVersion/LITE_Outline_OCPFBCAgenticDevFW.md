@@ -17,7 +17,7 @@ work.*
 
 | Step | Merges (full framework) |
 |---|---|
-| **1** — Define the Problem & Lock Parameters (the kickoff, Rule 6f: the working language, notifications, identity and the app icon, Deployment Target, countries, the one Main model and its thinking effort, naming, ID ranges, languages, `.gitignore`, and where the requirements are, asked back to back; then one setup batch — `app.json` complete, `docs/` by phase, `ProjectProgress.md`, the dashboard, the AL tools, the symbols — the setup-done box, then the requirements, the problem statement, and the sheet; version starts at `0.0.0.1`; AL source under `src/`) | PRE-01, PRE-02, Step 01 |
+| **1** — Define the Problem & Lock Parameters (the folder prepared and the requirements box first, when `start` has not; the kickoff, Rule 6f: the working language, notifications, identity and the app icon, Deployment Target, countries, the one Main model and its thinking effort, naming, ID ranges, languages, and `.gitignore`, asked back to back; then one setup batch — `app.json` complete, `docs/` by phase, `ProjectProgress.md`, the dashboard, the AL tools, the symbols — the setup-done box, then the requirements, the problem statement, and the sheet; version starts at `0.0.0.1`; AL source under `src/`) | PRE-01, PRE-02, Step 01 |
 
 ## II. DESIGN
 

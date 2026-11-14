@@ -19,6 +19,9 @@ In an AL project folder (or a new, empty one):
 Or just ask: *"Start a Business Central project with the OCPF framework."*
 
 The `start` skill:
+0. prepares the folder before its first question — deletes the AL template's untouched `HelloWorld.al` and
+   creates `requirements/` — and, right after the journey question, asks you to put your
+   requirements documents (Word, Markdown, PDF, images) in that folder and continue,
 1. helps you choose **Full** (a complete app or solution end to end, three models, 14 steps),
    **Lite** (updating an existing app or a new app without a large footprint, one model, 7
    steps), or **Build-a-Feature** (quick customizations in minutes, no steps, six short documents
@@ -31,7 +34,7 @@ The `start` skill:
 On a project that already follows the framework, `start` offers *Status*, *Check for a framework
 update*, or *Build a feature in this project*.
 
-**Project layout (since plugin 5.0.0, Full 5.0.0.0 / Lite 5.0.0.0; current 6.0.0 / 6.0.0.0):** everything the framework fetches
+**Project layout (since plugin 5.0.0, Full 5.0.0.0 / Lite 5.0.0.0; current 6.1.0 / 6.1.0.0):** everything the framework fetches
 or keeps lives under one folder, `ocpfFramework/` (step files, templates, guides, patterns,
 scripts, the marker, and per-developer `state/`); project documents go in `docs/` by phase
 (`0-project/`, `1-define/`, `2-design/`, `3-build/`, `4-prove/`; Build-a-Feature keeps its six

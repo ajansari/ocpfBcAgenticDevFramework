@@ -4,6 +4,36 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 6.1.0 — November 13, 2026
+
+Full / Lite runbook and Operations Guide **6.1.0.0**. Requirements first.
+
+- **`start`:** before its first question — the journey question included — it deletes the AL
+  template's `HelloWorld.al` when the project has one — only while it is still the template's
+  untouched file; any other content is somebody's code and stays — and creates `requirements/` in the project
+  root (Step 2, item 1a), said in one line. **Right after the journey question (or its
+  confirmation), the requirements box** (new Step 3a; Ops § Intake → *The requirements box*): put
+  Word documents, Markdown files, PDFs, images, spreadsheets, or notes in `requirements/`, then
+  *Continue — my documents are in `requirements/`* / *Continue — I have no documents; I'll describe
+  what I need* / *They're somewhere else — I'll paste them or type the path* (copied into
+  `requirements/` at once); the folder is listed again on the answer. The *say once* line about
+  `requirements/` is gone — the box replaces it, and the kickoff's *Where are the requirements?*
+  (K14) with it.
+- **`build-a-feature`:** it kept building without reading `requirements/`; the human had to tell it
+  every time. New **Part 1a** — in every case and every session: the requirements box (as this
+  skill's first box when `start` did not ask it this session), `requirements/` listed recursively
+  and every file read in full (all of them again in a new session), one line to the human naming the files read, `requirementsRead`
+  written to `ocpfFramework/state/feature.json` (`references/feature-record.md`), *Sources read* in
+  `docs/ProblemStatement.md`, *Build what `requirements/` describes (recommended)* as the intake
+  question's first option when the material names objects, and a gate at Part 4 step 1 — no
+  window opens unless the record is later than the session's first usage window, lists exactly
+  what the folder holds, and no file there is newer than it. `analyze` and question 4b no longer
+  assume `HelloWorld.al` is still present. *Build another
+  object* and a resumed session read the folder again. Part 0 prepares the folder when `start` has
+  not.
+- Bundled Full PRE-01 and Lite Step 1: K0 (the requirements box) when `start` did not ask it; K14
+  keeps only the existing-app analysis offer; the exit gates updated.
+
 ## 6.0.0 — October 31, 2026
 
 Full / Lite runbook and Operations Guide **6.0.0.0**. Custom Skills, the dashboard's View Project

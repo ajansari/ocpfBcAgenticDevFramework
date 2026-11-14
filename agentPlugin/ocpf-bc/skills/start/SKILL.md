@@ -9,12 +9,15 @@ This skill is the **one launching point** for every journey the framework offers
 the framework's manual setup: download the runbook, rename it to `CLAUDE.md` or
 `.github/copilot-instructions.md`, put everything else the framework keeps under
 `ocpfFramework/`, and begin. It adds three things on top:
+- it **prepares the folder before the first question** — the AL template's `HelloWorld.al` deleted, `requirements/` created (Step 2, item 1a),
 - it helps choose **Build-a-Feature, Full, or Lite** — Full recommended, always listed in that order (Ops § Journeys),
+- it asks for the **requirements documents right after the journey is chosen** — the requirements box (Step 3a),
 - it offers to **analyze and document an existing, undocumented app first** (the `analyze` skill),
 - it always installs the **latest** published runbook (Full and Lite; Build-a-Feature has none),
 - the routine's first step connects the AL tools with nothing to install, in its setup batch.
 
-It never overwrites an existing file.
+It never overwrites an existing file. The one file it deletes is the AL template's `HelloWorld.al`
+(Step 2, item 1a).
 
 Repository: `https://github.com/ajansari/ocpfBcAgenticDevFramework` (default branch `main`).
 
@@ -45,6 +48,21 @@ without a connected project folder. Skip to
 
 1. Confirm the workspace root with the human if it's unclear. It should be the AL project's root:
    a folder with `app.json`, or an empty or new folder for a new extension.
+1a. **Prepare the folder — the first act, before any question, the journey question included**
+   (since 6.1.0.0; Ops § Intake → *The requirements box*). Two things, in every case below, said in
+   one line (*"Deleted the AL template's HelloWorld.al and created requirements/."* — naming only
+   what was actually done):
+   - **Delete `HelloWorld.al`** when the project has one — in the root, where **AL: Go!** writes
+     it, or anywhere under `src/` — **and only when it is still the AL template's file — one page extension of "Customer List" (`pageextension 50100 CustomerListExt`) whose only code is the `OnOpenPage` trigger's `Message('App published: Hello world');`.** That file is
+     never part of an app and every journey drops it; nothing is asked. **A `HelloWorld.al` with any
+     other content is somebody's code: leave it, say so in the same line, and count it as a real
+     object** — this runs before anything is known about the project and possibly outside a Git
+     repository, where a deleted file cannot be brought back. Remember that the template's file was
+     there: with `app.json` at `1.0.0.0` and no package it marks an AL: Go! scaffold (item 2a).
+   - **Create `requirements/`** in the project root when it does not exist. An existing folder and
+     everything in it is left exactly as it is.
+   Why first: on real projects the human was told about `requirements/` in a line of prose, the
+   folder did not exist yet, and the documents arrived late or never.
 2. **Already set up?** Look for `ocpfFramework/framework.json` (or the older `.ocpf/framework.json`),
    or a `CLAUDE.md`, `.github/copilot-instructions.md`, `ocpfFramework/BC_App_Build_Routine_Agent.md`,
    or `ocpfFramework/LITE_BC_App_Build_Routine_Agent.md` (in the root on a pre-5.0.0.0 project)
@@ -59,7 +77,8 @@ without a connected project folder. Skip to
    - **Check for a framework update** (the `update-framework` skill);
    - **Build a feature in this project** — one object or a few, now, without touching the
      project's steps or documents: invoke the `build-a-feature` skill, which reads the
-     project's parameters and appends its own table to `ProjectProgress.md`. On a marker whose
+     project's parameters and appends its own table to `ProjectProgress.md`; that skill asks the
+     requirements box (Step 3a's) itself as its first box, since no journey question was asked here. On a marker whose
      `edition` is already `feature`, this is the recommended first option and continues the
      previous session;
    - **Load a custom skill into this project** — a third-party skill made for this framework, from
@@ -77,7 +96,8 @@ without a connected project folder. Skip to
    app, choose a journey*. On the first, invoke the `analyze` skill and stop here; it hands back to
    this skill when the human is ready. Otherwise go to Step 3, where Full is the recommended journey as always; the human takes
    Build-a-Feature when they want one more object or a quick change. **Do not call the file's version "installed":** an AL: Go!
-   scaffold says `1.0.0.0` with only `HelloWorld.al` and no package, and every journey treats
+   scaffold — `app.json` at `1.0.0.0`, no package, and no AL objects now that item 1a deleted the
+   template's `HelloWorld.al` — is not an installed app: every journey treats
    that as a *new* app that starts at `0.0.0.1` — the new-or-existing question (intake 4b) is
    asked by the journey, never answered from the file. Full and Lite stay available.
 
@@ -115,12 +135,6 @@ these terms:
   reliable agentic engineering process with quality outcomes — faster, cheaper, and with less detail
   than Full. One to two hours depending on complexity.
 
-Say once, when `requirements/` is empty: *the more well-formed and documented your idea, the faster
-the first stage goes — put requirements in `requirements/` (`.md` recommended; Word, PDF, and
-images work too) and an app icon in `images/`; every journey reads them at its first step.* The
-journey's kickoff asks the same thing as its last box when the folder is still empty (Ops § Intake
-→ *The kickoff boxes*, K14), so the human can act on it rather than scroll past it.
-
 Mention that nothing is lost by switching later: Lite's `DesignDoc.md` and `ChangeLog.md` carry
 straight over into the full framework, and a Build-a-Feature extension is an existing app to
 Lite's Step 1 or Full's PRE-01. A project follows one of Full or Lite, never both; Build-a-Feature
@@ -129,15 +143,50 @@ can run **on** a Full or Lite project later through Step 2's third choice.
 If the human invoked the skill with `full`, `lite`, or `feature`, confirm that choice instead of
 asking from scratch.
 
+## Step 3a: The requirements box — the very next box after the journey question
+
+**Since 6.1.0.0, on every journey, always — whether `requirements/` is empty or not** (Ops § Intake
+→ *The requirements box*). Nothing happens between the journey answer (or its confirmation) and
+this box but listing what `requirements/` holds — the marker's `edition` and the Custom Skills
+check below wait until the box is answered. It is a notification the human answers by
+continuing, asked through the options mechanism so the session waits for them:
+
+> **Add your requirements documents.** I created a `requirements/` folder in the project root
+> (when it holds files already: *`requirements/` holds: <file names>*). Put any documents you have
+> for this work in it now — Word documents, Markdown files, PDFs, images, spreadsheets, notes —
+> then choose an option to continue.
+> - *Continue — my documents are in `requirements/`*
+> - *Continue — I have no documents; I'll describe what I need*
+> - *They're somewhere else — I'll paste them or type the path*
+
+Add one sentence to the box's text: *an app icon, if you have one, goes in `images/`.* **On the
+third option** (or a free-text answer that pastes requirements or names a file or folder), end the
+turn asking for the paste or the path, and when it arrives copy it verbatim into `requirements/`
+**now** — pasted text as its own Markdown file with a descriptive name, a named file or folder's
+files copied as they are (the first step's capture rule) — before anything else. On every answer,
+**list `requirements/` again** (recursively) and say in one line what is there, by file
+name. If the human chose the first option and the folder is still empty, say so and ask once more:
+*They're there now* / *Go on without documents*. The files are **not read here**: the journey
+reads them at the moment its own rules name — Build-a-Feature right away, before its first kickoff
+box (its Part 1a); Full and Lite after the kickoff's setup-done box (Rule 6f). The box is asked once
+per session: the journey's first step does not ask it again — it records the answer as the
+project's *Requirements location* — and the kickoff no longer asks where the requirements are
+(K14 keeps only the existing-app analysis offer).
+
+### After the box — what the journey choice sets in motion
+
 **Custom Skills loaded before this point** (`ocpfFramework/customSkills.json` exists — the human ran
 `/ocpf-bc:skill-load` first, as the framework recommends): the journey question's text names, per
 option, any loaded skill that journey would exclude (*contoso_patterns is made for Full and Lite —
-Build-a-Feature would block on it*), and the moment the journey is chosen the agent writes
+Build-a-Feature would block on it*), and once the requirements box is answered — it always follows
+the journey question directly — the agent writes
 `edition` to the marker and runs `ocpf-skills --check` again (Ops § Custom Skills → 5): a block is
 resolved through the `skill-load` skill's per-issue boxes **before** the runbook is placed or the
 Build-a-Feature skill is invoked. Nothing starts on a blocked set.
 
-**Build-a-Feature chosen → invoke the `build-a-feature` skill now and stop here.** Its Part 1
+**Build-a-Feature chosen → after the requirements box (Step 3a), invoke the `build-a-feature`
+skill and stop here.** Tell it nothing it has to guess: the folder is prepared and the requirements
+box is answered, so its Part 1a reads `requirements/` in full before its first kickoff box. Its Part 1
 and Part 2 do the whole setup that journey needs (companions, marker with `"edition":
 "feature"`, notifications, identity, dashboard, model, AL tools, symbols, the feature table).
 Steps 4–9 below are Full and Lite only: there is no runbook to place, no changelog, no step
@@ -323,7 +372,8 @@ notification kind at the runbook's first step counts as asking, for the settings
    language, how to be notified (this plugin's `notifications` skill applies the answer in the
    batch), the identity and Deployment Target, countries and approvers, which models do the work
    (Full six questions, Lite two, after the one-sentence High-effort warning), the Copilot session
-   settings, naming and ID ranges, languages, `.gitignore`, and where the requirements are — then
+   settings, naming and ID ranges, languages, and `.gitignore` (where the requirements are was
+   settled by Step 3a's box) — then
    one setup batch with no question, then one setup-done box. Use this plugin's `roles` skill in
    its apply-only mode in that batch: it writes project-local copies of this plugin's sub-agents
    carrying the chosen model and
