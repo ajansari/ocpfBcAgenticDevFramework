@@ -364,6 +364,13 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## November 15, 2026 — Full v6.1.2.0 · Lite v6.1.2.0 · Operations Guide v6.1.2.0 · Plugin v6.1.2
+**Usage and cost fix.** A project could finish with an empty usage table in Claude Code: the
+scripts looked for the session transcripts in the wrong folder when the project path held a
+space, an underscore, or a dot, and nothing stopped a step from closing without its figures. The
+scripts now find the folder themselves, and a step or object cannot close until its usage is
+measured.
+
 ## November 15, 2026 — Full v6.1.1.0 · Lite v6.1.1.0 · Operations Guide v6.1.1.0 · Plugin v6.1.1
 **Dashboard fix.** A Build-a-Feature project could be built with no `ProjectDashboard.html`: the
 page templates were copied into a subfolder the renderer did not look in, and nothing checked.

@@ -32,6 +32,7 @@ the window may carry a `title` the dashboard shows, which this skill ignores.
   opening the file.
 - **The exit gate is not met until the rows exist.** The next step does not start on a missing row;
   the `status` skill reports a missing row as a blocker.
+- **A script error is not a measurement** (6.1.2.0). When the usage script exits non-zero (its message starts with or contains `error:` — no transcripts found, a missing interpreter, a step whose window holds no transcript lines), **or prints a table with no row for the step**, the step does not close and **no row is written, an `n/a` row included**: read the error, fix its cause, and run it again. The script finds Claude Code's transcript folder itself (the configured folder, the folder Claude Code derives from the project path, then any session started in this directory); when it still finds none, list the Claude projects folder, find this project's, and set `transcriptDir` to it. A missing interpreter is the next rung of the runner ladder. `n/a` with the reason is only for a step worked in a tool that keeps no usage record at all, or a machine where nothing on the runner ladder runs — and then the closing message says so in its first line. **When the cause cannot be fixed after two attempts, or the fix is the human's** (an interpreter to install, transcripts on another machine or already cleaned up, a session started in another folder), end the turn with one options box (Rule 6a): *Usage for <step> can't be measured: <the error's first sentence>* — *I'll fix it — tell me what to do* / *Try again* / *Close the step with n/a and this reason*. Only the human's third answer licenses an `n/a` row, and the row's Notes record that answer. Why: a real Build-a-Feature project was built and packaged with an empty usage table — every row was marked `Completed` on a measurement that had never produced a figure.
 - **The step close ends by refreshing the dashboard — every tool, every journey** (Ops § Usage &
   Cost → 5; Ops § Dashboard → 3). After the rows, run the renderer once with the `runner`
   recorded in `ocpfFramework/state/dashboard.json`:
@@ -71,8 +72,7 @@ and Lite keep the main role running the script itself.
 
 - **Missing?** Create it now with `aiTool` (`claude-code`, `copilot-chat`, or `copilot-cli` — the
   tool this session is running in, which decides the source and the table), `transcriptDir`
-  (Claude Code: `~/.claude/projects/<key>` — the session files `*.jsonl` **and** each session's sub-agent files `<id>/subagents/agent-*.jsonl`, which carry the Reasoning, Light, and Generator roles' usage — where `<key>` is the project's absolute path with every
-  `/` replaced by `-`; Copilot: `null`), and an empty `steps` list. In a Copilot project the script
+  (Claude Code: **`null` — never work the folder out by hand**; the script finds it: `~/.claude/projects/<key>`, where Claude Code builds `<key>` from the project's absolute path by turning **every character that is not a letter or a digit** into `-`, so a space, `_`, `.`, `:`, and both slashes all become `-`; it holds the session files `*.jsonl` **and** each session's sub-agent files `<id>/subagents/agent-*.jsonl`, which carry the Reasoning, Light, and Generator roles' usage. Before 6.1.2.0 this said "every `/` replaced by `-`", and the folder an agent wrote for a path with a space or a Windows drive never existed. Copilot: `null`), and an empty `steps` list. In a Copilot project the script
   adds `copilot.journalDirs` itself (and, on a pre-SDK chat, `copilot.sessionDirs` and
   `copilot.checkpoints`); never edit those by hand. Earlier steps get `n/a — no timestamps` in the table; never back-fill a guess.
 - **A step is starting or closing?** Append `{ "step", "startedAt" }` or set `completedAt`, ISO 8601
@@ -120,8 +120,12 @@ under `## Usage` in `requirements/existing/README.md`.
 Options: `--json` for machine output, `--step <id>` for one step (omit it for the whole table),
 `--transcripts <dir>` to point at the transcript folder, `--pricing <path>` and `--usage <path>` to
 override the defaults `ocpfFramework/state/pricing.json` and `ocpfFramework/state/usage.json`. If
-the transcript folder isn't where `usage.json` says, the script exits with a message naming the
-folder it tried; find it (`ls ~/.claude/projects/`) and fix `transcriptDir` rather than guessing.
+the transcript folder isn't where `usage.json` says, the script looks in the folder Claude Code
+derives from the project path and then for any session started in this directory, uses what it
+finds, and says so in a note — correct `transcriptDir` to the folder the note names. Only when
+nothing is found does it exit with an error listing every folder it tried; then list the Claude
+projects folder, find this project's, and set `transcriptDir` — and the step stays open until a
+run succeeds.
 If `--step` returns no rows, the window's timestamps are wrong — fix them, don't type a row. Copy
 the script into the project's `ocpfFramework/scripts/` only if the human wants to run it without
 the plugin; `ocpfFramework/scripts/` is gitignored.

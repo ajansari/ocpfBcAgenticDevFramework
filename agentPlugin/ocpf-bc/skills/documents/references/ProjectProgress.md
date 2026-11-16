@@ -69,7 +69,7 @@ From the Copilot session journals (`~/.copilot/session-state`, VS Code's chat an
 
 ## Before calling a refresh done
 - [ ] The step table's `In Progress` row (Build-a-Feature: the feature table's) matches the open window in `ocpfFramework/state/usage.json`.
-- [ ] Every step with a start timestamp has a usage row; a step that couldn't be measured says why.
+- [ ] Every step with a start timestamp has a usage row; a step worked in a tool that keeps no usage record says why — a script error is fixed and the script run again, never recorded as `n/a` unless the human chose that in the options box (the row's Notes say so).
 - [ ] Claude Code: one row per model that ran in the step, never one row per step. Copilot: one row per step, every model named. No row was hand-written.
 - [ ] Only the table for the project's AI tool is here (both, if the tool changed midway).
 - [ ] Copilot: the journal folder is in `ocpfFramework/state/usage.json`, no human was asked for a figure, and a still-open session is noted *as of* its last checkpoint.

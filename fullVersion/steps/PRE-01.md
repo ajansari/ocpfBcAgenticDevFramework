@@ -1,6 +1,6 @@
 # BC App Build Routine — PRE-01 — State the Problem
 
-**Runbook version:** 6.1.1.0 · Full edition · Phase: DEFINE
+**Runbook version:** 6.1.2.0 · Full edition · Phase: DEFINE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -23,7 +23,7 @@ between two kickoff boxes.
 
 **0. Open the clock — the very first act of the routine, before anything else** (Operating Rule 11;
 Ops § Usage & Cost → 1 and 8): create `ocpfFramework/state/` and `ocpfFramework/state/usage.json`
-(`aiTool`, `transcriptDir`, empty `steps`) and append `{ "step": "PRE-01", "startedAt": "<now>" }`.
+(`aiTool`, `transcriptDir` `null` — the usage script finds Claude Code's transcript folder, never work it out by hand —, empty `steps`) and append `{ "step": "PRE-01", "startedAt": "<now>" }`.
 Why first: a window opened after the setup questions left the session's first decisions and tokens
 outside every window on real projects.
 

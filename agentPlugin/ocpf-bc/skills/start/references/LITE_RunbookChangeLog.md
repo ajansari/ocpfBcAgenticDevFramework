@@ -16,6 +16,21 @@ framework.
 
 ---
 
+## v6.1.2.0 — November 15, 2026
+
+Derived from Full **v6.1.2.0**; Operations Guide **v6.1.2.0**; Standards Guide **v1.13.1.0**
+(unchanged); plugin **6.1.2**. A patch for a project that finished with an empty usage table.
+The usage and dashboard scripts now find Claude Code's transcript folder themselves — the folder
+is the project path with every character that is not a letter or a digit turned into `-`, which
+the scripts had wrong for a path with a space, an underscore, or a dot, and the guide's
+hand-written rule had wrong for a Windows path as well — and fall back to any session started in the project's directory; `usage.json` is created
+with `transcriptDir` `null`. **A usage-script `error:` is not a measurement**: the step stays open
+and no row, an `n/a` row included, is written until the cause is fixed and the script has run; a `--step` run that
+finds nothing in the step's window now exits with an error instead of an empty Total. **A project
+already built without usage:** run `/ocpf-bc:update-framework` (the project runs its own copies
+of the scripts in `ocpfFramework/scripts/`), then `/ocpf-bc:usage` without `--step` to back-fill.
+See the Full changelog's entry.
+
 ## v6.1.1.0 — November 15, 2026
 
 Derived from Full **v6.1.1.0**; Operations Guide **v6.1.1.0**; Standards Guide **v1.13.1.0**

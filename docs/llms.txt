@@ -1,6 +1,6 @@
 # OCPF BC Agentic Development Framework
 
-> A framework for building Microsoft Dynamics 365 Business Central AL extensions with an AI agent (Claude Code or GitHub Copilot), with human approval gates, a documented trail, and a live project dashboard. Version 6.1.1.0 (November 15, 2026). Source-available under PolyForm Shield 1.0.0. Created by AJ Ansari, Microsoft MVP (OnlyCopilotFans and OnlyBCFans).
+> A framework for building Microsoft Dynamics 365 Business Central AL extensions with an AI agent (Claude Code or GitHub Copilot), with human approval gates, a documented trail, and a live project dashboard. Version 6.1.2.0 (November 15, 2026). Source-available under PolyForm Shield 1.0.0. Created by AJ Ansari, Microsoft MVP (OnlyCopilotFans and OnlyBCFans).
 
 Three journeys: Build-a-Feature (one object at a time, no steps), Full (14 steps, the recommended journey), and Lite (7 steps). Every journey starts with `/ocpf-bc:start`.
 

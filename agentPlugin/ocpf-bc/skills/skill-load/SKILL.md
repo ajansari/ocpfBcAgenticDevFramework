@@ -178,9 +178,9 @@ On *Activate*, for each skill, in this order:
    `contentHash`, `sources[]` (`type`, `ref`, `addedAt`, `addedBy` = this harness, `auth` = the rung
    that answered, or `none`), `catalogUrl` (`https://bcskills.ai/ocpf/<slug>` when the skill came from the site's index, else `null`), `compatibility` from the
    manifest, `enabled: true`, `validatedAt` / `validatedAgainst` after the check below, `block`.
-   **Prove it is tracked:** `git check-ignore -v ocpfFramework/customSkills.json` must print nothing
+   **Prove it is tracked:** `git check-ignore -q ocpfFramework/customSkills.json` must exit 1 (not ignored; with `-v` it prints its own re-include line `!ocpfFramework/customSkills.json`, which is not a failure)
    — the second `.gitignore` group reads `ocpfFramework/*` plus `!ocpfFramework/customSkills.json`
-   for exactly this reason (Ops § Repository Hygiene); if it prints a rule, fix the block first.
+   for exactly this reason (Ops § Repository Hygiene); if it exits 0, fix the block first.
 4. **The sheet:** the **Custom skills** row of `docs/1-define/ProjectParameters.md` (Full §1.11, Lite's
    row of the same name — one line per skill: slug, version, author, source, enabled) or the
    *Custom skills* row of `docs/FeatureRegister.md` §1 (Build-a-Feature); before `/ocpf-bc:start`

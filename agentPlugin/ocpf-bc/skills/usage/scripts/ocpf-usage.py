@@ -62,8 +62,54 @@ def parse_ts(s):
         return None
 
 def project_key(path):
-    path = os.path.abspath(path)
-    return path.replace("\\", "-").replace("/", "-").replace(":", "-")
+    # Claude Code names a project's transcript folder after its absolute path with EVERY character that is not a
+    # letter or a digit turned into "-" (so a space, "_", "." and ":" too, not only the separators) - 6.1.2.0.
+    # (a character outside the Basic Multilingual Plane is two UTF-16 units there, so two dashes)
+    return re.sub(r"[^A-Za-z0-9]", lambda m: "-" * (2 if ord(m.group()) > 0xFFFF else 1), os.path.abspath(path))
+
+def _legacy_project_key(path):  # what this script derived before 6.1.2.0: separators and ":" only
+    return os.path.abspath(path).replace("\\", "-").replace("/", "-").replace(":", "-")
+
+def _jsonl(tdir):
+    return sorted(glob.glob(os.path.join(tdir, "*.jsonl")) + glob.glob(os.path.join(tdir, "*", "subagents", "*.jsonl")))
+
+def _same_path(a, b):
+    fold = (lambda s: s.lower()) if sys.platform in ("darwin", "win32") else (lambda s: s)  # case-insensitive file systems
+    n = lambda p: fold(os.path.normcase(os.path.realpath(p))).rstrip("\\/")
+    try: return n(a) == n(b)
+    except (OSError, ValueError): return False
+
+def claude_projects_dir():
+    return os.path.join(os.environ.get("CLAUDE_CONFIG_DIR") or os.path.join(os.path.expanduser("~"), ".claude"), "projects")
+
+def resolve_transcripts(root, configured=None):
+    """(folder, how, tried): the Claude Code transcript folder of this project. Tries the configured transcriptDir, the
+    folder Claude Code derives from the path, the pre-6.1.2.0 derivation, then every project folder whose sessions were
+    started in this directory (their "cwd"). folder is None when nothing has a transcript."""
+    base = claude_projects_dir()
+    cands = []
+    if configured: cands.append((os.path.expanduser(configured), "configured"))
+    for k, how in ((project_key(root), "derived"), (_legacy_project_key(root), "derived")):
+        c = os.path.join(base, k)
+        if c not in [x[0] for x in cands]: cands.append((c, how))
+    for c, how in cands:
+        if _jsonl(c): return c, how, [x[0] for x in cands]
+    try: dirs = sorted((d for d in glob.glob(os.path.join(base, "*")) if os.path.isdir(d)), key=os.path.getmtime, reverse=True)
+    except OSError: dirs = []
+    for d in dirs:
+        for jf in sorted(glob.glob(os.path.join(d, "*.jsonl")), key=os.path.getmtime, reverse=True)[:3]:
+            try:
+                with open(jf, encoding="utf-8", errors="replace") as f:
+                    for i, line in enumerate(f):
+                        if i > 60: break
+                        j = line.find('"cwd":')
+                        if j < 0: continue
+                        try: cwd = json.loads(line).get("cwd")
+                        except ValueError: continue
+                        if cwd and _same_path(cwd, root): return d, "found by cwd", [x[0] for x in cands]
+                        if cwd: break
+            except OSError: continue
+    return None, None, [x[0] for x in cands]
 
 def load_json(path, default):
     try:
@@ -838,13 +884,33 @@ def main():
     tool = a.tool or usage.get("aiTool") or "claude-code"
     if tool in ("copilot-chat", "copilot-cli"):
         return copilot_main(a, root, usage, usage_path, pricing, pricing_path)
-    tdir = a.transcripts or os.path.expanduser(usage.get("transcriptDir") or
-            os.path.join("~", ".claude", "projects", project_key(root)))
-    # a session is <id>.jsonl; its sub-agents (Agent tool) are journaled beside it in <id>/subagents/agent-*.jsonl
-    files = sorted(glob.glob(os.path.join(tdir, "*.jsonl")) + glob.glob(os.path.join(tdir, "*", "subagents", "*.jsonl")))
     notes = []
+    # a session is <id>.jsonl; its sub-agents (Agent tool) are journaled beside it in <id>/subagents/agent-*.jsonl
+    if a.transcripts:
+        tdir = os.path.expanduser(a.transcripts); tried = [tdir]
+    else:
+        configured = usage.get("transcriptDir")
+        tdir, how, tried = resolve_transcripts(root, configured)
+        if tdir and how != "configured":
+            # record the folder that was found, so the dashboard and every later run read the same one
+            if configured: notes.append(f"transcriptDir in {os.path.join(STATE, 'usage.json')} ({configured}) holds no transcripts; used {tdir} ({how}) and recorded it there")
+            elif how == "found by cwd": notes.append(f"transcripts {how}: {tdir} — recorded as transcriptDir in {os.path.join(STATE, 'usage.json')}")
+            try:
+                usage["transcriptDir"] = tdir
+                with open(usage_path, "w", encoding="utf-8") as f: json.dump(usage, f, indent=2, ensure_ascii=False); f.write("\n")
+            except OSError as e: notes.append(f"could not record transcriptDir in {os.path.join(STATE, 'usage.json')}: {e}")
+    files = _jsonl(tdir) if tdir else []
+    if files and not a.transcripts and how == "configured":
+        # a project renamed or moved after transcriptDir was set: its newer sessions are in the folder Claude Code derives now
+        d2 = os.path.join(claude_projects_dir(), project_key(root))
+        if not _same_path(d2, tdir) and _jsonl(d2):
+            files = sorted(set(files + _jsonl(d2)))
+            notes.append(f"read {d2} as well as the configured transcriptDir — this project's path now maps there")
     if not files:
-        sys.exit(f"error: no transcripts in {tdir} — set transcriptDir in {os.path.join(STATE, 'usage.json')} (ls ~/.claude/projects/)")
+        sys.exit("error: no Claude Code transcripts for this project. Tried: " + "; ".join(tried) + ". " +
+                 ("" if a.transcripts else f"No session under the Claude projects folder was started in {os.path.abspath(root)} either. ") +
+                 "This is not a measurement: do not close the step and do not write a row by hand. List the projects folder, "
+                 f"find this project's folder, set transcriptDir in {os.path.join(STATE, 'usage.json')}, and run again.")
     wins = windows_from(usage)
     if not wins: notes.append(f"no step windows in {os.path.join(STATE, 'usage.json')} — everything is Unattributed")
     wins = anchor_first_window(wins, transcript_spans(files), notes, "session")
@@ -922,6 +988,12 @@ def main():
                         "turns": turns.get(step, 0), "decisions": decisions.get(step, 0),
                         "subAgentCalls": agents.get(step, 0), "webRequests": web.get(step, 0)})
     if a.step and not out:
+        if not a.json and not a.calibrate:  # an empty Total line is not a measurement either (6.1.2.0)
+            w = next((x for x in wins if x[0] == a.step), None)
+            sys.exit(f"error: no transcript lines fall inside step {a.step}'s window" +
+                     (f" ({w[1]} to {w[2]})" if w else " (no such step in usage.json)") +
+                     f". This is not a measurement: do not close the step and do not write a row by hand. Fix the step's startedAt / completedAt in "
+                     f"{os.path.join(STATE, 'usage.json')} (ISO 8601, UTC) and run again; when several objects were written in one pass, run without --step.")
         notes.append(f"no transcript lines fall inside step {a.step}'s window — check its startedAt/completedAt in {os.path.join(STATE, 'usage.json')}")
     if a.calibrate:
         mark_closed(root, usage, usage_path, notes)

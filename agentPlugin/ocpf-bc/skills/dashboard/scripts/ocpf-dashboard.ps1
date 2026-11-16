@@ -21,7 +21,7 @@ param(
 )
 $ErrorActionPreference = "Stop"
 try {
-$root = (Resolve-Path $Project).Path
+$root = (Resolve-Path $Project).Path; if ($root.Length -gt 3) { $root = $root.TrimEnd('\', '/') }
 $stateDir = Join-Path $root "ocpfFramework/state"
 if (-not (Test-Path -LiteralPath (Join-Path $root "ocpfFramework"))) { if ($Quiet) { exit 0 }; Write-Error "$root has no ocpfFramework/ folder — not an OCPF project"; exit 1 }
 New-Item -ItemType Directory -Force -Path $stateDir | Out-Null
@@ -119,7 +119,7 @@ $notes = @(); $uj = $null
 if ($wins.Count) {
   $script = Join-Path $here "ocpf-usage.ps1"
   if (-not (Test-Path -LiteralPath $script)) { foreach ($c in @((Join-Path $root "ocpfFramework/scripts/ocpf-usage.ps1"), (Join-Path $here "../../usage/scripts/ocpf-usage.ps1"))) { if (Test-Path -LiteralPath $c) { $script = $c; break } } }
-  if (Test-Path -LiteralPath $script) { try { $out = & pwsh -NoProfile -File $script -Project $root -Json 2>&1; $uj = ($out | Out-String) | ConvertFrom-Json -AsHashtable } catch { $notes += "usage: $_" } } else { $notes += "usage script not found beside the dashboard script" }
+  if (Test-Path -LiteralPath $script) { try { $out = & pwsh -NoProfile -File $script -Project $root -Json 2>&1; if ($LASTEXITCODE -ne 0) { $notes += "usage: " + (@(($out | Out-String).Trim() -split "`n" | Where-Object { $_ -match '\S' } | ForEach-Object { ($_ -replace '\x1b\[[0-9;]*m', '').Trim(' ', '|') }) | Where-Object { $_ -match 'transcripts|error|usage' } | Select-Object -First 1) } else { $uj = ($out | Out-String) | ConvertFrom-Json -AsHashtable } } catch { $notes += "usage: $_" } } else { $notes += "usage script not found beside the dashboard script" }
 } else { $notes += "usage: no step windows yet" }
 $rows = @(if ($uj -and $uj.rows) { $uj.rows })
 $pricing = Load-Json (Join-Path $stateDir "pricing.json") @{}   # the usage script may just have fetched the prices (v5.8.0.0)
@@ -132,7 +132,7 @@ function Sum($arr, $k) { $t = 0.0; foreach ($r in $arr) { $t += [double]($r[$k] 
 if ($wins.Count) {
   $spans = @()
   if ($copilot) { foreach ($x in @($uj.sessions)) { $sa = Parse-Ts $x.start; if ($sa) { ,@($sa, ((Parse-Ts $x.lastKnownAt) ?? (NowUtc))) | ForEach-Object { $spans += ,$_ } } } }
-  else { $tdir0 = if ($usage.transcriptDir) { $usage.transcriptDir -replace '^~', $HOME } else { Join-Path $HOME ".claude/projects/$(($root -replace '[\\/:]', '-'))" }
+  else { $tdir0 = $(if ($usage.transcriptDir -and @(Get-ChildItem -LiteralPath ($usage.transcriptDir -replace '^~', $HOME) -Filter *.jsonl -ErrorAction SilentlyContinue).Count) { $usage.transcriptDir -replace '^~', $HOME } else { $cb = Join-Path $(if ($env:CLAUDE_CONFIG_DIR) { $env:CLAUDE_CONFIG_DIR } else { Join-Path $HOME ".claude" }) "projects"; $k1 = Join-Path $cb ($root -creplace '[^A-Za-z0-9]', '-'); if (@(Get-ChildItem -LiteralPath $k1 -Filter *.jsonl -ErrorAction SilentlyContinue).Count) { $k1 } else { Join-Path $cb ($root -replace '[\\/:]', '-') } })
     foreach ($f in @(Get-ChildItem -LiteralPath $tdir0 -Filter *.jsonl -ErrorAction SilentlyContinue)) { $lo = $null; $hi = $null
       foreach ($line in [IO.File]::ReadLines($f.FullName)) { $i = $line.IndexOf('"timestamp":"'); if ($i -lt 0) { continue }; $ts = Parse-Ts ($line.Substring($i + 13, [Math]::Min(24, $line.Length - $i - 13)).Split('"')[0]); if (-not $ts) { continue }; if ($null -eq $lo -or $ts -lt $lo) { $lo = $ts }; if ($null -eq $hi -or $ts -gt $hi) { $hi = $ts } }
       if ($lo -and $hi) { $spans += ,@($lo, $hi) } } }
@@ -187,7 +187,7 @@ function Step-Of($ts) { $hit = $null; foreach ($w in $wins) { if ($ts -ge $w[1] 
 # ---- Claude Code transcript: time split + live state ----
 $liveState = $null
 if (-not $copilot -and $wins.Count) {
-  $tdir = if ($usage.transcriptDir) { $usage.transcriptDir -replace '^~', $HOME } else { Join-Path $HOME ".claude/projects/$(($root -replace '[\\/:]', '-'))" }
+  $tdir = $(if ($usage.transcriptDir -and @(Get-ChildItem -LiteralPath ($usage.transcriptDir -replace '^~', $HOME) -Filter *.jsonl -ErrorAction SilentlyContinue).Count) { $usage.transcriptDir -replace '^~', $HOME } else { $cb = Join-Path $(if ($env:CLAUDE_CONFIG_DIR) { $env:CLAUDE_CONFIG_DIR } else { Join-Path $HOME ".claude" }) "projects"; $k1 = Join-Path $cb ($root -creplace '[^A-Za-z0-9]', '-'); if (@(Get-ChildItem -LiteralPath $k1 -Filter *.jsonl -ErrorAction SilentlyContinue).Count) { $k1 } else { Join-Path $cb ($root -replace '[\\/:]', '-') } })
   # a session is <id>.jsonl; its sub-agents (Agent tool) are journaled beside it in <id>/subagents/agent-*.jsonl
   $files = @(@(Get-ChildItem -LiteralPath $tdir -Filter *.jsonl -ErrorAction SilentlyContinue) + @(Get-ChildItem -LiteralPath $tdir -Directory -ErrorAction SilentlyContinue | ForEach-Object { Join-Path $_.FullName "subagents" } | Where-Object { Test-Path -LiteralPath $_ } | ForEach-Object { Get-ChildItem -LiteralPath $_ -Filter *.jsonl -ErrorAction SilentlyContinue }) | Sort-Object LastWriteTime)
   if ($files.Count) {

@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v6.1.1.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v6.1.1.0**, and Lite at **v6.1.1.0** — but
+**v6.1.2.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v6.1.2.0**, and Lite at **v6.1.2.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -23,6 +23,43 @@ change-worthy. (This is a different convention from a project's own ChangeLog, w
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
 
 ---
+
+## v6.1.2.0 — November 15, 2026
+
+**A project built and packaged with an empty usage table.** Lite **v6.1.2.0**, Operations Guide
+**v6.1.2.0**, Standards Guide **v1.13.1.0** (unchanged), plugin **6.1.2**. A patch: no step changed.
+
+- **What happened.** A real Build-a-Feature project (Claude Code) finished with six rows marked
+  `Completed` and a usage table holding only its empty *Total* line: no tokens, no cost. Two
+  causes, both confirmed. **The scripts derived Claude Code's transcript folder wrongly**: Claude
+  Code names it after the project path with *every* character that is not a letter or a digit
+  turned into `-`; the scripts (and this guide's "every `/` replaced by `-`") replaced only the
+  separators and `:`, so a path with a space, an underscore, or a dot — or a Windows path an agent
+  wrote into `transcriptDir` by hand — pointed at a folder that never existed. **And nothing
+  stopped the close**: the script exited with *no transcripts*, and the agent marked the row
+  `Completed` anyway; in tests on Full and Lite an agent wrote an `n/a` row and closed the step.
+- **The scripts find the folder.** `ocpf-usage.py` / `.ps1` try `transcriptDir` when it holds
+  transcripts, then Claude Code's own derivation, then the old one, then every project folder
+  whose sessions were started in this directory (the transcript's `cwd`), say in a note which was
+  used, and honour `CLAUDE_CONFIG_DIR`. The dashboard renderers use the same derivation for the
+  time split. `usage.json` is created with `transcriptDir` `null`; the agent never works it out.
+- **A script error is not a measurement** (Rule 11; Lite Rule 9; Ops § Usage & Cost → 5; the
+  `usage` skill; every Build-a-Feature close): the step or object stays open and no row — an
+  `n/a` row included — is written until the cause is fixed and the script has run. A `--step` run
+  whose window holds no transcript lines now **exits with an error** instead of printing an empty
+  *Total* and succeeding. `n/a` is only for a tool that keeps no usage record, a machine where
+  nothing on the runner ladder runs, or — when the cause cannot be fixed — the human's own answer
+  to one options box, recorded in the row's Notes. The `status` skill counts an unexplained `n/a`
+  row as missing.
+- **A project already built without usage** runs `/ocpf-bc:update-framework` first — a project
+  runs its own copies of the scripts in `ocpfFramework/scripts/` — then `/ocpf-bc:usage` without
+  `--step` to back-fill the table from the transcripts still on disk.
+- **The PowerShell twins** match the Python ones on a case-sensitive key (`-creplace`), a trailing
+  slash on the project path, an unreadable transcript in the scan, and the usage error shown on
+  the dashboard page; the usage script records the folder it found in `usage.json`, and reads the
+  derived folder as well when a configured `transcriptDir` belongs to the project's old path.
+- **The ignore proof for `ocpfFramework/customSkills.json`** is `git check-ignore -q` exiting 1:
+  with `-v` the path prints its own re-include line and exits 0, which read as a failure.
 
 ## v6.1.1.0 — November 15, 2026
 

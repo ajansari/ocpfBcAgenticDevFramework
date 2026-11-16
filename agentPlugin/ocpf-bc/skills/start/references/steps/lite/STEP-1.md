@@ -1,6 +1,6 @@
 # BC App Build Routine — STEP 1 — Define the Problem & Lock Parameters
 
-**Runbook version:** 6.1.1.0 · Lite edition · Phase: DEFINE
+**Runbook version:** 6.1.2.0 · Lite edition · Phase: DEFINE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -22,7 +22,7 @@ then the requirements, the problem statement, and the few sheet questions that n
 the human waits for happens between two kickoff boxes.
 
 **0. Open the clock — the very first act of the routine** (Operating Rule 9; Ops § Usage & Cost →
-1 and 8): create `ocpfFramework/state/usage.json` (`aiTool`, `transcriptDir`, empty `steps`) and
+1 and 8): create `ocpfFramework/state/usage.json` (`aiTool`, `transcriptDir` `null` — the usage script finds Claude Code's transcript folder, never work it out by hand —, empty `steps`) and
 append `{ "step": "STEP-1", "startedAt": "<now>" }`. A window opened after the setup questions left
 the session's first decisions and tokens outside every window on real projects.
 

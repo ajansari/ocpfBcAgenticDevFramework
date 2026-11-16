@@ -28,7 +28,7 @@ param(
 $ErrorActionPreference = "Stop"
 $inv = [cultureinfo]::InvariantCulture
 if ($Calibrate -and $Step) { Write-Error "-Calibrate exports the whole project; run it without -Step"; exit 1 }
-$root = (Resolve-Path $Project).Path
+$root = (Resolve-Path $Project).Path; if ($root.Length -gt 3) { $root = $root.TrimEnd('\', '/') }
 $stateDir = Join-Path $root "ocpfFramework/state"
 function Load-Json($path, $default) { if (Test-Path $path) { Get-Content $path -Raw | ConvertFrom-Json -AsHashtable } else { $default } }
 function Parse-Ts($s) { if (-not $s) { return $null }; if ($s -is [datetime]) { return $s.ToUniversalTime() }; if ($s -is [datetimeoffset]) { return $s.UtcDateTime }; try { return ([datetimeoffset]::Parse($s)).UtcDateTime } catch { return $null } }
@@ -425,12 +425,51 @@ if ($isCopilot) {
   if ($null -eq $usdPerCredit) { $notes += 'pricing.json has no "aiCredit" entry — fetch https://docs.github.com/en/copilot/reference/copilot-billing/models-and-pricing and write { "aiCredit": { "usd": <value>, "source": <url> } }' }
 }
 
+function Resolve-ClaudeTranscripts([string]$Root, [string]$Configured) {
+  # Claude Code names a project's transcript folder after its absolute path with EVERY character that is not a letter or a
+  # digit turned into "-" (a space, "_", "." and ":" too) - 6.1.2.0. Tries the configured folder, that derivation, the
+  # pre-6.1.2.0 one (separators and ":" only), then every project folder whose sessions were started in this directory.
+  $base = Join-Path $(if ($env:CLAUDE_CONFIG_DIR) { $env:CLAUDE_CONFIG_DIR } else { Join-Path $HOME ".claude" }) "projects"
+  $cands = @(); if ($Configured) { $cands += ,@(($Configured -replace '^~', $HOME), "configured") }
+  foreach ($k in @(($Root -creplace '[^A-Za-z0-9]', '-'), ($Root -replace '[\\/:]', '-'))) { $c = Join-Path $base $k; if (@($cands | ForEach-Object { $_[0] }) -notcontains $c) { $cands += ,@($c, "derived") } }
+  $tried = @($cands | ForEach-Object { $_[0] })
+  foreach ($c in $cands) { if (@(Get-ChildItem -LiteralPath $c[0] -Filter *.jsonl -ErrorAction SilentlyContinue).Count) { return @{ dir = $c[0]; how = $c[1]; tried = $tried } } }
+  $norm = { param($p) try { ([IO.Path]::GetFullPath($p)).TrimEnd('\', '/') } catch { $p } }
+  $want = & $norm $Root
+  foreach ($d in @(Get-ChildItem -LiteralPath $base -Directory -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending)) {
+    foreach ($jf in @(Get-ChildItem -LiteralPath $d.FullName -Filter *.jsonl -ErrorAction SilentlyContinue | Sort-Object LastWriteTime -Descending | Select-Object -First 3)) {
+      $n = 0
+      try {  # a transcript locked by another running session, or unreadable, is skipped like the .py twin does
+        foreach ($line in [IO.File]::ReadLines($jf.FullName)) { $n++; if ($n -gt 60) { break }
+          if ($line.IndexOf('"cwd":') -lt 0) { continue }
+          $cwd = $null; try { $cwd = ($line | ConvertFrom-Json).cwd } catch { continue }
+          if ($cwd) { if ([string]::Equals((& $norm $cwd), $want, [StringComparison]::OrdinalIgnoreCase)) { return @{ dir = $d.FullName; how = "found by cwd"; tried = $tried } }; break } }
+      } catch { continue } } }
+  return @{ dir = $null; how = $null; tried = $tried }
+}
+
 if (-not $isCopilot) {
-$key = ($root -replace '[\\/:]', '-')
-$tdir = if ($Transcripts) { $Transcripts } elseif ($usageDoc.transcriptDir) { $usageDoc.transcriptDir -replace '^~', $HOME } else { Join-Path $HOME ".claude/projects/$key" }
+$tried = @()
+if ($Transcripts) { $tdir = ($Transcripts -replace '^~', $HOME); $tried = @($tdir) }
+else {
+  $rt = Resolve-ClaudeTranscripts $root $usageDoc.transcriptDir; $tdir = $rt.dir; $tried = @($rt.tried)
+  if ($tdir -and $rt.how -ne "configured") {
+    # record the folder that was found, so the dashboard and every later run read the same one
+    if ($usageDoc.transcriptDir) { $notes += "transcriptDir in ocpfFramework/state/usage.json ($($usageDoc.transcriptDir)) holds no transcripts; used $tdir ($($rt.how)) and recorded it there" }
+    elseif ($rt.how -eq "found by cwd") { $notes += "transcripts found by cwd: $tdir — recorded as transcriptDir in ocpfFramework/state/usage.json" }
+    try { $usageDoc["transcriptDir"] = $tdir; $usageDoc | ConvertTo-Json -Depth 12 | Set-Content -Path $usagePath -Encoding utf8 } catch { $notes += "could not record transcriptDir in ocpfFramework/state/usage.json: $_" }
+  }
+}
+if (-not $tdir) { Write-Error ("no Claude Code transcripts for this project. Tried: " + ($tried -join "; ") + ". No session under the Claude projects folder was started in $root either. This is not a measurement: do not close the step and do not write a row by hand. List the projects folder, find this project's folder, set transcriptDir in ocpfFramework/state/usage.json, and run again."); exit 1 }
 # a session is <id>.jsonl; its sub-agents (Agent tool) are journaled beside it in <id>/subagents/agent-*.jsonl
 $files = @(@(Get-ChildItem -Path $tdir -Filter *.jsonl -ErrorAction SilentlyContinue) + @(Get-ChildItem -Path $tdir -Directory -ErrorAction SilentlyContinue | ForEach-Object { Join-Path $_.FullName "subagents" } | Where-Object { Test-Path $_ } | ForEach-Object { Get-ChildItem -Path $_ -Filter *.jsonl -ErrorAction SilentlyContinue }) | Sort-Object FullName)
-if (-not $files) { Write-Error "no transcripts in $tdir — set transcriptDir in ocpfFramework/state/usage.json (ls ~/.claude/projects/)"; exit 1 }
+if ($files -and -not $Transcripts -and $rt.how -eq "configured") {
+  # a project renamed or moved after transcriptDir was set: its newer sessions are in the folder Claude Code derives now
+  $d2 = Join-Path (Join-Path $(if ($env:CLAUDE_CONFIG_DIR) { $env:CLAUDE_CONFIG_DIR } else { Join-Path $HOME ".claude" }) "projects") ($root -creplace '[^A-Za-z0-9]', '-')
+  if (-not [string]::Equals($d2.TrimEnd('\','/'), ([string]$tdir).TrimEnd('\','/'), [StringComparison]::OrdinalIgnoreCase)) {
+    $more = @(@(Get-ChildItem -Path $d2 -Filter *.jsonl -ErrorAction SilentlyContinue) + @(Get-ChildItem -Path $d2 -Directory -ErrorAction SilentlyContinue | ForEach-Object { Join-Path $_.FullName "subagents" } | Where-Object { Test-Path $_ } | ForEach-Object { Get-ChildItem -Path $_ -Filter *.jsonl -ErrorAction SilentlyContinue }))
+    if ($more.Count) { $files = @(@($files) + $more | Sort-Object FullName -Unique); $notes += "read $d2 as well as the configured transcriptDir — this project's path now maps there" } } }
+if (-not $files) { Write-Error ("no Claude Code transcripts for this project. Tried: " + ($tried -join "; ") + ". This is not a measurement: do not close the step and do not write a row by hand. List the projects folder, find this project's folder, set transcriptDir in ocpfFramework/state/usage.json, and run again."); exit 1 }
 Anchor-FirstWindow (Transcript-Spans $files) "session"
 $seen = @{}; $rows = @(); $turns = @{}; $decisions = @{}; $agents = @{}; $web = @{}; $noRid = 0
 foreach ($f in $files) {
@@ -471,6 +510,7 @@ foreach ($sid in ($order | Select-Object -Unique)) {
       turns=($turns[$sid] ?? 0); decisions=($decisions[$sid] ?? 0); subAgentCalls=($agents[$sid] ?? 0); webRequests=($web[$sid] ?? 0) }
   }
 }
+if ($Step -and -not $out -and -not $Json -and -not $Calibrate) { Write-Error "no transcript lines fall inside step $Step's window. This is not a measurement: do not close the step and do not write a row by hand. Fix the step's startedAt / completedAt in ocpfFramework/state/usage.json (ISO 8601, UTC) and run again; when several objects were written in one pass, run without -Step."; exit 1 }
 if ($Step -and -not $out) { $notes += "no transcript lines fall inside step $Step's window — check its startedAt/completedAt in ocpfFramework/state/usage.json" }
 }
 

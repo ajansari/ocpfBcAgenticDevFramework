@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 6.1.1.0
+**Version:** 6.1.2.0
 **Last Updated:** November 15, 2026
 
 > Version history for this framework lives in `ocpfFramework/RunbookChangelog.md`, tracked
@@ -18,7 +18,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.13.1.0): the AL *rules* this sequence applies (Parts 1–11, Appendices A–E), cited below as
 >   **Standards §**.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v6.1.1.0): the *procedures*
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v6.1.2.0): the *procedures*
 >   this sequence uses — asking, intake, project setup, the AL tools, tooling checks, analyzers,
 >   symbols, editor sync, notifications, packaging, repository hygiene, translations, fetched
 >   companions, documents, usage and cost, and the plugin — cited below as **Ops §**. Both editions
@@ -245,7 +245,9 @@
       the Main model and every sub-agent model, never one row for the step with a single model.
       Paste those rows into the closing message so the human sees them without opening the file.
     - **The exit gate is not met until the rows exist.** The next step does not start on a missing
-      row; the `status` skill reports a missing row as a blocker.
+      row; the `status` skill reports a missing row as a blocker. **A usage-script `error:` is not
+      a measurement** (6.1.2.0): the step stays open and no row, an `n/a` row included, is written
+      until the cause is fixed and the script has run. When it cannot be fixed, one options box asks the human, and only their *Close the step with n/a and this reason* licenses an `n/a` row (Ops § Usage & Cost → 5).
     - **Never hand-write a row, in either tool.** The script reads Claude Code's transcripts, or
       the Copilot session journals (`~/.copilot/session-state`, VS Code's chat and the CLI alike),
       and already aggregates per step — one row per model in Claude Code, one row per step in
@@ -697,7 +699,8 @@ no longer has a separate usage report.
   AI cost of a step can be read next to the hours a senior AL developer would bill and next to what
   was predicted.
 - **Say what couldn't be measured.** A step worked in a tool that exposes no usage gets `n/a` and
-  the reason, not a blank and not a guess.
+  the reason, not a blank and not a guess. A script error is not that case: it is fixed and the
+  script run again before the step closes (Rule 11).
 - **At project close (Step 12), the `usage` skill also exports the calibration file** —
   `~/.ocpf/calibration/<project>-<date>.json`: per step and model, tokens by type, elapsed, turns,
   decisions, and the object counts by type — outside every project, so the next project's AI
@@ -950,7 +953,7 @@ after the last one (Rule 6f).
 
 The companion rules document — `ocpfALDevStandardsGuide.md`, v1.13.1.0 — holds the AL rules this
 runbook cites as **Standards §**, from PRE-02 onward. Its sibling, the **Operations Guide**
-(`ocpfOperationsGuide.md`, v6.1.1.0), holds the procedures, cited as **Ops §**.
+(`ocpfOperationsGuide.md`, v6.1.2.0), holds the procedures, cited as **Ops §**.
 
 **Fetch both at PRE-01, before the first kickoff box, in one batch with everything else that step reads first (Rule 6f)** — `ocpfFramework/standardsGuide/` and `ocpfFramework/opsGuide/` in
 this project's root, both always gitignored — **and, in the same fetch, this runbook's step files

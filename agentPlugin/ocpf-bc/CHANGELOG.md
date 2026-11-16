@@ -4,6 +4,28 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 6.1.2 — November 15, 2026
+
+Full / Lite runbook and Operations Guide **6.1.2.0**. A project was built and packaged with an
+empty usage table.
+
+- **`usage`:** `ocpf-usage.py` / `.ps1` derived Claude Code's transcript folder by replacing only
+  `/`, `\`, and `:` with `-`; Claude Code replaces every character that is not a letter or a
+  digit, so a project path with a space, an underscore, or a dot found nothing, and the skill
+  told the agent to write a hand-derived `transcriptDir` that was wrong the same way. The scripts
+  now try the configured folder, Claude Code's derivation, the old one, then any session started
+  in the project's directory (`cwd`), note which was used, and honour `CLAUDE_CONFIG_DIR`; the
+  error, when nothing is found, lists what was tried. `usage.json` is created with
+  `transcriptDir` `null`, and the script records the folder it found. A `--step` run whose
+  window holds no transcript lines exits with an error instead of an empty *Total*. **A script
+  error is not a measurement**: no close and no row, `n/a` included, until the script has run;
+  when the cause cannot be fixed, one options box asks the human. An existing project gets the
+  fixed scripts with `/ocpf-bc:update-framework`, then back-fills with `/ocpf-bc:usage`.
+- **`dashboard`:** the renderers use the same folder derivation for the agent / you / waiting split.
+- **`build-a-feature`:** a row is `Completed` only once the script has written its usage row.
+- **`skill-load`**, Ops § Repository Hygiene: the `customSkills.json` ignore proof is
+  `git check-ignore -q` exiting 1.
+
 ## 6.1.1 — November 15, 2026
 
 Full / Lite runbook and Operations Guide **6.1.1.0**. A Build-a-Feature project was built with no

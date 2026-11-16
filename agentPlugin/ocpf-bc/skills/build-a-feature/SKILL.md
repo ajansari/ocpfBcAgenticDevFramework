@@ -47,7 +47,7 @@ the same Part 1 checks and behaves identically; it is not a different journey.
 
 **The first act of the journey, before the working-language question, before reading anything
 but the folder:** make sure `ocpfFramework/state/usage.json` exists (create `ocpfFramework/state/`
-and the file as the `usage` skill's Step 1 says — `aiTool`, `transcriptDir`, empty `steps`; the
+and the file as the `usage` skill's Step 1 says — `aiTool`, `transcriptDir` `null` (the script finds Claude Code's folder; never work it out by hand), empty `steps`; the
 folder is always gitignored) and append `{ "step": "F00", "title": "Intake", "startedAt": "<now>" }`.
 Why first: on a real project the intake window was opened at the end of setup, so seven decisions
 and 40 % of the session's tokens were *Unattributed* and the dashboard's clock started minutes
@@ -422,7 +422,8 @@ problem statement beyond Part 3's short one, no estimates, no translation questi
    the register goes to `docs/1-define/FeatureRegister.md`.
 
 Close the intake window when the first object's window opens: set `F00`'s `completedAt`, run
-`/ocpf-bc:usage --step F00`, paste the rows, mark the row `Completed`.
+`/ocpf-bc:usage --step F00`, paste the rows, mark the row `Completed` — only once the script has
+printed the row (Part 4 step 8's rule applies to every close: `F00`, each object, `FRV`, `FPK`).
 
 ## Part 4: The object loop
 
@@ -495,7 +496,12 @@ For each object in the plan, in order. Each object is one row and one usage wind
    `docs/0-project/ChangeLog.md`) — date, object type, ID, name, file, *Build-a-Feature*. Stage →
    **Documented**. Two minutes at most; no research, no sub-agent.
 8. **Close the window:** `completedAt`, `/ocpf-bc:usage --step <id>`, the rows pasted into the
-   closing message, status `Completed`.
+   closing message, status `Completed` — **only once the script has written the row.** A script
+   `error:` (no transcripts, no interpreter) is not a measurement: the row stays `In Progress`,
+   the cause is fixed and the script run again before the next object; when it cannot be fixed,
+   one options box asks the human, and only their answer licenses an `n/a` row (the `usage`
+   skill; Ops § Usage & Cost → 5). On a real project six rows were marked `Completed` over an empty usage
+   table (6.1.2.0).
 9. **The companion box (the options box at every close; Full Rule 6c / Lite Rule 6c apply here
    verbatim).** End the closing message with the offer the reference file names for this object
    (or, when an enabled Custom Skill's `overrides.companionOffers` names this object type, that
@@ -532,7 +538,7 @@ until this box has been answered; a run that packages first has skipped a step.
   Present every finding in one message with its root cause and proposed fix, then one box:
   **Apply all** / *Apply selected* / *Discuss first*. Nothing is applied before the answer.
   Applied fixes go through Part 4's compile (step 6) again and update the documents (step 7); each
-  finding and its decision is one line in the ChangeLog. Close the window with its rows; stage
+  finding and its decision is one line in the ChangeLog. Close the window with its rows (Part 4 step 8's rule: no row, no close); stage
   **Reviewed** on every row the review covered. Then Part 6.
 - **Skip:** stage stays **Documented**. Say in one line what a review would have checked. Then
   Part 6.
@@ -553,7 +559,7 @@ now (recommended)** / *Not now — I'll build it from VS Code*.
   document (the human uploads; the agent never does unprompted); write the version into the
   **Shipped in** column of every row whose column is still blank (a row already shipped keeps its
   first version); one ChangeLog line with the version and the Schema Sync Mode; close the window
-  with its usage rows. On a second package later in the same session (a fix found after
+  with its usage rows (Part 4 step 8's rule: no row, no close). On a second package later in the same session (a fix found after
   packaging), the `FPK` row gets a second window; its stage shows the latest version.
 - **No:** say how to build it (`AL: Package` in VS Code) and that the version rule still applies;
   no install guide is written for a package the agent didn't build.

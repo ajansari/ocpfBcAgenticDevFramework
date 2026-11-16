@@ -19,7 +19,7 @@ conversation memory.
    A **remediation row** (`07a — Remediation`, `STEP-5a — Remediation`; Ops § Usage & Cost → 7)
    sits under its base step: report it as its own step, with the step the project returns to. Find the step marked `In Progress`, or the first one not complete. Then check
    the usage table against the step table: **every step marked `Completed` must have at least one
-   usage row** (one per model that ran); a closed step with no row is a blocker (Full Operating
+   usage row** (one per model that ran) — an `n/a` row on a Claude Code project counts as missing unless its Notes name the human's answer (6.1.2.0); a closed step with no row is a blocker (Full Operating
    Rule 11 / Lite Rule 9 — the exit gate wasn't met).
 2. **The step file** — `ocpfFramework/runbookSteps/<step>.md` (Full v4.0.0.0 / Lite v3.0.0.0 on; a
    Build-a-Feature project has none: the row's "gate" is the stage ladder in Ops § Build-a-Feature; on an older

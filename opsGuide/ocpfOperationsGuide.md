@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 6.1.1.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
+**Version:** 6.1.2.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
 **Last Updated:** November 15, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
@@ -2527,7 +2527,8 @@ framework file that exists on disk and `git status --porcelain` in the root: a f
 missing or misspelled — fix it before moving on. **One expected exception:** `?? ocpfFramework/` or
 `?? ocpfFramework/customSkills.json` is the Custom Skills register waiting for `git add` — it is
 re-included on purpose (6.0.0.0); stage it, never add an entry for it. Then run `git check-ignore -v ProjectDashboard.html
-ProjectDashboard-f1.html ProjectProgress.md ocpfFramework/customSkills.json`: it must print **nothing** (exit 1) — a match means an entry is too broad, and
+ProjectDashboard-f1.html ProjectProgress.md`: it must print **nothing** (exit 1) — and `git check-ignore -q ocpfFramework/customSkills.json`
+must exit **1** (with `-v` that one path prints its own re-include line, `!ocpfFramework/customSkills.json`, and exits 0, which is not a failure — 6.1.2.0). A match means an entry is too broad, and
 the human's dashboard would vanish from every clone. A `.gitignore` that was "written per the runbook"
 but never checked is how the changelog reached a client's remote on a real project.
 
@@ -2760,7 +2761,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v6.1.1.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
+folder as `README.md`. For runbook **v6.1.2.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2939,7 +2940,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v6.1.1.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v6.1.2.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
@@ -3200,7 +3201,7 @@ ritual*). Per developer, always gitignored.
 ```json
 {
   "aiTool": "claude-code",
-  "transcriptDir": "~/.claude/projects/-Users-aj-Projects-contosoApp",
+  "transcriptDir": null,
   "steps": [
     { "step": "PRE-01", "startedAt": "2026-09-19T14:02:11Z", "completedAt": "2026-09-19T14:41:05Z" },
     { "step": "PRE-02", "startedAt": "2026-09-19T14:41:05Z" }
@@ -3236,9 +3237,16 @@ to a step, so a missing file is fixed the moment it's noticed: create it, and ma
 **Claude Code** writes every request's usage to the session transcript on disk, per message, and
 that file is the source — not `/cost`, not memory:
 
-- **Where:** `~/.claude/projects/<project key>/*.jsonl`, where the project key is the project's
-  absolute path with every `/` replaced by `-` (macOS and Linux; on Windows, `%USERPROFILE%\.claude\projects\`
-  with the drive and separators encoded the same way). Record the folder in `usage.json` once.
+- **Where:** `~/.claude/projects/<project key>/*.jsonl` (on Windows `%USERPROFILE%\.claude\projects\`),
+  where Claude Code builds the project key from the project's absolute path by turning **every
+  character that is not a letter or a digit into `-`** — the separators, the drive's `:`, and also
+  every space, `_`, and `.` (`C:\Users\AJ Ansari\AL\My_App` → `C--Users-AJ-Ansari-AL-My-App`).
+  **The script finds the folder; the agent never works it out by hand** (6.1.2.0): it tries
+  `transcriptDir` when `usage.json` has one, then that derivation, then any session started in the
+  project's directory, and says which it used. Until 6.1.2.0 this guide said "every `/` replaced by
+  `-`" and the scripts replaced only the separators and `:`, so a project whose path held a space,
+  an underscore, or a dot — or a Windows path written by hand — found no transcripts and no usage
+  was ever recorded.
 - **What:** every line whose `type` is `assistant` carries `timestamp`, `message.model`, and
   `message.usage` with `input_tokens`, `output_tokens`, `cache_creation_input_tokens`,
   `cache_read_input_tokens`, and `cache_creation.ephemeral_5m_input_tokens` /
@@ -3428,6 +3436,7 @@ the end of the project, not "when there's time". Both editions, the same words (
 - **The exit gate is not met until the rows exist.** A step whose rows are missing is not closed;
   the next step does not start on a missing row, and the `status` skill reports a missing row for a
   closed step as a blocker.
+- **A script error is not a measurement** (6.1.2.0). When the usage script exits non-zero (its message starts with or contains `error:` — no transcripts found, a missing interpreter, a step whose window holds no transcript lines), **or prints a table with no row for the step**, the step does not close and **no row is written, an `n/a` row included**: read the error, fix its cause, and run it again. The script finds Claude Code's transcript folder itself (the configured folder, the folder Claude Code derives from the project path, then any session started in this directory); when it still finds none, list the Claude projects folder, find this project's, and set `transcriptDir` to it. A missing interpreter is the next rung of the runner ladder. `n/a` with the reason is only for a step worked in a tool that keeps no usage record at all, or a machine where nothing on the runner ladder runs — and then the closing message says so in its first line. **When the cause cannot be fixed after two attempts, or the fix is the human's** (an interpreter to install, transcripts on another machine or already cleaned up, a session started in another folder), end the turn with one options box (Rule 6a): *Usage for <step> can't be measured: <the error's first sentence>* — *I'll fix it — tell me what to do* / *Try again* / *Close the step with n/a and this reason*. Only the human's third answer licenses an `n/a` row, and the row's Notes record that answer. Why: a real Build-a-Feature project was built and packaged with an empty usage table — every row was marked `Completed` on a measurement that had never produced a figure.
 - **Never hand-write a row, in either tool.** The script reads the transcripts (Claude Code) or
   the Copilot session journals and already aggregates per step, sub-agents included. A hand-written
   row is exactly how a real project ended up with one model credited for everything, when three

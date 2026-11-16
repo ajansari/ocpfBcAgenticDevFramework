@@ -256,10 +256,15 @@ def usage_rows(root, tool):
 
 # ---------------------------------------------------------------- Claude Code transcript: time split and who is working
 def transcript_dir(root, usage):
-    d = usage.get("transcriptDir")
-    if d: return os.path.expanduser(d)
-    key = os.path.abspath(root).replace("\\", "-").replace("/", "-").replace(":", "-")
-    return os.path.expanduser(os.path.join("~", ".claude", "projects", key))
+    # Claude Code names the folder after the path with every non-alphanumeric character turned into "-" (6.1.2.0);
+    # a configured transcriptDir that holds nothing falls through to the derived folders.
+    base = os.path.join(os.environ.get("CLAUDE_CONFIG_DIR") or os.path.join(os.path.expanduser("~"), ".claude"), "projects")
+    ab = os.path.abspath(root)
+    cands = [os.path.expanduser(usage["transcriptDir"])] if usage.get("transcriptDir") else []
+    cands += [os.path.join(base, re.sub(r"[^A-Za-z0-9]", lambda m: "-" * (2 if ord(m.group()) > 0xFFFF else 1), ab)), os.path.join(base, ab.replace("\\", "-").replace("/", "-").replace(":", "-"))]
+    for c in cands:
+        if glob.glob(os.path.join(c, "*.jsonl")): return c
+    return cands[0]
 
 def claude_live(root, usage, wins, steps_idx):
     """Agent / you / waiting seconds per step, and the live state of Main and the sub-agents."""

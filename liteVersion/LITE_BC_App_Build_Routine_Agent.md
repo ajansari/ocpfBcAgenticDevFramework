@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework — Lite Edition
 
-**Version:** 6.1.1.0 (Lite, derived from the full framework v6.1.1.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
+**Version:** 6.1.2.0 (Lite, derived from the full framework v6.1.2.0 — from this release the Full and Lite runbooks, the Operations Guide, and the plugin share one version number)
 **Last Updated:** November 15, 2026
 
 > Version history for this edition lives in `ocpfFramework/LITE_RunbookChangeLog.md`, tracked
@@ -21,7 +21,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.13.1.0), cited as **Standards §**. Lite is *not* a reduced set of AL rules: the same rules
 >   apply to a 5-file extension as to a 50-file one. What Lite reduces is *process*.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v6.1.1.0), cited as
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v6.1.2.0), cited as
 >   **Ops §**: the procedures this routine uses — asking, intake, project setup, AL tools,
 >   tooling checks, analyzers, symbols, editor sync, notifications, packaging, repository hygiene,
 >   translations, fetched companions, documents, usage and cost, and the plugin.
@@ -270,7 +270,10 @@ and checks the AL MCP Server tooling. See ALL ALONG → OCPF Plugin.
    sub-agent model), never one row for the step with a single model. Paste those rows into the
    closing message so the human sees them without opening the file. **The exit gate is not met
    until the rows exist**; the next step does not start on a missing row, and the `status` skill
-   reports one as a blocker. **Never hand-write a row, in either tool** — the script reads Claude
+   reports one as a blocker. **A usage-script error, or a table with no row for the step, is not
+   a measurement** (6.1.2.0): the step stays open and no row, an `n/a` row included, is written
+   until the cause is fixed and the script has run; when it cannot be fixed, one options box asks
+   the human (Ops § Usage & Cost → 5). **Never hand-write a row, in either tool** — the script reads Claude
    Code's transcripts, or the Copilot session journals (`~/.copilot/session-state`, VS Code's chat
    and the CLI alike), and already aggregates per step — one row per model in Claude Code, one row
    per step in Copilot; a hand-written row is how a real project got one model for everything.
@@ -560,7 +563,10 @@ second table of `ProjectProgress.md`. In a plugin project the `usage` skill
   (the generator sub-agents and the skills' delegations) — next to the hours from
   `docs/2-design/HumanEffortEstimate.md` and the estimate from `docs/2-design/AiEffortEstimate.md`
   (Step 2) once they exist.
-- **Say what couldn't be measured** — `n/a` with the reason, never a blank or a guess.
+- **Say what couldn't be measured** — `n/a` with the reason, never a blank or a guess — for a tool
+  that keeps no usage record. **A usage-script `error:` is not a measurement** (6.1.2.0): the step
+  stays open and no row, an `n/a` row included, is written until the cause is fixed and the script
+  has run. When it cannot be fixed, one options box asks the human, and only their *Close the step with n/a and this reason* licenses an `n/a` row (Ops § Usage & Cost → 5).
 - **At Step 7's close,** the `usage` skill exports the project's calibration file to
   `~/.ocpf/calibration/<project>-<date>.json`, which future AI Effort Estimates read.
 
@@ -620,7 +626,7 @@ first package and before Step 6's release-candidate question. The non-negotiable
 
 Two companions are fetched at Step 1 and kept for the life of the project: the **Standards Guide**
 (`ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md`, v1.13.1.0), cited as **Standards §**, and the
-**Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v6.1.1.0), cited as **Ops §** and shared
+**Operations Guide** (`ocpfFramework/opsGuide/ocpfOperationsGuide.md`, v6.1.2.0), cited as **Ops §** and shared
 unchanged with the full framework.
 
 **Full procedure: Ops § Fetched Companions** — fetching, refreshing, the plugin's offline copies,
