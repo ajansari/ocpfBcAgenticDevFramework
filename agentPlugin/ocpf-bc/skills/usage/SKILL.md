@@ -134,11 +134,12 @@ the plugin; `ocpfFramework/scripts/` is gitignored.
 a different table (Ops § Usage & Cost → 2). Copilot bills in **AI credits**, and the Copilot SDK —
 the engine under VS Code's agent mode since VS Code 1.139 and under the CLI — journals every
 session at `~/.copilot/session-state/<id>/events.jsonl` (`%USERPROFILE%\.copilot\session-state`
-on Windows): the project folder in `session.start`, the cumulative credits (`totalNanoAiu`,
-1e9 to the credit) in `session.usage_checkpoint` and `session.shutdown`, every model request with
-its timestamp. The script finds the project's sessions by folder, takes each session's last
-journaled figure, splits it across the step windows by request share between the journaled
-points, prices the credits from `pricing.json`'s `aiCredit`, and prints the **credits table** —
+on Windows): the project folder in `session.start`, **one `session.usage_record` per model
+request, written as it happens, with that request's credits and model**, and the session's
+cumulative credits (`totalNanoAiu`, 1e9 to the credit) in `session.usage_checkpoint` and
+`session.shutdown`. The script finds the project's sessions by folder, sums the per-request
+records inside each step window, prices the credits from `pricing.json`'s `aiCredit`, and prints
+the **credits table** —
 ten columns, no token columns, **one row per step** with every model named:
 
 ```
@@ -149,10 +150,22 @@ pwsh   <this skill's folder>/scripts/ocpf-usage.ps1 -Project "<project root>" -S
 - `--tool copilot-chat` or `--tool copilot-cli` overrides `usage.json`'s `aiTool` (the source is
   the same journal); `--journal <dir>` names the session-state folder when it is on another machine
   (a remote, WSL, or dev-container window keeps it there).
-- **A checkpoint is written when the chat ends, not per turn.** So a step closed mid-chat gets its
-  share by request count, and the figure settles at the next measurement after the chat ends. Say
-  *as of the last checkpoint* in the closing message when the script notes an open session, and
-  **re-run the measurement without `--step` at the next boundary** so earlier rows refresh.
+- **The figure is live, mid-turn included (6.1.3.0).** Copilot writes the session's cumulative
+  total only when a **turn ends** — when the agent hands the chat back; an options box does not end
+  a turn, so a whole build can be one turn. The script does not wait for it: it sums the
+  per-request records, so a step closed mid-turn gets its credits and its model names. Why:
+  on a real Build-a-Feature project every close measured `0.0` credits and model `unknown` for the
+  whole build, and the same script printed 115.5 credits the moment the human typed a message.
+- **`pending — turn still open` is the script's own wording; copy it as printed.** A journal
+  with no per-request records (a Copilot older than 1.0.100) has nothing for requests that ran
+  after the last turn ended, so the script prints *pending* in that row's credits and cost cells
+  (or `<n> + pending`) instead of `0.0`, and a note says how many requests wait. Never replace it
+  with a number, and **re-run the measurement without `--step` at the next boundary** so the
+  earlier rows fill in.
+- **Sub-agents:** their requests are in the session's cumulative total. Whether each also gets
+  its own per-request record was not checked on a real session (6.1.3.0); if not, a mid-turn
+  figure runs low until the turn ends, and then the script scales the records to the total and
+  says so in a note.
 - **The Total is the sum of the sessions' journaled figures**, equal to what the Session Info
   popovers showed once every session has ended. `--reconcile` adds the account's month-to-date AI
   credits from GitHub's billing API as a cross-check (needs `gh auth refresh -s user` once); it

@@ -4,8 +4,10 @@
 # ~/.copilot/session-state/<id>/events.jsonl (%USERPROFILE%\.copilot\session-state on Windows) — the same journal
 # whether the session ran in VS Code's Copilot Chat agent mode or in the Copilot CLI. session.start names the project
 # folder (context.cwd); session.usage_checkpoint and session.shutdown carry totalNanoAiu, the cumulative cost in
-# nano-AI-units, 1e9 to the credit. A checkpoint is written when the chat ends, not per turn, so between two known
-# points the difference is split across the step windows by each window's share of model requests; the table says so.
+# nano-AI-units, 1e9 to the credit — written when a turn ends, never mid-turn. session.usage_record (Copilot 1.0.100 and
+# later) carries each model request's own credits and model as it happens: the script sums those per step window, so a
+# measurement in the middle of a turn is exact. A journal without those records falls back to splitting the difference
+# between two known points by each window's share of model requests; the table says so.
 # Legacy VS Code chat session files (workspaceStorage/<hash>/chatSessions, pre-SDK) are still read when present.
 # Copilot records no token totals by type, so the Copilot table has credit columns, not token columns.
 # Mirrors ocpf-usage.py (the Python script is the reference implementation); exercised on PowerShell 7 on macOS,
@@ -199,7 +201,7 @@ $NanoAiuPerCredit = 1000000000.0   # github/copilot-sdk NANO_AIU_PER_AIU; AIU = 
 function Journal-Dirs { $c = @((Join-Path $HOME ".copilot/session-state")); if ($env:USERPROFILE) { $c += (Join-Path $env:USERPROFILE ".copilot/session-state") }; @($c | Select-Object -Unique | Where-Object { Test-Path $_ }) }
 function Under-Path($path, $root) { if (-not $path) { return $false }; try { $a = [System.IO.Path]::GetFullPath($path).TrimEnd('\', '/'); $b = [System.IO.Path]::GetFullPath($root).TrimEnd('\', '/') } catch { return $false }; ($a -ieq $b) -or $a.StartsWith($b + [System.IO.Path]::DirectorySeparatorChar, [System.StringComparison]::OrdinalIgnoreCase) -or $a.StartsWith($b + '/', [System.StringComparison]::OrdinalIgnoreCase) }
 function Read-Journal($path) {
-  $sess = @{ id = (Split-Path -Leaf (Split-Path $path)); path = $path; cwd = $null; client = $null; start = $null; last = $null; points = @(); requests = @(); turns = 0; decisions = 0; subAgentCalls = 0; closed = $false; modelMetrics = $null }
+  $sess = @{ id = (Split-Path -Leaf (Split-Path $path)); path = $path; cwd = $null; client = $null; start = $null; last = $null; points = @(); requests = @(); records = @(); turns = 0; decisions = 0; subAgentCalls = 0; closed = $false; modelMetrics = $null }
   try {
     foreach ($line in [System.IO.File]::ReadLines($path)) {
       try { $o = $line | ConvertFrom-Json -AsHashtable } catch { continue }
@@ -207,13 +209,22 @@ function Read-Journal($path) {
       $t = $o.type; $d = if ($o.data -is [System.Collections.IDictionary]) { $o.data } else { @{} }; $ts = Parse-Ts $o.timestamp
       if ($null -eq $ts) { continue }
       $sess.last = $ts
+      if ($t -in @("session.resume", "assistant.message", "user.message")) { $sess.closed = $false }   # a session resumed after a shutdown is open again
       switch ($t) {
         "session.start" { $sess.start = $ts; if ($d.context -is [System.Collections.IDictionary]) { $sess.cwd = $d.context.cwd } }
         "session.context_changed" { if (-not $sess.cwd -and $d.cwd) { $sess.cwd = $d.cwd } }
-        "assistant.message" { $sess.requests += @{ ts = $ts; model = ($d.model ?? "unknown") } }
+        "assistant.message" { $sess.requests += @{ ts = $ts; model = $(if ($d.model) { $d.model } else { "unknown" }) } }
         "user.message" { $sess.turns++ }
         "tool.execution_start" { if ($d.toolName -eq "ask_user") { $sess.decisions++; $sess.turns++ } }
         "subagent.started" { $sess.subAgentCalls++ }
+        "session.usage_record" {
+          # One per model request, written as it happens (Copilot 1.0.100 and later): that request's credits and model. The
+          # cumulative figure is written only when a turn ends, and a framework run can be one turn (6.1.3.0). seg = how
+          # many cumulative points were journaled before this record.
+          $u = if ($d.usage -is [System.Collections.IDictionary]) { $d.usage } else { @{} }
+          $cu = if ($u.copilotUsage -is [System.Collections.IDictionary]) { $u.copilotUsage } elseif ($d.copilotUsage -is [System.Collections.IDictionary]) { $d.copilotUsage } else { @{} }
+          if ($cu.totalNanoAiu -is [ValueType] -and $cu.totalNanoAiu -isnot [bool] -and [double]$cu.totalNanoAiu -ge 0) { $sess.records += @{ ts = $ts; credits = ([double]$cu.totalNanoAiu / $NanoAiuPerCredit); model = $(if ($u.model) { $u.model } elseif ($u.responseModel) { $u.responseModel } else { "unknown" }); seg = $sess.points.Count } }
+        }
         { $_ -in @("session.usage_checkpoint", "session.shutdown") } {
           if ($d.totalNanoAiu -is [ValueType]) { $sess.points += @{ ts = $ts; val = ([double]$d.totalNanoAiu / $NanoAiuPerCredit); kind = $t } }
           if ($t -eq "session.shutdown") { $sess.closed = $true; $sess.modelMetrics = $d.modelMetrics }
@@ -223,8 +234,7 @@ function Read-Journal($path) {
   } catch { return $null }
   $wy = Join-Path (Split-Path $path) "workspace.yaml"
   if (Test-Path $wy) { foreach ($ln in [System.IO.File]::ReadLines($wy)) { if (-not $sess.cwd -and $ln.StartsWith("cwd:")) { $sess.cwd = $ln.Substring(4).Trim() }; if ($ln.StartsWith("client_name:")) { $sess.client = $ln.Substring(12).Trim() } } }
-  $sess.points = @($sess.points | Sort-Object { $_.ts })
-  $sess
+  $sess   # points stay in journal order: a record's seg indexes them
 }
 function Journal-SessionsFor($root, $dirs) {
   $found = @()
@@ -234,24 +244,39 @@ function Journal-SessionsFor($root, $dirs) {
   $found
 }
 function Attribute-Session($sess) {
-  # Split a session's credits over the step windows: exact at every journaled point, by request share between them.
+  # Split a session's credits over the step windows. Between two journaled points (and after the last one) the per-request
+  # records carry the credits exactly, each with its own timestamp and model (6.1.3.0). A journal written before Copilot
+  # kept those records has none: there the difference between two points is split by request share, and requests after
+  # the last point wait.
   $per = @{}
-  foreach ($r in $sess.requests) { $k = Step-For $r.ts; if (-not $per.ContainsKey($k)) { $per[$k] = @{ credits = 0.0; requests = 0; models = @{} } }; $per[$k].requests++ }
-  $known = 0.0; $prevTs = $sess.start; if ($null -eq $prevTs -and $sess.requests.Count) { $prevTs = $sess.requests[0].ts }; $prevVal = 0.0; $estimated = $false; $firstSeg = $true
-  foreach ($pt in $sess.points) {
-    $ts = $pt.ts; $val = $pt.val; $delta = [math]::Max(0.0, $val - $prevVal)
+  function Slot($k) { if (-not $per.ContainsKey($k)) { $per[$k] = @{ credits = 0.0; requests = 0; models = @{} } }; $per[$k] }
+  foreach ($r in $sess.requests) { (Slot (Step-For $r.ts)).requests++ }
+  $known = 0.0; $prevTs = $sess.start; if ($null -eq $prevTs -and $sess.requests.Count) { $prevTs = $sess.requests[0].ts }; $prevVal = 0.0; $estimated = $false; $firstSeg = $true; $off = 0
+  for ($i = 0; $i -lt $sess.points.Count; $i++) {
+    $pt = $sess.points[$i]; $ts = $pt.ts; $val = $pt.val; $delta = [math]::Max(0.0, $val - $prevVal)
     $seg = @($sess.requests | Where-Object { ($null -eq $prevTs -or ($(if ($firstSeg) { $_.ts -ge $prevTs } else { $_.ts -gt $prevTs }))) -and $_.ts -le $ts })
+    $srec = @($sess.records | Where-Object { $_.seg -eq $i }); $rsum = 0.0; foreach ($r in $srec) { $rsum += $r.credits }
     if ($delta -gt 0) {
-      if ($seg.Count) {
+      if ($rsum -gt 0) {
+        $scale = $delta / $rsum   # 1.0 whenever the records add up to the journaled figure
+        if ([math]::Abs($scale - 1.0) -gt 0.01) { $off++ }
+        foreach ($r in $srec) { $g = Slot (Step-For $r.ts); $g.credits += $r.credits * $scale; $g.models[$r.model] = ($g.models[$r.model] ?? 0.0) + $r.credits * $scale }
+      } elseif ($seg.Count) {
         $share = $delta / $seg.Count; $stepsIn = @{}
-        foreach ($r in $seg) { $k = Step-For $r.ts; $stepsIn[$k] = $true; if (-not $per.ContainsKey($k)) { $per[$k] = @{ credits = 0.0; requests = 0; models = @{} } }; $per[$k].credits += $share; $per[$k].models[$r.model] = ($per[$k].models[$r.model] ?? 0.0) + $share }
+        foreach ($r in $seg) { $k = Step-For $r.ts; $stepsIn[$k] = $true; $g = Slot $k; $g.credits += $share; $g.models[$r.model] = ($g.models[$r.model] ?? 0.0) + $share }
         if ($stepsIn.Count -gt 1) { $estimated = $true }
-      } else { $k = Step-For $ts; if (-not $per.ContainsKey($k)) { $per[$k] = @{ credits = 0.0; requests = 0; models = @{} } }; $per[$k].credits += $delta; $per[$k].models["unknown"] = ($per[$k].models["unknown"] ?? 0.0) + $delta }
+      } else { $g = Slot (Step-For $ts); $g.credits += $delta; $g.models["unknown"] = ($g.models["unknown"] ?? 0.0) + $delta }
     }
     $known = $val; $prevTs = $ts; $prevVal = $val; $firstSeg = $false
   }
-  $unj = @($sess.requests | Where-Object { $null -ne $prevTs -and $_.ts -gt $prevTs }).Count
-  @{ per = $per; known = $known; estimated = $estimated; unjournaled = $unj }
+  $tail = @($sess.records | Where-Object { $_.seg -eq $sess.points.Count }); $live = 0.0
+  $lastCounted = if ($sess.points.Count -and $prevTs) { $prevTs } else { $null }
+  foreach ($r in $tail) { $g = Slot (Step-For $r.ts); $g.credits += $r.credits; $g.models[$r.model] = ($g.models[$r.model] ?? 0.0) + $r.credits; $live += $r.credits; if ($null -eq $lastCounted -or $r.ts -gt $lastCounted) { $lastCounted = $r.ts } }
+  # requests nothing has counted yet: after the last journaled total, in a stretch that keeps no per-request records
+  $unjList = @(if (-not $tail.Count) { $sess.requests | Where-Object { $null -ne $prevTs -and (-not $sess.points.Count -or $_.ts -gt $prevTs) } })   # @() outside: an if-expression unrolls a one-element array
+  $pending = @{}; foreach ($r in $unjList) { $pending[(Step-For $r.ts)] = $true }
+  $sess.knownCredits = $known + $live; $sess.lastCountedAt = $lastCounted; $sess.uncounted = $unjList.Count
+  @{ per = $per; known = ($known + $live); estimated = $estimated; unjournaled = $unjList.Count; live = $live; pending = $pending; off = $off }
 }
 function Reconcile-GitHub {
   try {
@@ -394,10 +419,10 @@ if ($isCopilot) {
         turns=$d.turns; decisions=$d.decisions; subAgentCalls=$d.subAgentCalls; webRequests=0 }
     }
   }
-  # ---- Copilot SDK journals: exact session totals, split by request share between known points ----
-  $jRows = [ordered]@{}; $jTotal = 0.0; $openSessions = 0; $estAny = $false; $unj = 0
+  # ---- Copilot SDK journals: each request's credits from its own record; a journal without records is split by request share ----
+  $jRows = [ordered]@{}; $jTotal = 0.0; $openSessions = 0; $estAny = $false; $unj = 0; $liveTotal = 0.0; $offAny = 0; $pendingSteps = @{}
   foreach ($sess in $jSessions) {
-    $att = Attribute-Session $sess; $jTotal += $att.known; if ($att.estimated) { $estAny = $true }; $unj += $att.unjournaled
+    $att = Attribute-Session $sess; $jTotal += $att.known; if ($att.estimated) { $estAny = $true }; $unj += $att.unjournaled; $liveTotal += $att.live; $offAny += $att.off; foreach ($k in $att.pending.Keys) { $pendingSteps[$k] = $true }
     if (-not $sess.closed) { $openSessions++ }
     foreach ($sid in $att.per.Keys) { $v = $att.per[$sid]; if ($v.credits -le 0.00005 -and $v.requests -eq 0) { continue }
       if (-not $jRows.Contains($sid)) { $jRows[$sid] = @{ credits = 0.0; requests = 0; models = @{}; turns = 0; decisions = 0; subAgentCalls = 0 } }
@@ -406,17 +431,19 @@ if ($isCopilot) {
   }
   if ($jSessions.Count) {
     $notes += "Turns in a Copilot row = the human's prompts plus every question the agent asked and the human answered (ask_user)"
-    if ($estAny) { $notes += "inside a session the SDK journals the cumulative credits only when the chat ends; between those points the figure is split across steps by each step's share of model requests" }
-    if ($openSessions) { $notes += "$openSessions session(s) still open — their credits are as of the last journaled checkpoint; the step rows will grow when the chat ends and the measurement runs again" }
-    if ($unj) { $notes += "$unj model request(s) ran after the last journaled checkpoint and are not yet counted anywhere" }
+    if ($liveTotal -gt 0) { $notes += ("{0:N1} credit(s) are counted from the journal's per-request records, up to the last request — Copilot writes its running total only when a turn ends, and that total will confirm these figures" -f $liveTotal) }
+    if ($estAny) { $notes += "this journal has stretches with no per-request records (an older Copilot); there the SDK's running total, written when a turn ends, is split across steps by each step's share of model requests" }
+    if ($offAny) { $notes += "in $offAny stretch(es) the per-request records did not add up to the total Copilot journaled when the turn ended (requests with no record of their own — possibly a sub-agent's); the records were scaled to that total, so the step figures are right in sum and approximate in split" }
+    if ($unj) { $notes += "$unj model request(s) ran after the last journaled total in a stretch with no per-request records (an older Copilot) and are not counted yet — their rows say pending; measure again without --step once the turn has ended (a turn ends when the agent hands the chat back; an options box does not end it)" }
   }
   foreach ($sid in $jRows.Keys) {
     if ($Step -and $sid -ne $Step) { continue }
     $g = $jRows[$sid]; $el = Elapsed-For $sid
     $models = (@($g.models.Keys | Where-Object { $g.models[$_] -gt 0.00005 } | Sort-Object) -join ", "); if (-not $models) { $models = "unknown" }
-    $out += [pscustomobject]@{ step=$sid; model=$models; role="session"; aiCredits=[math]::Round($g.credits, 2); calls=$g.requests
+    $pend = [bool]$pendingSteps[$sid]; $blank = $pend -and $g.credits -le 0.00005   # requests ran, nothing is counted yet: never print that as 0.0
+    $out += [pscustomobject]@{ step=$sid; model=$models; role="session"; aiCredits=$(if ($blank) { $null } else { [math]::Round($g.credits, 2) }); pending=$pend; calls=$g.requests
       input=$null; output=$null; cacheWrite=$null; cacheRead=$null; requests=$g.requests
-      costUsd=$(if ($null -ne $usdPerCredit) { [math]::Round($g.credits * $usdPerCredit, 4) } else { $null }); elapsedSeconds=$(if ($null -ne $el) { [int][math]::Round($el) } else { $null })
+      costUsd=$(if ($blank) { $null } elseif ($null -ne $usdPerCredit) { [math]::Round($g.credits * $usdPerCredit, 4) } else { $null }); elapsedSeconds=$(if ($null -ne $el) { [int][math]::Round($el) } else { $null })
       turns=$g.turns; decisions=$g.decisions; subAgentCalls=$g.subAgentCalls; webRequests=0 }
   }
   $stepOrder = @($wins | ForEach-Object { $_[0] }) + "Unattributed"
@@ -567,14 +594,14 @@ if ($Calibrate) {
   foreach ($r in $out) {
     if (-not $steps.Contains($r.step)) { $steps[$r.step] = [ordered]@{ step=$r.step; elapsedSeconds=$r.elapsedSeconds; turns=$r.turns; decisions=$r.decisions; subAgentCalls=$r.subAgentCalls; models=@() } }
     $entry = [ordered]@{ model=$r.model; input=$r.input; output=$r.output; cacheWrite=$r.cacheWrite; cacheRead=$r.cacheRead; requests=$r.requests; costUsd=$r.costUsd }
-    if ($isCopilot) { $entry.aiCredits = $r.aiCredits; $entry.role = $r.role }
+    if ($isCopilot) { $entry.aiCredits = $r.aiCredits; $entry.role = $r.role; if ($r.pending) { $entry.pending = $true } }
     $steps[$r.step].models += $entry
   }
   $tot = @{ input=0; output=0; cacheWrite=0; cacheRead=0 }; $tcost = 0.0; $unpriced = $false; $elapsed = 0; $measuredOutput = 0; $credits = 0.0
   $hasTokens = -not $isCopilot
   foreach ($s in $steps.Values) {
     if ($s.elapsedSeconds) { $elapsed += $s.elapsedSeconds; foreach ($m in $s.models) { $measuredOutput += ($m.output ?? 0) } }
-    foreach ($m in $s.models) { $credits += ($m.aiCredits ?? 0); foreach ($k in @($tot.Keys)) { $tot[$k] += ($m[$k] ?? 0) }; if ($null -eq $m.costUsd) { $unpriced = $true } else { $tcost += $m.costUsd } }
+    foreach ($m in $s.models) { $credits += ($m.aiCredits ?? 0); foreach ($k in @($tot.Keys)) { $tot[$k] += ($m[$k] ?? 0) }; if ($null -eq $m.costUsd) { if (-not ($m.pending -and $null -eq $m.aiCredits)) { $unpriced = $true } } else { $tcost += $m.costUsd } }
   }
   $objects = Get-ObjectCounts $root $marker.edition
   if ($objects.note) { $notes += $objects.note }
@@ -600,18 +627,20 @@ if ($isCopilot) {
   $src = if ($pricingDoc.aiCredit -and $pricingDoc.aiCredit.source) { $pricingDoc.aiCredit.source } else { "none fetched" }
   $recon = $null
   if ($Reconcile) { $recon = Reconcile-GitHub; if ($recon.error) { $notes += "GitHub billing cross-check unavailable: $($recon.error)"; $recon = $null } }
-  $sessSummary = @(foreach ($x in $jSessions) { [ordered]@{ id=$x.id; client=$x.client; start=$x.start; lastKnownAt=$(if ($x.points.Count) { $x.points[-1].ts }); credits=$(if ($x.points.Count) { [math]::Round($x.points[-1].val, 2) } else { 0.0 }); closed=$x.closed; requests=$x.requests.Count; models=@($x.requests | ForEach-Object { $_.model } | Sort-Object -Unique) } })
+  $sessSummary = @(foreach ($x in $jSessions) { [ordered]@{ id=$x.id; client=$x.client; start=$x.start; lastKnownAt=$x.lastCountedAt; credits=[math]::Round([double]($x.knownCredits ?? 0.0), 2); perRequestRecords=$x.records.Count; uncounted=[int]($x.uncounted ?? 0); closed=$x.closed; requests=$x.requests.Count; models=@($x.requests | ForEach-Object { $_.model } | Sort-Object -Unique) } })
   if ($Json) { [ordered]@{ aiTool="copilot-chat"; journalDirs=$jDirs; sessions=$sessSummary; sessionDirs=$cpDirs; files=$cpFiles.Count; usdPerAiCredit=$usdPerCredit; pricingSource=$src; pricingFetchedAt=$pricingDoc.fetchedAt; sessionTotalCredits=[math]::Round((Snap-Total $current) + $jTotal, 1); githubMonthToDate=$recon; rows=$out; notes=$notes } | ConvertTo-Json -Depth 6; exit 0 }
   "| Step | Model(s) | AI credits | Cost (USD) | Elapsed | Turns | Decisions | Sub-agent calls | Senior AL dev est. (h) | Notes |"
   "|---|---|---|---|---|---|---|---|---|---|"
   $tc = 0.0; $tcost = 0.0; $unpriced = $false; $shown = @{}
   foreach ($r in $out) {
-    $c = if ($null -ne $r.costUsd) { $tcost += $r.costUsd; ([double]$r.costUsd).ToString("F2", $inv) } else { $unpriced = $true; "price unknown" }
-    $tc += $r.aiCredits
+    $blank = $r.pending -and $null -eq $r.aiCredits
+    $c = if ($blank) { "pending" } elseif ($null -ne $r.costUsd) { $tcost += $r.costUsd; ([double]$r.costUsd).ToString("F2", $inv) } else { $unpriced = $true; "price unknown" }
+    if ($null -ne $r.aiCredits) { $tc += $r.aiCredits }
+    $cred = if ($blank) { "pending — turn still open" } else { ([double]$r.aiCredits).ToString('N1', $inv) + $(if ($r.pending) { " + pending" }) }
     $first = -not $shown.ContainsKey($r.step); $shown[$r.step] = $true
     $el = if ($first) { HM $r.elapsedSeconds } else { "〃" }; $tu = if ($first) { $r.turns } else { "〃" }; $de = if ($first) { $r.decisions } else { "〃" }; $sa = if ($first) { $r.subAgentCalls } else { "〃" }
     $note = switch ($r.role) { "main" { "main, $($r.calls) turn(s)" } "sub-agent" { "sub-agent, $($r.calls) call(s)" } "session" { "$($r.calls) request(s), session journal" } "all" { "read from the popover by the human — no model breakdown" } default { $r.role } }
-    "| $($r.step) | $($r.model) | $(([double]$r.aiCredits).ToString('N1', $inv)) | $c | $el | $tu | $de | $sa |  | $note |"
+    "| $($r.step) | $($r.model) | $cred | $c | $el | $tu | $de | $sa |  | $note |"
   }
   "| **Total** |  | $($tc.ToString('N1', $inv)) | $($tcost.ToString('F2', $inv))$(if ($unpriced) { ' + unpriced' }) |  |  |  |  |  |  |"
   $parts = @()

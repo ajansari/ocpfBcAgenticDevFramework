@@ -359,8 +359,8 @@ map: refresh `ocpfFramework/scripts/` (`update-framework`).
 ## 4. What the page can and cannot know
 
 It shows only what is on disk and says so where it can't: *No estimate yet* before Step 03 / Lite
-Step 2; *Agent / you split needs the Claude Code transcript* in Copilot; *as of the last journaled
-checkpoint* for an open Copilot session; *none in progress* between steps. The exit-gate card is the
+Step 2; *Agent / you split needs the Claude Code transcript* in Copilot; *as of the last turn that
+ended* for a Copilot session with requests no journaled figure covers yet (an older Copilot, turn still open); *none in progress* between steps. The exit-gate card is the
 step file's wording — the gate is met when the agent says so in the closing message, never because
 the page listed it. The page never takes an answer: the *Waiting on you* card says where to reply.
 An approval shown in the documents popup is one that is already written in the document; the page

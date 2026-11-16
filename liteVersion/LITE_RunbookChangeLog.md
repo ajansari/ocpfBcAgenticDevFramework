@@ -16,6 +16,19 @@ framework.
 
 ---
 
+## v6.1.3.0 — November 16, 2026
+
+Derived from Full **v6.1.3.0**; Operations Guide **v6.1.3.0**; Standards Guide **v1.13.1.0**
+(unchanged); plugin **6.1.3**. A patch for a GitHub Copilot build that showed no credits until it
+was over. Copilot writes a session's cumulative credits only when a turn ends, and a framework run
+that asks its questions in options boxes can be one turn, so every close measured `0.0`. The
+usage scripts now sum the journal's per-request records (`session.usage_record`, Copilot 1.0.100
+and later) inside each step window: exact per step, with the model names, while the build runs.
+A journal from an older Copilot keeps the previous method, and there the scripts print *pending —
+turn still open* for a row whose requests nothing has counted yet, never `0.0`. **A project already
+built on Copilot:** run `/ocpf-bc:update-framework`, then `/ocpf-bc:usage` without `--step`.
+See the Full changelog's entry.
+
 ## v6.1.2.0 — November 15, 2026
 
 Derived from Full **v6.1.2.0**; Operations Guide **v6.1.2.0**; Standards Guide **v1.13.1.0**

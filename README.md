@@ -364,6 +364,12 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## November 16, 2026 — Full v6.1.3.0 · Lite v6.1.3.0 · Operations Guide v6.1.3.0 · Plugin v6.1.3
+**GitHub Copilot usage fix.** A build in GitHub Copilot showed no credits, on the usage table or
+the dashboard, until it was over: Copilot writes its running total only when a turn ends, and a
+whole build can be one turn. The scripts now read each request's credits from the session journal
+as it happens, so every step shows its credits, cost, and model while the build runs.
+
 ## November 15, 2026 — Full v6.1.2.0 · Lite v6.1.2.0 · Operations Guide v6.1.2.0 · Plugin v6.1.2
 **Usage and cost fix.** A project could finish with an empty usage table in Claude Code: the
 scripts looked for the session transcripts in the wrong folder when the project path held a
@@ -702,10 +708,11 @@ VS Code 1.139 (September 22, 2026) Copilot Chat's agent mode runs on the Copilot
 engine as the Copilot CLI, and the chat sessions moved out of VS Code's workspace storage into
 `~/.copilot/session-state/`. The usage script was still reading the old location, found nothing,
 and fell back to asking you to read *Session Cost* from the popover at every step close. It now
-reads the SDK journal: the project folder from `session.start`, the cumulative credits from
-`session.usage_checkpoint` and `session.shutdown`, every model request with its timestamp. The
-figure is exact when a chat ends and split by request share while it runs, and the table says
-which. Copilot CLI projects are measured the same way, from the same journal. `--reconcile` prints
+reads the SDK journal: the project folder from `session.start`, each model request's credits
+from `session.usage_record`, and the cumulative credits from `session.usage_checkpoint` and
+`session.shutdown`. Since 6.1.3.0 the figure is counted per request while the build runs; a
+journal from an older Copilot is split by request share, and the table says so.
+Copilot CLI projects are measured the same way, from the same journal. `--reconcile` prints
 the account's month-to-date credits from GitHub's billing API as a cross-check. The Copilot table
 is one row per step with every model named; the per-model split stays in the JSON and calibration
 output. Both script ports, the `usage` skill, Ops § Usage & Cost, both runbook cores, and the

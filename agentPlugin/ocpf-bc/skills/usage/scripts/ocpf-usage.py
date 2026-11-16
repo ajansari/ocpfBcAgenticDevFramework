@@ -30,13 +30,16 @@ SDK at ~/.copilot/session-state/<session id>/events.jsonl (Windows: %USERPROFILE
 The journal's session.start carries context.cwd, which names the project; its
 session.usage_checkpoint and session.shutdown events carry totalNanoAiu, the session's cumulative
 cost in nano-AI-units, 1e9 to the AI credit (the SDK's NANO_AIU_PER_AIU; verified against the
-Session Info popover on a real project). Per-call usage (assistant.usage) is ephemeral and never
-journaled, and a checkpoint is written when the chat ends, not per turn — so inside a session the
-cumulative figure is exact only at those points. Between two known points the script splits the
-difference across the step windows by the share of model requests (assistant.message events) each
-window holds, and the table says so. The project total is the sum of the sessions' last known
-figures: exact once a session has ended; "as of" its last checkpoint while it is open. No human
-reads a number for this. The older VS Code chat (pre-SDK) kept per-turn credits in
+Session Info popover on a real project). That cumulative figure is written when a turn ends — when
+the agent hands the chat back — never mid-turn, and a framework run asks its questions in options
+boxes, so a whole build can be one turn. Since Copilot 1.0.100 the journal also holds one
+session.usage_record per model request, written as it happens, with that request's own credits
+(usage.copilotUsage.totalNanoAiu) and model; their sum equals the cumulative figure at every
+point checked. The script sums those records per step window: exact per step, mid-turn included
+(6.1.3.0). A journal with no such records (an older Copilot) falls back to the cumulative points:
+between two of them the difference is split across the step windows by the share of model
+requests (assistant.message events) each window holds, requests after the last point wait for the
+turn to end, and the table says so. No human reads a number for this. The older VS Code chat (pre-SDK) kept per-turn credits in
 <user data>/User/workspaceStorage/<hash>/chatSessions/*.jsonl; those files are still read when
 present, so a project that spans both formats loses nothing. --reconcile prints the account's
 month-to-date AI credits from GitHub's billing API (gh api, needs the "user" scope) next to the
@@ -567,16 +570,19 @@ def read_journal(path, notes):
     """One Copilot session: its project folder, the cumulative credits at every point the SDK wrote one,
     and every model request with its timestamp — what per-step attribution needs."""
     sess = {"id": os.path.basename(os.path.dirname(path)), "path": path, "cwd": None, "client": None,
-            "start": None, "last": None, "points": [], "requests": [], "turns": 0, "decisions": 0,
+            "start": None, "last": None, "points": [], "requests": [], "records": [], "turns": 0, "decisions": 0,
             "subAgentCalls": 0, "closed": False, "modelMetrics": None}
     try:
         with open(path, encoding="utf-8", errors="replace") as fh:
             for line in fh:
                 try: o = json.loads(line)
                 except json.JSONDecodeError: continue
+                if not isinstance(o, dict): continue
                 t = o.get("type"); d = o.get("data") or {}; ts = parse_ts(o.get("timestamp"))
+                if not isinstance(d, dict): d = {}
                 if ts is None: continue
                 sess["last"] = ts
+                if t in ("session.resume", "assistant.message", "user.message"): sess["closed"] = False  # a session resumed after a shutdown is open again
                 if t == "session.start":
                     sess["start"] = ts; sess["cwd"] = (d.get("context") or {}).get("cwd")
                 elif t == "session.context_changed" and d.get("cwd"):
@@ -589,6 +595,16 @@ def read_journal(path, notes):
                     if d.get("toolName") == "ask_user": sess["decisions"] += 1; sess["turns"] += 1
                 elif t == "subagent.started":
                     sess["subAgentCalls"] += 1
+                elif t == "session.usage_record":
+                    # One per model request, written as it happens (Copilot 1.0.100 and later): that request's credits and
+                    # model. The cumulative figure below is written only when a turn ends, and a framework run asks its
+                    # questions in boxes, so a whole build can be one turn — these records are what a mid-build
+                    # measurement has (6.1.3.0). "seg" = how many cumulative points were journaled before this record.
+                    u = d.get("usage") if isinstance(d.get("usage"), dict) else {}
+                    cu = u.get("copilotUsage") if isinstance(u.get("copilotUsage"), dict) else (d.get("copilotUsage") if isinstance(d.get("copilotUsage"), dict) else {})
+                    v = cu.get("totalNanoAiu")
+                    if isinstance(v, (int, float)) and not isinstance(v, bool) and v >= 0:
+                        sess["records"].append((ts, float(v) / NANO_AIU_PER_CREDIT, u.get("model") or u.get("responseModel") or "unknown", len(sess["points"])))
                 elif t in ("session.usage_checkpoint", "session.shutdown"):
                     v = d.get("totalNanoAiu")
                     if isinstance(v, (int, float)):
@@ -610,8 +626,7 @@ def read_journal(path, notes):
             for ln in open(wy, encoding="utf-8", errors="replace"):
                 if ln.startswith("client_name:"): sess["client"] = ln[12:].strip()
         except OSError: pass
-    sess["points"].sort()
-    return sess
+    return sess   # points stay in journal order: a record's "seg" indexes them
 
 def journal_sessions_for(root, dirs, notes):
     out = []
@@ -622,18 +637,29 @@ def journal_sessions_for(root, dirs, notes):
     return out
 
 def attribute_session(sess, wins):
-    """Split a session's credits over the step windows. Returns {step: {"credits", "requests", "models"}},
-    the session's last known cumulative figure, and whether any segment was split by request share."""
+    """Split a session's credits over the step windows. Returns {step: {"credits", "requests", "models"}}, the session's
+    last known cumulative figure, whether any segment was split by request share, how many requests are not yet counted,
+    and the credits counted from per-request records after the last journaled point.
+
+    Between two journaled points (and after the last one) the per-request records carry the credits exactly, each with its
+    own timestamp and model (6.1.3.0). A journal written before Copilot kept those records has none: there the difference
+    between two points is split by each window's share of model requests, and requests after the last point wait."""
     per = defaultdict(lambda: {"credits": 0.0, "requests": 0, "models": defaultdict(float)})
-    reqs = sess["requests"]
+    reqs = sess["requests"]; recs = sess.get("records") or []
     for ts, model in reqs:
         per[step_for(ts, wins)]["requests"] += 1
-    known = 0.0; prev_ts = sess["start"] or (reqs[0][0] if reqs else None); prev_val = 0.0; estimated = False; first_seg = True
-    for ts, val, kind in sess["points"]:
+    known = 0.0; prev_ts = sess["start"] or (reqs[0][0] if reqs else None); prev_val = 0.0; estimated = False; first_seg = True; off = 0
+    for i, (ts, val, kind) in enumerate(sess["points"]):
         delta = max(0.0, val - prev_val)
         seg = [(t, m) for t, m in reqs if (prev_ts is None or (t >= prev_ts if first_seg else t > prev_ts)) and t <= ts]
+        srec = [r for r in recs if r[3] == i]; rsum = sum(r[1] for r in srec)
         if delta > 0:
-            if seg:
+            if rsum > 0:
+                scale = delta / rsum   # 1.0 whenever the records add up to the journaled figure, as on every session checked
+                if abs(scale - 1.0) > 0.01: off += 1
+                for t, c, m, _ in srec:
+                    k = step_for(t, wins); per[k]["credits"] += c * scale; per[k]["models"][m] += c * scale
+            elif seg:
                 share = delta / len(seg)
                 steps_in_seg = {step_for(t, wins) for t, _ in seg}
                 if len(steps_in_seg) > 1: estimated = True
@@ -642,8 +668,16 @@ def attribute_session(sess, wins):
             else:
                 k = step_for(ts, wins); per[k]["credits"] += delta; per[k]["models"]["unknown"] += delta
         known = val; prev_ts = ts; prev_val = val; first_seg = False
-    unjournaled = [t for t, _ in reqs if prev_ts is not None and t > prev_ts]
-    return per, known, estimated, len(unjournaled)
+    tail = [r for r in recs if r[3] == len(sess["points"])]; live = 0.0
+    for t, c, m, _ in tail:
+        k = step_for(t, wins); per[k]["credits"] += c; per[k]["models"][m] += c; live += c
+    counted = ([prev_ts] if (sess["points"] and prev_ts) else []) + [r[0] for r in tail]
+    last_counted = max(counted) if counted else None
+    # requests nothing has counted yet: after the last journaled total, in a stretch that keeps no per-request records
+    unjournaled = [] if tail else [t for t, _ in reqs if prev_ts is not None and (not sess["points"] or t > prev_ts)]
+    pending = {step_for(t, wins) for t in unjournaled}
+    sess["knownCredits"] = known + live; sess["lastCountedAt"] = last_counted; sess["uncounted"] = len(unjournaled)
+    return {"per": per, "known": known + live, "estimated": estimated, "unjournaled": len(unjournaled), "live": live, "pending": pending, "off": off}
 
 def reconcile_github(month_total_hint):
     """Month-to-date AI credits for the signed-in GitHub account, from the billing API via gh."""
@@ -762,11 +796,11 @@ def copilot_main(a, root, usage, usage_path, pricing, pricing_path):
             open_step = next((w[0] for w in reversed(wins) if w[1] >= (parse_ts(prev.get("at")) or w[1]) or w[2] is None), None)
             credit((open_step + " (open)") if open_step else "Unattributed", tail)
 
-    # ---- Copilot SDK journals: exact session totals, split by request share between known points ----
-    jrows = {}; jorder = []; jtotal = 0.0; open_sessions = 0; est_any = False; unj = 0; models_seen = set()
+    # ---- Copilot SDK journals: each request's credits from its own record; a journal without records is split by request share ----
+    jrows = {}; jorder = []; jtotal = 0.0; open_sessions = 0; est_any = False; unj = 0; models_seen = set(); live_total = 0.0; off_any = 0; pending_steps = set()
     for sess in sessions:
-        per_s, known, estimated, unjournaled = attribute_session(sess, wins)
-        jtotal += known; est_any = est_any or estimated; unj += unjournaled
+        att = attribute_session(sess, wins); per_s = att["per"]
+        jtotal += att["known"]; est_any = est_any or att["estimated"]; unj += att["unjournaled"]; live_total += att["live"]; off_any += att["off"]; pending_steps |= att["pending"]
         if not sess["closed"]: open_sessions += 1
         for step, v in per_s.items():
             if v["credits"] <= 0.00005 and v["requests"] == 0: continue
@@ -780,9 +814,10 @@ def copilot_main(a, root, usage, usage_path, pricing, pricing_path):
                 jrows[k]["turns"] += sess["turns"]; jrows[k]["decisions"] += sess["decisions"]; jrows[k]["subAgentCalls"] += sess["subAgentCalls"]
     if sessions:
         notes.append("Turns in a Copilot row = the human's prompts plus every question the agent asked and the human answered (ask_user)")
-        if est_any: notes.append("inside a session the SDK journals the cumulative credits only when the chat ends; between those points the figure is split across steps by each step's share of model requests")
-        if open_sessions: notes.append(f"{open_sessions} session(s) still open — their credits are as of the last journaled checkpoint; the step rows will grow when the chat ends and the measurement runs again")
-        if unj: notes.append(f"{unj} model request(s) ran after the last journaled checkpoint and are not yet counted anywhere")
+        if live_total > 0: notes.append(f"{live_total:,.1f} credit(s) are counted from the journal's per-request records, up to the last request — Copilot writes its running total only when a turn ends, and that total will confirm these figures")
+        if est_any: notes.append("this journal has stretches with no per-request records (an older Copilot); there the SDK's running total, written when a turn ends, is split across steps by each step's share of model requests")
+        if off_any: notes.append(f"in {off_any} stretch(es) the per-request records did not add up to the total Copilot journaled when the turn ended (requests with no record of their own — possibly a sub-agent's); the records were scaled to that total, so the step figures are right in sum and approximate in split")
+        if unj: notes.append(f"{unj} model request(s) ran after the last journaled total in a stretch with no per-request records (an older Copilot) and are not counted yet — their rows say pending; measure again without --step once the turn has ended (a turn ends when the agent hands the chat back; an options box does not end it)")
     fetch_copilot_credit(pricing, pricing_path, notes)
     usd = (pricing.get("aiCredit") or {}).get("usd")
     out = []
@@ -802,9 +837,10 @@ def copilot_main(a, root, usage, usage_path, pricing, pricing_path):
         if a.step and step != a.step: continue
         g = jrows[step]; el = elapsed_for(step, usage, wins)
         models = ", ".join(sorted(m for m in g["models"] if g["models"][m] > 0.00005)) or "unknown"
-        out.append({"step": step, "model": models, "role": "session", "aiCredits": round(g["credits"], 2), "calls": g["requests"],
+        pend = step in pending_steps; blank = pend and g["credits"] <= 0.00005   # requests ran, nothing is counted yet: never print that as 0.0
+        out.append({"step": step, "model": models, "role": "session", "aiCredits": None if blank else round(g["credits"], 2), "pending": pend, "calls": g["requests"],
                     "input": None, "output": None, "cacheWrite": None, "cacheRead": None, "requests": g["requests"],
-                    "costUsd": round(g["credits"] * usd, 4) if usd is not None else None,
+                    "costUsd": None if blank else (round(g["credits"] * usd, 4) if usd is not None else None),
                     "elapsedSeconds": round(el) if el is not None else None,
                     "turns": g["turns"], "decisions": g["decisions"], "subAgentCalls": g["subAgentCalls"], "webRequests": 0})
     out.sort(key=lambda r: ([w[0] for w in wins] + ["Unattributed"]).index(r["step"].replace(" (open)", "")) if r["step"].replace(" (open)", "") in [w[0] for w in wins] + ["Unattributed"] else 999)
@@ -820,8 +856,8 @@ def copilot_main(a, root, usage, usage_path, pricing, pricing_path):
     if a.reconcile:
         recon, err = reconcile_github(None)
         if err: notes.append(f"GitHub billing cross-check unavailable: {err}")
-    sess_summary = [{"id": x["id"], "client": x["client"], "start": x["start"], "lastKnownAt": (x["points"][-1][0] if x["points"] else None),
-                     "credits": round(x["points"][-1][1], 2) if x["points"] else 0.0, "closed": x["closed"], "requests": len(x["requests"]),
+    sess_summary = [{"id": x["id"], "client": x["client"], "start": x["start"], "lastKnownAt": x.get("lastCountedAt"),
+                     "credits": round(x.get("knownCredits") or 0.0, 2), "perRequestRecords": len(x["records"]), "uncounted": x.get("uncounted") or 0, "closed": x["closed"], "requests": len(x["requests"]),
                      "models": sorted({m for _, m in x["requests"]})} for x in sessions]
     if a.json:
         print(json.dumps({"aiTool": "copilot-chat", "journalDirs": jdirs, "sessions": sess_summary, "sessionDirs": dirs, "files": len(files),
@@ -835,15 +871,18 @@ def copilot_main(a, root, usage, usage_path, pricing, pricing_path):
     print("|---|---|---|---|---|---|---|---|---|---|")
     tc = 0.0; tcost = 0.0; unpriced = False; shown = set()
     for r in out:
-        cost = f"{r['costUsd']:.2f}" if r["costUsd"] is not None else "price unknown"
-        if r["costUsd"] is None: unpriced = True
+        blank = r.get("pending") and r["aiCredits"] is None
+        cost = "pending" if blank else (f"{r['costUsd']:.2f}" if r["costUsd"] is not None else "price unknown")
+        if blank: pass
+        elif r["costUsd"] is None: unpriced = True
         else: tcost += r["costUsd"]
-        tc += r["aiCredits"]
+        tc += r["aiCredits"] or 0
         first = r["step"] not in shown; shown.add(r["step"])
         el, tu, de, sa = (hm(r["elapsedSeconds"]), r["turns"], r["decisions"], r["subAgentCalls"]) if first else ("〃", "〃", "〃", "〃")
         note = {"main": f"main, {r['calls']} turn(s)", "sub-agent": f"sub-agent, {r['calls']} call(s)",
                 "session": f"{r['calls']} request(s), session journal", "all": "read from the popover by the human — no model breakdown"}.get(r["role"], r["role"])
-        print(f"| {r['step']} | {r['model']} | {r['aiCredits']:,.1f} | {cost} | {el} | {tu} | {de} | {sa} |  | {note} |")
+        cred = "pending — turn still open" if blank else (f"{r['aiCredits']:,.1f}" + (" + pending" if r.get("pending") else ""))
+        print(f"| {r['step']} | {r['model']} | {cred} | {cost} | {el} | {tu} | {de} | {sa} |  | {note} |")
     print(f"| **Total** |  | {tc:,.1f} | {tcost:.2f}{' + unpriced' if unpriced else ''} |  |  |  |  |  |  |")
     parts = []
     if sessions: parts.append(f"{len(sessions)} Copilot session journal(s) in {', '.join(jdirs)} ({sum(1 for x in sessions if x['closed'])} ended, {open_sessions} open)")
@@ -1049,6 +1088,7 @@ def calibrate(root, usage, pricing, rates, out, notes):
                                          "decisions": r["decisions"], "subAgentCalls": r["subAgentCalls"], "models": []})
         entry = {k: r[k] for k in ("model", "input", "output", "cacheWrite", "cacheRead", "requests", "costUsd")}
         if "aiCredits" in r: entry["aiCredits"] = r["aiCredits"]; entry["role"] = r.get("role")
+        if r.get("pending"): entry["pending"] = True   # requests nothing has counted yet (an older Copilot, turn still open)
         s["models"].append(entry)
     tot = defaultdict(int); tcost = 0.0; unpriced = False; elapsed = 0; measured_output = 0; credits = 0.0
     has_tokens = any(m["output"] is not None for s in steps.values() for m in s["models"])
@@ -1058,7 +1098,7 @@ def calibrate(root, usage, pricing, rates, out, notes):
         for m in s["models"]:
             credits += m.get("aiCredits") or 0
             for k in ("input", "output", "cacheWrite", "cacheRead"): tot[k] += m[k] or 0
-            if m["costUsd"] is None: unpriced = True
+            if m["costUsd"] is None: unpriced = unpriced or not (m.get("pending") and m.get("aiCredits") is None)  # a pending row is uncounted, not unpriced
             else: tcost += m["costUsd"]
     objects = object_counts(root, edition)
     if objects.get("note"): notes = notes + [objects["note"]]

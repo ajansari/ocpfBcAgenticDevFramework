@@ -242,7 +242,7 @@ $outside = @($rows | Where-Object { "$($_.step)" -like "Unattributed*" }); $oc =
 if ($unpriced.Count) { $tot.costUnpriced = $unpriced; $notes += ("price unknown for " + ($unpriced -join ", ") + " — the usage script fetches Anthropic's published rates itself at each measurement; if this stays, the machine is offline or the model's publisher is not covered (Ops § Usage & Cost → 3)") }
 $seen = @{}; $d = 0; $t = 0; foreach ($r in $rows) { if ($seen.ContainsKey("$($r.step)")) { continue }; $seen["$($r.step)"] = 1; $d += [int]($r.decisions ?? 0); $t += [int]($r.turns ?? 0) }
 $tot.decisions = $d; $tot.turns = $t
-if ($copilot) { $tot.credits = $(if ($rows.Count) { [Math]::Round((Sum $rows "aiCredits"), 1) } else { $null }); $tot.creditsOpen = [bool](@($uj.sessions | Where-Object { -not $_.closed }).Count) }
+if ($copilot) { $tot.credits = $(if ($rows.Count) { [Math]::Round((Sum $rows "aiCredits"), 1) } else { $null }); $tot.creditsOpen = [bool](@($uj.sessions | Where-Object { $_.uncounted }).Count) }
 else { $tk = [ordered]@{}; foreach ($k in "input","output","cacheWrite","cacheRead") { $tk[$k] = Sum $rows $k }; $tk.total = ($tk.input + $tk.output + $tk.cacheWrite + $tk.cacheRead); $tot.tokens = $(if ($rows.Count) { $tk } else { $null }) }
 if ($liveState) { $ag = 0.0; $hu = 0.0; $wa = 0.0; foreach ($v in $liveState.perStep.Values) { $ag += $v.agent; $hu += $v.human; $wa += $v.waiting }
   $ssum = $ag + $hu + $wa; $kf = $(if ($ssum -gt 0 -and $tot.elapsedSeconds) { $tot.elapsedSeconds / $ssum } else { 1.0 })  # scaled once more to the union, so the three add up to Elapsed exactly

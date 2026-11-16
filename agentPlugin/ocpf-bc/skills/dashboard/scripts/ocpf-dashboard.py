@@ -917,7 +917,7 @@ def build(root, a):
     if copilot:
         tot["credits"] = round(sum((r.get("aiCredits") or 0) for r in rows), 1) if rows else None
         sess = (uj or {}).get("sessions") or []
-        tot["creditsOpen"] = any(not s.get("closed") for s in sess)
+        tot["creditsOpen"] = any(s.get("uncounted") for s in sess)  # requests no journaled figure covers yet (an older Copilot, turn still open); with per-request records nothing waits (6.1.3.0)
     else:
         tk = {k: sum((r.get(k) or 0) for r in rows) for k in ("input", "output", "cacheWrite", "cacheRead")}
         tk["total"] = sum(tk.values()); tot["tokens"] = tk if rows else None

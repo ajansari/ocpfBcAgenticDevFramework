@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 6.1.2.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
-**Last Updated:** November 15, 2026
+**Version:** 6.1.3.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
+**Last Updated:** November 16, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
 > `fullVersion/BC_App_Build_Routine_Agent.md` and `liteVersion/LITE_BC_App_Build_Routine_Agent.md`.
@@ -2761,7 +2761,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v6.1.2.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
+folder as `README.md`. For runbook **v6.1.3.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2940,7 +2940,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v6.1.2.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v6.1.3.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
@@ -3286,14 +3286,26 @@ source** — the agent reads it, the human reads nothing:
   an `assistant.message` event with its model and timestamp; every question to the human is an
   `ask_user` tool call; every sub-agent is a `subagent.started` event. Sub-agents are folded into
   the session's figure.
-- **What the journal does not hold:** per-call usage. The SDK's `assistant.usage` event is streamed
-  live and never written to disk (GitHub's streaming-events reference marks it ephemeral), and a
-  **checkpoint is written when the chat ends, not per turn**. So inside a session the cumulative
-  figure is exact only at those points. Between two known points the script **splits the
-  difference across the step windows by each window's share of model requests**, and the table's
-  footnote says so. The project total is the sum of the sessions' last known figures: exact once a
-  session has ended, *as of* its last checkpoint while it is open — the next measurement picks up
-  the rest.
+- **Per request, as it happens (6.1.3.0):** since Copilot 1.0.100 the journal holds one
+  `session.usage_record` per model request, written when the request completes, with that
+  request's own credits (`usage.copilotUsage.totalNanoAiu`) and model. Their sum equals the
+  cumulative figure at every checkpoint checked on real sessions. **The script sums these records
+  inside each step window**, so a step's credits and model names are current at any moment.
+- **The cumulative figure is written when a turn ends, never mid-turn.** A turn ends when the
+  agent hands the chat back to the human; an options box does not end it, and the framework asks
+  its questions in boxes, so **a whole build can be one turn**. Why this matters: before 6.1.3.0
+  the script read only the cumulative figure, and on a real Build-a-Feature project every step
+  close measured `0.0` credits and model `unknown` until the build was over — then the same script,
+  run by hand one message later, printed 115.5 credits.
+- **A journal with no per-request records** (an older Copilot) falls back to the cumulative
+  points: between two of them the script splits the difference across the step windows by each
+  window's share of model requests, requests after the last point wait for the turn to end, and
+  the notes say so. There the script prints ***pending — turn still open*** in the credits and cost
+  cells of a row whose requests nothing has counted yet (or `<n> + pending`), never `0.0`: copy
+  it as printed and measure again without `--step` at the next boundary.
+- **Sub-agents** are in the cumulative total. Whether each of their requests also gets its own
+  record was not checked on a real session; if not, a mid-turn figure runs low until the turn
+  ends, when the script scales the records to the total and says so in a note.
 - **No token totals by type.** `session.shutdown` reports tokens per model for the whole session
   only, and the context meter is not consumption. **The Copilot table has no token columns**, and
   a token figure is never derived from credits.
@@ -3470,10 +3482,10 @@ the end of the project, not "when there's time". Both editions, the same words (
   name is missing — Ops § Dashboard → 3), this render is the only one, and the page is never more
   than one close stale. Why: on a real Windows project the hooks exited silently for the whole
   build and the page showed *Untitled extension* until the journey's closing render.
-- **Copilot: the figure refines when the chat ends.** The journal's cumulative credits are exact at
-  a checkpoint, which the SDK writes when the chat ends; a step closed mid-chat gets its share by
-  request count, and the next measurement after the chat ends settles it. Say *as of* in the
-  closing message when a session is still open.
+- **Copilot: the figure is live.** The script counts each request's credits from the journal as
+  it happens (Ops § Usage & Cost → 2), so a step closed mid-turn has its exact figure. Only a
+  journal with no per-request records (an older Copilot) waits for the turn to end; there the
+  script prints *pending* in the open turn's rows — copy it, and measure again at the next boundary.
 
 Why a ritual and not a reminder: on a real project the table was "to be filled in later", and later
 the windows were gone. Recording at the boundary costs one command; reconstructing costs the data.

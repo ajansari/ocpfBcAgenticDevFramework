@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v6.1.2.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v6.1.2.0**, and Lite at **v6.1.2.0** — but
+**v6.1.3.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v6.1.3.0**, and Lite at **v6.1.3.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -23,6 +23,40 @@ change-worthy. (This is a different convention from a project's own ChangeLog, w
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
 
 ---
+
+## v6.1.3.0 — November 16, 2026
+
+**A GitHub Copilot build showed no credits until it was over.** Lite **v6.1.3.0**, Operations Guide
+**v6.1.3.0**, Standards Guide **v1.13.1.0** (unchanged), plugin **6.1.3**. A patch: no step changed.
+
+- **What happened.** A real Build-a-Feature project in GitHub Copilot Chat measured its usage at
+  every close, and every row said `0.0` credits and model `unknown`; the dashboard showed no
+  spend for the whole build. One message later the human ran `/ocpf-bc:usage` and the same script
+  printed 115.5 credits. Cause, confirmed in that session's journal: Copilot writes a session's
+  cumulative credits only **when a turn ends** — when the agent hands the chat back — and the
+  script read only that figure. The framework asks its questions in options boxes, which do not
+  end a turn, so the whole build was one turn and the figure did not exist until it finished. The
+  guide's "a checkpoint is written when the chat ends" was wrong as well.
+- **The scripts read each request's credits.** Since Copilot 1.0.100 the journal holds one
+  `session.usage_record` per model request, written as it happens, with that request's credits
+  and model; on every session checked their sum equals the cumulative figure at each checkpoint.
+  `ocpf-usage.py` / `.ps1` now sum those records inside each step window: the credits and the
+  model names are exact per step at any moment, and no longer split by request share. Replayed
+  against that project's journal cut at its second close, the script prints 68.3 credits where
+  the build had printed 0.0.
+- **An older Copilot's journal** has no such records and keeps the previous method: the
+  cumulative points, split by request share between them. There the scripts print *pending —
+  turn still open* for a row whose requests nothing has counted yet, never `0.0`, and the table
+  is measured again at the next boundary (Ops § Usage & Cost → 2 and → 5; the `usage` skill).
+- **Not checked on a session with sub-agents.** Their requests are in the cumulative total; if
+  they have no records of their own, a mid-turn figure runs low until the turn ends, when the
+  scripts scale the records to the total and say so.
+- **The dashboard** shows the live figure through the same script; *as of the last turn that
+  ended* now appears only while requests wait uncounted.
+- **Not tested on Windows.** The PowerShell script was run on macOS against the same journals as
+  the Python one and prints the same table.
+- **A project already built on Copilot:** run `/ocpf-bc:update-framework` (the project runs its
+  own copies of the scripts in `ocpfFramework/scripts/`), then `/ocpf-bc:usage` without `--step`.
 
 ## v6.1.2.0 — November 15, 2026
 

@@ -4,6 +4,27 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 6.1.3 — November 16, 2026
+
+Full / Lite runbook and Operations Guide **6.1.3.0**. A GitHub Copilot build showed no credits
+until it was over.
+
+- **`usage`:** `ocpf-usage.py` / `.ps1` read only the session's cumulative credits, which Copilot
+  writes when a turn ends; a build whose questions are all options boxes is one turn, so every
+  close measured `0.0` credits and model `unknown`, and the same script printed the real figure
+  as soon as the human typed a message. The scripts now sum the journal's per-request records
+  (`session.usage_record`, Copilot 1.0.100 and later) inside each step window: exact credits and
+  model names per step, mid-turn included. A journal without those records keeps the previous
+  method (cumulative points, split by request share); there the scripts print *pending — turn
+  still open* for a row whose requests nothing has counted yet, never `0.0` (JSON: `aiCredits`
+  `null`, `pending` `true`). A session resumed after a shutdown counts as open again. The JSON's
+  `sessions` entries gain `perRequestRecords` and `uncounted`, and `credits` / `lastKnownAt` now
+  run to the last counted request. Not checked on a session with sub-agents: if their requests
+  have no records of their own, the figure corrects when the turn ends, with a note.
+- **`dashboard`:** the credits tile is live through the same script; *as of the last turn that
+  ended* shows only while requests wait uncounted.
+- The PowerShell script was run on macOS only.
+
 ## 6.1.2 — November 15, 2026
 
 Full / Lite runbook and Operations Guide **6.1.2.0**. A project was built and packaged with an
