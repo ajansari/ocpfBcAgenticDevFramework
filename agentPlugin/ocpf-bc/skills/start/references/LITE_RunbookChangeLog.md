@@ -16,6 +16,20 @@ framework.
 
 ---
 
+## v6.1.1.0 — November 15, 2026
+
+Derived from Full **v6.1.1.0**; Operations Guide **v6.1.1.0**; Standards Guide **v1.13.1.0**
+(unchanged); plugin **6.1.1**. A patch for a Build-a-Feature project that was built with no
+dashboard: the page templates had been copied into `ocpfFramework/scripts/templates/`, where the
+renderer did not look. Lite was not seen to fail, but it had no check. Step 1's setup batch now
+puts both templates directly in `ocpfFramework/scripts/` and **proves `ProjectDashboard.html` is
+at the project root after the first render** — the command exited 0 and the file exists; if not,
+the renderer's error is read, the cause fixed, and the page rendered again before the batch goes
+on (a machine with no interpreter at all records `runner: none`, installs nothing, and asks in
+the setup-done box). Every step close now confirms the page exists after its quiet render and
+repairs it when it does not. The renderers also find a misplaced `scripts/templates/` copy. See
+the Full changelog's entry.
+
 ## v6.1.0.0 — November 13, 2026
 
 **Requirements first.** Derived from Full **v6.1.0.0**; Operations Guide **v6.1.0.0**, Standards

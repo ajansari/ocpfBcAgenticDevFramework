@@ -34,17 +34,32 @@ supplies the text.
 1. **Place the scripts.** Copy `scripts/ocpf-dashboard.py` and `scripts/ocpf-dashboard.ps1`, the
    `usage` skill's `scripts/ocpf-usage.py` and `ocpf-usage.ps1` (the renderer calls it), and
    every file in `templates/` (`dashboard.html`, `dashboard-f1.html`) into the project's `ocpfFramework/scripts/` (already gitignored —
-   Ops § Repository Hygiene). Byte for byte, from this plugin or from
+   Ops § Repository Hygiene) — **the files themselves, directly in that folder beside the
+   scripts: `ocpfFramework/scripts/dashboard.html`, never `ocpfFramework/scripts/templates/…`**.
+   When the scripts are already there (the `start` or `build-a-feature` skill placed them), check
+   that both templates are too, and copy them if not. Byte for byte, from this plugin or from
    `https://raw.githubusercontent.com/ajansari/ocpfBcAgenticDevFramework/main/agentPlugin/ocpf-bc/skills/dashboard/<path>`
    (`main` is replaced by the environment variable `OCPF_FRAMEWORK_REF` when it is set — the
    framework's pre-release channel, Ops § Plugin; record the ref used in the marker's `ref`).
-2. **Render once and open it:**
+2. **Render once, open it, and prove the page was written.** Run the runner ladder first
+   (section 2) and render with the interpreter it found — on Windows that may be `python` or
+   `py -3` rather than `python3`:
    ```
    python3 ocpfFramework/scripts/ocpf-dashboard.py --project "<root>" --open --toast "Your dashboard is live"
    pwsh   ocpfFramework/scripts/ocpf-dashboard.ps1 -Project "<root>" -Open -Toast "Your dashboard is live"   # Windows / PowerShell 7
    ```
    `--open` uses the operating system's default opener (`open`, `start`, `xdg-open`) — the page
    appears in the default browser once, now. Nothing else ever opens it unasked.
+   **The page proof — every journey, before anything else in the batch** (6.1.1.0).
+   The render command exited 0 **and** `ProjectDashboard.html` exists at the project root
+   (`ls ProjectDashboard.html`; `Test-Path ProjectDashboard.html`). If either fails, the renderer
+   printed why — read it, fix it, render again: *template not found* means the two templates are
+   not in `ocpfFramework/scripts/` (step 1); a missing interpreter means the next rung of the
+   runner ladder (section 2). **Never go on without the page, and never report the dashboard as
+   created from the command having been run.** **The one exception: nothing on the runner ladder runs** (no `python3` / `python` / `py -3`, no PowerShell 7). Record `runner: none` in `ocpfFramework/state/dashboard.json`, **install nothing**, go on with the batch, and hold one options box for the setup-done box: *Continue without the dashboard on this machine* / *Install PowerShell 7 — I approve (Ops § Tooling Checks)*. Why: on a real Build-a-Feature project the
+   templates had been copied into `ocpfFramework/scripts/templates/`, the renderer stopped with
+   *template not found*, the agent carried on, and the app was built with no dashboard at all.
+   The renderers now also look in that subfolder, but the check stands.
 3. **Install the hooks** (section 2) with the interpreter the runner ladder found, then **prove
    them** (section 2a) — the Stop hook's exact command run once, the sidecar newer and carrying
    the app's name and the edition — so the header reads *Live* instead of *Refreshed* and the
@@ -152,10 +167,12 @@ After the hooks are written, and again on every repair:
    (`full`, `lite`, or `feature`). *Untitled extension*, or the Full step map on a feature
    project, is a fail.
 4. On a fail: run the same command without `--quiet` / `-Quiet` and read the error, step down the
-   ladder, rewrite the hooks, and prove again. When nothing on the ladder runs: record
-   `hooks: false` and `runner: none` in `dashboard.json`, say so in one sentence, and the
-   explanation question's last paragraph says the page refreshes at every step close rather than
-   every turn (the close render, section 2b).
+   ladder, rewrite the hooks, and prove again. When the hooks cannot run but a renderer can (the
+   harness has no hooks, or the hook's interpreter differs): record `hooks: false`, say so in one
+   sentence, and the explanation question's last paragraph says the page refreshes at every step
+   close rather than every turn (the close render, section 2b). When **nothing on the ladder
+   runs**: record `hooks: false` and `runner: none` — there is no page and no close render on
+   this machine; the setup-done box says so and offers the choice of section 1, step 2.
 5. On a pass: record `hooksVerified` (ISO timestamp) and `runner` in `dashboard.json`.
 
 Why: on a real Windows Build-a-Feature project (October 2026) the hooks were written for `pwsh`

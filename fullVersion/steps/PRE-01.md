@@ -1,6 +1,6 @@
 # BC App Build Routine — PRE-01 — State the Problem
 
-**Runbook version:** 6.1.0.0 · Full edition · Phase: DEFINE
+**Runbook version:** 6.1.1.0 · Full edition · Phase: DEFINE
 
 > One step of the OCPF BC Agentic Development Framework runbook, fetched into `ocpfFramework/runbookSteps/` at the
 > routine's first step and read **in full** the moment this step starts. The core runbook
@@ -168,7 +168,12 @@ proven with `git check-ignore` (Ops § Repository Hygiene — `ProjectDashboard.
 `requirements/`, `docs/`, and `ocpfFramework/customSkills.json` must not be ignored); **the Custom
 Skills K13a named fetched, inspected, and deduped** (Ops § Custom Skills → 3 — placed and registered
 after their *Activate* boxes in the setup-done box, where any issue's options box is asked too); **the live dashboard** — the renderer and
-template into `ocpfFramework/scripts/`, `ProjectDashboard.html` rendered at the project root,
+both templates into `ocpfFramework/scripts/` (the files directly in that folder, never a
+`templates` subfolder), `ProjectDashboard.html` rendered at the project root **and proven to be
+there** (the render exited 0 and the file exists; if not, read the renderer's error, fix it, and
+render again before the batch goes on; the one exception is a machine where nothing on the
+runner ladder runs: `runner: none` recorded, nothing installed, the choice held for the
+setup-done box — 6.1.1.0),
 opened once (`--open`), the refresh hooks installed with the interpreter the runner ladder found
 and proven — the Stop hook's exact command run once, the sidecar newer and carrying the app's name
 and the edition (Ops § Dashboard → 3; the plugin's `dashboard` skill); the AL tools connected

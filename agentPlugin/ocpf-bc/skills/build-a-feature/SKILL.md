@@ -160,7 +160,11 @@ every session**, a resumed one and *Build another object* included.
    `requirementsRead.at` is **later than the `startedAt` of the window Part 0 opened in this
    session** (`usage.json` — that is what "from this session" means, checkable after a context
    compaction too); `files` lists exactly the files `requirements/` holds now; and **no file under
-   `requirements/` has a modified time later than `at`**. Otherwise items 2 to 4 run first. *Build another object* (Part 7) and a resumed session come back through items 2 to 4
+   `requirements/` has a modified time later than `at`**. Otherwise items 2 to 4 run first.
+   **The same gate checks the dashboard** (6.1.1.0): `ProjectDashboard.html` exists at the project
+   root — in every case, A to D, a resumed project included — unless `dashboard.json` says
+   `runner: none`; if it does not, run the `dashboard` skill's section 1, steps 1 to 3, now (step
+   1 re-copies the scripts and both templates from the plugin) before the window opens. *Build another object* (Part 7) and a resumed session come back through items 2 to 4
    before Part 3's question is asked again — the human may have added a document in between.
 
 ## Part 2: Setup, the minimum
@@ -180,8 +184,8 @@ to back with nothing between them but recording the answer in `ocpfFramework/sta
 Copilot settings) in the same box, item 9 (naming and range), item 14 (the Custom Skills box — cases
 B, C, D), and **Part 3's one intake question as
 the last box, with case C's analysis offer beside it**; **then the setup batch, one message, no
-question** — items 3, 6 (render, open, hooks proven; the explanation question held), 10 (the one
-write of `app.json`), 11, 12, 13, the notifications applied and each hook's exact command run once,
+question** — items 3, 10 (the one write of `app.json`), 11, 6 (render, open, the page and the
+hooks proven; the explanation question held), 12, 13, the notifications applied and each hook's exact command run once,
 the icon placed or drawn; **then the setup-done box** — the dashboard explanation (*I understand* /
 *Other*, with the extra sentence of item 6), did each notification kind arrive, accept the drawn
 icon, the Main model switch confirmed, and each fetched skill's *Activate <skill>?* box with any
@@ -197,8 +201,15 @@ now says.
    `README.md` (Ops § Project Setup); fetch the Standards Guide into
    `ocpfFramework/standardsGuide/` (standalone repository at the pinned tag, Ops § Fetched
    Companions), the Operations Guide into `ocpfFramework/opsGuide/`, the patterns library into
-   `ocpfFramework/patterns/`, and this plugin's `usage` and `dashboard` scripts and templates into
-   `ocpfFramework/scripts/`. GitHub unreachable: use the bundled copies (`al-standards` and
+   `ocpfFramework/patterns/`, and this plugin's `usage` and `dashboard` files into
+   `ocpfFramework/scripts/` — **six files, all directly in that folder, no subfolder**:
+   `ocpf-usage.py`, `ocpf-usage.ps1`, `ocpf-dashboard.py`, `ocpf-dashboard.ps1` (from the two
+   skills' `scripts/`) and **`dashboard.html`, `dashboard-f1.html`** (from the `dashboard` skill's
+   `templates/` — the files, never the `templates` folder: `ocpfFramework/scripts/dashboard.html`,
+   not `ocpfFramework/scripts/templates/dashboard.html`). Why spelled out: on a real project the
+   agent copied the folder, the renderer found no template, and the project was built with no
+   dashboard (6.1.1.0). (The other scripts — `ocpf-notify.*`, `al-analyze.*`, `ocpf-skills.*` —
+   arrive with items 4, 11, and 14.) GitHub unreachable: use the bundled copies (`al-standards` and
    `start` skills' `references/`) and say which versions. **No step files, no runbook, and no
    document templates except the ones this journey writes** — `ProjectProgress.md`,
    `FeatureRegister.md`, `FeatureDataModel.md`, `FeatureDocumentation.md`, `ChangeLog.md`,
@@ -258,8 +269,13 @@ now says.
      installed version* / *I'll type the installed version* — first only when a package or real
      objects exist, and confirmed on the **Extension Management** page as Ops § Packaging says.
    Record the answer in `feature.json`; item 10 writes it. A new app is written `0.0.0.1` whatever the file said.
-6. **Dashboard, in the batch, once `app.json` is written** (B, C, D; A already has it): the `dashboard` skill
-   in apply-only mode — render, `--open`, hooks; the one explanation question (*I understand* /
+6. **Dashboard, in the batch, once `app.json` is written** (B, C, D; A: check `ProjectDashboard.html` is there, and create it this way if not): the `dashboard` skill
+   in apply-only mode — render, `--open`, hooks; **then prove the page exists** — the render
+   command exited 0 and `ProjectDashboard.html` is at the project root (`ls ProjectDashboard.html`);
+   if not, read the renderer's error, fix it (a missing template: item 2's six files), and render
+   again — the batch does not go on, and no object is built, without the page (the page proof,
+   the `dashboard` skill's section 1, step 2; its one exception is a machine where nothing on the
+   runner ladder runs — `runner: none`, nothing installed, the choice held for the setup-done box); the one explanation question (*I understand* /
    *Other*) is the first question of the setup-done box, with Ops § Dashboard's text, adding one
    sentence: *On this journey the Build Map shows one row per
    object you ask for, with its stage, its time, and its cost, instead of the framework's steps.*

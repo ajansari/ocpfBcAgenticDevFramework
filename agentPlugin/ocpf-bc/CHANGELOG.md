@@ -4,6 +4,30 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 6.1.1 — November 15, 2026
+
+Full / Lite runbook and Operations Guide **6.1.1.0**. A Build-a-Feature project was built with no
+dashboard.
+
+- **`build-a-feature`:** Part 2 item 2 said to copy the dashboard's "scripts and templates into
+  `ocpfFramework/scripts/`"; on a real project the agent copied the `templates` folder, the
+  renderer found no template, and no `ProjectDashboard.html` was ever written. The item now names
+  the six files and puts all of them directly in `ocpfFramework/scripts/`; item 6 proves the page
+  exists before the batch goes on.
+- **`dashboard`:** `ocpf-dashboard.py` / `.ps1` also look for the templates beside the script, in
+  `scripts/templates/`, and in `ocpfFramework/scripts/templates/`, and the *template not found*
+  error says which files to copy where. Section 1 step 1 states the placement and checks the
+  templates when another skill placed the scripts; step 2 now runs the runner ladder first and
+  ends with the page proof (exit 0 and the file at the project root) on every journey, with one
+  exception — a machine where nothing on the ladder runs records `runner: none`, installs
+  nothing, and holds the choice for the setup-done box. The Python twin now exits 0 silently under
+  `--quiet` on a missing template, as the PowerShell twin did.
+- **`usage`:** the close render is followed by a check that `ProjectDashboard.html` exists; a
+  missing page is repaired before the next step. **`build-a-feature`:** the Part 4 gate checks the
+  page too, in every case and on resume; the batch order is items 3, 10, 11, 6, 12, 13 (the
+  dashboard after `app.json` and `git init`).
+- Bundled Full PRE-01 and Lite Step 1: the setup batch places both templates and proves the page.
+
 ## 6.1.0 — November 13, 2026
 
 Full / Lite runbook and Operations Guide **6.1.0.0**. Requirements first.

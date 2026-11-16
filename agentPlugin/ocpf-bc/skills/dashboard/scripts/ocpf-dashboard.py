@@ -1042,10 +1042,12 @@ def render(root, data):
     outs = {}; first_payload = None
     for theme, (fname, outname) in THEMES.items():
         tpl = None
-        for cand in (os.path.join(HERE, "..", "templates", fname), os.path.join(root, "ocpfFramework", "scripts", fname)):
+        # scripts/templates/ is not where the templates belong, but a real run copied the folder instead of its files (6.1.1.0)
+        for cand in (os.path.join(HERE, "..", "templates", fname), os.path.join(root, "ocpfFramework", "scripts", fname),
+                     os.path.join(HERE, fname), os.path.join(HERE, "templates", fname), os.path.join(root, "ocpfFramework", "scripts", "templates", fname)):
             if os.path.isfile(cand): tpl = read(cand); break
         if not tpl:
-            if theme == "brand": sys.exit("error: dashboard.html template not found beside the script (templates/dashboard.html) or in ocpfFramework/scripts/")
+            if theme == "brand": sys.exit("error: dashboard.html template not found. Copy dashboard.html and dashboard-f1.html from the plugin's skills/dashboard/templates/ into ocpfFramework/scripts/ (the files themselves, beside this script) and run again.")
             continue  # an older scripts/ folder without this theme's template: skip it
         data["theme"] = theme
         payload = json.dumps(data, ensure_ascii=False, default=str).replace("</", "<\\/")
@@ -1155,7 +1157,9 @@ def main():
 
 if __name__ == "__main__":
     try: main()
-    except SystemExit: raise
+    except SystemExit as e:  # --quiet makes every failure silent and exit 0, as the .ps1 twin does (6.1.1.0)
+        if isinstance(e.code, str) and "--quiet" in sys.argv: sys.exit(0)
+        raise
     except Exception as e:  # a hook must never break the agent's turn
         if "--quiet" in sys.argv: sys.exit(0)
         raise

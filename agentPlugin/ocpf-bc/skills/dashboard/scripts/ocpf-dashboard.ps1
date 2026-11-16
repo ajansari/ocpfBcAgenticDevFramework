@@ -571,8 +571,8 @@ $themeKey = "$Theme".ToLower(); if (-not $THEMES.Contains($themeKey)) { $themeKe
 $data.dataUrl = "ocpfFramework/state/dashboard-data.js"  # the pages pull this sidecar and repaint in place (no full reload)
 $outs = @{}; $firstPayload = $null
 foreach ($k in $THEMES.Keys) { $tplName = $THEMES[$k][0]; $outName = $THEMES[$k][1]
-  $tpl = $null; foreach ($c in @((Join-Path $here "../templates/$tplName"), (Join-Path $root "ocpfFramework/scripts/$tplName"))) { if (Test-Path -LiteralPath $c) { $tpl = Get-Content -LiteralPath $c -Raw; break } }
-  if (-not $tpl) { if ($k -eq "brand") { Write-Error "dashboard.html template not found beside the script (templates/dashboard.html) or in ocpfFramework/scripts/"; exit 1 }; continue }
+  $tpl = $null; foreach ($c in @((Join-Path $here "../templates/$tplName"), (Join-Path $root "ocpfFramework/scripts/$tplName"), (Join-Path $here $tplName), (Join-Path $here "templates/$tplName"), (Join-Path $root "ocpfFramework/scripts/templates/$tplName"))) { if (Test-Path -LiteralPath $c) { $tpl = Get-Content -LiteralPath $c -Raw; break } }
+  if (-not $tpl) { if ($k -eq "brand") { Write-Error "dashboard.html template not found. Copy dashboard.html and dashboard-f1.html from the plugin's skills/dashboard/templates/ into ocpfFramework/scripts/ (the files themselves, beside this script) and run again."; exit 1 }; continue }
   $data.theme = $k
   $payload = ($data | ConvertTo-Json -Depth 8 -Compress) -replace '</', '<\/'
   if ($null -eq $firstPayload) { $firstPayload = $payload }

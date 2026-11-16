@@ -36,7 +36,12 @@ the window may carry a `title` the dashboard shows, which this skill ignores.
   Cost → 5; Ops § Dashboard → 3). After the rows, run the renderer once with the `runner`
   recorded in `ocpfFramework/state/dashboard.json`:
   `python3 ocpfFramework/scripts/ocpf-dashboard.py --project "<root>" --quiet` (or `pwsh` with
-  the `.ps1`, or `python` / `py -3` with the `.py` on Windows). In Full on Copilot Chat the
+  the `.ps1`, or `python` / `py -3` with the `.py` on Windows). **Then confirm
+  `ProjectDashboard.html` exists at the project root** (6.1.1.0; skip when `dashboard.json` says
+  `runner: none`): `--quiet` hides every failure, so if the page is missing, run the same command
+  without `--quiet`, read the error, and repair with the `dashboard` skill's section 1 (steps 1
+  and 2 — the scripts and both templates re-copied from the plugin, the page rendered and proven).
+  In Full on Copilot Chat the
   Reasoning role's measurement brief ends with the render command (below), so nothing more is
   needed. On Build-a-Feature an `F` row's close is a step close. Hooks do the same between closes
   in Claude Code and the Copilot CLI; when they don't (a missing interpreter), this is the only

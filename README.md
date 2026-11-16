@@ -8,7 +8,7 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 *by AJ Ansari*
 
-*Last Updated: Friday, November 13, 2026*
+*Last Updated: Sunday, November 15, 2026*
 
 > ## 🌐 [Official Website](https://ajansari.github.io/ocpfBcAgenticDevFramework/)
 >
@@ -363,6 +363,12 @@ Each month's release notes in brief. The complete, versioned record is in
 [fullVersion/RunbookChangelog.md](fullVersion/RunbookChangelog.md),
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
+
+## November 15, 2026 — Full v6.1.1.0 · Lite v6.1.1.0 · Operations Guide v6.1.1.0 · Plugin v6.1.1
+**Dashboard fix.** A Build-a-Feature project could be built with no `ProjectDashboard.html`: the
+page templates were copied into a subfolder the renderer did not look in, and nothing checked.
+The placement is now spelled out, the renderer finds a misplaced copy, and every journey proves
+the page exists right after its first render.
 
 ## November 13, 2026 — Full v6.1.0.0 · Lite v6.1.0.0 · Operations Guide v6.1.0.0 · Plugin v6.1.0
 **Requirements first.** `/ocpf-bc:start` now prepares the folder before it asks anything: the AL

@@ -149,7 +149,7 @@ Guide versions it expects. If a local copy's major version differs, say so: the 
    repository at the tag the new framework pins** — read the pin from the framework's
    `standardsGuide/README.md` (fetch that prelude into `ocpfFramework/standardsGuide/README.md` too):
    `https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfALDevStandardsGuide.md`
-   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v6.1.0.0 the pin is
+   → `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` (for runbook v6.1.1.0 the pin is
    `v1.13.1.0`). Update each folder's `SNAPSHOT.json` (`repo`, `ref`, `sha`, `fetchedAt`). **Since
    6.0.0.0 fetch `opsGuide/extensionPoints.json` → `ocpfFramework/extensionPoints.json` in the same
    call** and, when `ocpfFramework/customSkills.json` exists, run `ocpf-skills --check --project

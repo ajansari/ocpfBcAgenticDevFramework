@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 6.1.0.0
-**Last Updated:** November 13, 2026
+**Version:** 6.1.1.0
+**Last Updated:** November 15, 2026
 
 > Version history for this framework lives in `ocpfFramework/RunbookChangelog.md`, tracked
 > independently of any one project built with it — check there for what changed between the version
@@ -18,7 +18,7 @@
 > - `ocpfFramework/standardsGuide/ocpfALDevStandardsGuide.md` — the **OCPF AL Development Standards Guide**
 >   (v1.13.1.0): the AL *rules* this sequence applies (Parts 1–11, Appendices A–E), cited below as
 >   **Standards §**.
-> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v6.1.0.0): the *procedures*
+> - `ocpfFramework/opsGuide/ocpfOperationsGuide.md` — the **OCPF Operations Guide** (v6.1.1.0): the *procedures*
 >   this sequence uses — asking, intake, project setup, the AL tools, tooling checks, analyzers,
 >   symbols, editor sync, notifications, packaging, repository hygiene, translations, fetched
 >   companions, documents, usage and cost, and the plugin — cited below as **Ops §**. Both editions
@@ -950,7 +950,7 @@ after the last one (Rule 6f).
 
 The companion rules document — `ocpfALDevStandardsGuide.md`, v1.13.1.0 — holds the AL rules this
 runbook cites as **Standards §**, from PRE-02 onward. Its sibling, the **Operations Guide**
-(`ocpfOperationsGuide.md`, v6.1.0.0), holds the procedures, cited as **Ops §**.
+(`ocpfOperationsGuide.md`, v6.1.1.0), holds the procedures, cited as **Ops §**.
 
 **Fetch both at PRE-01, before the first kickoff box, in one batch with everything else that step reads first (Rule 6f)** — `ocpfFramework/standardsGuide/` and `ocpfFramework/opsGuide/` in
 this project's root, both always gitignored — **and, in the same fetch, this runbook's step files

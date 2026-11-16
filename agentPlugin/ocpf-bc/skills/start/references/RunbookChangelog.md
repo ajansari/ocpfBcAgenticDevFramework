@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v6.1.0.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v6.1.0.0**, and Lite at **v6.1.0.0** — but
+**v6.1.1.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v6.1.1.0**, and Lite at **v6.1.1.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -23,6 +23,40 @@ change-worthy. (This is a different convention from a project's own ChangeLog, w
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
 
 ---
+
+## v6.1.1.0 — November 15, 2026
+
+**A Build-a-Feature project built with no dashboard.** Lite **v6.1.1.0**, Operations Guide
+**v6.1.1.0**, Standards Guide **v1.13.1.0** (unchanged), plugin **6.1.1**. A patch: no step
+changed.
+
+- **What happened.** On a real Build-a-Feature project (Claude Code, Sonnet) no
+  `ProjectDashboard.html` was ever created. The `build-a-feature` skill told the agent to put the
+  dashboard's "scripts and templates into `ocpfFramework/scripts/`"; the agent copied the
+  `templates` folder, so the two page templates landed in `ocpfFramework/scripts/templates/`. The
+  renderer looks for them directly in `ocpfFramework/scripts/`, stopped with *template not found*,
+  and nothing checked that the page existed. Reproduced from a second project's folder.
+- **The placement is spelled out.** The `build-a-feature` skill names the six files and where each
+  goes — the templates directly in `ocpfFramework/scripts/`, never a subfolder; the `dashboard`
+  skill and Ops § Dashboard → 2 say the same, and the `dashboard` skill checks for the templates
+  when another skill placed the scripts.
+- **The renderers forgive the misplacement.** `ocpf-dashboard.py` and `ocpf-dashboard.ps1` also
+  look beside themselves, in `scripts/templates/`, and in `ocpfFramework/scripts/templates/`; the
+  error, when no template is found anywhere, says which files to copy where.
+- **The page is proven, on every journey.** After the first render the agent checks that the
+  command exited 0 and `ProjectDashboard.html` is at the project root, and fixes and re-renders if
+  not, before the setup batch goes on (the page proof — the `dashboard` skill's section 1, step 2; Ops § Dashboard
+  → 2; PRE-01's and Lite Step 1's setup batch; Build-a-Feature's Part 2, item 6). Full and Lite
+  were not seen to fail — they place the templates through the `dashboard` skill, which was
+  already explicit — but they had no check either. One exception: a machine where nothing on the
+  runner ladder runs records `runner: none`, installs nothing, and holds the choice (continue
+  without the dashboard, or approve PowerShell 7) for the setup-done box.
+- **Every step close checks the page again** (Ops § Usage & Cost → 5; the `usage` skill): the
+  close render is quiet, so the agent confirms `ProjectDashboard.html` exists and repairs it when
+  it does not. Build-a-Feature's Part 4 gate checks it before every object, on a resumed project
+  and on a Full or Lite host too, so a project built without a page gets one at its next object.
+  The Python renderer now exits 0 silently under `--quiet` on a missing template, as the
+  PowerShell twin did; Build-a-Feature's setup batch renders after `app.json` and `git init`.
 
 ## v6.1.0.0 — November 13, 2026
 

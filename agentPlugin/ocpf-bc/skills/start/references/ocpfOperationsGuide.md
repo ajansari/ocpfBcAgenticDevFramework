@@ -2,8 +2,8 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 6.1.0.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
-**Last Updated:** November 13, 2026
+**Version:** 6.1.1.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
+**Last Updated:** November 15, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
 > `fullVersion/BC_App_Build_Routine_Agent.md` and `liteVersion/LITE_BC_App_Build_Routine_Agent.md`.
@@ -1930,9 +1930,16 @@ Record the answer in `docs/0-project/ProjectMemory.md`; act on a free-text answe
 ### 2. What renders it, and from what
 
 `ocpfFramework/scripts/ocpf-dashboard.py` (PowerShell twin `ocpf-dashboard.ps1`; both print the
-same page) and its template `dashboard.html`, copied from the plugin's `dashboard` skill into
-`ocpfFramework/scripts/` (gitignored) at first creation and refreshed with the framework
-(`update-framework`). The renderer reads, and only reads:
+same page) and its templates `dashboard.html` and `dashboard-f1.html`, copied from the plugin's
+`dashboard` skill into `ocpfFramework/scripts/` (gitignored) at first creation and refreshed with
+the framework (`update-framework`) — **the template files sit directly in that folder, beside the
+scripts, never in a `templates` subfolder**. **After the first render, on every journey, the agent
+proves the page was written** (6.1.1.0): the command exited 0 and `ProjectDashboard.html` is at the
+project root; if not, it reads the renderer's error, fixes the cause, and renders again before
+the setup batch continues. **The one exception: nothing on the runner ladder runs** (no `python3` / `python` / `py -3`, no PowerShell 7). Record `runner: none` in `ocpfFramework/state/dashboard.json`, **install nothing**, go on with the batch, and hold one options box for the setup-done box: *Continue without the dashboard on this machine* / *Install PowerShell 7 — I approve (Ops § Tooling Checks)*. **Every step close checks it again** (Ops § Usage & Cost → 5), so
+a page that was never made, or stopped being made, is repaired at the next close. Why: on a real Build-a-Feature project the templates were copied as a
+folder, the renderer stopped with *template not found*, nothing checked, and the app was built
+with no dashboard. The renderers now also find a misplaced `scripts/templates/` copy. The renderer reads, and only reads:
 
 | Source | What the page takes from it |
 |---|---|
@@ -1990,9 +1997,11 @@ is newer **and** its `app.name` equals `app.json`'s `name` **and** its `framewor
 the marker's `edition` (`full`, `lite`, or `feature`). A page that says *Untitled extension* or
 shows the Full map on a feature project after that run has failed the proof. On failure: run the
 same command without `--quiet` / `-Quiet` to see the error, step down the ladder, rewrite the
-hooks, and prove again. When nothing on the ladder runs, record `hooks: false` and `runner: none`,
+hooks, and prove again. When the hooks cannot run but a renderer can, record `hooks: false`,
 say so in one sentence, and rely on the close render (next paragraph); the explanation question
-then says the page refreshes at every step close, not every turn. Record `hooksVerified` (ISO
+then says the page refreshes at every step close, not every turn. When nothing on the ladder runs
+at all, record `hooks: false` and `runner: none`: there is no page and no close render on this
+machine, and the setup-done box says so (section 2's one exception). Record `hooksVerified` (ISO
 timestamp) in `dashboard.json` when the proof passes; the `status` skill reports a project whose
 hooks were never proven. Why: on a real Windows Build-a-Feature project (October 2026) the hooks
 were written for `pwsh` on a machine without it; `--quiet` made every run exit 0 and silent, and
@@ -2433,7 +2442,7 @@ against nothing, and the human found an untracked folder at the end of the build
 - **`ocpfFramework/patterns/`** — the fetched patterns library, for the same reason as the
   Standards Guide.
 - **`ocpfFramework/scripts/`** — the framework's own plumbing: launchers, the one-shot helper, the
-  analyzer compile script, the notification script, the dashboard renderer and its template, the
+  analyzer compile script, the notification script, the dashboard renderer and its two templates, the
   Custom Skills helper.
 - **`ocpfFramework/extensionPoints.json`** — the fetched list of the moments a Custom Skill may plug
   into (Ops § Custom Skills → 2), refetched with the guides. Its neighbour
@@ -2751,7 +2760,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v6.1.0.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
+folder as `README.md`. For runbook **v6.1.1.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2930,7 +2939,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v6.1.0.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v6.1.1.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
@@ -3442,7 +3451,10 @@ the end of the project, not "when there's time". Both editions, the same words (
   rows are written and pasted, run the renderer once with the recorded `runner`
   (`python3 ocpfFramework/scripts/ocpf-dashboard.py --project "<root>" --quiet`, or the `.ps1`
   under `pwsh`, or `python` / `py -3` on Windows — `ocpfFramework/state/dashboard.json` says
-  which). In Full on Copilot Chat the Reasoning role's brief ends with the render command, so the
+  which). **Then the agent confirms `ProjectDashboard.html` is at the project root** (6.1.1.0;
+  not when `dashboard.json` says `runner: none`) — `--quiet` hides every failure — and when it is
+  missing, runs the command without `--quiet`, reads the error, and repairs it with the
+  `dashboard` skill's section 1 before the next step starts. In Full on Copilot Chat the Reasoning role's brief ends with the render command, so the
   page is refreshed when the measurement returns; everywhere else the main role runs it. On
   Build-a-Feature the close of every `F` row is a step close for this purpose. In Claude Code and
   the Copilot CLI the hooks do the same between closes; when they don't (an interpreter the hooks

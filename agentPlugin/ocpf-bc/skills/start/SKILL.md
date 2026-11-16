@@ -279,7 +279,9 @@ Nothing else in the root.
    repository `ajansari/ocpfBCALStandards` at the tag named in the framework's
    `standardsGuide/README.md`, fetched beside it — into `ocpfFramework/standardsGuide/`, the
    Operations Guide into `ocpfFramework/opsGuide/`, the patterns
-   library into `ocpfFramework/patterns/`; this plugin's scripts into `ocpfFramework/scripts/`; all
+   library into `ocpfFramework/patterns/`; this plugin's scripts into `ocpfFramework/scripts/` (files directly in that
+   folder, no subfolder; the dashboard's two templates are placed there by the `dashboard` skill
+   in the setup batch); all
    gitignored). The OnlyBCFans BC Copilot Blueprint (`ajansari/obcfBCCopilotBlueprint`) is fetched
    later, only when the intake records a Business Central Copilot feature, into a sibling folder
    outside the project root (Ops § Fetched Companions); it is not bundled here. If GitHub is unreachable then, the bundled copies are in this skill's
