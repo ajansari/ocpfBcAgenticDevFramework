@@ -232,7 +232,7 @@
     <tr><th>Source</th><th>Example</th></tr>
     <tr><td>Folder or zip</td><td><code>/ocpf-bc:skill-load ~/Downloads/posting_review_checklist.zip</code></td></tr>
     <tr><td>GitHub repository</td><td><code>/ocpf-bc:skill-load https://github.com/&lt;owner&gt;/&lt;repo&gt;#v1.0.0.0</code> (public, or private through your own GitHub sign-in)</td></tr>
-    <tr><td>bcskills.ai slug</td><td><code>/ocpf-bc:skill-load posting_review_checklist</code>, resolved to the author's repository once the catalog opens</td></tr>
+    <tr><td>bcskills.ai slug</td><td><code>/ocpf-bc:skill-load posting_review_checklist</code>, downloaded from bcskills.ai and checked against the SHA-256 the site publishes</td></tr>
     <tr><td>skillslocation.md</td><td>One source per line in the project root, tracked, so every clone loads the same set</td></tr>
   </table>
   <p>Whatever the source, the framework resolves it under <code>~/.ocpf/skills/</code>, inspects every file, checks the framework version, the journey, the extension points, and the other skills loaded, then shows you the manifest and file list and asks <strong>Activate?</strong> On yes it copies the skill to <code>.claude/skills/</code> and <code>.github/skills/</code>, records it in <code>ocpfFramework/customSkills.json</code> and the ChangeLog, and names the steps it will touch.</p>
@@ -249,8 +249,8 @@
       <h3><span class="sticker blue">Public</span> Share with anyone</h3>
       <ul>
         <li>Publish the skill in a public GitHub repository with the topic <code>ocpfbcskills</code>. Naming the repository after the slug is the convention.</li>
-        <li><strong>bcskills.ai</strong>, category <code>ocpf</code>, is the public catalog and the authority on slugs: one slug, one skill, first come, first served. It is being built. Until it answers, a typed slug falls back to the public topic search on GitHub.</li>
-        <li>The catalog stores links and a manifest hash, never your files. Your repository stays the home; anyone loads by URL now and by slug once the catalog opens.</li>
+        <li><strong>bcskills.ai</strong>, platform <code>bcdev.ai</code>, is the public library and the authority on slugs: one slug, one skill, first come, first served. A slug the site lacks falls back to the public topic search on GitHub.</li>
+        <li>You publish there yourself, in Author Studio: the skill's folder as a zip with <code>ocpf-skill.json</code> at its root. Each version is reviewed before it is listed. Anyone then loads it by slug, or by URL from your repository.</li>
       </ul>
     </div>
     <div>
@@ -285,7 +285,7 @@
 
 <footer>
   <div class="wrap">
-    <span>Framework version 6.1.4.0 · November 17, 2026 · <a href="https://github.com/ajansari/ocpfBcAgenticDevFramework#whats-new" target="_blank" rel="noopener">What's New</a></span>
+    <span>Framework version 6.1.5.0 · November 17, 2026 · <a href="https://github.com/ajansari/ocpfBcAgenticDevFramework#whats-new" target="_blank" rel="noopener">What's New</a></span>
     <span><a href="index.html">Framework home</a> · <a href="install.html">Install</a> · <a href="documentation.html">Documentation</a> · <a href="skills.html">Skills</a> · <a href="https://github.com/ajansari/ocpfBcAgenticDevFramework" target="_blank" rel="noopener">Repository</a> · <a href="llms.txt">For agents</a> · <a href="https://onlycopilotfans.com/privacy-policy" target="_blank" rel="noopener">Privacy</a> · <a href="https://onlycopilotfans.com/terms-of-service" target="_blank" rel="noopener">Terms</a> · © 2026 OnlyCopilotFans</span>
   </div>
 </footer>

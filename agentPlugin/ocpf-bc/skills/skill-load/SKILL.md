@@ -93,17 +93,41 @@ Work the list in order; collect every outcome before the first question of Step 
   `mcp`, `env:<name>`, `credential-helper`). A URL that fails with 404 on rung 1 is said back as *not
   found, or private — the next rung is <the smallest step available>*; with no rung left, *set a
   fine-grained token as `OCPF_GITHUB_TOKEN` in your shell, or add the GitHub MCP server*, one line.
-- **A bcskills.ai slug** (Ops § Custom Skills → 10): validate the slug's format first; fetch
-  `https://bcskills.ai/api/ocpf/skills/<slug>.json`; on an entry, fetch its `manifestUrl`, check
-  the SHA-256 against `manifestSha256` (a mismatch — the tag moved — is refused and said), check the
-  manifest's `slug` equals the typed one, then load `repository` at `ref` through the URL path above
-  with `sources[].type` `slug` and `catalogUrl` `https://bcskills.ai/ocpf/<slug>`. **The site is
-  being built: a 404 or an unreachable host is expected** — say so in one line and fall back: search
+- **A bcskills.ai slug** (Ops § Custom Skills → 10; a permanent ID, `sk_…`, resolves the same way):
+  validate the slug's format first, then, sending `X-BCS-Client: ocpf-bc/<plugin version>` on each
+  call and nothing about the project:
+  1. Fetch **`https://bcskills.ai/api/v1/skills/<slug>`** and read the answer, not only the status.
+     `200` with JSON — go on. `404` with the JSON body `{"error": "Skill not found"}` — *bcskills.ai
+     has no skill with that slug*, then the fallback. Anything else — an HTML 404 page (the path is
+     wrong, so this copy of the contract is out of date: say so and name
+     `/ocpf-bc:update-framework`), a `429` (say its `Retry-After`), a 5xx, a timeout — is **the site
+     not answering**: say that with the status, never "no such skill", and offer the fallback or a
+     retry in one box.
+  2. The entry's `slug` differs from the typed one — renamed on the site: say both, use the entry's.
+  3. `latestVersion.files` must list `ocpf-skill.json` at the root. If not: *<slug> is on
+     bcskills.ai but is not a Custom Skill of this framework (no `ocpf-skill.json`); it is listed
+     for <platform names>* — refuse and stop.
+  4. Download **`https://bcskills.ai/api/v1/skills/<slug>/download?version=<latestVersion.version>`**
+     to a temporary folder outside the project. Compute the file's SHA-256 with the runner found on
+     the ladder (`python3 -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" <zip>`;
+     `(Get-FileHash <zip> -Algorithm SHA256).Hash.ToLower()`) and compare it with **both**
+     `latestVersion.sha256` and the response's `X-Checksum-SHA256` header. Any difference — delete
+     the file, refuse, say which values differed. Never unzip an unverified file.
+  5. Load the verified zip through the `.zip` path above. The manifest's `slug` must equal the
+     entry's. Record `sources[].type` `slug`, `ref` = the entry's `permanentId`, `siteVersion`,
+     `sha256`, and `catalogUrl` `https://bcskills.ai/skills/<slug>`. If
+     `latestVersion.containsScripts` is true, say so in the *Activate* box and name the scripts.
+
+  **The fallback, only for a slug the site does not have** (step 1's JSON 404), or on the human's
+  choice when the site is not answering: search
   `https://api.github.com/search/repositories?q=topic:ocpfbcskills+<slug>+in:name` (then the
   plain topic search, through the ladder when the human asked for their private skills), fetch each
   candidate's `ocpf-skill.json` (`GET /repos/<owner>/<repo>/contents/ocpf-skill.json`, `Accept:
-  application/vnd.github.raw+json`), and match `slug`: none — *no skill with that slug is published —
-  do you have its repository URL?*; one — load it; two or more — the collision rule, both shown.
+  application/vnd.github.raw+json`), and match `slug`: none — *no skill with that slug is published
+  on bcskills.ai or in a public repository with the topic — do you have its repository URL?*; one —
+  load it; two or more — the collision rule, both shown. When `~/.ocpf/skills/<slug>/` already holds
+  a copy, offer it in the same box beside the site's or the repository's, each with its version —
+  never load the local copy in place of the published one without asking.
 - **Search my private skills on GitHub** (on request only, never at a kickoff): the topic search
   `topic:ocpfbcskills` through rung 2, 3, or 4 (rung 1 sees public repositories only — say so);
   list the repositories found (name, description, private or public), one box to pick, then the URL
@@ -176,7 +200,7 @@ On *Activate*, for each skill, in this order:
    `{"ocpfCustomSkills": 1, "frameworkVersion": "<v>", "block": null, "skills": {}}` when absent):
    the skill's entry with `displayName`, `version`, `renamedFrom`, `author`, `folder`,
    `contentHash`, `sources[]` (`type`, `ref`, `addedAt`, `addedBy` = this harness, `auth` = the rung
-   that answered, or `none`), `catalogUrl` (`https://bcskills.ai/ocpf/<slug>` when the skill came from the site's index, else `null`), `compatibility` from the
+   that answered, or `none`), `catalogUrl` (`https://bcskills.ai/skills/<slug>` when the skill came from the site, else `null`; a site source also carries `siteVersion` and `sha256`, and its `ref` is the permanent ID), `compatibility` from the
    manifest, `enabled: true`, `validatedAt` / `validatedAgainst` after the check below, `block`.
    **Prove it is tracked:** `git check-ignore -q ocpfFramework/customSkills.json` must exit 1 (not ignored; with `-v` it prints its own re-include line `!ocpfFramework/customSkills.json`, which is not a failure)
    — the second `.gitignore` group reads `ocpfFramework/*` plus `!ocpfFramework/customSkills.json`

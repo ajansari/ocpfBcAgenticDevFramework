@@ -65,10 +65,10 @@ is offered an upgrade to the new one instead of a collision. The frontmatter `na
 is the slug with `_` → `-` (`contoso-patterns`), because the harnesses list skills by hyphenated
 names.
 
-**Public and private.** The public authority on slugs is the **`ocpf` category of
-bcskills.ai** — once the site opens, a slug published there is unique first come, first served, and
-`skill-create` checks it. Until then, and for any slug the site lacks, the framework searches
-GitHub's public repositories carrying the topic **`ocpfbcskills`**. **A private skill lives in a
+**Public and private.** The public authority on slugs is **bcskills.ai**, where a framework skill
+is listed under the platform **bcdev.ai** — a slug published there is unique on the whole site,
+first come, first served, and `skill-create` checks it. For a slug the site lacks, the framework
+searches GitHub's public repositories carrying the topic **`ocpfbcskills`**. **A private skill lives in a
 private GitHub repository carrying the same topic**: GitHub shows a private repository in a topic
 search only to someone with access to it, so your projects find your private skills through your
 own sign-in (`gh`, your harness's GitHub MCP server, or a fine-grained token in your shell as
@@ -190,11 +190,15 @@ is a repository, refreshes the project's copies and the register, and re-checks 
 ## 9. Sharing
 
 - **Your GitHub repository**, private or public, with the topic `ocpfbcskills` (*Repository →
-  About → Topics*). Private: how your other projects find it. Public: the feed bcskills.ai reads.
-- **bcskills.ai**, `ocpf` category — the public catalog, being built. It will list links and a
-  hash, never host the skill; the framework reads its index to resolve a slug and checks the
-  manifest's SHA-256 and slug against it. The submission flow is not decided yet; when the site
-  opens, submit your slug there.
+  About → Topics*). Private: how your other projects find it. Public: anyone can load it by URL.
+- **bcskills.ai**, platform **bcdev.ai** — the public library. You publish there yourself: zip the
+  skill's folder with `ocpf-skill.json` at the zip's root and upload it in *Author Studio → Publish
+  a skill*; each version is reviewed before it is listed (`https://bcskills.ai/guidelines`). The
+  site hosts that zip and publishes its SHA-256. `/ocpf-bc:skill-load <slug>` reads the site's
+  public API, downloads the zip, checks the SHA-256 against the site's two published values, and
+  loads it like any other zip. A skill on the site without `ocpf-skill.json` is a skill for
+  another platform and is refused. The site's version has three parts (`1.0.0`); your manifest's
+  has four (`1.0.0.0`) and stays the skill's version in a project.
 - **`skillslocation.md`** in a team's project — the same set on every clone.
 
 Your README should carry the load line and badge `skill-create` writes: *Made for the OCPF BC

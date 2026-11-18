@@ -4,6 +4,30 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 6.1.5 — November 17, 2026
+
+Full / Lite runbook and Operations Guide **6.1.5.0**. A skill published on bcskills.ai could not be
+loaded by its slug.
+
+- **`skill-load`:** the slug path fetched `https://bcskills.ai/api/ocpf/skills/<slug>.json`, a URL
+  agreed before the site was built. The site serves `/api/v1/skills/<slug>`, so every slug got the
+  site's HTML 404 page, was reported as *no skill named <slug>*, and fell back to the GitHub topic
+  search. The slug path now reads `GET /api/v1/skills/<slug or sk_ id>`, requires `ocpf-skill.json`
+  in `latestVersion.files`, downloads `/api/v1/skills/<slug>/download?version=…`, compares the
+  zip's SHA-256 with both `latestVersion.sha256` and the `X-Checksum-SHA256` header, and loads the
+  verified zip through the `.zip` path. It sends `X-BCS-Client: ocpf-bc/<version>`. The register's
+  source entry records the permanent ID as `ref`, `siteVersion`, `sha256`, and `catalogUrl`
+  `https://bcskills.ai/skills/<slug>`.
+- **`skill-load`, the 404:** a JSON 404 (`{"error": "Skill not found"}`) means the site lacks the
+  slug; an HTML 404, a 429, a 5xx, or a timeout is said as the site not answering, with the
+  status, never as "no such skill". A copy in `~/.ocpf/skills/<slug>/` is offered beside the
+  published one, never loaded in its place unasked.
+- **`skill-create`:** the slug check uses the same endpoint; a slug is taken when the site has it
+  for any platform. The closing line says how the author publishes (Author Studio, a zip with
+  `ocpf-skill.json` at its root, platform bcdev.ai); the agent never uploads.
+- Checked against the live site with `bcissuehandler`: entry read, zip downloaded, both SHA-256
+  values equal the computed one, manifest slug equal to the entry's. No script changed.
+
 ## 6.1.4 — November 17, 2026
 
 Full / Lite runbook and Operations Guide **6.1.4.0**. On a Lite project the dashboard's step

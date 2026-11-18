@@ -2,7 +2,7 @@
 
 ## OnlyCopilotFans Agentic Dev Framework for BC Consultants
 
-**Version:** 6.1.4.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
+**Version:** 6.1.5.0 (since 5.0.0.0 the Full and Lite runbooks, this guide, and the plugin share one version number, and since 5.5.0.0 the Build-a-Feature journey carries it too — it has no runbook of its own, so a feature project's marker records this guide's version; the previous version of this guide was 2.0.1.0)
 **Last Updated:** November 17, 2026
 
 > **Relationship to the runbooks.** This guide is the shared companion to
@@ -2761,7 +2761,7 @@ https://raw.githubusercontent.com/ajansari/ocpfBCALStandards/<pinned tag>/ocpfAL
 The pinned tag is named in the framework repository's `standardsGuide/README.md` (the *prelude*:
 purpose, relationship to the runbook, the authoritative-source rule in Step 01 terms, and the
 "what is deliberately not in the guide" map), which is fetched beside the guide into the same
-folder as `README.md`. For runbook **v6.1.4.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
+folder as `README.md`. For runbook **v6.1.5.0 the pin is `v1.13.1.0`** (Standards Guide 1.13.1.0).
 The on-disk path and filename are unchanged from the days the guide lived in this repository, so
 no step file, runbook, or agent definition cites anything new. `SNAPSHOT.json` records
 `"repo": "ajansari/ocpfBCALStandards"`, the tag, the commit SHA, and the fetch time.
@@ -2940,7 +2940,7 @@ with `LookupOK`" — and a shipped per-tenant extension proved every one of thos
 - **Where:** **OUTSIDE the AL project's root**, like BCQuality — a sibling folder such as
   `../<ProjectName>.copilotBlueprint/` — because `templates/` holds nine real `.al` objects (prefix
   `PFX`, IDs 50100–50199) that `alc` would otherwise compile into the project. Shallow clone
-  **at the release tag the framework pins** (`v1.0.0.0` for runbook v6.1.4.0; the Blueprint pins
+  **at the release tag the framework pins** (`v1.0.0.0` for runbook v6.1.5.0; the Blueprint pins
   its claims to a BC version, so a tag matters), `.git` stripped, `LICENSE` kept (MIT), and a
   `SNAPSHOT.json` with repo, tag, commit SHA, and fetch time. Nothing to gitignore: it isn't in the
   tracked tree. **In Claude Code, also copy the folder to `.claude/skills/obcf-bc-copilot-blueprint/`**
@@ -3972,8 +3972,8 @@ and a match there is an upgrade offer, not a collision (section 4). The slug is 
 every load against the format, the reserved prefixes, and the project's register; bcskills.ai is
 consulted only when the source *is* a slug (section 10), and the `ocpfbcskills` topic only on
 *Search my private skills on GitHub* (section 9) — `skill-create` adds the bcskills.ai check and,
-on request, the topic (section 11). The public authority on slugs is the **bcskills.ai `ocpf`
-category**; the GitHub topic
+on request, the topic (section 11). The public authority on slugs is **bcskills.ai**, where a
+framework skill is listed under the platform **bcdev.ai**; the GitHub topic
 `ocpfbcskills` is for **private skills in private repositories**, found through the human's own
 GitHub identity, never searched automatically at a kickoff.
 
@@ -4218,32 +4218,68 @@ framework (tracked → a token in git); a classic `ghp_` token is not what to re
 not accept it). `git credential fill` is last because it hands the agent a secret the human stored
 for Git, possibly without a prompt — hence the box, every time.
 
-### 10. bcskills.ai — the read contract, and the fallback until it answers
+### 10. bcskills.ai — the read contract, and the fallback for a slug it lacks
 
-The **`ocpf` category of bcskills.ai is the public authority on slugs**: a slug published there
-is unique on the site and among public repositories carrying the topic, first come, first served.
-The framework reads three URLs and nothing else of the site; the index is **links plus a hash,
-never a host** — the skill itself is always fetched from the author's repository:
+**bcskills.ai is the public authority on slugs**: a slug published there is unique on the whole
+site, first come, first served, and never changes owner; a framework skill is listed there under the
+platform **bcdev.ai** (category slug `bcdev`). The site **hosts the skill**: each version is a zip
+it has reviewed, with a SHA-256 it publishes. The framework reads the site's public API (`/api/v1`,
+no sign-in; described at `https://bcskills.ai/llms.txt` and `https://bcskills.ai/openapi.json`) and
+nothing else of the site:
 
 | URL | Returns | Used by |
 |---|---|---|
-| `https://bcskills.ai/api/ocpf/skills.json` | the index — `{"schema": 1, "category": "ocpf", "generatedAt", "skills": [{"slug", "displayName", "version", "description", "author": {"name", "organization", "url"}, "repository", "ref", "manifestUrl", "manifestSha256", "framework": {"minVersion", "maxVersion"}, "journeys", "visibility", "updatedAt"}]}` | `skill-load`'s slug path; `skill-create`'s slug check |
-| `https://bcskills.ai/api/ocpf/skills/<slug>.json` | one entry, the same shape | slug resolution |
-| `https://bcskills.ai/ocpf/<slug>` | the human page | the README badge; the register's `catalogUrl` |
+| `GET https://bcskills.ai/api/v1/skills/<slug or sk_ id>` | the skill, JSON — `permanentId` (`sk_` + 10 characters, never changes), `slug`, `name`, `summary`, `status`, `categories[].slug`, `author` (`handle`, `name`, `company`), `url`, `downloadUrl`, `latestVersion` (`version`, `sha256`, `size`, `containsScripts`, `files[].path`), `versions`. An unknown slug is **404 with a JSON body** `{"error": "Skill not found"}` | `skill-load`'s slug path; `skill-create`'s slug check |
+| `GET https://bcskills.ai/api/v1/skills/<slug or sk_ id>/download[?version=<site version>]` | the zip (`application/zip`), the skill's files at the zip's root; header **`X-Checksum-SHA256`** | `skill-load`, after the entry was read |
+| `https://bcskills.ai/skills/<slug>` | the human page | the register's `catalogUrl`; the README's catalog line |
 
-**Resolving a slug:** fetch the entry; fetch `manifestUrl` (a `raw.githubusercontent.com` URL at the
-entry's `ref`) and check its SHA-256 against `manifestSha256` (a mismatch means the tag moved —
-refuse and say so); the manifest's `slug` must equal the entry's (else *mismatch*, refused); then load
-from `repository` at `ref` through section 3. **Until the site answers** (it is being built; a 404 or
-an unreachable host is expected), and for any slug the index lacks: search
+**Resolving a slug** (a permanent ID, `sk_…`, typed in place of a slug resolves the same way):
+1. Validate the slug's format, then fetch the entry. Send **`X-BCS-Client: ocpf-bc/<plugin
+   version>`** on every call (the site counts agent downloads by it), and nothing else about the
+   project or the human.
+2. **Read the answer, not only the status.** `200` with JSON — continue. `404` with the JSON body
+   above — *bcskills.ai has no skill with that slug*, then the fallback below. Anything else — a 404
+   that is an HTML page (the path is wrong: the framework's copy of this contract is out of date, say
+   so and name `/ocpf-bc:update-framework`), `429` (say the `Retry-After`), a 5xx, a timeout — is
+   **the site not answering**, said as that with the status, never as "no such skill"; offer the
+   fallback or a retry in one box.
+3. The entry's `slug` differs from the typed one — the skill was renamed on the site: say both, and
+   go on with the entry's slug (the manifest's `renamedFrom` rule of section 4 then applies).
+4. **It must be a framework skill**: `latestVersion.files` must list **`ocpf-skill.json`** at the
+   root. If not, refuse and say why — *<slug> is on bcskills.ai but is not a Custom Skill of this
+   framework (no `ocpf-skill.json`); it is listed for <the entry's platform names>* — and stop. The
+   `bcdev` category is the site's label for the same thing and is reported, not required.
+5. Download the zip to a temporary folder **outside the project**, compute its SHA-256 (the runner
+   found on the ladder: `hashlib` in Python, `Get-FileHash` in PowerShell; `shasum -a 256` where it
+   exists), and compare it with **both** `latestVersion.sha256` and the `X-Checksum-SHA256` header.
+   Any difference — refuse, delete the file, say which two values differed. Never unzip an
+   unverified file.
+6. Load the verified zip through section 3 exactly as a `.zip` the human supplied. The manifest's
+   `slug` must equal the entry's (else *mismatch*, refused). Record `sources[].type` `slug`, `ref`
+   = the entry's `permanentId`, `catalogUrl` = `https://bcskills.ai/skills/<slug>`, and in the same
+   source entry `siteVersion` (the site's three-part version — the manifest's own four-part
+   `version` stays the skill's version) and `sha256`. `containsScripts: true` is said in the
+   *Activate* box, with the script files named.
+
+**The fallback, for a slug the site lacks** (a skill shared only on GitHub, or a private one): search
 `topic:ocpfbcskills <slug> in:name` (the convention — recommended, not required — is repository
 name = slug), then the plain topic search, fetch each candidate's `ocpf-skill.json` (`GET
 /repos/<owner>/<repo>/contents/ocpf-skill.json`, `Accept: application/vnd.github.raw+json`), and
-match `slug`: zero matches — *no skill with that slug is published*; one — load it; two or more — the
-collision rule of section 4, both shown. Private skills are never in the index; a typed slug that is
-the human's own falls to the topic search through the ladder of section 9. **Submission** to the site
-is not decided; `skill-create`'s closing message says *when the site opens, submit <slug> there* and
-no more.
+match `slug`: zero matches — *no skill with that slug is published on bcskills.ai or in a public
+repository with the topic*; one — load it; two or more — the collision rule of section 4, both
+shown. Private skills are never on the site; a typed slug that is the human's own falls to the topic
+search through the ladder of section 9. **A copy already in `~/.ocpf/skills/<slug>/` is offered in
+the same box as the site's or the repository's**, never loaded in its place silently, with both
+versions shown.
+
+**Publishing** is the author's own act on the site, never the agent's: *bcskills.ai → Author
+Studio → Publish a skill*, the skill's folder as a zip with `ocpf-skill.json` at its root, platform
+**bcdev.ai**; the site reviews each version before it is listed
+(`https://bcskills.ai/guidelines`). `skill-create`'s closing message says that in one line and no
+more. Why this section was rewritten in 6.1.5.0: until then it described URLs
+(`/api/ocpf/skills/<slug>.json`) agreed before the site was built; the site opened with a different
+API, every slug load got the site's HTML 404 page and fell back, and a skill that was published was
+reported as missing.
 
 ### 11. Creating and updating a skill — `/ocpf-bc:skill-create`, `/ocpf-bc:skill-update`
 
@@ -4272,8 +4308,8 @@ then `gh repo create <owner>/<slug> --private|--public --source ~/.ocpf/skills/<
 `gh repo edit <owner>/<slug> --add-topic ocpfbcskills`) or,
 without `gh`, the closing message names the one setting (*Repository → About → Topics →
 `ocpfbcskills`*) and why: private, it is how *your* other projects find it; public, it is the feed
-bcskills.ai harvests until you submit it there. The framework never owns or hosts a developer's
-skill. Finally the skill is loaded into the current project (section 3) — the project that proved it
+people load by URL; to list it on bcskills.ai, the author publishes it there (section 10). The
+framework never owns or hosts a developer's skill. Finally the skill is loaded into the current project (section 3) — the project that proved it
 is the first to carry it — and the creation is a ChangeLog line.
 
 **Update** requires the skill to be **loaded in the current project** (the register names its home

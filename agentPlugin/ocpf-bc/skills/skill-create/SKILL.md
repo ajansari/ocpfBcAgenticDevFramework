@@ -67,11 +67,15 @@ the review check that enforces it).
   folder and run `--inspect`, or apply the regex yourself — say which);
 - the project's register: a loaded skill with that slug, or one whose `renamedFrom` names it, is a
   collision unless the human means an update (then `skill-update`);
-- **bcskills.ai**: `https://bcskills.ai/api/ocpf/skills/<slug>.json` — an entry means the slug is
-  taken publicly: *a public skill with this slug exists at <repository>; choose another*. The site is
-  being built; a 404 or an unreachable host is expected and said in one line, and the public check
-  falls back to the topic search `topic:ocpfbcskills <slug> in:name` (rung 1 of Ops § Custom
-  Skills → 9; one call);
+- **bcskills.ai**: `GET https://bcskills.ai/api/v1/skills/<slug>` (Ops § Custom Skills → 10) —
+  `200` means the slug is taken on the site, whatever platform the skill is listed for: *a skill
+  with this slug exists on bcskills.ai (<name>, by <author.name>, https://bcskills.ai/skills/<slug>);
+  choose another* — unless it is the human's own skill and they are creating its next version
+  (then `skill-update`). `404` with the JSON body `{"error": "Skill not found"}` means the slug is
+  free on the site; then the topic search `topic:ocpfbcskills <slug> in:name` (rung 1 of Ops §
+  Custom Skills → 9; one call) covers skills shared only on GitHub. Any other answer (an HTML 404
+  page, a 429, a 5xx, a timeout) is the site not answering: say so with the status, run the topic
+  search, and say the site's check did not happen — never report the slug as free on the site;
 - **the human's private skills**, only when they ask (*Also check my private skills on GitHub* typed
   in the box, or a yes to the one-line offer when `gh`, the GitHub MCP server, or a token in the
   environment is present): the same search through rung 2, 3, or 4 — never rung 5 for a check.
@@ -124,8 +128,8 @@ not a repository yet; `gh repo create <owner>/<slug> --private|--public --source
 --push`; then **`gh repo edit <owner>/<slug> --add-topic ocpfbcskills`**. On *Keep it local*, the load
 line names the folder and the *this repository* bullet is dropped. Say why the topic matters, in one sentence per case:
 **private** — it is how your other projects find this skill through your own sign-in; **public** —
-it is the feed bcskills.ai harvests, and when the site opens you submit `<slug>` there (the
-submission flow is not decided yet; nothing in the skill depends on it). Without `gh`: write the
+it is how people find and load it from GitHub; listing it on bcskills.ai is a separate step the
+author takes on the site (Step 6's closing line; nothing in the skill depends on it). Without `gh`: write the
 repository steps into the closing message — create the repository on github.com, push the folder,
 then *Repository → About → Topics → `ocpfbcskills`* — and record the source as a folder for now.
 The framework never owns or hosts a developer's skill; the repository is theirs.
@@ -137,7 +141,10 @@ when a repository was created and pushed), so the project that proved the skill 
 it — the *Activate* box included. Add one ChangeLog line (*Custom skill created*: slug, version, home
 folder, repository when one exists). The closing message: the folder, the files, the repository URL
 if any, the extension points in effect, and — when the skill is public — the one line about
-bcskills.ai.
+bcskills.ai: *to list it in the public library, zip the folder `~/.ocpf/skills/<slug>` (with
+`ocpf-skill.json` at the zip's root) and publish it at bcskills.ai → Author Studio, platform
+bcdev.ai; the site reviews each version before listing it (https://bcskills.ai/guidelines).* The
+agent never uploads it.
 
 ## What this skill never does
 

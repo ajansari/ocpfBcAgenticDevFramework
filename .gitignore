@@ -56,3 +56,5 @@ distributedDevelopment/
 CustomSkillsRoadmap/
 #NAV to BC code upgrade framework (separate sibling framework, front half only) working notes — local only, never pushed
 NAV-to-BC-Upgrades/
+#Dashboard live-feed ("nanny-cam") concept mockup — conceptual, local only, never pushed to the remote
+nannycam/

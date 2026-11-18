@@ -16,6 +16,17 @@ framework.
 
 ---
 
+## v6.1.5.0 — November 17, 2026
+
+Derived from Full **v6.1.5.0**; Operations Guide **v6.1.5.0**; Standards Guide **v1.13.1.0**
+(unchanged); plugin **6.1.5**. A patch: a skill published on bcskills.ai could not be loaded by
+its slug, because the Operations Guide described the site's addresses as agreed before it was
+built, and every slug got the site's 404 page. `/ocpf-bc:skill-load <slug>` now reads the site's
+public API, requires `ocpf-skill.json` among the skill's files, downloads the reviewed zip, checks
+its SHA-256 against the two values the site publishes, and loads it. Only a JSON 404 means "no
+such skill"; any other failure is said as the site not answering. No step changed. See the Full
+changelog's entry.
+
 ## v6.1.4.0 — November 17, 2026
 
 Derived from Full **v6.1.4.0**; Operations Guide **v6.1.4.0**; Standards Guide **v1.13.1.0**

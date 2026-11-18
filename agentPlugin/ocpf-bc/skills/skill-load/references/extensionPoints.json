@@ -1,6 +1,6 @@
 {
   "ocpfExtensionPoints": 1,
-  "frameworkVersion": "6.1.4.0",
+  "frameworkVersion": "6.1.5.0",
   "about": "The moments at which the OCPF BC Agentic Development Framework consults a loaded Custom Skill (Ops § Custom Skills). A skill's ocpf-skill.json may name only the keys below; 'active' points are consulted by this version at the places named, 'reserved' points are declared for a later version and a skill that names one is refused at load (it would otherwise silently not apply). Fetched into ocpfFramework/extensionPoints.json beside the Operations Guide; update-framework compares the new file with the loaded skills before it updates.",
   "extends": {
     "referenceSources": {

@@ -364,6 +364,12 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## November 17, 2026 — Full v6.1.5.0 · Lite v6.1.5.0 · Operations Guide v6.1.5.0 · Plugin v6.1.5
+**Loading a skill from bcskills.ai by its slug now works.** The framework was asking the site for
+addresses agreed before the site was built, so a published skill was reported as missing.
+`/ocpf-bc:skill-load <slug>` now reads the site's public API, downloads the reviewed zip, checks
+its SHA-256 against the value the site publishes, and loads it.
+
 ## November 17, 2026 — Full v6.1.4.0 · Lite v6.1.4.0 · Operations Guide v6.1.4.0 · Plugin v6.1.4
 **Dashboard fix for Lite.** On a Lite project the current step's marker on the Journey line read
 "STEP-7" inside a box sized for a number, so the text spilled out of it, and two card titles read
@@ -415,7 +421,7 @@ Custom Skills has the contract. `/ocpf-bc:skill-create` turns what worked in a p
 — slug, author, journeys, extension points, a folder under `~/.ocpf/skills/`, a GitHub repository of
 your own with the `ocpfbcskills` topic — and `/ocpf-bc:skill-update` versions it; private skills are
 found through your own GitHub sign-in (`gh`, the GitHub MCP server, or a token in your shell — never
-a token typed in chat), public ones on bcskills.ai once it opens. The kickoff asks *Do you have any
+a token typed in chat), public ones on bcskills.ai by slug. The kickoff asks *Do you have any
 skills you want to load?* (K13a, before the requirements question, on every journey), and
 `/ocpf-bc:update-framework` warns before an update that would block a loaded skill. For skill
 authors: [CustomSkillsGuide.md](CustomSkillsGuide.md).

@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v6.1.4.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v6.1.4.0**, and Lite at **v6.1.4.0** — but
+**v6.1.5.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v6.1.5.0**, and Lite at **v6.1.5.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -23,6 +23,40 @@ change-worthy. (This is a different convention from a project's own ChangeLog, w
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
 
 ---
+
+## v6.1.5.0 — November 17, 2026
+
+**A skill published on bcskills.ai could not be loaded by its slug.** Lite **v6.1.5.0**, Operations
+Guide **v6.1.5.0**, Standards Guide **v1.13.1.0** (unchanged), plugin **6.1.5**. A patch: no step
+changed.
+
+- **What happened.** A project on 6.1.4.0 was asked to load `bcissuehandler`, a skill published on
+  bcskills.ai that day. The agent answered *bcskills.ai has no skill named bcissuehandler (the site
+  returned a 404 page)* and recommended a local folder instead. The skill was there. Cause: Ops §
+  Custom Skills → 10 described the site's addresses as they were agreed before the site was built
+  (`/api/ocpf/skills/<slug>.json`, an index of links to the author's repository). The site opened
+  with a different public API (`/api/v1/skills/<slug>`) and hosts each reviewed version as a zip.
+  Every slug load therefore got the site's HTML 404 page, and the section told the agent a 404 was
+  expected.
+- **The contract is the site's real one** (Ops § Custom Skills → 10, the `skill-load` skill): read
+  the skill's entry, require `ocpf-skill.json` among its files (a skill without it is for another
+  platform and is refused, with the reason), download the zip, compare its SHA-256 with the two
+  values the site publishes, and only then load it, as any zip is loaded. A permanent ID (`sk_…`)
+  works in place of a slug. The site's three-part version is recorded beside the manifest's
+  four-part one.
+- **A 404 is read, not assumed.** The site answers an unknown slug with a JSON 404; only that
+  means "no such skill" and opens the GitHub topic fallback. An HTML 404, a 429, a 5xx, or a
+  timeout is reported as the site not answering, with the status.
+- **A local copy is never preferred silently.** When `~/.ocpf/skills/<slug>/` holds the skill, it
+  is offered beside the published one with both versions.
+- **`skill-create`** checks a new slug against the same endpoint and tells the author how to
+  publish: bcskills.ai → Author Studio, the folder as a zip, platform bcdev.ai. The agent never
+  uploads a skill.
+- **The Custom Skills Guide and the website's skills page** say the same; "category `ocpf`" is
+  now "platform bcdev.ai", as the site names it.
+- **Checked against the live site** with that skill: the entry, the download, and both checksums.
+  Not exercised: a full `/ocpf-bc:skill-load <slug>` run inside a project, and a skill that
+  contains scripts.
 
 ## v6.1.4.0 — November 17, 2026
 
