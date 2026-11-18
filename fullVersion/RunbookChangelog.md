@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v6.1.5.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v6.1.5.0**, and Lite at **v6.1.5.0** — but
+**v6.1.6.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v6.1.6.0**, and Lite at **v6.1.6.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -23,6 +23,37 @@ change-worthy. (This is a different convention from a project's own ChangeLog, w
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
 
 ---
+
+## v6.1.6.0 — November 17, 2026
+
+**Follow-up to 6.1.5.0: a slug bcskills.ai does not have was reported as the site not answering.**
+Lite **v6.1.6.0**, Operations Guide **v6.1.6.0**, Standards Guide **v1.13.1.0** (unchanged), plugin
+**6.1.6**. A patch: no step changed.
+
+- **What the review of 6.1.5.0 found.** That release told the agent to tell a JSON 404 (*no such
+  skill*) from any other failure, and the same skill still told it to fetch with `curl -f`, which
+  drops a 404's body. A published slug loaded; a missing one could not be read, was called *the
+  site not answering*, and never reached the GitHub fallback by itself.
+- **The fetch is spelled out** (Ops § Custom Skills → 10, the `skill-load` skill): both
+  bcskills.ai calls are made without `-f` and keep the status, the content type, the headers, and
+  the body. The checksum header is read from the saved headers.
+- **A copy already on the machine is a question with an answer.** 6.1.5.0 said such a copy is
+  "offered beside the published one" and gave no box. Now: the same content asks nothing;
+  different content gets one box, the published one recommended; choosing it keeps the existing
+  folder under a dated name, because it may be the author's working copy.
+- **Site version and manifest version are independent**, and the guide says what follows: an
+  author bumps the manifest with every version published on the site; a project refreshes a site
+  skill by loading its slug again, through `skill-load`'s *Update one*; `skill-update` stays the
+  author's.
+- **Smaller corrections.** A permanent ID typed as the source is not reported as a rename. A skill
+  the site marks as containing scripts is told so before the download. A `skillslocation.md` line
+  may be a bcskills.ai slug or permanent ID. The register's schema describes a site source. The
+  two new boxes join the setup-done box at a kickoff. Three sentences still describing the old
+  catalog are gone.
+- **Not decided here:** whether bcskills.ai accepts a slug with an underscore, as the framework's
+  own examples have. If it does not, such a skill can never match its manifest.
+- **Checked** against the live site: both commands, for a slug the site has and one it lacks. Not
+  exercised: a full slug load inside a project, a 429, a checksum mismatch, a renamed slug.
 
 ## v6.1.5.0 — November 17, 2026
 

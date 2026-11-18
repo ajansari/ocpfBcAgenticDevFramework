@@ -198,8 +198,12 @@ is a repository, refreshes the project's copies and the register, and re-checks 
   public API, downloads the zip, checks the SHA-256 against the site's two published values, and
   loads it like any other zip. A skill on the site without `ocpf-skill.json` is a skill for
   another platform and is refused. The site's version has three parts (`1.0.0`); your manifest's
-  has four (`1.0.0.0`) and stays the skill's version in a project.
-- **`skillslocation.md`** in a team's project — the same set on every clone.
+  has four (`1.0.0.0`) and stays the skill's version in a project. **Bump the manifest's version
+  with every version you publish on the site**: a project that already loaded the skill tells
+  versions apart by the manifest. A project refreshes a site skill by loading its slug again.
+- **`skillslocation.md`** in a team's project — the same set on every clone. A line is a folder
+  path, a GitHub URL, or a bcskills.ai skill written as a bare slug or, better, its permanent ID
+  (`sk_…`), which survives a rename on the site.
 
 Your README should carry the load line and badge `skill-create` writes: *Made for the OCPF BC
 Agentic Development Framework ≥ <minVersion> — load with `/ocpf-bc:skill-load <URL>`*.

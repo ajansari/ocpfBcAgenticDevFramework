@@ -143,8 +143,9 @@ folder, repository when one exists). The closing message: the folder, the files,
 if any, the extension points in effect, and — when the skill is public — the one line about
 bcskills.ai: *to list it in the public library, zip the folder `~/.ocpf/skills/<slug>` (with
 `ocpf-skill.json` at the zip's root) and publish it at bcskills.ai → Author Studio, platform
-bcdev.ai; the site reviews each version before listing it (https://bcskills.ai/guidelines).* The
-agent never uploads it.
+bcdev.ai; the site reviews each version before listing it (https://bcskills.ai/guidelines). Bump
+the manifest's `version` with every version you publish there, or projects that already loaded
+the skill cannot tell the two apart.* The agent never uploads it.
 
 ## What this skill never does
 

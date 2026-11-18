@@ -16,6 +16,16 @@ framework.
 
 ---
 
+## v6.1.6.0 — November 17, 2026
+
+Derived from Full **v6.1.6.0**; Operations Guide **v6.1.6.0**; Standards Guide **v1.13.1.0**
+(unchanged); plugin **6.1.6**. A follow-up to 6.1.5.0: the fetch command the `skill-load` skill
+mandated dropped a 404's body, so a slug bcskills.ai does not have was reported as the site not
+answering. Both calls are now spelled out and keep the status, content type, headers, and body. A
+copy of the skill already on the machine gets one box, never a silent choice; a site skill is
+refreshed by loading its slug again; a `skillslocation.md` line may name a bcskills.ai skill. No
+step changed. See the Full changelog's entry.
+
 ## v6.1.5.0 — November 17, 2026
 
 Derived from Full **v6.1.5.0**; Operations Guide **v6.1.5.0**; Standards Guide **v1.13.1.0**

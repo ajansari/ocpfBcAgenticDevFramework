@@ -4,6 +4,31 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 6.1.6 — November 17, 2026
+
+Full / Lite runbook and Operations Guide **6.1.6.0**. The review of 6.1.5 found the slug path
+could not do what it said for a slug the site lacks.
+
+- **`skill-load`, the fetch:** Step 1 mandated `curl -fsSL`, and with `-f` a 404 has no body or
+  content type, so the JSON 404 (*no such skill*) could not be told from an HTML one and a missing
+  slug was reported as the site not answering. The slug path now gives both commands, without
+  `-f`, writing the headers and the body to files and printing status and content type; the
+  download must be `200 application/zip`, and the checksum header is read from the saved headers.
+- **`skill-load`, a copy already in `~/.ocpf/skills/<slug>/`:** its own step, after the download
+  is verified. Equal content hashes ask nothing; different ones get one box (*published,
+  recommended* / *my copy* / *Stop*), and on *published* the existing folder is kept, renamed
+  `<slug>.local-<yyyymmdd>`. At a kickoff this box and the *site not answering* box join the
+  setup-done box.
+- **`skill-load`, the rest:** an `sk_` ID typed as the source is not called a rename; a skill
+  whose entry says `containsScripts` is told before the download that the inspection will refuse
+  it; *Update one* on a site skill compares the recorded `sha256` with the site's and re-loads,
+  and only other sources go to `skill-update`; a bare word in `skillslocation.md` is a
+  bcskills.ai slug or permanent ID.
+- **`skill-create`:** the closing line tells the author to bump the manifest's version with every
+  version published on the site.
+- Ops § Custom Skills → 6 describes the `slug` source's `ref`, `siteVersion`, and `sha256`.
+- The two curl commands were run against the live site for a slug it has and one it lacks.
+
 ## 6.1.5 — November 17, 2026
 
 Full / Lite runbook and Operations Guide **6.1.5.0**. A skill published on bcskills.ai could not be

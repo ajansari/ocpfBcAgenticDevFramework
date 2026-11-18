@@ -364,6 +364,12 @@ Each month's release notes in brief. The complete, versioned record is in
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
 
+## November 17, 2026 — Full v6.1.6.0 · Lite v6.1.6.0 · Operations Guide v6.1.6.0 · Plugin v6.1.6
+**Follow-up to the bcskills.ai fix.** A slug the site does not have was reported as the site not
+answering. The agent now reads the site's answer in full, asks before choosing between a published
+skill and a copy already on your machine, and a team's `skillslocation.md` can name a bcskills.ai
+skill.
+
 ## November 17, 2026 — Full v6.1.5.0 · Lite v6.1.5.0 · Operations Guide v6.1.5.0 · Plugin v6.1.5
 **Loading a skill from bcskills.ai by its slug now works.** The framework was asking the site for
 addresses agreed before the site was built, so a published skill was reported as missing.

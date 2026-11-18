@@ -45,19 +45,25 @@ answer — then Steps 2–3 run in the setup batch and Step 4's boxes join the s
 > in the free-text entry; on the Copilot CLI, where a choice takes no typed answer, add *I'll type it*)
 
 A `skillslocation.md` (the project root, or a subfolder the human names) is one source per line,
-folders or URLs, `#` comments, `#<tag>` or `#<branch>` after a URL pins it:
+folders, URLs, or bcskills.ai skills, `#` comments, `#<tag>` or `#<branch>` after a URL pins it. **A
+folder is written as a path** (it starts with `~`, `/`, `.`, or a drive letter); **a bare word is a
+bcskills.ai source** — a slug, or better the skill's permanent ID (`sk_` + 10 characters), which
+survives a rename on the site:
 
 ```
 # Contoso's skills for every BC project
 ~/.ocpf/skills/contoso_patterns
 https://github.com/contoso/ocpf-skill-posting-review
 https://github.com/contoso/ocpf-skill-release-notes#v2.1.0.0
+sk_kvxpddd239
 ```
 
 **The URL allowlist is `github.com`, `raw.githubusercontent.com`, `api.github.com`,
 `codeload.github.com`, and `bcskills.ai`.** Any other host is refused with the reason and the
 alternative (download it yourself, load it as a folder or a zip). Never fetch through a summarizing
-web tool; `curl -fsSL` or `git clone --depth 1`, byte for byte.
+web tool; `curl -fsSL` or `git clone --depth 1`, byte for byte. **The one exception to `-f` is
+bcskills.ai** (Step 2's slug path): there the status, the content type, and the body of an error are
+the answer, and `-f` throws them away.
 
 ## Step 2: Resolve every source to a folder
 
@@ -94,29 +100,55 @@ Work the list in order; collect every outcome before the first question of Step 
   found, or private — the next rung is <the smallest step available>*; with no rung left, *set a
   fine-grained token as `OCPF_GITHUB_TOKEN` in your shell, or add the GitHub MCP server*, one line.
 - **A bcskills.ai slug** (Ops § Custom Skills → 10; a permanent ID, `sk_…`, resolves the same way):
-  validate the slug's format first, then, sending `X-BCS-Client: ocpf-bc/<plugin version>` on each
-  call and nothing about the project:
-  1. Fetch **`https://bcskills.ai/api/v1/skills/<slug>`** and read the answer, not only the status.
-     `200` with JSON — go on. `404` with the JSON body `{"error": "Skill not found"}` — *bcskills.ai
-     has no skill with that slug*, then the fallback. Anything else — an HTML 404 page (the path is
-     wrong, so this copy of the contract is out of date: say so and name
-     `/ocpf-bc:update-framework`), a `429` (say its `Retry-After`), a 5xx, a timeout — is **the site
-     not answering**: say that with the status, never "no such skill", and offer the fallback or a
-     retry in one box.
-  2. The entry's `slug` differs from the typed one — renamed on the site: say both, use the entry's.
+  validate the typed word's format first, then, in a temporary folder `<tmp>` outside the project:
+  1. **Fetch the entry, without `-f`, keeping the status, the content type, the headers, and the
+     body** (`curl.exe` on Windows; `<v>` is the plugin's version; nothing about the project is sent):
+     ```
+     curl -sS -m 30 -H "X-BCS-Client: ocpf-bc/<v>" -D <tmp>/entry.headers -o <tmp>/entry.json -w "%{http_code} %{content_type}" "https://bcskills.ai/api/v1/skills/<slug or sk_ id>"
+     ```
+     Read all three. **`200` and JSON** — go on. **`404`, `application/json`, body
+     `{"error": "Skill not found"}`** — *bcskills.ai has no skill with that slug*, then the fallback
+     below. **Anything else is the site not answering**, said with the status and never as "no such
+     skill": a 404 that is `text/html` (the path is wrong, so this copy of the contract is out of
+     date — name `/ocpf-bc:update-framework`), a `429` (say the `Retry-After` from
+     `entry.headers`), a 5xx, a timeout; then one box — *Try bcskills.ai again* / *Search GitHub's
+     public topic instead* / *Stop*.
+  2. **A slug was typed and the entry's `slug` differs** — the skill was renamed on the site: say
+     both and use the entry's. **An `sk_` ID was typed** — say the slug it resolved to; that is not
+     a rename.
   3. `latestVersion.files` must list `ocpf-skill.json` at the root. If not: *<slug> is on
      bcskills.ai but is not a Custom Skill of this framework (no `ocpf-skill.json`); it is listed
-     for <platform names>* — refuse and stop.
-  4. Download **`https://bcskills.ai/api/v1/skills/<slug>/download?version=<latestVersion.version>`**
-     to a temporary folder outside the project. Compute the file's SHA-256 with the runner found on
-     the ladder (`python3 -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" <zip>`;
-     `(Get-FileHash <zip> -Algorithm SHA256).Hash.ToLower()`) and compare it with **both**
-     `latestVersion.sha256` and the response's `X-Checksum-SHA256` header. Any difference — delete
-     the file, refuse, say which values differed. Never unzip an unverified file.
+     for <platform names>* — refuse and stop. If `latestVersion.containsScripts` is true, say
+     before downloading that the framework refuses a skill that carries scripts (Step 3's `files`
+     rule) and that the inspection will name them.
+  4. **Download, the same way, and verify before unzipping:**
+     ```
+     curl -sS -m 120 -H "X-BCS-Client: ocpf-bc/<v>" -D <tmp>/zip.headers -o <tmp>/<slug>.zip -w "%{http_code} %{content_type}" "https://bcskills.ai/api/v1/skills/<slug>/download?version=<latestVersion.version>"
+     ```
+     It must be `200 application/zip` (else it is the site not answering, as in 1). Compute the
+     file's SHA-256 with the runner found on the ladder
+     (`python3 -c "import hashlib,sys;print(hashlib.sha256(open(sys.argv[1],'rb').read()).hexdigest())" <tmp>/<slug>.zip`;
+     `(Get-FileHash <tmp>/<slug>.zip -Algorithm SHA256).Hash.ToLower()`) and compare it with **both**
+     `latestVersion.sha256` and the `x-checksum-sha256` line of `zip.headers` (header names are
+     case-insensitive). Any difference — delete the file, refuse, say which values differed.
   5. Load the verified zip through the `.zip` path above. The manifest's `slug` must equal the
      entry's. Record `sources[].type` `slug`, `ref` = the entry's `permanentId`, `siteVersion`,
-     `sha256`, and `catalogUrl` `https://bcskills.ai/skills/<slug>`. If
-     `latestVersion.containsScripts` is true, say so in the *Activate* box and name the scripts.
+     `sha256`, and `catalogUrl` `https://bcskills.ai/skills/<slug>`.
+  6. **A copy already in `~/.ocpf/skills/<slug>/`.** Compare its `contentHash` (`--inspect`) with
+     the downloaded one's. Equal — the same skill; nothing to ask. Different — one box, with both
+     versions in the labels: *Load the published one from bcskills.ai — site <siteVersion>, manifest
+     <version> (recommended)* / *Load my copy in `~/.ocpf/skills/<slug>` — <its version>* / *Stop*.
+     On the published one, the existing home folder is **kept, renamed
+     `~/.ocpf/skills/<slug>.local-<yyyymmdd>/`** (it may be the author's working copy; nothing under
+     `~/.ocpf/skills/` is ever deleted), and the closing message names it. The local copy is never
+     loaded in place of the published one without this box. When the manifest's `version` equals
+     the loaded skill's and the content differs, say what that means for a site skill — *the site
+     has a new version (<siteVersion>) but its manifest still says <version>; that is for its
+     author to fix* — never "run `skill-update`".
+
+  **From the kickoff's K13a box or Build-a-Feature's item 14**, the boxes of 1 and 6 are questions
+  of the setup-done box like Step 4's (Rule 6f): the batch reports the skill as *not resolved yet*
+  and goes on.
 
   **The fallback, only for a slug the site does not have** (step 1's JSON 404), or on the human's
   choice when the site is not answering: search
@@ -125,9 +157,8 @@ Work the list in order; collect every outcome before the first question of Step 
   candidate's `ocpf-skill.json` (`GET /repos/<owner>/<repo>/contents/ocpf-skill.json`, `Accept:
   application/vnd.github.raw+json`), and match `slug`: none — *no skill with that slug is published
   on bcskills.ai or in a public repository with the topic — do you have its repository URL?*; one —
-  load it; two or more — the collision rule, both shown. When `~/.ocpf/skills/<slug>/` already holds
-  a copy, offer it in the same box beside the site's or the repository's, each with its version —
-  never load the local copy in place of the published one without asking.
+  load it; two or more — the collision rule, both shown. A copy already in `~/.ocpf/skills/<slug>/`
+  goes through the box of 6 here too, against the repository's.
 - **Search my private skills on GitHub** (on request only, never at a kickoff): the topic search
   `topic:ocpfbcskills` through rung 2, 3, or 4 (rung 1 sees public repositories only — say so);
   list the repositories found (name, description, private or public), one box to pick, then the URL
@@ -245,8 +276,12 @@ so when it does. On a blocked set, the message is the issues and the boxes of St
 
 `/ocpf-bc:skill-load` alone (or "which skills are loaded?") prints the register as a table — slug,
 display name, version, author, source, enabled, status from a fresh `--check` — and the block when
-there is one, then one box: *Nothing — just the list* / *Disable one* / *Remove one* / *Update one
-(the `skill-update` skill)*; a second box names the skill. Disable and remove go through
+there is one, then one box: *Nothing — just the list* / *Disable one* / *Remove one* / *Update one*;
+a second box names the skill. **Update depends on where the skill came from:** a skill whose source
+is `slug` is someone's published skill — fetch its entry (Step 2's slug path, by the recorded
+permanent ID), and when `latestVersion.sha256` differs from the recorded `sha256`, say the site has
+<version> and re-load it through that path; when equal, say it is current. Any other source goes to
+the `skill-update` skill, which is the author's write-back. Disable and remove go through
 Step 5's rules and ChangeLog lines; a removal also deletes `.claude/skills/<slug>/` and
 `.github/skills/<slug>/` and says the home folder was kept.
 
