@@ -41,6 +41,11 @@ Built from the baselines below: a **fixed per-step carry** (the runbook core plu
 One row per step per model. **GitHub Copilot:** the same token estimate, plus the last column —
 the row's tokens priced at the model's Copilot rates (§3) and converted to **AI credits**, the unit
 Copilot bills in and the unit the usage table will measure. Claude Code: leave the last column `—`.
+**The Step cell is the step's ID exactly as the usage table has it** (`07`, `PRE-02`, `STEP-5`),
+alone or followed by a space and the step's title (`STEP-5 Compile & Test`) — never `Step 5`,
+`5`, or `07: Compile`. Keep the `Input` and `Output` column headings as they are. The dashboard
+finds the current step's estimate by that cell in this table; a row it cannot match shows as
+*No estimate row* on the page.
 | Step | Model | Input | Output | Cache write | Cache read | Basis (objects × baseline, documents, rounds) | AI credits (Copilot) |
 |---|---|---|---|---|---|---|---|
 | <next step> | <Main> | | | | | | |

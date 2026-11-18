@@ -8,7 +8,7 @@ know if or how the framework it's using has since changed. Check here for what c
 Since v2.4.0.0 this also tracks the documents that ship alongside the runbook:
 `standardsGuide/ocpfALDevStandardsGuide.md` (the **OCPF AL Development Standards Guide**) and
 `liteVersion/` (the **Lite Edition**). All three are versioned independently — as of runbook
-**v6.1.3.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v6.1.3.0**, and Lite at **v6.1.3.0** — but
+**v6.1.4.0**, the Standards Guide is at **v1.13.1.0**, the Operations Guide at **v6.1.4.0**, and Lite at **v6.1.4.0** — but
 recorded together here, since a change to one usually has to be reflected in the others.
 Since v4.0.0.0 the runbook is a core file plus one file per step in `fullVersion/steps/`, and the
 document templates live in `documentTemplates/`; all are versioned with the runbook. Since
@@ -23,6 +23,49 @@ change-worthy. (This is a different convention from a project's own ChangeLog, w
 specifically to keep a superseded decision on record — see the runbook's ALL ALONG guidance.)
 
 ---
+
+## v6.1.4.0 — November 17, 2026
+
+**On a Lite project the dashboard's step marker overflowed its box.** Lite **v6.1.4.0**, Operations
+Guide **v6.1.4.0**, Standards Guide **v1.13.1.0** (unchanged), plugin **6.1.4**. A patch: no step
+changed.
+
+- **What happened.** On a real Lite project at Step 7, the Journey line's marker for the current
+  step showed "STEP-7" broken over two lines and running out of its box, and two card titles read
+  "Step STEP-7 vs AI Effort Estimate" and "Step STEP-7 exit gate". Cause: both dashboard templates
+  printed a step's ID as its label. Full's IDs are a number or `PRE-01`, and Build-a-Feature's are
+  three characters (`F03`), so both fit; Lite's IDs carry the word (`STEP-7`).
+- **Was it Lite only?** Yes. Full and Build-a-Feature were checked and fit. In the brand theme it
+  showed on every Lite step not yet done; in the F1 theme on every lap board ("✓ STEP-1" on a
+  board sized for "✓ 1"), and its titles read "Lap STEP-7".
+- **The fix.** The marker and the lap board show the step's number (`7`; a remediation row `5a`),
+  and the titles read "Step 7" and "Lap 7". The label under the marker and the timing screen keep
+  the full ID. Full's `PRE-01` marker reads `P1` in the brand theme, as the F1 theme always has,
+  and the F1 titles now print the lap as its board does ("Lap 7a", not "Lap 07a").
+- **The estimate on that card was wrong too.** The same project's card read "586.0k used of
+  117.00M estimated". The renderer looked for the step's row in every table of
+  `AiEffortEstimate.md` and wanted the first cell to equal the ID. The token table's row was
+  "STEP-7 Release for Testing", so it was missed; the wall-clock table's row "STEP-7" was taken
+  instead, and its "117 min" was read as 117 million. `ocpf-dashboard.py` / `.ps1` now read only
+  the token table (the one with Input and Output columns), accept the ID alone or followed by a
+  title, and no longer read the "m" of "min" as millions. The real figure for that step is 6.12M.
+  **Full projects were inflated as well:** there the ID matched in both tables, so the wall-clock
+  row was added to the token row. Run against five real projects, old against new: a Full
+  project's Step 07 read 459.34M where its estimate says 8.34M. Most steps with a wall-clock row
+  were high, some by hundreds of millions; where the time was written "2 h 5 min" the figure was
+  only a few tokens off. So an "on track" on this card before 6.1.4.0 meant little.
+- **How the row is found is now written down.** The estimate template says the Step cell is the
+  step's ID as the usage table has it (`07`, `STEP-5`), alone or followed by its title. The page
+  says *No token table found* when the file has no table with Input and Output columns, and *A
+  remediation has no estimate row* on a remediation row, where it used to say *No estimate row*.
+- **Three smaller things the review found.** The F1 theme told a Lite project its target is "set
+  at Step 03" (Lite: Step 2). The note "No estimate row for step STEP-7" printed the raw ID. A
+  remediation row's exit-gate card said "from runbookSteps/STEP-5a.md", a file that does not
+  exist; it now names the Operations Guide's remediation gate.
+- **Not tested on Windows.** The PowerShell renderer was run on macOS against the same project
+  as the Python one.
+- **A project already running:** run `/ocpf-bc:update-framework` (the project renders from its
+  own copies in `ocpfFramework/scripts/`); the next render shows the fix.
 
 ## v6.1.3.0 — November 16, 2026
 

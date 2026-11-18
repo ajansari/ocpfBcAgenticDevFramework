@@ -353,21 +353,38 @@ def roles(root, tool):
 
 # ---------------------------------------------------------------- estimate
 def estimate_for(root, sid, copilot):
-    txt = read(os.path.join(root, "docs", "2-design", "AiEffortEstimate.md"))
+    txt = read(os.path.join(root, "docs", "2-design", "AiEffortEstimate.md")).lstrip("\ufeff")  # a BOM would hide a table on line 1
     if not txt: return None
     tot_tokens = 0.0; credits = 0.0; hit = False
-    for line in txt.splitlines():
+    # Only the token table (the one whose header has Input and Output columns) is read, and a row is this step's when its
+    # first cell is the ID alone or the ID followed by a title ("STEP-7 Release for Testing"). Before 6.1.4.0 every table
+    # was read and the cell had to equal the ID: a Lite row with its title was missed, the wall-clock table's "STEP-7"
+    # row was taken instead, and its "117 min" was read as 117 million tokens.
+    # The token table is the one with an Input… and an Output… header cell and no USD cell (that is the cost table).
+    in_table = False; token_table = False; seen = False
+    for line in txt.split("\n"):  # as the twin splits: splitlines() would also break a row at a form feed
+        if not line.strip().startswith("|"): in_table = False; token_table = False; continue
         cells = [c.strip() for c in line.strip().strip("|").split("|")]
-        if len(cells) < 6 or cells[0].strip("*") != sid: continue
+        if not in_table:
+            in_table = True; heads = [c.replace("*", "").strip().lower() for c in cells]
+            token_table = any(h.startswith("input") for h in heads) and any(h.startswith("output") for h in heads) and not any("usd" in h for h in heads)
+            seen = seen or token_table; continue
+        first = cells[0].replace("*", "").strip()
+        if not token_table or len(cells) < 6 or not (first == sid or first.startswith(sid + " ")): continue
         def num(s):
             s = s.replace(",", "").strip().lower()
-            m = re.match(r"^([0-9.]+)\s*([km]?)", s)
+            m = re.match(r"^([0-9.]+)\s*(?:([km])\b)?", s)  # 6.12M, 20k, 1500 — never the m of "min"
             if not m: return 0.0
-            v = float(m.group(1)); return v * (1e6 if m.group(2) == "m" else 1e3 if m.group(2) == "k" else 1)
+            try: v = float(m.group(1))
+            except ValueError: return 0.0  # "1.2.3", "..." — not a number; a bad cell must not stop the render
+            return v * (1e6 if m.group(2) == "m" else 1e3 if m.group(2) == "k" else 1)
         hit = True
         tot_tokens += sum(num(c) for c in cells[2:6])
         if len(cells) >= 8: credits += num(cells[7])
-    if not hit: return {"note": f"No estimate row for step {sid}"}
+    if not hit:
+        if not seen: return {"note": "No token table found in AiEffortEstimate.md"}
+        if REMEDIATION_RE.match(sid): return {"note": "A remediation has no estimate row"}
+        return {"note": "No estimate row for step " + re.sub(r"^STEP-", "", sid)}
     return {"estimated": credits if copilot else tot_tokens, "unit": "credits" if copilot else "tokens"}
 
 # ---------------------------------------------------------------- events

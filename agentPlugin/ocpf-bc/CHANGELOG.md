@@ -4,6 +4,46 @@ The plugin is versioned with three-part semantic versions, independently of the 
 entry names the framework versions bundled as the offline fallback. The `start` skill always
 fetches the latest runbook from GitHub first, so a project isn't limited to the bundled versions.
 
+## 6.1.4 — November 17, 2026
+
+Full / Lite runbook and Operations Guide **6.1.4.0**. On a Lite project the dashboard's step
+marker overflowed its box.
+
+- **`dashboard`:** both templates printed a step's ID as its label. Full's IDs are short (`02`,
+  `PRE-01`) and Build-a-Feature's are three characters (`F03`), but Lite's carry the word
+  (`STEP-7`), so in `dashboard.html` the Journey line's station node (22 px, 30 px for the current
+  step) wrapped `STEP-7` over two lines and out of the box on every step not yet done, and the
+  estimate tile and the exit-gate card read *Step STEP-7*; in `dashboard-f1.html` the lap boards
+  read `✓ STEP-1` on a 42 px board, and the lap tile and race control read *Lap STEP-7*. A new
+  helper pair in both templates, `sn()` and `nodeLbl()`, strips `STEP-` for a label: the node and
+  the board show `7` (a remediation row `5a`), the titles *Step 7* / *Lap 7*. The label under
+  the node, the timing screen, and the `runbookSteps/STEP-7.md` source line keep the full ID.
+  The brand node also gains `white-space:nowrap`, and Full's `PRE-01` node reads `P1` as the F1
+  board always has, so a remediation row `PRE-01a` fits as `P1a`.
+- **`dashboard`, the estimate:** `estimate_for` (`ocpf-dashboard.py`; the `# ---- estimate ----`
+  block of the `.ps1`) matched a row in any table of `AiEffortEstimate.md` whose first cell
+  equalled the step ID. A Lite token row written `STEP-7 Release for Testing` was missed, the
+  wall-clock table's `STEP-7` row matched, and `117 min` parsed as 117e6: the tile read *586.0k
+  used of 117.00M estimated*. Now only the table whose header has `Input` and `Output` cells is
+  read, the first cell matches as the ID or the ID plus a space, and the suffix pattern is
+  `([km])?\b`. On Full the ID matched in both tables, so the wall-clock row was added to the
+  token row (a Step 07 read 459.34M against an estimate of 8.34M). Old and new `estimate_for`
+  were run against the estimate files of five real projects, one Lite and four Full. The note
+  reads *No estimate row for step 7* on Lite. The header test is by prefix (`Input…`, `Output…`,
+  no `USD` cell), `*` is dropped from the first cell, a leading BOM is stripped, a cell that is
+  not a number counts as 0 where it used to stop the render, and the note says *No token table
+  found in AiEffortEstimate.md* or *A remediation has no estimate row* when that is the reason.
+- **`documents`:** `AiEffortEstimate.md` says how the Step cell is written (the ID as the usage
+  table has it, optionally followed by the title).
+- **`dashboard`, from the review:** `dashboard-f1.html` said *set at Step 03* on a Lite project
+  (now *Step 2*); a remediation row's gate card named `runbookSteps/<id>.md`, which does not
+  exist (both templates now name Ops § Usage & Cost, through a new `isRem()`); the F1 titles use
+  a new `lapLbl()` so they print the lap as the board does (`7a`, `P1`).
+- Rendered against a real Lite project in both themes and a real Build-a-Feature project. The
+  PowerShell renderer was run on macOS only.
+- **A project already running:** `/ocpf-bc:update-framework` refreshes `ocpfFramework/scripts/`,
+  and the next render uses the new templates.
+
 ## 6.1.3 — November 16, 2026
 
 Full / Lite runbook and Operations Guide **6.1.3.0**. A GitHub Copilot build showed no credits

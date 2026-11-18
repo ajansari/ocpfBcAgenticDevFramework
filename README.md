@@ -8,7 +8,7 @@ Simple Enough for Functional Consultants. Robust Enough for Pro Developers.
 
 *by AJ Ansari*
 
-*Last Updated: Sunday, November 15, 2026*
+*Last Updated: Tuesday, November 17, 2026*
 
 > ## 🌐 [Official Website](https://ajansari.github.io/ocpfBcAgenticDevFramework/)
 >
@@ -363,6 +363,13 @@ Each month's release notes in brief. The complete, versioned record is in
 [fullVersion/RunbookChangelog.md](fullVersion/RunbookChangelog.md),
 [liteVersion/LITE_RunbookChangeLog.md](liteVersion/LITE_RunbookChangeLog.md), and
 [agentPlugin/ocpf-bc/CHANGELOG.md](agentPlugin/ocpf-bc/CHANGELOG.md).
+
+## November 17, 2026 — Full v6.1.4.0 · Lite v6.1.4.0 · Operations Guide v6.1.4.0 · Plugin v6.1.4
+**Dashboard fix for Lite.** On a Lite project the current step's marker on the Journey line read
+"STEP-7" inside a box sized for a number, so the text spilled out of it, and two card titles read
+"Step STEP-7". The marker now shows the step's number, and the titles read "Step 7". Both themes.
+The card's estimate figure was also far too high, on Full projects too: it read the time table's
+"117 min" as 117 million tokens. It now reads the token table only.
 
 ## November 16, 2026 — Full v6.1.3.0 · Lite v6.1.3.0 · Operations Guide v6.1.3.0 · Plugin v6.1.3
 **GitHub Copilot usage fix.** A build in GitHub Copilot showed no credits, on the usage table or

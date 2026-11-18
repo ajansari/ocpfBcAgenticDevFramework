@@ -298,10 +298,18 @@ $projState = [ordered]@{ state = $pState; since = $(if ($pSince) { $pSince.ToStr
 # ---- estimate ----
 $est = $null
 if ($cur -and $edition -ne "feature") { $etxt = Read-Text (Join-Path $root "docs/2-design/AiEffortEstimate.md")
-  if ($etxt) { $tokT = 0.0; $cred = 0.0; $hit = $false
-    function NumE($s) { $s = ("$s" -replace ',', '').Trim().ToLower(); if ($s -match '^([0-9.]+)\s*([km]?)') { $v = [double]$Matches[1]; if ($Matches[2] -eq 'm') { $v * 1e6 } elseif ($Matches[2] -eq 'k') { $v * 1e3 } else { $v } } else { 0.0 } }
-    foreach ($line in $etxt -split "`n") { $cells = @(($line.Trim().Trim('|')) -split '\|' | ForEach-Object { $_.Trim() }); if ($cells.Count -lt 6 -or $cells[0].Trim('*') -ne $cur.id) { continue }; $hit = $true; $tokT += (NumE $cells[2]) + (NumE $cells[3]) + (NumE $cells[4]) + (NumE $cells[5]); if ($cells.Count -ge 8) { $cred += NumE $cells[7] } }
-    $est = if ($hit) { [ordered]@{ estimated = $(if ($copilot) { $cred } else { $tokT }); unit = $(if ($copilot) { "credits" } else { "tokens" }); used = ($(if ($copilot) { $cur.credits } else { $cur.tokens }) ?? 0) } } else { [ordered]@{ note = "No estimate row for step $($cur.id)" } } } }
+  if ($etxt) { $etxt = $etxt.TrimStart([char]0xFEFF); $tokT = 0.0; $cred = 0.0; $hit = $false
+    function NumE($s) { $s = ("$s" -replace ',', '').Trim().ToLower(); if ($s -match '^([0-9.]+)\s*(?:([km])\b)?') { $v = 0.0; if (-not [double]::TryParse($Matches[1], [Globalization.NumberStyles]::Float, [Globalization.CultureInfo]::InvariantCulture, [ref]$v)) { return 0.0 }; if ($Matches[2] -eq 'm') { $v * 1e6 } elseif ($Matches[2] -eq 'k') { $v * 1e3 } else { $v } } else { 0.0 } }
+    # Only the token table (header has Input and Output) is read; a row is this step's when its first cell is the ID alone or the ID
+    # followed by a title. Before 6.1.4.0 a Lite row with its title was missed and the wall-clock table's "117 min" read as 117 million.
+    # The token table is the one with an Input… and an Output… header cell and no USD cell (that is the cost table).
+    $inTable = $false; $tokenTable = $false; $seenTok = $false
+    foreach ($line in $etxt -split "`n") { if (-not $line.Trim().StartsWith('|')) { $inTable = $false; $tokenTable = $false; continue }
+      $cells = @(($line.Trim().Trim('|')) -split '\|' | ForEach-Object { $_.Trim() })
+      if (-not $inTable) { $inTable = $true; $heads = @($cells | ForEach-Object { $_.Replace('*', '').Trim().ToLower() }); $tokenTable = [bool](@($heads | Where-Object { $_.StartsWith('input') }).Count) -and [bool](@($heads | Where-Object { $_.StartsWith('output') }).Count) -and -not [bool](@($heads | Where-Object { $_.Contains('usd') }).Count); if ($tokenTable) { $seenTok = $true }; continue }
+      $first = $cells[0].Replace('*', '').Trim()
+      if (-not $tokenTable -or $cells.Count -lt 6 -or -not ($first -ceq $cur.id -or $first.StartsWith("$($cur.id) ", [StringComparison]::Ordinal))) { continue }; $hit = $true; $tokT += (NumE $cells[2]) + (NumE $cells[3]) + (NumE $cells[4]) + (NumE $cells[5]); if ($cells.Count -ge 8) { $cred += NumE $cells[7] } }
+    $est = if ($hit) { [ordered]@{ estimated = $(if ($copilot) { $cred } else { $tokT }); unit = $(if ($copilot) { "credits" } else { "tokens" }); used = ($(if ($copilot) { $cur.credits } else { $cur.tokens }) ?? 0) } } elseif (-not $seenTok) { [ordered]@{ note = "No token table found in AiEffortEstimate.md" } } elseif ("$($cur.id)" -cmatch '^(PRE-0[12]|[0-9]{2}|STEP-[0-9])[a-z]$') { [ordered]@{ note = "A remediation has no estimate row" } } else { [ordered]@{ note = "No estimate row for step $($cur.id -replace '^STEP-', '')" } } } }
 
 # ---- events ----
 $events = @(); if (Test-Path -LiteralPath $evPath) { $lines = @(Get-Content -LiteralPath $evPath | Select-Object -Last 12); foreach ($l in $lines) { try { $o = $l | ConvertFrom-Json -AsHashtable } catch { continue }; $ts = Parse-Ts $o.at; $events += [ordered]@{ time = $(if ($ts) { $ts.ToLocalTime().ToString("HH:mm") } else { "" }); who = $o.who; text = $o.text } }; [array]::Reverse($events) }

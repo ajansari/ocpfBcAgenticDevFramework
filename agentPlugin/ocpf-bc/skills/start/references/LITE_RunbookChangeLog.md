@@ -16,6 +16,21 @@ framework.
 
 ---
 
+## v6.1.4.0 — November 17, 2026
+
+Derived from Full **v6.1.4.0**; Operations Guide **v6.1.4.0**; Standards Guide **v1.13.1.0**
+(unchanged); plugin **6.1.4**. A patch for the dashboard on a Lite project: the Journey line's
+marker for a step not yet done printed the step's ID, "STEP-7", in a box sized for a number, so
+the text broke over two lines and ran out of the box, and two card titles read "Step STEP-7". The
+F1 theme had the same on its lap boards and titles. The marker and the board now show the number
+(`7`; a remediation row `5a`), and the titles read "Step 7" and "Lap 7". Full and Build-a-Feature
+were not affected. The same card's estimate was wrong as well: the renderer missed the token
+table's row "STEP-7 Release for Testing", took the wall-clock table's "STEP-7" row, and read its
+"117 min" as 117 million tokens; it now reads the token table only (Full projects were inflated
+the same way, with the wall-clock row added to the token row). The F1 theme no longer tells
+a Lite project its target is "set at Step 03". No step changed. **A project already running:** run
+`/ocpf-bc:update-framework`; the next render shows the fix. See the Full changelog's entry.
+
 ## v6.1.3.0 — November 16, 2026
 
 Derived from Full **v6.1.3.0**; Operations Guide **v6.1.3.0**; Standards Guide **v1.13.1.0**
