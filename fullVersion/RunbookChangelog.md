@@ -50,8 +50,9 @@ Lite **v6.1.6.0**, Operations Guide **v6.1.6.0**, Standards Guide **v1.13.1.0** 
   may be a bcskills.ai slug or permanent ID. The register's schema describes a site source. The
   two new boxes join the setup-done box at a kickoff. Three sentences still describing the old
   catalog are gone.
-- **Not decided here:** whether bcskills.ai accepts a slug with an underscore, as the framework's
-  own examples have. If it does not, such a skill can never match its manifest.
+- **Slugs with an underscore: confirmed after the release.** bcskills.ai accepts underscores in
+  a slug and does not accept hyphens, which is the framework's own slug rule, so a skill such as
+  `contoso_patterns` is published under the slug its manifest carries. Nothing to change.
 - **Checked** against the live site: both commands, for a slug the site has and one it lacks. Not
   exercised: a full slug load inside a project, a 429, a checksum mismatch, a renamed slug.
 
